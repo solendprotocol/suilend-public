@@ -29,7 +29,7 @@ export default function LabelWithTooltip({
         className={cn(
           "flex w-max flex-row items-center gap-1",
           className,
-          tooltip &&
+          !!tooltip &&
             cn("decoration-muted-foreground/50", hoverUnderlineClassName),
         )}
       >

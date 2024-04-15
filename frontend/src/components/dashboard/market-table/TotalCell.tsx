@@ -42,7 +42,7 @@ export default function TotalCell({
         <TBody
           className={cn(
             "text-right",
-            tooltip &&
+            !!tooltip &&
               cn(
                 "text-muted-foreground decoration-muted-foreground/50",
                 hoverUnderlineClassName,
