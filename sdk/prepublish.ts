@@ -61,3 +61,6 @@ Object.entries(newPackageJson["exports"]).forEach(([key, value]) => {
 newPackageJson["types"] = "./index.js";
 
 fs.writeFileSync("./dist/package.json", JSON.stringify(newPackageJson), "utf8");
+
+// 8. Copy README.md
+fs.cpSync("./README.md", "./dist/README.md");
