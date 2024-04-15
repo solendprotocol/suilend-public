@@ -1,0 +1,31 @@
+name: Update README
+
+on:
+  push:
+    branches:
+      - staging
+
+jobs:
+  markscribe:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@master
+
+      - uses: muesli/readme-scribe@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+        with:
+          template: "templates/README.md.tpl"
+          writeTo: "README.md"
+
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        env:
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_GITHUB_TOKEN }}
+        with:
+          commit_options: "--allow-empty"
+          skip_dirty_check: true
+          commit_message: Update README
+          commit_user_name: vinceender
+          commit_user_email: vender@solend.fi
+          commit_author: vinceender <vender@solend.fi>

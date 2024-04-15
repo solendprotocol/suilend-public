@@ -1,0 +1,60 @@
+.root :global {
+  width: 100%;
+
+  div[class$="appContent"] {
+    padding: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+
+    div[class$="connectWallet"],
+    div[class*="button"][class*="elevated"],
+    div[class*="button"][class*="action"] {
+      border-radius: calc(var(--radius) - 4px);
+      color: hsl(var(--primary-foreground));
+      font-size: 0.875rem;
+      font-family: var(--supply-mono);
+      height: 32px;
+      letter-spacing: 0;
+      text-transform: uppercase;
+
+      svg.MuiSvgIcon-root {
+        width: 18px;
+        height: 18px;
+      }
+    }
+
+    .MuiSwitch-track {
+      background-color: hsl(var(--muted));
+    }
+    .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track {
+      background-color: hsl(var(--primary));
+    }
+
+    div[class$="input"],
+    div[class$="chainTile"],
+    div[class*="inputField"][class*="editable"] {
+      border-radius: var(--radius);
+      border: 1px solid hsl(var(--border));
+    }
+
+    div[class$="chain"] div[class$="input"] {
+      border: none;
+    }
+    div[class$="chain"] fieldset {
+      border-radius: var(--radius);
+      border: 1px solid hsl(var(--border));
+    }
+
+    div[class$="-searchContent"] div[class$="input"] {
+      border: none;
+    }
+
+    div[class$="secondaryText"],
+    div[class$="routeAmt"],
+    span[class$="rowTitle"],
+    div[class$="chainHeader"] {
+      opacity: 1;
+      color: hsl(var(--muted-foreground));
+    }
+  }
+}

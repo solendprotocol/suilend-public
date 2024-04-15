@@ -1,0 +1,425 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 219 85% 5%;
+    --foreground: 0 0% 100%;
+
+    --card: 221 65% 9%;
+    --card-foreground: 221 100% 57%;
+
+    --popover: 221 59% 12%;
+    --popover-foreground: 221 100% 57%;
+
+    --primary: 221 100% 57%;
+    --primary-foreground: 194 82% 76%; /* Same as --secondary */
+
+    --secondary: 194 82% 76%;
+    --secondary-foreground: 221 65% 9%; /* Same as --card */
+
+    --muted: 221 34% 65%;
+    --muted-foreground: 221 34% 65%;
+
+    --accent: 219 17% 19%; /* Not used */
+    --accent-foreground: 0 0% 80%; /* Not used */
+
+    --destructive: 3 66% 57%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 211 44% 15%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 211 44% 15%; /* same as border */
+
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Countdown */
+.countdown {
+  font-feature-settings: "tnum";
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 4px #48c8ff;
+}
+
+/* Scrollbar */
+body {
+  overflow-y: scroll;
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--border));
+  border-radius: 0;
+  border: transparent;
+}
+
+/* Lava */
+.lamp {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  height: 100vh;
+  height: 100vh;
+  width: 100vw;
+  min-width: 100vw;
+  z-index: -1;
+}
+
+.lampScaled {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(1.1);
+
+  height: 100vh;
+  height: 100vh;
+  width: 100vw;
+  min-width: 100vw;
+  z-index: -1;
+}
+
+.lava {
+  filter: url("#goo");
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  left: 0;
+}
+
+.gallery {
+  display: flex;
+  overflow-x: auto;
+  white-space: nowrap;
+  scroll-behavior: smooth; /* Ensures smooth scrolling */
+  /* Add some padding and possibly border for better appearance */
+  padding: 10px;
+  border: 1px solid #ccc;
+}
+
+.square {
+  width: 100px; /* Width of each square */
+  height: 100px; /* Height of each square */
+  background-color: skyblue; /* Background color of squares */
+  margin-right: 10px; /* Space between squares */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* Optional: add a border or shadow for better visualization */
+  border: 2px solid deepskyblue;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.blob {
+  border-radius: 50%;
+  box-shadow: inset 0 0 8px 0px hsl(var(--primary));
+  position: absolute;
+}
+
+.blobFiltered {
+  border-radius: 50%;
+  /* background: hsl(var(--primary)); */
+  box-shadow:
+    inset 0 0 100px 5px hsl(var(--primary)),
+    inset 0 0 10px hsl(var(--foreground));
+  position: absolute;
+}
+
+.blob.top {
+  border-radius: 50%;
+  width: 100%;
+  height: 4%;
+  top: -3%;
+  left: 0;
+}
+.blob.bottom {
+  border-radius: 50%;
+  width: 100%;
+  height: 4%;
+  bottom: -3%;
+  left: 0;
+}
+.blob:nth-child(1) {
+  width: 200px;
+  height: 200px;
+  left: 45%;
+  bottom: -15%;
+
+  animation:
+    wobble 4s ease-in-out alternate infinite,
+    blob-one ease-in-out 16s infinite;
+}
+.blob:nth-child(2) {
+  width: 330px;
+  height: 330px;
+  right: 24%;
+  bottom: -65%;
+
+  animation:
+    wobble 5s ease-in-out alternate infinite,
+    blob-two ease-in-out 25s infinite;
+}
+.blob:nth-child(3) {
+  width: 600px;
+  height: 600px;
+  bottom: -15%;
+  right: 44%;
+
+  animation:
+    wobble 6s ease-in-out alternate infinite,
+    blob-three ease-in-out 20s infinite;
+}
+.blob:nth-child(4) {
+  width: 235px;
+  height: 235px;
+  bottom: -19%;
+  right: 30%;
+
+  animation:
+    wobble 7s ease-in-out alternate infinite,
+    blob-four ease-in-out 14s infinite;
+}
+.blob:nth-child(4) {
+  width: 235px;
+  height: 235px;
+  bottom: -19%;
+  right: 10%;
+  animation:
+    wobble 8s ease-in-out alternate infinite,
+    blob-four ease-in-out 17s infinite;
+}
+.blob:nth-child(5) {
+  width: 440px;
+  height: 440px;
+  bottom: -25%;
+  left: 35%;
+
+  box-shadow:
+    inset 0 0 70px 5px hsl(var(--primary)),
+    inset 0 0 10px hsl(var(--foreground)) !important;
+
+  animation:
+    wobble 9s ease-in-out alternate infinite,
+    blob-five ease-in-out 34s infinite;
+}
+.blob:nth-child(6) {
+  width: 800px;
+  height: 800px;
+  bottom: -25%;
+  right: 15%;
+
+  animation:
+    wobble 10s ease-in-out alternate infinite,
+    blob-six ease-in-out 47s infinite;
+}
+.blob:nth-child(7) {
+  width: 435px;
+  height: 435px;
+  bottom: -85%;
+  right: 8%;
+
+  animation:
+    wobble 11s ease-in-out alternate infinite,
+    blob-seven ease-in-out 34s infinite;
+}
+@keyframes blob-one {
+  0%,
+  100% {
+    transform: translatey(0);
+  }
+  50% {
+    transform: translatey(-700%);
+  }
+}
+
+@keyframes blob-two {
+  0%,
+  100% {
+    transform: translatey(0);
+  }
+  50% {
+    transform: translatey(-420%);
+  }
+}
+
+@keyframes blob-three {
+  0%,
+  100% {
+    transform: translatey(0);
+  }
+  50% {
+    transform: translatey(-305%);
+  }
+}
+@keyframes blob-four {
+  0%,
+  100% {
+    transform: translatey(0);
+  }
+  50% {
+    transform: translatey(-605%);
+  }
+}
+@keyframes blob-five {
+  0%,
+  100% {
+    transform: translatey(0);
+  }
+  50% {
+    transform: translatey(-700%);
+  }
+}
+@keyframes blob-six {
+  0%,
+  100% {
+    transform: translatey(0);
+  }
+  50% {
+    transform: translatey(-700%);
+  }
+}
+@keyframes blob-seven {
+  0%,
+  100% {
+    transform: translatey(0);
+  }
+  50% {
+    transform: translatey(-300%);
+  }
+}
+
+@keyframes wobble {
+  50% {
+    border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%;
+  }
+  100% {
+    border-radius: 38% 52% 75% 36% / 50% 40% 50% 60%;
+  }
+}
+
+.ticker {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  overflow: hidden;
+  flex: 0 0 100%;
+}
+
+.tickerList {
+  display: flex;
+  flex: 0 0 100%;
+  /* width: 100%; */
+  animation: ticker 15s infinite linear;
+  justify-content: space-between;
+}
+
+.tickerWrapper {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  align-items: flex-end;
+}
+
+.tickerItem {
+  border-left: 1px solid transparent;
+  display: table-cell;
+  position: relative;
+  vertical-align: top;
+  color: #fff;
+}
+
+.tickerItem:hover {
+  animation-play-state: paused;
+}
+
+@keyframes ticker {
+  0% {
+    transform: translateX(100%);
+  }
+
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+/* Ticker */
+.newsticker {
+  min-width: 20%;
+  padding: 0.5rem;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.newsWrapper {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  align-items: flex-end;
+}
+
+.title {
+  text-overflow: ellipsis;
+  word-wrap: none;
+  white-space: nowrap;
+  max-width: auto;
+  overflow: hidden;
+}
+
+/* Wormhole Connect modal */
+.MuiDialog-root .MuiScopedCssBaseline-root {
+  background-color: hsl(var(--popover));
+}
+.MuiDialog-root .MuiAlert-root {
+  color: hsl(var(--foreground));
+  border-color: hsl(var(--secondary));
+}
+.MuiDialog-root .MuiAlert-root .MuiAlert-icon {
+  color: hsl(var(--secondary));
+}
+.MuiDialog-root .MuiAlert-root .MuiTypography-root {
+  color: hsl(var(--foreground));
+  text-decoration-color: hsla(var(--foreground) / 40%);
+  font-weight: 600;
+}
+.MuiDialog-root .MuiAlert-root .MuiTypography-root:hover {
+  text-decoration-color: currentColor;
+}
+
+.MuiDialog-root .MuiTabs-root .MuiTab-root.Mui-selected {
+  color: hsl(var(--foreground));
+}
+.MuiDialog-root .MuiTabs-root .MuiTabs-indicator {
+  background-color: hsl(var(--foreground));
+}
+
+.MuiDialog-root div[class$="tokenRow"] div[class$="nativeChain"],
+.MuiDialog-root div[class$="tokenRow"] div[class$="tokenRowAddress"],
+.MuiDialog-root div[class$="tokenRow"] div[class$="tokenRowBalanceText"],
+.MuiDialog-root div[class$="walletRow"] div[class$="context"] {
+  opacity: 1;
+  color: hsl(var(--muted-foreground));
+}
