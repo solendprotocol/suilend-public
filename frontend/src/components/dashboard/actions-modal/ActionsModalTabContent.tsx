@@ -242,7 +242,7 @@ export default function ActionsModalTabContent({
         onMaxClick={setMaxValue}
       />
 
-      <div className="-m-4 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-4 md:min-h-[200px]">
+      <div className="-m-4 flex min-h-0 flex-1 transform-gpu flex-col gap-4 overflow-y-auto p-4 md:min-h-[200px]">
         <div
           className="flex flex-col gap-3"
           style={{ height: 5 * 20 + (5 - 1) * (3 * 4) }}

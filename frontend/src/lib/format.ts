@@ -27,6 +27,9 @@ export const formatType = (
   return `${shorten(id, length)}::${module}::${type}`;
 };
 
+export const formatInteger = (value: number) =>
+  Intl.NumberFormat().format(value);
+
 export const formatNumber = (
   value: BigNumber,
   options?: {
@@ -85,12 +88,12 @@ export const formatNumber = (
         .split(".");
     }
 
-    const integersFormatted = Intl.NumberFormat().format(parseInt(integers));
+    const integersFormatted = formatInteger(parseInt(integers));
     const decimalsFormatted = decimals !== undefined ? `.${decimals}` : "";
     return `${prefix}${integersFormatted}${decimalsFormatted}${suffix}`;
   } else {
     const [integers, decimals] = value.toFixed(dp, roundingMode).split(".");
-    const integersFormatted = Intl.NumberFormat().format(parseInt(integers));
+    const integersFormatted = formatInteger(parseInt(integers));
     const decimalsFormatted = decimals !== undefined ? `.${decimals}` : "";
     return `${prefix}${integersFormatted}${decimalsFormatted}`;
   }
@@ -117,6 +120,14 @@ export const formatPrice = (value: BigNumber) => {
     dp: 2,
     roundingMode: BigNumber.ROUND_HALF_UP,
     exact: true,
+  });
+};
+
+export const formatPoints = (value: BigNumber) => {
+  return formatNumber(value, {
+    dp: 2,
+    exact: true,
+    roundingMode: BigNumber.ROUND_HALF_UP,
   });
 };
 

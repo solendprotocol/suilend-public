@@ -30,7 +30,7 @@ export default function TotalCell({
     <div
       className={cn(
         "flex flex-col items-end gap-1",
-        horizontal && "flex-row items-baseline gap-2",
+        horizontal && "flex-row items-baseline justify-end gap-2",
       )}
     >
       <Tooltip
@@ -42,7 +42,7 @@ export default function TotalCell({
         <TBody
           className={cn(
             "text-right",
-            !!tooltip &&
+            tooltip &&
               cn(
                 "text-muted-foreground decoration-muted-foreground/50",
                 hoverUnderlineClassName,

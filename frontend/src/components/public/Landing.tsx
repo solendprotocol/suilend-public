@@ -14,7 +14,7 @@ import { formatPercent } from "@/lib/format";
 import { getFilteredRewards, getTotalAprPercent } from "@/lib/liquidityMining";
 import { DASHBOARD_URL, DISCORD_URL, X_URL } from "@/lib/navigation";
 import Lava from "@/pages/Lava";
-import suilendLogo from "@/public/suilend.svg";
+import suilendLogo from "@/public/assets/suilend.svg";
 
 export default function Landing() {
   const { data } = useAppContext();

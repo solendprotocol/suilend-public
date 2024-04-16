@@ -4,7 +4,7 @@ import { capitalize } from "lodash";
 import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 import { Side } from "@suilend/sdk/types";
 
-import RewardChip from "@/components/dashboard/RewardChip";
+import Chip from "@/components/shared/Chip";
 import TokenIcon from "@/components/shared/TokenIcon";
 import Tooltip from "@/components/shared/Tooltip";
 import { TBody, TLabel, TTitle } from "@/components/shared/Typography";
@@ -177,7 +177,7 @@ export default function AprWithRewardsBreakdown({
                   key={reward.stats.id}
                   className="flex flex-row items-center justify-between gap-6"
                 >
-                  <RewardChip symbol={reward.stats.rewardSymbol} hasPlus />
+                  <Chip hasPlus>{reward.stats.rewardSymbol} rewards</Chip>
 
                   <div className="flex flex-row items-center gap-2">
                     <TokenIcon
@@ -200,7 +200,7 @@ export default function AprWithRewardsBreakdown({
                   key={reward.stats.id}
                   className="flex flex-row items-center justify-between gap-6"
                 >
-                  <RewardChip symbol={reward.stats.rewardSymbol} hasPlus />
+                  <Chip hasPlus>{reward.stats.rewardSymbol} rewards</Chip>
 
                   <div className="flex flex-row items-center gap-2">
                     <TokenIcon

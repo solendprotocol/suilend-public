@@ -4,18 +4,17 @@ import AppHeader from "@/components/layout/AppHeader";
 import Footer from "@/components/layout/Footer";
 import Container from "@/components/shared/Container";
 
-export default function Layout({
-  hideBackground,
-  children,
-}: PropsWithChildren & {
+interface LayoutProps extends PropsWithChildren {
   hideBackground?: boolean;
-}) {
+}
+
+export default function Layout({ hideBackground, children }: LayoutProps) {
   return (
     <div
       className="relative flex min-h-dvh flex-col"
       style={{
         background: !hideBackground
-          ? "url('/footer.svg') bottom no-repeat"
+          ? "url('/assets/footer.svg') bottom no-repeat"
           : undefined,
       }}
     >

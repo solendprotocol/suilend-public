@@ -29,6 +29,8 @@ export const EXPLORERS = [
   {
     id: "suiScan",
     name: "Suiscan",
+    buildAddressUrl: (address: string) =>
+      `https://suiscan.xyz/mainnet/account/${address}`,
     buildObjectUrl: (id: string) => `https://suiscan.xyz/mainnet/object/${id}`,
     buildCoinUrl: (coinType: string) =>
       `https://suiscan.xyz/mainnet/coin/${coinType}`,
@@ -37,6 +39,8 @@ export const EXPLORERS = [
   {
     id: "suiVision",
     name: "SuiVision",
+    buildAddressUrl: (address: string) =>
+      `https://suivision.xyz/account/${address}`,
     buildObjectUrl: (id: string) => `https://suivision.xyz/object/${id}`,
     buildCoinUrl: (coinType: string) =>
       `https://suivision.xyz/coin/${coinType}`,

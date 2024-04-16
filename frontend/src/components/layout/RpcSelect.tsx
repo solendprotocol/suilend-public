@@ -8,14 +8,19 @@ import { RPCS } from "@/lib/constants";
 
 interface RpcSelectProps {
   className?: clsx.ClassValue;
+  openClassName?: clsx.ClassValue;
 }
 
-export default function RpcSelect({ className }: RpcSelectProps) {
+export default function RpcSelect({
+  className,
+  openClassName,
+}: RpcSelectProps) {
   const { rpc, onRpcIdChange } = useAppContext();
 
   return (
     <StandardSelect
       className={className}
+      openClassName={openClassName}
       items={RPCS}
       selectedItemId={rpc.id}
       setValue={onRpcIdChange}

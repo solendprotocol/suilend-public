@@ -3,8 +3,8 @@ import React, { useState } from "react";
 import BigNumber from "bignumber.js";
 import { toast } from "sonner";
 
-import RewardChip from "@/components/dashboard/RewardChip";
 import Button from "@/components/shared/Button";
+import Chip from "@/components/shared/Chip";
 import Spinner from "@/components/shared/Spinner";
 import TextLink from "@/components/shared/TextLink";
 import TokenIcon from "@/components/shared/TokenIcon";
@@ -99,7 +99,7 @@ export default function LiquidityMiningCard() {
                 url={LOGO_MAP[NORMALIZED_SUI_COINTYPE]}
               />
 
-              <RewardChip symbol="SUI" />
+              <Chip>Protocol rewards</Chip>
             </div>
 
             <div className="flex flex-row justify-between gap-2">
