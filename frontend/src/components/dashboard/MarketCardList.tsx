@@ -9,6 +9,7 @@ import {
   X,
 } from "lucide-react";
 
+import Card from "@/components/dashboard/Card";
 import BorrowAprCell from "@/components/dashboard/market-table/BorrowAprCell";
 import DepositAprCell from "@/components/dashboard/market-table/DepositAprCell";
 import OpenLtvBwCell from "@/components/dashboard/market-table/OpenLtvBwCell";
@@ -20,7 +21,6 @@ import LabelWithTooltip from "@/components/shared/LabelWithTooltip";
 import Select from "@/components/shared/Select";
 import TokenIcon from "@/components/shared/TokenIcon";
 import { TBody, TLabel, TLabelSans } from "@/components/shared/Typography";
-import { Card } from "@/components/ui/card";
 import { SelectTrigger } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { OPEN_LTV_BW_TOOLTIP } from "@/lib/constants";
@@ -33,7 +33,7 @@ interface MarketCardProps {
 
 function MarketCard({ rowData }: MarketCardProps) {
   return (
-    <Card className="w-full cursor-pointer rounded-md">
+    <Card className="cursor-pointer rounded-md">
       <div className="flex w-full flex-col items-center gap-4 p-4">
         <div className="flex w-full flex-col items-center gap-2">
           <div className="flex flex-row items-center gap-2">

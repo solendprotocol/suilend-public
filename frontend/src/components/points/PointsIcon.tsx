@@ -1,12 +1,13 @@
-import NextImage from "next/image";
+import TokenIcon from "@/components/shared/TokenIcon";
+import { LOGO_MAP, NORMALIZED_SUILEND_POINTS_COINTYPE } from "@/lib/coinType";
 
 export default function PointsIcon() {
   return (
-    <NextImage
-      src="/assets/points.svg"
-      alt="Suilend points"
-      width={16}
-      height={16}
+    <TokenIcon
+      className="h-4 w-4"
+      coinType={NORMALIZED_SUILEND_POINTS_COINTYPE}
+      symbol="Suilend Points"
+      url={LOGO_MAP[NORMALIZED_SUILEND_POINTS_COINTYPE]}
     />
   );
 }

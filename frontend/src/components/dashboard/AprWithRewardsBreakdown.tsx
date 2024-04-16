@@ -4,7 +4,7 @@ import { capitalize } from "lodash";
 import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 import { Side } from "@suilend/sdk/types";
 
-import Chip from "@/components/shared/Chip";
+import RewardChip from "@/components/shared/RewardChip";
 import TokenIcon from "@/components/shared/TokenIcon";
 import Tooltip from "@/components/shared/Tooltip";
 import { TBody, TLabel, TTitle } from "@/components/shared/Typography";
@@ -177,11 +177,11 @@ export default function AprWithRewardsBreakdown({
                   key={reward.stats.id}
                   className="flex flex-row items-center justify-between gap-6"
                 >
-                  <Chip hasPlus>{reward.stats.rewardSymbol} rewards</Chip>
+                  <RewardChip symbol={reward.stats.rewardSymbol} />
 
-                  <div className="flex flex-row items-center gap-2">
+                  <div className="flex flex-row items-center gap-1.5">
                     <TokenIcon
-                      className="h-6 w-6"
+                      className="h-4 w-4"
                       coinType={reward.stats.rewardCoinType}
                       symbol={reward.stats.rewardSymbol}
                       url={reward.stats.iconUrl}
@@ -200,11 +200,11 @@ export default function AprWithRewardsBreakdown({
                   key={reward.stats.id}
                   className="flex flex-row items-center justify-between gap-6"
                 >
-                  <Chip hasPlus>{reward.stats.rewardSymbol} rewards</Chip>
+                  <RewardChip symbol={reward.stats.rewardSymbol} />
 
-                  <div className="flex flex-row items-center gap-2">
+                  <div className="flex flex-row items-center gap-1.5">
                     <TokenIcon
-                      className="h-6 w-6"
+                      className="h-4 w-4"
                       coinType={reward.stats.rewardCoinType}
                       symbol={reward.stats.rewardSymbol}
                       url={reward.stats.iconUrl}

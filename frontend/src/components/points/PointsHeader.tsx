@@ -1,4 +1,4 @@
-import Chip from "@/components/shared/Chip";
+import TitleChip from "@/components/shared/TitleChip";
 
 export default function PointsHeader() {
   return (
@@ -16,7 +16,7 @@ export default function PointsHeader() {
       </div>
 
       <div className="absolute bottom-0 left-0 right-0 top-0 z-[2] flex flex-col items-center justify-center gap-4 md:gap-6">
-        <Chip>Points hub</Chip>
+        <TitleChip>Points hub</TitleChip>
         <div className="text-center font-mono text-4xl font-normal uppercase text-foreground md:text-5xl">
           Suilend Points
         </div>

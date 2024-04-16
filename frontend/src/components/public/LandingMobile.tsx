@@ -110,7 +110,7 @@ export default function LandingMobile() {
                 return {
                   id: reserve.coinType,
                   text: (
-                    <div className="flex flex-row items-center gap-4 py-2">
+                    <div className="flex flex-row items-center gap-3 py-2">
                       <TokenIcon
                         coinType={reserve.coinType}
                         symbol={reserve.symbol}

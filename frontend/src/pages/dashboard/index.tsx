@@ -3,14 +3,13 @@ import { usePathname, useRouter } from "next/navigation";
 
 import { VenetianMask } from "lucide-react";
 
-import LiquidityMiningCard from "@/components/dashboard/LiquidityMiningCard";
 import MarketOverview from "@/components/dashboard/MarketOverview";
 import MarketTable from "@/components/dashboard/MarketTable";
 import ObligationBorrowsCard from "@/components/dashboard/ObligationBorrowsCard";
 import ObligationDepositsCard from "@/components/dashboard/ObligationDepositsCard";
 import ObligationPositionCard from "@/components/dashboard/ObligationPositionCard";
+import RewardsCard from "@/components/dashboard/RewardsCard";
 import WalletAssetsCard from "@/components/dashboard/WalletBalancesCard";
-import PointsSplash from "@/components/points/PointsSplash";
 import FullPageSpinner from "@/components/shared/FullPageSpinner";
 import {
   bodyClassNames,
@@ -26,7 +25,6 @@ import { cn } from "@/lib/utils";
 function Cards() {
   return (
     <>
-      <LiquidityMiningCard />
       <ObligationPositionCard />
       <ObligationDepositsCard />
       <ObligationBorrowsCard />
@@ -77,7 +75,7 @@ function Page() {
         </div>
 
         <MarketTable />
-        {!address && <PointsSplash />}
+        <RewardsCard />
       </div>
 
       {/* Horizontal layout (lg+) */}
@@ -85,7 +83,7 @@ function Page() {
         <div className="flex min-w-0 flex-1 flex-col gap-6">
           <MarketOverview />
           <MarketTable />
-          {!address && <PointsSplash />}
+          <RewardsCard />
         </div>
         <div className="flex w-[360px] shrink-0 flex-col gap-4">
           <Cards />
