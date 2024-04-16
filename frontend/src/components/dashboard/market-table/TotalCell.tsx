@@ -35,14 +35,14 @@ export default function TotalCell({
     >
       <Tooltip
         title={
-          !!tooltip ??
+          tooltip ??
           `${formatToken(total, { dp: reserve.mintDecimals })} ${symbol}`
         }
       >
         <TBody
           className={cn(
             "text-right",
-            tooltip &&
+            !!tooltip &&
               cn(
                 "text-muted-foreground decoration-muted-foreground/50",
                 hoverUnderlineClassName,
