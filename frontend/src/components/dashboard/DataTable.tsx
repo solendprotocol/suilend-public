@@ -215,7 +215,7 @@ export default function DataTable<T>({
                 className={cn(
                   "hover:bg-transparent",
                   (RowModal || onRowClick) &&
-                    "hover:bg-muted/10 cursor-pointer",
+                    "cursor-pointer hover:bg-muted/10",
                   tableRowClassName,
                 )}
                 style={{ appearance: "inherit" }}

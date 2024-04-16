@@ -3,10 +3,7 @@ import { PropsWithChildren } from "react";
 import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 
 import ActionsModalContainer from "@/components/dashboard/actions-modal/ActionsModalContainer";
-import {
-  Tab,
-  useActionsModalContext,
-} from "@/components/dashboard/actions-modal/ActionsModalContext";
+import { useActionsModalContext } from "@/components/dashboard/actions-modal/ActionsModalContext";
 import BorrowTabContent from "@/components/dashboard/actions-modal/BorrowTabContent";
 import DepositTabContent from "@/components/dashboard/actions-modal/DepositTabContent";
 import ParametersPanel from "@/components/dashboard/actions-modal/ParametersPanel";
@@ -14,6 +11,13 @@ import RepayTabContent from "@/components/dashboard/actions-modal/RepayTabConten
 import WithdrawTabContent from "@/components/dashboard/actions-modal/WithdrawTabContent";
 import Tabs from "@/components/shared/Tabs";
 import useBreakpoint from "@/hooks/useBreakpoint";
+
+export enum Tab {
+  DEPOSIT = "deposit",
+  BORROW = "borrow",
+  WITHDRAW = "withdraw",
+  REPAY = "repay",
+}
 
 interface ActionsModalProps extends PropsWithChildren {
   reserve: ParsedReserve;

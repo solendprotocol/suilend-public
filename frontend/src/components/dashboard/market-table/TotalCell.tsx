@@ -35,7 +35,7 @@ export default function TotalCell({
     >
       <Tooltip
         title={
-          tooltip ??
+          !!tooltip ??
           `${formatToken(total, { dp: reserve.mintDecimals })} ${symbol}`
         }
       >

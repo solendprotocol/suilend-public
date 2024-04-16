@@ -14,7 +14,7 @@ export default function PointsSplash() {
         backgroundRepeat: "no-repeat",
       }}
     >
-      <div className="text-primary-foreground text-center font-mono text-sm font-normal uppercase sm:text-[16px]">
+      <div className="text-center font-mono text-sm font-normal uppercase text-primary-foreground sm:text-[16px]">
         Start earning points
       </div>
 

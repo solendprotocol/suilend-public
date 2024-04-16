@@ -10,14 +10,8 @@ import {
 
 import { useLocalStorage } from "usehooks-ts";
 
+import { Tab } from "@/components/dashboard/actions-modal/ActionsModal";
 import { Panel } from "@/components/dashboard/actions-modal/ParametersPanel";
-
-export enum Tab {
-  DEPOSIT = "deposit",
-  BORROW = "borrow",
-  WITHDRAW = "withdraw",
-  REPAY = "repay",
-}
 
 interface ActionsModalContext {
   selectedTab: Tab;

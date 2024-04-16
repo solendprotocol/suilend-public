@@ -17,10 +17,10 @@ export default function PointsHeader() {
 
       <div className="absolute bottom-0 left-0 right-0 top-0 z-[2] flex flex-col items-center justify-center gap-4 md:gap-6">
         <Chip>Points hub</Chip>
-        <div className="text-foreground text-center font-mono text-4xl font-normal uppercase md:text-5xl">
+        <div className="text-center font-mono text-4xl font-normal uppercase text-foreground md:text-5xl">
           Suilend Points
         </div>
-        <div className="text-primary-foreground text-center font-mono text-lg font-normal uppercase md:text-2xl">
+        <div className="text-center font-mono text-lg font-normal uppercase text-primary-foreground md:text-2xl">
           Season 1
         </div>
       </div>

@@ -14,7 +14,7 @@ export default function PointsCount({ className }: PointsCountProps) {
   return (
     <div
       className={cn(
-        "text-primary-foreground h-8 rounded-sm bg-[#142142] px-3 py-0",
+        "h-8 rounded-sm bg-[#142142] px-3 py-0 text-primary-foreground",
         className,
       )}
     >
