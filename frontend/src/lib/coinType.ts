@@ -9,7 +9,7 @@ const USDT_ET_COINTYPE =
 export const NORMALIZED_SUI_COINTYPE = normalizeStructTag(SUI_COINTYPE);
 export const NORMALIZED_USDC_ET_COINTYPE = normalizeStructTag(USDC_ET_COINTYPE);
 export const NORMALIZED_USDT_ET_COINTYPE = normalizeStructTag(USDT_ET_COINTYPE);
-export const NORMALIZED_SUILEND_POINTS_COINTYPE = "SUILEND_POINTS";
+export const NORMALIZED_SUILEND_POINTS_COINTYPE = "0xSUILEND_POINTS";
 
 // 128x128
 export const LOGO_MAP = {
@@ -31,3 +31,5 @@ export const extractSymbolFromCoinType = (coinType: string) =>
 
 export const isSui = (coinType: string) =>
   normalizeStructTag(coinType) === NORMALIZED_SUI_COINTYPE;
+export const isSuilendPoints = (coinType: string) =>
+  normalizeStructTag(coinType) === NORMALIZED_SUILEND_POINTS_COINTYPE;

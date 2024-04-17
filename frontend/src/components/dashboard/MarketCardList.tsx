@@ -23,8 +23,8 @@ import TokenIcon from "@/components/shared/TokenIcon";
 import { TBody, TLabel, TLabelSans } from "@/components/shared/Typography";
 import { SelectTrigger } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { OPEN_LTV_BW_TOOLTIP } from "@/lib/constants";
 import { formatPrice } from "@/lib/format";
+import { OPEN_LTV_BW_TOOLTIP } from "@/lib/tooltips";
 import { cn } from "@/lib/utils";
 
 interface MarketCardProps {

@@ -19,13 +19,13 @@ import TotalBorrowsCell from "@/components/dashboard/market-table/TotalBorrowsCe
 import TotalDepositsCell from "@/components/dashboard/market-table/TotalDepositsCell";
 import MarketCardList from "@/components/dashboard/MarketCardList";
 import { AppData, useAppContext } from "@/contexts/AppContext";
-import { OPEN_LTV_BW_TOOLTIP } from "@/lib/constants";
 import { formatToken, formatUsd } from "@/lib/format";
 import {
   RewardSummary,
   getFilteredRewards,
   getTotalAprPercent,
 } from "@/lib/liquidityMining";
+import { OPEN_LTV_BW_TOOLTIP } from "@/lib/tooltips";
 
 export interface ReservesRowData {
   coinType: string;

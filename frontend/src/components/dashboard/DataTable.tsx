@@ -11,7 +11,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import BigNumber from "bignumber.js";
-import { ClassValue } from "clsx";
+import clsx from "clsx";
 import {
   ArrowDown01,
   ArrowDown10,
@@ -29,6 +29,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableContainerProps,
   TableHead,
   TableHeader,
   TableRow,
@@ -154,9 +155,10 @@ interface DataTableProps<T> {
   columns: ColumnDef<T>[];
   data: T[];
   noDataMessage: string;
-  tableClassName?: ClassValue;
-  tableRowClassName?: ClassValue;
-  tableCellClassName?: ClassValue;
+  tableContainer?: TableContainerProps;
+  tableClassName?: clsx.ClassValue;
+  tableRowClassName?: (row: Row<T>) => clsx.ClassValue;
+  tableCellClassName?: clsx.ClassValue;
   RowModal?: FunctionComponent<{
     row: T;
     children: ReactNode;
@@ -168,6 +170,7 @@ export default function DataTable<T>({
   columns,
   data,
   noDataMessage,
+  tableContainer,
   tableClassName,
   tableRowClassName,
   tableCellClassName,
@@ -188,7 +191,10 @@ export default function DataTable<T>({
   });
 
   return (
-    <Table className={cn("border-y", tableClassName)}>
+    <Table
+      className={cn("border-y", tableClassName)}
+      container={tableContainer}
+    >
       <TableHeader>
         {table.getHeaderGroups().map((headerGroup) => (
           <TableRow key={headerGroup.id} className="hover:bg-muted/10">
@@ -216,7 +222,7 @@ export default function DataTable<T>({
                   "hover:bg-transparent",
                   (RowModal || onRowClick) &&
                     "cursor-pointer hover:bg-muted/10",
-                  tableRowClassName,
+                  tableRowClassName && tableRowClassName(row),
                 )}
                 style={{ appearance: "inherit" }}
                 onClick={

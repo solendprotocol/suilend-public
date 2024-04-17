@@ -1,6 +1,7 @@
 import { CSSProperties } from "react";
 
-import { Toaster as ToasterComponent } from "../ui/sonner";
+import { Toaster as ToasterComponent } from "@/components/ui/sonner";
+import { TOAST_DURATION } from "@/lib/constants";
 
 export default function Toaster() {
   return (
@@ -26,7 +27,7 @@ export default function Toaster() {
         } as CSSProperties,
       }}
       position="bottom-left"
-      duration={3.5 * 1000}
+      duration={TOAST_DURATION}
       closeButton={true}
     />
   );

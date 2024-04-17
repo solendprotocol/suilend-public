@@ -4,6 +4,7 @@
 
 @layer base {
   :root {
+    /* colors */
     --background: 219 85% 5%;
     --foreground: 0 0% 100%;
 
@@ -32,6 +33,11 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 211 44% 15%; /* same as border */
 
+    --gold: 51 96% 67%;
+    --silver: 132 6% 85%;
+    --bronze: 19 65% 68%;
+
+    /* borderRadius */
     --radius: 0.5rem;
   }
 }

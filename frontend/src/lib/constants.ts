@@ -1,5 +1,6 @@
 export const msPerYear = 31556952000; // Approx. 1000 * 60 * 60 * 24 * 365;
 
+export const TOAST_DURATION = 3.5 * 1000;
 export const TX_TOAST_DURATION = 10 * 1000;
 
 export const SUI_DEPOSIT_GAS_MIN = 0.025;
@@ -47,6 +48,3 @@ export const EXPLORERS = [
     buildTxUrl: (digest: string) => `https://suivision.xyz/txblock/${digest}`,
   },
 ];
-
-export const OPEN_LTV_BW_TOOLTIP =
-  "Open LTV is a ratio that determines how much borrow power is contributed by a deposited asset. Borrow weight (BW) is a multiplier on the value borrowed, used for borrow limit calculations.";

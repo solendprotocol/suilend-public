@@ -8,6 +8,7 @@ import OpenOnExplorerButton from "@/components/shared/OpenOnExplorerButton";
 import Tooltip from "@/components/shared/Tooltip";
 import { TBody } from "@/components/shared/Typography";
 import { useAppContext } from "@/contexts/AppContext";
+import { useWalletContext } from "@/contexts/WalletContext";
 import { formatAddress, formatPoints } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -19,6 +20,7 @@ interface RowData {
 }
 
 export default function PointsLeaderboardTable() {
+  const { address } = useWalletContext();
   const { explorer } = useAppContext();
 
   // Columns
@@ -34,9 +36,9 @@ export default function PointsLeaderboardTable() {
           <TBody
             className={cn(
               "flex flex-row items-center gap-1",
-              rank === 1 && "text-[#FCE45A]",
-              rank === 2 && "text-[#D6DBD7]",
-              rank === 3 && "text-[#E39C7A]",
+              rank === 1 && "text-gold",
+              rank === 2 && "text-silver",
+              rank === 3 && "text-bronze",
             )}
           >
             #{rank}
@@ -73,9 +75,7 @@ export default function PointsLeaderboardTable() {
         return (
           <div className="flex flex-row items-center justify-end gap-1.5">
             <PointsIcon />
-            <TBody className="text-primary-foreground">
-              {formatPoints(new BigNumber(pointsPerDay))}
-            </TBody>
+            <TBody>{formatPoints(new BigNumber(pointsPerDay))}</TBody>
           </div>
         );
       },
@@ -91,9 +91,7 @@ export default function PointsLeaderboardTable() {
         return (
           <div className="flex flex-row items-center justify-end gap-1.5">
             <PointsIcon />
-            <TBody className="text-primary-foreground">
-              {formatPoints(new BigNumber(totalPoints))}
-            </TBody>
+            <TBody>{formatPoints(new BigNumber(totalPoints))}</TBody>
           </div>
         );
       },
@@ -105,7 +103,7 @@ export default function PointsLeaderboardTable() {
     {
       rank: 1,
       address:
-        "0x6191f9a47c411cc169ee4b0292f08531e4d442d4cb9ec61333016d2e9dee1205",
+        "0x98175f9a47c411cc169ee4b0292f08531e4d442d4cb9ec61333016d2e92125",
       pointsPerDay: 21521,
       totalPoints: 3837795,
     },
@@ -119,14 +117,13 @@ export default function PointsLeaderboardTable() {
     {
       rank: 3,
       address:
-        "0x6191f9a47c411cc169ee4b0292f08531e4d442d4cb9ec61333016d2e9dee1205",
+        "0x9289a47c411cc169ee4b0292f08531e4d442d4cb9ec61333016d2e9dee55551",
       pointsPerDay: 817512,
       totalPoints: 1928582,
     },
     {
       rank: 4,
-      address:
-        "0x6191f9a47c411cc169ee4b0292f08531e4d442d4cb9ec61333016d2e9dee1205",
+      address: "0x517c411cc169ee4b0292f08531e4d442d4cb9ec61333016d2e9d52212",
       pointsPerDay: 251,
       totalPoints: 99921,
     },
@@ -141,6 +138,11 @@ export default function PointsLeaderboardTable() {
         columns={columns}
         data={sortedRows}
         noDataMessage="No data"
+        tableContainer={{ className: "overflow-visible" }}
+        tableRowClassName={(row) =>
+          row.original.address === address &&
+          "outline outline-secondary rounded-sm !bg-secondary/5"
+        }
       />
     </div>
   );

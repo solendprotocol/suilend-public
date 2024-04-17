@@ -9,7 +9,8 @@ import TokenIcon from "@/components/shared/TokenIcon";
 import Tooltip from "@/components/shared/Tooltip";
 import { TBody, TLabel, TTitle } from "@/components/shared/Typography";
 import { Separator } from "@/components/ui/separator";
-import { formatPercent, formatToken } from "@/lib/format";
+import { isSuilendPoints } from "@/lib/coinType";
+import { formatPercent, formatPoints, formatToken } from "@/lib/format";
 import {
   RewardSummary,
   getDedupedAprRewards,
@@ -125,7 +126,10 @@ export default function AprWithRewardsBreakdown({
   const dedupedAprRewards = getDedupedAprRewards(filteredRewards);
   const dedupedNewAprRewards = dedupedAprRewards.map((r) => ({
     ...r,
-    aprPercent: r.stats.aprPercent.times(aprModifier),
+    stats: {
+      ...r.stats,
+      aprPercent: r.stats.aprPercent.times(aprModifier),
+    },
   }));
 
   // Total APR
@@ -133,7 +137,7 @@ export default function AprWithRewardsBreakdown({
 
   const newTotalAprPercent = newAprPercent.plus(
     dedupedNewAprRewards.reduce(
-      (acc, reward) => acc.plus(reward.aprPercent),
+      (acc, reward) => acc.plus(reward.stats.aprPercent),
       new BigNumber(0),
     ),
   );
@@ -142,7 +146,10 @@ export default function AprWithRewardsBreakdown({
   const dedupedDailyRewards = getDedupedDailyRewards(filteredRewards);
   const dedupedNewDailyRewards = dedupedDailyRewards.map((r) => ({
     ...r,
-    dailyReward: r.stats.dailyReward.times(aprModifier),
+    stats: {
+      ...r.stats,
+      dailyReward: r.stats.dailyReward.times(aprModifier),
+    },
   }));
 
   if (filteredRewards.length === 0)
@@ -177,7 +184,10 @@ export default function AprWithRewardsBreakdown({
                   key={reward.stats.id}
                   className="flex flex-row items-center justify-between gap-6"
                 >
-                  <RewardChip symbol={reward.stats.rewardSymbol} />
+                  <RewardChip
+                    coinType={reward.stats.rewardCoinType}
+                    symbol={reward.stats.rewardSymbol}
+                  />
 
                   <div className="flex flex-row items-center gap-1.5">
                     <TokenIcon
@@ -188,38 +198,55 @@ export default function AprWithRewardsBreakdown({
                     />
                     <TBody className="text-primary-foreground">
                       {amountChange
-                        ? `${formatPercent(reward.stats.aprPercent)} → ${invalidAprModifier ? "N/A" : formatPercent(dedupedNewAprRewards[index].aprPercent)}`
+                        ? `${formatPercent(reward.stats.aprPercent)} → ${invalidAprModifier ? "N/A" : formatPercent(dedupedNewAprRewards[index].stats.aprPercent)}`
                         : formatPercent(reward.stats.aprPercent)}
                     </TBody>
                   </div>
                 </div>
               ))}
 
-              {dedupedDailyRewards.map((reward, index) => (
-                <div
-                  key={reward.stats.id}
-                  className="flex flex-row items-center justify-between gap-6"
-                >
-                  <RewardChip symbol={reward.stats.rewardSymbol} />
+              {dedupedDailyRewards.map((reward, index) => {
+                const formatValue = (value: BigNumber) =>
+                  isSuilendPoints(reward.stats.rewardCoinType)
+                    ? formatPoints(value)
+                    : formatToken(value, { exact: false });
 
-                  <div className="flex flex-row items-center gap-1.5">
-                    <TokenIcon
-                      className="h-4 w-4"
+                return (
+                  <div
+                    key={reward.stats.id}
+                    className="flex flex-row items-start justify-between gap-6"
+                  >
+                    <RewardChip
                       coinType={reward.stats.rewardCoinType}
                       symbol={reward.stats.rewardSymbol}
-                      url={reward.stats.iconUrl}
                     />
-                    <TBody className="text-primary-foreground">
-                      {amountChange
-                        ? `${formatToken(reward.stats.dailyReward, { exact: false })} → ${invalidAprModifier ? "N/A" : formatToken(dedupedNewDailyRewards[index].stats.dailyReward, { exact: false })}`
-                        : formatToken(reward.stats.dailyReward, {
-                            exact: false,
-                          })}
-                    </TBody>
-                    <TBody className="text-muted-foreground">/day</TBody>
+
+                    <div className="flex flex-col items-end gap-0.5">
+                      <div className="flex flex-row items-center gap-1.5">
+                        <TokenIcon
+                          className="h-4 w-4"
+                          coinType={reward.stats.rewardCoinType}
+                          symbol={reward.stats.rewardSymbol}
+                          url={reward.stats.iconUrl}
+                        />
+                        <TBody
+                          className={cn(
+                            !isSuilendPoints(reward.stats.rewardCoinType) &&
+                              "text-primary-foreground",
+                          )}
+                        >
+                          {amountChange
+                            ? `${formatValue(reward.stats.dailyReward)} → ${invalidAprModifier ? "N/A" : formatValue(dedupedNewDailyRewards[index].stats.dailyReward)}`
+                            : formatValue(reward.stats.dailyReward)}
+                        </TBody>
+                      </div>
+                      <TLabel className="uppercase">
+                        per {reward.stats.rewardSymbol}/day
+                      </TLabel>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             <Separator />

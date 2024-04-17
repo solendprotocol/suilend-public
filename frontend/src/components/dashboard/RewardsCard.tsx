@@ -183,7 +183,7 @@ export default function RewardsCard() {
           }}
         >
           <div className="text-center font-mono text-sm font-normal uppercase text-primary-foreground sm:text-[16px]">
-            Start earning points
+            Start earning points & rewards
           </div>
 
           <Button
@@ -191,7 +191,7 @@ export default function RewardsCard() {
             variant="outline"
             onClick={() => setIsConnectWalletDropdownOpen(true)}
           >
-            Deposit
+            Connect wallet
           </Button>
         </div>
       ) : (

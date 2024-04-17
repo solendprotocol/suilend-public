@@ -1,3 +1,6 @@
+export const OPEN_LTV_BW_TOOLTIP =
+  "Open LTV is a ratio that determines how much borrow power is contributed by a deposited asset. Borrow weight (BW) is a multiplier on the value borrowed, used for borrow limit calculations.";
+
 export const DEPOSITS_TOOLTIP =
   "Value of all assets deposited. Increasing this value increases your borrow limit and liquidation threshold.";
 

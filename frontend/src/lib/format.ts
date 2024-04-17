@@ -47,11 +47,11 @@ export const formatNumber = (
   // Zero
   if (value.eq(0)) return `${prefix}0.${"0".repeat(dp)}`;
 
-  // < Min
+  // <Min
   const minValue = new BigNumber(10).pow(-dp);
-  if (value.lt(minValue)) return `< ${prefix}${minValue.toFixed(dp)}`;
+  if (value.lt(minValue)) return `<${prefix}${minValue.toFixed(dp)}`;
 
-  // < 1
+  // <1
   if (value.lt(1)) return `${prefix}${value.toFixed(dp, roundingMode)}`;
 
   if (!exact) {
@@ -142,7 +142,7 @@ export const formatPercent = (value: BigNumber, options?: { dp?: number }) => {
 };
 
 export const formatDuration = (seconds: BigNumber) => {
-  if (seconds.lt(1)) return "< 1s";
+  if (seconds.lt(1)) return "<1s";
   if (seconds.lt(60)) return `${seconds}s`;
   if (seconds.lt(60 * 60)) return `${seconds.div(60).toFixed(0)}m`;
   if (seconds.lt(60 * 60 * 24)) return `${seconds.div(60 * 60).toFixed(1)}h`;
