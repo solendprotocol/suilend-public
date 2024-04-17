@@ -89,8 +89,8 @@ export function formatRewards(
               poolReward.endTimeMs - poolReward.startTimeMs,
             ),
           )
-          .div(reserve.totalDeposits)
-          .div(365);
+          .div(365)
+          .div(reserve.totalDeposits);
 
     return {
       stats: {

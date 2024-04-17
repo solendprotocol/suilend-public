@@ -76,7 +76,7 @@ function PointsPerDayStat({ pointsPerDay, isCentered }: PointsPerDayStatProps) {
   return (
     <div className={cn("flex flex-col gap-1", isCentered && "items-center")}>
       <TLabel className={cn("uppercase", isCentered && "text-center")}>
-        Points / day
+        Points per day
       </TLabel>
       <div className="flex flex-row items-center gap-1.5">
         <PointsIcon />

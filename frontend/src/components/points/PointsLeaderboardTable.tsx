@@ -68,7 +68,7 @@ export default function PointsLeaderboardTable() {
       accessorKey: "pointsPerDay",
       sortingFn: "alphanumeric",
       header: ({ column }) =>
-        tableHeader(column, "Points / day", { isNumerical: true }),
+        tableHeader(column, "Points per day", { isNumerical: true }),
       cell: ({ row }) => {
         const { pointsPerDay } = row.original;
 

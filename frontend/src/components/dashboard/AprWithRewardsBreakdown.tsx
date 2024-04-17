@@ -7,11 +7,18 @@ import { Side } from "@suilend/sdk/types";
 import RewardChip from "@/components/shared/RewardChip";
 import TokenIcon from "@/components/shared/TokenIcon";
 import Tooltip from "@/components/shared/Tooltip";
-import { TBody, TLabel, TTitle } from "@/components/shared/Typography";
+import {
+  TBody,
+  TLabel,
+  TLabelSans,
+  TTitle,
+} from "@/components/shared/Typography";
 import { Separator } from "@/components/ui/separator";
 import { isSuilendPoints } from "@/lib/coinType";
 import { formatPercent, formatPoints, formatToken } from "@/lib/format";
 import {
+  AprRewardSummary,
+  DailyRewardSummary,
   RewardSummary,
   getDedupedAprRewards,
   getDedupedDailyRewards,
@@ -67,11 +74,128 @@ function calculateDepositAprPercent(reserve: ParsedReserve) {
   return currentUtil.times(borrowAprPercent).times(protocolTakePercentage);
 }
 
+const formatApr = (
+  value: BigNumber,
+  newValue: BigNumber,
+  isAprModifierInvalid: boolean,
+  showChange: boolean,
+) =>
+  showChange
+    ? `${formatPercent(value)} → ${isAprModifierInvalid ? "N/A" : formatPercent(newValue)}`
+    : formatPercent(value);
+
+const formatPointsDailyReward = (
+  value: BigNumber,
+  newValue: BigNumber,
+  isAprModifierInvalid: boolean,
+  showChange: boolean,
+) =>
+  showChange
+    ? `${formatPoints(value)} → ${isAprModifierInvalid ? "N/A" : formatPoints(newValue)}`
+    : formatPoints(value);
+
+const formatTokenDailyReward = (
+  value: BigNumber,
+  newValue: BigNumber,
+  isAprModifierInvalid: boolean,
+  showChange: boolean,
+) =>
+  showChange
+    ? `${formatToken(value, { exact: false })} → ${isAprModifierInvalid ? "N/A" : formatToken(newValue, { exact: false })}`
+    : formatToken(value, { exact: false });
+
+interface AprRewardRowProps {
+  reward: AprRewardSummary;
+  newReward: AprRewardSummary;
+  isAprModifierInvalid: boolean;
+  showChange: boolean;
+}
+
+function AprRewardRow({
+  reward,
+  newReward,
+  isAprModifierInvalid,
+  showChange,
+}: AprRewardRowProps) {
+  return (
+    <div className="flex flex-row items-center justify-between gap-6">
+      <RewardChip
+        coinType={reward.stats.rewardCoinType}
+        symbol={reward.stats.rewardSymbol}
+      />
+
+      <div className="flex flex-row items-center gap-1.5">
+        <TokenIcon
+          className="h-4 w-4"
+          coinType={reward.stats.rewardCoinType}
+          symbol={reward.stats.rewardSymbol}
+          url={reward.stats.iconUrl}
+        />
+        <TBody>
+          {formatApr(
+            reward.stats.aprPercent,
+            newReward.stats.aprPercent,
+            isAprModifierInvalid,
+            showChange,
+          )}
+        </TBody>
+      </div>
+    </div>
+  );
+}
+
+interface DailyRewardRowProps {
+  reserve: ParsedReserve;
+  reward: DailyRewardSummary;
+  newReward: DailyRewardSummary;
+  isAprModifierInvalid: boolean;
+  showChange: boolean;
+}
+
+function DailyRewardRow({
+  reserve,
+  reward,
+  newReward,
+  isAprModifierInvalid,
+  showChange,
+}: DailyRewardRowProps) {
+  return (
+    <div className="flex flex-row items-start justify-between gap-6">
+      <RewardChip
+        coinType={reward.stats.rewardCoinType}
+        symbol={reward.stats.rewardSymbol}
+      />
+
+      <div className="flex flex-col items-end gap-0.5">
+        <div className="flex flex-row items-center gap-1.5">
+          <TokenIcon
+            className="h-4 w-4"
+            coinType={reward.stats.rewardCoinType}
+            symbol={reward.stats.rewardSymbol}
+            url={reward.stats.iconUrl}
+          />
+          <TBody>
+            {(isSuilendPoints(reward.stats.rewardCoinType)
+              ? formatPointsDailyReward
+              : formatTokenDailyReward)(
+              reward.stats.dailyReward,
+              newReward.stats.dailyReward,
+              isAprModifierInvalid,
+              showChange,
+            )}
+          </TBody>
+        </div>
+        <TLabel className="uppercase">per {reserve.symbol} per day</TLabel>
+      </div>
+    </div>
+  );
+}
+
 interface AprWithRewardsBreakdownProps {
   side: Side;
   aprPercent: BigNumber;
   rewards: RewardSummary[];
-  reserve?: ParsedReserve;
+  reserve: ParsedReserve;
   amountChange?: BigNumber;
 }
 
@@ -89,7 +213,7 @@ export default function AprWithRewardsBreakdown({
   // Change this logic if this assumption changes.
   let newAprPercent = aprPercent;
   let aprModifier = new BigNumber(1);
-  if (reserve && amountChange) {
+  if (amountChange) {
     const delta =
       side === Side.DEPOSIT
         ? {
@@ -120,11 +244,36 @@ export default function AprWithRewardsBreakdown({
       : poolTotal.div(amountChange.plus(poolTotal));
   }
 
-  const invalidAprModifier = aprModifier.isNegative();
+  const isAprModifierInvalid = aprModifier.isNegative();
+  const showChange = amountChange !== undefined;
+
+  // Daily
+  const dailyRewards = getDedupedDailyRewards(filteredRewards);
+  const newDailyRewards = dailyRewards.map((r) => ({
+    ...r,
+    stats: {
+      ...r.stats,
+      dailyReward: r.stats.dailyReward.times(aprModifier),
+    },
+  }));
+
+  const pointsDailyRewards = dailyRewards.filter((r) =>
+    isSuilendPoints(r.stats.rewardCoinType),
+  );
+  const newPointsDailyRewards = newDailyRewards.filter((r) =>
+    isSuilendPoints(r.stats.rewardCoinType),
+  );
+
+  const nonPointsDailyRewards = dailyRewards.filter(
+    (r) => !isSuilendPoints(r.stats.rewardCoinType),
+  );
+  const newNonPointsDailyRewards = newDailyRewards.filter(
+    (r) => !isSuilendPoints(r.stats.rewardCoinType),
+  );
 
   // APR
-  const dedupedAprRewards = getDedupedAprRewards(filteredRewards);
-  const dedupedNewAprRewards = dedupedAprRewards.map((r) => ({
+  const aprRewards = getDedupedAprRewards(filteredRewards);
+  const newAprRewards = aprRewards.map((r) => ({
     ...r,
     stats: {
       ...r.stats,
@@ -136,28 +285,21 @@ export default function AprWithRewardsBreakdown({
   const totalAprPercent = getTotalAprPercent(aprPercent, filteredRewards);
 
   const newTotalAprPercent = newAprPercent.plus(
-    dedupedNewAprRewards.reduce(
+    newAprRewards.reduce(
       (acc, reward) => acc.plus(reward.stats.aprPercent),
       new BigNumber(0),
     ),
   );
 
-  // Daily
-  const dedupedDailyRewards = getDedupedDailyRewards(filteredRewards);
-  const dedupedNewDailyRewards = dedupedDailyRewards.map((r) => ({
-    ...r,
-    stats: {
-      ...r.stats,
-      dailyReward: r.stats.dailyReward.times(aprModifier),
-    },
-  }));
-
   if (filteredRewards.length === 0)
     return (
       <TBody>
-        {amountChange
-          ? `${formatPercent(totalAprPercent)} -> ${invalidAprModifier ? "N/A" : formatPercent(newTotalAprPercent)}`
-          : formatPercent(totalAprPercent)}
+        {formatApr(
+          totalAprPercent,
+          newTotalAprPercent,
+          isAprModifierInvalid,
+          showChange,
+        )}
       </TBody>
     );
   return (
@@ -169,111 +311,101 @@ export default function AprWithRewardsBreakdown({
         }}
         content={
           <>
+            {pointsDailyRewards.length > 0 && (
+              <>
+                <div className="flex flex-col gap-1">
+                  <TBody className="uppercase">Points boost</TBody>
+                  <TLabelSans>
+                    Deposit {reserve.symbol} to earn points.
+                  </TLabelSans>
+                </div>
+
+                <div className="flex flex-col gap-3">
+                  {pointsDailyRewards.map((reward, index) => (
+                    <DailyRewardRow
+                      key={index}
+                      reserve={reserve}
+                      reward={reward}
+                      newReward={newPointsDailyRewards[index]}
+                      isAprModifierInvalid={isAprModifierInvalid}
+                      showChange={showChange}
+                    />
+                  ))}
+                </div>
+
+                <Separator />
+              </>
+            )}
+
             <div className="flex flex-row items-center justify-between gap-6">
               <TLabel className="uppercase">{capitalize(side)} APR</TLabel>
               <TBody>
-                {amountChange
-                  ? `${formatPercent(aprPercent)} → ${formatPercent(newAprPercent)}`
-                  : formatPercent(aprPercent)}
+                {formatApr(
+                  aprPercent,
+                  newAprPercent,
+                  isAprModifierInvalid,
+                  showChange,
+                )}
               </TBody>
             </div>
 
-            <div className="flex flex-col gap-3">
-              {dedupedAprRewards.map((reward, index) => (
-                <div
-                  key={reward.stats.id}
-                  className="flex flex-row items-center justify-between gap-6"
-                >
-                  <RewardChip
-                    coinType={reward.stats.rewardCoinType}
-                    symbol={reward.stats.rewardSymbol}
-                  />
-
-                  <div className="flex flex-row items-center gap-1.5">
-                    <TokenIcon
-                      className="h-4 w-4"
-                      coinType={reward.stats.rewardCoinType}
-                      symbol={reward.stats.rewardSymbol}
-                      url={reward.stats.iconUrl}
+            {(aprRewards.length > 0 || nonPointsDailyRewards.length > 0) && (
+              <>
+                <div className="flex flex-col gap-3">
+                  {aprRewards.map((reward, index) => (
+                    <AprRewardRow
+                      key={index}
+                      reward={reward}
+                      newReward={newAprRewards[index]}
+                      isAprModifierInvalid={isAprModifierInvalid}
+                      showChange={showChange}
                     />
-                    <TBody className="text-primary-foreground">
-                      {amountChange
-                        ? `${formatPercent(reward.stats.aprPercent)} → ${invalidAprModifier ? "N/A" : formatPercent(dedupedNewAprRewards[index].stats.aprPercent)}`
-                        : formatPercent(reward.stats.aprPercent)}
-                    </TBody>
-                  </div>
+                  ))}
+
+                  {nonPointsDailyRewards.map((reward, index) => (
+                    <DailyRewardRow
+                      key={index}
+                      reserve={reserve}
+                      reward={reward}
+                      newReward={newNonPointsDailyRewards[index]}
+                      isAprModifierInvalid={isAprModifierInvalid}
+                      showChange={showChange}
+                    />
+                  ))}
                 </div>
-              ))}
 
-              {dedupedDailyRewards.map((reward, index) => {
-                const formatValue = (value: BigNumber) =>
-                  isSuilendPoints(reward.stats.rewardCoinType)
-                    ? formatPoints(value)
-                    : formatToken(value, { exact: false });
-
-                return (
-                  <div
-                    key={reward.stats.id}
-                    className="flex flex-row items-start justify-between gap-6"
-                  >
-                    <RewardChip
-                      coinType={reward.stats.rewardCoinType}
-                      symbol={reward.stats.rewardSymbol}
-                    />
-
-                    <div className="flex flex-col items-end gap-0.5">
-                      <div className="flex flex-row items-center gap-1.5">
-                        <TokenIcon
-                          className="h-4 w-4"
-                          coinType={reward.stats.rewardCoinType}
-                          symbol={reward.stats.rewardSymbol}
-                          url={reward.stats.iconUrl}
-                        />
-                        <TBody
-                          className={cn(
-                            !isSuilendPoints(reward.stats.rewardCoinType) &&
-                              "text-primary-foreground",
-                          )}
-                        >
-                          {amountChange
-                            ? `${formatValue(reward.stats.dailyReward)} → ${invalidAprModifier ? "N/A" : formatValue(dedupedNewDailyRewards[index].stats.dailyReward)}`
-                            : formatValue(reward.stats.dailyReward)}
-                        </TBody>
-                      </div>
-                      <TLabel className="uppercase">
-                        per {reward.stats.rewardSymbol}/day
-                      </TLabel>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            <Separator />
+                <Separator />
+              </>
+            )}
 
             <div className="flex flex-row items-center justify-between gap-6">
               <TTitle className="uppercase">Total APR</TTitle>
               <TBody>
-                {amountChange
-                  ? `${formatPercent(totalAprPercent)} -> ${invalidAprModifier ? "N/A" : formatPercent(newTotalAprPercent)}`
-                  : formatPercent(totalAprPercent)}
+                {formatApr(
+                  totalAprPercent,
+                  newTotalAprPercent,
+                  isAprModifierInvalid,
+                  showChange,
+                )}
               </TBody>
             </div>
           </>
         }
       >
         <div className="flex flex-row items-center gap-1.5">
-          {[...dedupedAprRewards, ...dedupedDailyRewards].map((reward) => {
-            return (
-              <TokenIcon
-                key={reward.stats.id}
-                className="h-4 w-4"
-                coinType={reward.stats.rewardCoinType}
-                symbol={reward.stats.rewardSymbol}
-                url={reward.stats.iconUrl}
-              />
-            );
-          })}
+          {[...pointsDailyRewards, ...aprRewards, ...nonPointsDailyRewards].map(
+            (reward) => {
+              return (
+                <TokenIcon
+                  key={reward.stats.id}
+                  className="h-4 w-4"
+                  coinType={reward.stats.rewardCoinType}
+                  symbol={reward.stats.rewardSymbol}
+                  url={reward.stats.iconUrl}
+                />
+              );
+            },
+          )}
 
           <TBody
             className={cn(
@@ -281,9 +413,12 @@ export default function AprWithRewardsBreakdown({
               hoverUnderlineClassName,
             )}
           >
-            {amountChange
-              ? `${formatPercent(totalAprPercent)} → ${invalidAprModifier ? "N/A" : formatPercent(newTotalAprPercent)}`
-              : formatPercent(totalAprPercent)}
+            {formatApr(
+              totalAprPercent,
+              newTotalAprPercent,
+              isAprModifierInvalid,
+              showChange,
+            )}
           </TBody>
         </div>
       </Tooltip>
