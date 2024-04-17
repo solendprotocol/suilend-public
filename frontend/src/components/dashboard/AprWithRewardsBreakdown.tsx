@@ -131,7 +131,7 @@ function AprRewardRow({
           symbol={reward.stats.rewardSymbol}
           url={reward.stats.iconUrl}
         />
-        <TBody>
+        <TBody className="text-primary-foreground">
           {formatApr(
             reward.stats.aprPercent,
             newReward.stats.aprPercent,
@@ -174,7 +174,7 @@ function DailyRewardRow({
             symbol={reward.stats.rewardSymbol}
             url={reward.stats.iconUrl}
           />
-          <TBody>
+          <TBody className="text-primary-foreground">
             {(isSuilendPoints(reward.stats.rewardCoinType)
               ? formatPointsDailyReward
               : formatTokenDailyReward)(

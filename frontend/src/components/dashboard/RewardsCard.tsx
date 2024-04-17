@@ -5,7 +5,8 @@ import BigNumber from "bignumber.js";
 import { toast } from "sonner";
 
 import Card from "@/components/dashboard/Card";
-import PointsIcon from "@/components/points/PointsIcon";
+import PointsCount from "@/components/points/PointsCount";
+import PointsRank from "@/components/points/PointsRank";
 import Button from "@/components/shared/Button";
 import Spinner from "@/components/shared/Spinner";
 import TextLink from "@/components/shared/TextLink";
@@ -20,7 +21,7 @@ import { useWalletContext } from "@/contexts/WalletContext";
 import useBreakpoint from "@/hooks/useBreakpoint";
 import { LOGO_MAP, NORMALIZED_SUI_COINTYPE, isSui } from "@/lib/coinType";
 import { TX_TOAST_DURATION } from "@/lib/constants";
-import { formatInteger, formatPoints, formatToken } from "@/lib/format";
+import { formatToken } from "@/lib/format";
 import { POINTS_URL } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 
@@ -48,21 +49,18 @@ function PendingRewards({ totalSuiRewards, isCentered }: PendingRewardsProps) {
   );
 }
 
-interface Season1StatProps {
+interface Season1PointsStatProps {
   points: BigNumber;
   isCentered?: boolean;
 }
 
-function Season1Stat({ points, isCentered }: Season1StatProps) {
+function Season1PointsStat({ points, isCentered }: Season1PointsStatProps) {
   return (
     <div className={cn("flex flex-col gap-1", isCentered && "items-center")}>
       <TLabel className={cn("uppercase", isCentered && "text-center")}>
         Season 1 points
       </TLabel>
-      <div className="flex flex-row items-center gap-1.5">
-        <PointsIcon />
-        <TBody>{formatPoints(points)}</TBody>
-      </div>
+      <PointsCount points={points} />
     </div>
   );
 }
@@ -78,10 +76,7 @@ function PointsPerDayStat({ pointsPerDay, isCentered }: PointsPerDayStatProps) {
       <TLabel className={cn("uppercase", isCentered && "text-center")}>
         Points per day
       </TLabel>
-      <div className="flex flex-row items-center gap-1.5">
-        <PointsIcon />
-        <TBody>{formatPoints(pointsPerDay)}</TBody>
-      </div>
+      <PointsCount points={pointsPerDay} />
     </div>
   );
 }
@@ -97,9 +92,7 @@ function RankStat({ rank, isCentered }: RankStatProps) {
       <TLabel className={cn("uppercase", isCentered && "text-center")}>
         Rank
       </TLabel>
-      <TBody className={cn(isCentered && "text-center")}>
-        #{formatInteger(rank)}
-      </TBody>
+      <PointsRank rank={rank} />
     </div>
   );
 }
@@ -210,7 +203,7 @@ export default function RewardsCard() {
               {md ? (
                 <div className="flex flex-1 flex-row items-center justify-between gap-4">
                   <PendingRewards totalSuiRewards={totalSuiRewards} />
-                  <Season1Stat points={points} />
+                  <Season1PointsStat points={points} />
                   <PointsPerDayStat pointsPerDay={pointsPerDay} />
                   <RankStat rank={rank} />
                 </div>
@@ -220,7 +213,7 @@ export default function RewardsCard() {
                     totalSuiRewards={totalSuiRewards}
                     isCentered
                   />
-                  <Season1Stat points={points} isCentered />
+                  <Season1PointsStat points={points} isCentered />
 
                   <PointsPerDayStat pointsPerDay={pointsPerDay} isCentered />
                   <RankStat rank={rank} isCentered />

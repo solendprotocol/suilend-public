@@ -11,7 +11,7 @@ import Logo from "@/components/layout/Logo";
 import NavigationLinks from "@/components/layout/NavigationLinks";
 import RefreshDataButton from "@/components/layout/RefreshDataButton";
 import RpcSelect from "@/components/layout/RpcSelect";
-import PointsCount from "@/components/points/PointsCount";
+import HeaderPointsPopover from "@/components/points/HeaderPointsPopover";
 import Button from "@/components/shared/Button";
 import { useWalletContext } from "@/contexts/WalletContext";
 import { ROOT_URL } from "@/lib/navigation";
@@ -67,7 +67,7 @@ export default function AppHeader() {
 
           {address && (
             <div className="hidden sm:flex">
-              <PointsCount />
+              <HeaderPointsPopover />
             </div>
           )}
 

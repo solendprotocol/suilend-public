@@ -1,7 +1,5 @@
 import { forwardRef } from "react";
 
-import { PProps } from "react-html-props";
-
 import { cn } from "@/lib/utils";
 
 // | 'display'
@@ -26,71 +24,77 @@ export const labelSansClassNames =
   "text-muted-foreground font-sans text-xs font-normal";
 
 // Display
-export const TDisplay = forwardRef<HTMLParagraphElement, PProps>(
-  ({ className, children, ...props }, ref) => {
-    return (
-      <p ref={ref} className={cn(displayClassNames, className)} {...props}>
-        {children}
-      </p>
-    );
-  },
-);
+export const TDisplay = forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLParagraphElement>
+>(({ className, children, ...props }, ref) => {
+  return (
+    <p ref={ref} className={cn(displayClassNames, className)} {...props}>
+      {children}
+    </p>
+  );
+});
 TDisplay.displayName = "TDisplay";
 
 // Title
-export const TTitle = forwardRef<HTMLHeadingElement, PProps>(
-  ({ className, children, ...props }, ref) => {
-    return (
-      <h2 ref={ref} className={cn(titleClassNames, className)} {...props}>
-        {children}
-      </h2>
-    );
-  },
-);
+export const TTitle = forwardRef<
+  HTMLHeadingElement,
+  React.HTMLAttributes<HTMLHeadingElement>
+>(({ className, children, ...props }, ref) => {
+  return (
+    <h2 ref={ref} className={cn(titleClassNames, className)} {...props}>
+      {children}
+    </h2>
+  );
+});
 TTitle.displayName = "TTitle";
 
 // Body (sm, foreground)
-export const TBody = forwardRef<HTMLParagraphElement, PProps>(
-  ({ className, children, ...props }, ref) => {
-    return (
-      <p ref={ref} className={cn(bodyClassNames, className)} {...props}>
-        {children}
-      </p>
-    );
-  },
-);
+export const TBody = forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLParagraphElement>
+>(({ className, children, ...props }, ref) => {
+  return (
+    <p ref={ref} className={cn(bodyClassNames, className)} {...props}>
+      {children}
+    </p>
+  );
+});
 TBody.displayName = "TBody";
 
-export const TBodySans = forwardRef<HTMLParagraphElement, PProps>(
-  ({ className, children, ...props }, ref) => {
-    return (
-      <p ref={ref} className={cn(bodySansClassNames, className)} {...props}>
-        {children}
-      </p>
-    );
-  },
-);
+export const TBodySans = forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLParagraphElement>
+>(({ className, children, ...props }, ref) => {
+  return (
+    <p ref={ref} className={cn(bodySansClassNames, className)} {...props}>
+      {children}
+    </p>
+  );
+});
 TBodySans.displayName = "TBodySans";
 
 // Label (xs, muted)
-export const TLabel = forwardRef<HTMLParagraphElement, PProps>(
-  ({ className, children, ...props }, ref) => {
-    return (
-      <p ref={ref} className={cn(labelClassNames, className)} {...props}>
-        {children}
-      </p>
-    );
-  },
-);
+export const TLabel = forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLParagraphElement>
+>(({ className, children, ...props }, ref) => {
+  return (
+    <p ref={ref} className={cn(labelClassNames, className)} {...props}>
+      {children}
+    </p>
+  );
+});
 TLabel.displayName = "TLabel";
 
-export const TLabelSans = forwardRef<HTMLParagraphElement, PProps>(
-  ({ className, children, ...props }, ref) => {
-    return (
-      <p ref={ref} className={cn(labelSansClassNames, className)} {...props}>
-        {children}
-      </p>
-    );
-  },
-);
+export const TLabelSans = forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLParagraphElement>
+>(({ className, children, ...props }, ref) => {
+  return (
+    <p ref={ref} className={cn(labelSansClassNames, className)} {...props}>
+      {children}
+    </p>
+  );
+});
 TLabelSans.displayName = "TLabelSans";

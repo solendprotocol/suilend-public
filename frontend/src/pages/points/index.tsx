@@ -31,7 +31,7 @@ function Page() {
   };
 
   return (
-    <div className="flex w-full flex-col items-center gap-6">
+    <div className="flex w-full min-w-0 flex-col items-center gap-6">
       <PointsHeader />
 
       {/* <Tabs

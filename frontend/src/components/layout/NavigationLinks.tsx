@@ -1,4 +1,4 @@
-import PointsCount from "@/components/points/PointsCount";
+import HeaderPointsPopover from "@/components/points/HeaderPointsPopover";
 import Link from "@/components/shared/Link";
 import { useAppContext } from "@/contexts/AppContext";
 import { useWalletContext } from "@/contexts/WalletContext";
@@ -23,7 +23,7 @@ export default function NavigationLinks() {
 
         {address && (
           <div className="sm:hidden">
-            <PointsCount />
+            <HeaderPointsPopover />
           </div>
         )}
       </div>

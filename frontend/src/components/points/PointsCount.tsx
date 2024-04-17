@@ -8,22 +8,21 @@ import { cn } from "@/lib/utils";
 
 interface PointsCountProps {
   className?: clsx.ClassValue;
+  iconClassName?: clsx.ClassValue;
+  labelClassName?: clsx.ClassValue;
+  points: BigNumber;
 }
 
-export default function PointsCount({ className }: PointsCountProps) {
+export default function PointsCount({
+  className,
+  iconClassName,
+  labelClassName,
+  points,
+}: PointsCountProps) {
   return (
-    <div
-      className={cn(
-        "h-8 rounded-sm bg-[#142142] px-3 py-0 text-primary-foreground",
-        className,
-      )}
-    >
-      <div className="flex h-full flex-row items-center gap-1.5">
-        <PointsIcon />
-        <TBody className="text-primary-foreground">
-          {formatPoints(new BigNumber(8771.5221))}
-        </TBody>
-      </div>
+    <div className={cn("flex flex-row items-center gap-1.5", className)}>
+      <PointsIcon className={iconClassName} />
+      <TBody className={cn(labelClassName)}>{formatPoints(points)}</TBody>
     </div>
   );
 }
