@@ -21,14 +21,14 @@ flattenDir("./dist/pyth-sdk/src");
 
 // 4. Update pyth-sdk imports in sdk/
 const SUILEND_SDK_ROOT = "./dist/sdk/";
-const files = (
+const sdkFiles = (
   fs.readdirSync(SUILEND_SDK_ROOT, { recursive: true }) as string[]
 ).filter(
   (file) =>
     !file.includes("_generated") &&
     (file.endsWith(".js") || file.endsWith(".ts")),
 );
-for (const file of files) {
+for (const file of sdkFiles) {
   const fileString = fs.readFileSync(`${SUILEND_SDK_ROOT}${file}`, "utf8");
   if (!fileString.includes("../../pyth-sdk/src")) continue;
 
@@ -54,10 +54,27 @@ const newPackageJson = Object.assign({}, packageJson);
 
 newPackageJson["private"] = false;
 newPackageJson["main"] = "./index.js";
-Object.entries(newPackageJson["exports"]).forEach(([key, value]) => {
-  newPackageJson["exports"][key as keyof (typeof newPackageJson)["exports"]] =
-    value.replace("./src/", "./");
-});
+
+const exportsMap: Record<string, string> = {
+  ".": "./index.js",
+};
+const files = (
+  fs.readdirSync("./dist/", { recursive: true }) as string[]
+).filter(
+  (file) =>
+    !file.startsWith("core") && file !== "index.js" && file.endsWith(".js"),
+);
+for (const file of files) {
+  const fileName = file.substring(
+    0,
+    file.endsWith("index.js")
+      ? file.lastIndexOf("/index.js")
+      : file.lastIndexOf(".js"),
+  );
+  exportsMap[`./${fileName}`] = `./${file}`;
+}
+newPackageJson["exports"] = exportsMap as any;
+
 newPackageJson["types"] = "./index.js";
 
 fs.writeFileSync("./dist/package.json", JSON.stringify(newPackageJson), "utf8");

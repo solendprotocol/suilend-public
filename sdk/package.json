@@ -7,8 +7,7 @@
   "license": "MIT",
   "main": "./src/index.ts",
   "exports": {
-    ".": "./src/index.js",
-    "./*": "./src/*/*.js"
+    ".": "./src/index.js"
   },
   "types": "./src/index.ts",
   "scripts": {
