@@ -49,31 +49,12 @@ export default function WormholeConnectWrapper() {
     showHamburgerMenu: false,
     env: "mainnet",
     rpcs: {
-      // Ankr RPCs from cam's account cam@solend.fi
       solana: solanaRpc,
       ethereum:
         "https://rpc.ankr.com/eth/d57d49c5cc988185579623ea8fc23e7a0fc7005e843939bc29ed460952b381cb",
-      polygon:
-        "https://rpc.ankr.com/polygon/d57d49c5cc988185579623ea8fc23e7a0fc7005e843939bc29ed460952b381cb",
-      avalanche:
-        "https://rpc.ankr.com/avalanche/d57d49c5cc988185579623ea8fc23e7a0fc7005e843939bc29ed460952b381cb",
       sui: suiRpc,
-      arbitrum:
-        "https://rpc.ankr.com/arbitrum/d57d49c5cc988185579623ea8fc23e7a0fc7005e843939bc29ed460952b381cb",
-      optimism:
-        "https://rpc.ankr.com/optimism/d57d49c5cc988185579623ea8fc23e7a0fc7005e843939bc29ed460952b381cb",
-      base: "https://rpc.ankr.com/base/d57d49c5cc988185579623ea8fc23e7a0fc7005e843939bc29ed460952b381cb",
     },
-    networks: [
-      "solana",
-      "ethereum",
-      "polygon",
-      "avalanche",
-      "sui",
-      "arbitrum",
-      "optimism",
-      "base",
-    ],
+    networks: ["solana", "ethereum", "sui"],
     tokens: [
       "USDCeth",
       // "USDCpolygon",
