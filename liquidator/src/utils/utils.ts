@@ -8,8 +8,8 @@ import { Ed25519Keypair } from "@mysten/sui.js/keypairs/ed25519";
 import { Secp256k1Keypair } from "@mysten/sui.js/keypairs/secp256k1";
 import { TransactionBlock } from "@mysten/sui.js/transactions";
 import { fromB64, normalizeStructTag } from "@mysten/sui.js/utils";
-import { phantom } from "@suilend/sdk/_generated/_framework/reified";
-import { LendingMarket } from "@suilend/sdk/_generated/suilend/lending-market/structs";
+import { phantom } from "@suilend/sdk/mainnet/_generated/_framework/reified";
+import { LendingMarket } from "@suilend/sdk/mainnet/_generated/suilend/lending-market/structs";
 import BN from "bn.js";
 
 import { COIN_TYPES } from "./constants";
