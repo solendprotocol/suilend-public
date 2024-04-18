@@ -25,8 +25,11 @@
     --accent: 219 17% 19%; /* Not used */
     --accent-foreground: 0 0% 80%; /* Not used */
 
-    --destructive: 3 66% 57%;
-    --destructive-foreground: 210 40% 98%;
+    --success: 158 56% 48%;
+    --success-foreground: 0 0% 0%; /* Not used */
+
+    --destructive: 0 86% 60%;
+    --destructive-foreground: 210 40% 98%; /* Not used */
 
     --border: 211 44% 15%;
     --input: 214.3 31.8% 91.4%;

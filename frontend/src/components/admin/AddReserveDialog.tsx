@@ -173,7 +173,9 @@ export default function AddReserveDialog() {
       setIsDialogOpen(false);
       reset();
     } catch (err) {
-      toast.error(`Failed to add reserve: ${(err as Error)?.message || err}`);
+      toast.error("Failed to add reserve", {
+        description: ((err as Error)?.message || err) as string,
+      });
     } finally {
       await refreshData();
     }

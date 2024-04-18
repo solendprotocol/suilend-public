@@ -17,7 +17,7 @@ import Button from "@/components/shared/Button";
 import LabelWithValue from "@/components/shared/LabelWithValue";
 import Spinner from "@/components/shared/Spinner";
 import TextLink from "@/components/shared/TextLink";
-import { TBodySans, TLabelSans } from "@/components/shared/Typography";
+import { TLabelSans } from "@/components/shared/Typography";
 import { Separator } from "@/components/ui/separator";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { ActionSignature } from "@/contexts/DashboardContext";
@@ -203,20 +203,17 @@ export default function ActionsModalTabContent({
       const res = await submit(reserve.coinType, submitAmount);
       const txUrl = explorer.buildTxUrl(res.digest);
 
-      toast.success(
-        <TBodySans>
-          {`${capitalize(actionPastTense)} ${formattedValue}. `}
-          <TextLink href={txUrl}>View transaction</TextLink>
-        </TBodySans>,
-        { duration: TX_TOAST_DURATION },
-      );
+      toast.success(`${capitalize(actionPastTense)} ${formattedValue}`, {
+        action: <TextLink href={txUrl}>View tx on {explorer.name}</TextLink>,
+        duration: TX_TOAST_DURATION,
+      });
       setUseMaxAmount(false);
       setValue("");
     } catch (err) {
-      toast.error(
-        `Failed to ${action.toLowerCase()} ${formattedValue}: ${(err as Error)?.message || err}`,
-        { duration: TX_TOAST_DURATION },
-      );
+      toast.error(`Failed to ${action.toLowerCase()} ${formattedValue}`, {
+        description: ((err as Error)?.message || err) as string,
+        duration: TX_TOAST_DURATION,
+      });
     } finally {
       setIsSubmitting(false);
       inputRef.current?.focus();

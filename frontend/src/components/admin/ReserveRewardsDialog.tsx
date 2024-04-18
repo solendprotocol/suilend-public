@@ -94,7 +94,9 @@ export default function ReserveRewardsDialog({
 
       toast.success("Canceled reward");
     } catch (err) {
-      toast.error(`Failed to cancel reward: ${(err as Error)?.message || err}`);
+      toast.error("Failed to cancel reward", {
+        description: ((err as Error)?.message || err) as string,
+      });
     } finally {
       await refreshData();
     }

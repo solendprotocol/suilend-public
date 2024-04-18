@@ -9,12 +9,7 @@ import Spinner from "@/components/shared/Spinner";
 import TextLink from "@/components/shared/TextLink";
 import TokenIcon from "@/components/shared/TokenIcon";
 import Tooltip from "@/components/shared/Tooltip";
-import {
-  TBodySans,
-  TDisplay,
-  TLabel,
-  TLabelSans,
-} from "@/components/shared/Typography";
+import { TDisplay, TLabel, TLabelSans } from "@/components/shared/Typography";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { AppData, useAppContext } from "@/contexts/AppContext";
@@ -65,17 +60,17 @@ export default function LiquidityMiningCard() {
       const txUrl = explorer.buildTxUrl(res.digest);
 
       toast.success(
-        <TBodySans>
-          {"Claimed rewards. "}
-          <TextLink href={txUrl}>View transaction</TextLink>
-        </TBodySans>,
-        { duration: TX_TOAST_DURATION },
+        `Claimed ${formatToken(totalSuiRewards, { dp: 9 })} SUI in rewards`,
+        {
+          action: <TextLink href={txUrl}>View tx on {explorer.name}</TextLink>,
+          duration: TX_TOAST_DURATION,
+        },
       );
     } catch (err) {
-      toast.error(
-        `Failed to claim rewards: ${(err as Error)?.message || err}`,
-        { duration: TX_TOAST_DURATION },
-      );
+      toast.error("Failed to claim rewards", {
+        description: ((err as Error)?.message || err) as string,
+        duration: TX_TOAST_DURATION,
+      });
     } finally {
       setIsClaiming(false);
       await refreshData();

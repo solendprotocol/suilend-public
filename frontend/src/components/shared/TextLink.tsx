@@ -22,7 +22,7 @@ export default function TextLink({ href, className, children }: TextLinkProps) {
       )}
     >
       {children}
-      <ExternalLink className="mb-0.5 ml-0.5 inline h-3 w-3" />
+      <ExternalLink className="mb-0.5 ml-1 inline h-3 w-3" />
     </NextLink>
   );
 }

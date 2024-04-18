@@ -204,7 +204,9 @@ export default function LiquidateDialog({
 
       toast.success("Liquidated");
     } catch (err) {
-      toast.error(`Failed to liquidate: ${(err as Error)?.message || err}`);
+      toast.error("Failed to liquidate", {
+        description: ((err as Error)?.message || err) as string,
+      });
     }
   }
   let parsedObligation: ParsedObligation | null = null;
@@ -347,7 +349,7 @@ export default function LiquidateDialog({
               tableClassName="border-y-0"
               onRowClick={async (x: formattedObligationHistory) => {
                 await navigator.clipboard.writeText(x.digest);
-                toast.success(`Copied ${x.digest} to clipboard`);
+                toast.info(`Copied ${x.digest} to clipboard`);
               }}
             />
           </div>

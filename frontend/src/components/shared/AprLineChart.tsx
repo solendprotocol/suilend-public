@@ -149,35 +149,6 @@ export default function AprLineChart({
 
   const showMouseoverDot = isMouseOver && !!xyForMouseChartX;
 
-  // Reference dot
-  const xyForReferenceDot = useMemo(() => {
-    if (!reference) return;
-
-    const { u0, ul, v0, vl } = chartConfig;
-
-    const x = reference.x;
-    const xPct = (x - u0) / ul;
-
-    const y = transform(reference.y);
-    const yPct = (y - v0) / vl;
-
-    return { x, xPct, y, yPct };
-  }, [reference, chartConfig]);
-
-  const referenceDotStyle = useMemo(() => {
-    if (!reference) return;
-    if (!chartDimensions) return;
-    if (!xyForReferenceDot) return;
-
-    const { top, right, bottom, left } = chartDimensions;
-    const { xPct, yPct } = xyForReferenceDot;
-
-    return {
-      left: `calc(${left}px + ${xPct * 100}% - ${(left + right) * xPct}px)`,
-      top: `calc(${top}px + ${(1 - yPct) * 100}% - ${(top + bottom) * (1 - yPct)}px`,
-    };
-  }, [reference, chartDimensions, xyForReferenceDot]);
-
   return (
     <div
       ref={containerRef}
@@ -217,31 +188,6 @@ export default function AprLineChart({
           )}
         />
       </Tooltip>
-
-      {/* Reference dot */}
-      {reference && xyForReferenceDot && referenceDotStyle && (
-        <Tooltip
-          rootProps={{ open: true }}
-          portalProps={{ container: containerRef.current }}
-          contentProps={{
-            className: cn(
-              "!pointer-events-none min-w-max transition-opacity",
-              showMouseoverDot && "opacity-0",
-            ),
-            side: xyForReferenceDot.yPct > 0.5 ? "left" : "top",
-            sideOffset: 8,
-            avoidCollisions: false,
-          }}
-          content={
-            <TooltipContent utilization={reference.x} apr={reference.y} />
-          }
-        >
-          <div
-            className="absolute z-[2] -ml-[4px] -mt-[4px] h-[8px] w-[8px] rounded-full bg-destructive"
-            style={referenceDotStyle}
-          />
-        </Tooltip>
-      )}
 
       <Recharts.ResponsiveContainer
         id={id}
@@ -336,6 +282,39 @@ export default function AprLineChart({
             }}
             strokeWidth={3}
           />
+          {reference && (
+            <Recharts.ReferenceDot
+              x={reference.x}
+              y={transform(reference.y)}
+              isFront
+              fill="hsl(var(--destructive))"
+              strokeWidth={0}
+              r={4}
+              shape={(props: any) => (
+                <Tooltip
+                  rootProps={{ open: true }}
+                  portalProps={{ container: containerRef.current }}
+                  contentProps={{
+                    className: cn(
+                      "!pointer-events-none min-w-max transition-opacity",
+                      showMouseoverDot && "opacity-50",
+                    ),
+                    side: "top",
+                    sideOffset: 8,
+                    avoidCollisions: false,
+                  }}
+                  content={
+                    <TooltipContent
+                      utilization={reference.x}
+                      apr={reference.y}
+                    />
+                  }
+                >
+                  <circle {...props} />
+                </Tooltip>
+              )}
+            />
+          )}
         </Recharts.LineChart>
       </Recharts.ResponsiveContainer>
     </div>
