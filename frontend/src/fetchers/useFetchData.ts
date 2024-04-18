@@ -8,7 +8,6 @@ import useSWR from "swr";
 
 import { phantom } from "@suilend/sdk/_generated/_framework/reified";
 import { LendingMarket } from "@suilend/sdk/_generated/suilend/lending-market/structs";
-import { Reserve } from "@suilend/sdk/_generated/suilend/reserve/structs";
 import {
   LENDING_MARKET_ID,
   LENDING_MARKET_TYPE,
@@ -42,16 +41,11 @@ export function useFetchAppData(
       LENDING_MARKET_ID,
     );
 
-    const connection = new SuiPriceServiceConnection(
-      "https://hermes.pyth.network",
-    );
-
-    let refreshedReserves = rawLendingMarket.reserves as Reserve<string>[];
-    refreshedReserves = await simulate.refreshReservePrice(
+    const refreshedReserves = await simulate.refreshReservePrice(
       rawLendingMarket.reserves.map((r) =>
         simulate.compoundReserveInterest(r, now),
       ),
-      connection,
+      new SuiPriceServiceConnection("https://hermes.pyth.network"),
     );
 
     if (!suilendClientRef.current) {
@@ -61,6 +55,9 @@ export function useFetchAppData(
           suiClient,
         );
     } else suilendClientRef.current.lendingMarket = rawLendingMarket;
+
+    // Get raw obligations
+    // Refresh obligations
 
     const coinTypes: string[] = [];
     refreshedReserves.forEach((r) => {

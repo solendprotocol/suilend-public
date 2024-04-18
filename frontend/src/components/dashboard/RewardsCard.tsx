@@ -108,23 +108,18 @@ export default function RewardsCard() {
 
   // Rewards
   let totalSuiRewards = new BigNumber(0);
-  const suiRewards = Object.values(data.rewardMap).flatMap((rewards) => {
-    return [...rewards.deposit, ...rewards.borrow].filter(
-      (r) =>
-        isSui(r.stats.rewardCoinType) &&
-        obligation &&
-        r.obligationClaims[obligation.id],
+  const suiRewards = Object.values(data.rewardMap).flatMap((rewards) =>
+    [...rewards.deposit, ...rewards.borrow].filter((r) =>
+      isSui(r.stats.rewardCoinType),
+    ),
+  );
+
+  suiRewards.forEach((reward) => {
+    totalSuiRewards = totalSuiRewards.plus(
+      reward.obligationClaims[obligation?.id]?.claimableAmount ??
+        new BigNumber(0),
     );
   });
-
-  if (obligation?.id) {
-    suiRewards.forEach((reward) => {
-      totalSuiRewards = totalSuiRewards.plus(
-        reward.obligationClaims[obligation.id]?.claimableAmount ??
-          new BigNumber(0),
-      );
-    });
-  }
 
   // Points
   const totalPoints = data.pointsStats.totalPoints.total;
