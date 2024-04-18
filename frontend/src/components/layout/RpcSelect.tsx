@@ -11,14 +11,14 @@ interface RpcSelectProps {
 }
 
 export default function RpcSelect({ className }: RpcSelectProps) {
-  const { rpc, onRpcIdChange } = useAppContext();
+  const { rpc, setRpcId } = useAppContext();
 
   return (
     <StandardSelect
       className={className}
       items={RPCS}
       selectedItemId={rpc.id}
-      setValue={onRpcIdChange}
+      setValue={setRpcId}
       title="Select RPC"
     />
   );
