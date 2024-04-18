@@ -47,7 +47,7 @@ export interface AppContextValue {
   data: AppData | null;
   refreshData: () => Promise<void>;
   rpc: (typeof RPCS)[number];
-  onRpcIdChange: (value: string) => void;
+  setRpcId: (value: string) => void;
   explorer: (typeof EXPLORERS)[number];
   setExplorerId: (value: string) => void;
   obligation: ParsedObligation | null;
@@ -65,7 +65,7 @@ const defaultContextValues: AppContextValue = {
     throw Error("AppContextProvider not initialized");
   },
   rpc: RPCS[0],
-  onRpcIdChange: () => {
+  setRpcId: () => {
     throw Error("AppContextProvider not initialized");
   },
   explorer: EXPLORERS[0],
@@ -100,6 +100,8 @@ export function AppContextProvider({ children }: PropsWithChildren) {
     "selectedExplorer",
     defaultContextValues.explorer.id,
   );
+  const explorer =
+    EXPLORERS.find((explorer) => explorer.id === explorerId) ?? EXPLORERS[0];
 
   // Sui client
   const suiClient = useMemo(() => new SuiClient({ url: rpc.url }), [rpc.url]);
@@ -127,23 +129,21 @@ export function AppContextProvider({ children }: PropsWithChildren) {
         await mutateData();
       },
       rpc,
-      onRpcIdChange: async (value: string) => {
-        const rpc = RPCS.find((rpc) => rpc.id === value);
-        if (!rpc) return;
+      setRpcId: async (value: string) => {
+        const newRpc = RPCS.find((r) => r.id === value);
+        if (!newRpc) return;
 
         setRpcId(value);
         await mutateData();
-        toast.info(`Switched RPC to ${rpc.name}`);
+        toast.info(`Switched RPC to ${newRpc.name}`);
       },
-      explorer:
-        EXPLORERS.find((explorer) => explorer.id === explorerId) ??
-        EXPLORERS[0],
+      explorer,
       setExplorerId: (value: string) => {
-        const explorer = EXPLORERS.find((explorer) => explorer.id === value);
-        if (!explorer) return;
+        const newExplorer = EXPLORERS.find((e) => e.id === value);
+        if (!newExplorer) return;
 
         setExplorerId(value);
-        toast.info(`Switched Explorer to ${explorer.name}`);
+        toast.info(`Switched Explorer to ${newExplorer.name}`);
       },
       obligation:
         data?.obligations?.find(
@@ -162,7 +162,7 @@ export function AppContextProvider({ children }: PropsWithChildren) {
       mutateData,
       rpc,
       setRpcId,
-      explorerId,
+      explorer,
       setExplorerId,
       obligationId,
       setObligationId,

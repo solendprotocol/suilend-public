@@ -15,7 +15,7 @@ export default function RpcSelect({
   className,
   openClassName,
 }: RpcSelectProps) {
-  const { rpc, onRpcIdChange } = useAppContext();
+  const { rpc, setRpcId } = useAppContext();
 
   return (
     <StandardSelect
@@ -23,7 +23,7 @@ export default function RpcSelect({
       openClassName={openClassName}
       items={RPCS}
       selectedItemId={rpc.id}
-      setValue={onRpcIdChange}
+      setValue={setRpcId}
       title="Select RPC"
     />
   );

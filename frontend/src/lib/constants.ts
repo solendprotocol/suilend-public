@@ -28,16 +28,6 @@ export const RPCS = [
 
 export const EXPLORERS = [
   {
-    id: "suiScan",
-    name: "Suiscan",
-    buildAddressUrl: (address: string) =>
-      `https://suiscan.xyz/mainnet/account/${address}`,
-    buildObjectUrl: (id: string) => `https://suiscan.xyz/mainnet/object/${id}`,
-    buildCoinUrl: (coinType: string) =>
-      `https://suiscan.xyz/mainnet/coin/${coinType}`,
-    buildTxUrl: (digest: string) => `https://suiscan.xyz/mainnet/tx/${digest}`,
-  },
-  {
     id: "suiVision",
     name: "SuiVision",
     buildAddressUrl: (address: string) =>
@@ -46,5 +36,13 @@ export const EXPLORERS = [
     buildCoinUrl: (coinType: string) =>
       `https://suivision.xyz/coin/${coinType}`,
     buildTxUrl: (digest: string) => `https://suivision.xyz/txblock/${digest}`,
+  },
+  {
+    id: "suiScan",
+    name: "Suiscan",
+    buildObjectUrl: (id: string) => `https://suiscan.xyz/mainnet/object/${id}`,
+    buildCoinUrl: (coinType: string) =>
+      `https://suiscan.xyz/mainnet/coin/${coinType}`,
+    buildTxUrl: (digest: string) => `https://suiscan.xyz/mainnet/tx/${digest}`,
   },
 ];
