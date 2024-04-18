@@ -1,8 +1,6 @@
 import NextLink from "next/link";
 import { useState } from "react";
 
-import BigNumber from "bignumber.js";
-
 import PointsCount from "@/components/points/PointsCount";
 import PointsIcon from "@/components/points/PointsIcon";
 import PointsRankCell from "@/components/points/PointsRank";
@@ -11,11 +9,18 @@ import Popover from "@/components/shared/Popover";
 import TitleChip from "@/components/shared/TitleChip";
 import { TLabel } from "@/components/shared/Typography";
 import { Separator } from "@/components/ui/separator";
+import { AppData, useAppContext } from "@/contexts/AppContext";
 import { formatPoints } from "@/lib/format";
 import { POINTS_URL } from "@/lib/navigation";
-import { cn } from "@/lib/utils";
 
 export default function PointsCountPopover() {
+  const appContext = useAppContext();
+  const data = appContext.data as AppData;
+
+  const totalPoints = data.pointsStats.totalPoints.total;
+  const pointsPerDay = data.pointsStats.pointsPerDay.total;
+  const rank = 3;
+
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   return (
@@ -24,14 +29,11 @@ export default function PointsCountPopover() {
       rootProps={{ open: isOpen, onOpenChange: setIsOpen }}
       trigger={
         <Button
-          className={cn(
-            "gap-1.5 bg-[#142142] hover:bg-[#142142]/80",
-            isOpen && "bg-[#142142]/80",
-          )}
+          className="gap-1.5 bg-[#142142] hover:bg-[#142142]/80"
           labelClassName="text-primary-foreground"
           startIcon={<PointsIcon className="h-4 w-4" />}
         >
-          {formatPoints(new BigNumber(8771.5221))}
+          {formatPoints(totalPoints)}
         </Button>
       }
       contentProps={{
@@ -43,7 +45,7 @@ export default function PointsCountPopover() {
         <TitleChip>Season 1 points</TitleChip>
 
         <PointsCount
-          points={new BigNumber(2678.87)}
+          points={totalPoints}
           className="gap-2"
           iconClassName="h-6 w-6"
           labelClassName="text-lg"
@@ -54,12 +56,12 @@ export default function PointsCountPopover() {
         <div className="flex w-full flex-col gap-2">
           <div className="flex flex-row items-center justify-between gap-4">
             <TLabel className="uppercase">Points per day</TLabel>
-            <PointsCount points={new BigNumber(543.4)} />
+            <PointsCount points={pointsPerDay} />
           </div>
 
           <div className="flex flex-row items-center justify-between gap-4">
             <TLabel className="uppercase">Rank</TLabel>
-            <PointsRankCell rank={3} />
+            <PointsRankCell rank={rank} />
           </div>
         </div>
 

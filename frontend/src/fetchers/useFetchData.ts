@@ -25,6 +25,7 @@ import { AppContextValue, AppData } from "@/contexts/AppContext";
 import { ParsedCoinBalance, parseCoinBalances } from "@/lib/coinBalance";
 import { getCoinMetadataMap } from "@/lib/coinMetadata";
 import { formatRewards } from "@/lib/liquidityMining";
+import { getPointsStats } from "@/lib/points";
 
 export function useFetchAppData(
   suiClient: SuiClient,
@@ -151,6 +152,7 @@ export function useFetchAppData(
     }
 
     const rewardMap = formatRewards(reserveMap, coinMetadataMap, obligations);
+    const pointsStats = getPointsStats(rewardMap, obligations);
 
     return {
       rawLendingMarket,
@@ -161,6 +163,7 @@ export function useFetchAppData(
       coinBalancesMap,
       coinMetadataMap,
       rewardMap,
+      pointsStats,
       coinBalancesRaw,
     } as AppData;
   };

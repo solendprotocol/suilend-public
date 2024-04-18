@@ -394,10 +394,10 @@ export default function AprWithRewardsBreakdown({
       >
         <div className="flex flex-row items-center gap-1.5">
           {[...pointsDailyRewards, ...aprRewards, ...nonPointsDailyRewards].map(
-            (reward) => {
+            (reward, index) => {
               return (
                 <TokenIcon
-                  key={reward.stats.id}
+                  key={index}
                   className="h-4 w-4"
                   coinType={reward.stats.rewardCoinType}
                   symbol={reward.stats.rewardSymbol}

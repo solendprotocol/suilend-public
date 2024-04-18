@@ -8,7 +8,7 @@ import { Side } from "@suilend/sdk/types";
 
 import ActionsModal from "@/components/dashboard/actions-modal/ActionsModal";
 import DataTable, {
-  decimalSortingFn,
+  bigNumberSortingFn,
   tableHeader,
 } from "@/components/dashboard/DataTable";
 import AssetCell from "@/components/dashboard/market-table/AssetCell";
@@ -31,7 +31,7 @@ export interface ReservesRowData {
   coinType: string;
   price: BigNumber;
   symbol: string;
-  iconUrl?: string;
+  iconUrl?: string | null;
   openLtvPct: number;
   borrowWeight: number;
   totalDeposits: BigNumber;
@@ -69,14 +69,14 @@ const columns: ColumnDef<ReservesRowData>[] = [
   },
   {
     accessorKey: "totalDeposits",
-    sortingFn: decimalSortingFn("totalDeposits"),
+    sortingFn: bigNumberSortingFn("totalDeposits"),
     header: ({ column }) =>
       tableHeader(column, "Total deposits", { isNumerical: true }),
     cell: ({ row }) => <TotalDepositsCell {...row.original} />,
   },
   {
     accessorKey: "depositAprPercent",
-    sortingFn: decimalSortingFn("totalDepositAprPercent"),
+    sortingFn: bigNumberSortingFn("totalDepositAprPercent"),
     header: ({ column }) =>
       tableHeader(column, "Deposit APR", { isNumerical: true }),
     cell: ({ row }) => (
@@ -87,14 +87,14 @@ const columns: ColumnDef<ReservesRowData>[] = [
   },
   {
     accessorKey: "totalBorrows",
-    sortingFn: decimalSortingFn("totalBorrows"),
+    sortingFn: bigNumberSortingFn("totalBorrows"),
     header: ({ column }) =>
       tableHeader(column, "Total borrows", { isNumerical: true }),
     cell: ({ row }) => <TotalBorrowsCell {...row.original} />,
   },
   {
     accessorKey: "borrowAprPercent",
-    sortingFn: decimalSortingFn("totalBorrowAprPercent"),
+    sortingFn: bigNumberSortingFn("totalBorrowAprPercent"),
     header: ({ column }) =>
       tableHeader(column, "Borrow APR", { isNumerical: true }),
     cell: ({ row }) => (

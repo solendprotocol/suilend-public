@@ -27,6 +27,7 @@ import { useFetchAppData } from "@/fetchers/useFetchData";
 import { ParsedCoinBalance } from "@/lib/coinBalance";
 import { EXPLORERS, RPCS } from "@/lib/constants";
 import { RewardMap } from "@/lib/liquidityMining";
+import { PointsStats } from "@/lib/points";
 
 export interface AppData {
   lendingMarket: ParsedLendingMarket;
@@ -36,6 +37,7 @@ export interface AppData {
   coinBalancesMap: Record<string, ParsedCoinBalance>;
   coinMetadataMap: Record<string, CoinMetadata>;
   rewardMap: RewardMap;
+  pointsStats: PointsStats;
   coinBalancesRaw: CoinBalance[];
 }
 

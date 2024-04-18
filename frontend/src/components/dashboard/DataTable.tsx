@@ -36,7 +36,7 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 
-export function decimalSortingFn<T>(key: string) {
+export function bigNumberSortingFn<T>(key: string) {
   return (rowA: Row<T>, rowB: Row<T>) => {
     const a = rowA.original as { [key: string]: BigNumber };
     const b = rowB.original as { [key: string]: BigNumber };

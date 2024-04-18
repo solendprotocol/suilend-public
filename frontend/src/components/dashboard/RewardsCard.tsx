@@ -127,9 +127,9 @@ export default function RewardsCard() {
   }
 
   // Points
-  const points = new BigNumber(2678.87);
-  const pointsPerDay = new BigNumber(543.4);
-  const rank = 12453;
+  const totalPoints = data.pointsStats.totalPoints.total;
+  const pointsPerDay = data.pointsStats.pointsPerDay.total;
+  const rank = 3;
 
   // Claim
   const { claimRewards } = useDashboardContext();
@@ -203,7 +203,7 @@ export default function RewardsCard() {
               {md ? (
                 <div className="flex flex-1 flex-row items-center justify-between gap-4">
                   <PendingRewards totalSuiRewards={totalSuiRewards} />
-                  <Season1PointsStat points={points} />
+                  <Season1PointsStat points={totalPoints} />
                   <PointsPerDayStat pointsPerDay={pointsPerDay} />
                   <RankStat rank={rank} />
                 </div>
@@ -213,7 +213,7 @@ export default function RewardsCard() {
                     totalSuiRewards={totalSuiRewards}
                     isCentered
                   />
-                  <Season1PointsStat points={points} isCentered />
+                  <Season1PointsStat points={totalPoints} isCentered />
 
                   <PointsPerDayStat pointsPerDay={pointsPerDay} isCentered />
                   <RankStat rank={rank} isCentered />

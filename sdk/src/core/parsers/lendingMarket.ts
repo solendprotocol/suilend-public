@@ -29,6 +29,9 @@ export const parseLendingMarket = (
   coinMetadataMap: Record<string, CoinMetadata>,
   currentTime: number,
 ) => {
+  const id = lendingMarket.id;
+  const version = lendingMarket.version;
+
   const parsedReserves = reserves.map((reserve) =>
     parseReserve(
       { Reserve, PoolRewardManager, PoolReward, simulate },
@@ -37,10 +40,18 @@ export const parseLendingMarket = (
     ),
   );
 
+  const obligations = lendingMarket.obligations;
+
   const parsedRateLimiter = parseRateLimiter(
     { RateLimiter },
     lendingMarket.rateLimiter,
     currentTime,
+  );
+
+  const feeReceiver = lendingMarket.feeReceiver;
+  const badDebtUsd = new BigNumber(lendingMarket.badDebtUsd.value.toString());
+  const badDebtLimitUsd = new BigNumber(
+    lendingMarket.badDebtLimitUsd.value.toString(),
   );
 
   // Custom
@@ -59,8 +70,14 @@ export const parseLendingMarket = (
   });
 
   return {
+    id,
+    version,
     reserves: parsedReserves,
+    obligations,
     rateLimiter: parsedRateLimiter,
+    feeReceiver,
+    badDebtUsd,
+    badDebtLimitUsd,
 
     totalSupplyUsd,
     totalBorrowUsd,

@@ -1,22 +1,12 @@
-import { PropsWithChildren, useEffect, useState } from "react";
+import { PropsWithChildren } from "react";
 
 import Container from "@/components/shared/Container";
-import { cn } from "@/lib/utils";
+import { useAppContext } from "@/contexts/AppContext";
 
 type HeaderBaseProps = PropsWithChildren;
 
 export default function HeaderBase({ children }: HeaderBaseProps) {
-  const [show, setShow] = useState<boolean>(false);
-
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      setShow(true);
-    }, 100);
-
-    return () => {
-      if (timeout) clearTimeout(timeout);
-    };
-  }, []);
+  const { data } = useAppContext();
 
   return (
     <>
@@ -26,13 +16,8 @@ export default function HeaderBase({ children }: HeaderBaseProps) {
         style={{ right: "var(--removed-body-scroll-bar-size, 0)" }}
       >
         <Container>
-          <div
-            className={cn(
-              "flex h-[64px] w-full flex-row items-center justify-between py-1 opacity-0 transition-opacity sm:py-3",
-              show && "opacity-100",
-            )}
-          >
-            {children}
+          <div className="flex h-[64px] w-full flex-row items-center justify-between py-1 sm:py-3">
+            {data && children}
           </div>
         </Container>
       </div>

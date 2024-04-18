@@ -36,7 +36,7 @@ import * as simulate from "@suilend/sdk/utils/simulate";
 import { SuiPriceServiceConnection } from "@pyth-sdk";
 
 import DataTable, {
-  decimalSortingFn,
+  bigNumberSortingFn,
   tableHeader,
 } from "@/components/dashboard/DataTable";
 import UtilizationBar from "@/components/dashboard/UtilizationBar";
@@ -382,7 +382,7 @@ function getColumnDefinition(isBorrow: boolean) {
     },
     {
       accessorKey: "quantity",
-      sortingFn: decimalSortingFn("quantity"),
+      sortingFn: bigNumberSortingFn("quantity"),
       header: ({ column }) => tableHeader(column, "Quantity"),
       cell: ({ row }) => {
         const { value } = row.original;
@@ -391,7 +391,7 @@ function getColumnDefinition(isBorrow: boolean) {
     },
     {
       accessorKey: "value",
-      sortingFn: decimalSortingFn("value"),
+      sortingFn: bigNumberSortingFn("value"),
       header: ({ column }) => tableHeader(column, "Value"),
       cell: ({ row }) => {
         const { value } = row.original;

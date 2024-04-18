@@ -31,7 +31,7 @@ export type RewardSummary = {
     aprPercent?: BigNumber;
     dailyReward?: BigNumber;
     price?: BigNumber;
-    iconUrl: string;
+    iconUrl?: string | null;
     rewardSymbol: string;
     side: Side;
   };
@@ -99,6 +99,7 @@ export function formatRewards(
           currentTime >= poolReward.startTimeMs &&
           currentTime <= poolReward.endTimeMs,
         rewardIndex: poolReward.rewardIndex,
+        reserveCoinType: reserve.coinType,
         rewardCoinType: poolReward.coinType,
         aprPercent,
         dailyReward,
@@ -129,13 +130,13 @@ export function formatRewards(
   };
 
   Object.values(parsedReserveMap).forEach((reserve) => {
-    const depositRewards = reserve.depositsPoolRewardManager.poolRewards
-      .map((poolReward) => getRewardSummary(reserve, poolReward, Side.DEPOSIT))
-      .filter(Boolean) as RewardSummary[];
+    const depositRewards = reserve.depositsPoolRewardManager.poolRewards.map(
+      (poolReward) => getRewardSummary(reserve, poolReward, Side.DEPOSIT),
+    ) as RewardSummary[];
 
-    const borrowRewards = reserve.borrowsPoolRewardManager.poolRewards
-      .map((poolReward) => getRewardSummary(reserve, poolReward, Side.BORROW))
-      .filter(Boolean) as RewardSummary[];
+    const borrowRewards = reserve.borrowsPoolRewardManager.poolRewards.map(
+      (poolReward) => getRewardSummary(reserve, poolReward, Side.BORROW),
+    ) as RewardSummary[];
 
     rewardMap[reserve.coinType] = {
       deposit: depositRewards,
