@@ -29,7 +29,7 @@ export default function CopyToClipboardButton({
   const copyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(value.toString());
-      toast.success(`Copied ${value} to clipboard`);
+      toast.info(`Copied ${value} to clipboard`);
       setJustCopied(true);
 
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -37,9 +37,9 @@ export default function CopyToClipboardButton({
         setJustCopied(false);
       }, 2500);
     } catch (err) {
-      toast.error(
-        `Failed to copy ${value} to clipboard: ${(err as Error)?.message || err}`,
-      );
+      toast.error(`Failed to copy ${value} to clipboard`, {
+        description: ((err as Error)?.message || err) as string,
+      });
       Sentry.captureException(err);
       console.error(err);
     }

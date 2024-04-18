@@ -11,8 +11,7 @@ import Collapsible from "@/components/shared/Collapsible";
 import DropdownMenu, {
   DropdownMenuItem,
 } from "@/components/shared/DropdownMenu";
-import TextLink from "@/components/shared/TextLink";
-import { TBodySans, TLabel, TLabelSans } from "@/components/shared/Typography";
+import { TLabel, TLabelSans } from "@/components/shared/Typography";
 import { useWalletContext } from "@/contexts/WalletContext";
 import useIsAndroid from "@/hooks/useIsAndroid";
 import useIsiOS from "@/hooks/useIsiOS";
@@ -57,20 +56,11 @@ function WalletDropdownItem({ wallet }: WalletDropdownItemProps) {
 
     try {
       await selectWallet(wallet.name);
-      toast.success(`Connected ${wallet.name}`);
+      toast.info(`Connected ${wallet.name}`);
     } catch (err) {
-      if (!wallet.isInstalled) {
-        toast.error(
-          <TBodySans>
-            {`${wallet.name} is not installed. `}
-            {downloadUrl && <TextLink href={downloadUrl}>Install</TextLink>}
-          </TBodySans>,
-        );
-      } else {
-        toast.error(
-          `Failed to connect to ${wallet.name}. Please try a different wallet.`,
-        );
-      }
+      toast.error(`Failed to connect ${wallet.name}`, {
+        description: "Please try a different wallet.",
+      });
       Sentry.captureException(err);
       console.error(err);
     }

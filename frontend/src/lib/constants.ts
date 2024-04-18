@@ -1,6 +1,6 @@
 export const msPerYear = 31556952000; // Approx. 1000 * 60 * 60 * 24 * 365;
 
-export const TOAST_DURATION = 3.5 * 1000;
+export const TOAST_DURATION = 4 * 1000;
 export const TX_TOAST_DURATION = 10 * 1000;
 
 export const SUI_DEPOSIT_GAS_MIN = 0.025;
@@ -28,21 +28,19 @@ export const RPCS = [
 
 export const EXPLORERS = [
   {
-    id: "suiVision",
-    name: "SuiVision",
-    buildAddressUrl: (address: string) =>
-      `https://suivision.xyz/account/${address}`,
-    buildObjectUrl: (id: string) => `https://suivision.xyz/object/${id}`,
-    buildCoinUrl: (coinType: string) =>
-      `https://suivision.xyz/coin/${coinType}`,
-    buildTxUrl: (digest: string) => `https://suivision.xyz/txblock/${digest}`,
-  },
-  {
     id: "suiScan",
     name: "Suiscan",
     buildObjectUrl: (id: string) => `https://suiscan.xyz/mainnet/object/${id}`,
     buildCoinUrl: (coinType: string) =>
       `https://suiscan.xyz/mainnet/coin/${coinType}`,
     buildTxUrl: (digest: string) => `https://suiscan.xyz/mainnet/tx/${digest}`,
+  },
+  {
+    id: "suiVision",
+    name: "SuiVision",
+    buildObjectUrl: (id: string) => `https://suivision.xyz/object/${id}`,
+    buildCoinUrl: (coinType: string) =>
+      `https://suivision.xyz/coin/${coinType}`,
+    buildTxUrl: (digest: string) => `https://suivision.xyz/txblock/${digest}`,
   },
 ];

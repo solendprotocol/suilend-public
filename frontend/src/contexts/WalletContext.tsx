@@ -199,7 +199,7 @@ export function WalletContextProvider({ children }: PropsWithChildren) {
         if (!_account) return;
 
         setAccountAddress(address);
-        toast.success(
+        toast.info(
           `Switched to ${[_account?.label, address].filter(Boolean).join(" • ")}`,
         );
       },

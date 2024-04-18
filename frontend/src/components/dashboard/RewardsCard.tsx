@@ -141,17 +141,17 @@ export default function RewardsCard() {
       const txUrl = explorer.buildTxUrl(res.digest);
 
       toast.success(
-        <TBodySans>
-          {"Claimed rewards. "}
-          <TextLink href={txUrl}>View transaction</TextLink>
-        </TBodySans>,
-        { duration: TX_TOAST_DURATION },
+        `Claimed ${formatToken(totalSuiRewards, { dp: 9 })} SUI in rewards`,
+        {
+          action: <TextLink href={txUrl}>View tx on {explorer.name}</TextLink>,
+          duration: TX_TOAST_DURATION,
+        },
       );
     } catch (err) {
-      toast.error(
-        `Failed to claim rewards: ${(err as Error)?.message || err}`,
-        { duration: TX_TOAST_DURATION },
-      );
+      toast.error("Failed to claim rewards", {
+        description: ((err as Error)?.message || err) as string,
+        duration: TX_TOAST_DURATION,
+      });
     } finally {
       setIsClaiming(false);
       await refreshData();
