@@ -154,7 +154,9 @@ export default function AddRewardDialog({
       setIsDialogOpen(false);
       reset();
     } catch (err) {
-      toast.error(`Failed to add reward: ${(err as Error)?.message || err}`);
+      toast.error("Failed to add reward", {
+        description: ((err as Error)?.message || err) as string,
+      });
     } finally {
       await refreshData();
     }

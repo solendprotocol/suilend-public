@@ -141,7 +141,7 @@ export function AppContextProvider({ children }: PropsWithChildren) {
         if (!newExplorer) return;
 
         setExplorerId(value);
-        toast.info(`Switched Explorer to ${newExplorer.name}`);
+        toast.info(`Switched explorer to ${newExplorer.name}`);
       },
       obligation:
         data?.obligations?.find(

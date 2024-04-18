@@ -1,0 +1,22 @@
+.toast {
+  padding-left: calc(4 * 4px + 20px + 4 * 4px);
+
+  --close-button-width: calc(4 * 4px + 20px + 4 * 4px);
+  --close-button-height: calc(3 * 4px + 20px + 3 * 4px);
+  --toast-padding-right: calc(4 * 4px);
+  padding-right: var(--toast-padding-right);
+}
+
+.title {
+  padding-right: calc(var(--close-button-width) - var(--toast-padding-right));
+}
+
+.closeButton {
+  width: var(--close-button-width);
+  height: var(--close-button-height);
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+}
