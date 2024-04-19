@@ -1,3 +1,5 @@
+import "@/lib/abortSignalPolyfill";
+
 import type { AppProps } from "next/app";
 import Head from "next/head";
 import { ReactNode, useEffect } from "react";
