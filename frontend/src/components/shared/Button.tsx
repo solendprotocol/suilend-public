@@ -1,7 +1,7 @@
 import { ReactElement, cloneElement, forwardRef } from "react";
 
 import { TooltipContentProps } from "@radix-ui/react-tooltip";
-import clsx from "clsx";
+import { ClassValue } from "clsx";
 
 import Tooltip from "@/components/shared/Tooltip";
 import { TLabel } from "@/components/shared/Typography";
@@ -12,7 +12,7 @@ import {
 import { cn } from "@/lib/utils";
 
 export interface ButtonProps extends ButtonComponentProps {
-  labelClassName?: clsx.ClassValue;
+  labelClassName?: ClassValue;
   tooltip?: string;
   tooltipAlign?: TooltipContentProps["align"];
   startIcon?: ReactElement;

@@ -1,6 +1,6 @@
 import { PropsWithChildren, ReactNode } from "react";
 
-import clsx from "clsx";
+import { ClassValue } from "clsx";
 import { Info } from "lucide-react";
 
 import Tooltip, { TooltipProps } from "@/components/shared/Tooltip";
@@ -8,7 +8,7 @@ import { TLabel, TLabelSans } from "@/components/shared/Typography";
 import { cn, hoverUnderlineClassName } from "@/lib/utils";
 
 interface LabelProps extends PropsWithChildren {
-  className?: clsx.ClassValue;
+  className?: ClassValue;
   tooltip?: string | ReactNode;
   tooltipContentProps?: TooltipProps["contentProps"];
   isMono?: boolean;

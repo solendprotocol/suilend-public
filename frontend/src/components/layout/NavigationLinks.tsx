@@ -1,11 +1,11 @@
-import clsx from "clsx";
+import { ClassValue } from "clsx";
 
 import Link from "@/components/shared/Link";
 import { useAppContext } from "@/contexts/AppContext";
 import { ADMIN_URL, BRIDGE_URL, DASHBOARD_URL } from "@/lib/navigation";
 
 interface NavigationLinksProps {
-  className?: clsx.ClassValue;
+  className?: ClassValue;
 }
 
 export default function NavigationLinks({ className }: NavigationLinksProps) {
