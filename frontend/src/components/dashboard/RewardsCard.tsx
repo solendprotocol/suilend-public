@@ -23,6 +23,7 @@ import useBreakpoint from "@/hooks/useBreakpoint";
 import { LOGO_MAP, NORMALIZED_SUI_COINTYPE, isSui } from "@/lib/coinType";
 import { TX_TOAST_DURATION } from "@/lib/constants";
 import { formatToken } from "@/lib/format";
+import { RewardSummary } from "@/lib/liquidityMining";
 import { POINTS_URL } from "@/lib/navigation";
 import { getPointsRewards, getPointsStats } from "@/lib/points";
 import { cn } from "@/lib/utils";
@@ -111,18 +112,21 @@ export default function RewardsCard() {
 
   // Rewards
   let totalSuiRewards = new BigNumber(0);
-  const suiRewards = Object.values(data.rewardMap).flatMap((rewards) =>
-    [...rewards.deposit, ...rewards.borrow].filter((r) =>
-      isSui(r.stats.rewardCoinType),
-    ),
-  );
-
-  suiRewards.forEach((reward) => {
-    totalSuiRewards = totalSuiRewards.plus(
-      reward.obligationClaims[obligation?.id]?.claimableAmount ??
-        new BigNumber(0),
+  let suiRewards: RewardSummary[] = [];
+  if (obligation) {
+    suiRewards = Object.values(data.rewardMap).flatMap((rewards) =>
+      [...rewards.deposit, ...rewards.borrow].filter(
+        (r) =>
+          isSui(r.stats.rewardCoinType) && r.obligationClaims[obligation.id],
+      ),
     );
-  });
+
+    suiRewards.forEach((reward) => {
+      totalSuiRewards = totalSuiRewards.plus(
+        reward.obligationClaims[obligation.id].claimableAmount,
+      );
+    });
+  }
 
   // Points
   const pointsRewards = getPointsRewards(data.rewardMap);
