@@ -1,6 +1,6 @@
 import { PropsWithChildren } from "react";
 
-import clsx from "clsx";
+import { ClassValue } from "clsx";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
 import Button from "@/components/shared/Button";
@@ -18,7 +18,7 @@ interface CollapsibleProps extends PropsWithChildren {
   title?: string;
   closedTitle?: string;
   openTitle?: string;
-  buttonClassName?: clsx.ClassValue;
+  buttonClassName?: ClassValue;
   hasSeparator?: boolean;
 }
 

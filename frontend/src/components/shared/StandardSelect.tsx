@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import clsx from "clsx";
+import { ClassValue } from "clsx";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
 import Select, { SelectProps } from "@/components/shared/Select";
@@ -8,7 +8,7 @@ import { SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
 interface StandardSelectProps extends Omit<SelectProps, "root" | "trigger"> {
-  className?: clsx.ClassValue;
+  className?: ClassValue;
 }
 
 export default function StandardSelect({

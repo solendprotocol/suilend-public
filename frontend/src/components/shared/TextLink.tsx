@@ -1,14 +1,14 @@
 import NextLink from "next/link";
 import { PropsWithChildren } from "react";
 
-import clsx from "clsx";
+import { ClassValue } from "clsx";
 import { ExternalLink } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
 interface TextLinkProps extends PropsWithChildren {
   href: string;
-  className?: clsx.ClassValue;
+  className?: ClassValue;
 }
 
 export default function TextLink({ href, className, children }: TextLinkProps) {

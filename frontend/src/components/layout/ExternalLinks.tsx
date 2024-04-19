@@ -1,4 +1,4 @@
-import clsx from "clsx";
+import { ClassValue } from "clsx";
 
 import DiscordIcon from "@/components/assets/DiscordIcon";
 import XIcon from "@/components/assets/XIcon";
@@ -6,7 +6,7 @@ import Link from "@/components/shared/Link";
 import { DISCORD_URL, DOCS_URL, X_URL } from "@/lib/navigation";
 
 interface ExternalLinksProps {
-  className?: clsx.ClassValue;
+  className?: ClassValue;
 }
 
 export default function ExternalLinks({ className }: ExternalLinksProps) {

@@ -2,14 +2,14 @@ import NextLink, { LinkProps as NextLinkProps } from "next/link";
 import { useRouter } from "next/router";
 import { PropsWithChildren, ReactNode } from "react";
 
-import clsx from "clsx";
+import { ClassValue } from "clsx";
 
 import { labelSansClassNames } from "@/components/shared/Typography";
 import { cn } from "@/lib/utils";
 
 interface LinkProps extends PropsWithChildren, NextLinkProps {
   href: string;
-  className?: clsx.ClassValue;
+  className?: ClassValue;
   isExternal?: boolean;
   icon?: ReactNode;
 }

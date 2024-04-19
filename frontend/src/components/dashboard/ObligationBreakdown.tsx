@@ -1,7 +1,7 @@
 import { PropsWithChildren, ReactNode } from "react";
 
 import BigNumber from "bignumber.js";
-import clsx from "clsx";
+import { ClassValue } from "clsx";
 
 import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
 
@@ -20,7 +20,7 @@ import {
 import { cn, sortInReserveOrder } from "@/lib/utils";
 
 interface BreakdownSectionTitle extends PropsWithChildren {
-  barSegmentClassName: clsx.ClassValue;
+  barSegmentClassName: ClassValue;
   tooltip: ReactNode;
 }
 
@@ -87,7 +87,7 @@ interface BreakdownTableProps {
   columns: BreakdownColumn[];
   totalLabel: string;
   totalValue: string;
-  totalValueClassName?: clsx.ClassValue;
+  totalValueClassName?: ClassValue;
 }
 
 function BreakdownTable({
