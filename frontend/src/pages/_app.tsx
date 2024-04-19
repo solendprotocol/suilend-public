@@ -13,7 +13,7 @@ import Layout from "@/components/layout/Layout";
 import Toaster from "@/components/shared/Toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppContextProvider } from "@/contexts/AppContext";
-import { RefreshDataContextProvider } from "@/contexts/RefreshDataContext";
+import { RefreshAppDataContextProvider } from "@/contexts/RefreshAppDataContext";
 import { WalletContextProvider } from "@/contexts/WalletContext";
 import { fontClassNames } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
@@ -59,9 +59,9 @@ export default function App({
           <WalletProvider>
             <WalletContextProvider>
               <AppContextProvider>
-                <RefreshDataContextProvider>
+                <RefreshAppDataContextProvider>
                   {getLayout(<Component {...pageProps} />)}
-                </RefreshDataContextProvider>
+                </RefreshAppDataContextProvider>
               </AppContextProvider>
             </WalletContextProvider>
           </WalletProvider>

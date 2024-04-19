@@ -4,12 +4,12 @@ import Button from "@/components/shared/Button";
 import Tooltip from "@/components/shared/Tooltip";
 import {
   AUTO_REFRESH_DATA_INTERVAL,
-  useRefreshDataContext,
-} from "@/contexts/RefreshDataContext";
+  useRefreshAppDataContext,
+} from "@/contexts/RefreshAppDataContext";
 import { formatDuration } from "@/lib/format";
 
 function CircularProgress() {
-  const { autoRefreshCountdown, isRefreshing } = useRefreshDataContext();
+  const { autoRefreshCountdown, isRefreshing } = useRefreshAppDataContext();
 
   const stroke = isRefreshing ? "hsl(var(--secondary))" : "hsl(var(--primary))";
   const strokeWidth = 3;
@@ -53,9 +53,9 @@ function CircularProgress() {
   );
 }
 
-export default function RefreshDataButton() {
+export default function RefreshAppDataButton() {
   const { autoRefreshCountdown, manuallyRefreshData, isRefreshing } =
-    useRefreshDataContext();
+    useRefreshAppDataContext();
 
   return (
     <Tooltip

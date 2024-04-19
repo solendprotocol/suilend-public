@@ -26,7 +26,7 @@ import { getCoinMetadataMap } from "@/lib/coinMetadata";
 import { formatRewards } from "@/lib/liquidityMining";
 import { getPointsStats } from "@/lib/points";
 
-export function useFetchAppData(
+export default function useFetchAppData(
   suiClient: SuiClient,
   address: string | undefined,
 ) {

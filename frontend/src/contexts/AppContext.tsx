@@ -23,7 +23,7 @@ import { ParsedLendingMarket } from "@suilend/sdk/parsers/lendingMarket";
 import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
 
 import { useWalletContext } from "@/contexts/WalletContext";
-import { useFetchAppData } from "@/fetchers/useFetchData";
+import useFetchAppData from "@/fetchers/useFetchAppData";
 import { ParsedCoinBalance } from "@/lib/coinBalance";
 import { EXPLORERS, RPCS } from "@/lib/constants";
 import { RewardMap } from "@/lib/liquidityMining";
