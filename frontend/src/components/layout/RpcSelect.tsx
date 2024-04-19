@@ -1,26 +1,21 @@
 import React from "react";
 
-import clsx from "clsx";
+import { ClassValue } from "clsx";
 
 import StandardSelect from "@/components/shared/StandardSelect";
 import { useAppContext } from "@/contexts/AppContext";
 import { RPCS } from "@/lib/constants";
 
 interface RpcSelectProps {
-  className?: clsx.ClassValue;
-  openClassName?: clsx.ClassValue;
+  className?: ClassValue;
 }
 
-export default function RpcSelect({
-  className,
-  openClassName,
-}: RpcSelectProps) {
+export default function RpcSelect({ className }: RpcSelectProps) {
   const { rpc, setRpcId } = useAppContext();
 
   return (
     <StandardSelect
       className={className}
-      openClassName={openClassName}
       items={RPCS}
       selectedItemId={rpc.id}
       setValue={setRpcId}

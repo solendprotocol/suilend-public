@@ -1,6 +1,6 @@
 import { PropsWithChildren } from "react";
 
-import clsx from "clsx";
+import { ClassValue } from "clsx";
 
 import { TabsList, Tabs as TabsRoot, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
@@ -14,7 +14,7 @@ interface TabsProps extends PropsWithChildren {
   tabs: Tab[];
   selectedTab: string;
   onTabChange: (tab: string) => void;
-  listClassName?: clsx.ClassValue;
+  listClassName?: ClassValue;
 }
 
 export default function Tabs({

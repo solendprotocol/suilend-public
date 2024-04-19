@@ -1,5 +1,5 @@
 import BigNumber from "bignumber.js";
-import clsx from "clsx";
+import { ClassValue } from "clsx";
 
 import PointsIcon from "@/components/points/PointsIcon";
 import { TBody } from "@/components/shared/Typography";
@@ -7,9 +7,9 @@ import { formatPoints } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 interface PointsCountProps {
-  className?: clsx.ClassValue;
-  iconClassName?: clsx.ClassValue;
-  labelClassName?: clsx.ClassValue;
+  className?: ClassValue;
+  iconClassName?: ClassValue;
+  labelClassName?: ClassValue;
   points: BigNumber;
 }
 

@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import clsx from "clsx";
+import { ClassValue } from "clsx";
 import { Drawer as DrawerPrimitive } from "vaul";
 
 import { cn } from "@/lib/utils";
@@ -38,7 +38,7 @@ const DrawerContent = React.forwardRef<
   React.ElementRef<typeof DrawerPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content> & {
     overlay?: React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Overlay>;
-    thumbClassName?: clsx.ClassValue;
+    thumbClassName?: ClassValue;
   }
 >(({ className, children, overlay, thumbClassName, ...props }, ref) => (
   <DrawerPortal

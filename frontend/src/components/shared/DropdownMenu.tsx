@@ -1,7 +1,7 @@
 import { PropsWithChildren, ReactNode } from "react";
 
 import { DropdownMenuProps as DropdownMenuRootProps } from "@radix-ui/react-dropdown-menu";
-import clsx from "clsx";
+import { ClassValue } from "clsx";
 
 import {
   DropdownMenuContent,
@@ -14,7 +14,7 @@ import {
 import { cn } from "@/lib/utils";
 
 interface DropdownMenuItemProps extends PropsWithChildren {
-  className?: clsx.ClassValue;
+  className?: ClassValue;
   onClick: () => void;
 }
 

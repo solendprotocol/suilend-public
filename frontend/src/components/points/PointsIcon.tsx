@@ -1,11 +1,11 @@
-import clsx from "clsx";
+import { ClassValue } from "clsx";
 
 import TokenIcon from "@/components/shared/TokenIcon";
 import { LOGO_MAP, NORMALIZED_SUILEND_POINTS_COINTYPE } from "@/lib/coinType";
 import { cn } from "@/lib/utils";
 
 interface PointsIconProps {
-  className?: clsx.ClassValue;
+  className?: ClassValue;
 }
 
 export default function PointsIcon({ className }: PointsIconProps) {

@@ -11,7 +11,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import BigNumber from "bignumber.js";
-import clsx from "clsx";
+import { ClassValue } from "clsx";
 import {
   ArrowDown01,
   ArrowDown10,
@@ -156,9 +156,9 @@ interface DataTableProps<T> {
   data: T[];
   noDataMessage: string;
   tableContainer?: TableContainerProps;
-  tableClassName?: clsx.ClassValue;
-  tableRowClassName?: (row: Row<T>) => clsx.ClassValue;
-  tableCellClassName?: clsx.ClassValue;
+  tableClassName?: ClassValue;
+  tableRowClassName?: (row: Row<T>) => ClassValue;
+  tableCellClassName?: ClassValue;
   RowModal?: FunctionComponent<{
     row: T;
     children: ReactNode;
