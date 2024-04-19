@@ -17,6 +17,7 @@ import {
   AddReserveArgs,
   BorrowArgs,
   CancelPoolRewardArgs,
+  ClosePoolRewardArgs,
   ClaimRewardsAndDepositArgs,
   ClaimRewardsArgs,
   CreateRateLimiterConfigArgs,
@@ -76,6 +77,11 @@ interface Deps {
     txb: TransactionBlock,
     typeArgs: [string, string],
     args: CancelPoolRewardArgs,
+  ) => TransactionResult;
+  closePoolReward: (
+    txb: TransactionBlock,
+    typeArgs: [string, string],
+    args: ClosePoolRewardArgs,
   ) => TransactionResult;
   claimRewards: (
     txb: TransactionBlock,
@@ -151,6 +157,7 @@ export class SuilendClient {
   addReserveFunction: Deps["addReserve"];
   addPoolRewardFunction: Deps["addPoolReward"];
   cancelPoolRewardFunction: Deps["cancelPoolReward"];
+  closePoolRewardFunction: Deps["closePoolReward"];
   claimRewardsFunction: Deps["claimRewards"];
   claimRewardsAndDepositFunction: Deps["claimRewardsAndDeposit"];
   createRateLimiterConfigFunction: Deps["createRateLimiterConfig"];
@@ -179,6 +186,7 @@ export class SuilendClient {
       addReserve,
       addPoolReward,
       cancelPoolReward,
+      closePoolReward,
       claimRewards,
       claimRewardsAndDeposit,
       createRateLimiterConfig,
@@ -215,6 +223,7 @@ export class SuilendClient {
     this.addReserveFunction = addReserve;
     this.addPoolRewardFunction = addPoolReward;
     this.cancelPoolRewardFunction = cancelPoolReward;
+    this.closePoolRewardFunction = closePoolReward;
     this.claimRewardsFunction = claimRewards;
     this.claimRewardsAndDepositFunction = claimRewardsAndDeposit;
     this.createRateLimiterConfigFunction = createRateLimiterConfig;
@@ -492,6 +501,28 @@ export class SuilendClient {
     txb: TransactionBlock,
   ) {
     return this.cancelPoolRewardFunction(
+      txb,
+      [this.lendingMarket.$typeArgs[0], rewardCoinType],
+      {
+        lendingMarketOwnerCap: lendingMarketOwnerCapId,
+        lendingMarket: this.lendingMarket.id,
+        reserveArrayIndex,
+        isDepositReward,
+        rewardIndex,
+        clock: SUI_CLOCK_OBJECT_ID,
+      },
+    );
+  }
+
+  closeReward(
+    lendingMarketOwnerCapId: string,
+    reserveArrayIndex: bigint,
+    isDepositReward: boolean,
+    rewardIndex: bigint,
+    rewardCoinType: string,
+    txb: TransactionBlock,
+  ) {
+    return this.closePoolRewardFunction(
       txb,
       [this.lendingMarket.$typeArgs[0], rewardCoinType],
       {

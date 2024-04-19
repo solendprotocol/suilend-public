@@ -102,6 +102,51 @@ export default function ReserveRewardsDialog({
     }
   };
 
+  const onCloseReward = async (poolReward: ParsedPoolReward) => {
+    if (!address) throw new Error("Wallet not connected");
+    if (!data.lendingMarketOwnerCapId)
+      throw new Error("Error: No lending market owner cap");
+
+    const txb = new TransactionBlock();
+
+    const reserveArrayIndex = BigInt(
+      data.lendingMarket.reserves.findIndex((r) => r.id === reserve.id),
+    );
+    const isDepositReward = selectedTab === Tab.DEPOSITS;
+    const rewardIndex = BigInt(
+      poolRewardManager.poolRewards.findIndex((pr) => pr.id === poolReward.id),
+    );
+    const rewardCoinType = poolReward.coinType;
+
+    try {
+      try {
+        const [unclaimedRewards] = suilendClient.closeReward(
+          data.lendingMarketOwnerCapId,
+          reserveArrayIndex,
+          isDepositReward,
+          rewardIndex,
+          rewardCoinType,
+          txb,
+        );
+        txb.transferObjects([unclaimedRewards], address);
+      } catch (err) {
+        Sentry.captureException(err);
+        console.error(err);
+        throw err;
+      }
+
+      await signExecuteAndWaitTransactionBlock(txb);
+
+      toast.success("Canceled reward");
+    } catch (err) {
+      toast.error("Failed to cancel reward", {
+        description: ((err as Error)?.message || err) as string,
+      });
+    } finally {
+      await refreshData();
+    }
+  };
+
   return (
     <Dialog
       trigger={
@@ -174,6 +219,7 @@ export default function ReserveRewardsDialog({
                 }))}
                 noPoolRewardsMessage={`No ${selectedTab === Tab.DEPOSITS ? "deposit" : "borrow"} rewards`}
                 onCancelReward={onCancelReward}
+                onCloseReward={onCloseReward}
                 isEditable={isEditable}
               />
             </div>

@@ -19,8 +19,8 @@
       "@/public/*": ["./public/*"],
       "@/*": ["./src/*"],
       // Update line below to target [beta/mainnet] program
-      // "@suilend/sdk/*": ["../sdk/src/beta/*"],
-      "@suilend/sdk/*": ["../sdk/src/mainnet/*"],
+      "@suilend/sdk/*": ["../sdk/src/beta/*"],
+      // "@suilend/sdk/*": ["../sdk/src/mainnet/*"],
       "@pyth-sdk": ["../pyth-sdk/src"],
       "@pyth-sdk/*": ["../pyth-sdk/src/*"]
     }
