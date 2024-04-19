@@ -17,12 +17,14 @@ import { TBody, TBodySans, TLabel } from "@/components/shared/Typography";
 import { Separator } from "@/components/ui/separator";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { useDashboardContext } from "@/contexts/DashboardContext";
+import { usePointsContext } from "@/contexts/PointsContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 import useBreakpoint from "@/hooks/useBreakpoint";
 import { LOGO_MAP, NORMALIZED_SUI_COINTYPE, isSui } from "@/lib/coinType";
 import { TX_TOAST_DURATION } from "@/lib/constants";
 import { formatToken } from "@/lib/format";
 import { POINTS_URL } from "@/lib/navigation";
+import { getPointsRewards, getPointsStats } from "@/lib/points";
 import { cn } from "@/lib/utils";
 
 interface PendingRewardsProps {
@@ -82,7 +84,7 @@ function PointsPerDayStat({ pointsPerDay, isCentered }: PointsPerDayStatProps) {
 }
 
 interface RankStatProps {
-  rank: number;
+  rank?: number | null;
   isCentered?: boolean;
 }
 
@@ -103,6 +105,7 @@ export default function RewardsCard() {
   const { refreshData, explorer, obligation, ...restAppContext } =
     useAppContext();
   const data = restAppContext.data as AppData;
+  const { rank } = usePointsContext();
 
   const { md } = useBreakpoint();
 
@@ -122,9 +125,8 @@ export default function RewardsCard() {
   });
 
   // Points
-  const totalPoints = data.pointsStats.totalPoints.total;
-  const pointsPerDay = data.pointsStats.pointsPerDay.total;
-  const rank = 3;
+  const pointsRewards = getPointsRewards(data.rewardMap);
+  const pointsStats = getPointsStats(pointsRewards, data.obligations);
 
   // Claim
   const { claimRewards } = useDashboardContext();
@@ -198,8 +200,10 @@ export default function RewardsCard() {
               {md ? (
                 <div className="flex flex-1 flex-row items-center justify-between gap-4">
                   <PendingRewards totalSuiRewards={totalSuiRewards} />
-                  <Season1PointsStat points={totalPoints} />
-                  <PointsPerDayStat pointsPerDay={pointsPerDay} />
+                  <Season1PointsStat points={pointsStats.totalPoints.total} />
+                  <PointsPerDayStat
+                    pointsPerDay={pointsStats.pointsPerDay.total}
+                  />
                   <RankStat rank={rank} />
                 </div>
               ) : (
@@ -208,9 +212,15 @@ export default function RewardsCard() {
                     totalSuiRewards={totalSuiRewards}
                     isCentered
                   />
-                  <Season1PointsStat points={totalPoints} isCentered />
+                  <Season1PointsStat
+                    points={pointsStats.totalPoints.total}
+                    isCentered
+                  />
 
-                  <PointsPerDayStat pointsPerDay={pointsPerDay} isCentered />
+                  <PointsPerDayStat
+                    pointsPerDay={pointsStats.pointsPerDay.total}
+                    isCentered
+                  />
                   <RankStat rank={rank} isCentered />
                 </div>
               )}

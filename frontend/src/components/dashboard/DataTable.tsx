@@ -25,6 +25,7 @@ import {
 import Button from "@/components/shared/Button";
 import LabelWithTooltip from "@/components/shared/LabelWithTooltip";
 import { TLabel, TLabelSans } from "@/components/shared/Typography";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -153,7 +154,8 @@ export function tableHeader<T>(
 
 interface DataTableProps<T> {
   columns: ColumnDef<T>[];
-  data: T[];
+  data?: T[];
+  maxRows?: number;
   noDataMessage: string;
   tableContainer?: TableContainerProps;
   tableClassName?: ClassValue;
@@ -169,6 +171,7 @@ interface DataTableProps<T> {
 export default function DataTable<T>({
   columns,
   data,
+  maxRows,
   noDataMessage,
   tableContainer,
   tableClassName,
@@ -180,7 +183,7 @@ export default function DataTable<T>({
   const [sorting, setSorting] = useState<SortingState>([]);
 
   const table = useReactTable({
-    data,
+    data: data ?? [],
     columns,
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
@@ -214,43 +217,62 @@ export default function DataTable<T>({
         ))}
       </TableHeader>
       <TableBody>
-        {table.getRowModel().rows?.length ? (
-          table.getRowModel().rows.map((row) => {
-            const children = (
-              <TableRow
-                className={cn(
-                  "hover:bg-transparent",
-                  (RowModal || onRowClick) &&
-                    "cursor-pointer hover:bg-muted/10",
-                  tableRowClassName && tableRowClassName(row),
-                )}
-                style={{ appearance: "inherit" }}
-                onClick={
-                  !RowModal && onRowClick
-                    ? () => onRowClick(row.original)
-                    : undefined
-                }
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id} className={cn(tableCellClassName)}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
+        {data === undefined ? (
+          <>
+            {Array.from({ length: 5 }).map((_, index) => (
+              <TableRow key={index} className="h-16 hover:bg-transparent">
+                <TableCell colSpan={columns.length} className="h-16 px-0 py-0">
+                  <Skeleton className="h-16 w-full bg-muted/10" />
+                </TableCell>
               </TableRow>
-            );
+            ))}
+          </>
+        ) : table.getRowModel().rows?.length ? (
+          table
+            .getRowModel()
+            .rows.slice(0, maxRows)
+            .map((row) => {
+              const children = (
+                <TableRow
+                  className={cn(
+                    "h-16 hover:bg-transparent",
+                    (RowModal || onRowClick) &&
+                      "cursor-pointer hover:bg-muted/10",
+                    tableRowClassName && tableRowClassName(row),
+                  )}
+                  style={{ appearance: "inherit" }}
+                  onClick={
+                    !RowModal && onRowClick
+                      ? () => onRowClick(row.original)
+                      : undefined
+                  }
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell
+                      key={cell.id}
+                      className={cn("h-16", tableCellClassName)}
+                    >
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              );
 
-            return (
-              <Fragment key={row.id}>
-                {RowModal ? (
-                  <RowModal row={row.original}>{children}</RowModal>
-                ) : (
-                  children
-                )}
-              </Fragment>
-            );
-          })
+              return (
+                <Fragment key={row.id}>
+                  {RowModal ? (
+                    <RowModal row={row.original}>{children}</RowModal>
+                  ) : (
+                    children
+                  )}
+                </Fragment>
+              );
+            })
         ) : (
-          <TableRow className="hover:bg-transparent">
+          <TableRow className="h-16 hover:bg-transparent">
             <TableCell
               colSpan={columns.length}
               className="h-16 py-0 text-center"

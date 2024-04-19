@@ -1,43 +1,35 @@
 import { ColumnDef } from "@tanstack/react-table";
-import BigNumber from "bignumber.js";
 
 import DataTable, {
   bigNumberSortingFn,
   tableHeader,
 } from "@/components/dashboard/DataTable";
+import LeaderboardDataLastUpdated from "@/components/points/LeaderboardDataLastUpdated";
+import LeaderboardDataUsers from "@/components/points/LeaderboardDataUsers";
 import PointsCount from "@/components/points/PointsCount";
 import PointsRank from "@/components/points/PointsRank";
 import OpenOnExplorerButton from "@/components/shared/OpenOnExplorerButton";
 import Tooltip from "@/components/shared/Tooltip";
-import { TBody } from "@/components/shared/Typography";
-import { AppData, useAppContext } from "@/contexts/AppContext";
+import { TBody, TLabelSans } from "@/components/shared/Typography";
+import { useAppContext } from "@/contexts/AppContext";
+import { LeaderboardRowData, usePointsContext } from "@/contexts/PointsContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 import { formatAddress } from "@/lib/format";
 
-interface RowData {
-  rank: number;
-  address: string;
-  pointsPerDay: BigNumber;
-  totalPoints: BigNumber;
-}
-
 export default function PointsLeaderboardTable() {
   const { address } = useWalletContext();
-  const { explorer, ...restAppContext } = useAppContext();
-  const data = restAppContext.data as AppData;
-
-  const totalPoints = data.pointsStats.totalPoints.total;
-  const pointsPerDay = data.pointsStats.pointsPerDay.total;
+  const { explorer } = useAppContext();
+  const { leaderboardRows } = usePointsContext();
 
   // Columns
-  const columns: ColumnDef<RowData>[] = [
+  const columns: ColumnDef<LeaderboardRowData>[] = [
     {
       accessorKey: "rank",
       enableSorting: false,
       header: ({ column }) => tableHeader(column, "Rank"),
       cell: ({ row }) => {
         const { rank } = row.original;
-        return <PointsRank rank={rank} />;
+        return <PointsRank rank={rank} noTooltip />;
       },
     },
     {
@@ -89,49 +81,19 @@ export default function PointsLeaderboardTable() {
     },
   ];
 
-  // Rows
-  const rawRows = [
-    {
-      address:
-        "0x98175f9a47c411cc169ee4b0292f08531e4d442d4cb9ec61333016d2e92125",
-      totalPoints: new BigNumber(3837795),
-      pointsPerDay: new BigNumber(21521),
-    },
-    {
-      address:
-        "0x9289a47c411cc169ee4b0292f08531e4d442d4cb9ec61333016d2e9dee55551",
-      totalPoints: new BigNumber(1928582),
-      pointsPerDay: new BigNumber(817512),
-    },
-    {
-      address: "0x517c411cc169ee4b0292f08531e4d442d4cb9ec61333016d2e9d52212",
-      totalPoints: new BigNumber(99921),
-      pointsPerDay: new BigNumber(251),
-    },
-  ];
-  if (address)
-    rawRows.push({
-      address,
-      totalPoints,
-      pointsPerDay,
-    });
-
-  // Sort
-  const sortedRawRows = rawRows
-    .slice()
-    .sort((a, b) => (b.totalPoints.gt(a.totalPoints) ? 1 : -1));
-
-  const rows: RowData[] = sortedRawRows.map((row, index) => ({
-    ...row,
-    rank: index + 1,
-  }));
-
   return (
-    <div className="w-full max-w-[960px]">
-      <DataTable<RowData>
+    <div className="flex w-full max-w-[960px] flex-col gap-6">
+      <TLabelSans>
+        <LeaderboardDataUsers />
+        {" • "}
+        <LeaderboardDataLastUpdated />
+      </TLabelSans>
+
+      <DataTable<LeaderboardRowData>
         columns={columns}
-        data={rows}
-        noDataMessage="No data"
+        data={leaderboardRows}
+        maxRows={100}
+        noDataMessage="No users"
         tableRowClassName={(row) =>
           row.original.address === address &&
           "shadow-[inset_0_0_0_2px_hsl(var(--secondary))] !bg-secondary/5"

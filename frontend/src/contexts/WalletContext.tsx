@@ -200,7 +200,8 @@ export function WalletContextProvider({ children }: PropsWithChildren) {
 
         setAccountAddress(address);
         toast.info(
-          `Switched to ${[_account?.label, address].filter(Boolean).join(" • ")}`,
+          `Switched to ${_account?.label ? _account.label : address}`,
+          { description: _account?.label ? address : undefined },
         );
       },
       address: impersonatedAddress ?? account?.address,

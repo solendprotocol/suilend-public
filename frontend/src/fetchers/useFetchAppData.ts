@@ -24,7 +24,6 @@ import { AppContextValue, AppData } from "@/contexts/AppContext";
 import { ParsedCoinBalance, parseCoinBalances } from "@/lib/coinBalance";
 import { getCoinMetadataMap } from "@/lib/coinMetadata";
 import { formatRewards } from "@/lib/liquidityMining";
-import { getPointsStats } from "@/lib/points";
 
 export default function useFetchAppData(
   suiClient: SuiClient,
@@ -41,7 +40,7 @@ export default function useFetchAppData(
       LENDING_MARKET_ID,
     );
 
-    const refreshedReserves = await simulate.refreshReservePrice(
+    const refreshedRawReserves = await simulate.refreshReservePrice(
       rawLendingMarket.reserves.map((r) =>
         simulate.compoundReserveInterest(r, now),
       ),
@@ -56,11 +55,8 @@ export default function useFetchAppData(
         );
     } else suilendClientRef.current.lendingMarket = rawLendingMarket;
 
-    // Get raw obligations
-    // Refresh obligations
-
     const coinTypes: string[] = [];
-    refreshedReserves.forEach((r) => {
+    refreshedRawReserves.forEach((r) => {
       coinTypes.push(normalizeStructTag(r.coinType.name));
 
       [
@@ -80,7 +76,7 @@ export default function useFetchAppData(
 
     const lendingMarket = parseLendingMarket(
       rawLendingMarket,
-      refreshedReserves,
+      refreshedRawReserves,
       coinMetadataMap,
       now,
     );
@@ -118,15 +114,13 @@ export default function useFetchAppData(
           ),
         );
 
-        const refreshedObligations = await Promise.all(
-          rawObligations.map((rawObligation) =>
-            simulate.refreshObligation(rawObligation, refreshedReserves),
-          ),
-        );
-
-        obligations = refreshedObligations.map((refreshedObligation) =>
-          parseObligation(refreshedObligation, reserveMap),
-        );
+        obligations = rawObligations
+          .map((rawObligation) =>
+            simulate.refreshObligation(rawObligation, refreshedRawReserves),
+          )
+          .map((refreshedObligation) =>
+            parseObligation(refreshedObligation, reserveMap),
+          );
       }
 
       // Wallet assets
@@ -149,18 +143,18 @@ export default function useFetchAppData(
     }
 
     const rewardMap = formatRewards(reserveMap, coinMetadataMap, obligations);
-    const pointsStats = getPointsStats(rewardMap, obligations);
 
     return {
       rawLendingMarket,
       lendingMarket,
       lendingMarketOwnerCapId: lendingMarketOwnerCapId ?? undefined,
+      refreshedRawReserves,
+      reserveMap,
       obligationOwnerCaps,
       obligations,
       coinBalancesMap,
       coinMetadataMap,
       rewardMap,
-      pointsStats,
       coinBalancesRaw,
     } as AppData;
   };

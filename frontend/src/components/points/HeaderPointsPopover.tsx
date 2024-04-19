@@ -1,4 +1,5 @@
 import NextLink from "next/link";
+import { useRouter } from "next/router";
 import { useState } from "react";
 
 import PointsCount from "@/components/points/PointsCount";
@@ -10,17 +11,22 @@ import TitleChip from "@/components/shared/TitleChip";
 import { TLabel } from "@/components/shared/Typography";
 import { Separator } from "@/components/ui/separator";
 import { AppData, useAppContext } from "@/contexts/AppContext";
+import { usePointsContext } from "@/contexts/PointsContext";
 import { formatPoints } from "@/lib/format";
 import { POINTS_URL } from "@/lib/navigation";
+import { getPointsRewards, getPointsStats } from "@/lib/points";
 
 export default function PointsCountPopover() {
+  const router = useRouter();
   const appContext = useAppContext();
   const data = appContext.data as AppData;
+  const { rank } = usePointsContext();
 
-  const totalPoints = data.pointsStats.totalPoints.total;
-  const pointsPerDay = data.pointsStats.pointsPerDay.total;
-  const rank = 3;
+  // Points
+  const pointsRewards = getPointsRewards(data.rewardMap);
+  const pointsStats = getPointsStats(pointsRewards, data.obligations);
 
+  // State
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   return (
@@ -33,7 +39,7 @@ export default function PointsCountPopover() {
           labelClassName="text-primary-foreground"
           startIcon={<PointsIcon className="h-4 w-4" />}
         >
-          {formatPoints(totalPoints)}
+          {formatPoints(pointsStats.totalPoints.total)}
         </Button>
       }
       contentProps={{
@@ -45,7 +51,7 @@ export default function PointsCountPopover() {
         <TitleChip>Season 1 points</TitleChip>
 
         <PointsCount
-          points={totalPoints}
+          points={pointsStats.totalPoints.total}
           className="gap-2"
           iconClassName="h-6 w-6"
           labelClassName="text-lg"
@@ -56,24 +62,27 @@ export default function PointsCountPopover() {
         <div className="flex w-full flex-col gap-2">
           <div className="flex flex-row items-center justify-between gap-4">
             <TLabel className="uppercase">Points per day</TLabel>
-            <PointsCount points={pointsPerDay} />
+            <PointsCount points={pointsStats.pointsPerDay.total} />
           </div>
 
           <div className="flex flex-row items-center justify-between gap-4">
             <TLabel className="uppercase">Rank</TLabel>
-            <PointsRankCell rank={rank} />
+            <PointsRankCell rank={rank} isRightAligned />
           </div>
         </div>
 
-        <NextLink href={POINTS_URL} className="w-full">
-          <Button
-            className="w-full border-secondary text-primary-foreground"
-            labelClassName="uppercase"
-            variant="secondaryOutline"
-          >
-            View points hub
-          </Button>
-        </NextLink>
+        {router.asPath !== POINTS_URL && (
+          <NextLink href={POINTS_URL} className="w-full">
+            <Button
+              className="w-full border-secondary text-primary-foreground"
+              labelClassName="uppercase"
+              variant="secondaryOutline"
+              onClick={() => setIsOpen(false)}
+            >
+              View points hub
+            </Button>
+          </NextLink>
+        )}
       </div>
     </Popover>
   );

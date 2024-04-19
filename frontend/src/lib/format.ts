@@ -30,6 +30,8 @@ export const formatType = (
 export const formatInteger = (value: number) =>
   Intl.NumberFormat().format(value);
 
+export const formatRank = (rank: number) => `#${formatInteger(rank)}`;
+
 export const formatNumber = (
   value: BigNumber,
   options?: {
