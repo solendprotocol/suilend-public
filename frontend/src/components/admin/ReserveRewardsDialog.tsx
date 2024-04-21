@@ -208,20 +208,24 @@ export default function ReserveRewardsDialog({
 
             <div className="overflow-hidden rounded-md border">
               <PoolRewardsTable
-                poolRewards={poolRewardManager.poolRewards.map((pr) => ({
-                  startTime: new Date(pr.startTimeMs),
-                  endTime: new Date(pr.endTimeMs),
-                  totalRewards: pr.totalRewards,
-                  allocatedRewards: pr.allocatedRewards,
-                  cumulativeRewardsPerShare: pr.cumulativeRewardsPerShare,
-                  mintDecimals: pr.mintDecimals,
-                  symbol: pr.symbol,
-                  poolReward: pr,
-                }))}
+                poolRewards={poolRewardManager.poolRewards
+                  .map((pr) => ({
+                    startTime: new Date(pr.startTimeMs),
+                    endTime: new Date(pr.endTimeMs),
+                    totalRewards: pr.totalRewards,
+                    allocatedRewards: pr.allocatedRewards,
+                    cumulativeRewardsPerShare: pr.cumulativeRewardsPerShare,
+                    mintDecimals: pr.mintDecimals,
+                    symbol: pr.symbol,
+                    poolReward: pr,
+                  }))
+                  .sort(
+                    (a, b) => a.startTime.getTime() - b.startTime.getTime(),
+                  )}
                 noPoolRewardsMessage={`No ${selectedTab === Tab.DEPOSITS ? "deposit" : "borrow"} rewards`}
                 onCancelReward={onCancelReward}
                 onCloseReward={onCloseReward}
-                isEditable={isEditable}
+                isEditable={true}
               />
             </div>
           </div>
