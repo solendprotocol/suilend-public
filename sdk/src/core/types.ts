@@ -208,6 +208,15 @@ export interface CancelPoolRewardArgs {
   clock: ObjectArg;
 }
 
+export interface ClosePoolRewardArgs {
+  lendingMarketOwnerCap: ObjectArg;
+  lendingMarket: ObjectArg;
+  reserveArrayIndex: bigint | TransactionArgument;
+  isDepositReward: boolean | TransactionArgument;
+  rewardIndex: bigint | TransactionArgument;
+  clock: ObjectArg;
+}
+
 export interface ClaimRewardsArgs {
   lendingMarket: ObjectArg;
   cap: ObjectArg;

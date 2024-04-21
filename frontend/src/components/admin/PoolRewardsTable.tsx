@@ -3,6 +3,8 @@ import BigNumber from "bignumber.js";
 import { formatDate } from "date-fns";
 import { Ban, Banana } from "lucide-react";
 
+import { ParsedPoolReward } from "@suilend/sdk/parsers/reserve";
+
 import DataTable, {
   decimalSortingFn,
   tableHeader,
@@ -11,7 +13,6 @@ import Button from "@/components/shared/Button";
 import Tooltip from "@/components/shared/Tooltip";
 import { TBody } from "@/components/shared/Typography";
 import { formatNumber } from "@/lib/format";
-import { ParsedPoolReward } from "@/lib/reserve";
 import { cn } from "@/lib/utils";
 
 interface RowData {
@@ -159,9 +160,8 @@ export default function PoolRewardsTable({
       enableSorting: false,
       header: ({ column }) => tableHeader(column, "Actions"),
       cell: ({ row }) => {
-        const { endTime, totalRewards, poolReward } = row.original;
+        const { endTime, poolReward } = row.original;
 
-        // if (totalRewards.eq(0)) return null; // Canceled reward
         return (
           <div className="flex flex-row gap-1">
             <Button

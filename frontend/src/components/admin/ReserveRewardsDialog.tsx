@@ -137,9 +137,9 @@ export default function ReserveRewardsDialog({
 
       await signExecuteAndWaitTransactionBlock(txb);
 
-      toast.success("Canceled reward");
+      toast.success("Closed reward");
     } catch (err) {
-      toast.error("Failed to cancel reward", {
+      toast.error("Failed to close reward", {
         description: ((err as Error)?.message || err) as string,
       });
     } finally {
@@ -214,6 +214,7 @@ export default function ReserveRewardsDialog({
                   totalRewards: pr.totalRewards,
                   allocatedRewards: pr.allocatedRewards,
                   cumulativeRewardsPerShare: pr.cumulativeRewardsPerShare,
+                  mintDecimals: pr.mintDecimals,
                   symbol: pr.symbol,
                   poolReward: pr,
                 }))}
