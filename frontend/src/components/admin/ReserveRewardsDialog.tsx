@@ -225,7 +225,7 @@ export default function ReserveRewardsDialog({
                 noPoolRewardsMessage={`No ${selectedTab === Tab.DEPOSITS ? "deposit" : "borrow"} rewards`}
                 onCancelReward={onCancelReward}
                 onCloseReward={onCloseReward}
-                isEditable={true}
+                isEditable={isEditable}
               />
             </div>
           </div>
