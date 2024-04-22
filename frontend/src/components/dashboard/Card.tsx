@@ -12,7 +12,6 @@ import Button from "@/components/shared/Button";
 import { TTitle } from "@/components/shared/Typography";
 import { CardHeader, Card as CardRoot } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import useBreakpoint from "@/hooks/useBreakpoint";
 import { cn } from "@/lib/utils";
 
 interface CardProps extends PropsWithChildren {
@@ -33,13 +32,11 @@ export default function Card({
   noHeaderSeparator,
   children,
 }: CardProps) {
-  const { lg } = useBreakpoint();
-
   const [isCollapsed, setIsCollapsed] = useLocalStorage<boolean>(id, false);
   const toggleIsCollapsed = () => setIsCollapsed((is) => !is);
 
-  const canToggle = !lg && !alwaysExpanded;
-  const showContent = lg || !isCollapsed;
+  const canToggle = !alwaysExpanded;
+  const showContent = !isCollapsed;
   const showHeaderSeparator = showContent && !noHeaderSeparator;
 
   return (
