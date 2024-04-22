@@ -162,6 +162,9 @@ export default function PoolRewardsTable({
       cell: ({ row }) => {
         const { endTime, poolReward } = row.original;
 
+        const isCancelable = Date.now() <= endTime.getTime();
+        const isClosable = Date.now() > endTime.getTime();
+
         return (
           <div className="flex flex-row gap-1">
             <Button
@@ -170,7 +173,7 @@ export default function PoolRewardsTable({
               variant="secondary"
               size="icon"
               onClick={() => onCancelReward(poolReward)}
-              disabled={endTime.getTime() > Date.now()}
+              disabled={!isCancelable}
             >
               Cancel reward
             </Button>
@@ -180,7 +183,7 @@ export default function PoolRewardsTable({
               variant="secondary"
               size="icon"
               onClick={() => onCloseReward(poolReward)}
-              disabled={endTime.getTime() < Date.now()}
+              disabled={!isClosable}
             >
               Close reward
             </Button>
