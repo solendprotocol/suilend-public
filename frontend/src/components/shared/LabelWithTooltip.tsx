@@ -1,7 +1,6 @@
 import { PropsWithChildren, ReactNode } from "react";
 
 import { ClassValue } from "clsx";
-import { Info } from "lucide-react";
 
 import Tooltip, { TooltipProps } from "@/components/shared/Tooltip";
 import { TLabel, TLabelSans } from "@/components/shared/Typography";
@@ -34,7 +33,6 @@ export default function LabelWithTooltip({
         )}
       >
         {children}
-        {tooltip && <Info className="h-3 w-3" />}
       </Component>
     </Tooltip>
   );
