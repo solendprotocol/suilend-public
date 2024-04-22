@@ -42,6 +42,8 @@ function Page() {
   const suilendClient = restAppContext.suilendClient as SuilendClient<string>;
   const data = restAppContext.data as AppData;
 
+  const isEditable = !!data.lendingMarketOwnerCapId;
+
   // Tabs
   enum Tab {
     LENDING_MARKET = "lendingMarket",
@@ -129,10 +131,7 @@ function Page() {
                 <TTitle className="uppercase">Lending market</TTitle>
               </CardHeader>
               <CardContent className="flex flex-row flex-wrap gap-2">
-                <Button
-                  onClick={onMigrate}
-                  disabled={!data.lendingMarketOwnerCapId}
-                >
+                <Button onClick={onMigrate} disabled={!isEditable}>
                   Migrate
                 </Button>
               </CardContent>
