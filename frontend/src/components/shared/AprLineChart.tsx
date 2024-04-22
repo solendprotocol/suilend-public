@@ -149,6 +149,9 @@ export default function AprLineChart({
 
   const showMouseoverDot = isMouseOver && !!xyForMouseChartX;
 
+  // Reference dot
+  const referenceDotRef = useRef<SVGCircleElement>(null);
+
   return (
     <div
       ref={containerRef}
@@ -287,32 +290,29 @@ export default function AprLineChart({
               fill="hsl(var(--destructive))"
               strokeWidth={0}
               r={4}
-              shape={(props: any) => {
-                console.log("XXX", props);
-                return (
-                  <Tooltip
-                    rootProps={{ open: true }}
-                    portalProps={{ container: containerRef.current }}
-                    contentProps={{
-                      className: cn(
-                        "!pointer-events-none min-w-max transition-opacity !animate-none",
-                        showMouseoverDot && "opacity-50",
-                      ),
-                      side: "top",
-                      sideOffset: 8,
-                      avoidCollisions: false,
-                    }}
-                    content={
-                      <TooltipContent
-                        utilization={reference.x}
-                        apr={reference.y}
-                      />
-                    }
-                  >
-                    <circle {...props} cy={props.cy + 1} />
-                  </Tooltip>
-                );
-              }}
+              shape={(props: any) => (
+                <Tooltip
+                  rootProps={{ open: !!referenceDotRef.current }}
+                  portalProps={{ container: containerRef.current }}
+                  contentProps={{
+                    className: cn(
+                      "!pointer-events-none min-w-max transition-opacity",
+                      showMouseoverDot && "opacity-50",
+                    ),
+                    side: "top",
+                    sideOffset: 8,
+                    avoidCollisions: false,
+                  }}
+                  content={
+                    <TooltipContent
+                      utilization={reference.x}
+                      apr={reference.y}
+                    />
+                  }
+                >
+                  <circle ref={referenceDotRef} {...props} cy={props.cy + 1} />
+                </Tooltip>
+              )}
             />
           )}
         </Recharts.LineChart>
