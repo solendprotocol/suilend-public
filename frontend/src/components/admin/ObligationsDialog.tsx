@@ -18,12 +18,12 @@ import * as simulate from "@suilend/sdk/utils/simulate";
 import { SuiPriceServiceConnection } from "@pyth-sdk";
 
 import Dialog from "@/components/admin/Dialog";
+import Input from "@/components/admin/Input";
 import LiquidateDialog from "@/components/admin/LiquidateDialog";
 import DataTable, { tableHeader } from "@/components/dashboard/DataTable";
 import UtilizationBar from "@/components/dashboard/UtilizationBar";
 import Button from "@/components/shared/Button";
 import Grid from "@/components/shared/Grid";
-import Input from "@/components/shared/Input";
 import Switch from "@/components/shared/Switch";
 import { TBody } from "@/components/shared/Typography";
 import Value from "@/components/shared/Value";
@@ -95,7 +95,6 @@ export default function ObligationsDialog() {
               newState[reserve.symbol] = !newState[reserve.symbol];
               setDepositFilters(newState);
             }}
-            isEditable={true}
           />
         ))}
       </div>
@@ -111,7 +110,6 @@ export default function ObligationsDialog() {
               newState[reserve.symbol] = !newState[reserve.symbol];
               setBorrowFilters(newState);
             }}
-            isEditable={true}
           />
         ))}
       </div>
@@ -124,7 +122,6 @@ export default function ObligationsDialog() {
           onChange={(value) => {
             setMinDepositValue(parseFloat(value));
           }}
-          isEditable={true}
           startDecorator="$"
         />
         <Input
@@ -135,7 +132,6 @@ export default function ObligationsDialog() {
           onChange={(value) => {
             setMinWeightedBorrowValue(parseFloat(value));
           }}
-          isEditable={true}
           startDecorator="$"
         />
         <Input
@@ -146,7 +142,6 @@ export default function ObligationsDialog() {
           onChange={(value) => {
             setMinUtil(parseFloat(value));
           }}
-          isEditable={true}
           startDecorator="%"
         />
         <Button

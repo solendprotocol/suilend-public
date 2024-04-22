@@ -11,7 +11,6 @@ import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 
 import Dialog from "@/components/admin/Dialog";
 import DiffLine, { InterestRateDiffLine } from "@/components/admin/DiffLine";
-import EditableBadge from "@/components/admin/EditableBadge";
 import ReserveConfig, {
   ConfigState,
   getSortedInterestRate,
@@ -167,7 +166,6 @@ export default function ReserveConfigDialog({
       }
       titleIcon={<Bolt />}
       title="Config"
-      titleEndDecorator={isEditable && <EditableBadge />}
       description={
         <div className="flex flex-row gap-2">
           <TBody>{reserve.symbol}</TBody>
@@ -180,22 +178,25 @@ export default function ReserveConfigDialog({
       }
       descriptionAsChild
       footer={
-        isEditable && (
-          <div className="flex w-full flex-row items-center gap-2">
-            <Button
-              tooltip="Revert changes"
-              icon={<Undo2 />}
-              variant="ghost"
-              size="icon"
-              onClick={resetConfigState}
-            >
-              Revert changes
-            </Button>
-            <Button className="flex-1" size="lg" onClick={saveChanges}>
-              Save changes
-            </Button>
-          </div>
-        )
+        <div className="flex w-full flex-row items-center gap-2">
+          <Button
+            tooltip="Revert changes"
+            icon={<Undo2 />}
+            variant="ghost"
+            size="icon"
+            onClick={resetConfigState}
+          >
+            Revert changes
+          </Button>
+          <Button
+            className="flex-1"
+            size="lg"
+            onClick={saveChanges}
+            disabled={!isEditable}
+          >
+            Save changes
+          </Button>
+        </div>
       }
     >
       <Grid>

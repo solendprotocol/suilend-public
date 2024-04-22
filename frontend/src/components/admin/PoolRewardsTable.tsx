@@ -12,6 +12,7 @@ import DataTable, {
 import Button from "@/components/shared/Button";
 import Tooltip from "@/components/shared/Tooltip";
 import { TBody } from "@/components/shared/Typography";
+import { AppData, useAppContext } from "@/contexts/AppContext";
 import { cn } from "@/lib/utils";
 
 interface RowData {
@@ -28,15 +29,18 @@ interface PoolRewardsTableProps {
   poolRewards: RowData[];
   noPoolRewardsMessage: string;
   onCancelReward: (poolReward: ParsedPoolReward) => void;
-  isEditable?: boolean;
 }
 
 export default function PoolRewardsTable({
   poolRewards,
   noPoolRewardsMessage,
   onCancelReward,
-  isEditable,
 }: PoolRewardsTableProps) {
+  const appContext = useAppContext();
+  const data = appContext.data as AppData;
+
+  const isEditable = !!data.lendingMarketOwnerCapId;
+
   const columns: ColumnDef<RowData>[] = [
     {
       accessorKey: "symbol",
@@ -149,9 +153,7 @@ export default function PoolRewardsTable({
         );
       },
     },
-  ];
-  if (isEditable)
-    columns.push({
+    {
       accessorKey: "actions",
       enableSorting: false,
       header: ({ column }) => tableHeader(column, ""),
@@ -166,13 +168,14 @@ export default function PoolRewardsTable({
             variant="secondary"
             size="icon"
             onClick={() => onCancelReward(poolReward)}
-            disabled={endTime.getTime() < Date.now()}
+            disabled={endTime.getTime() < Date.now() || !isEditable}
           >
             Cancel reward
           </Button>
         );
       },
-    });
+    },
+  ];
 
   return (
     <div className="w-full">

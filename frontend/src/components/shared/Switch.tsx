@@ -8,16 +8,9 @@ interface SwitchProps {
   id: string;
   value: boolean;
   onChange: (value: boolean) => void;
-  isEditable?: boolean;
 }
 
-export default function Switch({
-  label,
-  id,
-  value,
-  onChange,
-  isEditable,
-}: SwitchProps) {
+export default function Switch({ label, id, value, onChange }: SwitchProps) {
   const switchId = getSwitchId(id);
 
   return (
@@ -32,7 +25,6 @@ export default function Switch({
           id={switchId}
           checked={value}
           onCheckedChange={onChange}
-          disabled={!isEditable}
         />
       </div>
     </div>

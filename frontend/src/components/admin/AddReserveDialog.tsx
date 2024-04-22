@@ -11,6 +11,7 @@ import { SuilendClient } from "@suilend/sdk/client";
 
 import CoinPopover from "@/components/admin/CoinPopover";
 import Dialog from "@/components/admin/Dialog";
+import Input from "@/components/admin/Input";
 import ReserveConfig, {
   ConfigState,
   parseConfigState,
@@ -18,7 +19,6 @@ import ReserveConfig, {
 } from "@/components/admin/ReserveConfig";
 import Button from "@/components/shared/Button";
 import Grid from "@/components/shared/Grid";
-import Input from "@/components/shared/Input";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { parseCoinBalances } from "@/lib/coinBalance";
 import { getCoinMetadataMap } from "@/lib/coinMetadata";
@@ -29,6 +29,8 @@ export default function AddReserveDialog() {
   const suiClient = restAppContext.suiClient as SuiClient;
   const suilendClient = restAppContext.suilendClient as SuilendClient<string>;
   const data = restAppContext.data as AppData;
+
+  const isEditable = !!data.lendingMarketOwnerCapId;
 
   // Coin metadata
   const uniqueCoinTypes = useMemo(() => {
@@ -202,7 +204,12 @@ export default function AddReserveDialog() {
           >
             Clear
           </Button>
-          <Button className="flex-1" size="lg" onClick={submit}>
+          <Button
+            className="flex-1"
+            size="lg"
+            onClick={submit}
+            disabled={!isEditable}
+          >
             Submit
           </Button>
         </div>
@@ -219,7 +226,6 @@ export default function AddReserveDialog() {
           id="pythPriceId"
           value={pythPriceId}
           onChange={setPythPriceId}
-          isEditable
         />
 
         <ReserveConfig
