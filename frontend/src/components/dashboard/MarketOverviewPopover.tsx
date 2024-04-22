@@ -36,26 +36,21 @@ export default function MarketOverviewPopover() {
       }
       contentProps={{
         align: "end",
-        className: "w-[300px]",
+        className: "w-[300px] flex flex-col gap-2",
       }}
     >
-      <TTitle className="mb-3 flex flex-row items-center gap-2 uppercase">
-        <Info className="h-3 w-3" />
-        About this pool
-      </TTitle>
+      <TTitle className="uppercase">About this pool</TTitle>
 
-      <div className="flex flex-col gap-2">
-        <div className="flex flex-row items-center justify-between gap-4">
-          <TLabelSans>Max outflow</TLabelSans>
-          <TBody className="break-words text-right uppercase">
-            {formattedOutflow.formattedMaxOutflow}
-          </TBody>
-        </div>
+      <div className="flex flex-row items-center justify-between gap-4">
+        <TLabelSans>Max outflow</TLabelSans>
+        <TBody className="text-right uppercase">
+          {formattedOutflow.formattedMaxOutflow}
+        </TBody>
+      </div>
 
-        <div className="flex flex-row items-center justify-between gap-4">
-          <TLabelSans>Owner</TLabelSans>
-          <TBody className="text-right uppercase">Suilend</TBody>
-        </div>
+      <div className="flex flex-row items-center justify-between gap-4">
+        <TLabelSans>Owner</TLabelSans>
+        <TBody className="text-right uppercase">Suilend</TBody>
       </div>
     </Popover>
   );
