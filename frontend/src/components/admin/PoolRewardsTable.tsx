@@ -1,7 +1,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import BigNumber from "bignumber.js";
 import { formatDate } from "date-fns";
-import { Ban, Banana } from "lucide-react";
+import { Ban, X } from "lucide-react";
 
 import { ParsedPoolReward } from "@suilend/sdk/parsers/reserve";
 
@@ -181,7 +181,7 @@ export default function PoolRewardsTable({
             </Button>
             <Button
               tooltip="Close reward"
-              icon={<Banana />}
+              icon={<X />}
               variant="secondary"
               size="icon"
               onClick={() => onCloseReward(poolReward)}
