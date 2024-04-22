@@ -56,6 +56,7 @@ export default function RateLimiterConfig({
         </div>
 
         <Button
+          className="my-1"
           tooltip="Set to 2^64 - 1, the maximum possible value to allow unlimited outflow"
           icon={<Infinity />}
           variant={
