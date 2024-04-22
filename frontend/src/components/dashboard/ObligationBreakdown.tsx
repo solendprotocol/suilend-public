@@ -5,7 +5,10 @@ import { ClassValue } from "clsx";
 
 import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
 
-import { getPassedLimit } from "@/components/dashboard/UtilizationBar";
+import {
+  getPassedBorrowLimit,
+  getPassedLiquidationThreshold,
+} from "@/components/dashboard/UtilizationBar";
 import Collapsible from "@/components/shared/Collapsible";
 import LabelWithTooltip from "@/components/shared/LabelWithTooltip";
 import { TBody, TLabelSans } from "@/components/shared/Typography";
@@ -31,7 +34,7 @@ function BreakdownSectionTitle({
 }: BreakdownSectionTitle) {
   return (
     <div className="flex flex-row items-center gap-2">
-      <div className={cn("h-2 w-2", barSegmentClassName)} />
+      <div className={cn("h-2.5 w-2.5", barSegmentClassName)} />
       <LabelWithTooltip tooltip={tooltip}>{children}</LabelWithTooltip>
     </div>
   );
@@ -141,7 +144,8 @@ export default function ObligationBreakdown({
     .slice()
     .sort(sortInReserveOrder(data.lendingMarket.reserves));
 
-  const passedLimit = getPassedLimit(obligation);
+  const passedBorrowLimit = getPassedBorrowLimit(obligation);
+  const passedLiquidationThreshold = getPassedLiquidationThreshold(obligation);
 
   return (
     <Collapsible
@@ -160,7 +164,9 @@ export default function ObligationBreakdown({
         <div className="flex w-full flex-col gap-2">
           <BreakdownSectionTitle
             barSegmentClassName={
-              passedLimit ? "bg-destructive" : "bg-foreground/50"
+              passedBorrowLimit || passedLiquidationThreshold
+                ? "bg-destructive"
+                : "bg-foreground"
             }
             tooltip={WEIGHTED_BORROW_TOOLTIP}
           >
@@ -214,7 +220,9 @@ export default function ObligationBreakdown({
               ),
             )}
             totalValueClassName={
-              passedLimit ? "text-destructive" : "text-foreground/50"
+              passedBorrowLimit || passedLiquidationThreshold
+                ? "text-destructive"
+                : "text-foreground"
             }
           />
         </div>

@@ -123,10 +123,9 @@ function ObligationCardContent() {
         </div>
       </div>
 
-      <UtilizationBar
-        isBreakdownOpen={isBreakdownOpen}
-        onClick={() => setIsBreakdownOpen(!isBreakdownOpen)}
-      />
+      {!obligation.totalSupplyUsd.eq(0) && (
+        <UtilizationBar onClick={() => setIsBreakdownOpen(!isBreakdownOpen)} />
+      )}
 
       <div className="flex flex-row items-center justify-between gap-2">
         <LabelWithTooltip tooltip={LIQUIDATION_THRESHOLD_TOOLTIP}>
