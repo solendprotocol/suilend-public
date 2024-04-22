@@ -10,17 +10,23 @@ import { cn, hoverUnderlineClassName } from "@/lib/utils";
 interface PointsRankProps {
   rank?: number | null;
   noTooltip?: boolean;
+  isCentered?: boolean;
   isRightAligned?: boolean;
 }
 
 export default function PointsRank({
   rank,
   noTooltip,
+  isCentered,
   isRightAligned,
 }: PointsRankProps) {
   return (
     <div
-      className={cn("flex flex-row", isRightAligned && "justify-end")}
+      className={cn(
+        "flex flex-row",
+        isCentered && "justify-center",
+        isRightAligned && "justify-end",
+      )}
       style={{
         width: `${Math.ceil(8.4 * formatRank(9999).length)}px`,
       }}

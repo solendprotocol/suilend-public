@@ -10,10 +10,14 @@ import PointsRank from "@/components/points/PointsRank";
 import Button from "@/components/shared/Button";
 import Spinner from "@/components/shared/Spinner";
 import TextLink from "@/components/shared/TextLink";
-import TitleChip from "@/components/shared/TitleChip";
 import TokenIcon from "@/components/shared/TokenIcon";
 import Tooltip from "@/components/shared/Tooltip";
-import { TBody, TBodySans, TLabel } from "@/components/shared/Typography";
+import {
+  TBody,
+  TLabel,
+  TLabelSans,
+  TTitle,
+} from "@/components/shared/Typography";
 import { Separator } from "@/components/ui/separator";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { useDashboardContext } from "@/contexts/DashboardContext";
@@ -95,12 +99,12 @@ function RankStat({ rank, isCentered }: RankStatProps) {
       <TLabel className={cn("uppercase", isCentered && "text-center")}>
         Rank
       </TLabel>
-      <PointsRank rank={rank} />
+      <PointsRank rank={rank} isCentered={isCentered} />
     </div>
   );
 }
 
-export default function RewardsCard() {
+export default function ProtocolRewardsCard() {
   const { setIsConnectWalletDropdownOpen, address, isImpersonatingAddress } =
     useWalletContext();
   const { refreshData, explorer, obligation, ...restAppContext } =
@@ -164,88 +168,70 @@ export default function RewardsCard() {
     }
   };
 
-  return (
+  return !address ? (
     <Card className="bg-background">
-      {!address ? (
+      <div
+        className="flex h-[100px] flex-col items-center justify-center gap-4 sm:h-[110px]"
+        style={{
+          backgroundImage: "url('/assets/points-splash-bg.png')",
+          backgroundPosition: "center",
+          backgroundSize: "cover",
+          backgroundRepeat: "no-repeat",
+        }}
+      >
+        <div className="text-center font-mono text-sm font-normal uppercase text-primary-foreground sm:text-[16px]">
+          Start earning points & rewards
+        </div>
+
+        <Button
+          labelClassName="uppercase"
+          variant="outline"
+          onClick={() => setIsConnectWalletDropdownOpen(true)}
+        >
+          Connect wallet
+        </Button>
+      </div>
+    </Card>
+  ) : (
+    <Card className="rounded-[4px] border-none bg-gradient-to-r from-secondary to-border p-[1px]">
+      <div className="rounded-[3px] bg-background">
         <div
-          className="flex h-[100px] flex-col items-center justify-center gap-4 sm:h-[110px]"
+          className="p-4"
           style={{
-            backgroundImage: "url('/assets/points-splash.png')",
+            backgroundImage: "url('/assets/protocol-rewards-bg.png')",
             backgroundPosition: "center",
             backgroundSize: "cover",
             backgroundRepeat: "no-repeat",
           }}
         >
-          <div className="text-center font-mono text-sm font-normal uppercase text-primary-foreground sm:text-[16px]">
-            Start earning points & rewards
-          </div>
-
-          <Button
-            labelClassName="uppercase"
-            variant="outline"
-            onClick={() => setIsConnectWalletDropdownOpen(true)}
-          >
-            Connect wallet
-          </Button>
-        </div>
-      ) : (
-        <div className="p-4">
           <div className="flex flex-col gap-4">
-            <div className="flex flex-col gap-3">
-              <TitleChip>Protocol rewards</TitleChip>
-              <TBodySans>
-                Boost your earnings with bonus Suilend rewards.
-              </TBodySans>
-            </div>
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-col gap-1">
+                <TTitle className="uppercase text-primary-foreground">
+                  Protocol rewards
+                </TTitle>
+                <TLabelSans>
+                  Boost your earnings with bonus Suilend rewards.
+                </TLabelSans>
+              </div>
 
-            <Separator />
-
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:gap-10">
-              {md ? (
-                <div className="flex flex-1 flex-row items-center justify-between gap-4">
-                  <PendingRewards totalSuiRewards={totalSuiRewards} />
-                  <Season1PointsStat points={pointsStats.totalPoints.total} />
-                  <PointsPerDayStat
-                    pointsPerDay={pointsStats.pointsPerDay.total}
-                  />
-                  <RankStat rank={rank} />
-                </div>
-              ) : (
-                <div className="grid flex-1 grid-cols-2 gap-4">
-                  <PendingRewards
-                    totalSuiRewards={totalSuiRewards}
-                    isCentered
-                  />
-                  <Season1PointsStat
-                    points={pointsStats.totalPoints.total}
-                    isCentered
-                  />
-
-                  <PointsPerDayStat
-                    pointsPerDay={pointsStats.pointsPerDay.total}
-                    isCentered
-                  />
-                  <RankStat rank={rank} isCentered />
-                </div>
-              )}
-
-              <div className="flex flex-col gap-2 sm:flex-row md:w-max md:flex-col">
-                <div className="w-full sm:w-auto sm:flex-1 md:flex-auto">
-                  <NextLink href={POINTS_URL} className="h-7 w-full">
+              <div className="flex flex-row gap-2">
+                <div className="flex-1 sm:flex-initial">
+                  <NextLink href={POINTS_URL}>
                     <Button
-                      className="h-7 w-full"
-                      labelClassName="uppercase text-xs"
+                      className="w-full border-secondary text-primary-foreground"
+                      labelClassName="uppercase"
+                      variant="secondaryOutline"
                     >
                       Points hub
                     </Button>
                   </NextLink>
                 </div>
 
-                <div className="w-full sm:w-auto sm:flex-1 md:flex-auto">
+                <div className="flex-1 sm:flex-initial">
                   <Button
-                    className="h-7 w-full border-secondary text-primary-foreground"
-                    labelClassName="uppercase text-xs"
-                    variant="secondaryOutline"
+                    className="w-full sm:w-[134px]"
+                    labelClassName="uppercase"
                     disabled={totalSuiRewards.eq(0) || isImpersonatingAddress}
                     onClick={onClaimRewardsClick}
                   >
@@ -254,9 +240,36 @@ export default function RewardsCard() {
                 </div>
               </div>
             </div>
+
+            <Separator />
+
+            {md ? (
+              <div className="flex flex-row items-center justify-between gap-4">
+                <PendingRewards totalSuiRewards={totalSuiRewards} />
+                <Season1PointsStat points={pointsStats.totalPoints.total} />
+                <PointsPerDayStat
+                  pointsPerDay={pointsStats.pointsPerDay.total}
+                />
+                <RankStat rank={rank} />
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-4">
+                <PendingRewards totalSuiRewards={totalSuiRewards} isCentered />
+                <Season1PointsStat
+                  points={pointsStats.totalPoints.total}
+                  isCentered
+                />
+
+                <PointsPerDayStat
+                  pointsPerDay={pointsStats.pointsPerDay.total}
+                  isCentered
+                />
+                <RankStat rank={rank} isCentered />
+              </div>
+            )}
           </div>
         </div>
-      )}
+      </div>
     </Card>
   );
 }

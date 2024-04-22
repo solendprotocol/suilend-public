@@ -8,7 +8,7 @@ import MarketTable from "@/components/dashboard/MarketTable";
 import ObligationBorrowsCard from "@/components/dashboard/ObligationBorrowsCard";
 import ObligationDepositsCard from "@/components/dashboard/ObligationDepositsCard";
 import ObligationPositionCard from "@/components/dashboard/ObligationPositionCard";
-import RewardsCard from "@/components/dashboard/RewardsCard";
+import ProtocolRewardsCard from "@/components/dashboard/ProtocolRewardsCard";
 import WalletAssetsCard from "@/components/dashboard/WalletBalancesCard";
 import FullPageSpinner from "@/components/shared/FullPageSpinner";
 import {
@@ -75,7 +75,7 @@ function Page() {
         </div>
 
         <MarketTable />
-        <RewardsCard />
+        <ProtocolRewardsCard />
       </div>
 
       {/* Horizontal layout (lg+) */}
@@ -83,7 +83,7 @@ function Page() {
         <div className="flex min-w-0 flex-1 flex-col gap-6">
           <MarketOverview />
           <MarketTable />
-          <RewardsCard />
+          <ProtocolRewardsCard />
         </div>
         <div className="flex w-[360px] shrink-0 flex-col gap-4">
           <Cards />
