@@ -12,6 +12,7 @@ import DataTable, {
 import Button from "@/components/shared/Button";
 import Tooltip from "@/components/shared/Tooltip";
 import { TBody } from "@/components/shared/Typography";
+import { AppData, useAppContext } from "@/contexts/AppContext";
 import { formatNumber } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -31,7 +32,6 @@ interface PoolRewardsTableProps {
   noPoolRewardsMessage: string;
   onCancelReward: (poolReward: ParsedPoolReward) => void;
   onCloseReward: (poolReward: ParsedPoolReward) => void;
-  isEditable?: boolean;
 }
 
 export default function PoolRewardsTable({
@@ -39,8 +39,12 @@ export default function PoolRewardsTable({
   noPoolRewardsMessage,
   onCancelReward,
   onCloseReward,
-  isEditable,
 }: PoolRewardsTableProps) {
+  const appContext = useAppContext();
+  const data = appContext.data as AppData;
+
+  const isEditable = !!data.lendingMarketOwnerCapId;
+
   const columns: ColumnDef<RowData>[] = [
     {
       accessorKey: "symbol",
@@ -153,9 +157,7 @@ export default function PoolRewardsTable({
         );
       },
     },
-  ];
-  if (isEditable)
-    columns.push({
+    {
       accessorKey: "actions",
       enableSorting: false,
       header: ({ column }) => tableHeader(column, "Actions"),
@@ -173,7 +175,7 @@ export default function PoolRewardsTable({
               variant="secondary"
               size="icon"
               onClick={() => onCancelReward(poolReward)}
-              disabled={!isCancelable}
+              disabled={!isCancelable || !isEditable}
             >
               Cancel reward
             </Button>
@@ -183,14 +185,15 @@ export default function PoolRewardsTable({
               variant="secondary"
               size="icon"
               onClick={() => onCloseReward(poolReward)}
-              disabled={!isClosable}
+              disabled={!isClosable || !isEditable}
             >
               Close reward
             </Button>
           </div>
         );
       },
-    });
+    },
+  ];
 
   return (
     <div className="w-full">

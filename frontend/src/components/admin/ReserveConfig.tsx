@@ -6,12 +6,11 @@ import { v4 as uuidv4 } from "uuid";
 
 import { CreateReserveConfigArgs } from "@suilend/sdk/_generated/suilend/reserve-config/functions";
 
+import Input, { getInputId } from "@/components/admin/Input";
 import AprLineChart from "@/components/shared/AprLineChart";
 import Button from "@/components/shared/Button";
-import Input, { getInputId } from "@/components/shared/Input";
 import Switch from "@/components/shared/Switch";
 import { TLabelSans } from "@/components/shared/Typography";
-import { AppData, useAppContext } from "@/contexts/AppContext";
 
 export interface ConfigState {
   openLtvPct: string;
@@ -149,11 +148,6 @@ export default function ReserveConfig({
   setConfigStateKeyValue,
   interestRate,
 }: ReserveConfigProps) {
-  const appContext = useAppContext();
-  const data = appContext.data as AppData;
-
-  const isEditable = !!data.lendingMarketOwnerCapId;
-
   const sortedInterestRate = getSortedInterestRate(configState.interestRate);
 
   return (
@@ -164,7 +158,6 @@ export default function ReserveConfig({
         type="number"
         value={configState.openLtvPct}
         onChange={setConfigStateKeyValue("openLtvPct")}
-        isEditable={isEditable}
         inputProps={{
           min: 0,
           max: 100,
@@ -177,7 +170,6 @@ export default function ReserveConfig({
         type="number"
         value={configState.closeLtvPct}
         onChange={setConfigStateKeyValue("closeLtvPct")}
-        isEditable={isEditable}
         inputProps={{
           min: 0,
           max: 100,
@@ -190,7 +182,6 @@ export default function ReserveConfig({
         type="number"
         value={configState.maxCloseLtvPct}
         onChange={setConfigStateKeyValue("maxCloseLtvPct")}
-        isEditable={isEditable}
         inputProps={{
           min: 0,
           max: 100,
@@ -203,7 +194,6 @@ export default function ReserveConfig({
         type="number"
         value={configState.borrowWeightBps}
         onChange={setConfigStateKeyValue("borrowWeightBps")}
-        isEditable={isEditable}
         endDecorator="bps"
       />
       <Input
@@ -212,7 +202,6 @@ export default function ReserveConfig({
         type="number"
         value={configState.depositLimit}
         onChange={setConfigStateKeyValue("depositLimit")}
-        isEditable={isEditable}
         endDecorator={symbol}
       />
       <Input
@@ -221,7 +210,6 @@ export default function ReserveConfig({
         type="number"
         value={configState.borrowLimit}
         onChange={setConfigStateKeyValue("borrowLimit")}
-        isEditable={isEditable}
         endDecorator={symbol}
       />
       <Input
@@ -230,7 +218,6 @@ export default function ReserveConfig({
         type="number"
         value={configState.liquidationBonusBps}
         onChange={setConfigStateKeyValue("liquidationBonusBps")}
-        isEditable={isEditable}
         endDecorator="bps"
       />
       <Input
@@ -239,7 +226,6 @@ export default function ReserveConfig({
         type="number"
         value={configState.maxLiquidationBonusBps}
         onChange={setConfigStateKeyValue("maxLiquidationBonusBps")}
-        isEditable={isEditable}
         endDecorator="bps"
       />
       <Input
@@ -248,7 +234,6 @@ export default function ReserveConfig({
         type="number"
         value={configState.depositLimitUsd}
         onChange={setConfigStateKeyValue("depositLimitUsd")}
-        isEditable={isEditable}
         inputProps={{ className: "pl-6" }}
         startDecorator="$"
       />
@@ -258,7 +243,6 @@ export default function ReserveConfig({
         type="number"
         value={configState.borrowLimitUsd}
         onChange={setConfigStateKeyValue("borrowLimitUsd")}
-        isEditable={isEditable}
         inputProps={{ className: "pl-6" }}
         startDecorator="$"
       />
@@ -268,7 +252,6 @@ export default function ReserveConfig({
         type="number"
         value={configState.borrowFeeBps}
         onChange={setConfigStateKeyValue("borrowFeeBps")}
-        isEditable={isEditable}
         endDecorator="bps"
       />
       <Input
@@ -277,7 +260,6 @@ export default function ReserveConfig({
         type="number"
         value={configState.spreadFeeBps}
         onChange={setConfigStateKeyValue("spreadFeeBps")}
-        isEditable={isEditable}
         endDecorator="bps"
       />
       <Input
@@ -286,7 +268,6 @@ export default function ReserveConfig({
         type="number"
         value={configState.protocolLiquidationFeeBps}
         onChange={setConfigStateKeyValue("protocolLiquidationFeeBps")}
-        isEditable={isEditable}
         endDecorator="bps"
       />
       <Switch
@@ -294,7 +275,6 @@ export default function ReserveConfig({
         id="isolated"
         value={configState.isolated}
         onChange={setConfigStateKeyValue("isolated")}
-        isEditable={isEditable}
       />
       <Input
         label="openAttributedBorrowLimitUsd"
@@ -302,7 +282,6 @@ export default function ReserveConfig({
         type="number"
         value={configState.openAttributedBorrowLimitUsd}
         onChange={setConfigStateKeyValue("openAttributedBorrowLimitUsd")}
-        isEditable={isEditable}
         inputProps={{ className: "pl-6" }}
         startDecorator="$"
       />
@@ -312,7 +291,6 @@ export default function ReserveConfig({
         type="number"
         value={configState.closeAttributedBorrowLimitUsd}
         onChange={setConfigStateKeyValue("closeAttributedBorrowLimitUsd")}
-        isEditable={isEditable}
         inputProps={{ className: "pl-6" }}
         startDecorator="$"
       />
@@ -329,7 +307,6 @@ export default function ReserveConfig({
                   type="number"
                   value={row.utilPercent}
                   onChange={interestRate.onValueChange(row.id, "utilPercent")}
-                  isEditable={isEditable}
                   inputProps={{
                     min: 0,
                     max: 100,
@@ -345,38 +322,33 @@ export default function ReserveConfig({
                   type="number"
                   value={row.aprPercent}
                   onChange={interestRate.onValueChange(row.id, "aprPercent")}
-                  isEditable={isEditable}
                   endDecorator="%"
                 />
               </div>
 
-              {isEditable && (
-                <Button
-                  className="my-1"
-                  tooltip="Remove row"
-                  icon={<Minus />}
-                  variant="secondary"
-                  size="icon"
-                  disabled={configState.interestRate.length < 2}
-                  onClick={() => interestRate.removeRow(row.id)}
-                >
-                  Remove row
-                </Button>
-              )}
+              <Button
+                className="my-1"
+                tooltip="Remove row"
+                icon={<Minus />}
+                variant="secondary"
+                size="icon"
+                disabled={configState.interestRate.length < 2}
+                onClick={() => interestRate.removeRow(row.id)}
+              >
+                Remove row
+              </Button>
             </div>
           ))}
 
-          {isEditable && (
-            <Button
-              className="w-full"
-              startIcon={<Plus />}
-              variant="secondary"
-              size="lg"
-              onClick={() => interestRate.addRow()}
-            >
-              Add row
-            </Button>
-          )}
+          <Button
+            className="w-full"
+            startIcon={<Plus />}
+            variant="secondary"
+            size="lg"
+            onClick={() => interestRate.addRow()}
+          >
+            Add row
+          </Button>
 
           <div className="mt-4 h-[150px] sm:h-[250px]">
             <AprLineChart

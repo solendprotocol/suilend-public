@@ -302,3 +302,8 @@ export interface LiquidateArgs {
   clock: ObjectArg;
   repayCoins: ObjectArg;
 }
+
+export interface MigrateArgs {
+  lendingMarketOwnerCap: ObjectArg;
+  lendingMarket: ObjectArg;
+}
