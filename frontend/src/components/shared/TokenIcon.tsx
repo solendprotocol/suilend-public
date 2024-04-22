@@ -34,6 +34,9 @@ export default function TokenIcon({
   };
   const nativeAsset = nativeAssetMap[coinType];
 
+  const isSmall = className ? className.toString().includes("h-4") : false;
+  const wormholeLogoSize = isSmall ? 8 : 12;
+
   return (
     <Tooltip
       content={
@@ -63,8 +66,8 @@ export default function TokenIcon({
           <div className="absolute -bottom-0.5 -right-0.5 z-[2] rounded-full border border-background bg-background">
             <Image
               src={LOGO_MAP.WORMHOLE}
-              width={12}
-              height={12}
+              width={wormholeLogoSize}
+              height={wormholeLogoSize}
               alt="Wormhole logo"
             />
           </div>

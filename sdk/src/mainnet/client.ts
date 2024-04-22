@@ -15,12 +15,12 @@ import {
   depositCtokensIntoObligation,
   depositLiquidityAndMintCtokens,
   liquidate,
+  migrate,
   refreshReservePrice,
   repay,
   updateRateLimiterConfig as updateRateLimiterConfigFunction,
   updateReserveConfig as updateReserveConfigFunction,
   withdrawCtokens,
-  migrate
 } from "./_generated/suilend/lending-market/functions";
 import {
   LendingMarket,
@@ -60,7 +60,7 @@ const deps = {
   borrow,
   repay,
   liquidate,
-  migrate
+  migrate,
 };
 
 export class SuilendClient<T extends string> extends BaseSuilendClient {

@@ -15,12 +15,12 @@ import {
   depositCtokensIntoObligation,
   depositLiquidityAndMintCtokens,
   liquidate,
+  migrate,
   refreshReservePrice,
   repay,
   updateRateLimiterConfig as updateRateLimiterConfigFunction,
   updateReserveConfig as updateReserveConfigFunction,
   withdrawCtokens,
-  migrate
 } from "./_generated/suilend/lending-market/functions";
 import {
   LendingMarket,

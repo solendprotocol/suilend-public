@@ -27,7 +27,6 @@ interface DialogProps extends PropsWithChildren {
   contentProps?: DialogContentProps;
   titleIcon?: ReactElement;
   title?: string;
-  titleEndDecorator?: ReactNode;
   description?: ReactNode;
   descriptionAsChild?: boolean;
   noSeparator?: boolean;
@@ -40,7 +39,6 @@ export default function Dialog({
   contentProps,
   titleIcon,
   title,
-  titleEndDecorator,
   description,
   descriptionAsChild,
   noSeparator,
@@ -75,7 +73,6 @@ export default function Dialog({
                       style: { "--my": `${(20 - 16) / 2}px` },
                     })}
                   {title}
-                  {titleEndDecorator}
                 </DialogTitle>
               )}
               {description && (

@@ -24,6 +24,7 @@ import {
   DepositCtokensIntoObligationArgs,
   DepositLiquidityAndMintCtokensArgs,
   LiquidateArgs,
+  MigrateArgs,
   ObjectArg,
   PhantomReified,
   RefreshReservePriceArgs,
@@ -32,7 +33,6 @@ import {
   UpdateRateLimiterConfigArgs,
   UpdateReserveConfigArgs,
   WithdrawCtokensArgs,
-  MigrateArgs,
 } from "./types";
 
 const WORMHOLE_STATE_ID =
@@ -197,7 +197,7 @@ export class SuilendClient {
       borrow,
       repay,
       liquidate,
-      migrate
+      migrate,
     }: Deps,
   ) {
     this.lendingMarket = lendingMarket;
@@ -1030,17 +1030,10 @@ export class SuilendClient {
     );
   }
 
-  async migrate(
-    txb: TransactionBlock,
-    lendingMarketOwnerCapId: string,
-  ) {
-    return this.migrateFunction(
-      txb,
-      this.lendingMarket.$typeArgs[0],
-      {
-        lendingMarket: this.lendingMarket.id,
-        lendingMarketOwnerCap: lendingMarketOwnerCapId,
-      },
-    );
+  async migrate(txb: TransactionBlock, lendingMarketOwnerCapId: string) {
+    return this.migrateFunction(txb, this.lendingMarket.$typeArgs[0], {
+      lendingMarket: this.lendingMarket.id,
+      lendingMarketOwnerCap: lendingMarketOwnerCapId,
+    });
   }
 }

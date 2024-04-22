@@ -19,7 +19,6 @@ interface InputProps {
   placeholder?: string;
   value: string | number;
   onChange: (value: string) => void;
-  isEditable?: boolean;
   inputProps?: InputComponentProps;
   startDecorator?: string;
   endDecorator?: string;
@@ -35,7 +34,6 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       placeholder,
       value,
       onChange,
-      isEditable,
       inputProps = {},
       startDecorator,
       endDecorator,
@@ -80,7 +78,6 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             placeholder={placeholder}
             value={value}
             onChange={(e) => onChange(e.target.value)}
-            readOnly={!isEditable}
             onWheel={(e) => e.currentTarget.blur()}
             {...restInputProps}
           />
