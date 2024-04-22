@@ -152,10 +152,7 @@ export default function AprLineChart({
   return (
     <div
       ref={containerRef}
-      className={cn(
-        styles.container,
-        "relative h-full w-full transform-gpu overflow-hidden",
-      )}
+      className={cn(styles.container, "relative h-full w-full transform-gpu")}
       onMouseEnter={() => setIsMouseOver(true)}
       onMouseLeave={() => setIsMouseOver(false)}
     >
@@ -290,29 +287,32 @@ export default function AprLineChart({
               fill="hsl(var(--destructive))"
               strokeWidth={0}
               r={4}
-              shape={(props: any) => (
-                <Tooltip
-                  rootProps={{ open: true }}
-                  portalProps={{ container: containerRef.current }}
-                  contentProps={{
-                    className: cn(
-                      "!pointer-events-none min-w-max transition-opacity",
-                      showMouseoverDot && "opacity-50",
-                    ),
-                    side: "top",
-                    sideOffset: 8,
-                    avoidCollisions: false,
-                  }}
-                  content={
-                    <TooltipContent
-                      utilization={reference.x}
-                      apr={reference.y}
-                    />
-                  }
-                >
-                  <circle {...props} />
-                </Tooltip>
-              )}
+              shape={(props: any) => {
+                console.log("XXX", props);
+                return (
+                  <Tooltip
+                    rootProps={{ open: true }}
+                    portalProps={{ container: containerRef.current }}
+                    contentProps={{
+                      className: cn(
+                        "!pointer-events-none min-w-max transition-opacity !animate-none",
+                        showMouseoverDot && "opacity-50",
+                      ),
+                      side: "top",
+                      sideOffset: 8,
+                      avoidCollisions: false,
+                    }}
+                    content={
+                      <TooltipContent
+                        utilization={reference.x}
+                        apr={reference.y}
+                      />
+                    }
+                  >
+                    <circle {...props} cy={props.cy + 1} />
+                  </Tooltip>
+                );
+              }}
             />
           )}
         </Recharts.LineChart>
