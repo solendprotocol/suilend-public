@@ -24,6 +24,7 @@ import {
   DepositCtokensIntoObligationArgs,
   DepositLiquidityAndMintCtokensArgs,
   LiquidateArgs,
+  MigrateArgs,
   ObjectArg,
   PhantomReified,
   RefreshReservePriceArgs,
@@ -131,6 +132,11 @@ interface Deps {
     typeArgs: [string, string, string],
     args: LiquidateArgs,
   ) => TransactionResult;
+  migrate: (
+    txb: TransactionBlock,
+    typeArg: string,
+    args: MigrateArgs,
+  ) => TransactionResult;
 }
 
 export class SuilendClient {
@@ -162,6 +168,7 @@ export class SuilendClient {
   borrowFunction: Deps["borrow"];
   repayFunction: Deps["repay"];
   liquidateFunction: Deps["liquidate"];
+  migrateFunction: Deps["migrate"];
 
   constructor(
     lendingMarket: any,
@@ -190,6 +197,7 @@ export class SuilendClient {
       borrow,
       repay,
       liquidate,
+      migrate,
     }: Deps,
   ) {
     this.lendingMarket = lendingMarket;
@@ -227,6 +235,7 @@ export class SuilendClient {
     this.borrowFunction = borrow;
     this.repayFunction = repay;
     this.liquidateFunction = liquidate;
+    this.migrateFunction = migrate;
   }
 
   static async initialize(
@@ -1019,5 +1028,12 @@ export class SuilendClient {
         withdrawReserveArrayIndex: this.findReserveArrayIndex(withdrawCoinType),
       },
     );
+  }
+
+  async migrate(txb: TransactionBlock, lendingMarketOwnerCapId: string) {
+    return this.migrateFunction(txb, this.lendingMarket.$typeArgs[0], {
+      lendingMarket: this.lendingMarket.id,
+      lendingMarketOwnerCap: lendingMarketOwnerCapId,
+    });
   }
 }

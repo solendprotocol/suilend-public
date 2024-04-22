@@ -15,6 +15,7 @@ import {
   depositCtokensIntoObligation,
   depositLiquidityAndMintCtokens,
   liquidate,
+  migrate,
   refreshReservePrice,
   repay,
   updateRateLimiterConfig as updateRateLimiterConfigFunction,
@@ -59,6 +60,7 @@ const deps = {
   borrow,
   repay,
   liquidate,
+  migrate,
 };
 
 export class SuilendClient<T extends string> extends BaseSuilendClient {

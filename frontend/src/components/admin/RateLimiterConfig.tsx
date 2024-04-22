@@ -5,9 +5,8 @@ import { Infinity } from "lucide-react";
 import { NewConfigArgs as NewRateLimitedConfigArgs } from "@suilend/sdk/_generated/suilend/rate-limiter/functions";
 import { maxU64 } from "@suilend/sdk/constants";
 
+import Input from "@/components/admin/Input";
 import Button from "@/components/shared/Button";
-import Input from "@/components/shared/Input";
-import { AppData, useAppContext } from "@/contexts/AppContext";
 
 export interface ConfigState {
   maxOutflow: string;
@@ -43,11 +42,6 @@ export default function RateLimiterConfig({
   configState,
   setConfigStateKeyValue,
 }: RateLimiterConfigProps) {
-  const appContext = useAppContext();
-  const data = appContext.data as AppData;
-
-  const isEditable = !!data.lendingMarketOwnerCapId;
-
   return (
     <>
       <div className="flex flex-row items-end gap-2">
@@ -58,11 +52,11 @@ export default function RateLimiterConfig({
             type="number"
             value={configState.maxOutflow}
             onChange={setConfigStateKeyValue("maxOutflow")}
-            isEditable={isEditable}
           />
         </div>
 
         <Button
+          className="my-1"
           tooltip="Set to 2^64 - 1, the maximum possible value to allow unlimited outflow"
           icon={<Infinity />}
           variant={
@@ -85,7 +79,6 @@ export default function RateLimiterConfig({
         type="number"
         value={configState.windowDuration}
         onChange={setConfigStateKeyValue("windowDuration")}
-        isEditable={isEditable}
         endDecorator="sec"
       />
     </>

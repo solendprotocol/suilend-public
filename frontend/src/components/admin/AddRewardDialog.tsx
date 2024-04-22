@@ -12,9 +12,9 @@ import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 
 import CoinPopover from "@/components/admin/CoinPopover";
 import Dialog from "@/components/admin/Dialog";
+import Input from "@/components/admin/Input";
 import Button from "@/components/shared/Button";
 import Grid from "@/components/shared/Grid";
-import Input from "@/components/shared/Input";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 import { parseCoinBalances } from "@/lib/coinBalance";
@@ -36,6 +36,8 @@ export default function AddRewardDialog({
   const suiClient = restAppContext.suiClient as SuiClient;
   const suilendClient = restAppContext.suilendClient as SuilendClient<string>;
   const data = restAppContext.data as AppData;
+
+  const isEditable = !!data.lendingMarketOwnerCapId;
 
   // Coin metadata
   const uniqueCoinTypes = useMemo(() => {
@@ -184,7 +186,12 @@ export default function AddRewardDialog({
           >
             Clear
           </Button>
-          <Button className="flex-1" size="lg" onClick={submit}>
+          <Button
+            className="flex-1"
+            size="lg"
+            onClick={submit}
+            disabled={!isEditable}
+          >
             Submit
           </Button>
         </div>
@@ -207,7 +214,6 @@ export default function AddRewardDialog({
           type="number"
           value={amount}
           onChange={setAmount}
-          isEditable
           inputProps={{ disabled: coinIndex === null }}
           endDecorator={coin ? coin.symbol : undefined}
         />
@@ -217,7 +223,6 @@ export default function AddRewardDialog({
           type="number"
           value={startTimeMs}
           onChange={setStartTimeMs}
-          isEditable
           endDecorator="ms"
         />
         <Input
@@ -226,7 +231,6 @@ export default function AddRewardDialog({
           type="number"
           value={endTimeMs}
           onChange={setEndTimeMs}
-          isEditable
           endDecorator="ms"
         />
       </Grid>

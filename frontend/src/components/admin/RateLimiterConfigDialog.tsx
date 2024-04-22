@@ -11,7 +11,6 @@ import { ParsedRateLimiter } from "@suilend/sdk/parsers/rateLimiter";
 
 import Dialog from "@/components/admin/Dialog";
 import DiffLine from "@/components/admin/DiffLine";
-import EditableBadge from "@/components/admin/EditableBadge";
 import RateLimiterConfig, {
   ConfigState,
   parseConfigState,
@@ -51,7 +50,6 @@ export default function RateLimiterConfigDialog() {
   const suilendClient = restAppContext.suilendClient as SuilendClient<string>;
   const data = restAppContext.data as AppData;
 
-  const rateLimiter = data.lendingMarket.rateLimiter;
   const isEditable = !!data.lendingMarketOwnerCapId;
 
   const getInitialConfigState = (
@@ -61,7 +59,7 @@ export default function RateLimiterConfigDialog() {
     windowDuration: config.windowDuration.toString(),
   });
   const initialConfigStateRef = useRef<ConfigState>(
-    getInitialConfigState(rateLimiter.config),
+    getInitialConfigState(data.lendingMarket.rateLimiter.config),
   );
 
   const rateLimiterConfigState = useRateLimiterConfigState(
@@ -116,24 +114,26 @@ export default function RateLimiterConfigDialog() {
       }
       titleIcon={<Bolt />}
       title="Config"
-      titleEndDecorator={isEditable && <EditableBadge />}
       footer={
-        isEditable && (
-          <div className="flex w-full flex-row items-center gap-2">
-            <Button
-              tooltip="Revert changes"
-              icon={<Undo2 />}
-              variant="ghost"
-              size="icon"
-              onClick={resetConfigState}
-            >
-              Revert changes
-            </Button>
-            <Button className="flex-1" size="lg" onClick={saveChanges}>
-              Save changes
-            </Button>
-          </div>
-        )
+        <div className="flex w-full flex-row items-center gap-2">
+          <Button
+            tooltip="Revert changes"
+            icon={<Undo2 />}
+            variant="ghost"
+            size="icon"
+            onClick={resetConfigState}
+          >
+            Revert changes
+          </Button>
+          <Button
+            className="flex-1"
+            size="lg"
+            onClick={saveChanges}
+            disabled={!isEditable}
+          >
+            Save changes
+          </Button>
+        </div>
       }
     >
       <Grid>

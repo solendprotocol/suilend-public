@@ -38,8 +38,6 @@ export default function ReserveRewardsDialog({
   const suilendClient = restAppContext.suilendClient as SuilendClient<string>;
   const data = restAppContext.data as AppData;
 
-  const isEditable = !!data.lendingMarketOwnerCapId;
-
   // Tabs
   enum Tab {
     DEPOSITS = "deposits",
@@ -154,29 +152,30 @@ export default function ReserveRewardsDialog({
           <div className="flex flex-col gap-2 md:col-span-2">
             <TLabelSans>poolRewards</TLabelSans>
 
-            {isEditable && (
-              <AddRewardDialog
-                reserve={reserve}
-                isDepositReward={selectedTab === Tab.DEPOSITS}
-              />
-            )}
-
             <div className="overflow-hidden rounded-md border">
               <PoolRewardsTable
-                poolRewards={poolRewardManager.poolRewards.map((pr) => ({
-                  startTime: new Date(pr.startTimeMs),
-                  endTime: new Date(pr.endTimeMs),
-                  totalRewards: pr.totalRewards,
-                  allocatedRewards: pr.allocatedRewards,
-                  cumulativeRewardsPerShare: pr.cumulativeRewardsPerShare,
-                  symbol: pr.symbol,
-                  poolReward: pr,
-                }))}
+                poolRewards={poolRewardManager.poolRewards
+                  .map((pr) => ({
+                    startTime: new Date(pr.startTimeMs),
+                    endTime: new Date(pr.endTimeMs),
+                    totalRewards: pr.totalRewards,
+                    allocatedRewards: pr.allocatedRewards,
+                    cumulativeRewardsPerShare: pr.cumulativeRewardsPerShare,
+                    symbol: pr.symbol,
+                    poolReward: pr,
+                  }))
+                  .sort(
+                    (a, b) => a.startTime.getTime() - b.startTime.getTime(),
+                  )}
                 noPoolRewardsMessage={`No ${selectedTab === Tab.DEPOSITS ? "deposit" : "borrow"} rewards`}
                 onCancelReward={onCancelReward}
-                isEditable={isEditable}
               />
             </div>
+
+            <AddRewardDialog
+              reserve={reserve}
+              isDepositReward={selectedTab === Tab.DEPOSITS}
+            />
           </div>
         </Grid>
       </Tabs>
