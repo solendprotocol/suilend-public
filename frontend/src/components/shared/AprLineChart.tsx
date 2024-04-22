@@ -149,13 +149,13 @@ export default function AprLineChart({
 
   const showMouseoverDot = isMouseOver && !!xyForMouseChartX;
 
+  // Reference dot
+  const referenceDotRef = useRef<SVGCircleElement>(null);
+
   return (
     <div
       ref={containerRef}
-      className={cn(
-        styles.container,
-        "relative h-full w-full transform-gpu overflow-hidden",
-      )}
+      className={cn(styles.container, "relative h-full w-full transform-gpu")}
       onMouseEnter={() => setIsMouseOver(true)}
       onMouseLeave={() => setIsMouseOver(false)}
     >
@@ -292,7 +292,7 @@ export default function AprLineChart({
               r={4}
               shape={(props: any) => (
                 <Tooltip
-                  rootProps={{ open: true }}
+                  rootProps={{ open: !!referenceDotRef.current }}
                   portalProps={{ container: containerRef.current }}
                   contentProps={{
                     className: cn(
@@ -310,7 +310,7 @@ export default function AprLineChart({
                     />
                   }
                 >
-                  <circle {...props} />
+                  <circle ref={referenceDotRef} {...props} cy={props.cy + 1} />
                 </Tooltip>
               )}
             />

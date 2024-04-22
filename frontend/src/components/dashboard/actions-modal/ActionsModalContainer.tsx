@@ -2,6 +2,7 @@ import {
   MouseEvent,
   PropsWithChildren,
   ReactNode,
+  useEffect,
   useRef,
   useState,
 } from "react";
@@ -17,6 +18,7 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import useBreakpoint from "@/hooks/useBreakpoint";
+import { cn } from "@/lib/utils";
 
 interface ActionsModalContainerProps extends PropsWithChildren {
   trigger: ReactNode;
@@ -58,6 +60,25 @@ export default function ActionsModalContainer({
     e.stopPropagation();
     didDialogContentMouseDownRef.current = false;
   };
+
+  // Drawer
+  const [visualViewportHeight, setVisualViewportHeight] = useState<number>(0);
+  useEffect(() => {
+    if (!visualViewport) return;
+    setVisualViewportHeight(visualViewport.height);
+
+    const onResize = () => {
+      if (!visualViewport) return;
+      setVisualViewportHeight(visualViewport.height);
+    };
+
+    visualViewport.addEventListener("resize", onResize);
+
+    return () => {
+      if (!visualViewport) return;
+      visualViewport.removeEventListener("resize", onResize);
+    };
+  }, []);
 
   if (md) {
     return (
@@ -114,15 +135,18 @@ export default function ActionsModalContainer({
         {trigger}
       </DrawerTrigger>
       <DrawerContent
-        className="mt-[0] max-h-[calc(100dvh_-0)] rounded-t-lg bg-popover px-4 py-4"
+        className={cn(
+          "mt-[0] max-h-[calc(100dvh_-_0px)] rounded-t-lg bg-popover p-4",
+          isMoreParametersOpen ? "!h-[calc(100dvh_-_0px)]" : "!h-auto",
+          visualViewportHeight < 400
+            ? "!bottom-auto !top-0"
+            : "!bottom-0 !top-auto",
+        )}
         thumbClassName="hidden"
         onEscapeKeyDown={() => setIsOpen(false)}
         overlay={{
           className: "bg-background/80",
           onClick: () => setIsOpen(false),
-        }}
-        style={{
-          height: isMoreParametersOpen ? "calc(100dvh - 0)" : "auto",
         }}
       >
         {children}

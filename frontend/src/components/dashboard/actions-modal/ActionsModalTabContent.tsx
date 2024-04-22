@@ -306,10 +306,10 @@ export default function ActionsModalTabContent({
         )}
       </div>
 
-      <div className="flex w-full flex-col gap-4">
+      <div className="flex w-full flex-col gap-2">
         {!md && (
           <Button
-            className="h-14"
+            className="justify-between"
             labelClassName="uppercase"
             endIcon={<MoreParametersIcon className="h-4 w-4" />}
             variant="secondary"
