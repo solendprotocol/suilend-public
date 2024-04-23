@@ -85,7 +85,7 @@ export default function UtilizationBar({
             .times(barPercent)
             .toNumber(),
         },
-        { className: "bg-primary" },
+        { className: "bg-primary shadow-0primary" },
         {
           widthPercent: new BigNumber(
             liquidationThreshold.minus(borrowLimitUsd),
@@ -94,7 +94,7 @@ export default function UtilizationBar({
             .times(barPercent)
             .toNumber(),
         },
-        { className: "bg-secondary" },
+        { className: "bg-secondary shadow-0secondary" },
         {
           widthPercent: new BigNumber(supply.minus(liquidationThreshold))
             .div(supply)
@@ -121,7 +121,7 @@ export default function UtilizationBar({
             .times(barPercent)
             .toNumber(),
         },
-        { className: "bg-secondary" },
+        { className: "bg-secondary shadow-0secondary" },
         {
           widthPercent: new BigNumber(supply.minus(liquidationThreshold))
             .div(supply)
