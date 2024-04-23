@@ -14,7 +14,7 @@ const DynamicWormholeConnectWrapper = dynamic(
   { ssr: false },
 );
 
-function Page() {
+export default function Bridge() {
   return (
     <>
       <Head>
@@ -37,8 +37,4 @@ function Page() {
       </div>
     </>
   );
-}
-
-export default function Bridge() {
-  return <Page />;
 }

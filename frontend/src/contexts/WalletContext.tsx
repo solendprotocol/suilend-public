@@ -6,6 +6,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
@@ -21,6 +22,7 @@ import {
 } from "@mysten/wallet-standard";
 import * as Sentry from "@sentry/nextjs";
 import { useWallet } from "@suiet/wallet-kit";
+import { useLDClient } from "launchdarkly-react-client-sdk";
 import { toast } from "sonner";
 import { useLocalStorage } from "usehooks-ts";
 
@@ -114,6 +116,19 @@ export function WalletContextProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     Sentry.setUser({ id: account?.address });
   }, [account?.address]);
+
+  // LaunchDarkly
+  const ldClient = useLDClient();
+  const ldKeyRef = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    if (!ldClient) return;
+
+    const key = account?.address;
+    if (ldKeyRef.current === key) return;
+
+    ldKeyRef.current = key;
+    ldClient.identify(!key ? { anonymous: true } : { key });
+  }, [ldClient, account?.address]);
 
   // Tx
   // Note: Do NOT import and use this function directly. Instead, use the signExecuteAndWaitTransactionBlock
