@@ -7,6 +7,7 @@ import { ReactNode, useEffect } from "react";
 import { WalletProvider } from "@suiet/wallet-kit";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { LDProvider } from "launchdarkly-react-client-sdk";
 import mixpanel from "mixpanel-browser";
 
 import Layout from "@/components/layout/Layout";
@@ -32,6 +33,7 @@ export default function App({
   // Use the layout defined at the page level, if available
   const getLayout = Component.getLayout ?? ((page) => <Layout>{page}</Layout>);
 
+  // Mixpanel
   useEffect(() => {
     const projectToken = process.env.NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN;
     if (!projectToken) return;
@@ -56,15 +58,21 @@ export default function App({
 
       <main id="__app_main" className={cn("light", ...fontClassNames)}>
         <TooltipProvider>
-          <WalletProvider>
-            <WalletContextProvider>
-              <AppContextProvider>
-                <RefreshDataContextProvider>
-                  {getLayout(<Component {...pageProps} />)}
-                </RefreshDataContextProvider>
-              </AppContextProvider>
-            </WalletContextProvider>
-          </WalletProvider>
+          <LDProvider
+            clientSideID={
+              process.env.NEXT_PUBLIC_LAUNCHDARKLY_CLIENT_SIDE_ID as string
+            }
+          >
+            <WalletProvider>
+              <WalletContextProvider>
+                <AppContextProvider>
+                  <RefreshDataContextProvider>
+                    {getLayout(<Component {...pageProps} />)}
+                  </RefreshDataContextProvider>
+                </AppContextProvider>
+              </WalletContextProvider>
+            </WalletProvider>
+          </LDProvider>
           <Toaster />
         </TooltipProvider>
       </main>

@@ -16,7 +16,6 @@ import ReserveConfigDialog from "@/components/admin/ReserveConfigDialog";
 import ReservePropertiesDialog from "@/components/admin/ReservePropertiesDialog";
 import ReserveRewardsDialog from "@/components/admin/ReserveRewardsDialog";
 import Button from "@/components/shared/Button";
-import FullPageSpinner from "@/components/shared/FullPageSpinner";
 import Tabs from "@/components/shared/Tabs";
 import { TTitle } from "@/components/shared/Typography";
 import Value from "@/components/shared/Value";
@@ -29,7 +28,7 @@ import {
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { cn } from "@/lib/utils";
 
-function Page() {
+export default function Admin() {
   const router = useRouter();
   const tab = router.query.tab as string | undefined;
 
@@ -204,11 +203,4 @@ function Page() {
       </div>
     </>
   );
-}
-
-export default function Admin() {
-  const { suilendClient, data } = useAppContext();
-  if (!suilendClient || !data) return <FullPageSpinner />;
-
-  return <Page />;
 }

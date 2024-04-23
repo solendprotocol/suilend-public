@@ -10,13 +10,11 @@ import ObligationBorrowsCard from "@/components/dashboard/ObligationBorrowsCard"
 import ObligationDepositsCard from "@/components/dashboard/ObligationDepositsCard";
 import ObligationPositionCard from "@/components/dashboard/ObligationPositionCard";
 import WalletAssetsCard from "@/components/dashboard/WalletBalancesCard";
-import FullPageSpinner from "@/components/shared/FullPageSpinner";
 import {
   bodyClassNames,
   labelSansClassNames,
 } from "@/components/shared/Typography";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { useAppContext } from "@/contexts/AppContext";
 import { DashboardContextProvider } from "@/contexts/DashboardContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 import { formatAddress } from "@/lib/format";
@@ -34,13 +32,13 @@ function Cards() {
   );
 }
 
-function Page() {
+export default function Dashboard() {
   const router = useRouter();
   const pathname = usePathname();
   const { address, isImpersonatingAddress } = useWalletContext();
 
   return (
-    <>
+    <DashboardContextProvider>
       <Head>
         <title>Suilend Dashboard</title>
       </Head>
@@ -89,17 +87,6 @@ function Page() {
           <Cards />
         </div>
       </div>
-    </>
-  );
-}
-
-export default function Dashboard() {
-  const { suilendClient, data } = useAppContext();
-  if (!suilendClient || !data) return <FullPageSpinner />;
-
-  return (
-    <DashboardContextProvider>
-      <Page />
     </DashboardContextProvider>
   );
 }
