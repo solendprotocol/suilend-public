@@ -26,11 +26,11 @@ export default function Layout({ children }: PropsWithChildren) {
     },
   });
 
-  const isLoading =
+  const isHeaderLoading =
     flags.banner === undefined ||
-    (flags.banner?.message && [0, null].includes(bannerHeight)) ||
-    !suilendClient ||
-    !data;
+    (flags.banner?.message && [0, null].includes(bannerHeight));
+
+  const isPageLoading = isHeaderLoading || !suilendClient || !data;
 
   return (
     <div
@@ -42,20 +42,20 @@ export default function Layout({ children }: PropsWithChildren) {
         } as CSSProperties
       }
     >
-      <Banner ref={bannerRef} height={bannerHeight} isHidden={isLoading} />
+      {(isHeaderLoading || isPageLoading) && <FullPageSpinner />}
 
-      {isLoading ? (
-        <FullPageSpinner />
-      ) : (
-        <>
-          <AppHeader />
-          <div className="relative z-[1] flex-1 py-4 md:py-6">
-            <Container>{children}</Container>
-          </div>
+      <Banner
+        ref={bannerRef}
+        height={bannerHeight}
+        isHidden={isHeaderLoading}
+      />
+      {!isHeaderLoading && <AppHeader />}
 
-          <Footer />
-        </>
-      )}
+      <div className="relative z-[1] flex-1 py-4 md:py-6">
+        {!isPageLoading && <Container>{children}</Container>}
+      </div>
+
+      <Footer />
     </div>
   );
 }
