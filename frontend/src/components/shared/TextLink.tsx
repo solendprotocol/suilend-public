@@ -7,11 +7,11 @@ import { ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface TextLinkProps extends PropsWithChildren {
-  href: string;
   className?: ClassValue;
+  href: string;
 }
 
-export default function TextLink({ href, className, children }: TextLinkProps) {
+export default function TextLink({ className, href, children }: TextLinkProps) {
   return (
     <NextLink
       target="_blank"
