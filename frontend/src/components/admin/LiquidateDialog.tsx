@@ -40,7 +40,7 @@ import DataTable, {
   decimalSortingFn,
   tableHeader,
 } from "@/components/dashboard/DataTable";
-import UtilizationBar from "@/components/dashboard/UtilizationBar";
+import UtilizationBar from "@/components/dashboard/obligation/UtilizationBar";
 import Button from "@/components/shared/Button";
 import Grid from "@/components/shared/Grid";
 import LabelWithValue from "@/components/shared/LabelWithValue";

@@ -157,7 +157,7 @@ export default function AprWithRewardsBreakdown({
     <div>
       <Tooltip
         contentProps={{
-          className: "rounded-md px-4 py-4 flex-col flex gap-4 min-w-[300px]",
+          className: "px-4 py-4 flex-col flex gap-4 min-w-[300px]",
           style: { maxWidth: "none" },
         }}
         content={

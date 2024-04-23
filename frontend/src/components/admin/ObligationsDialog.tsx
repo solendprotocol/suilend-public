@@ -21,7 +21,7 @@ import Dialog from "@/components/admin/Dialog";
 import Input from "@/components/admin/Input";
 import LiquidateDialog from "@/components/admin/LiquidateDialog";
 import DataTable, { tableHeader } from "@/components/dashboard/DataTable";
-import UtilizationBar from "@/components/dashboard/UtilizationBar";
+import UtilizationBar from "@/components/dashboard/obligation/UtilizationBar";
 import Button from "@/components/shared/Button";
 import Grid from "@/components/shared/Grid";
 import Switch from "@/components/shared/Switch";

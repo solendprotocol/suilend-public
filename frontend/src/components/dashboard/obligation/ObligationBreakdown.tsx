@@ -1,44 +1,22 @@
-import { PropsWithChildren, ReactNode } from "react";
-
 import BigNumber from "bignumber.js";
 import { ClassValue } from "clsx";
 
 import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
 
+import BorrowLimitTitle from "@/components/dashboard/obligation/BorrowLimitTitle";
+import LiquidationThresholdTitle from "@/components/dashboard/obligation/LiquidationThresholdTitle";
 import {
   getPassedBorrowLimit,
   getPassedLiquidationThreshold,
-} from "@/components/dashboard/UtilizationBar";
+} from "@/components/dashboard/obligation/UtilizationBar";
+import WeightedBorrowTitle from "@/components/dashboard/obligation/WeightedBorrowTitle";
 import Collapsible from "@/components/shared/Collapsible";
-import LabelWithTooltip from "@/components/shared/LabelWithTooltip";
 import { TBody, TLabelSans } from "@/components/shared/Typography";
 import { Separator } from "@/components/ui/separator";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { formatLtv, formatPrice, formatToken, formatUsd } from "@/lib/format";
-import {
-  BORROW_LIMIT_TOOLTIP,
-  LIQUIDATION_THRESHOLD_TOOLTIP,
-  WEIGHTED_BORROW_TOOLTIP,
-} from "@/lib/tooltips";
 import { cn, sortInReserveOrder } from "@/lib/utils";
 
-interface BreakdownSectionTitle extends PropsWithChildren {
-  barSegmentClassName: ClassValue;
-  tooltip: ReactNode;
-}
-
-function BreakdownSectionTitle({
-  barSegmentClassName,
-  tooltip,
-  children,
-}: BreakdownSectionTitle) {
-  return (
-    <div className="flex flex-row items-center gap-2">
-      <div className={cn("h-2.5 w-2.5", barSegmentClassName)} />
-      <LabelWithTooltip tooltip={tooltip}>{children}</LabelWithTooltip>
-    </div>
-  );
-}
 interface BreakdownColumn {
   title: string;
   data?: string[];
@@ -162,17 +140,7 @@ export default function ObligationBreakdown({
         )}
       >
         <div className="flex w-full flex-col gap-2">
-          <BreakdownSectionTitle
-            barSegmentClassName={
-              passedBorrowLimit || passedLiquidationThreshold
-                ? "bg-destructive"
-                : "bg-foreground"
-            }
-            tooltip={WEIGHTED_BORROW_TOOLTIP}
-          >
-            Weighted borrow
-          </BreakdownSectionTitle>
-
+          <WeightedBorrowTitle />
           <BreakdownTable
             rowCount={sortedBorrows.length}
             columns={[
@@ -228,13 +196,7 @@ export default function ObligationBreakdown({
         </div>
 
         <div className="flex w-full flex-col gap-2">
-          <BreakdownSectionTitle
-            barSegmentClassName="bg-primary"
-            tooltip={BORROW_LIMIT_TOOLTIP}
-          >
-            Borrow limit
-          </BreakdownSectionTitle>
-
+          <BorrowLimitTitle />
           <BreakdownTable
             rowCount={sortedDeposits.length}
             columns={[
@@ -286,13 +248,7 @@ export default function ObligationBreakdown({
         </div>
 
         <div className="flex w-full flex-col gap-2">
-          <BreakdownSectionTitle
-            barSegmentClassName="bg-secondary"
-            tooltip={LIQUIDATION_THRESHOLD_TOOLTIP}
-          >
-            Liquidation threshold
-          </BreakdownSectionTitle>
-
+          <LiquidationThresholdTitle />
           <BreakdownTable
             rowCount={sortedDeposits.length}
             columns={[

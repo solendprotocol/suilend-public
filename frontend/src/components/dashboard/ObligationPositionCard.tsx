@@ -4,9 +4,9 @@ import { useLocalStorage } from "usehooks-ts";
 import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
 
 import Card from "@/components/dashboard/Card";
-import ObligationBreakdown from "@/components/dashboard/ObligationBreakdown";
+import ObligationBreakdown from "@/components/dashboard/obligation/ObligationBreakdown";
+import UtilizationBar from "@/components/dashboard/obligation/UtilizationBar";
 import ObligationSwitcherPopover from "@/components/dashboard/ObligationSwitcherPopover";
-import UtilizationBar from "@/components/dashboard/UtilizationBar";
 import LabelWithTooltip from "@/components/shared/LabelWithTooltip";
 import LabelWithValue from "@/components/shared/LabelWithValue";
 import { TBody, TLabel, TLabelSans } from "@/components/shared/Typography";
@@ -123,9 +123,7 @@ function ObligationCardContent() {
         </div>
       </div>
 
-      {!obligation.totalSupplyUsd.eq(0) && (
-        <UtilizationBar onClick={() => setIsBreakdownOpen(!isBreakdownOpen)} />
-      )}
+      <UtilizationBar onClick={() => setIsBreakdownOpen(!isBreakdownOpen)} />
 
       <div className="flex flex-row items-center justify-between gap-2">
         <LabelWithTooltip tooltip={LIQUIDATION_THRESHOLD_TOOLTIP}>

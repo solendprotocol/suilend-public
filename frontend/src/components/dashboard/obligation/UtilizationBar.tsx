@@ -5,10 +5,9 @@ import BigNumber from "bignumber.js";
 import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
 
 import Tooltip from "@/components/shared/Tooltip";
+import { TBody } from "@/components/shared/Typography";
 import { useAppContext } from "@/contexts/AppContext";
 import { cn } from "@/lib/utils";
-
-const BAR_WIDTH_PERCENT = 1.5;
 
 export const getPassedBorrowLimit = (obligation: ParsedObligation) => {
   const weightedBorrowUsd = obligation.maxPriceTotalWeightedBorrowUsd;
@@ -24,21 +23,35 @@ export const getPassedLiquidationThreshold = (obligation: ParsedObligation) => {
   return weightedBorrowUsd.gte(liquidationThreshold);
 };
 
-interface SectionProps {
+interface SegmentProps {
   className?: string;
-  widthPercent?: number;
-  tooltip?: string;
+  widthPercent: number;
 }
 
-function Section({ className, widthPercent, tooltip }: SectionProps) {
+function Segment({ className, widthPercent }: SegmentProps) {
   if (widthPercent === 0) return null;
   return (
-    <Tooltip title={tooltip}>
-      <div
-        className={cn("h-full bg-muted/20", className)}
-        style={{ width: `${widthPercent ?? BAR_WIDTH_PERCENT}%` }}
-      />
-    </Tooltip>
+    <div
+      className={cn("relative z-[1] h-full bg-muted/20", className)}
+      style={{ width: `${widthPercent}%` }}
+    />
+  );
+}
+
+interface ThresholdProps {
+  className?: string;
+  leftPercent: number;
+}
+
+function Threshold({ className, leftPercent }: ThresholdProps) {
+  return (
+    <div
+      className={cn(
+        "absolute bottom-0 top-0 z-[2] w-1 -translate-x-2/4",
+        className,
+      )}
+      style={{ left: `${leftPercent}%` }}
+    />
   );
 }
 
@@ -67,50 +80,38 @@ export default function UtilizationBar({
   const passedLiquidationThreshold =
     weightedBorrowUsd.gte(liquidationThreshold);
 
-  const getBars = () => {
+  const segments = (() => {
     if (!passedBorrowLimit) {
-      const barPercent = 100 - BAR_WIDTH_PERCENT * 2;
-
       return [
         {
-          widthPercent: weightedBorrowUsd
-            .div(supply)
-            .times(barPercent)
-            .toNumber(),
+          widthPercent: weightedBorrowUsd.div(supply).times(100).toNumber(),
           className: "bg-foreground shadow-0foreground",
         },
         {
           widthPercent: new BigNumber(borrowLimitUsd.minus(weightedBorrowUsd))
             .div(supply)
-            .times(barPercent)
+            .times(100)
             .toNumber(),
         },
-        { className: "bg-primary shadow-0primary" },
         {
           widthPercent: new BigNumber(
             liquidationThreshold.minus(borrowLimitUsd),
           )
             .div(supply)
-            .times(barPercent)
+            .times(100)
             .toNumber(),
         },
-        { className: "bg-secondary shadow-0secondary" },
         {
           widthPercent: new BigNumber(supply.minus(liquidationThreshold))
             .div(supply)
-            .times(barPercent)
+            .times(100)
             .toNumber(),
         },
       ];
     } else if (!passedLiquidationThreshold) {
-      const barPercent = 100 - BAR_WIDTH_PERCENT * 1;
-
       return [
         {
-          widthPercent: weightedBorrowUsd
-            .div(supply)
-            .times(barPercent)
-            .toNumber(),
+          widthPercent: weightedBorrowUsd.div(supply).times(100).toNumber(),
           className: "bg-destructive shadow-0destructive",
         },
         {
@@ -118,37 +119,42 @@ export default function UtilizationBar({
             liquidationThreshold.minus(weightedBorrowUsd),
           )
             .div(supply)
-            .times(barPercent)
+            .times(100)
             .toNumber(),
         },
-        { className: "bg-secondary shadow-0secondary" },
         {
           widthPercent: new BigNumber(supply.minus(liquidationThreshold))
             .div(supply)
-            .times(barPercent)
+            .times(100)
             .toNumber(),
         },
       ];
     } else {
-      const barPercent = 100 - BAR_WIDTH_PERCENT * 0;
-
       return [
         {
-          widthPercent: liquidationThreshold
-            .div(supply)
-            .times(barPercent)
-            .toNumber(),
+          widthPercent: weightedBorrowUsd.div(supply).times(100).toNumber(),
           className: "bg-destructive shadow-0destructive",
         },
         {
-          widthPercent: new BigNumber(supply.minus(liquidationThreshold))
+          widthPercent: new BigNumber(supply.minus(weightedBorrowUsd))
             .div(supply)
-            .times(barPercent)
+            .times(100)
             .toNumber(),
         },
       ];
     }
-  };
+  })();
+
+  const thresholds = [
+    {
+      leftPercent: borrowLimitUsd.div(supply).times(100).toNumber(),
+      className: "bg-primary shadow-0primary",
+    },
+    {
+      leftPercent: liquidationThreshold.div(supply).times(100).toNumber(),
+      className: "bg-secondary shadow-0secondary",
+    },
+  ];
 
   // const weightedBorrowUtilization = obligation.minPriceBorrowLimit.isZero()
   //   ? new BigNumber("0")
@@ -184,17 +190,35 @@ export default function UtilizationBar({
   //   "This portion represents the actual value of your borrows. However, certain assets have a borrow weight that changes their value during liquidation or borrow limit calculations.";
 
   return (
-    <div
-      className="flex h-2.5 w-full cursor-pointer flex-row"
-      onClick={onClick}
+    <Tooltip
+      contentProps={{
+        className: "px-4 py-4 flex-col flex gap-4",
+      }}
+      content={
+        <>
+          <TBody>Hi</TBody>
+        </>
+      }
     >
-      {getBars().map((bar, index) => (
-        <Section
-          key={index}
-          className={bar.className}
-          widthPercent={bar.widthPercent}
-        />
-      ))}
-    </div>
+      <div
+        className="relative flex h-2.5 w-full cursor-pointer flex-row"
+        onClick={onClick}
+      >
+        {segments.map((segment, index) => (
+          <Segment
+            key={index}
+            className={segment.className}
+            widthPercent={segment.widthPercent}
+          />
+        ))}
+        {thresholds.map((threshold, index) => (
+          <Threshold
+            key={index}
+            className={threshold.className}
+            leftPercent={threshold.leftPercent}
+          />
+        ))}
+      </div>
+    </Tooltip>
   );
 }
