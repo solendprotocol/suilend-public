@@ -3,9 +3,9 @@ import { useLocalStorage } from "usehooks-ts";
 
 import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
 
-import AccountBreakdown from "@/components/dashboard/account/AccountBreakdown";
-import AccountSubaccountPopover from "@/components/dashboard/account/AccountSubaccountPopover";
-import HealthBar from "@/components/dashboard/account/HealthBar";
+import ObligationBreakdown from "@/components/dashboard/account/ObligationBreakdown";
+import ObligationSwitcherPopover from "@/components/dashboard/account/ObligationSwitcherPopover";
+import UtilizationBar from "@/components/dashboard/account/UtilizationBar";
 import Card from "@/components/dashboard/Card";
 import LabelWithTooltip from "@/components/shared/LabelWithTooltip";
 import LabelWithValue from "@/components/shared/LabelWithValue";
@@ -25,7 +25,7 @@ import {
   WEIGHTED_BORROW_TOOLTIP,
 } from "@/lib/tooltips";
 
-function AccountCardContent() {
+function ObligationPositionCardContent() {
   const appContext = useAppContext();
   const data = appContext.data as AppData;
   const obligation = appContext.obligation as ParsedObligation;
@@ -123,7 +123,7 @@ function AccountCardContent() {
         </div>
       </div>
 
-      <HealthBar onClick={() => setIsBreakdownOpen(!isBreakdownOpen)} />
+      <UtilizationBar onClick={() => setIsBreakdownOpen(!isBreakdownOpen)} />
 
       <div className="flex flex-row items-center justify-between gap-2">
         <LabelWithTooltip tooltip={LIQUIDATION_THRESHOLD_TOOLTIP}>
@@ -134,7 +134,7 @@ function AccountCardContent() {
         </TBody>
       </div>
 
-      <AccountBreakdown
+      <ObligationBreakdown
         isBreakdownOpen={isBreakdownOpen}
         setIsBreakdownOpen={setIsBreakdownOpen}
       />
@@ -142,7 +142,7 @@ function AccountCardContent() {
   );
 }
 
-export default function AccountCard() {
+export default function ObligationPositionCard() {
   const { address } = useWalletContext();
   const { obligation, ...restAppContext } = useAppContext();
   const data = restAppContext.data as AppData;
@@ -153,7 +153,7 @@ export default function AccountCard() {
       title="Account"
       headerEndContent={
         data.obligations &&
-        data.obligations.length > 1 && <AccountSubaccountPopover />
+        data.obligations.length > 1 && <ObligationSwitcherPopover />
       }
       noHeaderSeparator
     >
@@ -165,7 +165,7 @@ export default function AccountCard() {
             No active positions. Get started by depositing assets.
           </TLabelSans>
         ) : (
-          <AccountCardContent />
+          <ObligationPositionCardContent />
         )}
       </CardContent>
     </Card>

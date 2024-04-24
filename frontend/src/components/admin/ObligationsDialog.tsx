@@ -20,7 +20,7 @@ import { SuiPriceServiceConnection } from "@pyth-sdk";
 import Dialog from "@/components/admin/Dialog";
 import Input from "@/components/admin/Input";
 import LiquidateDialog from "@/components/admin/LiquidateDialog";
-import HealthBar from "@/components/dashboard/account/HealthBar";
+import UtilizationBar from "@/components/dashboard/account/UtilizationBar";
 import DataTable, { tableHeader } from "@/components/dashboard/DataTable";
 import Button from "@/components/shared/Button";
 import Grid from "@/components/shared/Grid";
@@ -235,10 +235,10 @@ const COLUMNS: ColumnDef<ParsedObligation>[] = [
     },
   },
   {
-    accessorKey: "healthBar",
+    accessorKey: "UtilizationBar",
     header: ({ column }) => tableHeader(column, "Utilization"),
     cell: ({ row }) => {
-      return <HealthBar obligation={row.original} />;
+      return <UtilizationBar obligation={row.original} />;
     },
   },
   {

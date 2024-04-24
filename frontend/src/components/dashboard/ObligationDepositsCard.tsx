@@ -1,16 +1,16 @@
-import AssetTable from "@/components/dashboard/AssetTable";
+import AccountAssetTable from "@/components/dashboard/AccountAssetTable";
 import Card from "@/components/dashboard/Card";
 import { CardContent } from "@/components/ui/card";
 import { useAppContext } from "@/contexts/AppContext";
 
-export default function DepositsCard() {
+export default function ObligationDepositsCard() {
   const { obligation } = useAppContext();
 
   if (!obligation) return null;
   return (
     <Card id="assets-deposited" title="Assets deposited" noHeaderSeparator>
       <CardContent className="p-0">
-        <AssetTable
+        <AccountAssetTable
           assets={obligation.deposits.map((d) => ({
             coinType: d.coinType,
             mintDecimals: d.reserve.mintDecimals,

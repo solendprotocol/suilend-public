@@ -55,12 +55,15 @@ function Threshold({ className, leftPercent }: ThresholdProps) {
   );
 }
 
-interface HealthBarProps {
+interface UtilizationBarProps {
   obligation?: ParsedObligation | null;
   onClick?: () => void;
 }
 
-export default function HealthBar({ obligation, onClick }: HealthBarProps) {
+export default function UtilizationBar({
+  obligation,
+  onClick,
+}: UtilizationBarProps) {
   const appContext = useAppContext();
 
   if (!obligation) obligation = appContext.obligation;

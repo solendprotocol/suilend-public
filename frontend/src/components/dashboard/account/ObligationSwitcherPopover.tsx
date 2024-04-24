@@ -10,7 +10,7 @@ import { AppData, useAppContext } from "@/contexts/AppContext";
 import { formatUsd } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-export default function AccountSubaccountPopover() {
+export default function ObligationSwitcherPopover() {
   const { obligation, setObligationId, ...restAppContext } = useAppContext();
   const data = restAppContext.data as AppData;
 

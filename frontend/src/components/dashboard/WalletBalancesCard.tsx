@@ -3,7 +3,7 @@ import { Wallet } from "lucide-react";
 
 import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 
-import AssetTable from "@/components/dashboard/AssetTable";
+import AccountAssetTable from "@/components/dashboard/AccountAssetTable";
 import Card from "@/components/dashboard/Card";
 import { CardContent } from "@/components/ui/card";
 import { AppData, useAppContext } from "@/contexts/AppContext";
@@ -23,7 +23,7 @@ export default function WalletBalancesCard() {
       noHeaderSeparator
     >
       <CardContent className="p-0">
-        <AssetTable
+        <AccountAssetTable
           amountTitle="Balance"
           assets={Object.values(data.coinBalancesMap)
             .filter((cb) => !cb.balance.eq(0))
