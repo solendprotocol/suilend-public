@@ -105,6 +105,18 @@ export default function BorrowTabContent({ reserve }: BorrowTabContentProps) {
   };
 
   // Submit
+  const depositPosition = obligation?.deposits?.find(
+    (d) => d.coinType === reserve.coinType,
+  );
+  const depositedAmount =
+    depositPosition?.depositedAmount ?? new BigNumber("0");
+
+  const getSubmitButtonNoValueState = () => {
+    if (depositedAmount.gt(0.1))
+      return { isDisabled: true, title: "Cannot borrow supplied asset" };
+    return undefined;
+  };
+
   const getSubmitButtonState = (value: string) => {
     for (const calc of maxCalculations) {
       if (new BigNumber(value).gt(calc.value))
@@ -122,6 +134,7 @@ export default function BorrowTabContent({ reserve }: BorrowTabContentProps) {
       reserve={reserve}
       getNewCalculations={getNewCalculations}
       getMaxValue={getMaxValue}
+      getSubmitButtonNoValueState={getSubmitButtonNoValueState}
       getSubmitButtonState={getSubmitButtonState}
       submit={borrow}
     />
