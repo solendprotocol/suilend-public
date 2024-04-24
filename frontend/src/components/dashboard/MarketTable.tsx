@@ -34,12 +34,12 @@ export interface ReservesRowData {
   iconUrl?: string;
   openLtvPct: number;
   borrowWeight: number;
-  totalDeposits: BigNumber;
-  totalDepositsUsd: BigNumber;
-  totalDepositsTooltip?: string;
-  totalBorrows: BigNumber;
-  totalBorrowsUsd: BigNumber;
-  totalBorrowsTooltip?: string;
+  depositedAmount: BigNumber;
+  depositedAmountUsd: BigNumber;
+  depositedAmountTooltip?: string;
+  borrowedAmount: BigNumber;
+  borrowedAmountUsd: BigNumber;
+  borrowedAmountTooltip?: string;
   depositAprPercent: BigNumber;
   totalDepositAprPercent: BigNumber;
   borrowAprPercent: BigNumber;
@@ -68,10 +68,10 @@ const columns: ColumnDef<ReservesRowData>[] = [
     cell: ({ row }) => <OpenLtvBwCell {...row.original} />,
   },
   {
-    accessorKey: "totalDeposits",
-    sortingFn: decimalSortingFn("totalDeposits"),
+    accessorKey: "depositedAmount",
+    sortingFn: decimalSortingFn("depositedAmount"),
     header: ({ column }) =>
-      tableHeader(column, "Total deposits", { isNumerical: true }),
+      tableHeader(column, "Deposits", { isNumerical: true }),
     cell: ({ row }) => <TotalDepositsCell {...row.original} />,
   },
   {
@@ -86,10 +86,10 @@ const columns: ColumnDef<ReservesRowData>[] = [
     ),
   },
   {
-    accessorKey: "totalBorrows",
-    sortingFn: decimalSortingFn("totalBorrows"),
+    accessorKey: "borrowedAmount",
+    sortingFn: decimalSortingFn("borrowedAmount"),
     header: ({ column }) =>
-      tableHeader(column, "Total borrows", { isNumerical: true }),
+      tableHeader(column, "Borrows", { isNumerical: true }),
     cell: ({ row }) => <TotalBorrowsCell {...row.original} />,
   },
   {
@@ -128,10 +128,10 @@ export default function MarketTable() {
     )
       .div(100 * 100)
       .toNumber();
-    const totalDeposits = reserve.totalDeposits;
-    const totalDepositsUsd = reserve.totalDeposits.times(reserve.maxPrice);
-    const totalBorrows = reserve.borrowedAmount;
-    const totalBorrowsUsd = reserve.borrowedAmount.times(reserve.maxPrice);
+    const depositedAmount = reserve.depositedAmount;
+    const depositedAmountUsd = reserve.depositedAmountUsd;
+    const borrowedAmount = reserve.borrowedAmount;
+    const borrowedAmountUsd = reserve.borrowedAmountUsd;
     const depositAprPercent = reserve.depositAprPercent;
     const totalDepositAprPercent = getTotalAprPercent(
       reserve.depositAprPercent,
@@ -152,38 +152,38 @@ export default function MarketTable() {
 
     const almostExceedsDepositLimit = getAlmostExceedsLimit(
       reserve.config.depositLimit,
-      totalDeposits,
+      depositedAmount,
     );
     const almostExceedsDepositLimitUsd = getAlmostExceedsLimit(
       reserve.config.depositLimitUsd,
-      totalDepositsUsd,
+      depositedAmountUsd,
     );
 
     const exceedsDepositLimit = getExceedsLimit(
       reserve.config.depositLimit,
-      totalDeposits,
+      depositedAmount,
     );
     const exceedsDepositLimitUsd = getExceedsLimit(
       reserve.config.depositLimitUsd,
-      totalDepositsUsd,
+      depositedAmountUsd,
     );
 
     const almostExceedsBorrowLimit = getAlmostExceedsLimit(
       reserve.config.borrowLimit,
-      totalBorrows,
+      borrowedAmount,
     );
     const almostExceedsBorrowLimitUsd = getAlmostExceedsLimit(
       reserve.config.borrowLimitUsd,
-      totalBorrowsUsd,
+      borrowedAmountUsd,
     );
 
     const exceedsBorrowLimit = getExceedsLimit(
       reserve.config.borrowLimit,
-      totalBorrows,
+      borrowedAmount,
     );
     const exceedsBorrowLimitUsd = getExceedsLimit(
       reserve.config.borrowLimitUsd,
-      totalBorrowsUsd,
+      borrowedAmountUsd,
     );
 
     const getAlmostExceedsLimitTooltip = (
@@ -200,37 +200,37 @@ export default function MarketTable() {
     const getExceedsLimitUsdTooltip = (side: Side) =>
       `Asset USD ${side} limit reached.`;
 
-    const totalDepositsTooltip = exceedsDepositLimit
+    const depositedAmountTooltip = exceedsDepositLimit
       ? getExceedsLimitTooltip(Side.DEPOSIT)
       : exceedsDepositLimitUsd
         ? getExceedsLimitUsdTooltip(Side.DEPOSIT)
         : almostExceedsDepositLimit
           ? getAlmostExceedsLimitTooltip(
               Side.DEPOSIT,
-              reserve.config.depositLimit.minus(totalDeposits),
+              reserve.config.depositLimit.minus(depositedAmount),
               symbol,
             )
           : almostExceedsDepositLimitUsd
             ? getAlmostExceedsLimitUsd(
                 Side.DEPOSIT,
-                reserve.config.depositLimitUsd.minus(totalDepositsUsd),
+                reserve.config.depositLimitUsd.minus(depositedAmountUsd),
               )
             : undefined;
 
-    const totalBorrowsTooltip = exceedsBorrowLimit
+    const borrowedAmountTooltip = exceedsBorrowLimit
       ? getExceedsLimitTooltip(Side.DEPOSIT)
       : exceedsBorrowLimitUsd
         ? getExceedsLimitUsdTooltip(Side.DEPOSIT)
         : almostExceedsBorrowLimit
           ? getAlmostExceedsLimitTooltip(
               Side.DEPOSIT,
-              reserve.config.borrowLimit.minus(totalBorrows),
+              reserve.config.borrowLimit.minus(borrowedAmount),
               symbol,
             )
           : almostExceedsBorrowLimitUsd
             ? getAlmostExceedsLimitUsd(
                 Side.DEPOSIT,
-                reserve.config.borrowLimitUsd.minus(totalBorrowsUsd),
+                reserve.config.borrowLimitUsd.minus(borrowedAmountUsd),
               )
             : undefined;
 
@@ -241,12 +241,12 @@ export default function MarketTable() {
       iconUrl,
       openLtvPct,
       borrowWeight,
-      totalDeposits,
-      totalDepositsUsd,
-      totalDepositsTooltip,
-      totalBorrows,
-      totalBorrowsUsd,
-      totalBorrowsTooltip,
+      depositedAmount,
+      depositedAmountUsd,
+      depositedAmountTooltip,
+      borrowedAmount,
+      borrowedAmountUsd,
+      borrowedAmountTooltip,
       depositAprPercent,
       totalDepositAprPercent,
       borrowAprPercent,

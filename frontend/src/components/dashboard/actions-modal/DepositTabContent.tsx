@@ -26,10 +26,10 @@ export default function DepositTabContent({ reserve }: DepositTabContentProps) {
     .times(10 * 60 * 1000);
 
   const safeDepositLimit = reserve.config.depositLimit.minus(
-    reserve.totalDeposits.times(tenMinsDepositAprPercent.div(100)),
+    reserve.depositedAmount.times(tenMinsDepositAprPercent.div(100)),
   );
   const safeDepositLimitUsd = reserve.config.depositLimitUsd.minus(
-    reserve.totalDeposits
+    reserve.depositedAmount
       .times(reserve.maxPrice)
       .times(tenMinsDepositAprPercent.div(100)),
   );
@@ -43,14 +43,14 @@ export default function DepositTabContent({ reserve }: DepositTabContentProps) {
     {
       reason: "Exceeds reserve deposit limit",
       isDisabled: true,
-      value: BigNumber.max(safeDepositLimit.minus(reserve.totalDeposits), 0),
+      value: BigNumber.max(safeDepositLimit.minus(reserve.depositedAmount), 0),
     },
     {
       reason: "Exceeds reserve USD deposit limit",
       isDisabled: true,
       value: BigNumber.max(
         safeDepositLimitUsd
-          .minus(reserve.totalDeposits.times(reserve.maxPrice))
+          .minus(reserve.depositedAmount.times(reserve.maxPrice))
           .div(reserve.maxPrice),
         0,
       ),
@@ -104,13 +104,13 @@ export default function DepositTabContent({ reserve }: DepositTabContentProps) {
 
   // Submit
   const getSubmitButtonNoValueState = () => {
-    if (reserve.totalDeposits.gte(reserve.config.depositLimit))
+    if (reserve.depositedAmount.gte(reserve.config.depositLimit))
       return {
         isDisabled: true,
         title: "Reserve deposit limit reached",
       };
     if (
-      new BigNumber(reserve.totalDeposits.times(reserve.maxPrice)).gte(
+      new BigNumber(reserve.depositedAmountUsd).gte(
         reserve.config.depositLimitUsd,
       )
     )

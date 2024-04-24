@@ -113,7 +113,7 @@ export default function AprWithRewardsBreakdown({
         ? calculateDepositAprPercent(modifiedReserve)
         : calculateBorrowAprPercent(modifiedReserve);
     const poolTotal =
-      side === Side.DEPOSIT ? reserve.totalDeposits : reserve.borrowedAmount;
+      side === Side.DEPOSIT ? reserve.depositedAmount : reserve.borrowedAmount;
     aprModifier = amountChange.plus(poolTotal).isZero()
       ? new BigNumber(-1)
       : poolTotal.div(amountChange.plus(poolTotal));

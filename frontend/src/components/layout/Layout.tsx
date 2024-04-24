@@ -1,6 +1,5 @@
 import { CSSProperties, PropsWithChildren, useRef, useState } from "react";
 
-import { useFlags } from "launchdarkly-react-client-sdk";
 import { useResizeObserver } from "usehooks-ts";
 
 import AppHeader from "@/components/layout/AppHeader";
@@ -12,7 +11,6 @@ import { useAppContext } from "@/contexts/AppContext";
 
 export default function Layout({ children }: PropsWithChildren) {
   const { suilendClient, data } = useAppContext();
-  const flags = useFlags();
 
   // Banner
   const bannerRef = useRef<HTMLDivElement>(null);

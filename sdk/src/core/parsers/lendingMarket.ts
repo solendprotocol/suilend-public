@@ -44,26 +44,24 @@ export const parseLendingMarket = (
   );
 
   // Custom
-  let totalSupplyUsd = new BigNumber(0);
-  let totalBorrowUsd = new BigNumber(0);
+  let depositedAmountUsd = new BigNumber(0);
+  let borrowedAmountUsd = new BigNumber(0);
   let tvlUsd = new BigNumber(0);
 
-  parsedReserves.forEach((properties) => {
-    totalSupplyUsd = totalSupplyUsd.plus(
-      properties.totalDeposits.times(properties.price),
+  parsedReserves.forEach((parsedReserve) => {
+    depositedAmountUsd = depositedAmountUsd.plus(
+      parsedReserve.depositedAmountUsd,
     );
-    totalBorrowUsd = totalBorrowUsd.plus(
-      properties.borrowedAmount.times(properties.price),
-    );
-    tvlUsd = tvlUsd.plus(properties.availableAmount.times(properties.price));
+    borrowedAmountUsd = borrowedAmountUsd.plus(parsedReserve.borrowedAmountUsd);
+    tvlUsd = tvlUsd.plus(parsedReserve.availableAmountUsd);
   });
 
   return {
     reserves: parsedReserves,
     rateLimiter: parsedRateLimiter,
 
-    totalSupplyUsd,
-    totalBorrowUsd,
+    depositedAmountUsd,
+    borrowedAmountUsd,
     tvlUsd,
   };
 };

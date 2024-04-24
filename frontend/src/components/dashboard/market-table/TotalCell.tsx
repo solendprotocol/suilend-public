@@ -8,13 +8,13 @@ import { cn, hoverUnderlineClassName } from "@/lib/utils";
 
 interface TotalCellProps {
   symbol: ReservesRowData["symbol"];
-  total: ReservesRowData["totalDeposits"] | ReservesRowData["totalBorrows"];
+  total: ReservesRowData["depositedAmount"] | ReservesRowData["borrowedAmount"];
   totalUsd:
-    | ReservesRowData["totalDepositsUsd"]
-    | ReservesRowData["totalBorrowsUsd"];
+    | ReservesRowData["depositedAmountUsd"]
+    | ReservesRowData["borrowedAmountUsd"];
   tooltip?:
-    | ReservesRowData["totalDepositsTooltip"]
-    | ReservesRowData["totalBorrowsTooltip"];
+    | ReservesRowData["depositedAmountTooltip"]
+    | ReservesRowData["borrowedAmountTooltip"];
   reserve: ParsedReserve;
   horizontal?: boolean;
 }
