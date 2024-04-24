@@ -7,13 +7,13 @@ import WormholeConnect, {
 } from "@wormhole-foundation/wormhole-connect";
 
 import styles from "@/components/bridge/WormholeConnectWrapper.module.scss";
-import { RPCS } from "@/lib/constants";
+import { RPCS, Rpc } from "@/lib/constants";
 import track from "@/lib/track";
 
 export default function WormholeConnectWrapper() {
   // RPCs
-  const solanaRpc = `https://solendf-solendf-67c7.rpcpool.com/${process.env.NEXT_PUBLIC_SOL_TRITON_DEV_API_KEY ?? ""}`;
-  const suiRpc = RPCS.find((rpc) => rpc.id === "triton")?.url;
+  const solanaRpc = `https://solendf-solendf-67c7.rpcpool.com/${process.env.NEXT_PUBLIC_SOL_TRITON_ONE_DEV_API_KEY ?? ""}`;
+  const suiRpc = RPCS.find((rpc) => rpc.id === Rpc.TRITON_ONE)?.url;
 
   // Theme
   const customized = dark;
