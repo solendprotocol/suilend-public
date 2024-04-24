@@ -86,7 +86,7 @@ export default function DepositTabContent({ reserve }: DepositTabContentProps) {
         newBorrowUtilization: null,
       };
 
-    const newBorrowLimit = obligation.minPriceBorrowLimit.plus(
+    const newBorrowLimit = obligation.minPriceBorrowLimitUsd.plus(
       valueObj.times(reserve.minPrice).times(reserve.config.openLtvPct / 100),
     );
     const newBorrowUtilization =

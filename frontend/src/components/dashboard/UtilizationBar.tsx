@@ -10,14 +10,14 @@ import { useAppContext } from "@/contexts/AppContext";
 import { cn } from "@/lib/utils";
 
 export const getPassedBorrowLimit = (obligation: ParsedObligation) => {
-  const weightedBorrowUsd = obligation.maxPriceTotalWeightedBorrowUsd;
-  const borrowLimitUsd = obligation.minPriceBorrowLimit;
+  const weightedBorrowUsd = obligation.totalWeightedBorrowUsd;
+  const borrowLimitUsd = obligation.borrowLimitUsd;
 
   return weightedBorrowUsd.gte(borrowLimitUsd);
 };
 
 export const getPassedLiquidationThreshold = (obligation: ParsedObligation) => {
-  const weightedBorrowUsd = obligation.maxPriceTotalWeightedBorrowUsd;
+  const weightedBorrowUsd = obligation.totalWeightedBorrowUsd;
   const liquidationThreshold = obligation.unhealthyBorrowValueUsd;
 
   return weightedBorrowUsd.gte(liquidationThreshold);
@@ -72,8 +72,8 @@ export default function UtilizationBar({
   const supply = obligation.totalSupplyUsd;
   if (supply.eq(0)) return null;
 
-  const weightedBorrowUsd = obligation.maxPriceTotalWeightedBorrowUsd;
-  const borrowLimitUsd = obligation.minPriceBorrowLimit;
+  const weightedBorrowUsd = obligation.totalWeightedBorrowUsd;
+  const borrowLimitUsd = obligation.borrowLimitUsd;
   const liquidationThreshold = obligation.unhealthyBorrowValueUsd;
 
   const passedBorrowLimit = getPassedBorrowLimit(obligation);

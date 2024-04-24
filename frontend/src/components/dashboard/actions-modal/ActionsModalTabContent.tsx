@@ -264,8 +264,8 @@ export default function ActionsModalTabContent({
             label="User borrow limit"
             value={
               newBorrowLimit
-                ? `${formatUsd(obligation?.borrowLimit ?? new BigNumber("0"))} → ${formatUsd(newBorrowLimit)}`
-                : formatUsd(obligation?.borrowLimit ?? new BigNumber("0"))
+                ? `${formatUsd(obligation?.borrowLimitUsd ?? new BigNumber("0"))} → ${formatUsd(newBorrowLimit)}`
+                : formatUsd(obligation?.borrowLimitUsd ?? new BigNumber("0"))
             }
             horizontal
           />

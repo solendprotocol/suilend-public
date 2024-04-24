@@ -118,7 +118,7 @@ function ObligationPositionCardContent() {
             Borrow limit
           </LabelWithTooltip>
           <TBody className="text-right">
-            {formatUsd(obligation.borrowLimit)}
+            {formatUsd(obligation.borrowLimitUsd)}
           </TBody>
         </div>
       </div>

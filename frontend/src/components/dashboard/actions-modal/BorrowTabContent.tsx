@@ -42,10 +42,10 @@ export default function BorrowTabContent({ reserve }: BorrowTabContentProps) {
       value:
         !obligation ||
         obligation.maxPriceTotalWeightedBorrowUsd.gt(
-          obligation.minPriceBorrowLimit,
+          obligation.minPriceBorrowLimitUsd,
         )
           ? new BigNumber(0)
-          : obligation.minPriceBorrowLimit
+          : obligation.minPriceBorrowLimitUsd
               .minus(obligation.maxPriceTotalWeightedBorrowUsd)
               .div(
                 reserve.maxPrice.times(reserve.config.borrowWeightBps / 10000),
@@ -86,14 +86,14 @@ export default function BorrowTabContent({ reserve }: BorrowTabContentProps) {
       };
 
     const newBorrowUtilization =
-      !valueObj.isNaN() && !obligation.minPriceBorrowLimit.isZero()
+      !valueObj.isNaN() && !obligation.minPriceBorrowLimitUsd.isZero()
         ? obligation.maxPriceTotalWeightedBorrowUsd
             .plus(
               valueObj
                 .times(reserve.maxPrice)
                 .times(reserve.config.borrowWeightBps / 10000),
             )
-            .div(obligation.minPriceBorrowLimit)
+            .div(obligation.minPriceBorrowLimitUsd)
         : null;
 
     return {

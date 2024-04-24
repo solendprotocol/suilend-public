@@ -18,8 +18,8 @@ export const parseObligation = (
 ) => {
   let totalSupplyUsd = new BigNumber(0);
   let totalBorrowUsd = new BigNumber(0);
-  let borrowLimit = new BigNumber(0);
-  let minPriceBorrowLimit = new BigNumber(0);
+  let borrowLimitUsd = new BigNumber(0);
+  let minPriceBorrowLimitUsd = new BigNumber(0);
   let unhealthyBorrowValueUsd = new BigNumber(0);
   let totalWeightedBorrowUsd = new BigNumber(0);
   let maxPriceTotalWeightedBorrowUsd = new BigNumber(0);
@@ -48,12 +48,12 @@ export const parseObligation = (
     const depositedAmountUsd = depositedAmount.times(reserve.price);
     totalSupplyUsd = totalSupplyUsd.plus(depositedAmountUsd);
 
-    minPriceBorrowLimit = minPriceBorrowLimit.plus(
+    minPriceBorrowLimitUsd = minPriceBorrowLimitUsd.plus(
       depositedAmount
         .times(reserve.minPrice)
         .times(reserve.config.openLtvPct / 100),
     );
-    borrowLimit = borrowLimit.plus(
+    borrowLimitUsd = borrowLimitUsd.plus(
       depositedAmountUsd.times(reserve.config.openLtvPct / 100),
     );
     unhealthyBorrowValueUsd = unhealthyBorrowValueUsd.plus(
@@ -133,9 +133,9 @@ export const parseObligation = (
   const netValueUsd = totalSupplyUsd.minus(totalBorrowUsd);
 
   const weightedConservativeBorrowUtilizationPercent =
-    minPriceBorrowLimit.isZero()
+    minPriceBorrowLimitUsd.isZero()
       ? new BigNumber(0)
-      : maxPriceTotalWeightedBorrowUsd.div(minPriceBorrowLimit).times(100);
+      : maxPriceTotalWeightedBorrowUsd.div(minPriceBorrowLimitUsd).times(100);
 
   return {
     id: obligation.id,
@@ -143,14 +143,24 @@ export const parseObligation = (
     totalBorrowUsd,
     totalWeightedBorrowUsd,
     netValueUsd,
-    borrowLimit,
+    borrowLimitUsd,
     unhealthyBorrowValueUsd,
     positionCount,
     deposits,
     borrows,
-    minPriceBorrowLimit,
+    minPriceBorrowLimitUsd,
     maxPriceTotalWeightedBorrowUsd,
     weightedConservativeBorrowUtilizationPercent,
     original: obligation,
+
+    // Deprecated
+    /**
+     * @deprecated since version 1.0.3. Use `borrowLimitUsd` instead.
+     */
+    borrowLimit: borrowLimitUsd,
+    /**
+     * @deprecated since version 1.0.3. Use `minPriceBorrowLimitUsd` instead.
+     */
+    minPriceBorrowLimit: minPriceBorrowLimitUsd,
   };
 };
