@@ -8,7 +8,13 @@ import {
 import { useAppContext } from "@/contexts/AppContext";
 import { WEIGHTED_BORROW_TOOLTIP } from "@/lib/tooltips";
 
-export default function WeightedBorrowTitle() {
+interface WeightedBorrowTitleProps {
+  noTooltip?: boolean;
+}
+
+export default function WeightedBorrowTitle({
+  noTooltip,
+}: WeightedBorrowTitleProps) {
   const appContext = useAppContext();
   const obligation = appContext.obligation as ParsedObligation;
 
@@ -22,7 +28,7 @@ export default function WeightedBorrowTitle() {
           ? "bg-destructive"
           : "bg-foreground"
       }
-      tooltip={WEIGHTED_BORROW_TOOLTIP}
+      tooltip={!noTooltip ? WEIGHTED_BORROW_TOOLTIP : undefined}
     >
       Weighted borrow
     </SectionTitle>

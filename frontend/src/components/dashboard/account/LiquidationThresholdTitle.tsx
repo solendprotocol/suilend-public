@@ -1,11 +1,17 @@
 import SectionTitle from "@/components/dashboard/account/SectionTitle";
 import { LIQUIDATION_THRESHOLD_TOOLTIP } from "@/lib/tooltips";
 
-export default function LiquidationThresholdTitle() {
+interface LiquidationThresholdTitleProps {
+  noTooltip?: boolean;
+}
+
+export default function LiquidationThresholdTitle({
+  noTooltip,
+}: LiquidationThresholdTitleProps) {
   return (
     <SectionTitle
       barSegmentClassName="bg-secondary"
-      tooltip={LIQUIDATION_THRESHOLD_TOOLTIP}
+      tooltip={!noTooltip ? LIQUIDATION_THRESHOLD_TOOLTIP : undefined}
     >
       Liquidation threshold
     </SectionTitle>

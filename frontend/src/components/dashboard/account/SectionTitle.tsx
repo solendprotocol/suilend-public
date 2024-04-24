@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 
 interface SectionTitle extends PropsWithChildren {
   barSegmentClassName: ClassValue;
-  tooltip: ReactNode;
+  tooltip?: ReactNode;
 }
 
 export default function SectionTitle({

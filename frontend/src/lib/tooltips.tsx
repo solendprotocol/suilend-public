@@ -15,7 +15,7 @@ export const WEIGHTED_BORROW_TOOLTIP = (
     <span className="font-mono text-muted-foreground">
       Formula:
       <br />
-      <span className="uppercase">Position * Price * Borrow weight</span>
+      <span className="uppercase">Position × Price × Borrow weight</span>
     </span>
   </>
 );
@@ -29,22 +29,22 @@ export const BORROW_LIMIT_TOOLTIP = (
     <span className="font-mono text-muted-foreground">
       Formula:
       <br />
-      <span className="uppercase">Position * Price * Open LTV</span>
+      <span className="uppercase">Position × Price × Open LTV</span>
     </span>
   </>
 );
 
 export const LIQUIDATION_THRESHOLD_TOOLTIP = (
   <>
-    If your weighted borrow exceeds the liquidation threshold your position will
+    If your weighted borrow exceeds the liquidation threshold your account will
     be at risk of liquidation. Deposit more assets to increase your liquidation
-    threashold.
+    threshold.
     <br />
     <br />
     <span className="font-mono text-muted-foreground">
       Formula:
       <br />
-      <span className="uppercase">Position * Price * Close LTV</span>
+      <span className="uppercase">Position × Price × Close LTV</span>
     </span>
   </>
 );

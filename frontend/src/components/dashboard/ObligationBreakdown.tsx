@@ -66,7 +66,6 @@ function BreakdownColumn({
 interface BreakdownTableProps {
   rowCount: number;
   columns: BreakdownColumn[];
-  totalLabel: string;
   totalValue: string;
   totalValueClassName?: ClassValue;
 }
@@ -74,7 +73,6 @@ interface BreakdownTableProps {
 function BreakdownTable({
   rowCount,
   columns,
-  totalLabel,
   totalValue,
   totalValueClassName,
 }: BreakdownTableProps) {
@@ -92,8 +90,7 @@ function BreakdownTable({
         ))}
       </div>
       <Separator className="w-full" />
-      <div className="flex w-full flex-row items-center justify-between">
-        <TLabelSans>{totalLabel}</TLabelSans>
+      <div className="flex w-full flex-row justify-end">
         <TBody className={cn("text-xs", totalValueClassName)}>
           {totalValue}
         </TBody>
@@ -175,7 +172,6 @@ export default function ObligationBreakdown({
                 ),
               },
             ]}
-            totalLabel="Total weighted borrow"
             totalValue={formatUsd(
               sortedBorrows.reduce(
                 (acc, b) =>
@@ -231,7 +227,6 @@ export default function ObligationBreakdown({
                 ),
               },
             ]}
-            totalLabel="Total borrow limit"
             totalValue={formatUsd(
               sortedDeposits.reduce(
                 (acc, d) =>
@@ -283,7 +278,6 @@ export default function ObligationBreakdown({
                 ),
               },
             ]}
-            totalLabel="Total liquidation threshold"
             totalValue={formatUsd(
               sortedDeposits.reduce(
                 (acc, d) =>
