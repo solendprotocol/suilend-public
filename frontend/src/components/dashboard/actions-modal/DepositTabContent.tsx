@@ -76,26 +76,26 @@ export default function DepositTabContent({ reserve }: DepositTabContentProps) {
   const getNewCalculations = (value: string) => {
     if (!value.length)
       return {
-        newBorrowLimit: null,
+        newBorrowLimitUsd: null,
         newBorrowUtilization: null,
       };
     const valueObj = new BigNumber(value);
     if (!obligation || valueObj.isNaN())
       return {
-        newBorrowLimit: null,
+        newBorrowLimitUsd: null,
         newBorrowUtilization: null,
       };
 
-    const newBorrowLimit = obligation.minPriceBorrowLimitUsd.plus(
+    const newBorrowLimitUsd = obligation.minPriceBorrowLimitUsd.plus(
       valueObj.times(reserve.minPrice).times(reserve.config.openLtvPct / 100),
     );
     const newBorrowUtilization =
-      newBorrowLimit && !newBorrowLimit.isZero()
-        ? obligation.totalWeightedBorrowUsd.div(newBorrowLimit)
+      newBorrowLimitUsd && !newBorrowLimitUsd.isZero()
+        ? obligation.totalWeightedBorrowUsd.div(newBorrowLimitUsd)
         : null;
 
     return {
-      newBorrowLimit,
+      newBorrowLimitUsd,
       newBorrowUtilization: newBorrowUtilization
         ? BigNumber.max(BigNumber.min(1, newBorrowUtilization), 0)
         : null,

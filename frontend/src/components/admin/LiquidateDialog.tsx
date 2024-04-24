@@ -257,8 +257,8 @@ export default function LiquidateDialog({
             isUsd={true}
           />
           <LabelWithValue
-            label="Borrow Limit"
-            value={parsedObligation.borrowLimitUsd}
+            label="(Min Price) Borrow Limit"
+            value={parsedObligation.minPriceBorrowLimitUsd}
             isUsd={true}
           />
           <LabelWithValue

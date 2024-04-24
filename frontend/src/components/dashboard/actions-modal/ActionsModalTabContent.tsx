@@ -48,7 +48,7 @@ interface ActionsModalTabContentProps {
   getSubmitButtonState: (value: string) => SubmitButtonState | undefined;
   submit: ActionSignature;
   getNewCalculations: (value: string) => {
-    newBorrowLimit: BigNumber | null;
+    newBorrowLimitUsd: BigNumber | null;
     newBorrowUtilization: BigNumber | null;
   };
 }
@@ -100,7 +100,7 @@ export default function ActionsModalTabContent({
 
   const inputRef = useRef<HTMLInputElement>(null);
   const [value, setValue] = useState<string>("");
-  const { newBorrowLimit, newBorrowUtilization } = getNewCalculations(value);
+  const { newBorrowLimitUsd, newBorrowUtilization } = getNewCalculations(value);
 
   const onValueChangeCore = useCallback(
     (_value: string) => {
@@ -263,9 +263,11 @@ export default function ActionsModalTabContent({
           <LabelWithValue
             label="User borrow limit"
             value={
-              newBorrowLimit
-                ? `${formatUsd(obligation?.borrowLimitUsd ?? new BigNumber("0"))} → ${formatUsd(newBorrowLimit)}`
-                : formatUsd(obligation?.borrowLimitUsd ?? new BigNumber("0"))
+              newBorrowLimitUsd
+                ? `${formatUsd(obligation?.minPriceBorrowLimitUsd ?? new BigNumber("0"))} → ${formatUsd(newBorrowLimitUsd)}`
+                : formatUsd(
+                    obligation?.minPriceBorrowLimitUsd ?? new BigNumber("0"),
+                  )
             }
             horizontal
           />

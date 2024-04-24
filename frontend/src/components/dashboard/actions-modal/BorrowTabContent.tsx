@@ -75,13 +75,13 @@ export default function BorrowTabContent({ reserve }: BorrowTabContentProps) {
   const getNewCalculations = (value: string) => {
     if (!value.length)
       return {
-        newBorrowLimit: null,
+        newBorrowLimitUsd: null,
         newBorrowUtilization: null,
       };
     const valueObj = new BigNumber(value);
     if (!obligation || valueObj.isNaN())
       return {
-        newBorrowLimit: null,
+        newBorrowLimitUsd: null,
         newBorrowUtilization: null,
       };
 
@@ -97,7 +97,7 @@ export default function BorrowTabContent({ reserve }: BorrowTabContentProps) {
         : null;
 
     return {
-      newBorrowLimit: null,
+      newBorrowLimitUsd: null,
       newBorrowUtilization: newBorrowUtilization
         ? BigNumber.max(BigNumber.min(1, newBorrowUtilization), 0)
         : null,

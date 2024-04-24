@@ -9,18 +9,32 @@ import { TBody } from "@/components/shared/Typography";
 import { useAppContext } from "@/contexts/AppContext";
 import { cn } from "@/lib/utils";
 
-export const getPassedBorrowLimit = (obligation: ParsedObligation) => {
-  const weightedBorrowUsd = obligation.totalWeightedBorrowUsd;
-  const borrowLimitUsd = obligation.borrowLimitUsd;
+export const getBorrowLimitUsd = (obligation: ParsedObligation) =>
+  obligation.minPriceBorrowLimitUsd;
 
-  return weightedBorrowUsd.gte(borrowLimitUsd);
+export const getWeightedBorrowsUsd = (obligation: ParsedObligation) => {
+  return obligation.maxPriceTotalWeightedBorrowUsd.gt(
+    getBorrowLimitUsd(obligation),
+  )
+    ? BigNumber.max(
+        obligation.totalWeightedBorrowUsd,
+        getBorrowLimitUsd(obligation),
+      )
+    : obligation.maxPriceTotalWeightedBorrowUsd;
+};
+
+export const getPassedBorrowLimit = (obligation: ParsedObligation) => {
+  const weightedBorrowsUsd = getWeightedBorrowsUsd(obligation);
+  const borrowLimitUsd = getBorrowLimitUsd(obligation);
+
+  return weightedBorrowsUsd.gte(borrowLimitUsd);
 };
 
 export const getPassedLiquidationThreshold = (obligation: ParsedObligation) => {
-  const weightedBorrowUsd = obligation.totalWeightedBorrowUsd;
+  const weightedBorrowsUsd = getWeightedBorrowsUsd(obligation);
   const liquidationThreshold = obligation.unhealthyBorrowValueUsd;
 
-  return weightedBorrowUsd.gte(liquidationThreshold);
+  return weightedBorrowsUsd.gte(liquidationThreshold);
 };
 
 interface SegmentProps {
@@ -69,77 +83,69 @@ export default function UtilizationBar({
   if (!obligation) obligation = appContext.obligation;
   if (!obligation) return null;
 
-  const supply = obligation.totalSupplyUsd;
-  if (supply.eq(0)) return null;
+  const depositedAmountUsd = obligation.totalSupplyUsd;
+  if (depositedAmountUsd.eq(0)) return null;
 
-  const weightedBorrowUsd = obligation.totalWeightedBorrowUsd;
-  const borrowLimitUsd = obligation.borrowLimitUsd;
-  const liquidationThreshold = obligation.unhealthyBorrowValueUsd;
+  const weightedBorrowsUsd = getWeightedBorrowsUsd(obligation);
+  const borrowLimitUsd = getBorrowLimitUsd(obligation);
+  const liquidationThresholdUsd = obligation.unhealthyBorrowValueUsd;
 
   const passedBorrowLimit = getPassedBorrowLimit(obligation);
-  const passedLiquidationThreshold =
-    weightedBorrowUsd.gte(liquidationThreshold);
+  const passedLiquidationThreshold = getPassedLiquidationThreshold(obligation);
+
+  const toPercent = (value: BigNumber) =>
+    value.div(depositedAmountUsd).times(100).toNumber();
 
   const segments = (() => {
     if (!passedBorrowLimit) {
       return [
         {
-          widthPercent: weightedBorrowUsd.div(supply).times(100).toNumber(),
+          widthPercent: toPercent(weightedBorrowsUsd),
           className: "bg-foreground shadow-0foreground",
         },
         {
-          widthPercent: new BigNumber(borrowLimitUsd.minus(weightedBorrowUsd))
-            .div(supply)
-            .times(100)
-            .toNumber(),
+          widthPercent: toPercent(
+            new BigNumber(borrowLimitUsd.minus(weightedBorrowsUsd)),
+          ),
         },
         {
-          widthPercent: new BigNumber(
-            liquidationThreshold.minus(borrowLimitUsd),
-          )
-            .div(supply)
-            .times(100)
-            .toNumber(),
+          widthPercent: toPercent(
+            new BigNumber(liquidationThresholdUsd.minus(borrowLimitUsd)),
+          ),
         },
         {
-          widthPercent: new BigNumber(supply.minus(liquidationThreshold))
-            .div(supply)
-            .times(100)
-            .toNumber(),
+          widthPercent: toPercent(
+            new BigNumber(depositedAmountUsd.minus(liquidationThresholdUsd)),
+          ),
         },
       ];
     } else if (!passedLiquidationThreshold) {
       return [
         {
-          widthPercent: weightedBorrowUsd.div(supply).times(100).toNumber(),
+          widthPercent: toPercent(weightedBorrowsUsd),
           className: "bg-destructive shadow-0destructive",
         },
         {
-          widthPercent: new BigNumber(
-            liquidationThreshold.minus(weightedBorrowUsd),
-          )
-            .div(supply)
-            .times(100)
-            .toNumber(),
+          widthPercent: toPercent(
+            new BigNumber(liquidationThresholdUsd.minus(weightedBorrowsUsd)),
+          ),
         },
         {
-          widthPercent: new BigNumber(supply.minus(liquidationThreshold))
-            .div(supply)
-            .times(100)
-            .toNumber(),
+          widthPercent: toPercent(
+            new BigNumber(depositedAmountUsd.minus(liquidationThresholdUsd)),
+          ),
         },
       ];
     } else {
       return [
         {
-          widthPercent: weightedBorrowUsd.div(supply).times(100).toNumber(),
+          widthPercent: toPercent(weightedBorrowsUsd),
           className: "bg-destructive shadow-0destructive",
         },
         {
-          widthPercent: new BigNumber(supply.minus(weightedBorrowUsd))
-            .div(supply)
-            .times(100)
-            .toNumber(),
+          widthPercent: toPercent(
+            new BigNumber(depositedAmountUsd.minus(weightedBorrowsUsd)),
+          ),
         },
       ];
     }
@@ -147,11 +153,11 @@ export default function UtilizationBar({
 
   const thresholds = [
     {
-      leftPercent: borrowLimitUsd.div(supply).times(100).toNumber(),
+      leftPercent: toPercent(borrowLimitUsd),
       className: "bg-primary shadow-0primary",
     },
     {
-      leftPercent: liquidationThreshold.div(supply).times(100).toNumber(),
+      leftPercent: toPercent(liquidationThresholdUsd),
       className: "bg-secondary shadow-0secondary",
     },
   ];
