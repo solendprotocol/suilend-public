@@ -135,6 +135,12 @@ export const parseReserve = (
     name,
     iconUrl,
     description,
+
+    // Deprecated
+    /**
+     * @deprecated since version 1.0.3. Use `depositedAmount` instead.
+     */
+    totalDeposits: depositedAmount,
   };
 };
 

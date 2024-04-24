@@ -63,5 +63,15 @@ export const parseLendingMarket = (
     depositedAmountUsd,
     borrowedAmountUsd,
     tvlUsd,
+
+    // Deprecated
+    /**
+     * @deprecated since version 1.0.3. Use `depositedAmountUsd` instead.
+     */
+    totalSupplyUsd: depositedAmountUsd,
+    /**
+     * @deprecated since version 1.0.3. Use `borrowedAmountUsd` instead.
+     */
+    totalBorrowUsd: borrowedAmountUsd,
   };
 };
