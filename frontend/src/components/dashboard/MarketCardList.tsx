@@ -11,10 +11,10 @@ import {
 
 import BorrowAprCell from "@/components/dashboard/market-table/BorrowAprCell";
 import DepositAprCell from "@/components/dashboard/market-table/DepositAprCell";
-import { ReservesRowData } from "@/components/dashboard/market-table/MarketTable";
 import OpenLtvBwCell from "@/components/dashboard/market-table/OpenLtvBwCell";
 import TotalBorrowsCell from "@/components/dashboard/market-table/TotalBorrowsCell";
 import TotalDepositsCell from "@/components/dashboard/market-table/TotalDepositsCell";
+import { ReservesRowData } from "@/components/dashboard/MarketTable";
 import Button from "@/components/shared/Button";
 import LabelWithTooltip from "@/components/shared/LabelWithTooltip";
 import Select from "@/components/shared/Select";

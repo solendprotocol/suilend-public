@@ -1,4 +1,4 @@
-import { ReservesRowData } from "@/components/dashboard/market-table/MarketTable";
+import { ReservesRowData } from "@/components/dashboard/MarketTable";
 import TokenIcon from "@/components/shared/TokenIcon";
 import { TBody, TLabel } from "@/components/shared/Typography";
 import { formatPrice } from "@/lib/format";

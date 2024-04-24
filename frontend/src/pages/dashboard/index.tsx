@@ -4,8 +4,8 @@ import { usePathname, useRouter } from "next/navigation";
 import { VenetianMask } from "lucide-react";
 
 import LiquidityMiningCard from "@/components/dashboard/LiquidityMiningCard";
-import MarketTable from "@/components/dashboard/market-table/MarketTable";
 import MarketOverview from "@/components/dashboard/MarketOverview";
+import MarketTable from "@/components/dashboard/MarketTable";
 import ObligationBorrowsCard from "@/components/dashboard/ObligationBorrowsCard";
 import ObligationDepositsCard from "@/components/dashboard/ObligationDepositsCard";
 import ObligationPositionCard from "@/components/dashboard/ObligationPositionCard";

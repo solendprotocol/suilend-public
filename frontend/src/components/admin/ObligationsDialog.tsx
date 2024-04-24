@@ -235,7 +235,7 @@ const COLUMNS: ColumnDef<ParsedObligation>[] = [
     },
   },
   {
-    accessorKey: "UtilizationBar",
+    accessorKey: "healthBar",
     header: ({ column }) => tableHeader(column, "Utilization"),
     cell: ({ row }) => {
       return <UtilizationBar obligation={row.original} />;
