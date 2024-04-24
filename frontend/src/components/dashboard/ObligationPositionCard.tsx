@@ -25,7 +25,7 @@ import {
   WEIGHTED_BORROW_TOOLTIP,
 } from "@/lib/tooltips";
 
-function ObligationCardContent() {
+function ObligationPositionCardContent() {
   const appContext = useAppContext();
   const data = appContext.data as AppData;
   const obligation = appContext.obligation as ParsedObligation;
@@ -153,7 +153,7 @@ export default function ObligationPositionCard() {
   return (
     <Card
       id="position"
-      title="Position"
+      title="Account"
       headerEndContent={
         data.obligations &&
         data.obligations.length > 1 && <ObligationSwitcherPopover />
@@ -165,10 +165,10 @@ export default function ObligationPositionCard() {
           <TLabelSans>Get started by connecting your wallet.</TLabelSans>
         ) : !obligation ? (
           <TLabelSans>
-            No active positions. Start by depositing assets.
+            No active positions. Get started by depositing assets.
           </TLabelSans>
         ) : (
-          <ObligationCardContent />
+          <ObligationPositionCardContent />
         )}
       </CardContent>
     </Card>
