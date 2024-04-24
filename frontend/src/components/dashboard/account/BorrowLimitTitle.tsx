@@ -1,4 +1,4 @@
-import SectionTitle from "@/components/dashboard/obligation/SectionTitle";
+import SectionTitle from "@/components/dashboard/account/SectionTitle";
 import { BORROW_LIMIT_TOOLTIP } from "@/lib/tooltips";
 
 export default function BorrowLimitTitle() {

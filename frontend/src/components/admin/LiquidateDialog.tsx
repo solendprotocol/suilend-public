@@ -36,11 +36,11 @@ import * as simulate from "@suilend/sdk/utils/simulate";
 import { SuiPriceServiceConnection } from "@pyth-sdk";
 
 import Input from "@/components/admin/Input";
+import HealthBar from "@/components/dashboard/account/HealthBar";
 import DataTable, {
   decimalSortingFn,
   tableHeader,
 } from "@/components/dashboard/DataTable";
-import UtilizationBar from "@/components/dashboard/obligation/UtilizationBar";
 import Button from "@/components/shared/Button";
 import Grid from "@/components/shared/Grid";
 import LabelWithValue from "@/components/shared/LabelWithValue";
@@ -277,7 +277,7 @@ export default function LiquidateDialog({
             isUsd={true}
           />
           <div className="col-span-2">
-            <UtilizationBar obligation={parsedObligation} />
+            <HealthBar obligation={parsedObligation} />
           </div>
           <div className="col-span-2 flex flex-row items-end gap-2">
             <DataTable<RowData>

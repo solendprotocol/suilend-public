@@ -14,10 +14,10 @@ import DataTable, {
 import AssetCell from "@/components/dashboard/market-table/AssetCell";
 import BorrowAprCell from "@/components/dashboard/market-table/BorrowAprCell";
 import DepositAprCell from "@/components/dashboard/market-table/DepositAprCell";
+import MarketCardList from "@/components/dashboard/market-table/MarketCardList";
 import OpenLtvBwCell from "@/components/dashboard/market-table/OpenLtvBwCell";
 import TotalBorrowsCell from "@/components/dashboard/market-table/TotalBorrowsCell";
 import TotalDepositsCell from "@/components/dashboard/market-table/TotalDepositsCell";
-import MarketCardList from "@/components/dashboard/MarketCardList";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { OPEN_LTV_BW_TOOLTIP } from "@/lib/constants";
 import { formatToken, formatUsd } from "@/lib/format";

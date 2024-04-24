@@ -35,17 +35,17 @@ function RowModal({ row, children }: RowModalProps) {
   return <ActionsModal reserve={row.reserve}>{children}</ActionsModal>;
 }
 
-interface AccountAssetTableProps {
+interface AssetTableProps {
   amountTitle?: string;
   assets: RowData[];
   noAssetsMessage: string;
 }
 
-export default function AccountAssetTable({
+export default function AssetTable({
   amountTitle = "Amount",
   assets,
   noAssetsMessage,
-}: AccountAssetTableProps) {
+}: AssetTableProps) {
   const appContext = useAppContext();
   const data = appContext.data as AppData;
 

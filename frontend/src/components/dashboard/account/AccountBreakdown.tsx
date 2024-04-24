@@ -3,13 +3,13 @@ import { ClassValue } from "clsx";
 
 import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
 
-import BorrowLimitTitle from "@/components/dashboard/obligation/BorrowLimitTitle";
-import LiquidationThresholdTitle from "@/components/dashboard/obligation/LiquidationThresholdTitle";
+import BorrowLimitTitle from "@/components/dashboard/account/BorrowLimitTitle";
 import {
   getPassedBorrowLimit,
   getPassedLiquidationThreshold,
-} from "@/components/dashboard/obligation/UtilizationBar";
-import WeightedBorrowTitle from "@/components/dashboard/obligation/WeightedBorrowTitle";
+} from "@/components/dashboard/account/HealthBar";
+import LiquidationThresholdTitle from "@/components/dashboard/account/LiquidationThresholdTitle";
+import WeightedBorrowTitle from "@/components/dashboard/account/WeightedBorrowTitle";
 import Collapsible from "@/components/shared/Collapsible";
 import { TBody, TLabelSans } from "@/components/shared/Typography";
 import { Separator } from "@/components/ui/separator";
@@ -102,15 +102,15 @@ function BreakdownTable({
   );
 }
 
-interface ObligationBreakdownProps {
+interface AccountBreakdownProps {
   isBreakdownOpen: boolean;
   setIsBreakdownOpen: (value: boolean) => void;
 }
 
-export default function ObligationBreakdown({
+export default function AccountBreakdown({
   isBreakdownOpen,
   setIsBreakdownOpen,
-}: ObligationBreakdownProps) {
+}: AccountBreakdownProps) {
   const appContext = useAppContext();
   const data = appContext.data as AppData;
   const obligation = appContext.obligation as ParsedObligation;

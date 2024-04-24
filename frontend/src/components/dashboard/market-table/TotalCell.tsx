@@ -1,6 +1,6 @@
 import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 
-import { ReservesRowData } from "@/components/dashboard/MarketTable";
+import { ReservesRowData } from "@/components/dashboard/market-table/MarketTable";
 import Tooltip from "@/components/shared/Tooltip";
 import { TBody, TLabel } from "@/components/shared/Typography";
 import { formatToken, formatUsd } from "@/lib/format";
