@@ -3,12 +3,12 @@ import { usePathname, useRouter } from "next/navigation";
 
 import { VenetianMask } from "lucide-react";
 
-import ObligationPositionCard from "@/components/dashboard/account/ObligationPositionCard";
 import LiquidityMiningCard from "@/components/dashboard/LiquidityMiningCard";
 import MarketTable from "@/components/dashboard/market-table/MarketTable";
 import MarketOverview from "@/components/dashboard/MarketOverview";
 import ObligationBorrowsCard from "@/components/dashboard/ObligationBorrowsCard";
 import ObligationDepositsCard from "@/components/dashboard/ObligationDepositsCard";
+import ObligationPositionCard from "@/components/dashboard/ObligationPositionCard";
 import WalletAssetsCard from "@/components/dashboard/WalletBalancesCard";
 import {
   bodyClassNames,

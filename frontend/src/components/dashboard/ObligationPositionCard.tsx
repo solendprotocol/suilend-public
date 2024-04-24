@@ -3,10 +3,10 @@ import { useLocalStorage } from "usehooks-ts";
 
 import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
 
-import ObligationBreakdown from "@/components/dashboard/account/ObligationBreakdown";
-import ObligationSwitcherPopover from "@/components/dashboard/account/ObligationSwitcherPopover";
-import UtilizationBar from "@/components/dashboard/account/UtilizationBar";
 import Card from "@/components/dashboard/Card";
+import ObligationBreakdown from "@/components/dashboard/ObligationBreakdown";
+import ObligationSwitcherPopover from "@/components/dashboard/ObligationSwitcherPopover";
+import UtilizationBar from "@/components/dashboard/UtilizationBar";
 import LabelWithTooltip from "@/components/shared/LabelWithTooltip";
 import LabelWithValue from "@/components/shared/LabelWithValue";
 import { TBody, TLabel, TLabelSans } from "@/components/shared/Typography";

@@ -5,11 +5,11 @@ import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
 
 import BorrowLimitTitle from "@/components/dashboard/account/BorrowLimitTitle";
 import LiquidationThresholdTitle from "@/components/dashboard/account/LiquidationThresholdTitle";
+import WeightedBorrowTitle from "@/components/dashboard/account/WeightedBorrowTitle";
 import {
   getPassedBorrowLimit,
   getPassedLiquidationThreshold,
-} from "@/components/dashboard/account/UtilizationBar";
-import WeightedBorrowTitle from "@/components/dashboard/account/WeightedBorrowTitle";
+} from "@/components/dashboard/UtilizationBar";
 import Collapsible from "@/components/shared/Collapsible";
 import { TBody, TLabelSans } from "@/components/shared/Typography";
 import { Separator } from "@/components/ui/separator";

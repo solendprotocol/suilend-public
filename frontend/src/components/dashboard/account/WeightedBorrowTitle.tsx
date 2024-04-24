@@ -4,7 +4,7 @@ import SectionTitle from "@/components/dashboard/account/SectionTitle";
 import {
   getPassedBorrowLimit,
   getPassedLiquidationThreshold,
-} from "@/components/dashboard/account/UtilizationBar";
+} from "@/components/dashboard/UtilizationBar";
 import { useAppContext } from "@/contexts/AppContext";
 import { WEIGHTED_BORROW_TOOLTIP } from "@/lib/tooltips";
 
