@@ -1,6 +1,5 @@
 import BigNumber from "bignumber.js";
 
-import { maxU64 } from "@suilend/sdk/constants";
 import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 
 import ActionsModalTabContent from "@/components/dashboard/actions-modal/ActionsModalTabContent";
@@ -56,14 +55,13 @@ export default function DepositTabContent({ reserve }: DepositTabContentProps) {
         0,
       ),
     },
-    {
+  ];
+  if (isSui(reserve.coinType))
+    maxCalculations.push({
       reason: `Min ${SUI_DEPOSIT_GAS_MIN} SUI should be saved for gas`,
       isDisabled: true,
-      value: isSui(reserve.coinType)
-        ? coinBalanceForReserve.minus(SUI_DEPOSIT_GAS_MIN)
-        : new BigNumber(maxU64.toString()),
-    },
-  ];
+      value: coinBalanceForReserve.minus(SUI_DEPOSIT_GAS_MIN),
+    });
 
   // Value
   const getMaxValue = () => {
@@ -105,6 +103,24 @@ export default function DepositTabContent({ reserve }: DepositTabContentProps) {
   };
 
   // Submit
+  const getSubmitButtonNoValueState = () => {
+    if (reserve.totalDeposits.gte(reserve.config.depositLimit))
+      return {
+        isDisabled: true,
+        title: "Reserve deposit limit reached",
+      };
+    if (
+      new BigNumber(reserve.totalDeposits.times(reserve.maxPrice)).gte(
+        reserve.config.depositLimitUsd,
+      )
+    )
+      return {
+        isDisabled: true,
+        title: "Reserve USD deposit limit reached",
+      };
+    return undefined;
+  };
+
   const getSubmitButtonState = (value: string) => {
     for (const calc of maxCalculations) {
       if (new BigNumber(value).gt(calc.value))
@@ -122,6 +138,7 @@ export default function DepositTabContent({ reserve }: DepositTabContentProps) {
       reserve={reserve}
       getNewCalculations={getNewCalculations}
       getMaxValue={getMaxValue}
+      getSubmitButtonNoValueState={getSubmitButtonNoValueState}
       getSubmitButtonState={getSubmitButtonState}
       submit={deposit}
     />

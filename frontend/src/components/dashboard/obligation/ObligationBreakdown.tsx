@@ -151,12 +151,12 @@ export default function ObligationBreakdown({
                     `${formatToken(b.borrowedAmount, { exact: false })} ${b.reserve.symbol}`,
                 ),
               },
-              { title: "*" },
+              { title: "×" },
               {
                 title: "Price",
                 data: sortedBorrows.map((b) => formatPrice(b.reserve.price)),
               },
-              { title: "*" },
+              { title: "×" },
               {
                 title: "Weight",
                 data: sortedBorrows.map((b) =>
@@ -207,12 +207,12 @@ export default function ObligationBreakdown({
                     `${formatToken(d.depositedAmount, { exact: false })} ${d.reserve.symbol}`,
                 ),
               },
-              { title: "*" },
+              { title: "×" },
               {
                 title: "Price",
                 data: sortedDeposits.map((d) => formatPrice(d.reserve.price)),
               },
-              { title: "*" },
+              { title: "×" },
               {
                 title: "Open LTV",
                 data: sortedDeposits.map((d) =>
@@ -259,12 +259,12 @@ export default function ObligationBreakdown({
                     `${formatToken(d.depositedAmount, { exact: false })} ${d.reserve.symbol}`,
                 ),
               },
-              { title: "*" },
+              { title: "×" },
               {
                 title: "Price",
                 data: sortedDeposits.map((d) => formatPrice(d.reserve.price)),
               },
-              { title: "*" },
+              { title: "×" },
               {
                 title: "Close LTV",
                 data: sortedDeposits.map((d) =>
