@@ -3,8 +3,18 @@ export const DEPOSITS_TOOLTIP =
 
 export const BORROWS_TOOLTIP = "The value of all assets borrowed.";
 
-export const EQUITY_TOOLTIP =
-  "The total value of your account, calculated as (deposits - borrows).";
+export const EQUITY_TOOLTIP = (
+  <>
+    The total value of your account.
+    <br />
+    <br />
+    <span className="font-mono text-muted-foreground">
+      Formula:
+      <br />
+      <span className="uppercase">Deposits - Borrows</span>
+    </span>
+  </>
+);
 
 export const WEIGHTED_BORROWS_TOOLTIP = (
   <>
