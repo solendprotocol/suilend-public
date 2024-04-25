@@ -11,7 +11,8 @@ import LiquidationThresholdTitle from "@/components/dashboard/account/Liquidatio
 import WeightedBorrowsTitle from "@/components/dashboard/account/WeightedBorrowsTitle";
 import { getWeightedBorrowsColor } from "@/components/dashboard/UtilizationBar";
 import Collapsible from "@/components/shared/Collapsible";
-import { TBody, TLabelSans } from "@/components/shared/Typography";
+import LabelWithTooltip from "@/components/shared/LabelWithTooltip";
+import { TBody } from "@/components/shared/Typography";
 import { Separator } from "@/components/ui/separator";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { formatLtv, formatPrice, formatToken, formatUsd } from "@/lib/format";
@@ -19,6 +20,7 @@ import { cn, sortInReserveOrder } from "@/lib/utils";
 
 interface BreakdownColumn {
   title: string;
+  titleTooltip?: string;
   data?: string[];
 }
 
@@ -35,14 +37,15 @@ function BreakdownColumn({
 }: BreakdownColumnProps) {
   if (!column.data)
     return (
-      <TLabelSans
+      <LabelWithTooltip
         className={cn(
-          "h-fit flex-1 text-center",
+          "h-fit w-auto flex-1 text-center",
           rowCount > 0 && "border-b pb-2",
         )}
+        tooltip={column.titleTooltip}
       >
         {column.title}
-      </TLabelSans>
+      </LabelWithTooltip>
     );
   return (
     <div
@@ -51,9 +54,12 @@ function BreakdownColumn({
         isRightAligned && "justify-end text-right",
       )}
     >
-      <TLabelSans className={cn(rowCount > 0 && "mb-1 border-b pb-2")}>
+      <LabelWithTooltip
+        className={cn("w-auto", rowCount > 0 && "mb-1 border-b pb-2")}
+        tooltip={column.titleTooltip}
+      >
         {column.title}
-      </TLabelSans>
+      </LabelWithTooltip>
       {column.data.map((row, index) => (
         <TBody key={index} className="text-xs">
           {row}
@@ -199,7 +205,11 @@ export default function ObligationBreakdown() {
               { title: "×" },
               {
                 title: "Price",
-                data: sortedDeposits.map((d) => formatPrice(d.reserve.price)),
+                titleTooltip:
+                  "In borrow limit calculations, the price is defined as the minimum of the price and the exponentially-weighted moving average (EMA) price.",
+                data: sortedDeposits.map((d) =>
+                  formatPrice(d.reserve.minPrice),
+                ),
               },
               { title: "×" },
               {
@@ -214,7 +224,7 @@ export default function ObligationBreakdown() {
                 data: sortedDeposits.map((d) =>
                   formatUsd(
                     d.depositedAmount
-                      .times(d.reserve.price)
+                      .times(d.reserve.minPrice)
                       .times(d.reserve.config.openLtvPct / 100),
                   ),
                 ),
@@ -225,7 +235,7 @@ export default function ObligationBreakdown() {
                 (acc, d) =>
                   acc.plus(
                     d.depositedAmount
-                      .times(d.reserve.price)
+                      .times(d.reserve.minPrice)
                       .times(d.reserve.config.openLtvPct / 100),
                   ),
                 new BigNumber(0),
