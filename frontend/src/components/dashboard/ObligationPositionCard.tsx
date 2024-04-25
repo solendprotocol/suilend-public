@@ -1,5 +1,4 @@
 import BigNumber from "bignumber.js";
-import { useLocalStorage } from "usehooks-ts";
 
 import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
 
@@ -22,7 +21,7 @@ import {
   DEPOSITS_TOOLTIP,
   EQUITY_TOOLTIP,
   LIQUIDATION_THRESHOLD_TOOLTIP,
-  WEIGHTED_BORROW_TOOLTIP,
+  WEIGHTED_BORROWS_TOOLTIP,
 } from "@/lib/tooltips";
 
 function ObligationPositionCardContent() {
@@ -51,12 +50,6 @@ function ObligationPositionCardContent() {
 
   const weightedNetUsd = weightedDepositsUsd.minus(weightedBorrowsUsd);
   const netAprPercent = weightedNetUsd.div(obligation.netValueUsd);
-
-  // Breakdown
-  const [isBreakdownOpen, setIsBreakdownOpen] = useLocalStorage<boolean>(
-    "isPositionBreakdownOpen",
-    false,
-  );
 
   return (
     <div className="flex flex-col gap-4">
@@ -104,8 +97,8 @@ function ObligationPositionCardContent() {
 
       <div className="flex flex-row justify-between gap-2">
         <div className="flex flex-col gap-1">
-          <LabelWithTooltip tooltip={WEIGHTED_BORROW_TOOLTIP}>
-            Weighted borrow
+          <LabelWithTooltip tooltip={WEIGHTED_BORROWS_TOOLTIP}>
+            Weighted borrows
           </LabelWithTooltip>
           <TBody>{formatUsd(obligation.totalWeightedBorrowUsd)}</TBody>
         </div>
@@ -123,7 +116,7 @@ function ObligationPositionCardContent() {
         </div>
       </div>
 
-      <UtilizationBar onClick={() => setIsBreakdownOpen(!isBreakdownOpen)} />
+      <UtilizationBar />
 
       <div className="flex flex-row items-center justify-between gap-2">
         <LabelWithTooltip tooltip={LIQUIDATION_THRESHOLD_TOOLTIP}>
@@ -134,10 +127,7 @@ function ObligationPositionCardContent() {
         </TBody>
       </div>
 
-      <ObligationBreakdown
-        isBreakdownOpen={isBreakdownOpen}
-        setIsBreakdownOpen={setIsBreakdownOpen}
-      />
+      <ObligationBreakdown />
     </div>
   );
 }

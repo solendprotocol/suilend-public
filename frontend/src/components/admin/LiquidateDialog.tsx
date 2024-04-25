@@ -272,7 +272,7 @@ export default function LiquidateDialog({
             isUsd={true}
           />
           <LabelWithValue
-            label="Weighted Borrow"
+            label="Weighted Borrows"
             value={parsedObligation.totalWeightedBorrowUsd}
             isUsd={true}
           />

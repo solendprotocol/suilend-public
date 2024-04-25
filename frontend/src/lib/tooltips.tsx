@@ -1,14 +1,14 @@
 export const DEPOSITS_TOOLTIP =
-  "Value of all assets deposited. Increasing this value increases your borrow limit and liquidation threshold.";
+  "The value of all assets deposited. Depositing more assets increases your borrow limit and liquidation threshold.";
 
-export const BORROWS_TOOLTIP = "Value of all assets borrowed.";
+export const BORROWS_TOOLTIP = "The value of all assets borrowed.";
 
 export const EQUITY_TOOLTIP =
-  "Value of your account calculated as (deposit - borrow).";
+  "The total value of your account, calculated as (deposits - borrows).";
 
-export const WEIGHTED_BORROW_TOOLTIP = (
+export const WEIGHTED_BORROWS_TOOLTIP = (
   <>
-    The weighted borrow is the value of all assets borrowed, adjusted by their
+    Your weighted borrows is the value of all assets borrowed, adjusted by their
     borrow weight (BW).
     <br />
     <br />
@@ -22,8 +22,8 @@ export const WEIGHTED_BORROW_TOOLTIP = (
 
 export const BORROW_LIMIT_TOOLTIP = (
   <>
-    The borrow limit is the maximum amount you can borrow. Deposit more assets
-    to increase your borrow limit.
+    The borrow limit is the maximum amount you can borrow. Depositing more
+    assets increases your borrow limit.
     <br />
     <br />
     <span className="font-mono text-muted-foreground">
@@ -36,9 +36,9 @@ export const BORROW_LIMIT_TOOLTIP = (
 
 export const LIQUIDATION_THRESHOLD_TOOLTIP = (
   <>
-    If your weighted borrow exceeds the liquidation threshold your account will
-    be at risk of liquidation. Deposit more assets to increase your liquidation
-    threshold.
+    If your weighted borrows exceed your liquidation threshold, your account
+    will be at risk of liquidation. Depositing more assets increases your
+    liquidation threshold.
     <br />
     <br />
     <span className="font-mono text-muted-foreground">

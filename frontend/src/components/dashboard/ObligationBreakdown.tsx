@@ -1,15 +1,15 @@
+import { CSSProperties } from "react";
+
 import BigNumber from "bignumber.js";
 import { ClassValue } from "clsx";
+import { useLocalStorage } from "usehooks-ts";
 
 import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
 
 import BorrowLimitTitle from "@/components/dashboard/account/BorrowLimitTitle";
 import LiquidationThresholdTitle from "@/components/dashboard/account/LiquidationThresholdTitle";
-import WeightedBorrowTitle from "@/components/dashboard/account/WeightedBorrowTitle";
-import {
-  getPassedBorrowLimit,
-  getPassedLiquidationThreshold,
-} from "@/components/dashboard/UtilizationBar";
+import WeightedBorrowsTitle from "@/components/dashboard/account/WeightedBorrowsTitle";
+import { getWeightedBorrowsColor } from "@/components/dashboard/UtilizationBar";
 import Collapsible from "@/components/shared/Collapsible";
 import { TBody, TLabelSans } from "@/components/shared/Typography";
 import { Separator } from "@/components/ui/separator";
@@ -68,6 +68,7 @@ interface BreakdownTableProps {
   columns: BreakdownColumn[];
   totalValue: string;
   totalValueClassName?: ClassValue;
+  totalValueStyle?: CSSProperties;
 }
 
 function BreakdownTable({
@@ -75,6 +76,7 @@ function BreakdownTable({
   columns,
   totalValue,
   totalValueClassName,
+  totalValueStyle,
 }: BreakdownTableProps) {
   return (
     <div className="flex w-full flex-col gap-2">
@@ -91,7 +93,10 @@ function BreakdownTable({
       </div>
       <Separator className="w-full" />
       <div className="flex w-full flex-row justify-end">
-        <TBody className={cn("text-xs", totalValueClassName)}>
+        <TBody
+          className={cn("text-xs", totalValueClassName)}
+          style={totalValueStyle}
+        >
           {totalValue}
         </TBody>
       </div>
@@ -99,15 +104,7 @@ function BreakdownTable({
   );
 }
 
-interface ObligationBreakdownProps {
-  isBreakdownOpen: boolean;
-  setIsBreakdownOpen: (value: boolean) => void;
-}
-
-export default function ObligationBreakdown({
-  isBreakdownOpen,
-  setIsBreakdownOpen,
-}: ObligationBreakdownProps) {
+export default function ObligationBreakdown() {
   const appContext = useAppContext();
   const data = appContext.data as AppData;
   const obligation = appContext.obligation as ParsedObligation;
@@ -119,25 +116,23 @@ export default function ObligationBreakdown({
     .slice()
     .sort(sortInReserveOrder(data.lendingMarket.reserves));
 
-  const passedBorrowLimit = getPassedBorrowLimit(obligation);
-  const passedLiquidationThreshold = getPassedLiquidationThreshold(obligation);
+  // State
+  const [isOpen, setIsOpen] = useLocalStorage<boolean>(
+    "isPositionBreakdownOpen",
+    false,
+  );
 
   return (
     <Collapsible
-      open={isBreakdownOpen}
-      onOpenChange={setIsBreakdownOpen}
+      open={isOpen}
+      onOpenChange={setIsOpen}
       closedTitle="Show breakdown"
       openTitle="Hide breakdown"
       hasSeparator
     >
-      <div
-        className={cn(
-          "flex flex-col items-center gap-6",
-          isBreakdownOpen && "-mx-1 mt-6 sm:mx-0",
-        )}
-      >
+      <div className={cn("flex flex-col items-center gap-4", isOpen && "mt-6")}>
         <div className="flex w-full flex-col gap-2">
-          <WeightedBorrowTitle />
+          <WeightedBorrowsTitle />
           <BreakdownTable
             rowCount={sortedBorrows.length}
             columns={[
@@ -183,11 +178,9 @@ export default function ObligationBreakdown({
                 new BigNumber(0),
               ),
             )}
-            totalValueClassName={
-              passedBorrowLimit || passedLiquidationThreshold
-                ? "text-destructive"
-                : "text-foreground"
-            }
+            totalValueStyle={{
+              color: `hsl(var(--${getWeightedBorrowsColor(obligation)}))`,
+            }}
           />
         </div>
 

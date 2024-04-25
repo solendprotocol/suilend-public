@@ -1,18 +1,24 @@
-import React from "react";
+import React, { CSSProperties } from "react";
 
 import BigNumber from "bignumber.js";
+import { ClassValue } from "clsx";
+import { AlertCircle, AlertTriangle } from "lucide-react";
 
 import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
 
+import BorrowLimitTitle from "@/components/dashboard/account/BorrowLimitTitle";
+import LiquidationThresholdTitle from "@/components/dashboard/account/LiquidationThresholdTitle";
+import WeightedBorrowsTitle from "@/components/dashboard/account/WeightedBorrowsTitle";
 import Tooltip from "@/components/shared/Tooltip";
-import { TBody } from "@/components/shared/Typography";
+import { TBodySans } from "@/components/shared/Typography";
 import { useAppContext } from "@/contexts/AppContext";
+import { formatPercent, formatUsd } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-export const getBorrowLimitUsd = (obligation: ParsedObligation) =>
+const getBorrowLimitUsd = (obligation: ParsedObligation) =>
   obligation.minPriceBorrowLimitUsd;
 
-export const getWeightedBorrowsUsd = (obligation: ParsedObligation) => {
+const getWeightedBorrowsUsd = (obligation: ParsedObligation) => {
   return obligation.maxPriceTotalWeightedBorrowUsd.gt(
     getBorrowLimitUsd(obligation),
   )
@@ -23,31 +29,44 @@ export const getWeightedBorrowsUsd = (obligation: ParsedObligation) => {
     : obligation.maxPriceTotalWeightedBorrowUsd;
 };
 
-export const getPassedBorrowLimit = (obligation: ParsedObligation) => {
+const getPassedBorrowLimit = (obligation: ParsedObligation) => {
   const weightedBorrowsUsd = getWeightedBorrowsUsd(obligation);
   const borrowLimitUsd = getBorrowLimitUsd(obligation);
 
   return weightedBorrowsUsd.gte(borrowLimitUsd);
 };
 
-export const getPassedLiquidationThreshold = (obligation: ParsedObligation) => {
+const getPassedLiquidationThreshold = (obligation: ParsedObligation) => {
   const weightedBorrowsUsd = getWeightedBorrowsUsd(obligation);
   const liquidationThreshold = obligation.unhealthyBorrowValueUsd;
 
   return weightedBorrowsUsd.gte(liquidationThreshold);
 };
 
+export const getWeightedBorrowsColor = (obligation: ParsedObligation) => {
+  const passedBorrowLimit = getPassedBorrowLimit(obligation);
+  const passedLiquidationThreshold = getPassedLiquidationThreshold(obligation);
+
+  if (!passedBorrowLimit) return "foreground";
+  if (!passedLiquidationThreshold) return "warning";
+  return "destructive";
+};
+
+export const BORROW_LIMIT_COLOR = "primary";
+export const LIQUIDATION_THRESHOLD_COLOR = "secondary";
+
 interface SegmentProps {
-  className?: string;
+  className?: ClassValue;
+  style?: CSSProperties;
   widthPercent: number;
 }
 
-function Segment({ className, widthPercent }: SegmentProps) {
+function Segment({ className, style, widthPercent }: SegmentProps) {
   if (widthPercent === 0) return null;
   return (
     <div
       className={cn("relative z-[1] h-full bg-muted/20", className)}
-      style={{ width: `${widthPercent}%` }}
+      style={{ width: `${widthPercent}%`, ...style }}
     />
   );
 }
@@ -71,13 +90,9 @@ function Threshold({ className, leftPercent }: ThresholdProps) {
 
 interface UtilizationBarProps {
   obligation?: ParsedObligation | null;
-  onClick?: () => void;
 }
 
-export default function UtilizationBar({
-  obligation,
-  onClick,
-}: UtilizationBarProps) {
+export default function UtilizationBar({ obligation }: UtilizationBarProps) {
   const appContext = useAppContext();
 
   if (!obligation) obligation = appContext.obligation;
@@ -93,6 +108,12 @@ export default function UtilizationBar({
   const passedBorrowLimit = getPassedBorrowLimit(obligation);
   const passedLiquidationThreshold = getPassedLiquidationThreshold(obligation);
 
+  const weightedBorrowsColor = getWeightedBorrowsColor(obligation);
+  const WEIGHTED_BORROWS_SEGMENT_STYLE = {
+    backgroundColor: `hsl(var(--${weightedBorrowsColor}))`,
+    boxShadow: `0 0 14px 2px  hsl(var(--${weightedBorrowsColor}))`,
+  };
+
   const toPercent = (value: BigNumber) =>
     value.div(depositedAmountUsd).times(100).toNumber();
 
@@ -101,7 +122,7 @@ export default function UtilizationBar({
       return [
         {
           widthPercent: toPercent(weightedBorrowsUsd),
-          className: "bg-foreground shadow-0foreground",
+          style: WEIGHTED_BORROWS_SEGMENT_STYLE,
         },
         {
           widthPercent: toPercent(
@@ -123,7 +144,7 @@ export default function UtilizationBar({
       return [
         {
           widthPercent: toPercent(weightedBorrowsUsd),
-          className: "bg-destructive shadow-0destructive",
+          style: WEIGHTED_BORROWS_SEGMENT_STYLE,
         },
         {
           widthPercent: toPercent(
@@ -140,7 +161,7 @@ export default function UtilizationBar({
       return [
         {
           widthPercent: toPercent(weightedBorrowsUsd),
-          className: "bg-destructive shadow-0destructive",
+          style: WEIGHTED_BORROWS_SEGMENT_STYLE,
         },
         {
           widthPercent: toPercent(
@@ -162,67 +183,125 @@ export default function UtilizationBar({
     },
   ];
 
-  // const weightedBorrowUtilization = obligation.minPriceBorrowLimit.isZero()
-  //   ? new BigNumber("0")
-  //   : obligation.totalWeightedBorrowUsd.div(obligation.borrowLimit).times(100);
-
-  // const liquidationThresholdFactor = obligation.totalSupplyUsd.isZero()
-  //   ? new BigNumber("0")
-  //   : obligation.unhealthyBorrowValueUsd
-  //       .div(obligation.totalSupplyUsd)
-  //       .times(100);
-
-  // const borrowLimitOverSupply = obligation.totalSupplyUsd.isZero()
-  //   ? new BigNumber("0")
-  //   : obligation.minPriceBorrowLimit.div(obligation.totalSupplyUsd).times(100);
-
-  // // Tooltips
-  // let borrowToolTip = `Your weighted borrow is ${formatPercent(
-  //   weightedBorrowUsd,
-  // )} of your total deposited balance, or ${formatPercent(
-  //   weightedBorrowUtilization,
-  // )} of your borrow limit.`;
-
-  // if (passedLimit) {
-  //   borrowToolTip =
-  //     "Your weighted borrow balance is past the borrow limit and could be at risk of liquidation. Please repay your borrows or deposit more assets.";
-  // }
-  // if (passedThreshold) {
-  //   borrowToolTip =
-  //     "Your weighted borrow balance is past the liquidation threshold and could be liquidated.";
-  // }
-
-  // const unweightedBorrowTooltip =
-  //   "This portion represents the actual value of your borrows. However, certain assets have a borrow weight that changes their value during liquidation or borrow limit calculations.";
+  // Tooltip
+  const weightedBorrowsTooltip = (
+    <>
+      {"Your weighted borrows are "}
+      <span className="">{formatUsd(weightedBorrowsUsd)}</span>
+      {", which is"}
+      <br />
+      {"• "}
+      <span className="">
+        {formatPercent(weightedBorrowsUsd.div(borrowLimitUsd).times(100))}
+      </span>
+      {" of your borrow limit"}
+      <br />
+      {"• "}
+      <span className="">
+        {formatPercent(
+          weightedBorrowsUsd.div(liquidationThresholdUsd).times(100),
+        )}
+      </span>
+      {" of your liquidation threshold"}
+      <br />
+      {"• "}
+      <span className="">
+        {formatPercent(weightedBorrowsUsd.div(depositedAmountUsd).times(100))}
+      </span>
+      {" of your deposited balance"}
+      {passedBorrowLimit &&
+        (!passedLiquidationThreshold ? (
+          <>
+            <span className="mt-2 block rounded-md border border-warning/50 p-2">
+              <span className="mr-2 font-medium text-warning">
+                <AlertTriangle className="mb-0.5 mr-1 inline h-3 w-3" />
+                Warning
+              </span>
+              Your weighted borrows exceed your borrow limit. Repay your borrows
+              or deposit more assets to avoid liquidation.
+            </span>
+          </>
+        ) : (
+          <>
+            <span className="mt-2 block rounded-md border border-destructive/50 p-2">
+              <span className="mr-2 font-medium text-destructive">
+                <AlertCircle className="mb-0.5 mr-1 inline h-3 w-3" />
+                Danger
+              </span>
+              Your weighted borrows exceed your liquidation threshold, putting
+              your account at risk of liquidation.
+            </span>
+          </>
+        ))}
+    </>
+  );
+  const borrowLimitTooltip = (
+    <>
+      {"Your borrow limit is "}
+      <span className="">{formatUsd(borrowLimitUsd)}</span>
+      {", or "}
+      <span className="">
+        {formatPercent(borrowLimitUsd.div(depositedAmountUsd).times(100))}
+      </span>
+      {" of your deposited balance."}
+    </>
+  );
+  const liquidationThresholdTooltip = (
+    <>
+      {"Your liquidation threshold is "}
+      <span className="">{formatUsd(liquidationThresholdUsd)}</span>
+      {", or "}
+      <span className="">
+        {formatPercent(
+          liquidationThresholdUsd.div(depositedAmountUsd).times(100),
+        )}
+      </span>
+      {" of your deposited balance."}
+    </>
+  );
 
   return (
     <Tooltip
       contentProps={{
-        className: "px-4 py-4 flex-col flex gap-4",
+        className: "px-4 py-4 flex-col flex gap-4 w-max",
+        style: {
+          maxWidth: "var(--radix-popper-anchor-width)",
+        },
+        align: "start",
       }}
       content={
         <>
-          <TBody>Hi</TBody>
+          <div className="flex flex-col gap-2">
+            <WeightedBorrowsTitle
+              labelClassName="uppercase font-mono"
+              noTooltip
+            />
+            <TBodySans className="text-xs">{weightedBorrowsTooltip}</TBodySans>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <BorrowLimitTitle labelClassName="uppercase font-mono" noTooltip />
+            <TBodySans className="text-xs">{borrowLimitTooltip}</TBodySans>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <LiquidationThresholdTitle
+              labelClassName="uppercase font-mono"
+              noTooltip
+            />
+            <TBodySans className="text-xs">
+              {liquidationThresholdTooltip}
+            </TBodySans>
+          </div>
         </>
       }
     >
-      <div
-        className="relative flex h-2.5 w-full cursor-pointer flex-row"
-        onClick={onClick}
-      >
+      <div className="relative flex h-2.5 w-full cursor-pointer flex-row">
         {segments.map((segment, index) => (
-          <Segment
-            key={index}
-            className={segment.className}
-            widthPercent={segment.widthPercent}
-          />
+          <Segment key={index} {...segment} />
         ))}
         {thresholds.map((threshold, index) => (
-          <Threshold
-            key={index}
-            className={threshold.className}
-            leftPercent={threshold.leftPercent}
-          />
+          <Threshold key={index} {...threshold} />
         ))}
       </div>
     </Tooltip>
