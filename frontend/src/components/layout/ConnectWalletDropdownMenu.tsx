@@ -233,7 +233,8 @@ export default function ConnectWalletDropdownMenu() {
       id: "Coin98",
       name: "Coin98",
       isInstalled: false,
-      logoUrl: "",
+      logoUrl:
+        "https://lh3.googleusercontent.com/-9HOHY2oGbRA8KVhPbN-FyIX0RHjvVPLzR3Gw1ESSIPzZk91Pj9riWWsR2IWQrDkcVSGW8OgBOzeMA7_xTF_7xm2=s120",
       downloadUrls: {
         browserExtension:
           "https://chromewebstore.google.com/detail/coin98-wallet/aeachknmefphepccionboohckonoeemg",
