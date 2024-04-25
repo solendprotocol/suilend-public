@@ -7,7 +7,6 @@ import ObligationBreakdown from "@/components/dashboard/ObligationBreakdown";
 import ObligationSwitcherPopover from "@/components/dashboard/ObligationSwitcherPopover";
 import UtilizationBar from "@/components/dashboard/UtilizationBar";
 import LabelWithTooltip from "@/components/shared/LabelWithTooltip";
-import LabelWithValue from "@/components/shared/LabelWithValue";
 import { TBody, TLabel, TLabelSans } from "@/components/shared/Typography";
 import { CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -53,45 +52,41 @@ function ObligationPositionCardContent() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-row gap-2">
-        <LabelWithValue
-          className="w-max items-start text-left"
-          label="Deposits"
-          labelTooltip={DEPOSITS_TOOLTIP}
-          value={obligation.totalSupplyUsd}
-          isUsd
-        />
+      <div className="flex flex-row justify-between gap-2">
+        <div className="flex flex-col gap-1">
+          <LabelWithTooltip tooltip={DEPOSITS_TOOLTIP}>
+            Deposits
+          </LabelWithTooltip>
+          <TBody>{formatUsd(obligation.totalSupplyUsd)}</TBody>
+        </div>
 
-        <TLabel className="flex flex-1 flex-col justify-center text-center">
-          -
-        </TLabel>
+        <TLabel>-</TLabel>
 
-        <LabelWithValue
-          className="w-max items-center text-center"
-          label="Borrows"
-          labelTooltip={BORROWS_TOOLTIP}
-          value={obligation.totalBorrowUsd}
-          isUsd
-        />
+        <div className="flex flex-col items-center gap-1">
+          <LabelWithTooltip className="text-center" tooltip={BORROWS_TOOLTIP}>
+            Borrows
+          </LabelWithTooltip>
+          <TBody className="text-center">
+            {formatUsd(obligation.totalBorrowUsd)}
+          </TBody>
+        </div>
 
-        <TLabel className="flex flex-1 flex-col justify-center text-center">
-          =
-        </TLabel>
+        <TLabel>=</TLabel>
 
-        <LabelWithValue
-          className="w-max items-end text-right"
-          label="Equity"
-          labelTooltip={EQUITY_TOOLTIP}
-          value={obligation.netValueUsd}
-          isUsd
-        />
+        <div className="flex flex-col items-end gap-1">
+          <LabelWithTooltip className="text-right" tooltip={EQUITY_TOOLTIP}>
+            Equity
+          </LabelWithTooltip>
+          <TBody className="text-right">
+            {formatUsd(obligation.netValueUsd)}
+          </TBody>
+        </div>
       </div>
 
-      <LabelWithValue
-        label="Net APR"
-        value={formatPercent(netAprPercent)}
-        horizontal
-      />
+      <div className="flex flex-row items-center justify-between gap-2">
+        <LabelWithTooltip>Net APR</LabelWithTooltip>
+        <TBody className="text-right">{formatPercent(netAprPercent)}</TBody>
+      </div>
 
       <Separator />
 
