@@ -26,10 +26,10 @@ export default function DepositTabContent({ reserve }: DepositTabContentProps) {
     .times(10 * 60 * 1000);
 
   const safeDepositLimit = reserve.config.depositLimit.minus(
-    reserve.totalDeposits.times(tenMinsDepositAprPercent.div(100)),
+    reserve.depositedAmount.times(tenMinsDepositAprPercent.div(100)),
   );
   const safeDepositLimitUsd = reserve.config.depositLimitUsd.minus(
-    reserve.totalDeposits
+    reserve.depositedAmount
       .times(reserve.maxPrice)
       .times(tenMinsDepositAprPercent.div(100)),
   );
@@ -43,14 +43,14 @@ export default function DepositTabContent({ reserve }: DepositTabContentProps) {
     {
       reason: "Exceeds reserve deposit limit",
       isDisabled: true,
-      value: BigNumber.max(safeDepositLimit.minus(reserve.totalDeposits), 0),
+      value: BigNumber.max(safeDepositLimit.minus(reserve.depositedAmount), 0),
     },
     {
       reason: "Exceeds reserve USD deposit limit",
       isDisabled: true,
       value: BigNumber.max(
         safeDepositLimitUsd
-          .minus(reserve.totalDeposits.times(reserve.maxPrice))
+          .minus(reserve.depositedAmount.times(reserve.maxPrice))
           .div(reserve.maxPrice),
         0,
       ),
@@ -76,26 +76,26 @@ export default function DepositTabContent({ reserve }: DepositTabContentProps) {
   const getNewCalculations = (value: string) => {
     if (!value.length)
       return {
-        newBorrowLimit: null,
+        newBorrowLimitUsd: null,
         newBorrowUtilization: null,
       };
     const valueObj = new BigNumber(value);
     if (!obligation || valueObj.isNaN())
       return {
-        newBorrowLimit: null,
+        newBorrowLimitUsd: null,
         newBorrowUtilization: null,
       };
 
-    const newBorrowLimit = obligation.minPriceBorrowLimit.plus(
+    const newBorrowLimitUsd = obligation.minPriceBorrowLimitUsd.plus(
       valueObj.times(reserve.minPrice).times(reserve.config.openLtvPct / 100),
     );
     const newBorrowUtilization =
-      newBorrowLimit && !newBorrowLimit.isZero()
-        ? obligation.totalWeightedBorrowUsd.div(newBorrowLimit)
+      newBorrowLimitUsd && !newBorrowLimitUsd.isZero()
+        ? obligation.weightedBorrowsUsd.div(newBorrowLimitUsd)
         : null;
 
     return {
-      newBorrowLimit,
+      newBorrowLimitUsd,
       newBorrowUtilization: newBorrowUtilization
         ? BigNumber.max(BigNumber.min(1, newBorrowUtilization), 0)
         : null,
@@ -109,13 +109,13 @@ export default function DepositTabContent({ reserve }: DepositTabContentProps) {
   const borrowedAmount = borrowPosition?.borrowedAmount ?? new BigNumber("0");
 
   const getSubmitButtonNoValueState = () => {
-    if (reserve.totalDeposits.gte(reserve.config.depositLimit))
+    if (reserve.depositedAmount.gte(reserve.config.depositLimit))
       return {
         isDisabled: true,
         title: "Reserve deposit limit reached",
       };
     if (
-      new BigNumber(reserve.totalDeposits.times(reserve.price)).gte(
+      new BigNumber(reserve.depositedAmountUsd).gte(
         reserve.config.depositLimitUsd,
       )
     )

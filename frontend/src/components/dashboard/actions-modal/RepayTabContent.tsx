@@ -56,29 +56,29 @@ export default function RepayTabContent({ reserve }: RepayTabContentProps) {
   const getNewCalculations = (value: string) => {
     if (!value.length)
       return {
-        newBorrowLimit: null,
+        newBorrowLimitUsd: null,
         newBorrowUtilization: null,
       };
     const valueObj = new BigNumber(value);
     if (!obligation || valueObj.isNaN())
       return {
-        newBorrowLimit: null,
+        newBorrowLimitUsd: null,
         newBorrowUtilization: null,
       };
 
     const newBorrowUtilization =
-      !valueObj.isNaN() && !obligation.minPriceBorrowLimit.isZero()
-        ? obligation.totalBorrowUsd
+      !valueObj.isNaN() && !obligation.minPriceBorrowLimitUsd.isZero()
+        ? obligation.borrowedAmountUsd
             .minus(
               valueObj
                 .times(reserve.maxPrice)
                 .times(reserve.config.borrowFeeBps / 10000),
             )
-            .div(obligation.minPriceBorrowLimit)
+            .div(obligation.minPriceBorrowLimitUsd)
         : null;
 
     return {
-      newBorrowLimit: null,
+      newBorrowLimitUsd: null,
       newBorrowUtilization: newBorrowUtilization
         ? BigNumber.max(BigNumber.min(1, newBorrowUtilization), 0)
         : null,

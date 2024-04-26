@@ -124,7 +124,7 @@ export function tableHeader<T>(
       <TLabel className="px-4 uppercase">{title}</TLabel>
     ) : (
       <LabelWithTooltip
-        className="h-full px-4 uppercase"
+        className="flex h-full flex-col justify-center px-4 uppercase"
         tooltip={tooltip}
         isMono
       >

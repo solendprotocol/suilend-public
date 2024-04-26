@@ -9,9 +9,15 @@ import { cn } from "@/lib/utils";
 interface TextLinkProps extends PropsWithChildren {
   className?: ClassValue;
   href: string;
+  noIcon?: boolean;
 }
 
-export default function TextLink({ className, href, children }: TextLinkProps) {
+export default function TextLink({
+  className,
+  href,
+  noIcon,
+  children,
+}: TextLinkProps) {
   return (
     <NextLink
       target="_blank"
@@ -22,7 +28,7 @@ export default function TextLink({ className, href, children }: TextLinkProps) {
       )}
     >
       {children}
-      <ExternalLink className="mb-0.5 ml-1 inline h-3 w-3" />
+      {!noIcon && <ExternalLink className="mb-0.5 ml-1 inline h-3 w-3" />}
     </NextLink>
   );
 }

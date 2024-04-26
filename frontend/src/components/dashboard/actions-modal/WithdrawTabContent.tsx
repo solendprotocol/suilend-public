@@ -42,12 +42,12 @@ export default function WithdrawTabContent({
       isDisabled: true,
       value:
         !obligation ||
-        obligation.maxPriceTotalWeightedBorrowUsd.gt(
-          obligation.minPriceBorrowLimit,
+        obligation.maxPriceWeightedBorrowsUsd.gt(
+          obligation.minPriceBorrowLimitUsd,
         )
           ? new BigNumber(0)
-          : obligation.minPriceBorrowLimit
-              .minus(obligation.maxPriceTotalWeightedBorrowUsd)
+          : obligation.minPriceBorrowLimitUsd
+              .minus(obligation.maxPriceWeightedBorrowsUsd)
               .div(reserve.minPrice)
               .div(reserve.config.openLtvPct / 100),
     },
@@ -84,18 +84,18 @@ export default function WithdrawTabContent({
   const getNewCalculations = (value: string) => {
     if (!value.length)
       return {
-        newBorrowLimit: null,
+        newBorrowLimitUsd: null,
         newBorrowUtilization: null,
       };
     const valueObj = new BigNumber(value);
     if (!obligation || valueObj.isNaN())
       return {
-        newBorrowLimit: null,
+        newBorrowLimitUsd: null,
         newBorrowUtilization: null,
       };
 
-    const newBorrowLimit = !valueObj.isNaN()
-      ? obligation.minPriceBorrowLimit.minus(
+    const newBorrowLimitUsd = !valueObj.isNaN()
+      ? obligation.minPriceBorrowLimitUsd.minus(
           valueObj
             .times(reserve.minPrice)
             .times(reserve.config.openLtvPct / 100),
@@ -103,12 +103,12 @@ export default function WithdrawTabContent({
       : null;
 
     const newBorrowUtilization =
-      newBorrowLimit && !newBorrowLimit.isZero()
-        ? obligation.totalBorrowUsd.div(newBorrowLimit)
+      newBorrowLimitUsd && !newBorrowLimitUsd.isZero()
+        ? obligation.borrowedAmountUsd.div(newBorrowLimitUsd)
         : null;
 
     return {
-      newBorrowLimit,
+      newBorrowLimitUsd,
       newBorrowUtilization: newBorrowUtilization
         ? BigNumber.max(BigNumber.min(1, newBorrowUtilization), 0)
         : null,

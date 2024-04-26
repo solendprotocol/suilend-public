@@ -123,14 +123,14 @@ export function WalletContextProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     if (!ldClient) return;
 
-    const key = account?.address;
+    const key = impersonatedAddress ?? account?.address;
     if (ldKeyRef.current === key) return;
 
     (async () => {
       await ldClient.identify(!key ? { anonymous: true } : { key });
       ldKeyRef.current = key;
     })();
-  }, [ldClient, account?.address]);
+  }, [ldClient, impersonatedAddress, account?.address]);
 
   // Tx
   // Note: Do NOT import and use this function directly. Instead, use the signExecuteAndWaitTransactionBlock
