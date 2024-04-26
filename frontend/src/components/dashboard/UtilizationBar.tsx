@@ -19,14 +19,12 @@ const getBorrowLimitUsd = (obligation: ParsedObligation) =>
   obligation.minPriceBorrowLimitUsd;
 
 const getWeightedBorrowsUsd = (obligation: ParsedObligation) => {
-  return obligation.maxPriceTotalWeightedBorrowUsd.gt(
-    getBorrowLimitUsd(obligation),
-  )
+  return obligation.maxPriceWeightedBorrowsUsd.gt(getBorrowLimitUsd(obligation))
     ? BigNumber.max(
-        obligation.totalWeightedBorrowUsd,
+        obligation.weightedBorrowsUsd,
         getBorrowLimitUsd(obligation),
       )
-    : obligation.maxPriceTotalWeightedBorrowUsd;
+    : obligation.maxPriceWeightedBorrowsUsd;
 };
 
 const getPassedBorrowLimit = (obligation: ParsedObligation) => {
@@ -98,7 +96,7 @@ export default function UtilizationBar({ obligation }: UtilizationBarProps) {
   if (!obligation) obligation = appContext.obligation;
   if (!obligation) return null;
 
-  const depositedAmountUsd = obligation.totalSupplyUsd;
+  const depositedAmountUsd = obligation.depositedAmountUsd;
   if (depositedAmountUsd.eq(0)) return null;
 
   const weightedBorrowsUsd = getWeightedBorrowsUsd(obligation);

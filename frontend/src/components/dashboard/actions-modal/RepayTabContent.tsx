@@ -68,7 +68,7 @@ export default function RepayTabContent({ reserve }: RepayTabContentProps) {
 
     const newBorrowUtilization =
       !valueObj.isNaN() && !obligation.minPriceBorrowLimitUsd.isZero()
-        ? obligation.totalBorrowUsd
+        ? obligation.borrowedAmountUsd
             .minus(
               valueObj
                 .times(reserve.maxPrice)

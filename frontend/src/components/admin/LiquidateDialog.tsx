@@ -252,12 +252,12 @@ export default function LiquidateDialog({
             isUsd={true}
           />
           <LabelWithValue
-            label="Total Supply"
-            value={parsedObligation.totalSupplyUsd}
+            label="Deposited Amount"
+            value={parsedObligation.depositedAmountUsd}
             isUsd={true}
           />
           <LabelWithValue
-            label="(Min Price) Borrow Limit"
+            label="Borrow Limit"
             value={parsedObligation.minPriceBorrowLimitUsd}
             isUsd={true}
           />
@@ -267,13 +267,13 @@ export default function LiquidateDialog({
             isUsd={true}
           />
           <LabelWithValue
-            label="Total Borrow"
-            value={parsedObligation.totalBorrowUsd}
+            label="Borrowed Amount"
+            value={parsedObligation.borrowedAmountUsd}
             isUsd={true}
           />
           <LabelWithValue
             label="Weighted Borrows"
-            value={parsedObligation.totalWeightedBorrowUsd}
+            value={parsedObligation.weightedBorrowsUsd}
             isUsd={true}
           />
           <div className="col-span-2">

@@ -42,12 +42,12 @@ export default function WithdrawTabContent({
       isDisabled: true,
       value:
         !obligation ||
-        obligation.maxPriceTotalWeightedBorrowUsd.gt(
+        obligation.maxPriceWeightedBorrowsUsd.gt(
           obligation.minPriceBorrowLimitUsd,
         )
           ? new BigNumber(0)
           : obligation.minPriceBorrowLimitUsd
-              .minus(obligation.maxPriceTotalWeightedBorrowUsd)
+              .minus(obligation.maxPriceWeightedBorrowsUsd)
               .div(reserve.minPrice)
               .div(reserve.config.openLtvPct / 100),
     },
@@ -104,7 +104,7 @@ export default function WithdrawTabContent({
 
     const newBorrowUtilization =
       newBorrowLimitUsd && !newBorrowLimitUsd.isZero()
-        ? obligation.totalBorrowUsd.div(newBorrowLimitUsd)
+        ? obligation.borrowedAmountUsd.div(newBorrowLimitUsd)
         : null;
 
     return {

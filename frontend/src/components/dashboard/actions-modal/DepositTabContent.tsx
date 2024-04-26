@@ -91,7 +91,7 @@ export default function DepositTabContent({ reserve }: DepositTabContentProps) {
     );
     const newBorrowUtilization =
       newBorrowLimitUsd && !newBorrowLimitUsd.isZero()
-        ? obligation.totalWeightedBorrowUsd.div(newBorrowLimitUsd)
+        ? obligation.weightedBorrowsUsd.div(newBorrowLimitUsd)
         : null;
 
     return {

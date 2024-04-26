@@ -57,7 +57,7 @@ function ObligationPositionCardContent() {
           <LabelWithTooltip tooltip={DEPOSITS_TOOLTIP}>
             Deposits
           </LabelWithTooltip>
-          <TBody>{formatUsd(obligation.totalSupplyUsd)}</TBody>
+          <TBody>{formatUsd(obligation.depositedAmountUsd)}</TBody>
         </div>
 
         <TLabel>-</TLabel>
@@ -67,7 +67,7 @@ function ObligationPositionCardContent() {
             Borrows
           </LabelWithTooltip>
           <TBody className="text-center">
-            {formatUsd(obligation.totalBorrowUsd)}
+            {formatUsd(obligation.borrowedAmountUsd)}
           </TBody>
         </div>
 
@@ -95,7 +95,7 @@ function ObligationPositionCardContent() {
           <LabelWithTooltip tooltip={WEIGHTED_BORROWS_TOOLTIP}>
             Weighted borrows
           </LabelWithTooltip>
-          <TBody>{formatUsd(obligation.totalWeightedBorrowUsd)}</TBody>
+          <TBody>{formatUsd(obligation.weightedBorrowsUsd)}</TBody>
         </div>
 
         <div className="flex flex-col items-end gap-1">

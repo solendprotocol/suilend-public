@@ -67,10 +67,10 @@ export default function ObligationSwitcherPopover() {
 
               <div className="flex w-full justify-between">
                 <TLabelSans className="text-right">
-                  {formatUsd(o.totalSupplyUsd)} deposited
+                  {formatUsd(o.depositedAmountUsd)} deposited
                 </TLabelSans>
                 <TLabelSans className="text-right">
-                  {formatUsd(o.totalBorrowUsd)} borrowed
+                  {formatUsd(o.borrowedAmountUsd)} borrowed
                 </TLabelSans>
               </div>
             </CommandItem>
