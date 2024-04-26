@@ -61,6 +61,21 @@ export const LIQUIDATION_THRESHOLD_TOOLTIP = (
   </>
 );
 
+export const WEIGHTED_BORROWS_PRICE_TOOLTIP = (
+  <>
+    {
+      "In weighted borrows calculations, the price is defined as the maximum of the price and the "
+    }
+    <TextLink
+      href="https://docs.pyth.network/price-feeds/how-pyth-works/ema-price-aggregation"
+      noIcon
+    >
+      exponentially-weighted moving average (EMA) price
+    </TextLink>
+    {"."}
+  </>
+);
+
 export const BORROW_LIMIT_PRICE_TOOLTIP = (
   <>
     {

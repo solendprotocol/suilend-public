@@ -257,7 +257,7 @@ export default function LiquidateDialog({
             isUsd
           />
           <LabelWithValue
-            label="Borrow Limit"
+            label="(Min Price) Borrow Limit"
             value={parsedObligation.minPriceBorrowLimitUsd}
             isUsd
           />
@@ -272,8 +272,8 @@ export default function LiquidateDialog({
             isUsd
           />
           <LabelWithValue
-            label="Weighted Borrows"
-            value={parsedObligation.weightedBorrowsUsd}
+            label="(Max Price) Weighted Borrows"
+            value={parsedObligation.maxPriceWeightedBorrowsUsd}
             isUsd
           />
           <div className="col-span-2">
