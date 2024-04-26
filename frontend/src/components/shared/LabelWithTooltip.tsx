@@ -26,7 +26,7 @@ export default function LabelWithTooltip({
     <Tooltip title={tooltip} contentProps={tooltipContentProps}>
       <Component
         className={cn(
-          "w-max",
+          "flex w-max flex-row items-center",
           className,
           !!tooltip &&
             cn("decoration-muted-foreground/50", hoverUnderlineClassName),
