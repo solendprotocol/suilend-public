@@ -129,9 +129,9 @@ export default function MarketTable() {
       .div(100 * 100)
       .toNumber();
     const totalDeposits = reserve.totalDeposits;
-    const totalDepositsUsd = reserve.totalDeposits.times(reserve.maxPrice);
+    const totalDepositsUsd = reserve.totalDeposits.times(reserve.price);
     const totalBorrows = reserve.borrowedAmount;
-    const totalBorrowsUsd = reserve.borrowedAmount.times(reserve.maxPrice);
+    const totalBorrowsUsd = reserve.borrowedAmount.times(reserve.price);
     const depositAprPercent = reserve.depositAprPercent;
     const totalDepositAprPercent = getTotalAprPercent(
       reserve.depositAprPercent,
