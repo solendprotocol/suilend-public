@@ -50,9 +50,6 @@ export const getWeightedBorrowsColor = (obligation: ParsedObligation) => {
   return "destructive";
 };
 
-export const BORROW_LIMIT_COLOR = "primary";
-export const LIQUIDATION_THRESHOLD_COLOR = "secondary";
-
 interface SegmentProps {
   className?: ClassValue;
   style?: CSSProperties;
