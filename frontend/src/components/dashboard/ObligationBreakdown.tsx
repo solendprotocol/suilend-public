@@ -1,43 +1,27 @@
-import { PropsWithChildren, ReactNode } from "react";
+import { CSSProperties, ReactNode } from "react";
 
 import BigNumber from "bignumber.js";
 import { ClassValue } from "clsx";
+import { useLocalStorage } from "usehooks-ts";
 
 import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
 
-import { getPassedLimit } from "@/components/dashboard/UtilizationBar";
+import BorrowLimitTitle from "@/components/dashboard/account/BorrowLimitTitle";
+import LiquidationThresholdTitle from "@/components/dashboard/account/LiquidationThresholdTitle";
+import WeightedBorrowsTitle from "@/components/dashboard/account/WeightedBorrowsTitle";
+import { getWeightedBorrowsColor } from "@/components/dashboard/UtilizationBar";
 import Collapsible from "@/components/shared/Collapsible";
 import LabelWithTooltip from "@/components/shared/LabelWithTooltip";
-import { TBody, TLabelSans } from "@/components/shared/Typography";
+import { TBody } from "@/components/shared/Typography";
 import { Separator } from "@/components/ui/separator";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { formatLtv, formatPrice, formatToken, formatUsd } from "@/lib/format";
-import {
-  BORROW_LIMIT_TOOLTIP,
-  LIQUIDATION_THRESHOLD_TOOLTIP,
-  WEIGHTED_BORROW_TOOLTIP,
-} from "@/lib/tooltips";
+import { BORROW_LIMIT_PRICE_TOOLTIP } from "@/lib/tooltips";
 import { cn, sortInReserveOrder } from "@/lib/utils";
 
-interface BreakdownSectionTitle extends PropsWithChildren {
-  barSegmentClassName: ClassValue;
-  tooltip: ReactNode;
-}
-
-function BreakdownSectionTitle({
-  barSegmentClassName,
-  tooltip,
-  children,
-}: BreakdownSectionTitle) {
-  return (
-    <div className="flex flex-row items-center gap-2">
-      <div className={cn("h-2 w-2", barSegmentClassName)} />
-      <LabelWithTooltip tooltip={tooltip}>{children}</LabelWithTooltip>
-    </div>
-  );
-}
 interface BreakdownColumn {
   title: string;
+  titleTooltip?: string | ReactNode;
   data?: string[];
 }
 
@@ -54,14 +38,15 @@ function BreakdownColumn({
 }: BreakdownColumnProps) {
   if (!column.data)
     return (
-      <TLabelSans
+      <LabelWithTooltip
         className={cn(
-          "h-fit flex-1 text-center",
+          "h-fit w-auto flex-1 text-center",
           rowCount > 0 && "border-b pb-2",
         )}
+        tooltip={column.titleTooltip}
       >
         {column.title}
-      </TLabelSans>
+      </LabelWithTooltip>
     );
   return (
     <div
@@ -70,9 +55,12 @@ function BreakdownColumn({
         isRightAligned && "justify-end text-right",
       )}
     >
-      <TLabelSans className={cn(rowCount > 0 && "mb-1 border-b pb-2")}>
+      <LabelWithTooltip
+        className={cn("w-auto", rowCount > 0 && "mb-1 border-b pb-2")}
+        tooltip={column.titleTooltip}
+      >
         {column.title}
-      </TLabelSans>
+      </LabelWithTooltip>
       {column.data.map((row, index) => (
         <TBody key={index} className="text-xs">
           {row}
@@ -85,17 +73,17 @@ function BreakdownColumn({
 interface BreakdownTableProps {
   rowCount: number;
   columns: BreakdownColumn[];
-  totalLabel: string;
   totalValue: string;
   totalValueClassName?: ClassValue;
+  totalValueStyle?: CSSProperties;
 }
 
 function BreakdownTable({
   rowCount,
   columns,
-  totalLabel,
   totalValue,
   totalValueClassName,
+  totalValueStyle,
 }: BreakdownTableProps) {
   return (
     <div className="flex w-full flex-col gap-2">
@@ -111,9 +99,11 @@ function BreakdownTable({
         ))}
       </div>
       <Separator className="w-full" />
-      <div className="flex w-full flex-row items-center justify-between">
-        <TLabelSans>{totalLabel}</TLabelSans>
-        <TBody className={cn("text-xs", totalValueClassName)}>
+      <div className="flex w-full flex-row justify-end">
+        <TBody
+          className={cn("text-xs", totalValueClassName)}
+          style={totalValueStyle}
+        >
           {totalValue}
         </TBody>
       </div>
@@ -121,15 +111,7 @@ function BreakdownTable({
   );
 }
 
-interface ObligationBreakdownProps {
-  isBreakdownOpen: boolean;
-  setIsBreakdownOpen: (value: boolean) => void;
-}
-
-export default function ObligationBreakdown({
-  isBreakdownOpen,
-  setIsBreakdownOpen,
-}: ObligationBreakdownProps) {
+export default function ObligationBreakdown() {
   const appContext = useAppContext();
   const data = appContext.data as AppData;
   const obligation = appContext.obligation as ParsedObligation;
@@ -141,32 +123,23 @@ export default function ObligationBreakdown({
     .slice()
     .sort(sortInReserveOrder(data.lendingMarket.reserves));
 
-  const passedLimit = getPassedLimit(obligation);
+  // State
+  const [isOpen, setIsOpen] = useLocalStorage<boolean>(
+    "isPositionBreakdownOpen",
+    false,
+  );
 
   return (
     <Collapsible
-      open={isBreakdownOpen}
-      onOpenChange={setIsBreakdownOpen}
+      open={isOpen}
+      onOpenChange={setIsOpen}
       closedTitle="Show breakdown"
       openTitle="Hide breakdown"
       hasSeparator
     >
-      <div
-        className={cn(
-          "flex flex-col items-center gap-6",
-          isBreakdownOpen && "-mx-1 mt-6 sm:mx-0",
-        )}
-      >
+      <div className={cn("flex flex-col items-center gap-4", isOpen && "mt-6")}>
         <div className="flex w-full flex-col gap-2">
-          <BreakdownSectionTitle
-            barSegmentClassName={
-              passedLimit ? "bg-destructive" : "bg-foreground/50"
-            }
-            tooltip={WEIGHTED_BORROW_TOOLTIP}
-          >
-            Weighted borrow
-          </BreakdownSectionTitle>
-
+          <WeightedBorrowsTitle />
           <BreakdownTable
             rowCount={sortedBorrows.length}
             columns={[
@@ -177,12 +150,12 @@ export default function ObligationBreakdown({
                     `${formatToken(b.borrowedAmount, { exact: false })} ${b.reserve.symbol}`,
                 ),
               },
-              { title: "*" },
+              { title: "×" },
               {
                 title: "Price",
                 data: sortedBorrows.map((b) => formatPrice(b.reserve.price)),
               },
-              { title: "*" },
+              { title: "×" },
               {
                 title: "Weight",
                 data: sortedBorrows.map((b) =>
@@ -201,7 +174,6 @@ export default function ObligationBreakdown({
                 ),
               },
             ]}
-            totalLabel="Total weighted borrow"
             totalValue={formatUsd(
               sortedBorrows.reduce(
                 (acc, b) =>
@@ -213,20 +185,14 @@ export default function ObligationBreakdown({
                 new BigNumber(0),
               ),
             )}
-            totalValueClassName={
-              passedLimit ? "text-destructive" : "text-foreground/50"
-            }
+            totalValueStyle={{
+              color: `hsl(var(--${getWeightedBorrowsColor(obligation)}))`,
+            }}
           />
         </div>
 
         <div className="flex w-full flex-col gap-2">
-          <BreakdownSectionTitle
-            barSegmentClassName="bg-primary"
-            tooltip={BORROW_LIMIT_TOOLTIP}
-          >
-            Borrow limit
-          </BreakdownSectionTitle>
-
+          <BorrowLimitTitle />
           <BreakdownTable
             rowCount={sortedDeposits.length}
             columns={[
@@ -237,12 +203,15 @@ export default function ObligationBreakdown({
                     `${formatToken(d.depositedAmount, { exact: false })} ${d.reserve.symbol}`,
                 ),
               },
-              { title: "*" },
+              { title: "×" },
               {
                 title: "Price",
-                data: sortedDeposits.map((d) => formatPrice(d.reserve.price)),
+                titleTooltip: BORROW_LIMIT_PRICE_TOOLTIP,
+                data: sortedDeposits.map((d) =>
+                  formatPrice(d.reserve.minPrice),
+                ),
               },
-              { title: "*" },
+              { title: "×" },
               {
                 title: "Open LTV",
                 data: sortedDeposits.map((d) =>
@@ -255,19 +224,18 @@ export default function ObligationBreakdown({
                 data: sortedDeposits.map((d) =>
                   formatUsd(
                     d.depositedAmount
-                      .times(d.reserve.price)
+                      .times(d.reserve.minPrice)
                       .times(d.reserve.config.openLtvPct / 100),
                   ),
                 ),
               },
             ]}
-            totalLabel="Total borrow limit"
             totalValue={formatUsd(
               sortedDeposits.reduce(
                 (acc, d) =>
                   acc.plus(
                     d.depositedAmount
-                      .times(d.reserve.price)
+                      .times(d.reserve.minPrice)
                       .times(d.reserve.config.openLtvPct / 100),
                   ),
                 new BigNumber(0),
@@ -278,13 +246,7 @@ export default function ObligationBreakdown({
         </div>
 
         <div className="flex w-full flex-col gap-2">
-          <BreakdownSectionTitle
-            barSegmentClassName="bg-secondary"
-            tooltip={LIQUIDATION_THRESHOLD_TOOLTIP}
-          >
-            Liquidation threshold
-          </BreakdownSectionTitle>
-
+          <LiquidationThresholdTitle />
           <BreakdownTable
             rowCount={sortedDeposits.length}
             columns={[
@@ -295,12 +257,12 @@ export default function ObligationBreakdown({
                     `${formatToken(d.depositedAmount, { exact: false })} ${d.reserve.symbol}`,
                 ),
               },
-              { title: "*" },
+              { title: "×" },
               {
                 title: "Price",
                 data: sortedDeposits.map((d) => formatPrice(d.reserve.price)),
               },
-              { title: "*" },
+              { title: "×" },
               {
                 title: "Close LTV",
                 data: sortedDeposits.map((d) =>
@@ -319,7 +281,6 @@ export default function ObligationBreakdown({
                 ),
               },
             ]}
-            totalLabel="Total liquidation threshold"
             totalValue={formatUsd(
               sortedDeposits.reduce(
                 (acc, d) =>

@@ -1,6 +1,5 @@
 import BigNumber from "bignumber.js";
 
-import { maxU64 } from "@suilend/sdk/constants";
 import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 
 import ActionsModalTabContent from "@/components/dashboard/actions-modal/ActionsModalTabContent";
@@ -27,10 +26,10 @@ export default function DepositTabContent({ reserve }: DepositTabContentProps) {
     .times(10 * 60 * 1000);
 
   const safeDepositLimit = reserve.config.depositLimit.minus(
-    reserve.totalDeposits.times(tenMinsDepositAprPercent.div(100)),
+    reserve.depositedAmount.times(tenMinsDepositAprPercent.div(100)),
   );
   const safeDepositLimitUsd = reserve.config.depositLimitUsd.minus(
-    reserve.totalDeposits
+    reserve.depositedAmount
       .times(reserve.maxPrice)
       .times(tenMinsDepositAprPercent.div(100)),
   );
@@ -44,26 +43,25 @@ export default function DepositTabContent({ reserve }: DepositTabContentProps) {
     {
       reason: "Exceeds reserve deposit limit",
       isDisabled: true,
-      value: BigNumber.max(safeDepositLimit.minus(reserve.totalDeposits), 0),
+      value: BigNumber.max(safeDepositLimit.minus(reserve.depositedAmount), 0),
     },
     {
       reason: "Exceeds reserve USD deposit limit",
       isDisabled: true,
       value: BigNumber.max(
         safeDepositLimitUsd
-          .minus(reserve.totalDeposits.times(reserve.maxPrice))
+          .minus(reserve.depositedAmount.times(reserve.maxPrice))
           .div(reserve.maxPrice),
         0,
       ),
     },
-    {
+  ];
+  if (isSui(reserve.coinType))
+    maxCalculations.push({
       reason: `Min ${SUI_DEPOSIT_GAS_MIN} SUI should be saved for gas`,
       isDisabled: true,
-      value: isSui(reserve.coinType)
-        ? coinBalanceForReserve.minus(SUI_DEPOSIT_GAS_MIN)
-        : new BigNumber(maxU64.toString()),
-    },
-  ];
+      value: coinBalanceForReserve.minus(SUI_DEPOSIT_GAS_MIN),
+    });
 
   // Value
   const getMaxValue = () => {
@@ -78,26 +76,26 @@ export default function DepositTabContent({ reserve }: DepositTabContentProps) {
   const getNewCalculations = (value: string) => {
     if (!value.length)
       return {
-        newBorrowLimit: null,
+        newBorrowLimitUsd: null,
         newBorrowUtilization: null,
       };
     const valueObj = new BigNumber(value);
     if (!obligation || valueObj.isNaN())
       return {
-        newBorrowLimit: null,
+        newBorrowLimitUsd: null,
         newBorrowUtilization: null,
       };
 
-    const newBorrowLimit = obligation.minPriceBorrowLimit.plus(
+    const newBorrowLimitUsd = obligation.minPriceBorrowLimitUsd.plus(
       valueObj.times(reserve.minPrice).times(reserve.config.openLtvPct / 100),
     );
     const newBorrowUtilization =
-      newBorrowLimit && !newBorrowLimit.isZero()
-        ? obligation.totalWeightedBorrowUsd.div(newBorrowLimit)
+      newBorrowLimitUsd && !newBorrowLimitUsd.isZero()
+        ? obligation.weightedBorrowsUsd.div(newBorrowLimitUsd)
         : null;
 
     return {
-      newBorrowLimit,
+      newBorrowLimitUsd,
       newBorrowUtilization: newBorrowUtilization
         ? BigNumber.max(BigNumber.min(1, newBorrowUtilization), 0)
         : null,
@@ -105,6 +103,31 @@ export default function DepositTabContent({ reserve }: DepositTabContentProps) {
   };
 
   // Submit
+  const borrowPosition = obligation?.borrows?.find(
+    (d) => d.coinType === reserve.coinType,
+  );
+  const borrowedAmount = borrowPosition?.borrowedAmount ?? new BigNumber("0");
+
+  const getSubmitButtonNoValueState = () => {
+    if (reserve.depositedAmount.gte(reserve.config.depositLimit))
+      return {
+        isDisabled: true,
+        title: "Reserve deposit limit reached",
+      };
+    if (
+      new BigNumber(reserve.depositedAmountUsd).gte(
+        reserve.config.depositLimitUsd,
+      )
+    )
+      return {
+        isDisabled: true,
+        title: "Reserve USD deposit limit reached",
+      };
+    if (borrowedAmount.gt(0.01))
+      return { isDisabled: true, title: "Cannot deposit borrowed asset" };
+    return undefined;
+  };
+
   const getSubmitButtonState = (value: string) => {
     for (const calc of maxCalculations) {
       if (new BigNumber(value).gt(calc.value))
@@ -122,6 +145,7 @@ export default function DepositTabContent({ reserve }: DepositTabContentProps) {
       reserve={reserve}
       getNewCalculations={getNewCalculations}
       getMaxValue={getMaxValue}
+      getSubmitButtonNoValueState={getSubmitButtonNoValueState}
       getSubmitButtonState={getSubmitButtonState}
       submit={deposit}
     />

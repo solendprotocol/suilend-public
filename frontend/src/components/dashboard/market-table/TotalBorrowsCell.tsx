@@ -5,9 +5,9 @@ interface TotalBorrowsCellProps
   extends Pick<
     ReservesRowData,
     | "symbol"
-    | "totalBorrows"
-    | "totalBorrowsUsd"
-    | "totalBorrowsTooltip"
+    | "borrowedAmount"
+    | "borrowedAmountUsd"
+    | "borrowedAmountTooltip"
     | "reserve"
   > {
   horizontal?: boolean;
@@ -15,18 +15,18 @@ interface TotalBorrowsCellProps
 
 export default function TotalBorrowsCell({
   symbol,
-  totalBorrows,
-  totalBorrowsUsd,
-  totalBorrowsTooltip,
+  borrowedAmount,
+  borrowedAmountUsd,
+  borrowedAmountTooltip,
   reserve,
   horizontal,
 }: TotalBorrowsCellProps) {
   return (
     <TotalCell
       symbol={symbol}
-      total={totalBorrows}
-      totalUsd={totalBorrowsUsd}
-      tooltip={totalBorrowsTooltip}
+      total={borrowedAmount}
+      totalUsd={borrowedAmountUsd}
+      tooltip={borrowedAmountTooltip}
       reserve={reserve}
       horizontal={horizontal}
     />

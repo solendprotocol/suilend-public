@@ -72,12 +72,12 @@ function MarketCard({ rowData }: MarketCardProps) {
         </div>
 
         <div className="flex w-full flex-row items-center justify-between">
-          <TLabel className="uppercase">Total deposits</TLabel>
+          <TLabel className="uppercase">Deposits</TLabel>
           <TotalDepositsCell {...rowData} horizontal />
         </div>
 
         <div className="flex w-full flex-row items-center justify-between">
-          <TLabel className="uppercase">Total borrows</TLabel>
+          <TLabel className="uppercase">Borrows</TLabel>
           <TotalBorrowsCell {...rowData} horizontal />
         </div>
       </div>
@@ -110,11 +110,11 @@ export default function MarketCardList({
     BORROW_APR_ASC = "borrowAprAsc",
     BORROW_APR_DESC = "borrowAprDesc",
 
-    TOTAL_DEPOSITS_ASC = "totalDepositsAsc",
-    TOTAL_DEPOSITS_DESC = "totalDepositsDesc",
+    DEPOSITED_AMOUNT_ASC = "depositedAmountAsc",
+    DEPOSITED_AMOUNT_DESC = "depositedAmountDesc",
 
-    TOTAL_BORROWS_ASC = "totalBorrowsAsc",
-    TOTAL_BORROWS_DESC = "totalBorrowsDesc",
+    BORROWED_AMOUNT_ASC = "borrowedAmountAsc",
+    BORROWED_AMOUNT_DESC = "borrowedAmountDesc",
   }
 
   const sortOptions = {
@@ -145,22 +145,22 @@ export default function MarketCardList({
       name: "Borrow APR (desc)",
     },
 
-    [SortOption.TOTAL_DEPOSITS_ASC]: {
+    [SortOption.DEPOSITED_AMOUNT_ASC]: {
       icon: ArrowDown01,
-      name: "Total deposits (asc)",
+      name: "Deposits (asc)",
     },
-    [SortOption.TOTAL_DEPOSITS_DESC]: {
+    [SortOption.DEPOSITED_AMOUNT_DESC]: {
       icon: ArrowDown10,
-      name: "Total deposits (desc)",
+      name: "Deposits (desc)",
     },
 
-    [SortOption.TOTAL_BORROWS_ASC]: {
+    [SortOption.BORROWED_AMOUNT_ASC]: {
       icon: ArrowDown01,
-      name: "Total borrows (asc)",
+      name: "Borrows (asc)",
     },
-    [SortOption.TOTAL_BORROWS_DESC]: {
+    [SortOption.BORROWED_AMOUNT_DESC]: {
       icon: ArrowDown10,
-      name: "Total borrows (desc)",
+      name: "Borrows (desc)",
     },
   };
 
@@ -187,15 +187,15 @@ export default function MarketCardList({
         if (sortBy === SortOption.BORROW_APR_DESC)
           return b.totalBorrowAprPercent.lt(a.totalBorrowAprPercent) ? -1 : 1;
 
-        if (sortBy === SortOption.TOTAL_DEPOSITS_ASC)
-          return a.totalDepositsUsd.lt(b.totalDepositsUsd) ? -1 : 1;
-        if (sortBy === SortOption.TOTAL_DEPOSITS_DESC)
-          return b.totalDepositsUsd.lt(a.totalDepositsUsd) ? -1 : 1;
+        if (sortBy === SortOption.DEPOSITED_AMOUNT_ASC)
+          return a.depositedAmountUsd.lt(b.depositedAmountUsd) ? -1 : 1;
+        if (sortBy === SortOption.DEPOSITED_AMOUNT_DESC)
+          return b.depositedAmountUsd.lt(a.depositedAmountUsd) ? -1 : 1;
 
-        if (sortBy === SortOption.TOTAL_BORROWS_ASC)
-          return a.totalBorrowsUsd.lt(b.totalBorrowsUsd) ? -1 : 1;
-        if (sortBy === SortOption.TOTAL_BORROWS_DESC)
-          return b.totalBorrowsUsd.lt(a.totalBorrowsUsd) ? -1 : 1;
+        if (sortBy === SortOption.BORROWED_AMOUNT_ASC)
+          return a.borrowedAmountUsd.lt(b.borrowedAmountUsd) ? -1 : 1;
+        if (sortBy === SortOption.BORROWED_AMOUNT_DESC)
+          return b.borrowedAmountUsd.lt(a.borrowedAmountUsd) ? -1 : 1;
         return 0;
       });
 

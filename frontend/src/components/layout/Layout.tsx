@@ -1,6 +1,5 @@
 import { CSSProperties, PropsWithChildren, useRef, useState } from "react";
 
-import { useFlags } from "launchdarkly-react-client-sdk";
 import { useResizeObserver } from "usehooks-ts";
 
 import AppHeader from "@/components/layout/AppHeader";
@@ -12,7 +11,6 @@ import { useAppContext } from "@/contexts/AppContext";
 
 export default function Layout({ children }: PropsWithChildren) {
   const { suilendClient, data } = useAppContext();
-  const flags = useFlags();
 
   // Banner
   const bannerRef = useRef<HTMLDivElement>(null);
@@ -26,11 +24,7 @@ export default function Layout({ children }: PropsWithChildren) {
     },
   });
 
-  const isLoading =
-    flags.banner === undefined ||
-    (flags.banner?.message && [0, null].includes(bannerHeight)) ||
-    !suilendClient ||
-    !data;
+  const isPageLoading = !suilendClient || !data;
 
   return (
     <div
@@ -42,20 +36,15 @@ export default function Layout({ children }: PropsWithChildren) {
         } as CSSProperties
       }
     >
-      <Banner ref={bannerRef} height={bannerHeight} isHidden={isLoading} />
+      <Banner ref={bannerRef} height={bannerHeight} />
+      <AppHeader />
 
-      {isLoading ? (
-        <FullPageSpinner />
-      ) : (
-        <>
-          <AppHeader />
-          <div className="relative z-[1] flex-1 py-4 md:py-6">
-            <Container>{children}</Container>
-          </div>
+      {isPageLoading && <FullPageSpinner />}
+      <div className="relative z-[1] flex-1 py-4 md:py-6">
+        {!isPageLoading && <Container>{children}</Container>}
+      </div>
 
-          <Footer />
-        </>
-      )}
+      <Footer />
     </div>
   );
 }

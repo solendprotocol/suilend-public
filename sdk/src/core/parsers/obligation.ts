@@ -16,20 +16,21 @@ export const parseObligation = (
   obligation: typeof Obligation,
   parsedReserveMap: { [coinType: string]: ParsedReserve },
 ) => {
-  let totalSupplyUsd = new BigNumber(0);
-  let totalBorrowUsd = new BigNumber(0);
-  let borrowLimit = new BigNumber(0);
-  let minPriceBorrowLimit = new BigNumber(0);
+  let totalDepositedAmountUsd = new BigNumber(0);
+  let totalBorrowedAmountUsd = new BigNumber(0);
+
+  let weightedBorrowsUsd = new BigNumber(0);
+  let maxPriceWeightedBorrowsUsd = new BigNumber(0);
+  let borrowLimitUsd = new BigNumber(0);
+  let minPriceBorrowLimitUsd = new BigNumber(0);
   let unhealthyBorrowValueUsd = new BigNumber(0);
-  let totalWeightedBorrowUsd = new BigNumber(0);
-  let maxPriceTotalWeightedBorrowUsd = new BigNumber(0);
 
   const positionCount =
-    (obligation.deposits as any[]).filter(
-      (pos) => pos.depositedCtokenAmount.toString() !== "0",
+    (obligation.deposits as any[]).filter((deposit) =>
+      new BigNumber(deposit.depositedCtokenAmount.toString()).gt(0),
     ).length +
-    (obligation.borrows as any[]).filter(
-      (pos) => pos.borrowedAmount.value.toString() !== "0",
+    (obligation.borrows as any[]).filter((borrow) =>
+      new BigNumber(borrow.borrowedAmount.value.toString()).gt(0),
     ).length;
 
   const deposits = (obligation.deposits as any[]).map((deposit) => {
@@ -39,6 +40,7 @@ export const parseObligation = (
       throw new Error(
         `Reserve with coinType ${deposit.coinType.name} not found`,
       );
+
     const depositedCtokenAmount = new BigNumber(
       deposit.depositedCtokenAmount.toString(),
     ).div(10 ** reserve.mintDecimals);
@@ -46,35 +48,35 @@ export const parseObligation = (
       reserve.cTokenExchangeRate,
     );
     const depositedAmountUsd = depositedAmount.times(reserve.price);
-    totalSupplyUsd = totalSupplyUsd.plus(depositedAmountUsd);
 
-    minPriceBorrowLimit = minPriceBorrowLimit.plus(
+    totalDepositedAmountUsd = totalDepositedAmountUsd.plus(depositedAmountUsd);
+
+    borrowLimitUsd = borrowLimitUsd.plus(
+      depositedAmountUsd.times(reserve.config.openLtvPct / 100),
+    );
+    minPriceBorrowLimitUsd = minPriceBorrowLimitUsd.plus(
       depositedAmount
         .times(reserve.minPrice)
         .times(reserve.config.openLtvPct / 100),
-    );
-    borrowLimit = borrowLimit.plus(
-      depositedAmountUsd.times(reserve.config.openLtvPct / 100),
     );
     unhealthyBorrowValueUsd = unhealthyBorrowValueUsd.plus(
       depositedAmountUsd.times(reserve.config.closeLtvPct / 100),
     );
 
+    const reserveArrayIndex = deposit.reserveArrayIndex;
     const userRewardManagerIndex = Number(
       deposit.userRewardManagerIndex.toString(),
     );
     const userRewardManager =
       obligation.userRewardManagers[userRewardManagerIndex];
 
-    const reserveArrayIndex = deposit.reserveArrayIndex;
-
     return {
       coinType,
       reserveArrayIndex,
       userRewardManagerIndex,
+      userRewardManager,
       depositedAmount,
       depositedAmountUsd,
-      userRewardManager,
       reserve,
       original: obligation,
     };
@@ -87,7 +89,8 @@ export const parseObligation = (
       throw new Error(
         `Reserve with coinType ${borrow.coinType.name} not found`,
       );
-    const reserveCumulativeBorrowRate = new BigNumber(
+
+    const cumulativeBorrowRate = new BigNumber(
       borrow.cumulativeBorrowRate.value.toString(),
     ).div(WAD.toString());
     const borrowedAmountInitial = new BigNumber(
@@ -95,62 +98,89 @@ export const parseObligation = (
     )
       .div(WAD.toString())
       .div(10 ** reserve.mintDecimals);
-    const borrowInterestIndex = reserve.cumulativeBorrowRate.div(
-      reserveCumulativeBorrowRate,
-    );
+    const borrowInterestIndex =
+      reserve.cumulativeBorrowRate.div(cumulativeBorrowRate);
+
     const borrowedAmount = borrowedAmountInitial.times(borrowInterestIndex);
     const borrowedAmountUsd = borrowedAmount.times(reserve.price);
     const borrowWeight = reserve.config.borrowWeightBps / 10000;
 
-    totalBorrowUsd = totalBorrowUsd.plus(borrowedAmountUsd);
-    totalWeightedBorrowUsd = totalWeightedBorrowUsd.plus(
+    totalBorrowedAmountUsd = totalBorrowedAmountUsd.plus(borrowedAmountUsd);
+
+    weightedBorrowsUsd = weightedBorrowsUsd.plus(
       borrowedAmountUsd.times(borrowWeight),
     );
-
-    maxPriceTotalWeightedBorrowUsd = maxPriceTotalWeightedBorrowUsd.plus(
+    maxPriceWeightedBorrowsUsd = maxPriceWeightedBorrowsUsd.plus(
       borrowedAmount.times(reserve.maxPrice).times(borrowWeight),
     );
 
+    const reserveArrayIndex = borrow.reserveArrayIndex;
     const userRewardManagerIndex = Number(
       borrow.userRewardManagerIndex.toString(),
     );
     const userRewardManager =
       obligation.userRewardManagers[userRewardManagerIndex];
-    const reserveArrayIndex = borrow.reserveArrayIndex;
 
     return {
       coinType,
       reserveArrayIndex,
       userRewardManagerIndex,
+      userRewardManager,
       borrowedAmount,
       borrowedAmountUsd,
-      userRewardManager,
       reserve,
       original: obligation,
     };
   });
 
-  const netValueUsd = totalSupplyUsd.minus(totalBorrowUsd);
+  const netValueUsd = totalDepositedAmountUsd.minus(totalBorrowedAmountUsd);
 
   const weightedConservativeBorrowUtilizationPercent =
-    minPriceBorrowLimit.isZero()
+    minPriceBorrowLimitUsd.isZero()
       ? new BigNumber(0)
-      : maxPriceTotalWeightedBorrowUsd.div(minPriceBorrowLimit).times(100);
+      : maxPriceWeightedBorrowsUsd.div(minPriceBorrowLimitUsd).times(100);
 
   return {
     id: obligation.id,
-    totalSupplyUsd,
-    totalBorrowUsd,
-    totalWeightedBorrowUsd,
+    depositedAmountUsd: totalDepositedAmountUsd,
+    borrowedAmountUsd: totalBorrowedAmountUsd,
     netValueUsd,
-    borrowLimit,
+    weightedBorrowsUsd,
+    maxPriceWeightedBorrowsUsd,
+    borrowLimitUsd,
+    minPriceBorrowLimitUsd,
     unhealthyBorrowValueUsd,
+
     positionCount,
     deposits,
     borrows,
-    minPriceBorrowLimit,
-    maxPriceTotalWeightedBorrowUsd,
     weightedConservativeBorrowUtilizationPercent,
     original: obligation,
+
+    // Deprecated
+    /**
+     * @deprecated since version 1.0.3. Use `depositedAmountUsd` instead.
+     */
+    totalSupplyUsd: totalDepositedAmountUsd,
+    /**
+     * @deprecated since version 1.0.3. Use `borrowedAmountUsd` instead.
+     */
+    totalBorrowUsd: totalBorrowedAmountUsd,
+    /**
+     * @deprecated since version 1.0.3. Use `weightedBorrowsUsd` instead.
+     */
+    totalWeightedBorrowUsd: weightedBorrowsUsd,
+    /**
+     * @deprecated since version 1.0.3. Use `maxPriceWeightedBorrowsUsd` instead.
+     */
+    maxPriceTotalWeightedBorrowUsd: maxPriceWeightedBorrowsUsd,
+    /**
+     * @deprecated since version 1.0.3. Use `borrowLimitUsd` instead.
+     */
+    borrowLimit: borrowLimitUsd,
+    /**
+     * @deprecated since version 1.0.3. Use `minPriceBorrowLimitUsd` instead.
+     */
+    minPriceBorrowLimit: minPriceBorrowLimitUsd,
   };
 };

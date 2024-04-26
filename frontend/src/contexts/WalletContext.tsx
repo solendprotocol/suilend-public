@@ -112,7 +112,7 @@ export function WalletContextProvider({ children }: PropsWithChildren) {
   const account =
     accounts?.find((a) => a.address === accountAddress) ?? undefined;
 
-  // Analytics
+  // Sentry
   useEffect(() => {
     Sentry.setUser({ id: account?.address });
   }, [account?.address]);
@@ -123,42 +123,45 @@ export function WalletContextProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     if (!ldClient) return;
 
-    const key = account?.address;
+    const key = impersonatedAddress ?? account?.address;
     if (ldKeyRef.current === key) return;
 
-    ldKeyRef.current = key;
-    ldClient.identify(!key ? { anonymous: true } : { key });
-  }, [ldClient, account?.address]);
+    (async () => {
+      await ldClient.identify(!key ? { anonymous: true } : { key });
+      ldKeyRef.current = key;
+    })();
+  }, [ldClient, impersonatedAddress, account?.address]);
 
   // Tx
   // Note: Do NOT import and use this function directly. Instead, use the signExecuteAndWaitTransactionBlock
   // from AppContext.
   const signExecuteAndWaitTransactionBlock = useCallback(
     async (suiClient: SuiClient, txb: TransactionBlock) => {
-      if (!chain) throw new Error("Missing chain");
-      if (!adapter) throw new Error("Missing wallet adapter");
-
       const _address = impersonatedAddress ?? account?.address;
       if (_address) {
-        try {
-          const simResult = await suiClient.devInspectTransactionBlock({
-            sender: _address,
-            transactionBlock:
-              txb as unknown as DevInspectTransactionBlockParams["transactionBlock"],
-          });
+        (async () => {
+          try {
+            const simResult = await suiClient.devInspectTransactionBlock({
+              sender: _address,
+              transactionBlock:
+                txb as unknown as DevInspectTransactionBlockParams["transactionBlock"],
+            });
 
-          if (simResult.error) {
-            throw simResult.error;
+            if (simResult.error) {
+              throw simResult.error;
+            }
+          } catch (err) {
+            Sentry.captureException(err, {
+              extra: { simulation: true },
+            });
+            console.error(err);
+            // throw err; - Do not rethrow error
           }
-        } catch (err) {
-          Sentry.captureException(err, {
-            extra: { simulation: true },
-          });
-          console.error(err);
-          // throw err; - Do not rethrow error
-        }
+        })(); // Do not await
       }
 
+      if (!chain) throw new Error("Missing chain");
+      if (!adapter) throw new Error("Missing adapter");
       if (!account) throw new Error("Missing account");
 
       try {
@@ -187,7 +190,7 @@ export function WalletContextProvider({ children }: PropsWithChildren) {
         throw err;
       }
     },
-    [chain, adapter, account, impersonatedAddress],
+    [impersonatedAddress, account, chain, adapter],
   );
 
   // Context
@@ -195,13 +198,13 @@ export function WalletContextProvider({ children }: PropsWithChildren) {
     () => ({
       accounts,
       account,
-      selectAccount: (address: string) => {
-        const _account = accounts.find((a) => a.address === address);
+      selectAccount: (_address: string) => {
+        const _account = accounts.find((a) => a.address === _address);
         if (!_account) return;
 
-        setAccountAddress(address);
+        setAccountAddress(_address);
         toast.info(
-          `Switched to ${[_account?.label, address].filter(Boolean).join(" • ")}`,
+          `Switched to ${[_account?.label, _address].filter(Boolean).join(" • ")}`,
         );
       },
       address: impersonatedAddress ?? account?.address,

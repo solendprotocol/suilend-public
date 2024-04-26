@@ -5,9 +5,9 @@ interface TotalDepositsCellProps
   extends Pick<
     ReservesRowData,
     | "symbol"
-    | "totalDeposits"
-    | "totalDepositsUsd"
-    | "totalDepositsTooltip"
+    | "depositedAmount"
+    | "depositedAmountUsd"
+    | "depositedAmountTooltip"
     | "reserve"
   > {
   horizontal?: boolean;
@@ -15,18 +15,18 @@ interface TotalDepositsCellProps
 
 export default function TotalDepositsCell({
   symbol,
-  totalDeposits,
-  totalDepositsUsd,
-  totalDepositsTooltip,
+  depositedAmount,
+  depositedAmountUsd,
+  depositedAmountTooltip,
   reserve,
   horizontal,
 }: TotalDepositsCellProps) {
   return (
     <TotalCell
       symbol={symbol}
-      total={totalDeposits}
-      totalUsd={totalDepositsUsd}
-      tooltip={totalDepositsTooltip}
+      total={depositedAmount}
+      totalUsd={depositedAmountUsd}
+      tooltip={depositedAmountTooltip}
       reserve={reserve}
       horizontal={horizontal}
     />

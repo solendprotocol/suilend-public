@@ -40,7 +40,7 @@ export default function ObligationSwitcherPopover() {
           variant="secondaryOutline"
           role="combobox"
         >
-          Account{" "}
+          Subaccount{" "}
           {data.obligations.findIndex((o) => o.id === obligation.id) + 1}
         </Button>
       }
@@ -59,7 +59,7 @@ export default function ObligationSwitcherPopover() {
               className="flex cursor-pointer flex-col items-center gap-1 text-foreground aria-selected:text-foreground"
             >
               <div className="flex w-full justify-between">
-                <TLabel className="text-inherit">Account {index + 1}</TLabel>
+                <TLabel className="text-inherit">Subaccount {index + 1}</TLabel>
                 <TLabel className="text-inherit">
                   {o.positionCount} position{o.positionCount > 1 ? "s" : ""}
                 </TLabel>
@@ -67,10 +67,10 @@ export default function ObligationSwitcherPopover() {
 
               <div className="flex w-full justify-between">
                 <TLabelSans className="text-right">
-                  {formatUsd(o.totalSupplyUsd)} deposited
+                  {formatUsd(o.depositedAmountUsd)} deposited
                 </TLabelSans>
                 <TLabelSans className="text-right">
-                  {formatUsd(o.totalBorrowUsd)} borrowed
+                  {formatUsd(o.borrowedAmountUsd)} borrowed
                 </TLabelSans>
               </div>
             </CommandItem>

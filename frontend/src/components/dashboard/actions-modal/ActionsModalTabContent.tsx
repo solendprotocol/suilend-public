@@ -33,21 +33,22 @@ import {
 } from "@/lib/format";
 import { Action } from "@/lib/types";
 
+export type SubmitButtonState = {
+  isLoading?: boolean;
+  isDisabled?: boolean;
+  title?: string;
+};
+
 interface ActionsModalTabContentProps {
   action: Action;
   actionPastTense: string;
   reserve: ParsedReserve;
   getMaxValue: () => string;
-  getSubmitButtonState: (value: string) =>
-    | {
-        isLoading?: boolean;
-        isDisabled?: boolean;
-        title?: string;
-      }
-    | undefined;
+  getSubmitButtonNoValueState?: () => SubmitButtonState | undefined;
+  getSubmitButtonState: (value: string) => SubmitButtonState | undefined;
   submit: ActionSignature;
   getNewCalculations: (value: string) => {
-    newBorrowLimit: BigNumber | null;
+    newBorrowLimitUsd: BigNumber | null;
     newBorrowUtilization: BigNumber | null;
   };
 }
@@ -57,6 +58,7 @@ export default function ActionsModalTabContent({
   actionPastTense,
   reserve,
   getMaxValue,
+  getSubmitButtonNoValueState,
   getSubmitButtonState,
   submit,
   getNewCalculations,
@@ -98,7 +100,7 @@ export default function ActionsModalTabContent({
 
   const inputRef = useRef<HTMLInputElement>(null);
   const [value, setValue] = useState<string>("");
-  const { newBorrowLimit, newBorrowUtilization } = getNewCalculations(value);
+  const { newBorrowLimitUsd, newBorrowUtilization } = getNewCalculations(value);
 
   const onValueChangeCore = useCallback(
     (_value: string) => {
@@ -137,20 +139,28 @@ export default function ActionsModalTabContent({
   // Submit
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  const getSubmitButtonStateWrapper = () => {
+  const getSubmitButtonStateWrapper = (): SubmitButtonState => {
     if (!address) return { isDisabled: true, title: "Connect wallet" };
     if (isSubmitting) return { isDisabled: true, isLoading: true };
+
+    if (
+      getSubmitButtonNoValueState !== undefined &&
+      getSubmitButtonNoValueState() !== undefined
+    )
+      return getSubmitButtonNoValueState() as SubmitButtonState;
+
     if (value === "") return { isDisabled: true, title: "Enter a value" };
     if (new BigNumber(value).lt(0))
       return { isDisabled: true, title: "Enter a +ve value" };
     if (new BigNumber(value).eq(0))
       return { isDisabled: true, title: "Enter a non-zero value" };
 
-    return (
-      getSubmitButtonState(value) || {
-        title: `${capitalize(action)} ${formattedValue}`,
-      }
-    );
+    if (getSubmitButtonState(value) !== undefined)
+      return getSubmitButtonState(value) as SubmitButtonState;
+
+    return {
+      title: `${capitalize(action)} ${formattedValue}`,
+    };
   };
   const submitButtonState = getSubmitButtonStateWrapper();
 
@@ -253,9 +263,11 @@ export default function ActionsModalTabContent({
           <LabelWithValue
             label="User borrow limit"
             value={
-              newBorrowLimit
-                ? `${formatUsd(obligation?.borrowLimit ?? new BigNumber("0"))} → ${formatUsd(newBorrowLimit)}`
-                : formatUsd(obligation?.borrowLimit ?? new BigNumber("0"))
+              newBorrowLimitUsd
+                ? `${formatUsd(obligation?.minPriceBorrowLimitUsd ?? new BigNumber("0"))} → ${formatUsd(newBorrowLimitUsd)}`
+                : formatUsd(
+                    obligation?.minPriceBorrowLimitUsd ?? new BigNumber("0"),
+                  )
             }
             horizontal
           />

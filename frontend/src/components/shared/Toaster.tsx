@@ -38,7 +38,7 @@ export default function Toaster() {
       icons={{
         success: <Check className="h-5 w-5 text-success" />,
         info: <Info className="h-5 w-5 text-foreground" />,
-        warning: <AlertTriangle className="h-5 w-5 text-foreground" />,
+        warning: <AlertTriangle className="h-5 w-5 text-warning" />,
         error: <X className="h-5 w-5 text-destructive" />,
       }}
       position="bottom-left"
