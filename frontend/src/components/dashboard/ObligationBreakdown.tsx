@@ -16,7 +16,10 @@ import { TBody } from "@/components/shared/Typography";
 import { Separator } from "@/components/ui/separator";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { formatLtv, formatPrice, formatToken, formatUsd } from "@/lib/format";
-import { BORROW_LIMIT_PRICE_TOOLTIP } from "@/lib/tooltips";
+import {
+  BORROW_LIMIT_PRICE_TOOLTIP,
+  WEIGHTED_BORROWS_PRICE_TOOLTIP,
+} from "@/lib/tooltips";
 import { cn, sortInReserveOrder } from "@/lib/utils";
 
 interface BreakdownColumn {
@@ -153,7 +156,8 @@ export default function ObligationBreakdown() {
               { title: "×" },
               {
                 title: "Price",
-                data: sortedBorrows.map((b) => formatPrice(b.reserve.price)),
+                titleTooltip: WEIGHTED_BORROWS_PRICE_TOOLTIP,
+                data: sortedBorrows.map((b) => formatPrice(b.reserve.maxPrice)),
               },
               { title: "×" },
               {
@@ -168,7 +172,7 @@ export default function ObligationBreakdown() {
                 data: sortedBorrows.map((b) =>
                   formatUsd(
                     b.borrowedAmount
-                      .times(b.reserve.price)
+                      .times(b.reserve.maxPrice)
                       .times(b.reserve.config.borrowWeightBps / 10000),
                   ),
                 ),
@@ -179,7 +183,7 @@ export default function ObligationBreakdown() {
                 (acc, b) =>
                   acc.plus(
                     b.borrowedAmount
-                      .times(b.reserve.price)
+                      .times(b.reserve.maxPrice)
                       .times(b.reserve.config.borrowWeightBps / 10000),
                   ),
                 new BigNumber(0),

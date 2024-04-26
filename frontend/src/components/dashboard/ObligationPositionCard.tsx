@@ -95,7 +95,7 @@ function ObligationPositionCardContent() {
           <LabelWithTooltip tooltip={WEIGHTED_BORROWS_TOOLTIP}>
             Weighted borrows
           </LabelWithTooltip>
-          <TBody>{formatUsd(obligation.weightedBorrowsUsd)}</TBody>
+          <TBody>{formatUsd(obligation.maxPriceWeightedBorrowsUsd)}</TBody>
         </div>
 
         <div className="flex flex-col items-end gap-1">
