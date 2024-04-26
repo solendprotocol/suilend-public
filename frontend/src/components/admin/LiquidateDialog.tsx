@@ -249,32 +249,32 @@ export default function LiquidateDialog({
           <LabelWithValue
             label="Net Value"
             value={parsedObligation.netValueUsd}
-            isUsd={true}
+            isUsd
           />
           <LabelWithValue
             label="Deposited Amount"
             value={parsedObligation.depositedAmountUsd}
-            isUsd={true}
+            isUsd
           />
           <LabelWithValue
             label="Borrow Limit"
             value={parsedObligation.minPriceBorrowLimitUsd}
-            isUsd={true}
+            isUsd
           />
           <LabelWithValue
             label="Unhealthy Borrow Value"
             value={parsedObligation.unhealthyBorrowValueUsd}
-            isUsd={true}
+            isUsd
           />
           <LabelWithValue
             label="Borrowed Amount"
             value={parsedObligation.borrowedAmountUsd}
-            isUsd={true}
+            isUsd
           />
           <LabelWithValue
             label="Weighted Borrows"
             value={parsedObligation.weightedBorrowsUsd}
-            isUsd={true}
+            isUsd
           />
           <div className="col-span-2">
             <UtilizationBar obligation={parsedObligation} />
