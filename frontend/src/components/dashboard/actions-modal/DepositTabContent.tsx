@@ -103,6 +103,11 @@ export default function DepositTabContent({ reserve }: DepositTabContentProps) {
   };
 
   // Submit
+  const borrowPosition = obligation?.borrows?.find(
+    (d) => d.coinType === reserve.coinType,
+  );
+  const borrowedAmount = borrowPosition?.borrowedAmount ?? new BigNumber("0");
+
   const getSubmitButtonNoValueState = () => {
     if (reserve.depositedAmount.gte(reserve.config.depositLimit))
       return {
@@ -118,6 +123,8 @@ export default function DepositTabContent({ reserve }: DepositTabContentProps) {
         isDisabled: true,
         title: "Reserve USD deposit limit reached",
       };
+    if (borrowedAmount.gt(0.01))
+      return { isDisabled: true, title: "Cannot deposit borrowed asset" };
     return undefined;
   };
 

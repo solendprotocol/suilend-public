@@ -112,8 +112,22 @@ export default function BorrowTabContent({ reserve }: BorrowTabContentProps) {
     depositPosition?.depositedAmount ?? new BigNumber("0");
 
   const getSubmitButtonNoValueState = () => {
-    if (depositedAmount.gt(0.1))
-      return { isDisabled: true, title: "Cannot borrow supplied asset" };
+    if (reserve.borrowedAmount.gte(reserve.config.borrowLimit))
+      return {
+        isDisabled: true,
+        title: "Reserve borrow limit reached",
+      };
+    if (
+      new BigNumber(reserve.borrowedAmount.times(reserve.price)).gte(
+        reserve.config.borrowLimitUsd,
+      )
+    )
+      return {
+        isDisabled: true,
+        title: "Reserve USD borrow limit reached",
+      };
+    if (depositedAmount.gt(0.01))
+      return { isDisabled: true, title: "Cannot borrow deposited asset" };
     return undefined;
   };
 
