@@ -1,3 +1,5 @@
+import TextLink from "@/components/shared/TextLink";
+
 export const DEPOSITS_TOOLTIP =
   "The value of all assets deposited. Depositing more assets increases your borrow limit and liquidation threshold.";
 
@@ -56,5 +58,20 @@ export const LIQUIDATION_THRESHOLD_TOOLTIP = (
       <br />
       <span className="uppercase">Position × Price × Close LTV</span>
     </span>
+  </>
+);
+
+export const BORROW_LIMIT_PRICE_TOOLTIP = (
+  <>
+    {
+      "In borrow limit calculations, the price is defined as the minimum of the price and the "
+    }
+    <TextLink
+      href="https://docs.pyth.network/price-feeds/how-pyth-works/ema-price-aggregation"
+      noIcon
+    >
+      exponentially-weighted moving average (EMA) price
+    </TextLink>
+    {"."}
   </>
 );

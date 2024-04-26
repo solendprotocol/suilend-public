@@ -1,4 +1,4 @@
-import { CSSProperties } from "react";
+import { CSSProperties, ReactNode } from "react";
 
 import BigNumber from "bignumber.js";
 import { ClassValue } from "clsx";
@@ -16,11 +16,12 @@ import { TBody } from "@/components/shared/Typography";
 import { Separator } from "@/components/ui/separator";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { formatLtv, formatPrice, formatToken, formatUsd } from "@/lib/format";
+import { BORROW_LIMIT_PRICE_TOOLTIP } from "@/lib/tooltips";
 import { cn, sortInReserveOrder } from "@/lib/utils";
 
 interface BreakdownColumn {
   title: string;
-  titleTooltip?: string;
+  titleTooltip?: string | ReactNode;
   data?: string[];
 }
 
@@ -205,8 +206,7 @@ export default function ObligationBreakdown() {
               { title: "×" },
               {
                 title: "Price",
-                titleTooltip:
-                  "In borrow limit calculations, the price is defined as the minimum of the price and the exponentially-weighted moving average (EMA) price.",
+                titleTooltip: BORROW_LIMIT_PRICE_TOOLTIP,
                 data: sortedDeposits.map((d) =>
                   formatPrice(d.reserve.minPrice),
                 ),
