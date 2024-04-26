@@ -8,7 +8,7 @@ import { Separator } from "@/components/ui/separator";
 export default function HeaderMenu() {
   return (
     <div
-      className="absolute right-0 top-[65px] z-[3] flex h-[calc(100dvh_-_65px)] w-full flex-col overflow-y-auto bg-background sm:w-[360px] sm:border-l"
+      className="absolute right-0 top-[65px] z-[3] flex h-[calc(100dvh-65px)] w-full flex-col overflow-y-auto bg-background sm:w-[360px] sm:border-l"
       style={{
         overscrollBehavior: "auto contain",
       }}

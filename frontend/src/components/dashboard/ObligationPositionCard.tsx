@@ -4,6 +4,7 @@ import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
 
 import Card from "@/components/dashboard/Card";
 import ObligationBreakdown from "@/components/dashboard/ObligationBreakdown";
+import ObligationHistoryDialog from "@/components/dashboard/ObligationHistoryDialog";
 import ObligationSwitcherPopover from "@/components/dashboard/ObligationSwitcherPopover";
 import UtilizationBar, {
   getWeightedBorrowsUsd,
@@ -138,6 +139,7 @@ export default function ObligationPositionCard() {
     <Card
       id="position"
       title="Account"
+      headerStartContent={<ObligationHistoryDialog />}
       headerEndContent={
         data.obligations &&
         data.obligations.length > 1 && <ObligationSwitcherPopover />

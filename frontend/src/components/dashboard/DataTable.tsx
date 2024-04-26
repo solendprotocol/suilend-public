@@ -3,6 +3,7 @@ import { Fragment, FunctionComponent, ReactNode, useState } from "react";
 import {
   Column,
   ColumnDef,
+  Header,
   Row,
   SortingState,
   flexRender,
@@ -25,6 +26,7 @@ import {
 import Button from "@/components/shared/Button";
 import LabelWithTooltip from "@/components/shared/LabelWithTooltip";
 import { TLabel, TLabelSans } from "@/components/shared/Typography";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -74,7 +76,7 @@ function getSortState<T>(
       tooltip = "Click to sort smallest to biggest";
     } else if (isDate) {
       icon = <ChevronsUpDown />;
-      tooltip = "Click to sort newest to oldest";
+      tooltip = "Click to sort oldest to newest";
     } else {
       icon = <ChevronsUpDown />;
       tooltip = "Click to sort A-Z";
@@ -85,7 +87,7 @@ function getSortState<T>(
       tooltip = "Click to sort biggest to smallest";
     } else if (isDate) {
       icon = <ChevronDown />;
-      tooltip = "Click to sort oldest to newest";
+      tooltip = "Click to sort newest to oldest";
     } else {
       icon = <ArrowDownAz />;
       tooltip = "Click to sort Z-A";
@@ -113,7 +115,13 @@ export function tableHeader<T>(
     isNumerical,
     isDate,
     tooltip,
-  }: { isNumerical?: boolean; isDate?: boolean; tooltip?: string } = {},
+    borderBottom,
+  }: {
+    isNumerical?: boolean;
+    isDate?: boolean;
+    tooltip?: string;
+    borderBottom?: boolean;
+  } = {},
 ) {
   const sortState = column.getCanSort()
     ? getSortState(column, { isNumerical, isDate })
@@ -121,10 +129,20 @@ export function tableHeader<T>(
 
   if (!sortState)
     return !tooltip ? (
-      <TLabel className="px-4 uppercase">{title}</TLabel>
+      <TLabel
+        className={cn(
+          "flex h-full flex-col justify-center px-4 uppercase",
+          borderBottom && "border-b",
+        )}
+      >
+        {title}
+      </TLabel>
     ) : (
       <LabelWithTooltip
-        className="flex h-full flex-col justify-center px-4 uppercase"
+        className={cn(
+          "flex h-full flex-col justify-center px-4 uppercase",
+          borderBottom && "border-b",
+        )}
         tooltip={tooltip}
         isMono
       >
@@ -134,8 +152,9 @@ export function tableHeader<T>(
   return (
     <Button
       className={cn(
-        "h-full w-full px-4 py-0 hover:bg-transparent",
+        "h-full w-full rounded-none px-4 py-0 hover:bg-transparent",
         isNumerical ? "justify-end" : "justify-start",
+        borderBottom && "border-b",
         column.getIsSorted() && "!text-primary-foreground",
       )}
       labelClassName="text-xs uppercase"
@@ -152,9 +171,11 @@ export function tableHeader<T>(
 
 interface DataTableProps<T> {
   columns: ColumnDef<T>[];
-  data: T[];
+  data?: T[];
   noDataMessage: string;
   tableClassName?: ClassValue;
+  tableHeaderRowClassName?: ClassValue;
+  tableHeadClassName?: (header: Header<T, unknown>) => ClassValue;
   tableRowClassName?: ClassValue;
   tableCellClassName?: ClassValue;
   RowModal?: FunctionComponent<{
@@ -169,6 +190,8 @@ export default function DataTable<T>({
   data,
   noDataMessage,
   tableClassName,
+  tableHeaderRowClassName,
+  tableHeadClassName,
   tableRowClassName,
   tableCellClassName,
   RowModal,
@@ -177,7 +200,7 @@ export default function DataTable<T>({
   const [sorting, setSorting] = useState<SortingState>([]);
 
   const table = useReactTable({
-    data,
+    data: data ?? [],
     columns,
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
@@ -191,10 +214,19 @@ export default function DataTable<T>({
     <Table className={cn("border-y", tableClassName)}>
       <TableHeader>
         {table.getHeaderGroups().map((headerGroup) => (
-          <TableRow key={headerGroup.id} className="hover:bg-muted/10">
+          <TableRow
+            key={headerGroup.id}
+            className={cn("hover:bg-muted/10", tableHeaderRowClassName)}
+          >
             {headerGroup.headers.map((header) => {
               return (
-                <TableHead key={header.id} className="h-9 px-0 py-0">
+                <TableHead
+                  key={header.id}
+                  className={cn(
+                    "h-9 px-0 py-0",
+                    tableHeadClassName && tableHeadClassName(header),
+                  )}
+                >
                   {header.isPlaceholder
                     ? null
                     : flexRender(
@@ -208,49 +240,78 @@ export default function DataTable<T>({
         ))}
       </TableHeader>
       <TableBody>
-        {table.getRowModel().rows?.length ? (
-          table.getRowModel().rows.map((row) => {
-            const children = (
+        {data === undefined ? (
+          <>
+            {Array.from({ length: 5 }).map((_, index) => (
               <TableRow
-                className={cn(
-                  "hover:bg-muted/10",
-                  (RowModal || onRowClick) && "cursor-pointer",
-                  tableRowClassName,
-                )}
-                style={{ appearance: "inherit" }}
-                onClick={
-                  !RowModal && onRowClick
-                    ? () => onRowClick(row.original)
-                    : undefined
-                }
+                key={index}
+                className={cn("hover:bg-transparent", tableRowClassName)}
               >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id} className={cn(tableCellClassName)}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
+                <TableCell
+                  colSpan={columns.length}
+                  className={cn("h-16 px-0 py-0", tableCellClassName)}
+                >
+                  <Skeleton className="h-full w-full bg-muted/5" />
+                </TableCell>
               </TableRow>
-            );
-
-            return (
-              <Fragment key={row.id}>
-                {RowModal ? (
-                  <RowModal row={row.original}>{children}</RowModal>
-                ) : (
-                  children
-                )}
-              </Fragment>
-            );
-          })
+            ))}
+          </>
         ) : (
-          <TableRow className="hover:bg-transparent">
-            <TableCell
-              colSpan={columns.length}
-              className="h-16 py-0 text-center"
-            >
-              <TLabelSans>{noDataMessage}</TLabelSans>
-            </TableCell>
-          </TableRow>
+          <>
+            {table.getRowModel().rows.length ? (
+              table.getRowModel().rows.map((row) => {
+                const children = (
+                  <TableRow
+                    className={cn(
+                      "hover:bg-transparent",
+                      (RowModal || onRowClick) &&
+                        "cursor-pointer hover:bg-muted/10",
+                      tableRowClassName,
+                    )}
+                    style={{ appearance: "inherit" }}
+                    onClick={
+                      !RowModal && onRowClick
+                        ? () => onRowClick(row.original)
+                        : undefined
+                    }
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell
+                        key={cell.id}
+                        className={cn("h-16", tableCellClassName)}
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                );
+
+                return (
+                  <Fragment key={row.id}>
+                    {RowModal ? (
+                      <RowModal row={row.original}>{children}</RowModal>
+                    ) : (
+                      children
+                    )}
+                  </Fragment>
+                );
+              })
+            ) : (
+              <TableRow
+                className={cn("hover:bg-transparent", tableRowClassName)}
+              >
+                <TableCell
+                  colSpan={columns.length}
+                  className={cn("h-16 py-0 text-center", tableCellClassName)}
+                >
+                  <TLabelSans>{noDataMessage}</TLabelSans>
+                </TableCell>
+              </TableRow>
+            )}
+          </>
         )}
       </TableBody>
     </Table>
