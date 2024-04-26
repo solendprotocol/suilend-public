@@ -6,29 +6,40 @@ export const TX_TOAST_DURATION = 10 * 1000;
 export const SUI_DEPOSIT_GAS_MIN = 0.025;
 export const SUI_REPAY_GAS_MIN = 0.01;
 
+export enum Rpc {
+  TRITON_ONE = "tritonOne",
+  FULL_NODE = "fullNode",
+  ALL_THAT_NODE = "allThatNode",
+}
+
 export const RPCS = [
   {
-    id: "triton",
-    name: "Triton",
+    id: Rpc.TRITON_ONE,
+    name: "Triton One",
     url: `https://solendf-suishar-0c55.mainnet.sui.rpcpool.com/${
-      process.env.NEXT_PUBLIC_SUI_TRITON_DEV_API_KEY ?? ""
+      process.env.NEXT_PUBLIC_SUI_TRITON_ONE_DEV_API_KEY ?? ""
     }`,
   },
   {
-    id: "fullNode",
+    id: Rpc.FULL_NODE,
     name: "Full Node",
     url: "https://fullnode.mainnet.sui.io:443",
   },
   {
-    id: "allThatNode",
+    id: Rpc.ALL_THAT_NODE,
     name: "All That Node",
     url: "https://sui-mainnet-rpc.allthatnode.com",
   },
 ];
 
+export enum Explorer {
+  SUI_SCAN = "suiScan",
+  SUI_VISION = "suiVision",
+}
+
 export const EXPLORERS = [
   {
-    id: "suiScan",
+    id: Explorer.SUI_SCAN,
     name: "Suiscan",
     buildAddressUrl: (address: string) =>
       `https://suiscan.xyz/mainnet/account/${address}`,
@@ -38,7 +49,7 @@ export const EXPLORERS = [
     buildTxUrl: (digest: string) => `https://suiscan.xyz/mainnet/tx/${digest}`,
   },
   {
-    id: "suiVision",
+    id: Explorer.SUI_VISION,
     name: "SuiVision",
     buildAddressUrl: (address: string) =>
       `https://suivision.xyz/account/${address}`,

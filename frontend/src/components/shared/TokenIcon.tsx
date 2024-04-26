@@ -4,7 +4,6 @@ import { ClassValue } from "clsx";
 
 import TextLink from "@/components/shared/TextLink";
 import Tooltip from "@/components/shared/Tooltip";
-import { TLabelSans } from "@/components/shared/Typography";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { LOGO_MAP, NORMALIZED_USDT_ET_COINTYPE } from "@/lib/coinType";
 import { NORMALIZED_USDC_ET_COINTYPE } from "@/lib/coinType";
@@ -39,12 +38,12 @@ export default function TokenIcon({
 
   return (
     <Tooltip
-      content={
+      title={
         nativeAsset ? (
-          <TLabelSans className="text-foreground">
+          <>
             {`${nativeAsset.fullName}. `}
             <TextLink href={DOCS_BRIDGE_LEARN_MORE_URL}>Learn more</TextLink>
-          </TLabelSans>
+          </>
         ) : undefined
       }
     >

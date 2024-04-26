@@ -29,6 +29,7 @@ export default function useFetchAppData(
   suiClient: SuiClient,
   address: string | undefined,
 ) {
+  // Suilend client
   const suilendClientRef = useRef<AppContextValue["suilendClient"]>(null);
 
   // Data

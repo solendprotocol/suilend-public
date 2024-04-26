@@ -78,7 +78,7 @@ export function formatRewards(
               poolReward.endTimeMs - poolReward.startTimeMs,
             ),
           )
-          .div(reserve.totalDeposits.times(reserve.price))
+          .div(reserve.depositedAmountUsd)
           .times(100)
       : undefined;
     const dailyReward = rewardReserve
@@ -90,7 +90,7 @@ export function formatRewards(
             ),
           )
           .div(365)
-          .div(reserve.totalDeposits);
+          .div(reserve.depositedAmount);
 
     return {
       stats: {

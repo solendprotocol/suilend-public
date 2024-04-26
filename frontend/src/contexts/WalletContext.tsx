@@ -8,6 +8,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
@@ -23,6 +24,7 @@ import {
 } from "@mysten/wallet-standard";
 import * as Sentry from "@sentry/nextjs";
 import { useWallet } from "@suiet/wallet-kit";
+import { useLDClient } from "launchdarkly-react-client-sdk";
 import { toast } from "sonner";
 import { useLocalStorage } from "usehooks-ts";
 
@@ -122,40 +124,56 @@ export function WalletContextProvider({ children }: PropsWithChildren) {
   const account =
     accounts?.find((a) => a.address === accountAddress) ?? undefined;
 
-  // Analytics
+  // Sentry
   useEffect(() => {
     Sentry.setUser({ id: account?.address });
   }, [account?.address]);
+
+  // LaunchDarkly
+  const ldClient = useLDClient();
+  const ldKeyRef = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    if (!ldClient) return;
+
+    const key = impersonatedAddress ?? account?.address;
+    if (ldKeyRef.current === key) return;
+
+    (async () => {
+      await ldClient.identify(!key ? { anonymous: true } : { key });
+      ldKeyRef.current = key;
+    })();
+  }, [ldClient, impersonatedAddress, account?.address]);
 
   // Tx
   // Note: Do NOT import and use this function directly. Instead, use the signExecuteAndWaitTransactionBlock
   // from AppContext.
   const signExecuteAndWaitTransactionBlock = useCallback(
     async (suiClient: SuiClient, txb: TransactionBlock) => {
-      if (!chain) throw new Error("Missing chain");
-      if (!adapter) throw new Error("Missing wallet adapter");
-
       const _address = impersonatedAddress ?? account?.address;
       if (_address) {
-        try {
-          const simResult = await suiClient.devInspectTransactionBlock({
-            sender: _address,
-            transactionBlock:
-              txb as unknown as DevInspectTransactionBlockParams["transactionBlock"],
-          });
+        (async () => {
+          try {
+            const simResult = await suiClient.devInspectTransactionBlock({
+              sender: _address,
+              transactionBlock:
+                txb as unknown as DevInspectTransactionBlockParams["transactionBlock"],
+            });
 
-          if (simResult.error) {
-            throw simResult.error;
+            if (simResult.error) {
+              throw simResult.error;
+            }
+          } catch (err) {
+            Sentry.captureException(err, {
+              extra: { simulation: true },
+            });
+            console.error(err);
+            // throw err; - Do not rethrow error
           }
-        } catch (err) {
-          Sentry.captureException(err, {
-            extra: { simulation: true },
-          });
-          console.error(err);
-          // throw err; - Do not rethrow error
-        }
+        })(); // Do not await
       }
 
+      if (!chain) throw new Error("Missing chain");
+      if (!adapter) throw new Error("Missing adapter");
       if (!account) throw new Error("Missing account");
 
       try {
@@ -184,7 +202,7 @@ export function WalletContextProvider({ children }: PropsWithChildren) {
         throw err;
       }
     },
-    [chain, adapter, account, impersonatedAddress],
+    [impersonatedAddress, account, chain, adapter],
   );
 
   // Context
@@ -194,14 +212,14 @@ export function WalletContextProvider({ children }: PropsWithChildren) {
       setIsConnectWalletDropdownOpen,
       accounts,
       account,
-      selectAccount: (address: string) => {
-        const _account = accounts.find((a) => a.address === address);
+      selectAccount: (_address: string) => {
+        const _account = accounts.find((a) => a.address === _address);
         if (!_account) return;
 
-        setAccountAddress(address);
+        setAccountAddress(_address);
         toast.info(
-          `Switched to ${_account?.label ? _account.label : address}`,
-          { description: _account?.label ? address : undefined },
+          `Switched to ${_account?.label ? _account.label : _address}`,
+          { description: _account?.label ? _address : undefined },
         );
       },
       address: impersonatedAddress ?? account?.address,

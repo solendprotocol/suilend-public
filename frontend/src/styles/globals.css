@@ -29,6 +29,9 @@
     --success: 158 56% 48%;
     --success-foreground: 0 0% 0%; /* Not used */
 
+    --warning: 33 92% 61%;
+    --warning-foreground: 0 0% 0%; /* Not used */
+
     --destructive: 0 86% 60%;
     --destructive-foreground: 210 40% 98%; /* Not used */
 

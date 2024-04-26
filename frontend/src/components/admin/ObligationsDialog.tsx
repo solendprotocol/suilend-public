@@ -221,16 +221,18 @@ const COLUMNS: ColumnDef<ParsedObligation>[] = [
     header: ({ column }) =>
       tableHeader(column, "Deposit", { isNumerical: true }),
     cell: ({ row }) => {
-      const value = row.original.totalSupplyUsd.toFormat(2).toString();
+      const value = row.original.depositedAmountUsd.toFormat(2).toString();
       return <TBody>${value}</TBody>;
     },
   },
   {
     accessorKey: "weightedBorrowValue",
     sortingFn: "auto",
-    header: ({ column }) => tableHeader(column, "Wtd. Borrow"),
+    header: ({ column }) => tableHeader(column, "(Max Price) Wtd. Borrows"),
     cell: ({ row }) => {
-      const value = row.original.totalWeightedBorrowUsd.toFormat(2).toString();
+      const value = row.original.maxPriceWeightedBorrowsUsd
+        .toFormat(2)
+        .toString();
       return <TBody>${value}</TBody>;
     },
   },

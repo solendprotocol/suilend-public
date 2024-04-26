@@ -41,12 +41,12 @@ export default function BorrowTabContent({ reserve }: BorrowTabContentProps) {
       isDisabled: true,
       value:
         !obligation ||
-        obligation.maxPriceTotalWeightedBorrowUsd.gt(
-          obligation.minPriceBorrowLimit,
+        obligation.maxPriceWeightedBorrowsUsd.gt(
+          obligation.minPriceBorrowLimitUsd,
         )
           ? new BigNumber(0)
-          : obligation.minPriceBorrowLimit
-              .minus(obligation.maxPriceTotalWeightedBorrowUsd)
+          : obligation.minPriceBorrowLimitUsd
+              .minus(obligation.maxPriceWeightedBorrowsUsd)
               .div(
                 reserve.maxPrice.times(reserve.config.borrowWeightBps / 10000),
               )
@@ -75,29 +75,29 @@ export default function BorrowTabContent({ reserve }: BorrowTabContentProps) {
   const getNewCalculations = (value: string) => {
     if (!value.length)
       return {
-        newBorrowLimit: null,
+        newBorrowLimitUsd: null,
         newBorrowUtilization: null,
       };
     const valueObj = new BigNumber(value);
     if (!obligation || valueObj.isNaN())
       return {
-        newBorrowLimit: null,
+        newBorrowLimitUsd: null,
         newBorrowUtilization: null,
       };
 
     const newBorrowUtilization =
-      !valueObj.isNaN() && !obligation.minPriceBorrowLimit.isZero()
-        ? obligation.maxPriceTotalWeightedBorrowUsd
+      !valueObj.isNaN() && !obligation.minPriceBorrowLimitUsd.isZero()
+        ? obligation.maxPriceWeightedBorrowsUsd
             .plus(
               valueObj
                 .times(reserve.maxPrice)
                 .times(reserve.config.borrowWeightBps / 10000),
             )
-            .div(obligation.minPriceBorrowLimit)
+            .div(obligation.minPriceBorrowLimitUsd)
         : null;
 
     return {
-      newBorrowLimit: null,
+      newBorrowLimitUsd: null,
       newBorrowUtilization: newBorrowUtilization
         ? BigNumber.max(BigNumber.min(1, newBorrowUtilization), 0)
         : null,
@@ -105,6 +105,32 @@ export default function BorrowTabContent({ reserve }: BorrowTabContentProps) {
   };
 
   // Submit
+  const depositPosition = obligation?.deposits?.find(
+    (d) => d.coinType === reserve.coinType,
+  );
+  const depositedAmount =
+    depositPosition?.depositedAmount ?? new BigNumber("0");
+
+  const getSubmitButtonNoValueState = () => {
+    if (reserve.borrowedAmount.gte(reserve.config.borrowLimit))
+      return {
+        isDisabled: true,
+        title: "Reserve borrow limit reached",
+      };
+    if (
+      new BigNumber(reserve.borrowedAmount.times(reserve.price)).gte(
+        reserve.config.borrowLimitUsd,
+      )
+    )
+      return {
+        isDisabled: true,
+        title: "Reserve USD borrow limit reached",
+      };
+    if (depositedAmount.gt(0.01))
+      return { isDisabled: true, title: "Cannot borrow deposited asset" };
+    return undefined;
+  };
+
   const getSubmitButtonState = (value: string) => {
     for (const calc of maxCalculations) {
       if (new BigNumber(value).gt(calc.value))
@@ -122,6 +148,7 @@ export default function BorrowTabContent({ reserve }: BorrowTabContentProps) {
       reserve={reserve}
       getNewCalculations={getNewCalculations}
       getMaxValue={getMaxValue}
+      getSubmitButtonNoValueState={getSubmitButtonNoValueState}
       getSubmitButtonState={getSubmitButtonState}
       submit={borrow}
     />
