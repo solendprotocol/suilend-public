@@ -13,12 +13,14 @@ import RefreshAppDataButton from "@/components/layout/RefreshAppDataButton";
 import RpcSelect from "@/components/layout/RpcSelect";
 import HeaderPointsPopover from "@/components/points/HeaderPointsPopover";
 import Button from "@/components/shared/Button";
+import { useAppContext } from "@/contexts/AppContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 import { ROOT_URL } from "@/lib/navigation";
 
 export default function AppHeader() {
   const router = useRouter();
   const { address } = useWalletContext();
+  const { data } = useAppContext();
 
   // Menu
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
@@ -65,7 +67,7 @@ export default function AppHeader() {
             <RpcSelect />
           </div>
 
-          {address && (
+          {address && data && (
             <div className="hidden sm:flex">
               <HeaderPointsPopover />
             </div>
