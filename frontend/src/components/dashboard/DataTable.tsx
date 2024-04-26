@@ -121,7 +121,7 @@ export function tableHeader<T>(
 
   if (!sortState)
     return !tooltip ? (
-      <TLabel className="px-4 uppercase">{title}</TLabel>
+      <TLabel className="w-max px-4 uppercase">{title}</TLabel>
     ) : (
       <LabelWithTooltip
         className="flex h-full flex-col justify-center px-4 uppercase"
