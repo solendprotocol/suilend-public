@@ -29,6 +29,7 @@
     "@mysten/bcs": "^0.10.1",
     "@mysten/sui.js": "^0.49.1",
     "bignumber.js": "^9.1.2",
+    "p-limit": "^5.0.0",
     "uuid": "^9.0.1"
   },
   "devDependencies": {
