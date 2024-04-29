@@ -131,7 +131,7 @@ export function tableHeader<T>(
     return !tooltip ? (
       <TLabel
         className={cn(
-          "flex h-full flex-col justify-center px-4 uppercase",
+          "flex h-full w-max flex-col justify-center px-4 uppercase",
           borderBottom && "border-b",
         )}
       >
