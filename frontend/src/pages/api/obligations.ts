@@ -11,8 +11,8 @@ export default async function handler(
     const json = await response.json();
 
     res.status(200).json(json);
-  } catch (e) {
-    console.error(e);
-    res.status(500);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: ((err as Error)?.message || err) as string });
   }
 }
