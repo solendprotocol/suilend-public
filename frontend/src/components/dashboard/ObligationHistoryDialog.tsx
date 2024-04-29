@@ -29,7 +29,7 @@ enum EventType {
 
 type DepositEvent = {
   id: number;
-  lendingMarket: string;
+  lendingMarketId: string;
   coinType: string;
   reserveId: string;
   obligationId: string;
@@ -42,7 +42,7 @@ type DepositEvent = {
 
 type BorrowEvent = {
   id: number;
-  lendingMarket: string;
+  lendingMarketId: string;
   coinType: string;
   reserveId: string;
   obligationId: string;
@@ -55,7 +55,7 @@ type BorrowEvent = {
 
 type WithdrawEvent = {
   id: number;
-  lendingMarket: string;
+  lendingMarketId: string;
   coinType: string;
   reserveId: string;
   obligationId: string;
@@ -68,7 +68,7 @@ type WithdrawEvent = {
 
 type RepayEvent = {
   id: number;
-  lendingMarket: string;
+  lendingMarketId: string;
   coinType: string;
   reserveId: string;
   obligationId: string;
