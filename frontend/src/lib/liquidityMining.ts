@@ -81,7 +81,7 @@ export function formatRewards(
           .div(reserve.depositedAmountUsd)
           .times(100)
       : undefined;
-    const dailyReward = rewardReserve
+    const dailyReward = !rewardReserve
       ? undefined
       : poolReward.totalRewards
           .times(
@@ -101,7 +101,7 @@ export function formatRewards(
         rewardIndex: poolReward.rewardIndex,
         reserveCoinType: reserve.coinType,
         rewardCoinType: poolReward.coinType,
-        aprPercent,
+        aprPercent: undefined,
         dailyReward,
         price: rewardReserve?.price,
         iconUrl: rewardCoinMetadata.iconUrl,
