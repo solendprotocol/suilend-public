@@ -3,12 +3,14 @@ import { CSSProperties, useCallback, useState } from "react";
 import { normalizeStructTag } from "@mysten/sui.js/utils";
 import { ColumnDef } from "@tanstack/react-table";
 import axios from "axios";
+import BigNumber from "bignumber.js";
 import { formatDate } from "date-fns";
 import { FileClock, RefreshCcw } from "lucide-react";
 
 import DataTable, { tableHeader } from "@/components/dashboard/DataTable";
 import Button from "@/components/shared/Button";
 import OpenOnExplorerButton from "@/components/shared/OpenOnExplorerButton";
+import TokenIcon from "@/components/shared/TokenIcon";
 import { TBody, TTitle } from "@/components/shared/Typography";
 import {
   Dialog,
@@ -16,7 +18,17 @@ import {
   DialogHeader,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useAppContext } from "@/contexts/AppContext";
+import { AppData, useAppContext } from "@/contexts/AppContext";
+import {
+  BorrowEvent,
+  ClaimRewardEvent,
+  DepositEvent,
+  RepayEvent,
+  WithdrawEvent,
+  eventSortFunction,
+  getDedupedClaimRewardEvents,
+} from "@/lib/events";
+import { formatInteger, formatToken } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 enum EventType {
@@ -27,67 +39,24 @@ enum EventType {
   CLAIM_REWARD = "claimReward",
 }
 
-type DepositEvent = {
+type ReserveAssetDataEvent = {
   id: number;
-  lendingMarketId: string;
+  lendingMarket: string;
   coinType: string;
   reserveId: string;
-  obligationId: string;
-  ctokenAmount: string;
-  timestamp: number;
-  digest: string;
-  eventIndex: number;
-  sender: string;
-};
-
-type BorrowEvent = {
-  id: number;
-  lendingMarketId: string;
-  coinType: string;
-  reserveId: string;
-  obligationId: string;
-  liquidityAmount: string;
-  timestamp: number;
-  digest: string;
-  eventIndex: number;
-  sender: string;
-};
-
-type WithdrawEvent = {
-  id: number;
-  lendingMarketId: string;
-  coinType: string;
-  reserveId: string;
-  obligationId: string;
-  ctokenAmount: string;
-  timestamp: number;
-  digest: string;
-  eventIndex: number;
-  sender: string;
-};
-
-type RepayEvent = {
-  id: number;
-  lendingMarketId: string;
-  coinType: string;
-  reserveId: string;
-  obligationId: string;
-  liquidityAmount: string;
-  timestamp: number;
-  digest: string;
-  eventIndex: number;
-  sender: string;
-};
-
-type ClaimRewardEvent = {
-  id: number;
-  coinType: string;
-  isDepositReward: boolean;
-  lendingMarketId: string;
-  liquidityAmount: string;
-  obligationId: string;
-  poolRewardId: string;
-  reserveId: string;
+  availableAmount: string;
+  supplyAmount: string;
+  borrowedAmount: string;
+  availableAmountUsdEstimate: string;
+  supplyAmountUsdEstimate: string;
+  borrowedAmountUsdEstimate: string;
+  borrowApr: string;
+  supplyApr: string;
+  ctokenSupply: string;
+  cumulativeBorrowRate: string;
+  price: string;
+  smoothedPrice: string;
+  priceLastUpdateTimestampS: number;
   timestamp: number;
   digest: string;
   eventIndex: number;
@@ -105,8 +74,19 @@ interface RowData {
     | ClaimRewardEvent;
 }
 
+const ALL_EVENT_TYPES = Object.values(EventType);
+
+const EventTypeNameMap: Record<EventType, string> = {
+  [EventType.DEPOSIT]: "Deposit",
+  [EventType.BORROW]: "Borrow",
+  [EventType.WITHDRAW]: "Withdraw",
+  [EventType.REPAY]: "Repay",
+  [EventType.CLAIM_REWARD]: "Claim rewards",
+};
+
 export default function ObligationHistoryDialog() {
-  const { explorer, obligation } = useAppContext();
+  const { explorer, obligation, ...restAppContext } = useAppContext();
+  const data = restAppContext.data as AppData;
 
   // Columns
   const columns: ColumnDef<RowData>[] = [
@@ -119,7 +99,11 @@ export default function ObligationHistoryDialog() {
       cell: ({ row }) => {
         const { date } = row.original;
 
-        return <TBody>{formatDate(date, "yyyy-MM-dd HH:mm:ss")}</TBody>;
+        return (
+          <TBody className="w-max">
+            {formatDate(date, "yyyy-MM-dd HH:mm:ss")}
+          </TBody>
+        );
       },
     },
     {
@@ -127,19 +111,136 @@ export default function ObligationHistoryDialog() {
       accessorKey: "type",
       enableSorting: false,
       header: ({ column }) =>
-        tableHeader(column, "Txn Type", { borderBottom: true }),
+        tableHeader(column, "Action", { borderBottom: true }),
       cell: ({ row }) => {
         const { type } = row.original;
 
         return (
-          <TBody className="uppercase">
-            {type === EventType.DEPOSIT && "Deposit"}
-            {type === EventType.BORROW && "Borrow"}
-            {type === EventType.WITHDRAW && "Withdraw"}
-            {type === EventType.REPAY && "Repay"}
-            {type === EventType.CLAIM_REWARD && "Claim reward"}
-          </TBody>
+          <TBody className="w-max uppercase">{EventTypeNameMap[type]}</TBody>
         );
+      },
+    },
+    {
+      id: "details",
+      accessorKey: "details",
+      enableSorting: false,
+      header: ({ column }) =>
+        tableHeader(column, "Details", { borderBottom: true }),
+      cell: ({ row }) => {
+        const { event, type } = row.original;
+
+        const coinMetadata = data.coinMetadataMap[event.coinType];
+
+        if (type === EventType.DEPOSIT) {
+          const depositEvent = event as DepositEvent;
+
+          return (
+            <div className="flex w-max flex-row items-center gap-2">
+              <TokenIcon
+                className="h-4 w-4"
+                coinType={event.coinType}
+                symbol={coinMetadata.symbol}
+                url={coinMetadata.iconUrl}
+              />
+
+              <TBody className="uppercase">
+                {formatInteger(parseInt(depositEvent.ctokenAmount))}{" "}
+                {coinMetadata.symbol}
+              </TBody>
+            </div>
+          );
+        } else if (type === EventType.BORROW) {
+          const borrowEvent = event as BorrowEvent;
+
+          return (
+            <div className="flex flex-row items-center gap-2">
+              <TokenIcon
+                className="h-4 w-4"
+                coinType={event.coinType}
+                symbol={coinMetadata.symbol}
+                url={coinMetadata.iconUrl}
+              />
+
+              <TBody className="uppercase">
+                {formatToken(
+                  new BigNumber(borrowEvent.liquidityAmount).div(
+                    10 ** coinMetadata.decimals,
+                  ),
+                  { dp: coinMetadata.decimals },
+                )}{" "}
+                {coinMetadata.symbol}
+              </TBody>
+            </div>
+          );
+        } else if (type === EventType.WITHDRAW) {
+          const withdrawEvent = event as WithdrawEvent;
+
+          return (
+            <div className="flex w-max flex-row items-center gap-2">
+              <TokenIcon
+                className="h-4 w-4"
+                coinType={event.coinType}
+                symbol={coinMetadata.symbol}
+                url={coinMetadata.iconUrl}
+              />
+
+              <TBody className="uppercase">
+                {formatInteger(parseInt(withdrawEvent.ctokenAmount))}{" "}
+                {coinMetadata.symbol}
+              </TBody>
+            </div>
+          );
+        } else if (type === EventType.REPAY) {
+          const repayEvent = event as RepayEvent;
+
+          return (
+            <div className="flex flex-row items-center gap-2">
+              <TokenIcon
+                className="h-4 w-4"
+                coinType={event.coinType}
+                symbol={coinMetadata.symbol}
+                url={coinMetadata.iconUrl}
+              />
+
+              <TBody className="uppercase">
+                {formatToken(
+                  new BigNumber(repayEvent.liquidityAmount).div(
+                    10 ** coinMetadata.decimals,
+                  ),
+                  { dp: coinMetadata.decimals },
+                )}{" "}
+                {coinMetadata.symbol}
+              </TBody>
+            </div>
+          );
+        } else if (type === EventType.CLAIM_REWARD) {
+          const claimRewardEvent = event as ClaimRewardEvent;
+
+          const coin = data.coinMetadataMap[claimRewardEvent.coinType];
+
+          return (
+            <div className="flex w-max flex-row items-center gap-2">
+              <TokenIcon
+                className="h-4 w-4"
+                coinType={claimRewardEvent.coinType}
+                symbol={coin.symbol}
+                url={coin.iconUrl}
+              />
+
+              <TBody className="uppercase">
+                {formatToken(
+                  new BigNumber(claimRewardEvent.liquidityAmount).div(
+                    10 ** coinMetadata.decimals,
+                  ),
+                  { dp: coinMetadata.decimals },
+                )}{" "}
+                {coinMetadata.symbol}
+              </TBody>
+            </div>
+          );
+        }
+
+        return <div>{event.eventIndex}</div>;
       },
     },
     {
@@ -170,13 +271,7 @@ export default function ObligationHistoryDialog() {
     try {
       const response = await axios.get("/api/events", {
         params: {
-          eventTypes: [
-            "deposit",
-            "borrow",
-            "withdraw",
-            "repay",
-            "claimReward",
-          ].join(","),
+          eventTypes: ALL_EVENT_TYPES.join(","),
           obligationId: obligation.id,
         },
       });
@@ -189,49 +284,65 @@ export default function ObligationHistoryDialog() {
         repay: RepayEvent[];
         claimReward: ClaimRewardEvent[];
       };
-      for (const event of data.deposit) {
-        event.coinType = normalizeStructTag(event.coinType);
-      }
-      for (const event of data.borrow) {
-        event.coinType = normalizeStructTag(event.coinType);
-      }
-      for (const event of data.withdraw) {
-        event.coinType = normalizeStructTag(event.coinType);
-      }
-      for (const event of data.repay) {
-        event.coinType = normalizeStructTag(event.coinType);
-      }
-      for (const event of data.claimReward) {
+      for (const event of Object.values(data).flat()) {
         event.coinType = normalizeStructTag(event.coinType);
       }
 
+      const depositEvents = (data.deposit ?? [])
+        .slice()
+        .sort(eventSortFunction);
+      const borrowEvents = (data.borrow ?? []).slice().sort(eventSortFunction);
+      const withdrawEvents = (data.withdraw ?? [])
+        .slice()
+        .sort(eventSortFunction);
+      const repayEvents = (data.repay ?? []).slice().sort(eventSortFunction);
+      const claimRewardEvents = getDedupedClaimRewardEvents(
+        (data.claimReward ?? []).slice().sort(eventSortFunction),
+      );
+
+      // const depositBorrowDigests = Array.from(
+      //   new Set([
+      //     ...data.deposit.map((event) => event.digest),
+      //     ...data.borrow.map((event) => event.digest),
+      //   ]),
+      // );
+      // const response2 = await axios.get("/api/events", {
+      //   params: {
+      //     eventTypes: ["reserveDataAsset"].join(","),
+      //     digest: depositBorrowDigests.join(","),
+      //   },
+      // });
+      // console.log("XXX", response2);
+
       const list = [
-        ...data.deposit.map((event) => ({
+        ...depositEvents.map((event) => ({
           date: new Date(event.timestamp * 1000),
           type: EventType.DEPOSIT,
           event,
         })),
-        ...data.borrow.map((event) => ({
+        ...borrowEvents.map((event) => ({
           date: new Date(event.timestamp * 1000),
           type: EventType.BORROW,
           event,
         })),
-        ...data.withdraw.map((event) => ({
+        ...withdrawEvents.map((event) => ({
           date: new Date(event.timestamp * 1000),
           type: EventType.WITHDRAW,
           event,
         })),
-        ...data.repay.map((event) => ({
+        ...repayEvents.map((event) => ({
           date: new Date(event.timestamp * 1000),
           type: EventType.REPAY,
           event,
         })),
-        ...data.claimReward.map((event) => ({
+        ...claimRewardEvents.map((event) => ({
           date: new Date(event.timestamp * 1000),
           type: EventType.CLAIM_REWARD,
           event,
         })),
-      ].sort((a, b) => b.date.getTime() - a.date.getTime()) as RowData[];
+      ].sort((a: RowData, b: RowData) =>
+        eventSortFunction(a.event, b.event),
+      ) as RowData[];
 
       setRows(list);
     } catch (e) {
@@ -239,10 +350,25 @@ export default function ObligationHistoryDialog() {
     }
   }, [obligation, clearEventsData]);
 
+  // State
   const onOpenChange = (isOpen: boolean) => {
-    if (isOpen) fetchEventsData();
-    else clearEventsData();
+    if (isOpen && rows === undefined) fetchEventsData();
   };
+
+  // Filters
+  const [filters, setFilters] = useState<string[]>(ALL_EVENT_TYPES);
+  const toggleFilter = (eventType: string) => {
+    setFilters((arr) =>
+      arr.includes(eventType)
+        ? arr.filter((f) => f !== eventType)
+        : [...arr, eventType],
+    );
+  };
+
+  const filteredRows =
+    rows === undefined
+      ? undefined
+      : rows.filter((row) => filters.includes(row.type));
 
   if (!obligation) return null;
   return (
@@ -282,19 +408,42 @@ export default function ObligationHistoryDialog() {
           </Button>
         </DialogHeader>
 
+        <div className="flex flex-row flex-wrap gap-2 p-4">
+          {Object.values(EventType).map((eventType) => (
+            <Button
+              key={eventType}
+              labelClassName="text-xs font-sans"
+              className={cn(
+                "rounded-full",
+                filters.includes(eventType) &&
+                  "border-secondary bg-secondary/5 text-primary-foreground",
+              )}
+              variant="secondaryOutline"
+              size="sm"
+              onClick={() => toggleFilter(eventType)}
+            >
+              {EventTypeNameMap[eventType]}
+            </Button>
+          ))}
+        </div>
+
         <DataTable<RowData>
-          tableClassName="border-y-0 table-fixed relative"
+          tableClassName="border-y-0 relative"
           tableHeaderRowClassName="border-none"
           tableHeadClassName={(header) =>
             cn(
-              "sticky bg-popover top-0",
+              "sticky bg-popover top-0 z-2",
               header.id === "digest" ? "w-16" : "w-auto",
             )
           }
-          tableCellClassName="py-0 h-12"
+          tableCellClassName="py-0 h-12 z-1"
           columns={columns}
-          data={rows}
-          noDataMessage="No history"
+          data={filteredRows}
+          noDataMessage={
+            filters.length === ALL_EVENT_TYPES.length
+              ? "No history"
+              : "No history for the selected filters"
+          }
         />
       </DialogContent>
     </Dialog>
