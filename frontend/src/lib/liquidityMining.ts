@@ -91,7 +91,7 @@ export function formatRewards(
           )
           .div(365)
           .div(reserve.depositedAmount);
-
+    //
     return {
       stats: {
         id: poolReward.id,
