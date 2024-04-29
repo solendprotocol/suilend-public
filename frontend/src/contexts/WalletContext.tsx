@@ -80,7 +80,7 @@ export function WalletContextProvider({ children }: PropsWithChildren) {
   } = useWallet();
 
   const searchParams = useSearchParams();
-  const impersonatedAddress = searchParams.get("wallet") ?? undefined;
+  const impersonatedAddress = searchParams?.get("wallet") ?? undefined;
 
   // Wallet connect dropdown
   const [isConnectWalletDropdownOpen, setIsConnectWalletDropdownOpen] =
