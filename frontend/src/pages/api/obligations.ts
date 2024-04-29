@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
-import { API_URL } from "@/lib/navigation";
+const API_URL = "https://api.suilend.fi";
 
 export default async function handler(
   req: NextApiRequest,
