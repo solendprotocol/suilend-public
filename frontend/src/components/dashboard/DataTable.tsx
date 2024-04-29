@@ -131,7 +131,7 @@ export function tableHeader<T>(
     return !tooltip ? (
       <TLabel
         className={cn(
-          "flex h-full w-max flex-col justify-center px-4 uppercase",
+          "flex h-full flex-col justify-center px-4 uppercase",
           borderBottom && "border-b",
         )}
       >
@@ -212,7 +212,7 @@ export default function DataTable<T>({
 
   return (
     <Table className={cn("border-y", tableClassName)}>
-      <TableHeader>
+      <TableHeader className="relative z-[2]">
         {table.getHeaderGroups().map((headerGroup) => (
           <TableRow
             key={headerGroup.id}
@@ -239,7 +239,7 @@ export default function DataTable<T>({
           </TableRow>
         ))}
       </TableHeader>
-      <TableBody>
+      <TableBody className="relative z-[1]">
         {data === undefined ? (
           <>
             {Array.from({ length: 5 }).map((_, index) => (
