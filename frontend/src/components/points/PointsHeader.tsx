@@ -20,9 +20,6 @@ export default function PointsHeader() {
         <div className="text-center font-mono text-4xl font-normal uppercase text-foreground md:text-5xl">
           Suilend Points
         </div>
-        <div className="text-center font-mono text-lg font-normal uppercase text-primary-foreground md:text-2xl">
-          Season 1
-        </div>
       </div>
     </div>
   );

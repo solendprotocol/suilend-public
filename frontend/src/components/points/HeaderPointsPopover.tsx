@@ -7,9 +7,7 @@ import PointsIcon from "@/components/points/PointsIcon";
 import PointsRankCell from "@/components/points/PointsRank";
 import Button from "@/components/shared/Button";
 import Popover from "@/components/shared/Popover";
-import TitleChip from "@/components/shared/TitleChip";
 import { TLabel } from "@/components/shared/Typography";
-import { Separator } from "@/components/ui/separator";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { usePointsContext } from "@/contexts/PointsContext";
 import { formatPoints } from "@/lib/format";
@@ -48,18 +46,12 @@ export default function PointsCountPopover() {
       }}
     >
       <div className="flex flex-col items-center gap-4">
-        <TitleChip>Season 1 points</TitleChip>
-
-        <PointsCount
-          points={pointsStats.totalPoints.total}
-          className="gap-2"
-          iconClassName="h-6 w-6"
-          labelClassName="text-lg"
-        />
-
-        <Separator />
-
         <div className="flex w-full flex-col gap-2">
+          <div className="flex flex-row items-center justify-between gap-4">
+            <TLabel className="uppercase">Total points</TLabel>
+            <PointsCount points={pointsStats.totalPoints.total} />
+          </div>
+
           <div className="flex flex-row items-center justify-between gap-4">
             <TLabel className="uppercase">Points per day</TLabel>
             <PointsCount points={pointsStats.pointsPerDay.total} />
@@ -79,7 +71,7 @@ export default function PointsCountPopover() {
               variant="secondaryOutline"
               onClick={() => setIsOpen(false)}
             >
-              View points hub
+              Points hub
             </Button>
           </NextLink>
         )}

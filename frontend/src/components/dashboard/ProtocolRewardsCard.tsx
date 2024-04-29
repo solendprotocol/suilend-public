@@ -56,18 +56,18 @@ function PendingRewards({ totalSuiRewards, isCentered }: PendingRewardsProps) {
   );
 }
 
-interface Season1PointsStatProps {
-  points: BigNumber;
+interface TotalPointsStatProps {
+  totalPoints: BigNumber;
   isCentered?: boolean;
 }
 
-function Season1PointsStat({ points, isCentered }: Season1PointsStatProps) {
+function TotalPointsStat({ totalPoints, isCentered }: TotalPointsStatProps) {
   return (
     <div className={cn("flex flex-col gap-1", isCentered && "items-center")}>
       <TLabel className={cn("uppercase", isCentered && "text-center")}>
-        Season 1 points
+        Total points
       </TLabel>
-      <PointsCount points={points} />
+      <PointsCount points={totalPoints} />
     </div>
   );
 }
@@ -246,7 +246,7 @@ export default function ProtocolRewardsCard() {
             {md ? (
               <div className="flex flex-row items-center justify-between gap-4">
                 <PendingRewards totalSuiRewards={totalSuiRewards} />
-                <Season1PointsStat points={pointsStats.totalPoints.total} />
+                <TotalPointsStat totalPoints={pointsStats.totalPoints.total} />
                 <PointsPerDayStat
                   pointsPerDay={pointsStats.pointsPerDay.total}
                 />
@@ -255,8 +255,8 @@ export default function ProtocolRewardsCard() {
             ) : (
               <div className="grid grid-cols-2 gap-4">
                 <PendingRewards totalSuiRewards={totalSuiRewards} isCentered />
-                <Season1PointsStat
-                  points={pointsStats.totalPoints.total}
+                <TotalPointsStat
+                  totalPoints={pointsStats.totalPoints.total}
                   isCentered
                 />
 
