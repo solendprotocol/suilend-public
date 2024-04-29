@@ -46,7 +46,7 @@ export default function Dashboard() {
         <Alert
           className="mb-6 cursor-pointer"
           onClick={() => {
-            router.push(pathname);
+            router.push(pathname as string);
           }}
         >
           <div className="flex flex-row items-center gap-4">
