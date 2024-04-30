@@ -42,8 +42,8 @@ async function claimRewards() {
   let [coin] = suilendClient.claimReward(
     "0x389c366935d4b98cf3cebd21236565bf3e41b10eddcab2e0ebcb3e1b32cba5ea", 
     BigInt(0), 
-    BigInt(0), 
-    "0x5d4b302506645c37ff133b98c4b50a5ae14841659738d6d733d59d0d217a93bf::coin::COIN", 
+    BigInt(1), 
+    "0x34fe4f3c9e450fed4d0a3c587ed842eec5313c30c3cc3c0841247c49425e246b::suilend_point::SUILEND_POINT", 
     Side.DEPOSIT, 
     txb
   );
