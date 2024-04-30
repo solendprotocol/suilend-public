@@ -164,7 +164,7 @@ export function option(
   arg: GenericArg | null,
 ) {
   if (arg === null) {
-    return pure(txb, arg, `0x1::option::Option<${type}>`);
+    return pure(txb, null, `0x1::option::Option<${type}>`);
   }
 
   if (typeArgIsPure(type)) {
@@ -177,7 +177,7 @@ export function option(
     return arg;
   } else {
     if (arg === null) {
-      return pure(txb, arg, `vector<${type}>`);
+      return pure(txb, null, `vector<${type}>`);
     }
 
     // wrap it with some
