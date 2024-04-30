@@ -155,8 +155,8 @@ export function tableHeader<T>(
 interface DataTableProps<T> {
   columns: ColumnDef<T>[];
   data?: T[];
-  maxRows?: number;
   noDataMessage: string;
+  maxRows?: number;
   tableContainer?: TableContainerProps;
   tableClassName?: ClassValue;
   tableRowClassName?: (row: Row<T>) => ClassValue;
@@ -171,8 +171,8 @@ interface DataTableProps<T> {
 export default function DataTable<T>({
   columns,
   data,
-  maxRows,
   noDataMessage,
+  maxRows,
   tableContainer,
   tableClassName,
   tableRowClassName,

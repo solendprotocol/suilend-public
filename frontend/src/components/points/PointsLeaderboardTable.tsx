@@ -16,6 +16,7 @@ import { useAppContext } from "@/contexts/AppContext";
 import { LeaderboardRowData, usePointsContext } from "@/contexts/PointsContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 import { formatAddress } from "@/lib/format";
+import { cn } from "@/lib/utils";
 
 export default function PointsLeaderboardTable() {
   const { address } = useWalletContext();
@@ -97,8 +98,11 @@ export default function PointsLeaderboardTable() {
       <DataTable<LeaderboardRowData>
         columns={columns}
         data={leaderboardRows}
-        maxRows={100}
         noDataMessage="No users"
+        maxRows={100}
+        tableContainer={{
+          className: cn(!leaderboardRows && "-mb-6"),
+        }}
         tableRowClassName={(row) =>
           row.original.address === address &&
           "shadow-[inset_0_0_0_2px_hsl(var(--secondary))] !bg-secondary/5"
