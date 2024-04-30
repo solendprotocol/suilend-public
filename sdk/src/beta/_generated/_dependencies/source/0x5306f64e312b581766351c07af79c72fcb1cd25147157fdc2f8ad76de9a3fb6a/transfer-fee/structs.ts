@@ -268,10 +268,12 @@ export class TransferFee implements StructClass {
   static get bcs() {
     return bcs.struct("TransferFee", {
       amount: bcs.u64(),
-      recipient: bcs.bytes(32).transform({
-        input: (val: string) => fromHEX(val),
-        output: (val: Uint8Array) => toHEX(val),
-      }),
+      recipient: bcs
+        .bytes(32)
+        .transform({
+          input: (val: string) => fromHEX(val),
+          output: (val: Uint8Array) => toHEX(val),
+        }),
     });
   }
 
