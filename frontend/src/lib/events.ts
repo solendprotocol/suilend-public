@@ -1,8 +1,83 @@
 import BigNumber from "bignumber.js";
 
+export enum EventType {
+  RESERVE_ASSET_DATA = "reserveAssetData",
+  MINT = "mint",
+  REDEEM = "redeem",
+  DEPOSIT = "deposit",
+  BORROW = "borrow",
+  WITHDRAW = "withdraw",
+  REPAY = "repay",
+  LIQUIDATE = "liquidate",
+  CLAIM_REWARD = "claimReward",
+}
+
+export const EventTypeNameMap: Record<EventType, string> = {
+  [EventType.RESERVE_ASSET_DATA]: "Reserve asset data",
+  [EventType.MINT]: "Mint",
+  [EventType.REDEEM]: "Redeem",
+  [EventType.DEPOSIT]: "Deposit",
+  [EventType.BORROW]: "Borrow",
+  [EventType.WITHDRAW]: "Withdraw",
+  [EventType.REPAY]: "Repay",
+  [EventType.LIQUIDATE]: "Liquidation",
+  [EventType.CLAIM_REWARD]: "Claim rewards",
+};
+
 export type GenericEvent = {
   timestamp: number;
+  digest: string;
   eventIndex: number;
+};
+
+export type ReserveAssetDataEvent = {
+  id: number;
+  lendingMarketId: string;
+  coinType: string;
+  reserveId: string;
+  availableAmount: string;
+  supplyAmount: string;
+  borrowedAmount: string;
+  availableAmountUsdEstimate: string;
+  supplyAmountUsdEstimate: string;
+  borrowedAmountUsdEstimate: string;
+  borrowApr: string;
+  supplyApr: string;
+  ctokenSupply: string;
+  cumulativeBorrowRate: string;
+  price: string;
+  smoothedPrice: string;
+  priceLastUpdateTimestampS: number;
+  timestamp: number;
+  digest: string;
+  eventIndex: number;
+  sender: string;
+};
+
+export type MintEvent = {
+  id: number;
+  lendingMarketId: string;
+  coinType: string;
+  reserveId: string;
+  liquidityAmount: string;
+  ctokenAmount: string;
+  timestamp: number;
+  digest: string;
+  eventIndex: number;
+  sender: string;
+};
+
+export type RedeemEvent = {
+  id: number;
+  lendingMarketId: string;
+  coinType: string;
+  reserveId: string;
+  ctokenAmount: string;
+  liquidityAmount: string;
+  timestamp: number;
+  digest: string;
+  eventIndex: number;
+  sender: string;
 };
 
 export type DepositEvent = {
@@ -57,6 +132,22 @@ export type RepayEvent = {
   sender: string;
 };
 
+export type LiquidateEvent = {
+  id: number;
+  lendingMarketId: string;
+  repayReserveId: string;
+  withdrawReserveId: string;
+  obligationId: string;
+  repayAmount: string;
+  withdrawAmount: string;
+  protocolFeeAmount: string;
+  liquidatorBonusAmount: string;
+  timestamp: number;
+  digest: string;
+  eventIndex: number;
+  sender: string;
+};
+
 export type ClaimRewardEvent = {
   id: number;
   coinType: string;
@@ -72,7 +163,7 @@ export type ClaimRewardEvent = {
   sender: string;
 };
 
-export const eventSortFunction = (a: GenericEvent, b: GenericEvent) => {
+export const eventSortDesc = (a: GenericEvent, b: GenericEvent) => {
   const aDate = new Date(a.timestamp * 1000).getTime();
   const bDate = new Date(b.timestamp * 1000).getTime();
   if (aDate !== bDate) return bDate - aDate;
@@ -82,6 +173,9 @@ export const eventSortFunction = (a: GenericEvent, b: GenericEvent) => {
 
   return bEventIndex - aEventIndex;
 };
+
+export const eventSortAsc = (a: GenericEvent, b: GenericEvent) =>
+  -1 * eventSortDesc(a, b);
 
 export const getDedupedClaimRewardEvents = (events: ClaimRewardEvent[]) => {
   const dedupedClaimRewardEvents: ClaimRewardEvent[] = [];

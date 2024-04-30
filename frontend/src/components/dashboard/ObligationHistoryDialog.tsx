@@ -1,11 +1,14 @@
 import { CSSProperties, useCallback, useState } from "react";
 
 import { normalizeStructTag } from "@mysten/sui.js/utils";
-import { ColumnDef } from "@tanstack/react-table";
+import { ColumnDef, Row } from "@tanstack/react-table";
 import axios from "axios";
 import BigNumber from "bignumber.js";
 import { formatDate } from "date-fns";
 import { FileClock, RefreshCcw } from "lucide-react";
+import pLimit from "p-limit";
+
+import { WAD } from "@suilend/sdk/constants";
 
 import DataTable, { tableHeader } from "@/components/dashboard/DataTable";
 import Button from "@/components/shared/Button";
@@ -23,44 +26,28 @@ import {
   BorrowEvent,
   ClaimRewardEvent,
   DepositEvent,
+  EventType,
+  EventTypeNameMap,
+  LiquidateEvent,
   RepayEvent,
+  ReserveAssetDataEvent,
   WithdrawEvent,
-  eventSortFunction,
+  eventSortAsc,
+  eventSortDesc,
   getDedupedClaimRewardEvents,
 } from "@/lib/events";
-import { formatInteger, formatToken } from "@/lib/format";
+import { formatToken } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-enum EventType {
-  DEPOSIT = "deposit",
-  BORROW = "borrow",
-  WITHDRAW = "withdraw",
-  REPAY = "repay",
-  CLAIM_REWARD = "claimReward",
-}
+type EventsData = {
+  reserveAssetData: ReserveAssetDataEvent[];
 
-type ReserveAssetDataEvent = {
-  id: number;
-  lendingMarket: string;
-  coinType: string;
-  reserveId: string;
-  availableAmount: string;
-  supplyAmount: string;
-  borrowedAmount: string;
-  availableAmountUsdEstimate: string;
-  supplyAmountUsdEstimate: string;
-  borrowedAmountUsdEstimate: string;
-  borrowApr: string;
-  supplyApr: string;
-  ctokenSupply: string;
-  cumulativeBorrowRate: string;
-  price: string;
-  smoothedPrice: string;
-  priceLastUpdateTimestampS: number;
-  timestamp: number;
-  digest: string;
-  eventIndex: number;
-  sender: string;
+  deposit: DepositEvent[];
+  borrow: BorrowEvent[];
+  withdraw: WithdrawEvent[];
+  repay: RepayEvent[];
+  liquidate: LiquidateEvent[];
+  claimReward: ClaimRewardEvent[];
 };
 
 interface RowData {
@@ -71,18 +58,9 @@ interface RowData {
     | BorrowEvent
     | WithdrawEvent
     | RepayEvent
+    | LiquidateEvent
     | ClaimRewardEvent;
 }
-
-const ALL_EVENT_TYPES = Object.values(EventType);
-
-const EventTypeNameMap: Record<EventType, string> = {
-  [EventType.DEPOSIT]: "Deposit",
-  [EventType.BORROW]: "Borrow",
-  [EventType.WITHDRAW]: "Withdraw",
-  [EventType.REPAY]: "Repay",
-  [EventType.CLAIM_REWARD]: "Claim rewards",
-};
 
 export default function ObligationHistoryDialog() {
   const { explorer, obligation, ...restAppContext } = useAppContext();
@@ -93,7 +71,8 @@ export default function ObligationHistoryDialog() {
     {
       id: "date",
       accessorKey: "date",
-      sortingFn: "datetime",
+      sortingFn: (rowA: Row<RowData>, rowB: Row<RowData>) =>
+        eventSortAsc(rowA.original.event, rowB.original.event),
       header: ({ column }) =>
         tableHeader(column, "Date", { isDate: true, borderBottom: true }),
       cell: ({ row }) => {
@@ -129,102 +108,141 @@ export default function ObligationHistoryDialog() {
       cell: ({ row }) => {
         const { event, type } = row.original;
 
-        const coinMetadata = data.coinMetadataMap[event.coinType];
-
         if (type === EventType.DEPOSIT) {
           const depositEvent = event as DepositEvent;
+          const coinMetadata = data.coinMetadataMap[depositEvent.coinType];
+
+          let amount;
+
+          const reserveAssetDataEvent = eventsData?.reserveAssetData.find(
+            (e) => e.digest === depositEvent.digest,
+          );
+          if (reserveAssetDataEvent) {
+            const ctokenExchangeRate = new BigNumber(
+              new BigNumber(reserveAssetDataEvent.supplyAmount).div(
+                WAD.toString(),
+              ),
+            ).div(reserveAssetDataEvent.ctokenSupply);
+
+            amount = new BigNumber(depositEvent.ctokenAmount)
+              .times(ctokenExchangeRate)
+              .div(10 ** coinMetadata.decimals);
+          }
 
           return (
             <div className="flex w-max flex-row items-center gap-2">
               <TokenIcon
                 className="h-4 w-4"
-                coinType={event.coinType}
+                coinType={depositEvent.coinType}
                 symbol={coinMetadata.symbol}
                 url={coinMetadata.iconUrl}
               />
 
               <TBody className="uppercase">
-                {formatInteger(parseInt(depositEvent.ctokenAmount))}{" "}
+                {amount === undefined
+                  ? "N/A"
+                  : formatToken(amount, { dp: coinMetadata.decimals })}{" "}
                 {coinMetadata.symbol}
               </TBody>
             </div>
           );
         } else if (type === EventType.BORROW) {
           const borrowEvent = event as BorrowEvent;
+          const coinMetadata = data.coinMetadataMap[borrowEvent.coinType];
+
+          const amount = new BigNumber(borrowEvent.liquidityAmount).div(
+            10 ** coinMetadata.decimals,
+          );
 
           return (
             <div className="flex flex-row items-center gap-2">
               <TokenIcon
                 className="h-4 w-4"
-                coinType={event.coinType}
+                coinType={borrowEvent.coinType}
                 symbol={coinMetadata.symbol}
                 url={coinMetadata.iconUrl}
               />
 
               <TBody className="uppercase">
-                {formatToken(
-                  new BigNumber(borrowEvent.liquidityAmount).div(
-                    10 ** coinMetadata.decimals,
-                  ),
-                  { dp: coinMetadata.decimals },
-                )}{" "}
+                {formatToken(amount, { dp: coinMetadata.decimals })}{" "}
                 {coinMetadata.symbol}
               </TBody>
             </div>
           );
         } else if (type === EventType.WITHDRAW) {
           const withdrawEvent = event as WithdrawEvent;
+          const coinMetadata = data.coinMetadataMap[withdrawEvent.coinType];
+
+          let amount;
+
+          const reserveAssetDataEvent = eventsData?.reserveAssetData.find(
+            (e) => e.digest === withdrawEvent.digest,
+          );
+          if (reserveAssetDataEvent) {
+            const ctokenExchangeRate = new BigNumber(
+              new BigNumber(reserveAssetDataEvent.supplyAmount).div(
+                WAD.toString(),
+              ),
+            ).div(reserveAssetDataEvent.ctokenSupply);
+
+            amount = new BigNumber(withdrawEvent.ctokenAmount)
+              .times(ctokenExchangeRate)
+              .div(10 ** coinMetadata.decimals);
+          }
 
           return (
             <div className="flex w-max flex-row items-center gap-2">
               <TokenIcon
                 className="h-4 w-4"
-                coinType={event.coinType}
+                coinType={withdrawEvent.coinType}
                 symbol={coinMetadata.symbol}
                 url={coinMetadata.iconUrl}
               />
 
               <TBody className="uppercase">
-                {formatInteger(parseInt(withdrawEvent.ctokenAmount))}{" "}
+                {amount === undefined
+                  ? "N/A"
+                  : formatToken(amount, { dp: coinMetadata.decimals })}{" "}
                 {coinMetadata.symbol}
               </TBody>
             </div>
           );
         } else if (type === EventType.REPAY) {
           const repayEvent = event as RepayEvent;
+          const coinMetadata = data.coinMetadataMap[repayEvent.coinType];
+
+          const amount = new BigNumber(repayEvent.liquidityAmount).div(
+            10 ** coinMetadata.decimals,
+          );
 
           return (
             <div className="flex flex-row items-center gap-2">
               <TokenIcon
                 className="h-4 w-4"
-                coinType={event.coinType}
+                coinType={repayEvent.coinType}
                 symbol={coinMetadata.symbol}
                 url={coinMetadata.iconUrl}
               />
 
               <TBody className="uppercase">
-                {formatToken(
-                  new BigNumber(repayEvent.liquidityAmount).div(
-                    10 ** coinMetadata.decimals,
-                  ),
-                  { dp: coinMetadata.decimals },
-                )}{" "}
+                {formatToken(amount, { dp: coinMetadata.decimals })}{" "}
                 {coinMetadata.symbol}
               </TBody>
             </div>
           );
+        } else if (type === EventType.LIQUIDATE) {
+          return <div>liq</div>;
         } else if (type === EventType.CLAIM_REWARD) {
           const claimRewardEvent = event as ClaimRewardEvent;
-
-          const coin = data.coinMetadataMap[claimRewardEvent.coinType];
+          const coinMetadata = data.coinMetadataMap[claimRewardEvent.coinType];
 
           return (
             <div className="flex w-max flex-row items-center gap-2">
               <TokenIcon
                 className="h-4 w-4"
                 coinType={claimRewardEvent.coinType}
-                symbol={coin.symbol}
-                url={coin.iconUrl}
+                symbol={coinMetadata.symbol}
+                url={coinMetadata.iconUrl}
               />
 
               <TBody className="uppercase">
@@ -257,11 +275,13 @@ export default function ObligationHistoryDialog() {
     },
   ];
 
-  // Rows
-  const [rows, setRows] = useState<RowData[] | undefined>(undefined);
+  // Events
+  const [eventsData, setEventsData] = useState<EventsData | undefined>(
+    undefined,
+  );
 
   const clearEventsData = useCallback(() => {
-    setRows(undefined);
+    setEventsData(undefined);
   }, []);
 
   const fetchEventsData = useCallback(async () => {
@@ -271,80 +291,71 @@ export default function ObligationHistoryDialog() {
     try {
       const response = await axios.get("/api/events", {
         params: {
-          eventTypes: ALL_EVENT_TYPES.join(","),
+          eventTypes: [
+            EventType.DEPOSIT,
+            EventType.BORROW,
+            EventType.WITHDRAW,
+            EventType.REPAY,
+            EventType.LIQUIDATE,
+            EventType.CLAIM_REWARD,
+          ].join(","),
           obligationId: obligation.id,
         },
       });
 
       // Parse
-      const data = response.data as {
-        deposit: DepositEvent[];
-        borrow: BorrowEvent[];
-        withdraw: WithdrawEvent[];
-        repay: RepayEvent[];
-        claimReward: ClaimRewardEvent[];
-      };
-      for (const event of Object.values(data).flat()) {
+      const data = response.data as Omit<EventsData, "reserveAssetData">;
+      for (const event of [
+        ...data.deposit,
+        ...data.borrow,
+        ...data.withdraw,
+        ...data.repay,
+        ...data.claimReward,
+      ]) {
         event.coinType = normalizeStructTag(event.coinType);
       }
 
-      const depositEvents = (data.deposit ?? [])
-        .slice()
-        .sort(eventSortFunction);
-      const borrowEvents = (data.borrow ?? []).slice().sort(eventSortFunction);
-      const withdrawEvents = (data.withdraw ?? [])
-        .slice()
-        .sort(eventSortFunction);
-      const repayEvents = (data.repay ?? []).slice().sort(eventSortFunction);
-      const claimRewardEvents = getDedupedClaimRewardEvents(
-        (data.claimReward ?? []).slice().sort(eventSortFunction),
+      // Get reserve asset data events for deposit & withdraw events
+      const depositWithdrawDigests = Array.from(
+        new Set(
+          [...data.deposit, ...data.withdraw].map((event) => event.digest),
+        ),
       );
 
-      // const depositBorrowDigests = Array.from(
-      //   new Set([
-      //     ...data.deposit.map((event) => event.digest),
-      //     ...data.borrow.map((event) => event.digest),
-      //   ]),
-      // );
-      // const response2 = await axios.get("/api/events", {
-      //   params: {
-      //     eventTypes: ["reserveDataAsset"].join(","),
-      //     digest: depositBorrowDigests.join(","),
-      //   },
-      // });
-      // console.log("XXX", response2);
+      const limit = pLimit(5);
+      const promises = depositWithdrawDigests.map((digest) =>
+        limit(() =>
+          axios.get("/api/events", {
+            params: {
+              eventTypes: "reserveAssetData",
+              digest,
+            },
+          }),
+        ),
+      );
+      const reserveAssetDataEvents = (await Promise.all(promises))
+        .map(
+          (r) =>
+            (r.data as Pick<EventsData, "reserveAssetData">).reserveAssetData ??
+            [],
+        )
+        .flat();
+      for (const event of reserveAssetDataEvents) {
+        event.coinType = normalizeStructTag(event.coinType);
+      }
 
-      const list = [
-        ...depositEvents.map((event) => ({
-          date: new Date(event.timestamp * 1000),
-          type: EventType.DEPOSIT,
-          event,
-        })),
-        ...borrowEvents.map((event) => ({
-          date: new Date(event.timestamp * 1000),
-          type: EventType.BORROW,
-          event,
-        })),
-        ...withdrawEvents.map((event) => ({
-          date: new Date(event.timestamp * 1000),
-          type: EventType.WITHDRAW,
-          event,
-        })),
-        ...repayEvents.map((event) => ({
-          date: new Date(event.timestamp * 1000),
-          type: EventType.REPAY,
-          event,
-        })),
-        ...claimRewardEvents.map((event) => ({
-          date: new Date(event.timestamp * 1000),
-          type: EventType.CLAIM_REWARD,
-          event,
-        })),
-      ].sort((a: RowData, b: RowData) =>
-        eventSortFunction(a.event, b.event),
-      ) as RowData[];
+      setEventsData({
+        reserveAssetData: reserveAssetDataEvents.slice().sort(eventSortAsc),
 
-      setRows(list);
+        deposit: (data.deposit ?? []).slice().sort(eventSortDesc),
+        borrow: (data.borrow ?? []).slice().sort(eventSortDesc),
+        withdraw: (data.withdraw ?? []).slice().sort(eventSortDesc),
+        repay: (data.repay ?? []).slice().sort(eventSortDesc),
+        liquidate: (data.liquidate ?? []).slice().sort(eventSortDesc),
+        claimReward: getDedupedClaimRewardEvents(
+          (data.claimReward ?? []).slice().sort(eventSortDesc),
+        ),
+      });
     } catch (e) {
       console.error(e);
     }
@@ -356,14 +367,42 @@ export default function ObligationHistoryDialog() {
   };
 
   // Filters
-  const [filters, setFilters] = useState<string[]>(ALL_EVENT_TYPES);
-  const toggleFilter = (eventType: string) => {
+  const initialFilters = [
+    EventType.DEPOSIT,
+    EventType.BORROW,
+    EventType.WITHDRAW,
+    EventType.REPAY,
+    EventType.LIQUIDATE,
+    EventType.CLAIM_REWARD,
+  ];
+  const [filters, setFilters] = useState<EventType[]>(initialFilters);
+
+  const toggleFilter = (eventType: EventType) => {
     setFilters((arr) =>
       arr.includes(eventType)
         ? arr.filter((f) => f !== eventType)
         : [...arr, eventType],
     );
   };
+
+  // Rows
+  const rows =
+    eventsData === undefined
+      ? undefined
+      : Object.entries(eventsData)
+          .reduce((acc: RowData[], [key, value]) => {
+            if ((key as EventType) === EventType.RESERVE_ASSET_DATA) return acc;
+
+            return [
+              ...acc,
+              ...value.map((event) => ({
+                date: new Date(event.timestamp * 1000),
+                type: key as EventType,
+                event,
+              })),
+            ] as RowData[];
+          }, [])
+          .sort((a: RowData, b: RowData) => eventSortDesc(a.event, b.event));
 
   const filteredRows =
     rows === undefined
@@ -409,7 +448,7 @@ export default function ObligationHistoryDialog() {
         </DialogHeader>
 
         <div className="flex flex-row flex-wrap gap-2 p-4">
-          {Object.values(EventType).map((eventType) => (
+          {initialFilters.map((eventType) => (
             <Button
               key={eventType}
               labelClassName="text-xs font-sans"
@@ -440,7 +479,7 @@ export default function ObligationHistoryDialog() {
           columns={columns}
           data={filteredRows}
           noDataMessage={
-            filters.length === ALL_EVENT_TYPES.length
+            filters.length === initialFilters.length
               ? "No history"
               : "No history for the selected filters"
           }
