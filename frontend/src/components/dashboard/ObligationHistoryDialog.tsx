@@ -14,7 +14,7 @@ import DataTable, { tableHeader } from "@/components/dashboard/DataTable";
 import Button from "@/components/shared/Button";
 import OpenOnExplorerButton from "@/components/shared/OpenOnExplorerButton";
 import TokenIcon from "@/components/shared/TokenIcon";
-import { TBody, TTitle } from "@/components/shared/Typography";
+import { TBody, TLabelSans, TTitle } from "@/components/shared/Typography";
 import {
   Dialog,
   DialogContent,
@@ -38,6 +38,38 @@ import {
 } from "@/lib/events";
 import { formatToken } from "@/lib/format";
 import { cn } from "@/lib/utils";
+
+interface TokenAmountProps {
+  amount?: BigNumber;
+  coinType: string;
+  symbol: string;
+  iconUrl?: string | null;
+  decimals: number;
+}
+
+function TokenAmount({
+  amount,
+  coinType,
+  symbol,
+  iconUrl,
+  decimals,
+}: TokenAmountProps) {
+  return (
+    <div className="flex w-max flex-row items-center gap-2">
+      <TokenIcon
+        className="h-4 w-4"
+        coinType={coinType}
+        symbol={symbol}
+        url={iconUrl}
+      />
+
+      <TBody className="uppercase">
+        {amount === undefined ? "N/A" : formatToken(amount, { dp: decimals })}{" "}
+        {symbol}
+      </TBody>
+    </div>
+  );
+}
 
 type EventsData = {
   reserveAssetData: ReserveAssetDataEvent[];
@@ -130,21 +162,13 @@ export default function ObligationHistoryDialog() {
           }
 
           return (
-            <div className="flex w-max flex-row items-center gap-2">
-              <TokenIcon
-                className="h-4 w-4"
-                coinType={depositEvent.coinType}
-                symbol={coinMetadata.symbol}
-                url={coinMetadata.iconUrl}
-              />
-
-              <TBody className="uppercase">
-                {amount === undefined
-                  ? "N/A"
-                  : formatToken(amount, { dp: coinMetadata.decimals })}{" "}
-                {coinMetadata.symbol}
-              </TBody>
-            </div>
+            <TokenAmount
+              amount={amount}
+              coinType={depositEvent.coinType}
+              symbol={coinMetadata.symbol}
+              iconUrl={coinMetadata.iconUrl}
+              decimals={coinMetadata.decimals}
+            />
           );
         } else if (type === EventType.BORROW) {
           const borrowEvent = event as BorrowEvent;
@@ -155,19 +179,13 @@ export default function ObligationHistoryDialog() {
           );
 
           return (
-            <div className="flex flex-row items-center gap-2">
-              <TokenIcon
-                className="h-4 w-4"
-                coinType={borrowEvent.coinType}
-                symbol={coinMetadata.symbol}
-                url={coinMetadata.iconUrl}
-              />
-
-              <TBody className="uppercase">
-                {formatToken(amount, { dp: coinMetadata.decimals })}{" "}
-                {coinMetadata.symbol}
-              </TBody>
-            </div>
+            <TokenAmount
+              amount={amount}
+              coinType={borrowEvent.coinType}
+              symbol={coinMetadata.symbol}
+              iconUrl={coinMetadata.iconUrl}
+              decimals={coinMetadata.decimals}
+            />
           );
         } else if (type === EventType.WITHDRAW) {
           const withdrawEvent = event as WithdrawEvent;
@@ -191,21 +209,13 @@ export default function ObligationHistoryDialog() {
           }
 
           return (
-            <div className="flex w-max flex-row items-center gap-2">
-              <TokenIcon
-                className="h-4 w-4"
-                coinType={withdrawEvent.coinType}
-                symbol={coinMetadata.symbol}
-                url={coinMetadata.iconUrl}
-              />
-
-              <TBody className="uppercase">
-                {amount === undefined
-                  ? "N/A"
-                  : formatToken(amount, { dp: coinMetadata.decimals })}{" "}
-                {coinMetadata.symbol}
-              </TBody>
-            </div>
+            <TokenAmount
+              amount={amount}
+              coinType={withdrawEvent.coinType}
+              symbol={coinMetadata.symbol}
+              iconUrl={coinMetadata.iconUrl}
+              decimals={coinMetadata.decimals}
+            />
           );
         } else if (type === EventType.REPAY) {
           const repayEvent = event as RepayEvent;
@@ -216,22 +226,70 @@ export default function ObligationHistoryDialog() {
           );
 
           return (
-            <div className="flex flex-row items-center gap-2">
-              <TokenIcon
-                className="h-4 w-4"
-                coinType={repayEvent.coinType}
-                symbol={coinMetadata.symbol}
-                url={coinMetadata.iconUrl}
-              />
-
-              <TBody className="uppercase">
-                {formatToken(amount, { dp: coinMetadata.decimals })}{" "}
-                {coinMetadata.symbol}
-              </TBody>
-            </div>
+            <TokenAmount
+              amount={amount}
+              coinType={repayEvent.coinType}
+              symbol={coinMetadata.symbol}
+              iconUrl={coinMetadata.iconUrl}
+              decimals={coinMetadata.decimals}
+            />
           );
         } else if (type === EventType.LIQUIDATE) {
-          return <div>liq</div>;
+          const liquidateEvent = event as LiquidateEvent;
+
+          const reserveAssetDataEvent = eventsData?.reserveAssetData.find(
+            (e) => e.digest === liquidateEvent.digest,
+          );
+
+          const repayReserve = data.lendingMarket.reserves.find(
+            (reserve) => reserve.id === liquidateEvent.repayReserveId,
+          );
+          const withdrawReserve = data.lendingMarket.reserves.find(
+            (reserve) => reserve.id === liquidateEvent.withdrawReserveId,
+          );
+
+          if (!reserveAssetDataEvent || !repayReserve || !withdrawReserve)
+            return (
+              <TLabelSans className="w-max">See txn for details</TLabelSans>
+            );
+
+          const ctokenExchangeRate = new BigNumber(
+            new BigNumber(reserveAssetDataEvent.supplyAmount).div(
+              WAD.toString(),
+            ),
+          ).div(reserveAssetDataEvent.ctokenSupply);
+
+          const liquidatedAmount = new BigNumber(liquidateEvent.withdrawAmount)
+            .times(ctokenExchangeRate)
+            .div(10 ** withdrawReserve.mintDecimals);
+          const repaidAmount = new BigNumber(liquidateEvent.repayAmount).div(
+            10 ** repayReserve.mintDecimals,
+          );
+
+          return (
+            <div className="flex w-max flex-col">
+              <div className="flex w-max flex-row items-center gap-2">
+                <TLabelSans>Deposits liquidated</TLabelSans>
+                <TokenAmount
+                  amount={liquidatedAmount}
+                  coinType={withdrawReserve.coinType}
+                  symbol={withdrawReserve.symbol}
+                  iconUrl={withdrawReserve.iconUrl}
+                  decimals={withdrawReserve.mintDecimals}
+                />
+              </div>
+              <div className="flex w-max flex-row items-center gap-2">
+                <TLabelSans>Borrows repaid</TLabelSans>
+                <TokenAmount
+                  amount={repaidAmount}
+                  coinType={repayReserve.coinType}
+                  symbol={repayReserve.symbol}
+                  iconUrl={repayReserve.iconUrl}
+                  decimals={repayReserve.mintDecimals}
+                />
+              </div>
+            </div>
+          );
         } else if (type === EventType.CLAIM_REWARD) {
           const claimRewardEvent = event as ClaimRewardEvent;
           const coinMetadata = data.coinMetadataMap[claimRewardEvent.coinType];
@@ -315,15 +373,17 @@ export default function ObligationHistoryDialog() {
         event.coinType = normalizeStructTag(event.coinType);
       }
 
-      // Get reserve asset data events for deposit & withdraw events
-      const depositWithdrawDigests = Array.from(
+      // Get reserve asset data events for deposit, withdraw, and liquidate events
+      const digests = Array.from(
         new Set(
-          [...data.deposit, ...data.withdraw].map((event) => event.digest),
+          [...data.deposit, ...data.withdraw, ...data.liquidate].map(
+            (event) => event.digest,
+          ),
         ),
       );
 
       const limit = pLimit(5);
-      const promises = depositWithdrawDigests.map((digest) =>
+      const promises = digests.map((digest) =>
         limit(() =>
           axios.get("/api/events", {
             params: {
@@ -467,21 +527,32 @@ export default function ObligationHistoryDialog() {
         </div>
 
         <DataTable<RowData>
-          tableClassName="border-y-0 relative"
-          tableHeaderRowClassName="border-none"
-          tableHeadClassName={(header) =>
-            cn(
-              "sticky bg-popover top-0 z-2",
-              header.id === "digest" ? "w-16" : "w-auto",
-            )
-          }
-          tableCellClassName="py-0 h-12 z-1"
           columns={columns}
           data={filteredRows}
           noDataMessage={
             filters.length === initialFilters.length
               ? "No history"
-              : "No history for the selected filters"
+              : "No history for the active filters"
+          }
+          skeletonRows={20}
+          container={{
+            className: cn(filteredRows === undefined && "overflow-y-hidden"),
+          }}
+          tableClassName="border-y-0 relative"
+          tableHeaderRowClassName="border-none"
+          tableHeadClassName={(header) =>
+            cn(
+              "sticky bg-popover top-0 z-[2]",
+              header.id === "digest" ? "w-16" : "w-auto",
+            )
+          }
+          tableCellClassName={(cell) =>
+            cn(
+              "z-[1]",
+              cell?.row.original.type === EventType.LIQUIDATE
+                ? "py-2 h-auto"
+                : "py-0 h-12",
+            )
           }
         />
       </DialogContent>

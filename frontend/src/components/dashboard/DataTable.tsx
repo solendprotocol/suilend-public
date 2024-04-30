@@ -1,6 +1,7 @@
 import { Fragment, FunctionComponent, ReactNode, useState } from "react";
 
 import {
+  Cell,
   Column,
   ColumnDef,
   Header,
@@ -31,6 +32,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableContainerProps,
   TableHead,
   TableHeader,
   TableRow,
@@ -173,11 +175,13 @@ interface DataTableProps<T> {
   columns: ColumnDef<T>[];
   data?: T[];
   noDataMessage: string;
+  skeletonRows?: number;
+  container?: TableContainerProps;
   tableClassName?: ClassValue;
   tableHeaderRowClassName?: ClassValue;
   tableHeadClassName?: (header: Header<T, unknown>) => ClassValue;
   tableRowClassName?: ClassValue;
-  tableCellClassName?: ClassValue;
+  tableCellClassName?: (cell?: Cell<T, unknown>) => ClassValue;
   RowModal?: FunctionComponent<{
     row: T;
     children: ReactNode;
@@ -189,6 +193,8 @@ export default function DataTable<T>({
   columns,
   data,
   noDataMessage,
+  skeletonRows,
+  container,
   tableClassName,
   tableHeaderRowClassName,
   tableHeadClassName,
@@ -211,7 +217,7 @@ export default function DataTable<T>({
   });
 
   return (
-    <Table className={cn("border-y", tableClassName)}>
+    <Table container={container} className={cn("border-y", tableClassName)}>
       <TableHeader className="relative z-[2]">
         {table.getHeaderGroups().map((headerGroup) => (
           <TableRow
@@ -242,14 +248,17 @@ export default function DataTable<T>({
       <TableBody className="relative z-[1]">
         {data === undefined ? (
           <>
-            {Array.from({ length: 5 }).map((_, index) => (
+            {Array.from({ length: skeletonRows ?? 5 }).map((_, index) => (
               <TableRow
                 key={index}
                 className={cn("hover:bg-transparent", tableRowClassName)}
               >
                 <TableCell
                   colSpan={columns.length}
-                  className={cn("h-16 px-0 py-0", tableCellClassName)}
+                  className={cn(
+                    "h-16 px-0 py-0",
+                    tableCellClassName && tableCellClassName(),
+                  )}
                 >
                   <Skeleton className="h-full w-full bg-muted/5" />
                 </TableCell>
@@ -278,7 +287,10 @@ export default function DataTable<T>({
                     {row.getVisibleCells().map((cell) => (
                       <TableCell
                         key={cell.id}
-                        className={cn("h-16", tableCellClassName)}
+                        className={cn(
+                          "h-16",
+                          tableCellClassName && tableCellClassName(cell),
+                        )}
                       >
                         {flexRender(
                           cell.column.columnDef.cell,
@@ -305,7 +317,10 @@ export default function DataTable<T>({
               >
                 <TableCell
                   colSpan={columns.length}
-                  className={cn("h-16 py-0 text-center", tableCellClassName)}
+                  className={cn(
+                    "h-16 py-0 text-center",
+                    tableCellClassName && tableCellClassName(),
+                  )}
                 >
                   <TLabelSans>{noDataMessage}</TLabelSans>
                 </TableCell>
