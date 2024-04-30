@@ -23,7 +23,7 @@ export function isDecimal(type: string): boolean {
   type = compressSuiType(type);
   return (
     type ===
-    "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::decimal::Decimal"
+    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::decimal::Decimal"
   );
 }
 
@@ -35,12 +35,12 @@ export type DecimalReified = Reified<Decimal, DecimalFields>;
 
 export class Decimal implements StructClass {
   static readonly $typeName =
-    "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::decimal::Decimal";
+    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::decimal::Decimal";
   static readonly $numTypeParams = 0;
 
   readonly $typeName = Decimal.$typeName;
 
-  readonly $fullTypeName: "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::decimal::Decimal";
+  readonly $fullTypeName: "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::decimal::Decimal";
 
   readonly $typeArgs: [];
 
@@ -50,7 +50,7 @@ export class Decimal implements StructClass {
     this.$fullTypeName = composeSuiType(
       Decimal.$typeName,
       ...typeArgs,
-    ) as "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::decimal::Decimal";
+    ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::decimal::Decimal";
     this.$typeArgs = typeArgs;
 
     this.value = fields.value;
@@ -62,7 +62,7 @@ export class Decimal implements StructClass {
       fullTypeName: composeSuiType(
         Decimal.$typeName,
         ...[],
-      ) as "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::decimal::Decimal",
+      ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::decimal::Decimal",
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => Decimal.fromFields(fields),

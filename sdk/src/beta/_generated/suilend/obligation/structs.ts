@@ -36,7 +36,7 @@ export function isBorrow(type: string): boolean {
   type = compressSuiType(type);
   return (
     type ===
-    "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::obligation::Borrow"
+    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::obligation::Borrow"
   );
 }
 
@@ -53,12 +53,12 @@ export type BorrowReified = Reified<Borrow, BorrowFields>;
 
 export class Borrow implements StructClass {
   static readonly $typeName =
-    "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::obligation::Borrow";
+    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::obligation::Borrow";
   static readonly $numTypeParams = 0;
 
   readonly $typeName = Borrow.$typeName;
 
-  readonly $fullTypeName: "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::obligation::Borrow";
+  readonly $fullTypeName: "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::obligation::Borrow";
 
   readonly $typeArgs: [];
 
@@ -73,7 +73,7 @@ export class Borrow implements StructClass {
     this.$fullTypeName = composeSuiType(
       Borrow.$typeName,
       ...typeArgs,
-    ) as "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::obligation::Borrow";
+    ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::obligation::Borrow";
     this.$typeArgs = typeArgs;
 
     this.coinType = fields.coinType;
@@ -90,7 +90,7 @@ export class Borrow implements StructClass {
       fullTypeName: composeSuiType(
         Borrow.$typeName,
         ...[],
-      ) as "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::obligation::Borrow",
+      ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::obligation::Borrow",
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => Borrow.fromFields(fields),
@@ -271,7 +271,7 @@ export function isBorrowRecord(type: string): boolean {
   type = compressSuiType(type);
   return (
     type ===
-    "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::obligation::BorrowRecord"
+    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::obligation::BorrowRecord"
   );
 }
 
@@ -288,12 +288,12 @@ export type BorrowRecordReified = Reified<BorrowRecord, BorrowRecordFields>;
 
 export class BorrowRecord implements StructClass {
   static readonly $typeName =
-    "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::obligation::BorrowRecord";
+    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::obligation::BorrowRecord";
   static readonly $numTypeParams = 0;
 
   readonly $typeName = BorrowRecord.$typeName;
 
-  readonly $fullTypeName: "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::obligation::BorrowRecord";
+  readonly $fullTypeName: "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::obligation::BorrowRecord";
 
   readonly $typeArgs: [];
 
@@ -308,7 +308,7 @@ export class BorrowRecord implements StructClass {
     this.$fullTypeName = composeSuiType(
       BorrowRecord.$typeName,
       ...typeArgs,
-    ) as "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::obligation::BorrowRecord";
+    ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::obligation::BorrowRecord";
     this.$typeArgs = typeArgs;
 
     this.coinType = fields.coinType;
@@ -325,7 +325,7 @@ export class BorrowRecord implements StructClass {
       fullTypeName: composeSuiType(
         BorrowRecord.$typeName,
         ...[],
-      ) as "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::obligation::BorrowRecord",
+      ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::obligation::BorrowRecord",
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
@@ -508,7 +508,7 @@ export function isDeposit(type: string): boolean {
   type = compressSuiType(type);
   return (
     type ===
-    "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::obligation::Deposit"
+    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::obligation::Deposit"
   );
 }
 
@@ -525,12 +525,12 @@ export type DepositReified = Reified<Deposit, DepositFields>;
 
 export class Deposit implements StructClass {
   static readonly $typeName =
-    "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::obligation::Deposit";
+    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::obligation::Deposit";
   static readonly $numTypeParams = 0;
 
   readonly $typeName = Deposit.$typeName;
 
-  readonly $fullTypeName: "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::obligation::Deposit";
+  readonly $fullTypeName: "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::obligation::Deposit";
 
   readonly $typeArgs: [];
 
@@ -545,7 +545,7 @@ export class Deposit implements StructClass {
     this.$fullTypeName = composeSuiType(
       Deposit.$typeName,
       ...typeArgs,
-    ) as "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::obligation::Deposit";
+    ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::obligation::Deposit";
     this.$typeArgs = typeArgs;
 
     this.coinType = fields.coinType;
@@ -562,7 +562,7 @@ export class Deposit implements StructClass {
       fullTypeName: composeSuiType(
         Deposit.$typeName,
         ...[],
-      ) as "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::obligation::Deposit",
+      ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::obligation::Deposit",
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => Deposit.fromFields(fields),
@@ -743,7 +743,7 @@ export function isDepositRecord(type: string): boolean {
   type = compressSuiType(type);
   return (
     type ===
-    "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::obligation::DepositRecord"
+    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::obligation::DepositRecord"
   );
 }
 
@@ -760,12 +760,12 @@ export type DepositRecordReified = Reified<DepositRecord, DepositRecordFields>;
 
 export class DepositRecord implements StructClass {
   static readonly $typeName =
-    "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::obligation::DepositRecord";
+    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::obligation::DepositRecord";
   static readonly $numTypeParams = 0;
 
   readonly $typeName = DepositRecord.$typeName;
 
-  readonly $fullTypeName: "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::obligation::DepositRecord";
+  readonly $fullTypeName: "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::obligation::DepositRecord";
 
   readonly $typeArgs: [];
 
@@ -780,7 +780,7 @@ export class DepositRecord implements StructClass {
     this.$fullTypeName = composeSuiType(
       DepositRecord.$typeName,
       ...typeArgs,
-    ) as "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::obligation::DepositRecord";
+    ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::obligation::DepositRecord";
     this.$typeArgs = typeArgs;
 
     this.coinType = fields.coinType;
@@ -797,7 +797,7 @@ export class DepositRecord implements StructClass {
       fullTypeName: composeSuiType(
         DepositRecord.$typeName,
         ...[],
-      ) as "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::obligation::DepositRecord",
+      ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::obligation::DepositRecord",
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
@@ -979,7 +979,7 @@ export class DepositRecord implements StructClass {
 export function isObligation(type: string): boolean {
   type = compressSuiType(type);
   return type.startsWith(
-    "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::obligation::Obligation<",
+    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::obligation::Obligation<",
   );
 }
 
@@ -1008,12 +1008,12 @@ export type ObligationReified<P extends PhantomTypeArgument> = Reified<
 
 export class Obligation<P extends PhantomTypeArgument> implements StructClass {
   static readonly $typeName =
-    "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::obligation::Obligation";
+    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::obligation::Obligation";
   static readonly $numTypeParams = 1;
 
   readonly $typeName = Obligation.$typeName;
 
-  readonly $fullTypeName: `0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::obligation::Obligation<${PhantomToTypeStr<P>}>`;
+  readonly $fullTypeName: `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::obligation::Obligation<${PhantomToTypeStr<P>}>`;
 
   readonly $typeArgs: [PhantomToTypeStr<P>];
 
@@ -1040,7 +1040,7 @@ export class Obligation<P extends PhantomTypeArgument> implements StructClass {
     this.$fullTypeName = composeSuiType(
       Obligation.$typeName,
       ...typeArgs,
-    ) as `0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::obligation::Obligation<${PhantomToTypeStr<P>}>`;
+    ) as `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::obligation::Obligation<${PhantomToTypeStr<P>}>`;
     this.$typeArgs = typeArgs;
 
     this.id = fields.id;
@@ -1069,7 +1069,7 @@ export class Obligation<P extends PhantomTypeArgument> implements StructClass {
       fullTypeName: composeSuiType(
         Obligation.$typeName,
         ...[extractType(P)],
-      ) as `0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::obligation::Obligation<${PhantomToTypeStr<ToPhantomTypeArgument<P>>}>`,
+      ) as `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::obligation::Obligation<${PhantomToTypeStr<ToPhantomTypeArgument<P>>}>`,
       typeArgs: [extractType(P)] as [
         PhantomToTypeStr<ToPhantomTypeArgument<P>>,
       ],
@@ -1261,11 +1261,11 @@ export class Obligation<P extends PhantomTypeArgument> implements StructClass {
       id: this.id,
       lendingMarketId: this.lendingMarketId,
       deposits: fieldToJSON<Vector<Deposit>>(
-        `vector<0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::obligation::Deposit>`,
+        `vector<0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::obligation::Deposit>`,
         this.deposits,
       ),
       borrows: fieldToJSON<Vector<Borrow>>(
-        `vector<0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::obligation::Borrow>`,
+        `vector<0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::obligation::Borrow>`,
         this.borrows,
       ),
       depositedValueUsd: this.depositedValueUsd.toJSONField(),
@@ -1279,7 +1279,7 @@ export class Obligation<P extends PhantomTypeArgument> implements StructClass {
         this.weightedBorrowedValueUpperBoundUsd.toJSONField(),
       borrowingIsolatedAsset: this.borrowingIsolatedAsset,
       userRewardManagers: fieldToJSON<Vector<UserRewardManager>>(
-        `vector<0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::liquidity_mining::UserRewardManager>`,
+        `vector<0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::UserRewardManager>`,
         this.userRewardManagers,
       ),
       badDebtUsd: this.badDebtUsd.toJSONField(),
@@ -1409,7 +1409,7 @@ export function isObligationDataEvent(type: string): boolean {
   type = compressSuiType(type);
   return (
     type ===
-    "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::obligation::ObligationDataEvent"
+    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::obligation::ObligationDataEvent"
   );
 }
 
@@ -1437,12 +1437,12 @@ export type ObligationDataEventReified = Reified<
 
 export class ObligationDataEvent implements StructClass {
   static readonly $typeName =
-    "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::obligation::ObligationDataEvent";
+    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::obligation::ObligationDataEvent";
   static readonly $numTypeParams = 0;
 
   readonly $typeName = ObligationDataEvent.$typeName;
 
-  readonly $fullTypeName: "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::obligation::ObligationDataEvent";
+  readonly $fullTypeName: "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::obligation::ObligationDataEvent";
 
   readonly $typeArgs: [];
 
@@ -1465,7 +1465,7 @@ export class ObligationDataEvent implements StructClass {
     this.$fullTypeName = composeSuiType(
       ObligationDataEvent.$typeName,
       ...typeArgs,
-    ) as "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::obligation::ObligationDataEvent";
+    ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::obligation::ObligationDataEvent";
     this.$typeArgs = typeArgs;
 
     this.lendingMarketId = fields.lendingMarketId;
@@ -1491,7 +1491,7 @@ export class ObligationDataEvent implements StructClass {
       fullTypeName: composeSuiType(
         ObligationDataEvent.$typeName,
         ...[],
-      ) as "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::obligation::ObligationDataEvent",
+      ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::obligation::ObligationDataEvent",
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
@@ -1527,14 +1527,18 @@ export class ObligationDataEvent implements StructClass {
 
   static get bcs() {
     return bcs.struct("ObligationDataEvent", {
-      lending_market_id: bcs.bytes(32).transform({
-        input: (val: string) => fromHEX(val),
-        output: (val: Uint8Array) => toHEX(val),
-      }),
-      obligation_id: bcs.bytes(32).transform({
-        input: (val: string) => fromHEX(val),
-        output: (val: Uint8Array) => toHEX(val),
-      }),
+      lending_market_id: bcs
+        .bytes(32)
+        .transform({
+          input: (val: string) => fromHEX(val),
+          output: (val: Uint8Array) => toHEX(val),
+        }),
+      obligation_id: bcs
+        .bytes(32)
+        .transform({
+          input: (val: string) => fromHEX(val),
+          output: (val: Uint8Array) => toHEX(val),
+        }),
       deposits: bcs.vector(DepositRecord.bcs),
       borrows: bcs.vector(BorrowRecord.bcs),
       deposited_value_usd: Decimal.bcs,
@@ -1670,11 +1674,11 @@ export class ObligationDataEvent implements StructClass {
       lendingMarketId: this.lendingMarketId,
       obligationId: this.obligationId,
       deposits: fieldToJSON<Vector<DepositRecord>>(
-        `vector<0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::obligation::DepositRecord>`,
+        `vector<0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::obligation::DepositRecord>`,
         this.deposits,
       ),
       borrows: fieldToJSON<Vector<BorrowRecord>>(
-        `vector<0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::obligation::BorrowRecord>`,
+        `vector<0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::obligation::BorrowRecord>`,
         this.borrows,
       ),
       depositedValueUsd: this.depositedValueUsd.toJSONField(),

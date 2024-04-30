@@ -88,10 +88,12 @@ export class ID implements StructClass {
 
   static get bcs() {
     return bcs.struct("ID", {
-      bytes: bcs.bytes(32).transform({
-        input: (val: string) => fromHEX(val),
-        output: (val: Uint8Array) => toHEX(val),
-      }),
+      bytes: bcs
+        .bytes(32)
+        .transform({
+          input: (val: string) => fromHEX(val),
+          output: (val: Uint8Array) => toHEX(val),
+        }),
     });
   }
 

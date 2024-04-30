@@ -23,7 +23,7 @@ export function isMAIN_POOL(type: string): boolean {
   type = compressSuiType(type);
   return (
     type ===
-    "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::suilend::MAIN_POOL"
+    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::suilend::MAIN_POOL"
   );
 }
 
@@ -35,12 +35,12 @@ export type MAIN_POOLReified = Reified<MAIN_POOL, MAIN_POOLFields>;
 
 export class MAIN_POOL implements StructClass {
   static readonly $typeName =
-    "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::suilend::MAIN_POOL";
+    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::suilend::MAIN_POOL";
   static readonly $numTypeParams = 0;
 
   readonly $typeName = MAIN_POOL.$typeName;
 
-  readonly $fullTypeName: "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::suilend::MAIN_POOL";
+  readonly $fullTypeName: "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::suilend::MAIN_POOL";
 
   readonly $typeArgs: [];
 
@@ -50,7 +50,7 @@ export class MAIN_POOL implements StructClass {
     this.$fullTypeName = composeSuiType(
       MAIN_POOL.$typeName,
       ...typeArgs,
-    ) as "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::suilend::MAIN_POOL";
+    ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::suilend::MAIN_POOL";
     this.$typeArgs = typeArgs;
 
     this.dummyField = fields.dummyField;
@@ -62,7 +62,7 @@ export class MAIN_POOL implements StructClass {
       fullTypeName: composeSuiType(
         MAIN_POOL.$typeName,
         ...[],
-      ) as "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::suilend::MAIN_POOL",
+      ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::suilend::MAIN_POOL",
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => MAIN_POOL.fromFields(fields),
