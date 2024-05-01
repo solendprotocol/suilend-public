@@ -19,7 +19,7 @@
     "commander": "^11.1.0",
     "hot-shots": "^10.0.0",
     "module-alias": "^2.2.3",
-    "p-limit": "^5.0.0",
+    "p-limit": "3.1.0",
     "tslog": "^4.9.2"
   },
   "devDependencies": {
