@@ -898,15 +898,19 @@ export class InterestUpdateEvent implements StructClass {
 
   static get bcs() {
     return bcs.struct("InterestUpdateEvent", {
-      lending_market_id: bcs.bytes(32).transform({
-        input: (val: string) => fromHEX(val),
-        output: (val: Uint8Array) => toHEX(val),
-      }),
+      lending_market_id: bcs
+        .bytes(32)
+        .transform({
+          input: (val: string) => fromHEX(val),
+          output: (val: Uint8Array) => toHEX(val),
+        }),
       coin_type: TypeName.bcs,
-      reserve_id: bcs.bytes(32).transform({
-        input: (val: string) => fromHEX(val),
-        output: (val: Uint8Array) => toHEX(val),
-      }),
+      reserve_id: bcs
+        .bytes(32)
+        .transform({
+          input: (val: string) => fromHEX(val),
+          output: (val: Uint8Array) => toHEX(val),
+        }),
       cumulative_borrow_rate: Decimal.bcs,
       available_amount: bcs.u64(),
       borrowed_amount: Decimal.bcs,
@@ -1718,15 +1722,19 @@ export class ReserveAssetDataEvent implements StructClass {
 
   static get bcs() {
     return bcs.struct("ReserveAssetDataEvent", {
-      lending_market_id: bcs.bytes(32).transform({
-        input: (val: string) => fromHEX(val),
-        output: (val: Uint8Array) => toHEX(val),
-      }),
+      lending_market_id: bcs
+        .bytes(32)
+        .transform({
+          input: (val: string) => fromHEX(val),
+          output: (val: Uint8Array) => toHEX(val),
+        }),
       coin_type: TypeName.bcs,
-      reserve_id: bcs.bytes(32).transform({
-        input: (val: string) => fromHEX(val),
-        output: (val: Uint8Array) => toHEX(val),
-      }),
+      reserve_id: bcs
+        .bytes(32)
+        .transform({
+          input: (val: string) => fromHEX(val),
+          output: (val: Uint8Array) => toHEX(val),
+        }),
       available_amount: Decimal.bcs,
       supply_amount: Decimal.bcs,
       borrowed_amount: Decimal.bcs,
