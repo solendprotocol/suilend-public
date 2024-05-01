@@ -5,8 +5,8 @@ import { ColumnDef, Row } from "@tanstack/react-table";
 import axios from "axios";
 import BigNumber from "bignumber.js";
 import { formatDate } from "date-fns";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { FileClock, RefreshCcw } from "lucide-react";
-import pLimit from "p-limit";
 
 import { WAD } from "@suilend/sdk/constants";
 
@@ -38,6 +38,11 @@ import {
 } from "@/lib/events";
 import { formatToken } from "@/lib/format";
 import { cn } from "@/lib/utils";
+
+const getCtokenExchangeRate = (event: ReserveAssetDataEvent) =>
+  new BigNumber(new BigNumber(event.supplyAmount).div(WAD.toString())).div(
+    event.ctokenSupply,
+  );
 
 interface TokenAmountProps {
   amount?: BigNumber;
@@ -83,7 +88,8 @@ type EventsData = {
 };
 
 interface RowData {
-  date: Date;
+  timestamp: number;
+  eventIndex: number;
   type: EventType;
   event:
     | DepositEvent
@@ -92,6 +98,7 @@ interface RowData {
     | RepayEvent
     | LiquidateEvent
     | ClaimRewardEvent;
+  subRows?: RowData[];
 }
 
 export default function ObligationHistoryDialog() {
@@ -104,15 +111,23 @@ export default function ObligationHistoryDialog() {
       id: "date",
       accessorKey: "date",
       sortingFn: (rowA: Row<RowData>, rowB: Row<RowData>) =>
-        eventSortAsc(rowA.original.event, rowB.original.event),
+        eventSortAsc(rowA.original, rowB.original),
       header: ({ column }) =>
         tableHeader(column, "Date", { isDate: true, borderBottom: true }),
       cell: ({ row }) => {
-        const { date } = row.original;
+        const isGroupRow = row.getCanExpand() && row.subRows.length > 1;
+        const { timestamp } = row.original;
 
         return (
-          <TBody className="w-max">
-            {formatDate(date, "yyyy-MM-dd HH:mm:ss")}
+          <TBody
+            className={cn(
+              "w-max",
+              isGroupRow && "uppercase text-muted-foreground",
+            )}
+          >
+            {isGroupRow
+              ? "Multiple"
+              : formatDate(new Date(timestamp * 1000), "yyyy-MM-dd HH:mm:ss")}
           </TBody>
         );
       },
@@ -121,13 +136,21 @@ export default function ObligationHistoryDialog() {
       id: "type",
       accessorKey: "type",
       enableSorting: false,
+      filterFn: (row, key, value: EventType[]) =>
+        value.includes(row.original.type),
       header: ({ column }) =>
         tableHeader(column, "Action", { borderBottom: true }),
       cell: ({ row }) => {
+        const isGroupRow = row.getCanExpand() && row.subRows.length > 1;
         const { type } = row.original;
 
         return (
-          <TBody className="w-max uppercase">{EventTypeNameMap[type]}</TBody>
+          <TBody className="w-max uppercase">
+            {EventTypeNameMap[type]}
+            {isGroupRow && (
+              <span className="text-muted-foreground">{` (${row.subRows.length})`}</span>
+            )}
+          </TBody>
         );
       },
     },
@@ -138,26 +161,21 @@ export default function ObligationHistoryDialog() {
       header: ({ column }) =>
         tableHeader(column, "Details", { borderBottom: true }),
       cell: ({ row }) => {
-        const { event, type } = row.original;
+        const isGroupRow = row.getCanExpand() && row.subRows.length > 1;
+        const { type, event } = row.original;
 
         if (type === EventType.DEPOSIT) {
           const depositEvent = event as DepositEvent;
           const coinMetadata = data.coinMetadataMap[depositEvent.coinType];
 
-          let amount;
-
           const reserveAssetDataEvent = eventsData?.reserveAssetData.find(
             (e) => e.digest === depositEvent.digest,
           );
-          if (reserveAssetDataEvent) {
-            const ctokenExchangeRate = new BigNumber(
-              new BigNumber(reserveAssetDataEvent.supplyAmount).div(
-                WAD.toString(),
-              ),
-            ).div(reserveAssetDataEvent.ctokenSupply);
 
+          let amount;
+          if (reserveAssetDataEvent) {
             amount = new BigNumber(depositEvent.ctokenAmount)
-              .times(ctokenExchangeRate)
+              .times(getCtokenExchangeRate(reserveAssetDataEvent))
               .div(10 ** coinMetadata.decimals);
           }
 
@@ -177,34 +195,36 @@ export default function ObligationHistoryDialog() {
           const amount = new BigNumber(borrowEvent.liquidityAmount).div(
             10 ** coinMetadata.decimals,
           );
+          const feesAmount = new BigNumber(0.000125);
 
           return (
-            <TokenAmount
-              amount={amount}
-              coinType={borrowEvent.coinType}
-              symbol={coinMetadata.symbol}
-              iconUrl={coinMetadata.iconUrl}
-              decimals={coinMetadata.decimals}
-            />
+            <div className="flex w-max flex-col gap-1">
+              <TokenAmount
+                amount={amount}
+                coinType={borrowEvent.coinType}
+                symbol={coinMetadata.symbol}
+                iconUrl={coinMetadata.iconUrl}
+                decimals={coinMetadata.decimals}
+              />
+
+              {/* <TLabelSans className="w-max">
+                +{formatToken(feesAmount, { dp: coinMetadata.decimals })}{" "}
+                {coinMetadata.symbol} in fees
+              </TLabelSans> */}
+            </div>
           );
         } else if (type === EventType.WITHDRAW) {
           const withdrawEvent = event as WithdrawEvent;
           const coinMetadata = data.coinMetadataMap[withdrawEvent.coinType];
 
-          let amount;
-
           const reserveAssetDataEvent = eventsData?.reserveAssetData.find(
             (e) => e.digest === withdrawEvent.digest,
           );
-          if (reserveAssetDataEvent) {
-            const ctokenExchangeRate = new BigNumber(
-              new BigNumber(reserveAssetDataEvent.supplyAmount).div(
-                WAD.toString(),
-              ),
-            ).div(reserveAssetDataEvent.ctokenSupply);
 
+          let amount;
+          if (reserveAssetDataEvent) {
             amount = new BigNumber(withdrawEvent.ctokenAmount)
-              .times(ctokenExchangeRate)
+              .times(getCtokenExchangeRate(reserveAssetDataEvent))
               .div(10 ** coinMetadata.decimals);
           }
 
@@ -237,34 +257,64 @@ export default function ObligationHistoryDialog() {
         } else if (type === EventType.LIQUIDATE) {
           const liquidateEvent = event as LiquidateEvent;
 
-          const reserveAssetDataEvent = eventsData?.reserveAssetData.find(
-            (e) => e.digest === liquidateEvent.digest,
-          );
-
           const repayReserve = data.lendingMarket.reserves.find(
             (reserve) => reserve.id === liquidateEvent.repayReserveId,
           );
           const withdrawReserve = data.lendingMarket.reserves.find(
             (reserve) => reserve.id === liquidateEvent.withdrawReserveId,
           );
-
-          if (!reserveAssetDataEvent || !repayReserve || !withdrawReserve)
+          if (!repayReserve || !withdrawReserve)
             return (
-              <TLabelSans className="w-max">See txn for details</TLabelSans>
+              <TLabelSans className="w-max">
+                {isGroupRow ? "N/A" : "See txn for details"}
+              </TLabelSans>
             );
 
-          const ctokenExchangeRate = new BigNumber(
-            new BigNumber(reserveAssetDataEvent.supplyAmount).div(
-              WAD.toString(),
-            ),
-          ).div(reserveAssetDataEvent.ctokenSupply);
+          let liquidatedAmount = new BigNumber(0);
+          let repaidAmount = new BigNumber(0);
 
-          const liquidatedAmount = new BigNumber(liquidateEvent.withdrawAmount)
-            .times(ctokenExchangeRate)
-            .div(10 ** withdrawReserve.mintDecimals);
-          const repaidAmount = new BigNumber(liquidateEvent.repayAmount).div(
-            10 ** repayReserve.mintDecimals,
-          );
+          if (isGroupRow) {
+            for (const subRow of row.subRows) {
+              const subRowLiquidateEvent = subRow.original
+                .event as LiquidateEvent;
+
+              const reserveAssetDataEvent = eventsData?.reserveAssetData.find(
+                (e) => e.digest === subRowLiquidateEvent.digest,
+              );
+              if (!reserveAssetDataEvent)
+                return <TLabelSans className="w-max">N/A</TLabelSans>;
+
+              liquidatedAmount = liquidatedAmount.plus(
+                new BigNumber(subRowLiquidateEvent.withdrawAmount)
+                  .times(getCtokenExchangeRate(reserveAssetDataEvent))
+                  .div(10 ** withdrawReserve.mintDecimals),
+              );
+              repaidAmount = repaidAmount.plus(
+                new BigNumber(subRowLiquidateEvent.repayAmount).div(
+                  10 ** repayReserve.mintDecimals,
+                ),
+              );
+            }
+          } else {
+            const reserveAssetDataEvent = eventsData?.reserveAssetData.find(
+              (e) => e.digest === liquidateEvent.digest,
+            );
+            if (!reserveAssetDataEvent)
+              return (
+                <TLabelSans className="w-max">See txn for details</TLabelSans>
+              );
+
+            liquidatedAmount = liquidatedAmount.plus(
+              new BigNumber(liquidateEvent.withdrawAmount)
+                .times(getCtokenExchangeRate(reserveAssetDataEvent))
+                .div(10 ** withdrawReserve.mintDecimals),
+            );
+            repaidAmount = repaidAmount.plus(
+              new BigNumber(liquidateEvent.repayAmount).div(
+                10 ** repayReserve.mintDecimals,
+              ),
+            );
+          }
 
           return (
             <div className="flex w-max flex-col">
@@ -294,29 +344,20 @@ export default function ObligationHistoryDialog() {
           const claimRewardEvent = event as ClaimRewardEvent;
           const coinMetadata = data.coinMetadataMap[claimRewardEvent.coinType];
 
-          return (
-            <div className="flex w-max flex-row items-center gap-2">
-              <TokenIcon
-                className="h-4 w-4"
-                coinType={claimRewardEvent.coinType}
-                symbol={coinMetadata.symbol}
-                url={coinMetadata.iconUrl}
-              />
+          const claimedAmount = new BigNumber(
+            claimRewardEvent.liquidityAmount,
+          ).div(10 ** coinMetadata.decimals);
 
-              <TBody className="uppercase">
-                {formatToken(
-                  new BigNumber(claimRewardEvent.liquidityAmount).div(
-                    10 ** coinMetadata.decimals,
-                  ),
-                  { dp: coinMetadata.decimals },
-                )}{" "}
-                {coinMetadata.symbol}
-              </TBody>
-            </div>
+          return (
+            <TokenAmount
+              amount={claimedAmount}
+              coinType={claimRewardEvent.coinType}
+              symbol={coinMetadata.symbol}
+              iconUrl={coinMetadata.iconUrl}
+              decimals={coinMetadata.decimals}
+            />
           );
         }
-
-        return <div>{event.eventIndex}</div>;
       },
     },
     {
@@ -326,9 +367,23 @@ export default function ObligationHistoryDialog() {
       header: ({ column }) =>
         tableHeader(column, "Txn", { borderBottom: true }),
       cell: ({ row }) => {
+        const isGroupRow = row.getCanExpand() && row.subRows.length > 1;
         const { event } = row.original;
 
-        return <OpenOnExplorerButton url={explorer.buildTxUrl(event.digest)} />;
+        if (isGroupRow) {
+          const isExpanded = row.getIsExpanded();
+          const Icon = isExpanded ? ChevronUp : ChevronDown;
+
+          return (
+            <div className="flex h-8 w-8 flex-row items-center justify-center">
+              <Icon className="h-4 w-4 text-muted-foreground" />
+            </div>
+          );
+        } else {
+          return (
+            <OpenOnExplorerButton url={explorer.buildTxUrl(event.digest)} />
+          );
+        }
       },
     },
   ];
@@ -347,14 +402,22 @@ export default function ObligationHistoryDialog() {
 
     clearEventsData();
     try {
-      const response = await axios.get("/api/events", {
+      const response1 = await axios.get("/api/events", {
         params: {
           eventTypes: [
             EventType.DEPOSIT,
-            EventType.BORROW,
             EventType.WITHDRAW,
-            EventType.REPAY,
             EventType.LIQUIDATE,
+          ].join(","),
+          obligationId: obligation.id,
+          joinEventTypes: EventType.RESERVE_ASSET_DATA,
+        },
+      });
+      const response2 = await axios.get("/api/events", {
+        params: {
+          eventTypes: [
+            EventType.BORROW,
+            EventType.REPAY,
             EventType.CLAIM_REWARD,
           ].join(","),
           obligationId: obligation.id,
@@ -362,7 +425,7 @@ export default function ObligationHistoryDialog() {
       });
 
       // Parse
-      const data = response.data as Omit<EventsData, "reserveAssetData">;
+      const data = { ...response1.data, ...response2.data } as EventsData;
       for (const event of [
         ...data.deposit,
         ...data.borrow,
@@ -373,39 +436,8 @@ export default function ObligationHistoryDialog() {
         event.coinType = normalizeStructTag(event.coinType);
       }
 
-      // Get reserve asset data events for deposit, withdraw, and liquidate events
-      const digests = Array.from(
-        new Set(
-          [...data.deposit, ...data.withdraw, ...data.liquidate].map(
-            (event) => event.digest,
-          ),
-        ),
-      );
-
-      const limit = pLimit(5);
-      const promises = digests.map((digest) =>
-        limit(() =>
-          axios.get("/api/events", {
-            params: {
-              eventTypes: "reserveAssetData",
-              digest,
-            },
-          }),
-        ),
-      );
-      const reserveAssetDataEvents = (await Promise.all(promises))
-        .map(
-          (r) =>
-            (r.data as Pick<EventsData, "reserveAssetData">).reserveAssetData ??
-            [],
-        )
-        .flat();
-      for (const event of reserveAssetDataEvents) {
-        event.coinType = normalizeStructTag(event.coinType);
-      }
-
       setEventsData({
-        reserveAssetData: reserveAssetDataEvents.slice().sort(eventSortAsc),
+        reserveAssetData: data.reserveAssetData ?? [],
 
         deposit: (data.deposit ?? []).slice().sort(eventSortDesc),
         borrow: (data.borrow ?? []).slice().sort(eventSortDesc),
@@ -446,28 +478,57 @@ export default function ObligationHistoryDialog() {
   };
 
   // Rows
-  const rows =
-    eventsData === undefined
-      ? undefined
-      : Object.entries(eventsData)
-          .reduce((acc: RowData[], [key, value]) => {
-            if ((key as EventType) === EventType.RESERVE_ASSET_DATA) return acc;
+  const rows = (() => {
+    if (eventsData === undefined) return undefined;
 
-            return [
-              ...acc,
-              ...value.map((event) => ({
-                date: new Date(event.timestamp * 1000),
+    const sortedRows = Object.entries(eventsData)
+      .reduce((acc: RowData[], [key, value]) => {
+        if ((key as EventType) === EventType.RESERVE_ASSET_DATA) return acc;
+
+        return [
+          ...acc,
+          ...value.map(
+            (event) =>
+              ({
+                timestamp: event.timestamp,
+                eventIndex: event.eventIndex,
                 type: key as EventType,
                 event,
-              })),
-            ] as RowData[];
-          }, [])
-          .sort((a: RowData, b: RowData) => eventSortDesc(a.event, b.event));
+              }) as RowData,
+          ),
+        ];
+      }, [])
+      .sort(eventSortDesc);
 
-  const filteredRows =
-    rows === undefined
-      ? undefined
-      : rows.filter((row) => filters.includes(row.type));
+    // Group liquidate events
+    const finalRows: RowData[] = [];
+    for (let i = 0; i < sortedRows.length; i++) {
+      const row = sortedRows[i];
+
+      if (row.type !== EventType.LIQUIDATE) finalRows.push(row);
+      else {
+        const lastRow = finalRows[finalRows.length - 1];
+
+        if (
+          !lastRow ||
+          lastRow.type !== EventType.LIQUIDATE ||
+          (lastRow.event as LiquidateEvent).repayReserveId !==
+            (row.event as LiquidateEvent).repayReserveId ||
+          (lastRow.event as LiquidateEvent).withdrawReserveId !==
+            (row.event as LiquidateEvent).withdrawReserveId
+        ) {
+          finalRows.push({
+            ...row,
+            subRows: [row],
+          });
+        } else {
+          (lastRow.subRows as RowData[]).push(row);
+        }
+      }
+    }
+
+    return finalRows;
+  })();
 
   if (!obligation) return null;
   return (
@@ -528,15 +589,16 @@ export default function ObligationHistoryDialog() {
 
         <DataTable<RowData>
           columns={columns}
-          data={filteredRows}
+          data={rows}
           noDataMessage={
             filters.length === initialFilters.length
               ? "No history"
               : "No history for the active filters"
           }
+          columnFilters={[{ id: "type", value: filters }]}
           skeletonRows={20}
           container={{
-            className: cn(filteredRows === undefined && "overflow-y-hidden"),
+            className: cn(rows === undefined && "overflow-y-hidden"),
           }}
           tableClassName="border-y-0 relative"
           tableHeaderRowClassName="border-none"
@@ -546,14 +608,31 @@ export default function ObligationHistoryDialog() {
               header.id === "digest" ? "w-16" : "w-auto",
             )
           }
+          tableRowClassName={(row) => {
+            if (!row) return;
+            const isGroupRow = row.getCanExpand() && row.subRows.length > 1;
+            const isNested = !!row.getParentRow();
+
+            return cn(
+              isGroupRow && row.getIsExpanded() && "!bg-muted/10",
+              isNested && "!bg-card",
+            );
+          }}
           tableCellClassName={(cell) =>
             cn(
               "z-[1]",
-              cell?.row.original.type === EventType.LIQUIDATE
+              cell &&
+                [EventType.BORROW, EventType.LIQUIDATE].includes(
+                  cell.row.original.type,
+                )
                 ? "py-2 h-auto"
                 : "py-0 h-12",
             )
           }
+          onRowClick={(row) => {
+            const isGroupRow = row.getCanExpand() && row.subRows.length > 1;
+            if (isGroupRow) return row.getToggleExpandedHandler();
+          }}
         />
       </DialogContent>
     </Dialog>

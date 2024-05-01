@@ -24,12 +24,6 @@ export const EventTypeNameMap: Record<EventType, string> = {
   [EventType.CLAIM_REWARD]: "Claim rewards",
 };
 
-export type GenericEvent = {
-  timestamp: number;
-  digest: string;
-  eventIndex: number;
-};
-
 export type ReserveAssetDataEvent = {
   id: number;
   lendingMarketId: string;
@@ -163,18 +157,20 @@ export type ClaimRewardEvent = {
   sender: string;
 };
 
-export const eventSortDesc = (a: GenericEvent, b: GenericEvent) => {
+type EventRow = {
+  timestamp: number;
+  eventIndex: number;
+};
+
+export const eventSortDesc = (a: EventRow, b: EventRow) => {
   const aDate = new Date(a.timestamp * 1000).getTime();
   const bDate = new Date(b.timestamp * 1000).getTime();
   if (aDate !== bDate) return bDate - aDate;
 
-  const aEventIndex = a.eventIndex;
-  const bEventIndex = b.eventIndex;
-
-  return bEventIndex - aEventIndex;
+  return b.eventIndex - a.eventIndex;
 };
 
-export const eventSortAsc = (a: GenericEvent, b: GenericEvent) =>
+export const eventSortAsc = (a: EventRow, b: EventRow) =>
   -1 * eventSortDesc(a, b);
 
 export const getDedupedClaimRewardEvents = (events: ClaimRewardEvent[]) => {

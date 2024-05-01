@@ -4,11 +4,15 @@ import {
   Cell,
   Column,
   ColumnDef,
+  ColumnFiltersState,
+  ExpandedState,
   Header,
   Row,
   SortingState,
   flexRender,
   getCoreRowModel,
+  getExpandedRowModel,
+  getFilteredRowModel,
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
@@ -175,24 +179,26 @@ interface DataTableProps<T> {
   columns: ColumnDef<T>[];
   data?: T[];
   noDataMessage: string;
+  columnFilters?: ColumnFiltersState;
   skeletonRows?: number;
   container?: TableContainerProps;
   tableClassName?: ClassValue;
   tableHeaderRowClassName?: ClassValue;
   tableHeadClassName?: (header: Header<T, unknown>) => ClassValue;
-  tableRowClassName?: ClassValue;
+  tableRowClassName?: (row?: Row<T>) => ClassValue;
   tableCellClassName?: (cell?: Cell<T, unknown>) => ClassValue;
   RowModal?: FunctionComponent<{
     row: T;
     children: ReactNode;
   }>;
-  onRowClick?: (x: T) => void;
+  onRowClick?: (row: Row<T>) => ((x: T) => void) | undefined;
 }
 
 export default function DataTable<T>({
   columns,
   data,
   noDataMessage,
+  columnFilters,
   skeletonRows,
   container,
   tableClassName,
@@ -204,6 +210,9 @@ export default function DataTable<T>({
   onRowClick,
 }: DataTableProps<T>) {
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [expanded, setExpanded] = useState<ExpandedState>({});
+
+  type TWithSubRows = T & { subRows?: T[] };
 
   const table = useReactTable({
     data: data ?? [],
@@ -211,8 +220,17 @@ export default function DataTable<T>({
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
+    onExpandedChange: setExpanded,
+    getExpandedRowModel: getExpandedRowModel(),
+    getSubRows: (row: T) =>
+      "subRows" in (row as TWithSubRows)
+        ? (row as TWithSubRows).subRows
+        : undefined,
+    getFilteredRowModel: getFilteredRowModel(),
     state: {
       sorting,
+      expanded,
+      columnFilters,
     },
   });
 
@@ -251,7 +269,10 @@ export default function DataTable<T>({
             {Array.from({ length: skeletonRows ?? 5 }).map((_, index) => (
               <TableRow
                 key={index}
-                className={cn("hover:bg-transparent", tableRowClassName)}
+                className={cn(
+                  "hover:bg-transparent",
+                  tableRowClassName && tableRowClassName(),
+                )}
               >
                 <TableCell
                   colSpan={columns.length}
@@ -273,14 +294,15 @@ export default function DataTable<T>({
                   <TableRow
                     className={cn(
                       "hover:bg-transparent",
-                      (RowModal || onRowClick) &&
+                      (RowModal || (onRowClick && onRowClick(row))) &&
                         "cursor-pointer hover:bg-muted/10",
-                      tableRowClassName,
+                      tableRowClassName && tableRowClassName(row),
                     )}
                     style={{ appearance: "inherit" }}
                     onClick={
-                      !RowModal && onRowClick
-                        ? () => onRowClick(row.original)
+                      !RowModal && onRowClick && onRowClick(row)
+                        ? () =>
+                            (onRowClick(row) as (x: T) => void)(row.original)
                         : undefined
                     }
                   >
@@ -313,7 +335,10 @@ export default function DataTable<T>({
               })
             ) : (
               <TableRow
-                className={cn("hover:bg-transparent", tableRowClassName)}
+                className={cn(
+                  "hover:bg-transparent",
+                  tableRowClassName && tableRowClassName(),
+                )}
               >
                 <TableCell
                   colSpan={columns.length}
