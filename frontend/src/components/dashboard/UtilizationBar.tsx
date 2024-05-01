@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
 const getBorrowLimitUsd = (obligation: ParsedObligation) =>
   obligation.minPriceBorrowLimitUsd;
 
-const getWeightedBorrowsUsd = (obligation: ParsedObligation) => {
+export const getWeightedBorrowsUsd = (obligation: ParsedObligation) => {
   return obligation.maxPriceWeightedBorrowsUsd.gt(getBorrowLimitUsd(obligation))
     ? BigNumber.max(
         obligation.weightedBorrowsUsd,

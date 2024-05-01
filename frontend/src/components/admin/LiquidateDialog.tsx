@@ -290,7 +290,7 @@ export default function LiquidateDialog({
                   selected: deposit.reserve.symbol === selectedWithdrawAsset,
                 };
               })}
-              onRowClick={(x: RowData) => {
+              onRowClick={() => (x: RowData) => {
                 if (selectedWithdrawAsset === x.symbol) {
                   setSelectedWithdrawAsset("");
                 } else {
@@ -312,7 +312,7 @@ export default function LiquidateDialog({
                   selected: borrow.reserve.symbol === selectedRepayAsset,
                 };
               })}
-              onRowClick={(x: RowData) => {
+              onRowClick={() => (x: RowData) => {
                 if (selectedRepayAsset === x.symbol) {
                   setSelectedRepayAsset("");
                 } else {
@@ -346,7 +346,7 @@ export default function LiquidateDialog({
               data={obligationHistory}
               noDataMessage={"Loading obligation history"}
               tableClassName="border-y-0"
-              onRowClick={async (x: formattedObligationHistory) => {
+              onRowClick={() => async (x: formattedObligationHistory) => {
                 await navigator.clipboard.writeText(x.digest);
                 toast.info(`Copied ${x.digest} to clipboard`);
               }}

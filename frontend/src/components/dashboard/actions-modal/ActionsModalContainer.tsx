@@ -136,8 +136,8 @@ export default function ActionsModalContainer({
       </DrawerTrigger>
       <DrawerContent
         className={cn(
-          "mt-[0] max-h-[calc(100dvh_-_0px)] rounded-t-lg bg-popover p-4",
-          isMoreParametersOpen ? "!h-[calc(100dvh_-_0px)]" : "!h-auto",
+          "mt-[0] max-h-[calc(100dvh-0px)] rounded-t-lg bg-popover p-4",
+          isMoreParametersOpen ? "!h-[calc(100dvh-0px)]" : "!h-auto",
           visualViewportHeight < 400
             ? "!bottom-auto !top-0"
             : "!bottom-0 !top-auto",

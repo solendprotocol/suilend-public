@@ -207,7 +207,7 @@ function PanelButton({ isActive, onClick, children }: PanelButtonProps) {
   return (
     <Button
       className={cn(
-        "h-7 flex-1 py-0 uppercase text-muted-foreground",
+        "h-7 flex-1 py-0 uppercase",
         isActive && "border-secondary bg-secondary/5 text-primary-foreground",
       )}
       labelClassName="text-xs"
