@@ -14,7 +14,12 @@ import DataTable, { tableHeader } from "@/components/dashboard/DataTable";
 import Button from "@/components/shared/Button";
 import OpenOnExplorerButton from "@/components/shared/OpenOnExplorerButton";
 import TokenIcon from "@/components/shared/TokenIcon";
-import { TBody, TLabelSans, TTitle } from "@/components/shared/Typography";
+import {
+  TBody,
+  TLabel,
+  TLabelSans,
+  TTitle,
+} from "@/components/shared/Typography";
 import {
   Dialog,
   DialogContent,
@@ -118,16 +123,11 @@ export default function ObligationHistoryDialog() {
         const isGroupRow = row.getCanExpand() && row.subRows.length > 1;
         const { timestamp } = row.original;
 
+        if (isGroupRow)
+          return <TLabel className="w-max uppercase">Multiple</TLabel>;
         return (
-          <TBody
-            className={cn(
-              "w-max",
-              isGroupRow && "uppercase text-muted-foreground",
-            )}
-          >
-            {isGroupRow
-              ? "Multiple"
-              : formatDate(new Date(timestamp * 1000), "yyyy-MM-dd HH:mm:ss")}
+          <TBody className="w-max">
+            {formatDate(new Date(timestamp * 1000), "yyyy-MM-dd HH:mm:ss")}
           </TBody>
         );
       },
