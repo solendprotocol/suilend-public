@@ -10,7 +10,6 @@
     "paths": {
       // Update line below to target [beta/mainnet] program
       // "@suilend/sdk/*": ["../sdk/src/beta/*"],
-      "@suilend/sdk/*": ["../sdk/src/mainnet/*"]
     }
   },
   "include": ["./src/**/*.ts"],

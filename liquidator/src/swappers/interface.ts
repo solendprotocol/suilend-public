@@ -1,4 +1,3 @@
-import { SuiTransactionBlockResponse } from "@mysten/sui.js/client";
 import {
   TransactionBlock,
   TransactionObjectArgument,
