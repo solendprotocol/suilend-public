@@ -202,7 +202,6 @@ export default function PoolRewardsTable({
         data={poolRewards}
         noDataMessage={noPoolRewardsMessage}
         tableClassName="border-y-0"
-        tableCellClassName="py-3 whitespace-nowrap"
       />
     </div>
   );

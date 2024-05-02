@@ -9,7 +9,7 @@ const Table = React.forwardRef<
   React.HTMLAttributes<HTMLTableElement> & {
     container?: TableContainerProps;
   }
->(({ className, container, ...props }, ref) => {
+>(({ container, className, ...props }, ref) => {
   const { className: containerClassName, ...restContainerProps } =
     container || {};
 

@@ -5,12 +5,12 @@ import { TransactionBlock } from "@mysten/sui.js/transactions";
 import {
   Borrow,
   Obligation,
-} from "@suilend/sdk/_generated/suilend/obligation/structs";
-import { Reserve } from "@suilend/sdk/_generated/suilend/reserve/structs";
-import { SuilendClient } from "@suilend/sdk/client";
-import { getRedeemEvent } from "@suilend/sdk/utils/events";
-import { fetchAllObligationsForMarket } from "@suilend/sdk/utils/obligation";
-import * as simulate from "@suilend/sdk/utils/simulate";
+} from "@suilend/sdk/mainnet/_generated/suilend/obligation/structs";
+import { SuilendClient } from "@suilend/sdk/mainnet/client";
+import { getRedeemEvent } from "@suilend/sdk/mainnet/utils/events";
+import { fetchAllObligationsForMarket } from "@suilend/sdk/mainnet/utils/obligation";
+import * as simulate from "@suilend/sdk/mainnet/utils/simulate";
+
 import BigNumber from "bignumber.js";
 import BN from "bn.js";
 import { StatsD } from "hot-shots";
@@ -26,20 +26,23 @@ import {
   mergeAllCoins,
   sleep,
 } from "./utils/utils";
+import { Reserve } from "@suilend/sdk/mainnet/_generated/suilend/reserve/structs";
 
 const logger = new Logger({ name: "Suilend Liquidator" });
+const LIQUIDATION_CLOSE_FACTOR = 0.2;
 
 export type LiquidatorConfig = {
   liquidateSleepSeconds: number;
   updatePositionsSleepSeconds: number;
+  refreshObligationsMinIntervalSeconds: number;
   rpcURL: string;
   marketAddress: string;
   lendingMarketType: string;
   numLiquidationLoops: number;
   liquidationAttemptDurationSeconds: number;
+  minDepositValueUSD: number;
   statsd?: StatsD;
 };
-
 export class Liquidator {
   client: SuiClient;
   suilend?: SuilendClient<string>;
@@ -55,6 +58,8 @@ export class Liquidator {
   swapper: Swapper;
   pythConnection: SuiPriceServiceConnection;
   statsd?: StatsD;
+  obligations: Obligation<string>[];
+  lastObligationRefresh: number | null; // seconds
 
   constructor(
     keypair: Secp256k1Keypair | Ed25519Keypair,
@@ -70,6 +75,8 @@ export class Liquidator {
     );
     this.liquidationTasks = {};
     this.statsd = config.statsd;
+    this.obligations = [];
+    this.lastObligationRefresh = null;
   }
 
   async run() {
@@ -87,23 +94,42 @@ export class Liquidator {
     await Promise.all(loops);
   }
 
+  async refreshObligationCache() {
+    const start = Date.now();
+    this.obligations = (
+      await fetchAllObligationsForMarket(this.client, this.config.marketAddress)
+    ).filter((obligation) => {
+      return (
+        obligation.borrows.length > 0 &&
+        simulate
+          .decimalToBigNumber(obligation.depositedValueUsd)
+          .gte(new BigNumber(this.config.minDepositValueUSD))
+      );
+    });
+    shuffle(this.obligations);
+    this.statsd &&
+      this.statsd.gauge("fetch_obligations_duration", Date.now() - start);
+    this.statsd &&
+      this.statsd.gauge("obligation_count", this.obligations.length);
+    logger.info(`Fetched ${this.obligations.length} obligations`);
+    logger.info(`Obligatio example: ${this.obligations[0].id}`);
+    this.lastObligationRefresh = Math.round(Date.now() / 1000);
+  }
+
   async updateLiquidatablePositions() {
+    await this.refreshObligationCache();
     while (true) {
       this.statsd &&
         this.statsd.increment("heartbeat", { task: "update_positions" });
       try {
-        const start = Date.now();
-        const obligations = await fetchAllObligationsForMarket(
-          this.client,
-          this.config.marketAddress,
-        );
-        this.statsd &&
-          this.statsd.gauge("fetch_obligations_duration", Date.now() - start);
-        this.statsd &&
-          this.statsd.gauge("obligation_count", obligations.length);
-        logger.info(`Fetched ${obligations.length} obligations`);
-        let liquidationsQueued = 0;
         const now = Math.round(Date.now() / 1000);
+        if (
+          now - this.lastObligationRefresh! >
+          this.config.refreshObligationsMinIntervalSeconds
+        ) {
+          await this.refreshObligationCache();
+        }
+        let liquidationsQueued = 0;
         const lendingMarket = await this.getLendingMarket();
         const refreshedReserves = await simulate.refreshReservePrice(
           lendingMarket.reserves.map((r) =>
@@ -118,11 +144,10 @@ export class Liquidator {
           this.statsd &&
             this.statsd.increment("liquidate_error", { type: "rebalance" });
         }
-        for (const obligation of obligations) {
-          if (obligation.borrows.length === 0) {
-            continue;
-          }
+        let ongoingLiquidations = 0;
+        for (const obligation of this.obligations) {
           if (this.liquidationTasks[obligation.id]) {
+            ongoingLiquidations += 1;
             continue;
           }
           const refreshedObligation = await this.simulateRefreshObligation(
@@ -140,15 +165,22 @@ export class Liquidator {
             };
           }
         }
+        logger.info(`${ongoingLiquidations} ongoing liquidations`);
+        console.log(this.liquidationTasks);
         logger.info(`${liquidationsQueued} obligations marked for liquidation`);
-        await sleep(this.config.updatePositionsSleepSeconds * 1000);
+        if (liquidationsQueued + ongoingLiquidations === 0) {
+          logger.info(
+            `Nothing interesting happening. Going to sleep for ${this.config.updatePositionsSleepSeconds} seconds`,
+          );
+          await sleep(this.config.updatePositionsSleepSeconds * 1000);
+        }
       } catch (e: any) {
         logger.error(e);
         this.statsd &&
           this.statsd.increment("liquidate_error", 1, {
             type: "update_positions",
           });
-        await sleep(this.config.updatePositionsSleepSeconds * 1000);
+        await sleep(1000);
         continue;
       }
     }
@@ -418,15 +450,28 @@ export class Liquidator {
     obligation: Obligation<string>,
     reserves: Reserve<string>[],
   ) {
-    const deficitUsd = simulate
-      .decimalToBigNumber(obligation.weightedBorrowedValueUsd)
-      .minus(simulate.decimalToBigNumber(obligation.unhealthyBorrowValueUsd));
     const repay = this.selectRepay(obligation, reserves);
-    const assetValue = simulate
-      .decimalToBigNumber(repay.marketValue)
-      .dividedBy(simulate.decimalToBigNumber(repay.borrowedAmount));
-    const repayAmount = BigNumber.min(
-      deficitUsd.dividedBy(assetValue),
+    if (simulate.decimalToBigNumber(repay.marketValue).lte(new BigNumber(1))) {
+      return {
+        repayCoinType: "0x" + repay.coinType.name,
+        repayAmount: Math.ceil(
+          simulate.decimalToBigNumber(repay.borrowedAmount).toNumber(),
+        ),
+      };
+    }
+
+    // Can close 20% of the value of their obligation
+    // But only up to all of this borrowed position
+    const maxRepayValue = BigNumber.minimum(
+      simulate
+        .decimalToBigNumber(obligation.weightedBorrowedValueUsd)
+        .multipliedBy(new BigNumber(LIQUIDATION_CLOSE_FACTOR)),
+      simulate.decimalToBigNumber(repay.marketValue),
+    );
+    const maxRepayPercent = maxRepayValue.dividedBy(
+      simulate.decimalToBigNumber(repay.marketValue),
+    );
+    const repayAmount = maxRepayPercent.multipliedBy(
       simulate.decimalToBigNumber(repay.borrowedAmount),
     );
     return {
@@ -482,3 +527,13 @@ export class Liquidator {
     });
   }
 }
+
+const shuffle = (array: Obligation<string>[]) => {
+  array.sort(() => Math.random() - 0.5);
+};
+
+/*
+TODO:
+1. Fix repayment amount
+2. Make refresh obligation interval longer
+*/

@@ -22,6 +22,7 @@ interface CardProps extends PropsWithChildren, CardRootProps {
   id?: string;
   titleIcon?: ReactElement;
   title?: string;
+  headerStartContent?: ReactNode;
   headerEndContent?: ReactNode;
   alwaysExpanded?: boolean;
   noHeaderSeparator?: boolean;
@@ -31,6 +32,7 @@ export default function Card({
   id,
   titleIcon,
   title,
+  headerStartContent,
   headerEndContent,
   alwaysExpanded,
   noHeaderSeparator,
@@ -56,43 +58,42 @@ export default function Card({
       )}
       {...restProps}
     >
-      {title && (
-        <CardHeader className="flex flex-col gap-2 space-y-0">
-          <div className="flex flex-row items-center">
-            <TTitle
-              className={cn(
-                "flex flex-1 flex-row items-center gap-2 uppercase",
-                canToggle && "cursor-pointer",
-              )}
-              onClick={canToggle ? toggleIsCollapsed : undefined}
-            >
-              {titleIcon &&
-                cloneElement(titleIcon, {
-                  className: "w-3 h-3 shrink-0",
-                })}
-              {title}
-            </TTitle>
+      <CardHeader className="flex flex-col gap-2 space-y-0">
+        <div className="flex flex-row items-center gap-1">
+          <TTitle
+            className={cn(
+              "flex flex-row items-center gap-2 uppercase",
+              canToggle && "cursor-pointer",
+            )}
+            onClick={canToggle ? toggleIsCollapsed : undefined}
+          >
+            {titleIcon &&
+              cloneElement(titleIcon, {
+                className: "w-3 h-3 shrink-0",
+              })}
+            {title}
+          </TTitle>
+          {headerStartContent}
 
-            <div className="flex h-5 flex-row items-center gap-1">
-              {headerEndContent}
+          <div className="flex h-5 flex-1 flex-row items-center justify-end gap-1">
+            {headerEndContent}
 
-              {canToggle && (
-                <Button
-                  className="text-muted-foreground"
-                  icon={isCollapsed ? <ChevronDown /> : <ChevronUp />}
-                  variant="ghost"
-                  size="icon"
-                  onClick={toggleIsCollapsed}
-                >
-                  Toggle
-                </Button>
-              )}
-            </div>
+            {canToggle && (
+              <Button
+                className="text-muted-foreground"
+                icon={isCollapsed ? <ChevronDown /> : <ChevronUp />}
+                variant="ghost"
+                size="icon"
+                onClick={toggleIsCollapsed}
+              >
+                Toggle
+              </Button>
+            )}
           </div>
+        </div>
 
-          {showHeaderSeparator && <Separator />}
-        </CardHeader>
-      )}
+        {showHeaderSeparator && <Separator />}
+      </CardHeader>
 
       {showContent && children}
     </CardRoot>

@@ -40,7 +40,7 @@ export default function ObligationSwitcherPopover() {
           variant="secondaryOutline"
           role="combobox"
         >
-          Subaccount{" "}
+          {"Subacc. "}
           {data.obligations.findIndex((o) => o.id === obligation.id) + 1}
         </Button>
       }

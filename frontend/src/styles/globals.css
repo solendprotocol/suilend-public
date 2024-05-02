@@ -64,6 +64,11 @@
   text-shadow: 0 0 4px #48c8ff;
 }
 
+/* Focus */
+:focus-visible {
+  outline: none;
+}
+
 /* Scrollbar */
 body {
   overflow-y: scroll;

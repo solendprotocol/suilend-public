@@ -4,8 +4,11 @@ import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
 
 import Card from "@/components/dashboard/Card";
 import ObligationBreakdown from "@/components/dashboard/ObligationBreakdown";
+import ObligationHistoryDialog from "@/components/dashboard/ObligationHistoryDialog";
 import ObligationSwitcherPopover from "@/components/dashboard/ObligationSwitcherPopover";
-import UtilizationBar from "@/components/dashboard/UtilizationBar";
+import UtilizationBar, {
+  getWeightedBorrowsUsd,
+} from "@/components/dashboard/UtilizationBar";
 import LabelWithTooltip from "@/components/shared/LabelWithTooltip";
 import { TBody, TLabel, TLabelSans } from "@/components/shared/Typography";
 import { CardContent } from "@/components/ui/card";
@@ -95,7 +98,7 @@ function ObligationPositionCardContent() {
           <LabelWithTooltip tooltip={WEIGHTED_BORROWS_TOOLTIP}>
             Weighted borrows
           </LabelWithTooltip>
-          <TBody>{formatUsd(obligation.maxPriceWeightedBorrowsUsd)}</TBody>
+          <TBody>{formatUsd(getWeightedBorrowsUsd(obligation))}</TBody>
         </div>
 
         <div className="flex flex-col items-end gap-1">
@@ -136,6 +139,7 @@ export default function ObligationPositionCard() {
     <Card
       id="position"
       title="Account"
+      headerStartContent={<ObligationHistoryDialog />}
       headerEndContent={
         data.obligations &&
         data.obligations.length > 1 && <ObligationSwitcherPopover />
