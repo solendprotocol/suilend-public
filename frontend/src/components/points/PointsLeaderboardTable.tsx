@@ -8,11 +8,9 @@ import LeaderboardDataLastUpdated from "@/components/points/LeaderboardDataLastU
 import LeaderboardDataUsers from "@/components/points/LeaderboardDataUsers";
 import PointsCount from "@/components/points/PointsCount";
 import PointsRank from "@/components/points/PointsRank";
-import OpenOnExplorerButton from "@/components/shared/OpenOnExplorerButton";
 import Tooltip from "@/components/shared/Tooltip";
 import { TBody, TLabelSans } from "@/components/shared/Typography";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useAppContext } from "@/contexts/AppContext";
 import { LeaderboardRowData, usePointsContext } from "@/contexts/PointsContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 import { formatAddress } from "@/lib/format";
@@ -20,7 +18,6 @@ import { cn } from "@/lib/utils";
 
 export default function PointsLeaderboardTable() {
   const { address } = useWalletContext();
-  const { explorer } = useAppContext();
   const { leaderboardRows } = usePointsContext();
 
   // Columns
@@ -42,12 +39,9 @@ export default function PointsLeaderboardTable() {
         const { address } = row.original;
 
         return (
-          <div className="flex flex-row items-center gap-1">
-            <Tooltip title={address}>
-              <TBody>{formatAddress(address)}</TBody>
-            </Tooltip>
-            <OpenOnExplorerButton url={explorer.buildAddressUrl(address)} />
-          </div>
+          <Tooltip title={address}>
+            <TBody>{formatAddress(address)}</TBody>
+          </Tooltip>
         );
       },
     },
