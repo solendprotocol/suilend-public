@@ -94,7 +94,7 @@ export default function AccountAssetTable({
         noDataMessage={noAssetsMessage}
         tableClassName="border-y-0"
         onRowClick={(row) => () =>
-          openActionsModal(row.original.reserve.arrayIndex)
+          openActionsModal(Number(row.original.reserve.arrayIndex))
         }
       />
     </div>

@@ -255,7 +255,7 @@ export default function MarketTable() {
           data={rowData}
           noDataMessage="No assets"
           onRowClick={(row) => () =>
-            openActionsModal(row.original.reserve.arrayIndex)
+            openActionsModal(Number(row.original.reserve.arrayIndex))
           }
         />
       </div>
