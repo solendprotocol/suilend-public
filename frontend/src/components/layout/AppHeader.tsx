@@ -9,7 +9,7 @@ import HeaderBase from "@/components/layout/HeaderBase";
 import HeaderMenu from "@/components/layout/HeaderMenu";
 import Logo from "@/components/layout/Logo";
 import NavigationLinks from "@/components/layout/NavigationLinks";
-import RefreshAppDataButton from "@/components/layout/RefreshAppDataButton";
+import RefreshDataButton from "@/components/layout/RefreshDataButton";
 import RpcSelect from "@/components/layout/RpcSelect";
 import HeaderPointsPopover from "@/components/points/HeaderPointsPopover";
 import Button from "@/components/shared/Button";
@@ -60,7 +60,7 @@ export default function AppHeader() {
 
       {/* End */}
       <div className="flex flex-row items-center gap-4">
-        <RefreshAppDataButton />
+        <RefreshDataButton />
 
         <div className="flex flex-row items-center gap-2">
           <div className="hidden md:flex">
