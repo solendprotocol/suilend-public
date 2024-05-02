@@ -97,6 +97,7 @@ export default function PointsLeaderboardTable() {
         container={{
           className: cn(!leaderboardRows && "-mb-6"),
         }}
+        tableClassName="border-b-0"
         tableRowClassName={(row) =>
           row?.original.address === address &&
           "shadow-[inset_0_0_0_2px_hsl(var(--secondary))] !bg-secondary/5"

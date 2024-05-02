@@ -111,6 +111,7 @@ export default function ProtocolRewardsCard() {
     useAppContext();
   const data = restAppContext.data as AppData;
   const { rank } = usePointsContext();
+  const { claimRewards } = useDashboardContext();
 
   const { md } = useBreakpoint();
 
@@ -131,13 +132,6 @@ export default function ProtocolRewardsCard() {
       );
     });
   }
-
-  // Points
-  const pointsRewards = getPointsRewards(data.rewardMap);
-  const pointsStats = getPointsStats(pointsRewards, data.obligations);
-
-  // Claim
-  const { claimRewards } = useDashboardContext();
 
   const [isClaiming, setIsClaiming] = useState<boolean>(false);
 
@@ -165,6 +159,10 @@ export default function ProtocolRewardsCard() {
     }
   };
 
+  // Points
+  const pointsRewards = getPointsRewards(data.rewardMap);
+  const pointsStats = getPointsStats(pointsRewards, data.obligations);
+
   return !address ? (
     <Card className="bg-background">
       <div
@@ -177,9 +175,9 @@ export default function ProtocolRewardsCard() {
           backgroundRepeat: "no-repeat",
         }}
       >
-        <div className="text-center font-mono text-sm font-normal uppercase text-primary-foreground sm:text-[16px]">
+        <TTitle className="text-center uppercase text-primary-foreground sm:text-[16px]">
           Start earning points & rewards
-        </div>
+        </TTitle>
 
         <Button
           labelClassName="uppercase"
@@ -192,81 +190,77 @@ export default function ProtocolRewardsCard() {
     </Card>
   ) : (
     <Card className="rounded-[4px] border-none bg-gradient-to-r from-secondary to-border p-[1px]">
-      <div className="rounded-[3px] bg-background">
-        <div
-          className="p-4"
-          style={{
-            backgroundImage:
-              "url('/assets/dashboard/protocol-rewards-connected.png')",
-            backgroundPosition: "center",
-            backgroundSize: "cover",
-            backgroundRepeat: "no-repeat",
-          }}
-        >
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex flex-col gap-1">
-                <TTitle className="uppercase text-primary-foreground">
-                  Protocol rewards
-                </TTitle>
-                <TLabelSans>
-                  Boost your earnings with bonus Suilend rewards.
-                </TLabelSans>
-              </div>
-
-              <div className="flex flex-row gap-2">
-                <div className="flex-1 sm:flex-initial">
-                  <NextLink href={POINTS_URL}>
-                    <Button
-                      className="w-full border-secondary text-primary-foreground"
-                      labelClassName="uppercase"
-                      variant="secondaryOutline"
-                    >
-                      Points hub
-                    </Button>
-                  </NextLink>
-                </div>
-
-                <div className="flex-1 sm:flex-initial">
-                  <Button
-                    className="w-full sm:w-[134px]"
-                    labelClassName="uppercase"
-                    disabled={totalSuiRewards.eq(0) || isImpersonatingAddress}
-                    onClick={onClaimRewardsClick}
-                  >
-                    {isClaiming ? <Spinner size="sm" /> : "Claim rewards"}
-                  </Button>
-                </div>
-              </div>
+      <div
+        className="rounded-[3px] bg-background p-4"
+        style={{
+          backgroundImage:
+            "url('/assets/dashboard/protocol-rewards-connected.png')",
+          backgroundPosition: "center",
+          backgroundSize: "cover",
+          backgroundRepeat: "no-repeat",
+        }}
+      >
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-1">
+              <TTitle className="uppercase text-primary-foreground">
+                Protocol rewards
+              </TTitle>
+              <TLabelSans>
+                Boost your earnings with bonus Suilend rewards.
+              </TLabelSans>
             </div>
 
-            <Separator />
-
-            {md ? (
-              <div className="flex flex-row items-center justify-between gap-4">
-                <PendingRewards totalSuiRewards={totalSuiRewards} />
-                <TotalPointsStat totalPoints={pointsStats.totalPoints.total} />
-                <PointsPerDayStat
-                  pointsPerDay={pointsStats.pointsPerDay.total}
-                />
-                <RankStat rank={rank} />
+            <div className="flex flex-row gap-2">
+              <div className="flex-1 sm:flex-initial">
+                <NextLink href={POINTS_URL}>
+                  <Button
+                    className="w-full border-secondary text-primary-foreground"
+                    labelClassName="uppercase"
+                    variant="secondaryOutline"
+                  >
+                    Points hub
+                  </Button>
+                </NextLink>
               </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-4">
-                <PendingRewards totalSuiRewards={totalSuiRewards} isCentered />
-                <TotalPointsStat
-                  totalPoints={pointsStats.totalPoints.total}
-                  isCentered
-                />
 
-                <PointsPerDayStat
-                  pointsPerDay={pointsStats.pointsPerDay.total}
-                  isCentered
-                />
-                <RankStat rank={rank} isCentered />
+              <div className="flex-1 sm:flex-initial">
+                <Button
+                  className="w-full sm:w-[134px]"
+                  labelClassName="uppercase"
+                  disabled={totalSuiRewards.eq(0) || isImpersonatingAddress}
+                  onClick={onClaimRewardsClick}
+                >
+                  {isClaiming ? <Spinner size="sm" /> : "Claim rewards"}
+                </Button>
               </div>
-            )}
+            </div>
           </div>
+
+          <Separator />
+
+          {md ? (
+            <div className="flex flex-row items-center justify-between gap-4">
+              <PendingRewards totalSuiRewards={totalSuiRewards} />
+              <TotalPointsStat totalPoints={pointsStats.totalPoints.total} />
+              <PointsPerDayStat pointsPerDay={pointsStats.pointsPerDay.total} />
+              <RankStat rank={rank} />
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              <PendingRewards totalSuiRewards={totalSuiRewards} isCentered />
+              <TotalPointsStat
+                totalPoints={pointsStats.totalPoints.total}
+                isCentered
+              />
+
+              <PointsPerDayStat
+                pointsPerDay={pointsStats.pointsPerDay.total}
+                isCentered
+              />
+              <RankStat rank={rank} isCentered />
+            </div>
+          )}
         </div>
       </div>
     </Card>
