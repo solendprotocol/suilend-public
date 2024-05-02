@@ -1,4 +1,5 @@
-import { CSSProperties, useCallback, useState } from "react";
+import { useRouter } from "next/router";
+import { CSSProperties, useCallback, useEffect, useRef, useState } from "react";
 
 import { normalizeStructTag } from "@mysten/sui.js/utils";
 import { ColumnDef, Row } from "@tanstack/react-table";
@@ -107,6 +108,7 @@ interface RowData {
 }
 
 export default function ObligationHistoryDialog() {
+  const router = useRouter();
   const { explorer, obligation, ...restAppContext } = useAppContext();
   const data = restAppContext.data as AppData;
 
@@ -453,11 +455,6 @@ export default function ObligationHistoryDialog() {
     }
   }, [obligation, clearEventsData]);
 
-  // State
-  const onOpenChange = (isOpen: boolean) => {
-    if (isOpen && rows === undefined) fetchEventsData();
-  };
-
   // Filters
   const initialFilters = [
     EventType.DEPOSIT,
@@ -530,9 +527,30 @@ export default function ObligationHistoryDialog() {
     return finalRows;
   })();
 
+  // State
+  const isOpen = router.query.history !== undefined;
+
+  const isFetchingRef = useRef<boolean>(false);
+  useEffect(() => {
+    if (isOpen && rows === undefined) {
+      if (isFetchingRef.current) return;
+
+      fetchEventsData();
+      isFetchingRef.current = true;
+    }
+  }, [isOpen, rows, fetchEventsData]);
+
+  const onOpenChange = (_isOpen: boolean) => {
+    const { history, ...restQuery } = router.query;
+
+    router.push({
+      query: _isOpen ? { ...restQuery, history: true } : restQuery,
+    });
+  };
+
   if (!obligation) return null;
   return (
-    <Dialog onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogTrigger asChild className="appearance-none">
         <Button
           className="text-muted-foreground"

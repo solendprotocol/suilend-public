@@ -17,6 +17,7 @@ import {
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { DashboardContextProvider } from "@/contexts/DashboardContext";
 import { useWalletContext } from "@/contexts/WalletContext";
+import useBreakpoint from "@/hooks/useBreakpoint";
 import { formatAddress } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -36,6 +37,8 @@ export default function Dashboard() {
   const router = useRouter();
   const pathname = usePathname();
   const { address, isImpersonatingAddress } = useWalletContext();
+
+  const { lg } = useBreakpoint();
 
   return (
     <DashboardContextProvider>
@@ -66,27 +69,29 @@ export default function Dashboard() {
         </Alert>
       )}
 
-      {/* Vertical layout (<lg) */}
-      <div className="flex w-full flex-col gap-6 lg:hidden">
-        <div className="flex flex-col gap-2">
-          <MarketOverview />
-          <Cards />
-          <div className="mt-4 w-full">
-            <MarketTable />
+      {!lg ? (
+        // Vertical layout
+        <div className="flex w-full flex-col gap-6">
+          <div className="flex flex-col gap-2">
+            <MarketOverview />
+            <Cards />
+            <div className="mt-4 w-full">
+              <MarketTable />
+            </div>
           </div>
         </div>
-      </div>
-
-      {/* Horizontal layout (lg+) */}
-      <div className="hidden w-full flex-row gap-10 lg:flex">
-        <div className="flex min-w-0 flex-1 flex-col gap-6">
-          <MarketOverview />
-          <MarketTable />
+      ) : (
+        // Horizontal layout
+        <div className="flex w-full flex-row gap-10">
+          <div className="flex min-w-0 flex-1 flex-col gap-6">
+            <MarketOverview />
+            <MarketTable />
+          </div>
+          <div className="flex w-[360px] shrink-0 flex-col gap-4">
+            <Cards />
+          </div>
         </div>
-        <div className="flex w-[360px] shrink-0 flex-col gap-4">
-          <Cards />
-        </div>
-      </div>
+      )}
     </DashboardContextProvider>
   );
 }
