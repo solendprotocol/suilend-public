@@ -3,27 +3,13 @@ import BigNumber from "bignumber.js";
 import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
 
 import { isSuilendPoints } from "@/lib/coinType";
-import { RewardMap, RewardSummary } from "@/lib/liquidityMining";
-
-export const getPointsRewards = (rewardMap: RewardMap) => {
-  const deposit = Object.values(rewardMap).flatMap((rewards) =>
-    rewards.deposit.filter((r) => isSuilendPoints(r.stats.rewardCoinType)),
-  );
-  const borrow = Object.values(rewardMap).flatMap((rewards) =>
-    rewards.borrow.filter((r) => isSuilendPoints(r.stats.rewardCoinType)),
-  );
-
-  return { deposit, borrow };
-};
+import { RewardMap } from "@/lib/liquidityMining";
 
 const roundPoints = (value: BigNumber) =>
   value.decimalPlaces(0, BigNumber.ROUND_HALF_UP);
 
 export const getPointsStats = (
-  pointsRewards: {
-    deposit: RewardSummary[];
-    borrow: RewardSummary[];
-  },
+  rewardMap: RewardMap,
   obligations?: ParsedObligation[],
 ) => {
   const totalPoints = {
@@ -38,6 +24,15 @@ export const getPointsStats = (
   };
   if (obligations === undefined || obligations.length === 0)
     return { totalPoints, pointsPerDay };
+
+  const pointsRewards = {
+    deposit: Object.values(rewardMap).flatMap((rewards) =>
+      rewards.deposit.filter((r) => isSuilendPoints(r.stats.rewardCoinType)),
+    ),
+    borrow: Object.values(rewardMap).flatMap((rewards) =>
+      rewards.borrow.filter((r) => isSuilendPoints(r.stats.rewardCoinType)),
+    ),
+  };
 
   obligations.forEach((obligation) => {
     pointsRewards.deposit.forEach((reward) => {

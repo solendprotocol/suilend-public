@@ -21,7 +21,7 @@ export default function NavigationLinks() {
           Points
         </Link>
 
-        {address && data && (
+        {address && (
           <div className="sm:hidden">
             <HeaderPointsPopover />
           </div>

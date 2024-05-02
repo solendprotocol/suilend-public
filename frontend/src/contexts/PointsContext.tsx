@@ -19,7 +19,7 @@ import {
 import { useAppContext } from "@/contexts/AppContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 import { formatRewards } from "@/lib/liquidityMining";
-import { getPointsRewards, getPointsStats } from "@/lib/points";
+import { getPointsStats } from "@/lib/points";
 
 export interface LeaderboardRowData {
   rank: number;
@@ -114,8 +114,7 @@ export function PointsContextProvider({ children }: PropsWithChildren) {
           data.coinMetadataMap,
           obligations,
         );
-        const pointsRewards = getPointsRewards(rewardMap);
-        const pointsStats = getPointsStats(pointsRewards, obligations);
+        const pointsStats = getPointsStats(rewardMap, obligations);
 
         return {
           address: owner,

@@ -29,7 +29,7 @@ import { TX_TOAST_DURATION } from "@/lib/constants";
 import { formatToken } from "@/lib/format";
 import { RewardSummary } from "@/lib/liquidityMining";
 import { POINTS_URL } from "@/lib/navigation";
-import { getPointsRewards, getPointsStats } from "@/lib/points";
+import { getPointsStats } from "@/lib/points";
 import { cn } from "@/lib/utils";
 
 interface PendingRewardsProps {
@@ -160,8 +160,7 @@ export default function ProtocolRewardsCard() {
   };
 
   // Points
-  const pointsRewards = getPointsRewards(data.rewardMap);
-  const pointsStats = getPointsStats(pointsRewards, data.obligations);
+  const pointsStats = getPointsStats(data.rewardMap, data.obligations);
 
   return !address ? (
     <Card className="bg-background">

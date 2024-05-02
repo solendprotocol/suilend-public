@@ -67,7 +67,7 @@ export default function AppHeader() {
             <RpcSelect />
           </div>
 
-          {address && data && (
+          {address && (
             <div className="hidden sm:flex">
               <HeaderPointsPopover />
             </div>
