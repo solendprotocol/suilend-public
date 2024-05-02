@@ -542,7 +542,6 @@ export default function ObligationHistoryDialog() {
 
   const onOpenChange = (_isOpen: boolean) => {
     const { history, ...restQuery } = router.query;
-
     router.push({
       query: _isOpen ? { ...restQuery, history: true } : restQuery,
     });

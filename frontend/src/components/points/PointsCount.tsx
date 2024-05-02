@@ -20,7 +20,7 @@ export default function PointsCount({
   points,
 }: PointsCountProps) {
   return (
-    <div className={cn("flex flex-row items-center gap-1.5", className)}>
+    <div className={cn("flex w-max flex-row items-center gap-1.5", className)}>
       <PointsIcon className={iconClassName} />
       <TBody className={cn(labelClassName)}>{formatPoints(points)}</TBody>
     </div>

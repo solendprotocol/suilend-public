@@ -2,7 +2,7 @@ import TitleChip from "@/components/shared/TitleChip";
 
 export default function PointsHeader() {
   return (
-    <div className="relative -mt-4 h-[180px] w-full md:-mt-6 md:h-[240px]">
+    <div className="relative h-[180px] w-full md:h-[240px]">
       <div className="relative z-[1] -mx-4 flex flex-row justify-center md:-mx-10">
         <div
           className="h-[180px] w-full max-w-[calc(1440px_-_40px_*_2)] md:h-[240px]"

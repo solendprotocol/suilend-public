@@ -15,7 +15,6 @@ import {
   ParsedObligation,
   parseObligation,
 } from "@suilend/sdk/parsers/obligation";
-import * as simulate from "@suilend/sdk/utils/simulate";
 
 import { useAppContext } from "@/contexts/AppContext";
 import { useWalletContext } from "@/contexts/WalletContext";
@@ -34,15 +33,15 @@ type ObligationWithOwner = Obligation<string> & {
 };
 
 export interface PointsContextValue {
-  rawObligations?: ObligationWithOwner[];
-  rawObligationsUpdatedAt?: Date;
+  refreshedObligations?: ObligationWithOwner[];
+  refreshedObligationsUpdatedAt?: Date;
   leaderboardRows?: LeaderboardRowData[];
   rank?: number | null;
 }
 
 const defaultContextValues: PointsContextValue = {
-  rawObligations: undefined,
-  rawObligationsUpdatedAt: undefined,
+  refreshedObligations: undefined,
+  refreshedObligationsUpdatedAt: undefined,
   leaderboardRows: undefined,
   rank: undefined,
 };
@@ -56,12 +55,13 @@ export function PointsContextProvider({ children }: PropsWithChildren) {
   const { data } = useAppContext();
 
   // Obligations
-  const [rawObligations, setRawObligations] = useState<
-    PointsContextValue["rawObligations"]
-  >(defaultContextValues["rawObligations"]);
-  const [rawObligationsUpdatedAt, setRawObligationsUpdatedAt] = useState<
-    PointsContextValue["rawObligationsUpdatedAt"]
-  >(defaultContextValues["rawObligationsUpdatedAt"]);
+  const [refreshedObligations, setRefreshedObligations] = useState<
+    PointsContextValue["refreshedObligations"]
+  >(defaultContextValues["refreshedObligations"]);
+  const [refreshedObligationsUpdatedAt, setRefreshedObligationsUpdatedAt] =
+    useState<PointsContextValue["refreshedObligationsUpdatedAt"]>(
+      defaultContextValues["refreshedObligationsUpdatedAt"],
+    );
 
   const isFetchingObligationsRef = useRef<boolean>(false);
   useEffect(() => {
@@ -73,8 +73,8 @@ export function PointsContextProvider({ children }: PropsWithChildren) {
         const res = await fetch("/api/obligations");
         const json = await res.json();
 
-        setRawObligations(json.obligations);
-        setRawObligationsUpdatedAt(new Date(json.updatedAt * 1000));
+        setRefreshedObligations(json.obligations);
+        setRefreshedObligationsUpdatedAt(new Date(json.updatedAt * 1000));
       } catch (e) {
         console.error(e);
       }
@@ -88,19 +88,16 @@ export function PointsContextProvider({ children }: PropsWithChildren) {
 
   const isProcessingLeaderboardRowsRef = useRef<boolean>(false);
   useEffect(() => {
-    if (rawObligations === undefined) return;
+    if (refreshedObligations === undefined) return;
     if (data === null) return;
     if (isProcessingLeaderboardRowsRef.current) return;
 
     isProcessingLeaderboardRowsRef.current = true;
 
-    const obligations = (rawObligations || [])
-      .map((rawObligation) =>
-        simulate.refreshObligation(rawObligation, data.refreshedRawReserves),
-      )
-      .map((refreshedObligation) =>
+    const obligations = (refreshedObligations || []).map(
+      (refreshedObligation) =>
         parseObligation(refreshedObligation, data.reserveMap),
-      );
+    );
 
     type AddressObligationMap = Record<string, ParsedObligation[]>;
     const addressObligations = obligations.reduce((acc, obligation) => {
@@ -134,7 +131,7 @@ export function PointsContextProvider({ children }: PropsWithChildren) {
         .sort((a, b) => (b.totalPoints.gt(a.totalPoints) ? 1 : -1))
         .map((row, index) => ({ ...row, rank: index + 1 })),
     );
-  }, [rawObligations, data]);
+  }, [refreshedObligations, data]);
 
   // Rank
   const [rank, setRank] = useState<PointsContextValue["rank"]>(
@@ -159,11 +156,11 @@ export function PointsContextProvider({ children }: PropsWithChildren) {
   // Context
   const contextValue: PointsContextValue = useMemo(
     () => ({
-      rawObligationsUpdatedAt,
+      refreshedObligationsUpdatedAt,
       leaderboardRows,
       rank,
     }),
-    [rawObligationsUpdatedAt, leaderboardRows, rank],
+    [refreshedObligationsUpdatedAt, leaderboardRows, rank],
   );
 
   return (

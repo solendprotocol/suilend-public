@@ -63,7 +63,7 @@ export default function PointsCountPopover() {
           </div>
         </div>
 
-        {router.asPath !== POINTS_URL && (
+        {!router.asPath.startsWith(POINTS_URL) && (
           <NextLink href={POINTS_URL} className="w-full">
             <Button
               className="w-full border-secondary text-primary-foreground"

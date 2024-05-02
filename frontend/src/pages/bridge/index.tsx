@@ -22,7 +22,7 @@ export default function Bridge() {
       </Head>
 
       <div className="flex w-full flex-col items-center gap-8">
-        <Alert className="max-w-[650px]">
+        <Alert className="max-w-[650px] rounded-sm">
           <Info className="my-0.5 h-4 w-4 !text-muted-foreground" />
           <AlertTitle
             className={cn(bodySansClassNames, "mb-0 tracking-normal")}
