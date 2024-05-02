@@ -7,7 +7,7 @@ export default function PointsHeader() {
         <div
           className="h-[180px] w-full max-w-[calc(1440px_-_40px_*_2)] md:h-[240px]"
           style={{
-            backgroundImage: "url('/assets/points-header.png')",
+            backgroundImage: "url('/assets/points/header.png')",
             backgroundPosition: "top center",
             backgroundSize: "cover",
             backgroundRepeat: "no-repeat",

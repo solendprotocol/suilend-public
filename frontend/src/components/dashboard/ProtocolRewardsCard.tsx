@@ -170,7 +170,8 @@ export default function ProtocolRewardsCard() {
       <div
         className="flex h-[100px] flex-col items-center justify-center gap-4 sm:h-[110px]"
         style={{
-          backgroundImage: "url('/assets/points-splash-bg.png')",
+          backgroundImage:
+            "url('/assets/dashboard/protocol-rewards-not-connected.png')",
           backgroundPosition: "center",
           backgroundSize: "cover",
           backgroundRepeat: "no-repeat",
@@ -195,7 +196,8 @@ export default function ProtocolRewardsCard() {
         <div
           className="p-4"
           style={{
-            backgroundImage: "url('/assets/protocol-rewards-bg.png')",
+            backgroundImage:
+              "url('/assets/dashboard/protocol-rewards-connected.png')",
             backgroundPosition: "center",
             backgroundSize: "cover",
             backgroundRepeat: "no-repeat",

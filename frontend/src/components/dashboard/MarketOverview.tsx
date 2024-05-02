@@ -11,10 +11,7 @@ export default function MarketOverview() {
 
   return (
     <Card
-      id="market-overview"
-      title="Pool overview"
-      headerEndContent={<MarketOverviewPopover />}
-      alwaysExpanded
+      header={{ title: "Pool overview", endContent: <MarketOverviewPopover /> }}
     >
       <CardContent className="flex flex-row justify-between gap-4">
         <div className="flex flex-col gap-1">

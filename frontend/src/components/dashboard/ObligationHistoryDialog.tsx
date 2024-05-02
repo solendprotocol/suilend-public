@@ -7,7 +7,7 @@ import axios from "axios";
 import BigNumber from "bignumber.js";
 import { formatDate } from "date-fns";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { FileClock, RefreshCcw } from "lucide-react";
+import { FileClock, RotateCw } from "lucide-react";
 
 import { WAD } from "@suilend/sdk/constants";
 
@@ -577,7 +577,7 @@ export default function ObligationHistoryDialog() {
           <Button
             className="absolute right-[calc(8px+20px+16px)] top-1/2 -translate-y-2/4 text-muted-foreground"
             tooltip="Refresh"
-            icon={<RefreshCcw />}
+            icon={<RotateCw />}
             variant="ghost"
             size="icon"
             onClick={fetchEventsData}
