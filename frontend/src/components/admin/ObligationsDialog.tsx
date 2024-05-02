@@ -194,7 +194,7 @@ export default function ObligationsDialog() {
               );
             })
             .map((obligation) => parseObligation(obligation, reserveMap))}
-          noDataMessage={"No Obligations"}
+          noDataMessage="No Obligations"
           tableClassName="border-y-0"
         />
       </div>

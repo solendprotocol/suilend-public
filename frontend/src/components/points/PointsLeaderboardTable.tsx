@@ -100,11 +100,11 @@ export default function PointsLeaderboardTable() {
         data={leaderboardRows}
         noDataMessage="No users"
         maxRows={100}
-        tableContainer={{
+        container={{
           className: cn(!leaderboardRows && "-mb-6"),
         }}
         tableRowClassName={(row) =>
-          row.original.address === address &&
+          row?.original.address === address &&
           "shadow-[inset_0_0_0_2px_hsl(var(--secondary))] !bg-secondary/5"
         }
       />
