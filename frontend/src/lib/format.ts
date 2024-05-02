@@ -47,7 +47,7 @@ export const formatNumber = (
   const exact = options?.exact ?? false;
 
   // Zero
-  if (value.eq(0)) return `${prefix}0.${"0".repeat(dp)}`;
+  if (value.eq(0)) return `${prefix}0${dp > 0 ? `.${"0".repeat(dp)}` : ""}`;
 
   // <Min
   const minValue = new BigNumber(10).pow(-dp);
@@ -127,9 +127,9 @@ export const formatPrice = (value: BigNumber) => {
 
 export const formatPoints = (value: BigNumber) => {
   return formatNumber(value, {
-    dp: 2,
-    exact: true,
+    dp: 0,
     roundingMode: BigNumber.ROUND_HALF_UP,
+    exact: true,
   });
 };
 

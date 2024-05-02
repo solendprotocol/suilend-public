@@ -75,8 +75,8 @@ export function PointsContextProvider({ children }: PropsWithChildren) {
 
         setRefreshedObligations(json.obligations);
         setRefreshedObligationsUpdatedAt(new Date(json.updatedAt * 1000));
-      } catch (e) {
-        console.error(e);
+      } catch (err) {
+        console.error(err);
       }
     })();
   }, [data]);
@@ -107,8 +107,8 @@ export function PointsContextProvider({ children }: PropsWithChildren) {
       return acc;
     }, {} as AddressObligationMap);
 
-    const rawRows = Object.entries(addressObligations).map(
-      ([owner, obligations]) => {
+    const sortedRows: LeaderboardRowData[] = Object.entries(addressObligations)
+      .map(([owner, obligations]) => {
         const rewardMap = formatRewards(
           data.reserveMap,
           data.coinMetadataMap,
@@ -121,16 +121,24 @@ export function PointsContextProvider({ children }: PropsWithChildren) {
           address: owner,
           totalPoints: pointsStats.totalPoints.total,
           pointsPerDay: pointsStats.pointsPerDay.total,
+          rank: -1,
         };
-      },
-    );
+      })
+      .sort((a, b) => (b.totalPoints.gt(a.totalPoints) ? 1 : -1));
 
-    setLeaderboardRows(
-      rawRows
-        .filter((row) => row.totalPoints.gt(0))
-        .sort((a, b) => (b.totalPoints.gt(a.totalPoints) ? 1 : -1))
-        .map((row, index) => ({ ...row, rank: index + 1 })),
-    );
+    for (let i = 0; i < sortedRows.length; i++) {
+      if (i === 0) sortedRows[i].rank = 1;
+      else {
+        const row = sortedRows[i];
+        const lastRow = sortedRows[i - 1];
+
+        row.rank = row.totalPoints.eq(lastRow.totalPoints)
+          ? lastRow.rank
+          : i + 1;
+      }
+    }
+
+    setLeaderboardRows(sortedRows);
   }, [refreshedObligations, data]);
 
   // Rank

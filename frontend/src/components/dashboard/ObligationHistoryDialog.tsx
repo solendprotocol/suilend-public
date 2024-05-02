@@ -450,8 +450,8 @@ export default function ObligationHistoryDialog() {
           (data.claimReward ?? []).slice().sort(eventSortDesc),
         ),
       });
-    } catch (e) {
-      console.error(e);
+    } catch (err) {
+      console.error(err);
     }
   }, [obligation, clearEventsData]);
 
