@@ -27,7 +27,7 @@ export const parseReserve = (
 
   const $typeName = reserve.$typeName;
   const id = reserve.id;
-  const arrayIndex = reserve.arrayIndex;
+  const arrayIndex = Number(reserve.arrayIndex);
   const coinType = normalizeStructTag(reserve.coinType.name);
 
   const coinMetadata = coinMetadataMap[coinType];

@@ -1,11 +1,9 @@
-import { PropsWithChildren } from "react";
-
 import { ColumnDef } from "@tanstack/react-table";
 import BigNumber from "bignumber.js";
 
 import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 
-import ActionsModal from "@/components/dashboard/actions-modal/ActionsModal";
+import { useActionsModalContext } from "@/components/dashboard/actions-modal/ActionsModalContext";
 import DataTable, {
   decimalSortingFn,
   tableHeader,
@@ -27,14 +25,6 @@ interface RowData {
   reserve: ParsedReserve;
 }
 
-interface RowModalProps extends PropsWithChildren {
-  row: RowData;
-}
-
-function RowModal({ row, children }: RowModalProps) {
-  return <ActionsModal reserve={row.reserve}>{children}</ActionsModal>;
-}
-
 interface AccountAssetTableProps {
   amountTitle?: string;
   assets: RowData[];
@@ -48,6 +38,7 @@ export default function AccountAssetTable({
 }: AccountAssetTableProps) {
   const appContext = useAppContext();
   const data = appContext.data as AppData;
+  const { open: openActionsModal } = useActionsModalContext();
 
   // Columns
   const columns: ColumnDef<RowData>[] = [
@@ -102,7 +93,9 @@ export default function AccountAssetTable({
         data={sortedAssets}
         noDataMessage={noAssetsMessage}
         tableClassName="border-y-0"
-        RowModal={RowModal}
+        onRowClick={(row) => () =>
+          openActionsModal(row.original.reserve.arrayIndex)
+        }
       />
     </div>
   );

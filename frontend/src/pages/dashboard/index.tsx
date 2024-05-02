@@ -3,6 +3,7 @@ import { usePathname, useRouter } from "next/navigation";
 
 import { VenetianMask } from "lucide-react";
 
+import ActionsModal from "@/components/dashboard/actions-modal/ActionsModal";
 import LiquidityMiningCard from "@/components/dashboard/LiquidityMiningCard";
 import MarketOverview from "@/components/dashboard/MarketOverview";
 import MarketTable from "@/components/dashboard/MarketTable";
@@ -92,6 +93,8 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+
+      <ActionsModal />
     </DashboardContextProvider>
   );
 }

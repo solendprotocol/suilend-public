@@ -191,7 +191,7 @@ interface DataTableProps<T> {
     row: T;
     children: ReactNode;
   }>;
-  onRowClick?: (row: Row<T>) => ((x: T) => void) | undefined;
+  onRowClick?: (row: Row<T>, index: number) => (() => void) | undefined;
 }
 
 export default function DataTable<T>({
@@ -289,20 +289,20 @@ export default function DataTable<T>({
         ) : (
           <>
             {table.getRowModel().rows.length ? (
-              table.getRowModel().rows.map((row) => {
+              table.getRowModel().rows.map((row, index) => {
                 const children = (
                   <TableRow
                     className={cn(
                       "hover:bg-transparent",
-                      (RowModal || (onRowClick && onRowClick(row))) &&
+                      (RowModal ||
+                        (onRowClick && onRowClick(row, index) !== undefined)) &&
                         "cursor-pointer hover:bg-muted/10",
                       tableRowClassName && tableRowClassName(row),
                     )}
                     style={{ appearance: "inherit" }}
                     onClick={
-                      !RowModal && onRowClick && onRowClick(row)
-                        ? () =>
-                            (onRowClick(row) as (x: T) => void)(row.original)
+                      !RowModal && onRowClick
+                        ? onRowClick(row, index)
                         : undefined
                     }
                   >
