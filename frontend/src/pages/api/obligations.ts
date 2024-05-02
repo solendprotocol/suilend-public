@@ -4,6 +4,10 @@ import type { NextApiRequest, NextApiResponse } from "next";
 
 import { API_URL } from "@/lib/navigation";
 
+// export const config = {
+//   maxDuration: 300,
+// };
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
