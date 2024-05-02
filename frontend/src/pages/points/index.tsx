@@ -2,13 +2,11 @@ import Head from "next/head";
 
 import PointsHeader from "@/components/points/PointsHeader";
 import PointsLeaderboardTable from "@/components/points/PointsLeaderboardTable";
-import FullPageSpinner from "@/components/shared/FullPageSpinner";
 import ImpersonationModeBanner from "@/components/shared/ImpersonationModeBanner";
-import { useAppContext } from "@/contexts/AppContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 import { cn } from "@/lib/utils";
 
-function Page() {
+export default function Points() {
   const { address, isImpersonatingAddress } = useWalletContext();
   const hasImpersonationModeBanner = address && isImpersonatingAddress;
 
@@ -33,11 +31,4 @@ function Page() {
       </div>
     </>
   );
-}
-
-export default function Points() {
-  const { suilendClient, data } = useAppContext();
-  if (!suilendClient || !data) return <FullPageSpinner />;
-
-  return <Page />;
 }
