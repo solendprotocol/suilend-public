@@ -21,7 +21,9 @@ export default async function handler(
       inflateSync(Buffer.from(compressedJson.data, "base64")).toString(),
     );
 
-    res.status(200).json(json);
+    const { obligations } = json;
+
+    res.status(200).json({ ...json, obligations: obligations.slice(0, 3) });
   } catch (err) {
     console.error(err);
     res.status(500);
