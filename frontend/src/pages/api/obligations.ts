@@ -4,10 +4,6 @@ import type { NextApiRequest, NextApiResponse } from "next";
 
 import { API_URL } from "@/lib/navigation";
 
-export const config = {
-  maxDuration: 300,
-};
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
@@ -21,9 +17,7 @@ export default async function handler(
       inflateSync(Buffer.from(compressedJson.data, "base64")).toString(),
     );
 
-    const { obligations } = json;
-
-    res.status(200).json({ ...json, obligations: obligations.slice(0, 3) });
+    res.status(200).json(json);
   } catch (err) {
     console.error(err);
     res.status(500);
