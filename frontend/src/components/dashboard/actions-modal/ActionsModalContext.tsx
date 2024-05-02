@@ -20,6 +20,11 @@ export enum Tab {
 }
 
 interface ActionsModalContext {
+  reserveIndex?: number;
+  isOpen: boolean;
+  open: (reserveIndex: number) => void;
+  close: () => void;
+
   selectedTab: Tab;
   setSelectedTab: Dispatch<SetStateAction<Tab>>;
   isMoreParametersOpen: boolean;
@@ -29,6 +34,15 @@ interface ActionsModalContext {
 }
 
 const ActionsModalContext = createContext<ActionsModalContext>({
+  reserveIndex: undefined,
+  isOpen: false,
+  open: () => {
+    throw Error("ActionsModalContextProvider not initialized");
+  },
+  close: () => {
+    throw Error("ActionsModalContextProvider not initialized");
+  },
+
   selectedTab: Tab.DEPOSIT,
   setSelectedTab: () => {
     throw Error("ActionsModalContextProvider not initialized");
@@ -54,6 +68,11 @@ export const useActionsModalContext = () => {
 };
 
 export function ActionsModalContextProvider({ children }: PropsWithChildren) {
+  const [reserveIndex, setReserveIndex] = useState<number | undefined>(
+    undefined,
+  );
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+
   const [selectedTab, setSelectedTab] = useState<Tab>(Tab.DEPOSIT);
   const [isMoreParametersOpen, setIsMoreParametersOpen] =
     useLocalStorage<boolean>("isActionsModalMoreParametersOpen", false);
@@ -61,6 +80,16 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
 
   const contextValue = useMemo(
     () => ({
+      reserveIndex,
+      isOpen: isOpen && reserveIndex !== undefined,
+      open: (_reserveIndex: number) => {
+        setIsOpen(true);
+        setReserveIndex(_reserveIndex);
+      },
+      close: () => {
+        setIsOpen(false);
+      },
+
       selectedTab,
       setSelectedTab,
       isMoreParametersOpen,
@@ -68,7 +97,14 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
       activePanel,
       setActivePanel,
     }),
-    [selectedTab, isMoreParametersOpen, setIsMoreParametersOpen, activePanel],
+    [
+      reserveIndex,
+      isOpen,
+      selectedTab,
+      isMoreParametersOpen,
+      setIsMoreParametersOpen,
+      activePanel,
+    ],
   );
 
   return (
