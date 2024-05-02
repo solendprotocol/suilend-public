@@ -5,7 +5,7 @@ import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 
 import { useActionsModalContext } from "@/components/dashboard/actions-modal/ActionsModalContext";
 import DataTable, {
-  bigNumberSortingFn,
+  decimalSortingFn,
   tableHeader,
 } from "@/components/dashboard/DataTable";
 import TokenIcon from "@/components/shared/TokenIcon";
@@ -63,7 +63,7 @@ export default function AccountAssetTable({
     },
     {
       accessorKey: "amount",
-      sortingFn: bigNumberSortingFn("amount"),
+      sortingFn: decimalSortingFn("amount"),
       header: ({ column }) =>
         tableHeader(column, amountTitle, { isNumerical: true }),
       cell: ({ row }) => {

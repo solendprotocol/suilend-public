@@ -1,7 +1,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 
 import DataTable, {
-  bigNumberSortingFn,
+  decimalSortingFn,
   tableHeader,
 } from "@/components/dashboard/DataTable";
 import LeaderboardDataLastUpdated from "@/components/points/LeaderboardDataLastUpdated";
@@ -53,7 +53,7 @@ export default function PointsLeaderboardTable() {
     },
     {
       accessorKey: "pointsPerDay",
-      sortingFn: bigNumberSortingFn("pointsPerDay"),
+      sortingFn: decimalSortingFn("pointsPerDay"),
       header: ({ column }) =>
         tableHeader(column, "Points per day", { isNumerical: true }),
       cell: ({ row }) => {
@@ -68,7 +68,7 @@ export default function PointsLeaderboardTable() {
     },
     {
       accessorKey: "totalPoints",
-      sortingFn: bigNumberSortingFn("totalPoints"),
+      sortingFn: decimalSortingFn("totalPoints"),
       header: ({ column }) =>
         tableHeader(column, "Total Points", { isNumerical: true }),
       cell: ({ row }) => {

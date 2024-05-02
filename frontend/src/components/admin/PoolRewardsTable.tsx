@@ -6,7 +6,7 @@ import { Ban, X } from "lucide-react";
 import { ParsedPoolReward } from "@suilend/sdk/parsers/reserve";
 
 import DataTable, {
-  bigNumberSortingFn,
+  decimalSortingFn,
   tableHeader,
 } from "@/components/dashboard/DataTable";
 import Button from "@/components/shared/Button";
@@ -99,7 +99,7 @@ export default function PoolRewardsTable({
     },
     {
       accessorKey: "totalRewards",
-      sortingFn: bigNumberSortingFn("totalRewards"),
+      sortingFn: decimalSortingFn("totalRewards"),
       header: ({ column }) =>
         tableHeader(column, "Total rewards", { isNumerical: true }),
       cell: ({ row }) => {
@@ -119,7 +119,7 @@ export default function PoolRewardsTable({
     },
     {
       accessorKey: "allocatedRewards",
-      sortingFn: bigNumberSortingFn("allocatedRewards"),
+      sortingFn: decimalSortingFn("allocatedRewards"),
       header: ({ column }) =>
         tableHeader(column, "Allocated rewards", { isNumerical: true }),
       cell: ({ row }) => {
@@ -139,7 +139,7 @@ export default function PoolRewardsTable({
     },
     {
       accessorKey: "cumulativeRewardsPerShare",
-      sortingFn: bigNumberSortingFn("cumulativeRewardsPerShare"),
+      sortingFn: decimalSortingFn("cumulativeRewardsPerShare"),
       header: ({ column }) =>
         tableHeader(column, "Cum. rewards per share", { isNumerical: true }),
       cell: ({ row }) => {
