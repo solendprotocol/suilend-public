@@ -28,7 +28,7 @@ export default function PointsRank({
         isRightAligned && "justify-end",
       )}
       style={{
-        width: `${Math.ceil(8.4 * formatRank(9999).length)}px`,
+        width: `${Math.ceil(8.4 * formatRank(99999).length)}px`,
       }}
     >
       {rank === undefined ? (

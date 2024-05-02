@@ -166,6 +166,7 @@ export default function MarketCardList({
     },
   };
 
+  const [isSortByOpen, setIsSortByOpen] = useState<boolean>(false);
   const [sortBy, setSortBy] = useState<SortOption | undefined>(undefined);
   const onSortChange = (value: string) => setSortBy(value as SortOption);
 
@@ -208,10 +209,12 @@ export default function MarketCardList({
 
         <div className="flex h-5 flex-row items-center gap-1">
           <Select
+            root={{ open: isSortByOpen, onOpenChange: setIsSortByOpen }}
             trigger={
               <SelectTrigger
                 className={cn(
                   "h-8 w-fit gap-1 border-none p-0 uppercase text-muted-foreground ring-offset-transparent transition-colors hover:text-foreground focus:ring-transparent",
+                  isSortByOpen && "text-foreground",
                   sortBy && "!text-primary-foreground",
                 )}
                 icon={<SortByIcon className="h-3 w-3" />}

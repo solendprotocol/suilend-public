@@ -30,6 +30,7 @@ export default function Value({ value, url, isId, isType, isUsd }: ValueProps) {
         style={{ "--my": `${(32 - 20) / 2}px` } as CSSProperties}
       >
         <CopyToClipboardButton value={value.toString()} />
+
         {url && <OpenOnExplorerButton url={url} />}
       </div>
     </div>

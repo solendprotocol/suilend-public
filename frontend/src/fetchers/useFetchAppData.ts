@@ -146,10 +146,8 @@ export default function useFetchAppData(
     const rewardMap = formatRewards(reserveMap, coinMetadataMap, obligations);
 
     return {
-      rawLendingMarket,
       lendingMarket,
       lendingMarketOwnerCapId: lendingMarketOwnerCapId ?? undefined,
-      refreshedRawReserves,
       reserveMap,
       obligationOwnerCaps,
       obligations,

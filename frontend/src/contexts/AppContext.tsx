@@ -17,11 +17,7 @@ import { TransactionBlock } from "@mysten/sui.js/transactions";
 import { toast } from "sonner";
 import { useLocalStorage } from "usehooks-ts";
 
-import {
-  LendingMarket,
-  ObligationOwnerCap,
-} from "@suilend/sdk/_generated/suilend/lending-market/structs";
-import { Reserve } from "@suilend/sdk/_generated/suilend/reserve/structs";
+import { ObligationOwnerCap } from "@suilend/sdk/_generated/suilend/lending-market/structs";
 import { SuilendClient } from "@suilend/sdk/client";
 import { ParsedLendingMarket } from "@suilend/sdk/parsers/lendingMarket";
 import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
@@ -34,10 +30,8 @@ import { EXPLORERS, RPCS } from "@/lib/constants";
 import { RewardMap } from "@/lib/liquidityMining";
 
 export interface AppData {
-  rawLendingMarket: LendingMarket<string>;
   lendingMarket: ParsedLendingMarket;
   lendingMarketOwnerCapId: string | undefined;
-  refreshedRawReserves: Reserve<string>[];
   reserveMap: Record<string, ParsedReserve>;
   obligationOwnerCaps: ObligationOwnerCap<string>[] | undefined;
   obligations: ParsedObligation[] | undefined;
