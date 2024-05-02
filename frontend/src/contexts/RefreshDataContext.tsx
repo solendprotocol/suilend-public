@@ -11,7 +11,7 @@ import {
 
 import { useAppContext } from "@/contexts/AppContext";
 
-export const AUTO_REFRESH_INTERVAL = 30; // Seconds
+export const AUTO_REFRESH_DATA_INTERVAL = 30; // Seconds
 
 interface RefreshDataContextValue {
   autoRefreshCountdown: number;
@@ -40,7 +40,9 @@ export function RefreshDataContextProvider({ children }: PropsWithChildren) {
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
 
   // Countdown
-  const [countdown, setCountdown] = useState<number>(AUTO_REFRESH_INTERVAL);
+  const [countdown, setCountdown] = useState<number>(
+    AUTO_REFRESH_DATA_INTERVAL,
+  );
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const pauseCountdown = useCallback(() => {
@@ -56,7 +58,7 @@ export function RefreshDataContextProvider({ children }: PropsWithChildren) {
   const startCountdown = useCallback(() => {
     pauseCountdown();
 
-    setCountdown(AUTO_REFRESH_INTERVAL);
+    setCountdown(AUTO_REFRESH_DATA_INTERVAL);
     resumeCountdown();
   }, [pauseCountdown, resumeCountdown]);
 

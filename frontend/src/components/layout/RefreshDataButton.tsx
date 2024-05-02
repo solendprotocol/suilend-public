@@ -3,7 +3,7 @@ import BigNumber from "bignumber.js";
 import Button from "@/components/shared/Button";
 import Tooltip from "@/components/shared/Tooltip";
 import {
-  AUTO_REFRESH_INTERVAL,
+  AUTO_REFRESH_DATA_INTERVAL,
   useRefreshDataContext,
 } from "@/contexts/RefreshDataContext";
 import { formatDuration } from "@/lib/format";
@@ -19,7 +19,7 @@ function CircularProgress() {
   const circumference = radius * 2 * Math.PI;
 
   const completionPercent =
-    (1 - autoRefreshCountdown / AUTO_REFRESH_INTERVAL) * 100;
+    (1 - autoRefreshCountdown / AUTO_REFRESH_DATA_INTERVAL) * 100;
   const offset = (1 - completionPercent / 100) * circumference;
 
   return (
