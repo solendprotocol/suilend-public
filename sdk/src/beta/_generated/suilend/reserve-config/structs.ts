@@ -27,7 +27,7 @@ export function isReserveConfig(type: string): boolean {
   type = compressSuiType(type);
   return (
     type ===
-    "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::reserve_config::ReserveConfig"
+    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve_config::ReserveConfig"
   );
 }
 
@@ -57,12 +57,12 @@ export type ReserveConfigReified = Reified<ReserveConfig, ReserveConfigFields>;
 
 export class ReserveConfig implements StructClass {
   static readonly $typeName =
-    "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::reserve_config::ReserveConfig";
+    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve_config::ReserveConfig";
   static readonly $numTypeParams = 0;
 
   readonly $typeName = ReserveConfig.$typeName;
 
-  readonly $fullTypeName: "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::reserve_config::ReserveConfig";
+  readonly $fullTypeName: "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve_config::ReserveConfig";
 
   readonly $typeArgs: [];
 
@@ -90,7 +90,7 @@ export class ReserveConfig implements StructClass {
     this.$fullTypeName = composeSuiType(
       ReserveConfig.$typeName,
       ...typeArgs,
-    ) as "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::reserve_config::ReserveConfig";
+    ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve_config::ReserveConfig";
     this.$typeArgs = typeArgs;
 
     this.openLtvPct = fields.openLtvPct;
@@ -120,7 +120,7 @@ export class ReserveConfig implements StructClass {
       fullTypeName: composeSuiType(
         ReserveConfig.$typeName,
         ...[],
-      ) as "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::reserve_config::ReserveConfig",
+      ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve_config::ReserveConfig",
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
@@ -430,7 +430,7 @@ export function isReserveConfigBuilder(type: string): boolean {
   type = compressSuiType(type);
   return (
     type ===
-    "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::reserve_config::ReserveConfigBuilder"
+    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve_config::ReserveConfigBuilder"
   );
 }
 
@@ -445,12 +445,12 @@ export type ReserveConfigBuilderReified = Reified<
 
 export class ReserveConfigBuilder implements StructClass {
   static readonly $typeName =
-    "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::reserve_config::ReserveConfigBuilder";
+    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve_config::ReserveConfigBuilder";
   static readonly $numTypeParams = 0;
 
   readonly $typeName = ReserveConfigBuilder.$typeName;
 
-  readonly $fullTypeName: "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::reserve_config::ReserveConfigBuilder";
+  readonly $fullTypeName: "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve_config::ReserveConfigBuilder";
 
   readonly $typeArgs: [];
 
@@ -460,7 +460,7 @@ export class ReserveConfigBuilder implements StructClass {
     this.$fullTypeName = composeSuiType(
       ReserveConfigBuilder.$typeName,
       ...typeArgs,
-    ) as "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::reserve_config::ReserveConfigBuilder";
+    ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve_config::ReserveConfigBuilder";
     this.$typeArgs = typeArgs;
 
     this.fields = fields.fields;
@@ -472,7 +472,7 @@ export class ReserveConfigBuilder implements StructClass {
       fullTypeName: composeSuiType(
         ReserveConfigBuilder.$typeName,
         ...[],
-      ) as "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::reserve_config::ReserveConfigBuilder",
+      ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve_config::ReserveConfigBuilder",
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>

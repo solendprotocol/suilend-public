@@ -111,10 +111,12 @@ export class VerifiedID implements StructClass {
   static get bcs() {
     return bcs.struct("VerifiedID", {
       id: UID.bcs,
-      owner: bcs.bytes(32).transform({
-        input: (val: string) => fromHEX(val),
-        output: (val: Uint8Array) => toHEX(val),
-      }),
+      owner: bcs
+        .bytes(32)
+        .transform({
+          input: (val: string) => fromHEX(val),
+          output: (val: Uint8Array) => toHEX(val),
+        }),
       key_claim_name: String.bcs,
       key_claim_value: String.bcs,
       issuer: String.bcs,

@@ -1527,14 +1527,18 @@ export class ObligationDataEvent implements StructClass {
 
   static get bcs() {
     return bcs.struct("ObligationDataEvent", {
-      lending_market_id: bcs.bytes(32).transform({
-        input: (val: string) => fromHEX(val),
-        output: (val: Uint8Array) => toHEX(val),
-      }),
-      obligation_id: bcs.bytes(32).transform({
-        input: (val: string) => fromHEX(val),
-        output: (val: Uint8Array) => toHEX(val),
-      }),
+      lending_market_id: bcs
+        .bytes(32)
+        .transform({
+          input: (val: string) => fromHEX(val),
+          output: (val: Uint8Array) => toHEX(val),
+        }),
+      obligation_id: bcs
+        .bytes(32)
+        .transform({
+          input: (val: string) => fromHEX(val),
+          output: (val: Uint8Array) => toHEX(val),
+        }),
       deposits: bcs.vector(DepositRecord.bcs),
       borrows: bcs.vector(BorrowRecord.bcs),
       deposited_value_usd: Decimal.bcs,

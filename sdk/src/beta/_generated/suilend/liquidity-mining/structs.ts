@@ -37,7 +37,7 @@ export function isPoolReward(type: string): boolean {
   type = compressSuiType(type);
   return (
     type ===
-    "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::liquidity_mining::PoolReward"
+    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::PoolReward"
   );
 }
 
@@ -58,12 +58,12 @@ export type PoolRewardReified = Reified<PoolReward, PoolRewardFields>;
 
 export class PoolReward implements StructClass {
   static readonly $typeName =
-    "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::liquidity_mining::PoolReward";
+    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::PoolReward";
   static readonly $numTypeParams = 0;
 
   readonly $typeName = PoolReward.$typeName;
 
-  readonly $fullTypeName: "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::liquidity_mining::PoolReward";
+  readonly $fullTypeName: "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::PoolReward";
 
   readonly $typeArgs: [];
 
@@ -82,7 +82,7 @@ export class PoolReward implements StructClass {
     this.$fullTypeName = composeSuiType(
       PoolReward.$typeName,
       ...typeArgs,
-    ) as "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::liquidity_mining::PoolReward";
+    ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::PoolReward";
     this.$typeArgs = typeArgs;
 
     this.id = fields.id;
@@ -103,7 +103,7 @@ export class PoolReward implements StructClass {
       fullTypeName: composeSuiType(
         PoolReward.$typeName,
         ...[],
-      ) as "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::liquidity_mining::PoolReward",
+      ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::PoolReward",
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
@@ -318,7 +318,7 @@ export function isPoolRewardManager(type: string): boolean {
   type = compressSuiType(type);
   return (
     type ===
-    "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::liquidity_mining::PoolRewardManager"
+    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::PoolRewardManager"
   );
 }
 
@@ -336,12 +336,12 @@ export type PoolRewardManagerReified = Reified<
 
 export class PoolRewardManager implements StructClass {
   static readonly $typeName =
-    "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::liquidity_mining::PoolRewardManager";
+    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::PoolRewardManager";
   static readonly $numTypeParams = 0;
 
   readonly $typeName = PoolRewardManager.$typeName;
 
-  readonly $fullTypeName: "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::liquidity_mining::PoolRewardManager";
+  readonly $fullTypeName: "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::PoolRewardManager";
 
   readonly $typeArgs: [];
 
@@ -354,7 +354,7 @@ export class PoolRewardManager implements StructClass {
     this.$fullTypeName = composeSuiType(
       PoolRewardManager.$typeName,
       ...typeArgs,
-    ) as "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::liquidity_mining::PoolRewardManager";
+    ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::PoolRewardManager";
     this.$typeArgs = typeArgs;
 
     this.id = fields.id;
@@ -369,7 +369,7 @@ export class PoolRewardManager implements StructClass {
       fullTypeName: composeSuiType(
         PoolRewardManager.$typeName,
         ...[],
-      ) as "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::liquidity_mining::PoolRewardManager",
+      ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::PoolRewardManager",
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
@@ -451,7 +451,7 @@ export class PoolRewardManager implements StructClass {
       id: this.id,
       totalShares: this.totalShares.toString(),
       poolRewards: fieldToJSON<Vector<Option<PoolReward>>>(
-        `vector<0x1::option::Option<0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::liquidity_mining::PoolReward>>`,
+        `vector<0x1::option::Option<0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::PoolReward>>`,
         this.poolRewards,
       ),
       lastUpdateTimeMs: this.lastUpdateTimeMs.toString(),
@@ -523,7 +523,7 @@ export class PoolRewardManager implements StructClass {
 export function isRewardBalance(type: string): boolean {
   type = compressSuiType(type);
   return type.startsWith(
-    "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::liquidity_mining::RewardBalance<",
+    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::RewardBalance<",
   );
 }
 
@@ -540,12 +540,12 @@ export class RewardBalance<T extends PhantomTypeArgument>
   implements StructClass
 {
   static readonly $typeName =
-    "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::liquidity_mining::RewardBalance";
+    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::RewardBalance";
   static readonly $numTypeParams = 1;
 
   readonly $typeName = RewardBalance.$typeName;
 
-  readonly $fullTypeName: `0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::liquidity_mining::RewardBalance<${PhantomToTypeStr<T>}>`;
+  readonly $fullTypeName: `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::RewardBalance<${PhantomToTypeStr<T>}>`;
 
   readonly $typeArgs: [PhantomToTypeStr<T>];
 
@@ -558,7 +558,7 @@ export class RewardBalance<T extends PhantomTypeArgument>
     this.$fullTypeName = composeSuiType(
       RewardBalance.$typeName,
       ...typeArgs,
-    ) as `0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::liquidity_mining::RewardBalance<${PhantomToTypeStr<T>}>`;
+    ) as `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::RewardBalance<${PhantomToTypeStr<T>}>`;
     this.$typeArgs = typeArgs;
 
     this.dummyField = fields.dummyField;
@@ -572,7 +572,7 @@ export class RewardBalance<T extends PhantomTypeArgument>
       fullTypeName: composeSuiType(
         RewardBalance.$typeName,
         ...[extractType(T)],
-      ) as `0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::liquidity_mining::RewardBalance<${PhantomToTypeStr<ToPhantomTypeArgument<T>>}>`,
+      ) as `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::RewardBalance<${PhantomToTypeStr<ToPhantomTypeArgument<T>>}>`,
       typeArgs: [extractType(T)] as [
         PhantomToTypeStr<ToPhantomTypeArgument<T>>,
       ],
@@ -726,7 +726,7 @@ export function isUserReward(type: string): boolean {
   type = compressSuiType(type);
   return (
     type ===
-    "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::liquidity_mining::UserReward"
+    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::UserReward"
   );
 }
 
@@ -740,12 +740,12 @@ export type UserRewardReified = Reified<UserReward, UserRewardFields>;
 
 export class UserReward implements StructClass {
   static readonly $typeName =
-    "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::liquidity_mining::UserReward";
+    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::UserReward";
   static readonly $numTypeParams = 0;
 
   readonly $typeName = UserReward.$typeName;
 
-  readonly $fullTypeName: "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::liquidity_mining::UserReward";
+  readonly $fullTypeName: "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::UserReward";
 
   readonly $typeArgs: [];
 
@@ -757,7 +757,7 @@ export class UserReward implements StructClass {
     this.$fullTypeName = composeSuiType(
       UserReward.$typeName,
       ...typeArgs,
-    ) as "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::liquidity_mining::UserReward";
+    ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::UserReward";
     this.$typeArgs = typeArgs;
 
     this.poolRewardId = fields.poolRewardId;
@@ -771,7 +771,7 @@ export class UserReward implements StructClass {
       fullTypeName: composeSuiType(
         UserReward.$typeName,
         ...[],
-      ) as "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::liquidity_mining::UserReward",
+      ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::UserReward",
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
@@ -921,7 +921,7 @@ export function isUserRewardManager(type: string): boolean {
   type = compressSuiType(type);
   return (
     type ===
-    "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::liquidity_mining::UserRewardManager"
+    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::UserRewardManager"
   );
 }
 
@@ -939,12 +939,12 @@ export type UserRewardManagerReified = Reified<
 
 export class UserRewardManager implements StructClass {
   static readonly $typeName =
-    "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::liquidity_mining::UserRewardManager";
+    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::UserRewardManager";
   static readonly $numTypeParams = 0;
 
   readonly $typeName = UserRewardManager.$typeName;
 
-  readonly $fullTypeName: "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::liquidity_mining::UserRewardManager";
+  readonly $fullTypeName: "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::UserRewardManager";
 
   readonly $typeArgs: [];
 
@@ -957,7 +957,7 @@ export class UserRewardManager implements StructClass {
     this.$fullTypeName = composeSuiType(
       UserRewardManager.$typeName,
       ...typeArgs,
-    ) as "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::liquidity_mining::UserRewardManager";
+    ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::UserRewardManager";
     this.$typeArgs = typeArgs;
 
     this.poolRewardManagerId = fields.poolRewardManagerId;
@@ -972,7 +972,7 @@ export class UserRewardManager implements StructClass {
       fullTypeName: composeSuiType(
         UserRewardManager.$typeName,
         ...[],
-      ) as "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::liquidity_mining::UserRewardManager",
+      ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::UserRewardManager",
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
@@ -1060,7 +1060,7 @@ export class UserRewardManager implements StructClass {
       poolRewardManagerId: this.poolRewardManagerId,
       share: this.share.toString(),
       rewards: fieldToJSON<Vector<Option<UserReward>>>(
-        `vector<0x1::option::Option<0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::liquidity_mining::UserReward>>`,
+        `vector<0x1::option::Option<0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::UserReward>>`,
         this.rewards,
       ),
       lastUpdateTimeMs: this.lastUpdateTimeMs.toString(),

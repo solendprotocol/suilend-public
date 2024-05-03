@@ -30,7 +30,7 @@ import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
 export function isCell(type: string): boolean {
   type = compressSuiType(type);
   return type.startsWith(
-    "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::cell::Cell<",
+    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::cell::Cell<",
   );
 }
 
@@ -45,12 +45,12 @@ export type CellReified<Element extends TypeArgument> = Reified<
 
 export class Cell<Element extends TypeArgument> implements StructClass {
   static readonly $typeName =
-    "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::cell::Cell";
+    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::cell::Cell";
   static readonly $numTypeParams = 1;
 
   readonly $typeName = Cell.$typeName;
 
-  readonly $fullTypeName: `0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::cell::Cell<${ToTypeStr<Element>}>`;
+  readonly $fullTypeName: `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::cell::Cell<${ToTypeStr<Element>}>`;
 
   readonly $typeArgs: [ToTypeStr<Element>];
 
@@ -63,7 +63,7 @@ export class Cell<Element extends TypeArgument> implements StructClass {
     this.$fullTypeName = composeSuiType(
       Cell.$typeName,
       ...typeArgs,
-    ) as `0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::cell::Cell<${ToTypeStr<Element>}>`;
+    ) as `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::cell::Cell<${ToTypeStr<Element>}>`;
     this.$typeArgs = typeArgs;
 
     this.element = fields.element;
@@ -77,7 +77,7 @@ export class Cell<Element extends TypeArgument> implements StructClass {
       fullTypeName: composeSuiType(
         Cell.$typeName,
         ...[extractType(Element)],
-      ) as `0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::cell::Cell<${ToTypeStr<ToTypeArgument<Element>>}>`,
+      ) as `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::cell::Cell<${ToTypeStr<ToTypeArgument<Element>>}>`,
       typeArgs: [extractType(Element)] as [ToTypeStr<ToTypeArgument<Element>>],
       reifiedTypeArgs: [Element],
       fromFields: (fields: Record<string, any>) =>

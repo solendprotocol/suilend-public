@@ -285,10 +285,12 @@ export class State implements StructClass {
       governance_data_source: DataSource.bcs,
       stale_price_threshold: bcs.u64(),
       base_update_fee: bcs.u64(),
-      fee_recipient_address: bcs.bytes(32).transform({
-        input: (val: string) => fromHEX(val),
-        output: (val: Uint8Array) => toHEX(val),
-      }),
+      fee_recipient_address: bcs
+        .bytes(32)
+        .transform({
+          input: (val: string) => fromHEX(val),
+          output: (val: Uint8Array) => toHEX(val),
+        }),
       last_executed_governance_sequence: bcs.u64(),
       consumed_vaas: ConsumedVAAs.bcs,
       upgrade_cap: UpgradeCap.bcs,
