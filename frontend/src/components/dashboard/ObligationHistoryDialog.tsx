@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import { CSSProperties, useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { normalizeStructTag } from "@mysten/sui.js/utils";
 import { ColumnDef, Row } from "@tanstack/react-table";
@@ -12,22 +12,12 @@ import { FileClock, RefreshCcw } from "lucide-react";
 import { WAD } from "@suilend/sdk/constants";
 
 import DataTable, { tableHeader } from "@/components/dashboard/DataTable";
+import Dialog from "@/components/dashboard/Dialog";
 import ObligationSwitcherPopover from "@/components/dashboard/ObligationSwitcherPopover";
 import Button from "@/components/shared/Button";
 import OpenOnExplorerButton from "@/components/shared/OpenOnExplorerButton";
 import TokenIcon from "@/components/shared/TokenIcon";
-import {
-  TBody,
-  TLabel,
-  TLabelSans,
-  TTitle,
-} from "@/components/shared/Typography";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { TBody, TLabel, TLabelSans } from "@/components/shared/Typography";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import {
   BorrowEvent,
@@ -558,8 +548,9 @@ export default function ObligationHistoryDialog() {
 
   if (!obligation) return null;
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogTrigger asChild className="appearance-none">
+    <Dialog
+      rootProps={{ open: isOpen, onOpenChange }}
+      trigger={
         <Button
           className="text-muted-foreground"
           tooltip="View history"
@@ -569,104 +560,94 @@ export default function ObligationHistoryDialog() {
         >
           View history
         </Button>
-      </DialogTrigger>
-      <DialogContent
-        className="flex h-dvh max-h-none max-w-none flex-col gap-0 overflow-hidden bg-popover p-0 sm:h-[calc(100dvh-var(--sm-my)*2)] sm:w-[calc(100dvw-var(--sm-mx)*2)] sm:max-w-4xl"
-        style={{ "--sm-mx": "2rem", "--sm-my": "2rem" } as CSSProperties}
-        onOpenAutoFocus={(e) => e.preventDefault()}
-        overlay={{ className: "bg-background/80" }}
-      >
-        <DialogHeader className="relative h-max space-y-0 border-b p-4">
-          <TTitle className="flex flex-row items-center gap-2 uppercase">
-            <FileClock className="h-4 w-4 shrink-0" />
-            Account history
-          </TTitle>
+      }
+      titleIcon={<FileClock />}
+      title="Account history"
+      headerEndContent={
+        <>
+          {data.obligations && data.obligations.length > 1 && (
+            <ObligationSwitcherPopover onSelect={fetchEventsData} />
+          )}
 
-          <div className="absolute right-[calc(8px+20px+16px)] top-1/2 flex -translate-y-2/4 flex-row gap-1">
-            {data.obligations && data.obligations.length > 1 && (
-              <ObligationSwitcherPopover onSelect={fetchEventsData} />
+          <Button
+            className="text-muted-foreground"
+            tooltip="Refresh"
+            icon={<RefreshCcw />}
+            variant="ghost"
+            size="icon"
+            onClick={() => fetchEventsData()}
+          >
+            Refresh
+          </Button>
+        </>
+      }
+    >
+      <div className="flex flex-row flex-wrap gap-2 p-4">
+        {initialFilters.map((eventType) => (
+          <Button
+            key={eventType}
+            labelClassName="text-xs font-sans"
+            className={cn(
+              "rounded-full",
+              filters.includes(eventType) &&
+                "border-secondary bg-secondary/5 text-primary-foreground",
             )}
+            variant="secondaryOutline"
+            size="sm"
+            onClick={() => toggleFilter(eventType)}
+          >
+            {EventTypeNameMap[eventType]}
+          </Button>
+        ))}
+      </div>
 
-            <Button
-              className="text-muted-foreground"
-              tooltip="Refresh"
-              icon={<RefreshCcw />}
-              variant="ghost"
-              size="icon"
-              onClick={() => fetchEventsData()}
-            >
-              Refresh
-            </Button>
-          </div>
-        </DialogHeader>
+      <DataTable<RowData>
+        columns={columns}
+        data={rows}
+        noDataMessage={
+          filters.length === initialFilters.length
+            ? "No history"
+            : "No history for the active filters"
+        }
+        columnFilters={[{ id: "type", value: filters }]}
+        skeletonRows={20}
+        container={{
+          className: cn(rows === undefined && "overflow-y-hidden"),
+        }}
+        tableClassName="border-y-0 relative"
+        tableHeaderRowClassName="border-none"
+        tableHeadClassName={(header) =>
+          cn(
+            "sticky bg-popover top-0 z-[2]",
+            header.id === "digest" ? "w-16" : "w-auto",
+          )
+        }
+        tableRowClassName={(row) => {
+          if (!row) return;
+          const isGroupRow = row.getCanExpand() && row.subRows.length > 1;
+          const isNested = !!row.getParentRow();
 
-        <div className="flex flex-row flex-wrap gap-2 p-4">
-          {initialFilters.map((eventType) => (
-            <Button
-              key={eventType}
-              labelClassName="text-xs font-sans"
-              className={cn(
-                "rounded-full",
-                filters.includes(eventType) &&
-                  "border-secondary bg-secondary/5 text-primary-foreground",
-              )}
-              variant="secondaryOutline"
-              size="sm"
-              onClick={() => toggleFilter(eventType)}
-            >
-              {EventTypeNameMap[eventType]}
-            </Button>
-          ))}
-        </div>
-
-        <DataTable<RowData>
-          columns={columns}
-          data={rows}
-          noDataMessage={
-            filters.length === initialFilters.length
-              ? "No history"
-              : "No history for the active filters"
-          }
-          columnFilters={[{ id: "type", value: filters }]}
-          skeletonRows={20}
-          container={{
-            className: cn(rows === undefined && "overflow-y-hidden"),
-          }}
-          tableClassName="border-y-0 relative"
-          tableHeaderRowClassName="border-none"
-          tableHeadClassName={(header) =>
-            cn(
-              "sticky bg-popover top-0 z-[2]",
-              header.id === "digest" ? "w-16" : "w-auto",
-            )
-          }
-          tableRowClassName={(row) => {
-            if (!row) return;
-            const isGroupRow = row.getCanExpand() && row.subRows.length > 1;
-            const isNested = !!row.getParentRow();
-
-            return cn(
-              isGroupRow && row.getIsExpanded() && "!bg-muted/10",
-              isNested && "!bg-card",
-            );
-          }}
-          tableCellClassName={(cell) =>
-            cn(
-              "z-[1]",
-              cell &&
-                [EventType.BORROW, EventType.LIQUIDATE].includes(
-                  cell.row.original.type,
-                )
-                ? "py-2 h-auto"
-                : "py-0 h-12",
-            )
-          }
-          onRowClick={(row) => {
-            const isGroupRow = row.getCanExpand() && row.subRows.length > 1;
-            if (isGroupRow) return row.getToggleExpandedHandler();
-          }}
-        />
-      </DialogContent>
+          return cn(
+            isGroupRow && row.getIsExpanded() && "!bg-muted/10",
+            isNested && "!bg-card",
+          );
+        }}
+        tableCellClassName={(cell) =>
+          cn(
+            "z-[1]",
+            cell &&
+              [EventType.BORROW, EventType.LIQUIDATE].includes(
+                cell.row.original.type,
+              )
+              ? "py-2 h-auto"
+              : "py-0 h-12",
+          )
+        }
+        onRowClick={(row) => {
+          const isGroupRow = row.getCanExpand() && row.subRows.length > 1;
+          if (isGroupRow) return row.getToggleExpandedHandler();
+        }}
+      />
     </Dialog>
   );
 }
