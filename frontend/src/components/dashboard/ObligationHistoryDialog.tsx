@@ -3,7 +3,6 @@ import { CSSProperties, useCallback, useEffect, useRef, useState } from "react";
 
 import { normalizeStructTag } from "@mysten/sui.js/utils";
 import { ColumnDef, Row } from "@tanstack/react-table";
-import axios from "axios";
 import BigNumber from "bignumber.js";
 import { formatDate } from "date-fns";
 import { ChevronDown, ChevronUp } from "lucide-react";
@@ -43,6 +42,7 @@ import {
   getDedupedClaimRewardEvents,
 } from "@/lib/events";
 import { formatToken } from "@/lib/format";
+import { API_URL } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 
 const getCtokenExchangeRate = (event: ReserveAssetDataEvent) =>
@@ -404,30 +404,31 @@ export default function ObligationHistoryDialog() {
 
     clearEventsData();
     try {
-      const response1 = await axios.get("/api/events", {
-        params: {
-          eventTypes: [
-            EventType.DEPOSIT,
-            EventType.WITHDRAW,
-            EventType.LIQUIDATE,
-          ].join(","),
-          obligationId: obligation.id,
-          joinEventTypes: EventType.RESERVE_ASSET_DATA,
-        },
-      });
-      const response2 = await axios.get("/api/events", {
-        params: {
-          eventTypes: [
-            EventType.BORROW,
-            EventType.REPAY,
-            EventType.CLAIM_REWARD,
-          ].join(","),
-          obligationId: obligation.id,
-        },
-      });
+      const url1 = `${API_URL}/events?${new URLSearchParams({
+        eventTypes: [
+          EventType.DEPOSIT,
+          EventType.WITHDRAW,
+          EventType.LIQUIDATE,
+        ].join(","),
+        obligationId: obligation.id,
+        joinEventTypes: EventType.RESERVE_ASSET_DATA,
+      })}`;
+      const res1 = await fetch(url1);
+      const json1 = await res1.json();
+
+      const url2 = `${API_URL}/events?${new URLSearchParams({
+        eventTypes: [
+          EventType.BORROW,
+          EventType.REPAY,
+          EventType.CLAIM_REWARD,
+        ].join(","),
+        obligationId: obligation.id,
+      })}`;
+      const res2 = await fetch(url2);
+      const json2 = await res2.json();
 
       // Parse
-      const data = { ...response1.data, ...response2.data } as EventsData;
+      const data = { ...json1, ...json2 } as EventsData;
       for (const event of [
         ...data.deposit,
         ...data.borrow,
@@ -439,7 +440,9 @@ export default function ObligationHistoryDialog() {
       }
 
       setEventsData({
-        reserveAssetData: data.reserveAssetData ?? [],
+        reserveAssetData: (data.reserveAssetData ?? [])
+          .slice()
+          .sort(eventSortAsc),
 
         deposit: (data.deposit ?? []).slice().sort(eventSortDesc),
         borrow: (data.borrow ?? []).slice().sort(eventSortDesc),

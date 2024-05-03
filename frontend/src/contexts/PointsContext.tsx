@@ -9,6 +9,7 @@ import {
 } from "react";
 
 import BigNumber from "bignumber.js";
+import { strFromU8, unzlibSync } from "fflate";
 
 import { Obligation } from "@suilend/sdk/_generated/suilend/obligation/structs";
 import {
@@ -19,6 +20,7 @@ import {
 import { useAppContext } from "@/contexts/AppContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 import { formatRewards } from "@/lib/liquidityMining";
+import { API_URL } from "@/lib/navigation";
 import { getPointsStats } from "@/lib/points";
 
 export interface LeaderboardRowData {
@@ -70,8 +72,13 @@ export function PointsContextProvider({ children }: PropsWithChildren) {
 
       isFetchingObligationsRef.current = true;
       try {
-        const res = await fetch("/api/obligations");
-        const json = await res.json();
+        const url = `${API_URL}/obligations/all?compressed=true`;
+
+        const res = await fetch(url);
+        const compressedJson = await res.json();
+        const json = JSON.parse(
+          strFromU8(unzlibSync(Buffer.from(compressedJson.data, "base64"))),
+        );
 
         setRefreshedObligations(json.obligations);
         setRefreshedObligationsUpdatedAt(new Date(json.updatedAt * 1000));
