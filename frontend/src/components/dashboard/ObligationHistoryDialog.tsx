@@ -12,6 +12,7 @@ import { FileClock, RefreshCcw } from "lucide-react";
 import { WAD } from "@suilend/sdk/constants";
 
 import DataTable, { tableHeader } from "@/components/dashboard/DataTable";
+import ObligationSwitcherPopover from "@/components/dashboard/ObligationSwitcherPopover";
 import Button from "@/components/shared/Button";
 import OpenOnExplorerButton from "@/components/shared/OpenOnExplorerButton";
 import TokenIcon from "@/components/shared/TokenIcon";
@@ -399,61 +400,66 @@ export default function ObligationHistoryDialog() {
     setEventsData(undefined);
   }, []);
 
-  const fetchEventsData = useCallback(async () => {
-    if (!obligation) return;
+  const fetchEventsData = useCallback(
+    async (_obligationId?: string) => {
+      const obligationId = _obligationId ?? obligation?.id;
+      if (!obligationId) return;
 
-    clearEventsData();
-    try {
-      const response1 = await axios.get("/api/events", {
-        params: {
-          eventTypes: [
-            EventType.DEPOSIT,
-            EventType.WITHDRAW,
-            EventType.LIQUIDATE,
-          ].join(","),
-          obligationId: obligation.id,
-          joinEventTypes: EventType.RESERVE_ASSET_DATA,
-        },
-      });
-      const response2 = await axios.get("/api/events", {
-        params: {
-          eventTypes: [
-            EventType.BORROW,
-            EventType.REPAY,
-            EventType.CLAIM_REWARD,
-          ].join(","),
-          obligationId: obligation.id,
-        },
-      });
+      clearEventsData();
 
-      // Parse
-      const data = { ...response1.data, ...response2.data } as EventsData;
-      for (const event of [
-        ...data.deposit,
-        ...data.borrow,
-        ...data.withdraw,
-        ...data.repay,
-        ...data.claimReward,
-      ]) {
-        event.coinType = normalizeStructTag(event.coinType);
+      try {
+        const response1 = await axios.get("/api/events", {
+          params: {
+            eventTypes: [
+              EventType.DEPOSIT,
+              EventType.WITHDRAW,
+              EventType.LIQUIDATE,
+            ].join(","),
+            obligationId,
+            joinEventTypes: EventType.RESERVE_ASSET_DATA,
+          },
+        });
+        const response2 = await axios.get("/api/events", {
+          params: {
+            eventTypes: [
+              EventType.BORROW,
+              EventType.REPAY,
+              EventType.CLAIM_REWARD,
+            ].join(","),
+            obligationId,
+          },
+        });
+
+        // Parse
+        const data = { ...response1.data, ...response2.data } as EventsData;
+        for (const event of [
+          ...data.deposit,
+          ...data.borrow,
+          ...data.withdraw,
+          ...data.repay,
+          ...data.claimReward,
+        ]) {
+          event.coinType = normalizeStructTag(event.coinType);
+        }
+
+        setEventsData({
+          reserveAssetData: data.reserveAssetData ?? [],
+
+          deposit: (data.deposit ?? []).slice().sort(eventSortDesc),
+          borrow: (data.borrow ?? []).slice().sort(eventSortDesc),
+          withdraw: (data.withdraw ?? []).slice().sort(eventSortDesc),
+          repay: (data.repay ?? []).slice().sort(eventSortDesc),
+          liquidate: (data.liquidate ?? []).slice().sort(eventSortDesc),
+          claimReward: getDedupedClaimRewardEvents(
+            (data.claimReward ?? []).slice().sort(eventSortDesc),
+          ),
+        });
+      } catch (e) {
+        console.error(e);
       }
-
-      setEventsData({
-        reserveAssetData: data.reserveAssetData ?? [],
-
-        deposit: (data.deposit ?? []).slice().sort(eventSortDesc),
-        borrow: (data.borrow ?? []).slice().sort(eventSortDesc),
-        withdraw: (data.withdraw ?? []).slice().sort(eventSortDesc),
-        repay: (data.repay ?? []).slice().sort(eventSortDesc),
-        liquidate: (data.liquidate ?? []).slice().sort(eventSortDesc),
-        claimReward: getDedupedClaimRewardEvents(
-          (data.claimReward ?? []).slice().sort(eventSortDesc),
-        ),
-      });
-    } catch (e) {
-      console.error(e);
-    }
-  }, [obligation, clearEventsData]);
+    },
+    [obligation?.id, clearEventsData],
+  );
 
   // Filters
   const initialFilters = [
@@ -532,14 +538,16 @@ export default function ObligationHistoryDialog() {
 
   const isFetchingRef = useRef<boolean>(false);
   useEffect(() => {
-    if (isOpen && rows === undefined) {
+    if (isOpen) {
       if (isFetchingRef.current) return;
 
       fetchEventsData();
       isFetchingRef.current = true;
+    } else {
+      clearEventsData();
+      isFetchingRef.current = false;
     }
-  }, [isOpen, rows, fetchEventsData]);
-
+  }, [isOpen, fetchEventsData, clearEventsData]);
   const onOpenChange = (_isOpen: boolean) => {
     const { history, ...restQuery } = router.query;
 
@@ -574,16 +582,22 @@ export default function ObligationHistoryDialog() {
             Account history
           </TTitle>
 
-          <Button
-            className="absolute right-[calc(8px+20px+16px)] top-1/2 -translate-y-2/4 text-muted-foreground"
-            tooltip="Refresh"
-            icon={<RefreshCcw />}
-            variant="ghost"
-            size="icon"
-            onClick={fetchEventsData}
-          >
-            Refresh
-          </Button>
+          <div className="absolute right-[calc(8px+20px+16px)] top-1/2 flex -translate-y-2/4 flex-row gap-1">
+            {data.obligations && data.obligations.length > 1 && (
+              <ObligationSwitcherPopover onSelect={fetchEventsData} />
+            )}
+
+            <Button
+              className="text-muted-foreground"
+              tooltip="Refresh"
+              icon={<RefreshCcw />}
+              variant="ghost"
+              size="icon"
+              onClick={() => fetchEventsData()}
+            >
+              Refresh
+            </Button>
+          </div>
         </DialogHeader>
 
         <div className="flex flex-row flex-wrap gap-2 p-4">
