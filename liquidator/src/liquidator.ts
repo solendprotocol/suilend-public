@@ -2,21 +2,20 @@ import { SuiClient } from "@mysten/sui.js/client";
 import { Ed25519Keypair } from "@mysten/sui.js/keypairs/ed25519";
 import { Secp256k1Keypair } from "@mysten/sui.js/keypairs/secp256k1";
 import { TransactionBlock } from "@mysten/sui.js/transactions";
+import { SuilendClient } from "@suilend/sdk";
 import {
   Borrow,
   Obligation,
 } from "@suilend/sdk/mainnet/_generated/suilend/obligation/structs";
-import { SuilendClient } from "@suilend/sdk/mainnet/client";
+import { Reserve } from "@suilend/sdk/mainnet/_generated/suilend/reserve/structs";
 import { getRedeemEvent } from "@suilend/sdk/mainnet/utils/events";
 import { fetchAllObligationsForMarket } from "@suilend/sdk/mainnet/utils/obligation";
 import * as simulate from "@suilend/sdk/mainnet/utils/simulate";
-
+import { SuiPriceServiceConnection } from "@suilend/sdk/pyth-sdk";
 import BigNumber from "bignumber.js";
 import BN from "bn.js";
 import { StatsD } from "hot-shots";
 import { Logger } from "tslog";
-
-import { SuiPriceServiceConnection } from "../../pyth-sdk/src";
 
 import { Swapper } from "./swappers/interface";
 import { COIN_TYPES } from "./utils/constants";
@@ -26,7 +25,6 @@ import {
   mergeAllCoins,
   sleep,
 } from "./utils/utils";
-import { Reserve } from "@suilend/sdk/mainnet/_generated/suilend/reserve/structs";
 
 const logger = new Logger({ name: "Suilend Liquidator" });
 const LIQUIDATION_CLOSE_FACTOR = 0.2;
@@ -132,7 +130,7 @@ export class Liquidator {
         let liquidationsQueued = 0;
         const lendingMarket = await this.getLendingMarket();
         const refreshedReserves = await simulate.refreshReservePrice(
-          lendingMarket.reserves.map((r) =>
+          lendingMarket.reserves.map((r: Reserve<string>) =>
             simulate.compoundReserveInterest(r, now),
           ),
           this.pythConnection,
