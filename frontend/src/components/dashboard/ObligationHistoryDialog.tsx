@@ -524,7 +524,7 @@ export default function ObligationHistoryDialog() {
   })();
 
   // State
-  const isOpen = router.query.history !== undefined;
+  const isOpen = router.query.showHistory !== undefined;
 
   const isFetchingRef = useRef<boolean>(false);
   useEffect(() => {
@@ -539,10 +539,10 @@ export default function ObligationHistoryDialog() {
     }
   }, [isOpen, fetchEventsData, clearEventsData]);
   const onOpenChange = (_isOpen: boolean) => {
-    const { history, ...restQuery } = router.query;
+    const { showHistory, ...restQuery } = router.query;
 
     router.push({
-      query: _isOpen ? { ...restQuery, history: true } : restQuery,
+      query: _isOpen ? { ...restQuery, showHistory: true } : restQuery,
     });
   };
 
