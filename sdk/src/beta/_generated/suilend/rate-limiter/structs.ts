@@ -24,7 +24,7 @@ export function isRateLimiter(type: string): boolean {
   type = compressSuiType(type);
   return (
     type ===
-    "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::rate_limiter::RateLimiter"
+    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::rate_limiter::RateLimiter"
   );
 }
 
@@ -39,12 +39,12 @@ export type RateLimiterReified = Reified<RateLimiter, RateLimiterFields>;
 
 export class RateLimiter implements StructClass {
   static readonly $typeName =
-    "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::rate_limiter::RateLimiter";
+    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::rate_limiter::RateLimiter";
   static readonly $numTypeParams = 0;
 
   readonly $typeName = RateLimiter.$typeName;
 
-  readonly $fullTypeName: "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::rate_limiter::RateLimiter";
+  readonly $fullTypeName: "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::rate_limiter::RateLimiter";
 
   readonly $typeArgs: [];
 
@@ -57,7 +57,7 @@ export class RateLimiter implements StructClass {
     this.$fullTypeName = composeSuiType(
       RateLimiter.$typeName,
       ...typeArgs,
-    ) as "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::rate_limiter::RateLimiter";
+    ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::rate_limiter::RateLimiter";
     this.$typeArgs = typeArgs;
 
     this.config = fields.config;
@@ -72,7 +72,7 @@ export class RateLimiter implements StructClass {
       fullTypeName: composeSuiType(
         RateLimiter.$typeName,
         ...[],
-      ) as "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::rate_limiter::RateLimiter",
+      ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::rate_limiter::RateLimiter",
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
@@ -215,7 +215,7 @@ export function isRateLimiterConfig(type: string): boolean {
   type = compressSuiType(type);
   return (
     type ===
-    "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::rate_limiter::RateLimiterConfig"
+    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::rate_limiter::RateLimiterConfig"
   );
 }
 
@@ -231,12 +231,12 @@ export type RateLimiterConfigReified = Reified<
 
 export class RateLimiterConfig implements StructClass {
   static readonly $typeName =
-    "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::rate_limiter::RateLimiterConfig";
+    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::rate_limiter::RateLimiterConfig";
   static readonly $numTypeParams = 0;
 
   readonly $typeName = RateLimiterConfig.$typeName;
 
-  readonly $fullTypeName: "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::rate_limiter::RateLimiterConfig";
+  readonly $fullTypeName: "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::rate_limiter::RateLimiterConfig";
 
   readonly $typeArgs: [];
 
@@ -247,7 +247,7 @@ export class RateLimiterConfig implements StructClass {
     this.$fullTypeName = composeSuiType(
       RateLimiterConfig.$typeName,
       ...typeArgs,
-    ) as "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::rate_limiter::RateLimiterConfig";
+    ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::rate_limiter::RateLimiterConfig";
     this.$typeArgs = typeArgs;
 
     this.windowDuration = fields.windowDuration;
@@ -260,7 +260,7 @@ export class RateLimiterConfig implements StructClass {
       fullTypeName: composeSuiType(
         RateLimiterConfig.$typeName,
         ...[],
-      ) as "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::rate_limiter::RateLimiterConfig",
+      ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::rate_limiter::RateLimiterConfig",
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>

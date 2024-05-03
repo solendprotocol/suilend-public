@@ -103,10 +103,12 @@ export class Borrow implements StructClass {
 
   static get bcs() {
     return bcs.struct("Borrow", {
-      ref: bcs.bytes(32).transform({
-        input: (val: string) => fromHEX(val),
-        output: (val: Uint8Array) => toHEX(val),
-      }),
+      ref: bcs
+        .bytes(32)
+        .transform({
+          input: (val: string) => fromHEX(val),
+          output: (val: Uint8Array) => toHEX(val),
+        }),
       obj: ID.bcs,
     });
   }
@@ -279,10 +281,12 @@ export class Referent<T extends TypeArgument> implements StructClass {
   static get bcs() {
     return <T extends BcsType<any>>(T: T) =>
       bcs.struct(`Referent<${T.name}>`, {
-        id: bcs.bytes(32).transform({
-          input: (val: string) => fromHEX(val),
-          output: (val: Uint8Array) => toHEX(val),
-        }),
+        id: bcs
+          .bytes(32)
+          .transform({
+            input: (val: string) => fromHEX(val),
+            output: (val: Uint8Array) => toHEX(val),
+          }),
         value: Option.bcs(T),
       });
   }

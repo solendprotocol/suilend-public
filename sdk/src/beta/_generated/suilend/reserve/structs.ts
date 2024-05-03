@@ -42,7 +42,7 @@ export function isBalanceKey(type: string): boolean {
   type = compressSuiType(type);
   return (
     type ===
-    "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::reserve::BalanceKey"
+    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::BalanceKey"
   );
 }
 
@@ -54,12 +54,12 @@ export type BalanceKeyReified = Reified<BalanceKey, BalanceKeyFields>;
 
 export class BalanceKey implements StructClass {
   static readonly $typeName =
-    "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::reserve::BalanceKey";
+    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::BalanceKey";
   static readonly $numTypeParams = 0;
 
   readonly $typeName = BalanceKey.$typeName;
 
-  readonly $fullTypeName: "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::reserve::BalanceKey";
+  readonly $fullTypeName: "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::BalanceKey";
 
   readonly $typeArgs: [];
 
@@ -69,7 +69,7 @@ export class BalanceKey implements StructClass {
     this.$fullTypeName = composeSuiType(
       BalanceKey.$typeName,
       ...typeArgs,
-    ) as "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::reserve::BalanceKey";
+    ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::BalanceKey";
     this.$typeArgs = typeArgs;
 
     this.dummyField = fields.dummyField;
@@ -81,7 +81,7 @@ export class BalanceKey implements StructClass {
       fullTypeName: composeSuiType(
         BalanceKey.$typeName,
         ...[],
-      ) as "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::reserve::BalanceKey",
+      ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::BalanceKey",
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
@@ -202,7 +202,7 @@ export class BalanceKey implements StructClass {
 export function isBalances(type: string): boolean {
   type = compressSuiType(type);
   return type.startsWith(
-    "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::reserve::Balances<",
+    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::Balances<",
   );
 }
 
@@ -228,12 +228,12 @@ export class Balances<
 > implements StructClass
 {
   static readonly $typeName =
-    "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::reserve::Balances";
+    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::Balances";
   static readonly $numTypeParams = 2;
 
   readonly $typeName = Balances.$typeName;
 
-  readonly $fullTypeName: `0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::reserve::Balances<${PhantomToTypeStr<P>}, ${PhantomToTypeStr<T>}>`;
+  readonly $fullTypeName: `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::Balances<${PhantomToTypeStr<P>}, ${PhantomToTypeStr<T>}>`;
 
   readonly $typeArgs: [PhantomToTypeStr<P>, PhantomToTypeStr<T>];
 
@@ -250,7 +250,7 @@ export class Balances<
     this.$fullTypeName = composeSuiType(
       Balances.$typeName,
       ...typeArgs,
-    ) as `0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::reserve::Balances<${PhantomToTypeStr<P>}, ${PhantomToTypeStr<T>}>`;
+    ) as `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::Balances<${PhantomToTypeStr<P>}, ${PhantomToTypeStr<T>}>`;
     this.$typeArgs = typeArgs;
 
     this.availableAmount = fields.availableAmount;
@@ -272,7 +272,7 @@ export class Balances<
       fullTypeName: composeSuiType(
         Balances.$typeName,
         ...[extractType(P), extractType(T)],
-      ) as `0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::reserve::Balances<${PhantomToTypeStr<ToPhantomTypeArgument<P>>}, ${PhantomToTypeStr<ToPhantomTypeArgument<T>>}>`,
+      ) as `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::Balances<${PhantomToTypeStr<ToPhantomTypeArgument<P>>}, ${PhantomToTypeStr<ToPhantomTypeArgument<T>>}>`,
       typeArgs: [extractType(P), extractType(T)] as [
         PhantomToTypeStr<ToPhantomTypeArgument<P>>,
         PhantomToTypeStr<ToPhantomTypeArgument<T>>,
@@ -535,7 +535,7 @@ export class Balances<
 export function isCToken(type: string): boolean {
   type = compressSuiType(type);
   return type.startsWith(
-    "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::reserve::CToken<",
+    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::CToken<",
   );
 }
 
@@ -557,12 +557,12 @@ export class CToken<
 > implements StructClass
 {
   static readonly $typeName =
-    "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::reserve::CToken";
+    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::CToken";
   static readonly $numTypeParams = 2;
 
   readonly $typeName = CToken.$typeName;
 
-  readonly $fullTypeName: `0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::reserve::CToken<${PhantomToTypeStr<P>}, ${PhantomToTypeStr<T>}>`;
+  readonly $fullTypeName: `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::CToken<${PhantomToTypeStr<P>}, ${PhantomToTypeStr<T>}>`;
 
   readonly $typeArgs: [PhantomToTypeStr<P>, PhantomToTypeStr<T>];
 
@@ -575,7 +575,7 @@ export class CToken<
     this.$fullTypeName = composeSuiType(
       CToken.$typeName,
       ...typeArgs,
-    ) as `0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::reserve::CToken<${PhantomToTypeStr<P>}, ${PhantomToTypeStr<T>}>`;
+    ) as `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::CToken<${PhantomToTypeStr<P>}, ${PhantomToTypeStr<T>}>`;
     this.$typeArgs = typeArgs;
 
     this.dummyField = fields.dummyField;
@@ -593,7 +593,7 @@ export class CToken<
       fullTypeName: composeSuiType(
         CToken.$typeName,
         ...[extractType(P), extractType(T)],
-      ) as `0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::reserve::CToken<${PhantomToTypeStr<ToPhantomTypeArgument<P>>}, ${PhantomToTypeStr<ToPhantomTypeArgument<T>>}>`,
+      ) as `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::CToken<${PhantomToTypeStr<ToPhantomTypeArgument<P>>}, ${PhantomToTypeStr<ToPhantomTypeArgument<T>>}>`,
       typeArgs: [extractType(P), extractType(T)] as [
         PhantomToTypeStr<ToPhantomTypeArgument<P>>,
         PhantomToTypeStr<ToPhantomTypeArgument<T>>,
@@ -780,7 +780,7 @@ export function isInterestUpdateEvent(type: string): boolean {
   type = compressSuiType(type);
   return (
     type ===
-    "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::reserve::InterestUpdateEvent"
+    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::InterestUpdateEvent"
   );
 }
 
@@ -808,12 +808,12 @@ export type InterestUpdateEventReified = Reified<
 
 export class InterestUpdateEvent implements StructClass {
   static readonly $typeName =
-    "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::reserve::InterestUpdateEvent";
+    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::InterestUpdateEvent";
   static readonly $numTypeParams = 0;
 
   readonly $typeName = InterestUpdateEvent.$typeName;
 
-  readonly $fullTypeName: "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::reserve::InterestUpdateEvent";
+  readonly $fullTypeName: "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::InterestUpdateEvent";
 
   readonly $typeArgs: [];
 
@@ -836,7 +836,7 @@ export class InterestUpdateEvent implements StructClass {
     this.$fullTypeName = composeSuiType(
       InterestUpdateEvent.$typeName,
       ...typeArgs,
-    ) as "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::reserve::InterestUpdateEvent";
+    ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::InterestUpdateEvent";
     this.$typeArgs = typeArgs;
 
     this.lendingMarketId = fields.lendingMarketId;
@@ -862,7 +862,7 @@ export class InterestUpdateEvent implements StructClass {
       fullTypeName: composeSuiType(
         InterestUpdateEvent.$typeName,
         ...[],
-      ) as "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::reserve::InterestUpdateEvent",
+      ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::InterestUpdateEvent",
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
@@ -898,15 +898,19 @@ export class InterestUpdateEvent implements StructClass {
 
   static get bcs() {
     return bcs.struct("InterestUpdateEvent", {
-      lending_market_id: bcs.bytes(32).transform({
-        input: (val: string) => fromHEX(val),
-        output: (val: Uint8Array) => toHEX(val),
-      }),
+      lending_market_id: bcs
+        .bytes(32)
+        .transform({
+          input: (val: string) => fromHEX(val),
+          output: (val: Uint8Array) => toHEX(val),
+        }),
       coin_type: TypeName.bcs,
-      reserve_id: bcs.bytes(32).transform({
-        input: (val: string) => fromHEX(val),
-        output: (val: Uint8Array) => toHEX(val),
-      }),
+      reserve_id: bcs
+        .bytes(32)
+        .transform({
+          input: (val: string) => fromHEX(val),
+          output: (val: Uint8Array) => toHEX(val),
+        }),
       cumulative_borrow_rate: Decimal.bcs,
       available_amount: bcs.u64(),
       borrowed_amount: Decimal.bcs,
@@ -1144,7 +1148,7 @@ export class InterestUpdateEvent implements StructClass {
 export function isReserve(type: string): boolean {
   type = compressSuiType(type);
   return type.startsWith(
-    "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::reserve::Reserve<",
+    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::Reserve<",
   );
 }
 
@@ -1177,12 +1181,12 @@ export type ReserveReified<P extends PhantomTypeArgument> = Reified<
 
 export class Reserve<P extends PhantomTypeArgument> implements StructClass {
   static readonly $typeName =
-    "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::reserve::Reserve";
+    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::Reserve";
   static readonly $numTypeParams = 1;
 
   readonly $typeName = Reserve.$typeName;
 
-  readonly $fullTypeName: `0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::reserve::Reserve<${PhantomToTypeStr<P>}>`;
+  readonly $fullTypeName: `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::Reserve<${PhantomToTypeStr<P>}>`;
 
   readonly $typeArgs: [PhantomToTypeStr<P>];
 
@@ -1213,7 +1217,7 @@ export class Reserve<P extends PhantomTypeArgument> implements StructClass {
     this.$fullTypeName = composeSuiType(
       Reserve.$typeName,
       ...typeArgs,
-    ) as `0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::reserve::Reserve<${PhantomToTypeStr<P>}>`;
+    ) as `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::Reserve<${PhantomToTypeStr<P>}>`;
     this.$typeArgs = typeArgs;
 
     this.id = fields.id;
@@ -1245,7 +1249,7 @@ export class Reserve<P extends PhantomTypeArgument> implements StructClass {
       fullTypeName: composeSuiType(
         Reserve.$typeName,
         ...[extractType(P)],
-      ) as `0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::reserve::Reserve<${PhantomToTypeStr<ToPhantomTypeArgument<P>>}>`,
+      ) as `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::Reserve<${PhantomToTypeStr<ToPhantomTypeArgument<P>>}>`,
       typeArgs: [extractType(P)] as [
         PhantomToTypeStr<ToPhantomTypeArgument<P>>,
       ],
@@ -1595,7 +1599,7 @@ export function isReserveAssetDataEvent(type: string): boolean {
   type = compressSuiType(type);
   return (
     type ===
-    "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::reserve::ReserveAssetDataEvent"
+    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::ReserveAssetDataEvent"
   );
 }
 
@@ -1625,12 +1629,12 @@ export type ReserveAssetDataEventReified = Reified<
 
 export class ReserveAssetDataEvent implements StructClass {
   static readonly $typeName =
-    "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::reserve::ReserveAssetDataEvent";
+    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::ReserveAssetDataEvent";
   static readonly $numTypeParams = 0;
 
   readonly $typeName = ReserveAssetDataEvent.$typeName;
 
-  readonly $fullTypeName: "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::reserve::ReserveAssetDataEvent";
+  readonly $fullTypeName: "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::ReserveAssetDataEvent";
 
   readonly $typeArgs: [];
 
@@ -1655,7 +1659,7 @@ export class ReserveAssetDataEvent implements StructClass {
     this.$fullTypeName = composeSuiType(
       ReserveAssetDataEvent.$typeName,
       ...typeArgs,
-    ) as "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::reserve::ReserveAssetDataEvent";
+    ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::ReserveAssetDataEvent";
     this.$typeArgs = typeArgs;
 
     this.lendingMarketId = fields.lendingMarketId;
@@ -1682,7 +1686,7 @@ export class ReserveAssetDataEvent implements StructClass {
       fullTypeName: composeSuiType(
         ReserveAssetDataEvent.$typeName,
         ...[],
-      ) as "0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::reserve::ReserveAssetDataEvent",
+      ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::ReserveAssetDataEvent",
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
@@ -1718,15 +1722,19 @@ export class ReserveAssetDataEvent implements StructClass {
 
   static get bcs() {
     return bcs.struct("ReserveAssetDataEvent", {
-      lending_market_id: bcs.bytes(32).transform({
-        input: (val: string) => fromHEX(val),
-        output: (val: Uint8Array) => toHEX(val),
-      }),
+      lending_market_id: bcs
+        .bytes(32)
+        .transform({
+          input: (val: string) => fromHEX(val),
+          output: (val: Uint8Array) => toHEX(val),
+        }),
       coin_type: TypeName.bcs,
-      reserve_id: bcs.bytes(32).transform({
-        input: (val: string) => fromHEX(val),
-        output: (val: Uint8Array) => toHEX(val),
-      }),
+      reserve_id: bcs
+        .bytes(32)
+        .transform({
+          input: (val: string) => fromHEX(val),
+          output: (val: Uint8Array) => toHEX(val),
+        }),
       available_amount: Decimal.bcs,
       supply_amount: Decimal.bcs,
       borrowed_amount: Decimal.bcs,

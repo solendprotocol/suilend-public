@@ -1066,10 +1066,12 @@ export class Kiosk implements StructClass {
     return bcs.struct("Kiosk", {
       id: UID.bcs,
       profits: Balance.bcs,
-      owner: bcs.bytes(32).transform({
-        input: (val: string) => fromHEX(val),
-        output: (val: Uint8Array) => toHEX(val),
-      }),
+      owner: bcs
+        .bytes(32)
+        .transform({
+          input: (val: string) => fromHEX(val),
+          output: (val: Uint8Array) => toHEX(val),
+        }),
       item_count: bcs.u32(),
       allow_extensions: bcs.bool(),
     });

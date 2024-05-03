@@ -33,9 +33,8 @@ import { newConfig as createRateLimiterConfig } from "./_generated/suilend/rate-
 import { createReserveConfig } from "./_generated/suilend/reserve-config/functions";
 
 export const LENDING_MARKET_ID =
-  "0x39a238e6610b7a5cece49e3164a870ae655f37382b58917bbf530145c7692489";
-export const LENDING_MARKET_TYPE =
-  "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::suilend::MAIN_POOL";
+  "0x354a8d00fe7e9f46f60d79a6ecd9adf2bbf6d648f6e5855e172ac9601fc1bbcb";
+export const LENDING_MARKET_TYPE = "0x2::sui::SUI";
 
 const deps = {
   phantom,
