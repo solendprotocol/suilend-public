@@ -8,8 +8,6 @@
     "strict": true,
     "skipLibCheck": true,
     "paths": {
-      // Update line below to target [beta/mainnet] program
-      // "@suilend/sdk/*": ["../sdk/src/beta/*"],
     }
   },
   "include": ["./src/**/*.ts"],

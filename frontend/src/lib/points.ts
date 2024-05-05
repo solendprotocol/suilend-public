@@ -3,7 +3,7 @@ import BigNumber from "bignumber.js";
 import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
 
 import { isSuilendPoints } from "@/lib/coinType";
-import { RewardMap } from "@/lib/liquidityMining";
+import { RewardMap, getFilteredRewards } from "@/lib/liquidityMining";
 
 const roundPoints = (value: BigNumber) =>
   value.decimalPlaces(0, BigNumber.ROUND_HALF_UP);
@@ -26,11 +26,15 @@ export const getPointsStats = (
     return { totalPoints, pointsPerDay };
 
   const pointsRewards = {
-    deposit: Object.values(rewardMap).flatMap((rewards) =>
-      rewards.deposit.filter((r) => isSuilendPoints(r.stats.rewardCoinType)),
+    deposit: getFilteredRewards(
+      Object.values(rewardMap).flatMap((rewards) =>
+        rewards.deposit.filter((r) => isSuilendPoints(r.stats.rewardCoinType)),
+      ),
     ),
-    borrow: Object.values(rewardMap).flatMap((rewards) =>
-      rewards.borrow.filter((r) => isSuilendPoints(r.stats.rewardCoinType)),
+    borrow: getFilteredRewards(
+      Object.values(rewardMap).flatMap((rewards) =>
+        rewards.borrow.filter((r) => isSuilendPoints(r.stats.rewardCoinType)),
+      ),
     ),
   };
 

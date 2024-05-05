@@ -10,20 +10,27 @@ import { AppData, useAppContext } from "@/contexts/AppContext";
 import { formatUsd } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-export default function ObligationSwitcherPopover() {
+interface ObligationSwitcherPopoverProps {
+  onSelect?: (id: string) => void;
+}
+
+export default function ObligationSwitcherPopover({
+  onSelect,
+}: ObligationSwitcherPopoverProps) {
   const { obligation, setObligationId, ...restAppContext } = useAppContext();
   const data = restAppContext.data as AppData;
 
   // State
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
-  const onSelect = async (id: string) => {
+  const onSelectWrapper = async (id: string) => {
     setObligationId(id);
+    if (onSelect) onSelect(id);
+
     setIsOpen(false);
   };
 
   if (!data.obligations || !obligation) return null;
-
   return (
     <Popover
       id="obligation"
@@ -55,7 +62,7 @@ export default function ObligationSwitcherPopover() {
             <CommandItem
               key={o.id}
               value={o.id}
-              onSelect={() => onSelect(o.id)}
+              onSelect={() => onSelectWrapper(o.id)}
               className="flex cursor-pointer flex-col items-center gap-1 text-foreground aria-selected:text-foreground"
             >
               <div className="flex w-full justify-between">

@@ -5,12 +5,12 @@ import { normalizeStructTag } from "@mysten/sui.js/utils";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import BigNumber from "bignumber.js";
 import { formatDate } from "date-fns";
-import { ChevronDown, ChevronUp } from "lucide-react";
-import { FileClock, RotateCw } from "lucide-react";
+import { ChevronDown, ChevronUp, FileClock, RotateCw } from "lucide-react";
 
 import { WAD } from "@suilend/sdk/constants";
 
 import DataTable, { tableHeader } from "@/components/dashboard/DataTable";
+import ObligationSwitcherPopover from "@/components/dashboard/ObligationSwitcherPopover";
 import Button from "@/components/shared/Button";
 import OpenOnExplorerButton from "@/components/shared/OpenOnExplorerButton";
 import TokenIcon from "@/components/shared/TokenIcon";
@@ -399,64 +399,68 @@ export default function ObligationHistoryDialog() {
     setEventsData(undefined);
   }, []);
 
-  const fetchEventsData = useCallback(async () => {
-    if (!obligation) return;
+  const fetchEventsData = useCallback(
+    async (_obligationId?: string) => {
+      const obligationId = _obligationId ?? obligation?.id;
+      if (!obligationId) return;
 
-    clearEventsData();
-    try {
-      const url1 = `${API_URL}/events?${new URLSearchParams({
-        eventTypes: [
-          EventType.DEPOSIT,
-          EventType.WITHDRAW,
-          EventType.LIQUIDATE,
-        ].join(","),
-        obligationId: obligation.id,
-        joinEventTypes: EventType.RESERVE_ASSET_DATA,
-      })}`;
-      const res1 = await fetch(url1);
-      const json1 = await res1.json();
+      clearEventsData();
+      try {
+        const url1 = `${API_URL}/events?${new URLSearchParams({
+          eventTypes: [
+            EventType.DEPOSIT,
+            EventType.WITHDRAW,
+            EventType.LIQUIDATE,
+          ].join(","),
+          obligationId,
+          joinEventTypes: EventType.RESERVE_ASSET_DATA,
+        })}`;
+        const res1 = await fetch(url1);
+        const json1 = await res1.json();
 
-      const url2 = `${API_URL}/events?${new URLSearchParams({
-        eventTypes: [
-          EventType.BORROW,
-          EventType.REPAY,
-          EventType.CLAIM_REWARD,
-        ].join(","),
-        obligationId: obligation.id,
-      })}`;
-      const res2 = await fetch(url2);
-      const json2 = await res2.json();
+        const url2 = `${API_URL}/events?${new URLSearchParams({
+          eventTypes: [
+            EventType.BORROW,
+            EventType.REPAY,
+            EventType.CLAIM_REWARD,
+          ].join(","),
+          obligationId,
+        })}`;
+        const res2 = await fetch(url2);
+        const json2 = await res2.json();
 
-      // Parse
-      const data = { ...json1, ...json2 } as EventsData;
-      for (const event of [
-        ...data.deposit,
-        ...data.borrow,
-        ...data.withdraw,
-        ...data.repay,
-        ...data.claimReward,
-      ]) {
-        event.coinType = normalizeStructTag(event.coinType);
+        // Parse
+        const data = { ...json1, ...json2 } as EventsData;
+        for (const event of [
+          ...data.deposit,
+          ...data.borrow,
+          ...data.withdraw,
+          ...data.repay,
+          ...data.claimReward,
+        ]) {
+          event.coinType = normalizeStructTag(event.coinType);
+        }
+
+        setEventsData({
+          reserveAssetData: (data.reserveAssetData ?? [])
+            .slice()
+            .sort(eventSortAsc),
+
+          deposit: (data.deposit ?? []).slice().sort(eventSortDesc),
+          borrow: (data.borrow ?? []).slice().sort(eventSortDesc),
+          withdraw: (data.withdraw ?? []).slice().sort(eventSortDesc),
+          repay: (data.repay ?? []).slice().sort(eventSortDesc),
+          liquidate: (data.liquidate ?? []).slice().sort(eventSortDesc),
+          claimReward: getDedupedClaimRewardEvents(
+            (data.claimReward ?? []).slice().sort(eventSortDesc),
+          ),
+        });
+      } catch (err) {
+        console.error(err);
       }
-
-      setEventsData({
-        reserveAssetData: (data.reserveAssetData ?? [])
-          .slice()
-          .sort(eventSortAsc),
-
-        deposit: (data.deposit ?? []).slice().sort(eventSortDesc),
-        borrow: (data.borrow ?? []).slice().sort(eventSortDesc),
-        withdraw: (data.withdraw ?? []).slice().sort(eventSortDesc),
-        repay: (data.repay ?? []).slice().sort(eventSortDesc),
-        liquidate: (data.liquidate ?? []).slice().sort(eventSortDesc),
-        claimReward: getDedupedClaimRewardEvents(
-          (data.claimReward ?? []).slice().sort(eventSortDesc),
-        ),
-      });
-    } catch (err) {
-      console.error(err);
-    }
-  }, [obligation, clearEventsData]);
+    },
+    [obligation, clearEventsData],
+  );
 
   // Filters
   const initialFilters = [
@@ -535,13 +539,16 @@ export default function ObligationHistoryDialog() {
 
   const isFetchingRef = useRef<boolean>(false);
   useEffect(() => {
-    if (isOpen && rows === undefined) {
+    if (isOpen) {
       if (isFetchingRef.current) return;
 
       fetchEventsData();
       isFetchingRef.current = true;
+    } else {
+      clearEventsData();
+      isFetchingRef.current = false;
     }
-  }, [isOpen, rows, fetchEventsData]);
+  }, [isOpen, fetchEventsData, clearEventsData]);
 
   const onOpenChange = (_isOpen: boolean) => {
     const { history, ...restQuery } = router.query;
@@ -576,16 +583,22 @@ export default function ObligationHistoryDialog() {
             Account history
           </TTitle>
 
-          <Button
-            className="absolute right-[calc(8px+20px+16px)] top-1/2 -translate-y-2/4 text-muted-foreground"
-            tooltip="Refresh"
-            icon={<RotateCw />}
-            variant="ghost"
-            size="icon"
-            onClick={fetchEventsData}
-          >
-            Refresh
-          </Button>
+          <div className="absolute right-[calc(8px+20px+16px)] top-1/2 flex -translate-y-2/4 flex-row gap-1">
+            {data.obligations && data.obligations.length > 1 && (
+              <ObligationSwitcherPopover onSelect={fetchEventsData} />
+            )}
+
+            <Button
+              className="text-muted-foreground"
+              tooltip="Refresh"
+              icon={<RotateCw />}
+              variant="ghost"
+              size="icon"
+              onClick={() => fetchEventsData()}
+            >
+              Refresh
+            </Button>
+          </div>
         </DialogHeader>
 
         <div className="flex flex-row flex-wrap gap-2 p-4">

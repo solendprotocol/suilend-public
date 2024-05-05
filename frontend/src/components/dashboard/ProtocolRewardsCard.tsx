@@ -27,7 +27,7 @@ import useBreakpoint from "@/hooks/useBreakpoint";
 import { LOGO_MAP, NORMALIZED_SUI_COINTYPE, isSui } from "@/lib/coinType";
 import { TX_TOAST_DURATION } from "@/lib/constants";
 import { formatToken } from "@/lib/format";
-import { RewardSummary } from "@/lib/liquidityMining";
+import { RewardSummary, getFilteredRewards } from "@/lib/liquidityMining";
 import { POINTS_URL } from "@/lib/navigation";
 import { getPointsStats } from "@/lib/points";
 import { cn } from "@/lib/utils";
@@ -119,10 +119,12 @@ export default function ProtocolRewardsCard() {
   let totalSuiRewards = new BigNumber(0);
   let suiRewards: RewardSummary[] = [];
   if (obligation) {
-    suiRewards = Object.values(data.rewardMap).flatMap((rewards) =>
-      [...rewards.deposit, ...rewards.borrow].filter(
-        (r) =>
-          isSui(r.stats.rewardCoinType) && r.obligationClaims[obligation.id],
+    suiRewards = getFilteredRewards(
+      Object.values(data.rewardMap).flatMap((rewards) =>
+        [...rewards.deposit, ...rewards.borrow].filter(
+          (r) =>
+            isSui(r.stats.rewardCoinType) && r.obligationClaims[obligation.id],
+        ),
       ),
     );
 
