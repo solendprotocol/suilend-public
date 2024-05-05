@@ -27,7 +27,7 @@ export const parseReserve = (
 
   const $typeName = reserve.$typeName;
   const id = reserve.id;
-  const arrayIndex = reserve.arrayIndex;
+  const arrayIndex = BigInt(reserve.arrayIndex);
   const coinType = normalizeStructTag(reserve.coinType.name);
 
   const coinMetadata = coinMetadataMap[coinType];
@@ -259,6 +259,7 @@ export const parsePoolReward = (
 
   const coinMetadata = coinMetadataMap[coinType];
   const mintDecimals = coinMetadata.decimals;
+
   const startTimeMs = Number(poolReward.startTimeMs);
   const endTimeMs = Number(poolReward.endTimeMs);
   const totalRewards = new BigNumber(poolReward.totalRewards.toString()).div(
@@ -283,7 +284,6 @@ export const parsePoolReward = (
   return {
     $typeName,
     id,
-    rewardIndex,
     poolRewardManagerId,
     coinType,
     startTimeMs,
@@ -292,8 +292,9 @@ export const parsePoolReward = (
     allocatedRewards,
     cumulativeRewardsPerShare,
     numUserRewardManagers,
-    mintDecimals,
 
+    rewardIndex,
     symbol,
+    mintDecimals,
   };
 };
