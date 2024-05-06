@@ -1,62 +1,38 @@
-import React, { CSSProperties, useMemo } from "react";
+import { Fragment, ReactNode } from "react";
 
-const sharedPositionProps = {
-  position: "fixed",
-};
+import { ClassValue } from "clsx";
 
-export const Ticker = ({ position, items, slideSpeed }: TickerProps) => {
-  const positionToApply = useMemo(() => {
-    if (!position) return {};
-    if (position === "top") {
-      return {
-        ...sharedPositionProps,
-        top: 0,
-      };
-    }
-    return {
-      ...sharedPositionProps,
-      bottom: 0,
-    };
-  }, [position]);
+import { cn } from "@/lib/utils";
 
-  const animationDuration = useMemo(
-    () => (slideSpeed ? { animationDuration: slideSpeed } : {}),
-    [slideSpeed],
-  );
-
-  return (
-    <div style={positionToApply} className="ticker">
-      <div className="tickerList" style={animationDuration}>
-        {items.map(({ id, text }, index) => (
-          <div
-            className={`$"newsticker $"tickerItem mr-6 lg:mr-0`}
-            key={id || index}
-          >
-            <div className="tickerItem">
-              <div className="title">{text}</div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-export interface TickerProps {
-  /** Positions the ticker at the top or bottom of the viewport, if left out, will not position at all */
-  position?: "top" | "bottom";
-  items: TickerItem[];
+interface TickerProps {
+  className?: ClassValue;
   /** Must be a CSS readable duration
    * @default 10s
    * @example '15s'
    * @example '1s'
    * @example '200ms'
    */
-  slideSpeed?: CSSProperties["animationDuration"];
+  items: ReactNode[];
 }
 
-export interface TickerItem {
-  text: React.ReactNode;
-  /** If present, this will be used as the key, defaults to index */
-  id?: string;
+export default function Ticker({ className, items }: TickerProps) {
+  return (
+    <div
+      className={cn(
+        "flex w-full transform-gpu flex-row flex-nowrap overflow-hidden",
+        className,
+      )}
+    >
+      <div className="animate-infinite-scroll flex w-max flex-shrink-0 flex-row items-center gap-20 pr-20 md:gap-40 md:pr-40">
+        {items.map((item, index) => (
+          <Fragment key={index}>{item}</Fragment>
+        ))}
+      </div>
+      <div className="animate-infinite-scroll flex w-max flex-shrink-0 flex-row items-center gap-20 pr-20 md:gap-40 md:pr-40">
+        {items.map((item, index) => (
+          <Fragment key={index}>{item}</Fragment>
+        ))}
+      </div>
+    </div>
+  );
 }

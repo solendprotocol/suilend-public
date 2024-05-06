@@ -1,4 +1,3 @@
-import dynamic from "next/dynamic";
 import Head from "next/head";
 
 import { Info } from "lucide-react";
@@ -8,11 +7,6 @@ import { bodySansClassNames } from "@/components/shared/Typography";
 import { Alert, AlertTitle } from "@/components/ui/alert";
 import { DOCS_BRIDGE_LEARN_MORE_URL } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
-
-const DynamicWormholeConnectWrapper = dynamic(
-  () => import("@/components/bridge/WormholeConnectWrapper"),
-  { ssr: false },
-);
 
 export default function Bridge() {
   return (
@@ -32,8 +26,6 @@ export default function Bridge() {
             <TextLink href={DOCS_BRIDGE_LEARN_MORE_URL}>Learn more</TextLink>
           </AlertTitle>
         </Alert>
-
-        <DynamicWormholeConnectWrapper />
       </div>
     </>
   );
