@@ -33,7 +33,7 @@ export default function Home() {
       </div>
 
       <div
-        className="fixed bottom-0 right-[360px] top-0 z-[2] w-1/3 min-w-[300px] transform-gpu border-x bg-background max-lg:hidden"
+        className="fixed bottom-0 right-[332px] top-0 z-[2] w-1/3 min-w-[300px] transform-gpu border-x bg-background max-lg:hidden"
         style={{ clipPath: "inset(0 0 0 0)" }}
       >
         <div className="absolute h-full w-full bg-[radial-gradient(128.40%_69.55%_at_-80.76%_32.29%,rgba(0,59,187,1)_0%,rgba(255,255,255,0.00)_100%)]" />
@@ -53,10 +53,10 @@ export default function Home() {
           </NextLink>
         </HeaderBase>
 
-        <div className="flex w-full flex-1 flex-col gap-12 md:flex-row md:items-stretch">
+        <div className="flex w-full flex-1 flex-col justify-between gap-12 md:flex-row md:items-stretch">
           {/* Left/Top */}
           <div className="md:flex-1">
-            <div className="flex flex-col justify-between gap-12 px-4 pt-8 md:py-12 md:pl-10 md:pr-0">
+            <div className="flex flex-col justify-between gap-12 px-4 pt-8 md:h-full md:py-12 md:pl-10 md:pr-0">
               <div className="flex w-full flex-col gap-8 md:pt-4">
                 <Image
                   className="max-md:hidden"
@@ -70,16 +70,16 @@ export default function Home() {
                   Lending and borrowing platform on Sui.
                 </TDisplay>
 
-                <NextLink href={DASHBOARD_URL} className="max-md:hidden">
+                <NextLink href={DASHBOARD_URL} className="w-max max-md:hidden">
                   <Button labelClassName="uppercase" size="lg">
                     Launch app
                   </Button>
                 </NextLink>
               </div>
 
-              <div className="flex w-full flex-col gap-6 md:flex-row md:items-stretch md:gap-4">
+              <div className="flex w-full flex-col gap-6 md:flex-row md:items-stretch md:gap-0">
                 <div
-                  className="flex flex-col justify-center border-t border-secondary px-4 py-4 max-md:-mx-4 max-md:border-b max-md:bg-[radial-gradient(128.40%_300.55%_at_-50.76%_132.29%,rgba(0,59,187,1)_0%,rgba(255,255,255,0.00)_100%)]"
+                  className="flex flex-col justify-center border-t border-secondary px-4 py-4 max-md:-mx-4 max-md:border-b max-md:bg-[radial-gradient(128.40%_300.55%_at_-50.76%_132.29%,rgba(0,59,187,1)_0%,rgba(255,255,255,0.00)_100%)] md:px-6"
                   style={{ clipPath: "inset(0 0 0 0)" }}
                 >
                   <Lava className="md:hidden" isFiltered />
@@ -90,7 +90,7 @@ export default function Home() {
                   </TTitle>
                 </div>
 
-                <div className="flex flex-col gap-6 md:gap-4 md:border-t md:px-4 md:py-4">
+                <div className="flex flex-col gap-6 md:border-t md:px-6 md:py-6">
                   <div className="flex flex-row items-center gap-4">
                     <Server className="h-6 w-6 text-muted-foreground" />
                     <TBody className="w-full text-[16px] uppercase text-muted-foreground md:max-w-[300px]">
@@ -110,7 +110,7 @@ export default function Home() {
           </div>
 
           {/* Right/bottom */}
-          <div className="w-full px-4 pb-8 md:w-[300px] md:py-4 md:pl-0">
+          <div className="w-full px-4 pb-8 md:w-[316px] md:py-4 md:pl-0">
             <div className="flex h-full w-full flex-col gap-6 rounded-lg border border-secondary p-4 md:items-end md:justify-between">
               <NextLink href={DASHBOARD_URL} className="max-md:hidden">
                 <Button labelClassName="uppercase">Launch app</Button>
