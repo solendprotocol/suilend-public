@@ -15,8 +15,8 @@ export default function Bridge() {
         <title>Suilend Bridge</title>
       </Head>
 
-      <div className="flex w-full flex-col items-center gap-8">
-        <Alert className="max-w-[650px]">
+      <div className="flex w-full flex-col items-center">
+        <Alert className="mb-8 max-w-[650px]">
           <Info className="my-0.5 h-4 w-4 !text-muted-foreground" />
           <AlertTitle
             className={cn(bodySansClassNames, "mb-0 tracking-normal")}
