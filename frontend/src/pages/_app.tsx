@@ -17,6 +17,7 @@ import { AppContextProvider } from "@/contexts/AppContext";
 import { PointsContextProvider } from "@/contexts/PointsContext";
 import { RefreshDataContextProvider } from "@/contexts/RefreshDataContext";
 import { WalletContextProvider } from "@/contexts/WalletContext";
+import { WormholeConnectContextProvider } from "@/contexts/WormholeConnectContext";
 import { fontClassNames } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
 
@@ -69,7 +70,9 @@ export default function App({
                 <AppContextProvider>
                   <RefreshDataContextProvider>
                     <PointsContextProvider>
-                      {getLayout(<Component {...pageProps} />)}
+                      <WormholeConnectContextProvider>
+                        {getLayout(<Component {...pageProps} />)}
+                      </WormholeConnectContextProvider>
                     </PointsContextProvider>
                   </RefreshDataContextProvider>
                 </AppContextProvider>

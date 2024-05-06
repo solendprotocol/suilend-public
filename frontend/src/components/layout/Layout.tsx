@@ -1,16 +1,23 @@
+import { useRouter } from "next/router";
 import { CSSProperties, PropsWithChildren, useRef, useState } from "react";
 
 import { useResizeObserver } from "usehooks-ts";
 
+import WormholeConnect from "@/components/bridge/WormholeConnect";
 import AppHeader from "@/components/layout/AppHeader";
 import Banner from "@/components/layout/Banner";
 import Footer from "@/components/layout/Footer";
 import Container from "@/components/shared/Container";
 import FullPageSpinner from "@/components/shared/FullPageSpinner";
 import { useAppContext } from "@/contexts/AppContext";
+import { useWormholeConnectContext } from "@/contexts/WormholeConnectContext";
+import { BRIDGE_URL, ROOT_URL } from "@/lib/navigation";
+import { cn } from "@/lib/utils";
 
 export default function Layout({ children }: PropsWithChildren) {
+  const router = useRouter();
   const { suilendClient, data } = useAppContext();
+  const { isLoading: isWormholeConnectLoading } = useWormholeConnectContext();
 
   // Banner
   const bannerRef = useRef<HTMLDivElement>(null);
@@ -24,7 +31,16 @@ export default function Layout({ children }: PropsWithChildren) {
     },
   });
 
-  const isPageLoading = !suilendClient || !data;
+  // Loading
+  const isOnLandingPage = router.asPath === ROOT_URL;
+  const isOnBridgePage = router.asPath.startsWith(BRIDGE_URL);
+
+  const isDataLoading = !suilendClient || !data;
+  const isPageLoading = isOnLandingPage
+    ? false
+    : !isOnBridgePage
+      ? isDataLoading
+      : isDataLoading || isWormholeConnectLoading;
 
   return (
     <div
@@ -37,14 +53,24 @@ export default function Layout({ children }: PropsWithChildren) {
       }
     >
       <Banner ref={bannerRef} height={bannerHeight} />
-      <AppHeader />
+      {!isOnLandingPage && <AppHeader />}
 
       {isPageLoading && <FullPageSpinner />}
-      <div className="relative z-[1] flex-1 py-4 md:py-6">
-        {!isPageLoading && <Container>{children}</Container>}
+      <div
+        className={cn(
+          "relative z-[1] flex-1",
+          !isOnLandingPage && "py-4 md:py-6",
+        )}
+      >
+        {!isOnLandingPage ? (
+          <Container>{!isPageLoading && children}</Container>
+        ) : (
+          children
+        )}
+        <WormholeConnect isHidden={!isOnBridgePage || isPageLoading} />
       </div>
 
-      <Footer />
+      {!isOnLandingPage && <Footer />}
     </div>
   );
 }
