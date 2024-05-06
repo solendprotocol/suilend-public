@@ -23,12 +23,12 @@ export default function Ticker({ className, items }: TickerProps) {
         className,
       )}
     >
-      <div className="animate-infinite-scroll flex w-max flex-shrink-0 flex-row items-center gap-20 pr-20 md:gap-40 md:pr-40">
+      <div className="flex w-max flex-shrink-0 animate-infinite-scroll flex-row items-center gap-20 pr-20 md:gap-40 md:pr-40">
         {items.map((item, index) => (
           <Fragment key={index}>{item}</Fragment>
         ))}
       </div>
-      <div className="animate-infinite-scroll flex w-max flex-shrink-0 flex-row items-center gap-20 pr-20 md:gap-40 md:pr-40">
+      <div className="flex w-max flex-shrink-0 animate-infinite-scroll flex-row items-center gap-20 pr-20 md:gap-40 md:pr-40">
         {items.map((item, index) => (
           <Fragment key={index}>{item}</Fragment>
         ))}
