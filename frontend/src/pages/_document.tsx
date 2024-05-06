@@ -39,6 +39,13 @@ export default function Document() {
         <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5" />
         <meta name="msapplication-TileColor" content="#da532c" />
         <meta name="theme-color" content="#020A19" />
+
+        {/* Wormhole Connect */}
+        <link
+          rel="stylesheet"
+          href="https://www.unpkg.com/@wormhole-foundation/wormhole-connect@0.3.3/dist/main.css"
+          integrity="sha384-BTkX2AhTeIfxDRFsJbLtR26TQ9QKKpi7EMe807JdfQQBTAkUT9a2mSGwf/5CJ4bF"
+        />
       </Head>
       <body>
         <Main />
