@@ -415,6 +415,7 @@ export default function ObligationHistoryDialog() {
       if (!obligationId) return;
 
       clearEventsData();
+
       try {
         const url1 = `${API_URL}/events?${new URLSearchParams({
           eventTypes: [
@@ -469,7 +470,7 @@ export default function ObligationHistoryDialog() {
         console.error(err);
       }
     },
-    [obligation, clearEventsData],
+    [obligation?.id, clearEventsData],
   );
 
   // Filters
