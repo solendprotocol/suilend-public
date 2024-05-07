@@ -1,4 +1,4 @@
-import React, { Fragment, FunctionComponent, ReactNode, useState } from "react";
+import React, { useState } from "react";
 
 import {
   ArrowDown01,
@@ -9,6 +9,7 @@ import {
   X,
 } from "lucide-react";
 
+import { useActionsModalContext } from "@/components/dashboard/actions-modal/ActionsModalContext";
 import BorrowAprCell from "@/components/dashboard/market-table/BorrowAprCell";
 import DepositAprCell from "@/components/dashboard/market-table/DepositAprCell";
 import OpenLtvBwCell from "@/components/dashboard/market-table/OpenLtvBwCell";
@@ -29,11 +30,12 @@ import { cn } from "@/lib/utils";
 
 interface MarketCardProps {
   rowData: ReservesRowData;
+  onClick: () => void;
 }
 
-function MarketCard({ rowData }: MarketCardProps) {
+function MarketCard({ rowData, onClick }: MarketCardProps) {
   return (
-    <Card className="w-full cursor-pointer rounded-md">
+    <Card className="w-full cursor-pointer rounded-md" onClick={onClick}>
       <div className="flex w-full flex-col items-center gap-4 p-4">
         <div className="flex w-full flex-col items-center gap-2">
           <div className="flex flex-row items-center gap-2">
@@ -88,17 +90,14 @@ function MarketCard({ rowData }: MarketCardProps) {
 interface MarketCardListProps {
   data: ReservesRowData[];
   noDataMessage: string;
-  RowModal?: FunctionComponent<{
-    row: ReservesRowData;
-    children: ReactNode;
-  }>;
 }
 
 export default function MarketCardList({
   data,
   noDataMessage,
-  RowModal,
 }: MarketCardListProps) {
+  const { open: openActionsModal } = useActionsModalContext();
+
   // Sort
   enum SortOption {
     ASSET_NAME_ASC = "assetNameAsc",
@@ -249,17 +248,13 @@ export default function MarketCardList({
       {sortedData.length > 0 ? (
         <div className="flex w-full flex-col gap-4">
           {sortedData.map((rowData) => (
-            <Fragment key={rowData.coinType}>
-              {RowModal ? (
-                <RowModal row={rowData}>
-                  <div>
-                    <MarketCard rowData={rowData} />
-                  </div>
-                </RowModal>
-              ) : (
-                <MarketCard rowData={rowData} />
-              )}
-            </Fragment>
+            <MarketCard
+              key={rowData.coinType}
+              rowData={rowData}
+              onClick={() =>
+                openActionsModal(Number(rowData.reserve.arrayIndex))
+              }
+            />
           ))}
         </div>
       ) : (

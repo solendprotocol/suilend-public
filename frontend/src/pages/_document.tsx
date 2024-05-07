@@ -39,6 +39,12 @@ export default function Document() {
         <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5" />
         <meta name="msapplication-TileColor" content="#da532c" />
         <meta name="theme-color" content="#020A19" />
+
+        {/* Wormhole Connect */}
+        <link
+          rel="stylesheet"
+          href="https://bt70tedhyxrom6ou.public.blob.vercel-storage.com/wormhole-connect@0.3.7/main.css"
+        />
       </Head>
       <body>
         <Main />

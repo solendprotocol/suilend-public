@@ -1,12 +1,10 @@
-import { PropsWithChildren } from "react";
-
 import { ColumnDef } from "@tanstack/react-table";
 import BigNumber from "bignumber.js";
 
 import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 import { Side } from "@suilend/sdk/types";
 
-import ActionsModal from "@/components/dashboard/actions-modal/ActionsModal";
+import { useActionsModalContext } from "@/components/dashboard/actions-modal/ActionsModalContext";
 import DataTable, {
   decimalSortingFn,
   tableHeader,
@@ -105,17 +103,10 @@ const columns: ColumnDef<ReservesRowData>[] = [
   },
 ];
 
-interface RowModalProps extends PropsWithChildren {
-  row: ReservesRowData;
-}
-
-function RowModal({ row, children }: RowModalProps) {
-  return <ActionsModal reserve={row.reserve}>{children}</ActionsModal>;
-}
-
 export default function MarketTable() {
   const appContext = useAppContext();
   const data = appContext.data as AppData;
+  const { open: openActionsModal } = useActionsModalContext();
 
   const rowData = data.lendingMarket.reserves.map((reserve) => {
     const coinType = reserve.coinType;
@@ -263,15 +254,13 @@ export default function MarketTable() {
           columns={columns}
           data={rowData}
           noDataMessage="No assets"
-          RowModal={RowModal}
+          onRowClick={(row) => () =>
+            openActionsModal(Number(row.original.reserve.arrayIndex))
+          }
         />
       </div>
       <div className="w-full md:hidden">
-        <MarketCardList
-          data={rowData}
-          noDataMessage="No assets"
-          RowModal={RowModal}
-        />
+        <MarketCardList data={rowData} noDataMessage="No assets" />
       </div>
     </div>
   );

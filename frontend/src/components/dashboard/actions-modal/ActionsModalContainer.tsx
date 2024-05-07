@@ -1,7 +1,6 @@
 import {
   MouseEvent,
   PropsWithChildren,
-  ReactNode,
   useEffect,
   useRef,
   useState,
@@ -11,34 +10,17 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { useActionsModalContext } from "@/components/dashboard/actions-modal/ActionsModalContext";
 import Button from "@/components/shared/Button";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import {
-  DrawerContent,
-  Drawer as DrawerRoot,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { DrawerContent, Drawer as DrawerRoot } from "@/components/ui/drawer";
 import useBreakpoint from "@/hooks/useBreakpoint";
 import { cn } from "@/lib/utils";
 
-interface ActionsModalContainerProps extends PropsWithChildren {
-  trigger: ReactNode;
-}
-
-export default function ActionsModalContainer({
-  trigger,
-  children,
-}: ActionsModalContainerProps) {
-  const { isMoreParametersOpen, setIsMoreParametersOpen } =
+export default function ActionsModalContainer({ children }: PropsWithChildren) {
+  const { isOpen, close, isMoreParametersOpen, setIsMoreParametersOpen } =
     useActionsModalContext();
   const MoreParametersIcon = isMoreParametersOpen ? ChevronLeft : ChevronRight;
 
   const { md } = useBreakpoint();
-
-  // Open
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-  const onOpenChange = (value: boolean) => {
-    if (value) setIsOpen(true);
-  };
 
   // Dialog events
   const didDialogContentMouseDownRef = useRef<boolean>(false);
@@ -47,7 +29,7 @@ export default function ActionsModalContainer({
   };
   const onDialogContentMouseUp = () => {
     if (didDialogContentMouseDownRef.current) {
-      setIsOpen(false);
+      close();
       didDialogContentMouseDownRef.current = false;
     }
   };
@@ -82,17 +64,14 @@ export default function ActionsModalContainer({
 
   if (md) {
     return (
-      <Dialog open={isOpen} onOpenChange={onOpenChange}>
-        <DialogTrigger asChild className="appearance-none">
-          {trigger}
-        </DialogTrigger>
+      <Dialog open={isOpen}>
         <DialogContent
           className="grid h-dvh max-w-none place-items-center overflow-auto border-none bg-transparent p-0 px-10 py-8"
           onOpenAutoFocus={(e) => e.preventDefault()}
-          onEscapeKeyDown={() => setIsOpen(false)}
+          onEscapeKeyDown={() => close()}
           overlay={{
             className: "bg-background/80",
-            onClick: () => setIsOpen(false),
+            onClick: () => close(),
           }}
           showCloseButton={false}
           onMouseDown={onDialogContentMouseDown}
@@ -126,27 +105,20 @@ export default function ActionsModalContainer({
     );
   }
   return (
-    <DrawerRoot
-      open={isOpen}
-      onOpenChange={onOpenChange}
-      onRelease={(e, open) => setIsOpen(open)}
-    >
-      <DrawerTrigger asChild className="appearance-none">
-        {trigger}
-      </DrawerTrigger>
+    <DrawerRoot open={isOpen} onRelease={(e, open) => !open && close()}>
       <DrawerContent
         className={cn(
-          "mt-[0] max-h-[calc(100dvh_-_0px)] rounded-t-lg bg-popover p-4",
-          isMoreParametersOpen ? "!h-[calc(100dvh_-_0px)]" : "!h-auto",
+          "mt-[0] max-h-[calc(100dvh-0px)] rounded-t-lg bg-popover p-4",
+          isMoreParametersOpen ? "!h-[calc(100dvh-0px)]" : "!h-auto",
           visualViewportHeight < 400
             ? "!bottom-auto !top-0"
             : "!bottom-0 !top-auto",
         )}
         thumbClassName="hidden"
-        onEscapeKeyDown={() => setIsOpen(false)}
+        onEscapeKeyDown={() => close()}
         overlay={{
           className: "bg-background/80",
-          onClick: () => setIsOpen(false),
+          onClick: () => close(),
         }}
       >
         {children}

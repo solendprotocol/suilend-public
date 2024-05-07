@@ -12,13 +12,14 @@
   },
   "dependencies": {
     "@cetusprotocol/cetus-sui-clmm-sdk": "^3.17.9",
-    "@mysten/bcs": "^0.10.1",
-    "@mysten/sui.js": "^0.49.1",
+    "@mysten/bcs": "0.11.1",
+    "@mysten/sui.js": "0.51.2",
+    "@suilend/sdk": "^1.0.5",
     "bignumber.js": "^9.1.2",
     "commander": "^11.1.0",
     "hot-shots": "^10.0.0",
     "module-alias": "^2.2.3",
-    "p-limit": "^5.0.0",
+    "p-limit": "3.1.0",
     "tslog": "^4.9.2"
   },
   "devDependencies": {
@@ -33,8 +34,5 @@
     "prettier": "^3.2.5",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
-  },
-  "_moduleAliases": {
-    "@suilend/sdk": "../sdk/src/mainnet"
   }
 }

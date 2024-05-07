@@ -410,7 +410,7 @@ export function liquidate(
       obj(txb, args.obligation),
       vector(
         txb,
-        `0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::reserve::Reserve<${typeArg}>`,
+        `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::Reserve<${typeArg}>`,
         args.reserves,
       ),
       pure(txb, args.repayReserveArrayIndex, `u64`),
@@ -468,7 +468,7 @@ export function refresh(
       obj(txb, args.obligation),
       vector(
         txb,
-        `0x9d5c964fda4247e0e191c5856bcdb7c96d19800c82d2a4a6e52740a64bc44625::reserve::Reserve<${typeArg}>`,
+        `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::Reserve<${typeArg}>`,
         args.reserves,
       ),
       obj(txb, args.clock),

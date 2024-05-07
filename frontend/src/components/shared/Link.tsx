@@ -1,6 +1,6 @@
 import NextLink, { LinkProps as NextLinkProps } from "next/link";
 import { useRouter } from "next/router";
-import { PropsWithChildren, ReactNode } from "react";
+import { PropsWithChildren, ReactNode, useEffect, useState } from "react";
 
 import { ClassValue } from "clsx";
 
@@ -23,7 +23,11 @@ export default function Link({
   ...props
 }: LinkProps) {
   const router = useRouter();
-  const isActive = router.asPath === href;
+  const [isActive, setIsActive] = useState<boolean>(false);
+
+  useEffect(() => {
+    setIsActive(router.asPath.startsWith(href));
+  }, [router.asPath, href]);
 
   const Component = isExternal ? "a" : NextLink;
 

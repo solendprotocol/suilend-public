@@ -59,13 +59,10 @@ export default function LiquidityMiningCard() {
       const res = await claimRewards(suiRewards);
       const txUrl = explorer.buildTxUrl(res.digest);
 
-      toast.success(
-        `Claimed ${formatToken(totalSuiRewards, { dp: 9 })} SUI in rewards`,
-        {
-          action: <TextLink href={txUrl}>View tx on {explorer.name}</TextLink>,
-          duration: TX_TOAST_DURATION,
-        },
-      );
+      toast.success("Claimed rewards", {
+        action: <TextLink href={txUrl}>View tx on {explorer.name}</TextLink>,
+        duration: TX_TOAST_DURATION,
+      });
     } catch (err) {
       toast.error("Failed to claim rewards", {
         description: ((err as Error)?.message || err) as string,

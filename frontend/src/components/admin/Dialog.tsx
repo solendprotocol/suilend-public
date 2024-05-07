@@ -50,15 +50,18 @@ export default function Dialog({
 
   return (
     <DialogRoot {...rootProps}>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      <DialogTrigger asChild className="appearance-none">
+        {trigger}
+      </DialogTrigger>
 
       <DialogContent
         className={cn(
-          "max-h-dvh max-w-none gap-4 overflow-y-auto bg-popover sm:max-h-[calc(100dvh-var(--sm-my))] sm:w-[calc(100dvw-var(--sm-mx))] sm:max-w-4xl",
+          "max-h-dvh max-w-none gap-4 overflow-y-auto bg-popover sm:max-h-[calc(100dvh-var(--sm-my)*2)] sm:w-[calc(100dvw-var(--sm-mx)*2)] sm:max-w-4xl",
           contentClassName,
         )}
-        style={{ "--sm-mx": "3rem", "--sm-my": "3rem" } as CSSProperties}
+        style={{ "--sm-mx": "2rem", "--sm-my": "2rem" } as CSSProperties}
         onOpenAutoFocus={(e) => e.preventDefault()}
+        overlay={{ className: "bg-background/80" }}
         {...restContentProps}
       >
         {(title || description) && (

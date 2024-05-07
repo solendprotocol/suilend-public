@@ -18,6 +18,7 @@ interface CardProps extends PropsWithChildren {
   id: string;
   titleIcon?: ReactElement;
   title: string;
+  headerStartContent?: ReactNode;
   headerEndContent?: ReactNode;
   alwaysExpanded?: boolean;
   noHeaderSeparator?: boolean;
@@ -27,6 +28,7 @@ export default function Card({
   id,
   titleIcon,
   title,
+  headerStartContent,
   headerEndContent,
   alwaysExpanded,
   noHeaderSeparator,
@@ -42,10 +44,10 @@ export default function Card({
   return (
     <CardRoot className="w-full overflow-hidden rounded-sm">
       <CardHeader className="flex flex-col gap-2 space-y-0">
-        <div className="flex flex-row items-center">
+        <div className="flex flex-row items-center gap-1">
           <TTitle
             className={cn(
-              "flex flex-1 flex-row items-center gap-2 uppercase",
+              "flex flex-row items-center gap-2 uppercase",
               canToggle && "cursor-pointer",
             )}
             onClick={canToggle ? toggleIsCollapsed : undefined}
@@ -56,8 +58,9 @@ export default function Card({
               })}
             {title}
           </TTitle>
+          {headerStartContent}
 
-          <div className="flex h-5 flex-row items-center gap-1">
+          <div className="flex h-5 flex-1 flex-row items-center justify-end gap-1">
             {headerEndContent}
 
             {canToggle && (

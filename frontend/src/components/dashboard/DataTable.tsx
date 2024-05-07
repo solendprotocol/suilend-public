@@ -1,12 +1,18 @@
 import { Fragment, FunctionComponent, ReactNode, useState } from "react";
 
 import {
+  Cell,
   Column,
   ColumnDef,
+  ColumnFiltersState,
+  ExpandedState,
+  Header,
   Row,
   SortingState,
   flexRender,
   getCoreRowModel,
+  getExpandedRowModel,
+  getFilteredRowModel,
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
@@ -25,10 +31,12 @@ import {
 import Button from "@/components/shared/Button";
 import LabelWithTooltip from "@/components/shared/LabelWithTooltip";
 import { TLabel, TLabelSans } from "@/components/shared/Typography";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
   TableCell,
+  TableContainerProps,
   TableHead,
   TableHeader,
   TableRow,
@@ -74,7 +82,7 @@ function getSortState<T>(
       tooltip = "Click to sort smallest to biggest";
     } else if (isDate) {
       icon = <ChevronsUpDown />;
-      tooltip = "Click to sort newest to oldest";
+      tooltip = "Click to sort oldest to newest";
     } else {
       icon = <ChevronsUpDown />;
       tooltip = "Click to sort A-Z";
@@ -85,7 +93,7 @@ function getSortState<T>(
       tooltip = "Click to sort biggest to smallest";
     } else if (isDate) {
       icon = <ChevronDown />;
-      tooltip = "Click to sort oldest to newest";
+      tooltip = "Click to sort newest to oldest";
     } else {
       icon = <ArrowDownAz />;
       tooltip = "Click to sort Z-A";
@@ -113,7 +121,13 @@ export function tableHeader<T>(
     isNumerical,
     isDate,
     tooltip,
-  }: { isNumerical?: boolean; isDate?: boolean; tooltip?: string } = {},
+    borderBottom,
+  }: {
+    isNumerical?: boolean;
+    isDate?: boolean;
+    tooltip?: string;
+    borderBottom?: boolean;
+  } = {},
 ) {
   const sortState = column.getCanSort()
     ? getSortState(column, { isNumerical, isDate })
@@ -121,10 +135,20 @@ export function tableHeader<T>(
 
   if (!sortState)
     return !tooltip ? (
-      <TLabel className="px-4 uppercase">{title}</TLabel>
+      <TLabel
+        className={cn(
+          "flex h-full flex-col justify-center px-4 uppercase",
+          borderBottom && "border-b",
+        )}
+      >
+        {title}
+      </TLabel>
     ) : (
       <LabelWithTooltip
-        className="flex h-full flex-col justify-center px-4 uppercase"
+        className={cn(
+          "flex h-full flex-col justify-center px-4 uppercase",
+          borderBottom && "border-b",
+        )}
         tooltip={tooltip}
         isMono
       >
@@ -134,8 +158,9 @@ export function tableHeader<T>(
   return (
     <Button
       className={cn(
-        "h-full w-full px-4 py-0 hover:bg-transparent",
+        "h-full w-full rounded-none px-4 py-0 hover:bg-transparent",
         isNumerical ? "justify-end" : "justify-start",
+        borderBottom && "border-b",
         column.getIsSorted() && "!text-primary-foreground",
       )}
       labelClassName="text-xs uppercase"
@@ -152,49 +177,80 @@ export function tableHeader<T>(
 
 interface DataTableProps<T> {
   columns: ColumnDef<T>[];
-  data: T[];
+  data?: T[];
   noDataMessage: string;
+  columnFilters?: ColumnFiltersState;
+  skeletonRows?: number;
+  container?: TableContainerProps;
   tableClassName?: ClassValue;
-  tableRowClassName?: ClassValue;
-  tableCellClassName?: ClassValue;
+  tableHeaderRowClassName?: ClassValue;
+  tableHeadClassName?: (header: Header<T, unknown>) => ClassValue;
+  tableRowClassName?: (row?: Row<T>) => ClassValue;
+  tableCellClassName?: (cell?: Cell<T, unknown>) => ClassValue;
   RowModal?: FunctionComponent<{
     row: T;
     children: ReactNode;
   }>;
-  onRowClick?: (x: T) => void;
+  onRowClick?: (row: Row<T>, index: number) => (() => void) | undefined;
 }
 
 export default function DataTable<T>({
   columns,
   data,
   noDataMessage,
+  columnFilters,
+  skeletonRows,
+  container,
   tableClassName,
+  tableHeaderRowClassName,
+  tableHeadClassName,
   tableRowClassName,
   tableCellClassName,
   RowModal,
   onRowClick,
 }: DataTableProps<T>) {
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [expanded, setExpanded] = useState<ExpandedState>({});
+
+  type TWithSubRows = T & { subRows?: T[] };
 
   const table = useReactTable({
-    data,
+    data: data ?? [],
     columns,
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
+    onExpandedChange: setExpanded,
+    getExpandedRowModel: getExpandedRowModel(),
+    getSubRows: (row: T) =>
+      "subRows" in (row as TWithSubRows)
+        ? (row as TWithSubRows).subRows
+        : undefined,
+    getFilteredRowModel: getFilteredRowModel(),
     state: {
       sorting,
+      expanded,
+      columnFilters,
     },
   });
 
   return (
-    <Table className={cn("border-y", tableClassName)}>
-      <TableHeader>
+    <Table container={container} className={cn("border-y", tableClassName)}>
+      <TableHeader className="relative z-[2]">
         {table.getHeaderGroups().map((headerGroup) => (
-          <TableRow key={headerGroup.id} className="hover:bg-muted/10">
+          <TableRow
+            key={headerGroup.id}
+            className={cn("hover:bg-muted/10", tableHeaderRowClassName)}
+          >
             {headerGroup.headers.map((header) => {
               return (
-                <TableHead key={header.id} className="h-9 px-0 py-0">
+                <TableHead
+                  key={header.id}
+                  className={cn(
+                    "h-9 px-0 py-0",
+                    tableHeadClassName && tableHeadClassName(header),
+                  )}
+                >
                   {header.isPlaceholder
                     ? null
                     : flexRender(
@@ -207,50 +263,95 @@ export default function DataTable<T>({
           </TableRow>
         ))}
       </TableHeader>
-      <TableBody>
-        {table.getRowModel().rows?.length ? (
-          table.getRowModel().rows.map((row) => {
-            const children = (
+      <TableBody className="relative z-[1]">
+        {data === undefined ? (
+          <>
+            {Array.from({ length: skeletonRows ?? 5 }).map((_, index) => (
+              <TableRow
+                key={index}
+                className={cn(
+                  "hover:bg-transparent",
+                  tableRowClassName && tableRowClassName(),
+                )}
+              >
+                <TableCell
+                  colSpan={columns.length}
+                  className={cn(
+                    "h-16 px-0 py-0",
+                    tableCellClassName && tableCellClassName(),
+                  )}
+                >
+                  <Skeleton className="h-full w-full bg-muted/5" />
+                </TableCell>
+              </TableRow>
+            ))}
+          </>
+        ) : (
+          <>
+            {table.getRowModel().rows.length ? (
+              table.getRowModel().rows.map((row, index) => {
+                const children = (
+                  <TableRow
+                    className={cn(
+                      "hover:bg-transparent",
+                      (RowModal ||
+                        (onRowClick && onRowClick(row, index) !== undefined)) &&
+                        "cursor-pointer hover:bg-muted/10",
+                      tableRowClassName && tableRowClassName(row),
+                    )}
+                    style={{ appearance: "inherit" }}
+                    onClick={
+                      !RowModal && onRowClick
+                        ? onRowClick(row, index)
+                        : undefined
+                    }
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell
+                        key={cell.id}
+                        className={cn(
+                          "h-16",
+                          tableCellClassName && tableCellClassName(cell),
+                        )}
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                );
+
+                return (
+                  <Fragment key={row.id}>
+                    {RowModal ? (
+                      <RowModal row={row.original}>{children}</RowModal>
+                    ) : (
+                      children
+                    )}
+                  </Fragment>
+                );
+              })
+            ) : (
               <TableRow
                 className={cn(
-                  "hover:bg-muted/10",
-                  (RowModal || onRowClick) && "cursor-pointer",
-                  tableRowClassName,
+                  "hover:bg-transparent",
+                  tableRowClassName && tableRowClassName(),
                 )}
-                style={{ appearance: "inherit" }}
-                onClick={
-                  !RowModal && onRowClick
-                    ? () => onRowClick(row.original)
-                    : undefined
-                }
               >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id} className={cn(tableCellClassName)}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
+                <TableCell
+                  colSpan={columns.length}
+                  className={cn(
+                    "h-16 py-0 text-center",
+                    tableCellClassName && tableCellClassName(),
+                  )}
+                >
+                  <TLabelSans>{noDataMessage}</TLabelSans>
+                </TableCell>
               </TableRow>
-            );
-
-            return (
-              <Fragment key={row.id}>
-                {RowModal ? (
-                  <RowModal row={row.original}>{children}</RowModal>
-                ) : (
-                  children
-                )}
-              </Fragment>
-            );
-          })
-        ) : (
-          <TableRow className="hover:bg-transparent">
-            <TableCell
-              colSpan={columns.length}
-              className="h-16 py-0 text-center"
-            >
-              <TLabelSans>{noDataMessage}</TLabelSans>
-            </TableCell>
-          </TableRow>
+            )}
+          </>
         )}
       </TableBody>
     </Table>

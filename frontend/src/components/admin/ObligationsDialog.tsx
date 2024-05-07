@@ -228,9 +228,11 @@ const COLUMNS: ColumnDef<ParsedObligation>[] = [
   {
     accessorKey: "weightedBorrowValue",
     sortingFn: "auto",
-    header: ({ column }) => tableHeader(column, "Wtd. Borrows"),
+    header: ({ column }) => tableHeader(column, "(Max Price) Wtd. Borrows"),
     cell: ({ row }) => {
-      const value = row.original.weightedBorrowsUsd.toFormat(2).toString();
+      const value = row.original.maxPriceWeightedBorrowsUsd
+        .toFormat(2)
+        .toString();
       return <TBody>${value}</TBody>;
     },
   },
