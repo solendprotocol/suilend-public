@@ -13,7 +13,7 @@ export default function MarketOverviewPopover() {
   const appContext = useAppContext();
   const data = appContext.data as AppData;
 
-  const formatedOutflow = getFormattedMaxOutflow(
+  const formattedOutflow = getFormattedMaxOutflow(
     data.lendingMarket.rateLimiter,
   );
 
@@ -44,7 +44,7 @@ export default function MarketOverviewPopover() {
       <div className="flex flex-row items-center justify-between gap-4">
         <TLabelSans>Max outflow</TLabelSans>
         <TBody className="break-words text-right uppercase">
-          {formatedOutflow.formattedMaxOutflow}
+          {formattedOutflow.formattedMaxOutflow}
         </TBody>
       </div>
 

@@ -25,7 +25,7 @@ import { cn, sortInReserveOrder } from "@/lib/utils";
 interface BreakdownColumn {
   title: string;
   titleTooltip?: string | ReactNode;
-  data?: string[];
+  data?: (string | ReactNode)[];
 }
 
 interface BreakdownColumnProps {
@@ -76,7 +76,7 @@ function BreakdownColumn({
 interface BreakdownTableProps {
   rowCount: number;
   columns: BreakdownColumn[];
-  totalValue: string;
+  totalValue: string | ReactNode;
   totalValueClassName?: ClassValue;
   totalValueStyle?: CSSProperties;
 }
@@ -148,10 +148,12 @@ export default function ObligationBreakdown() {
             columns={[
               {
                 title: "Position",
-                data: sortedBorrows.map(
-                  (b) =>
-                    `${formatToken(b.borrowedAmount, { exact: false })} ${b.reserve.symbol}`,
-                ),
+                data: sortedBorrows.map((b) => (
+                  <>
+                    {formatToken(b.borrowedAmount, { exact: false })}{" "}
+                    {b.reserve.symbol}
+                  </>
+                )),
               },
               { title: "×" },
               {
@@ -202,10 +204,12 @@ export default function ObligationBreakdown() {
             columns={[
               {
                 title: "Position",
-                data: sortedDeposits.map(
-                  (d) =>
-                    `${formatToken(d.depositedAmount, { exact: false })} ${d.reserve.symbol}`,
-                ),
+                data: sortedDeposits.map((d) => (
+                  <>
+                    {formatToken(d.depositedAmount, { exact: false })}{" "}
+                    {d.reserve.symbol}
+                  </>
+                )),
               },
               { title: "×" },
               {
@@ -256,10 +260,12 @@ export default function ObligationBreakdown() {
             columns={[
               {
                 title: "Position",
-                data: sortedDeposits.map(
-                  (d) =>
-                    `${formatToken(d.depositedAmount, { exact: false })} ${d.reserve.symbol}`,
-                ),
+                data: sortedDeposits.map((d) => (
+                  <>
+                    {formatToken(d.depositedAmount, { exact: false })}{" "}
+                    {d.reserve.symbol}
+                  </>
+                )),
               },
               { title: "×" },
               {

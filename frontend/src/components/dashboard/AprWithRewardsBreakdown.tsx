@@ -210,11 +210,22 @@ export default function AprWithRewardsBreakdown({
                       url={reward.stats.iconUrl}
                     />
                     <TBody className="text-primary-foreground">
-                      {amountChange
-                        ? `${formatToken(reward.stats.dailyReward, { exact: false })} → ${invalidAprModifier ? "N/A" : formatToken(dedupedNewDailyRewards[index].stats.dailyReward, { exact: false })}`
-                        : formatToken(reward.stats.dailyReward, {
+                      {amountChange ? (
+                        <>
+                          {formatToken(reward.stats.dailyReward, {
                             exact: false,
                           })}
+                          {" → "}
+                          {invalidAprModifier
+                            ? "N/A"
+                            : formatToken(
+                                dedupedNewDailyRewards[index].stats.dailyReward,
+                                { exact: false },
+                              )}
+                        </>
+                      ) : (
+                        formatToken(reward.stats.dailyReward, { exact: false })
+                      )}
                     </TBody>
                     <TBody className="text-muted-foreground">/day</TBody>
                   </div>

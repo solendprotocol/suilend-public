@@ -181,10 +181,19 @@ export default function MarketTable() {
       side: Side,
       remaining: BigNumber,
       symbol: string,
-    ) =>
-      `Asset ${side} limit almost reached. Capacity remaining: ${formatToken(remaining, { dp: reserve.mintDecimals })} ${symbol}`;
-    const getAlmostExceedsLimitUsd = (side: Side, remaining: BigNumber) =>
-      `Asset USD ${side} limit almost reached. Capacity remaining: ${formatUsd(remaining)}`;
+    ) => (
+      <>
+        {`Asset ${side} limit almost reached. Capacity remaining: `}
+        {formatToken(remaining, { dp: reserve.mintDecimals })}
+        {` ${symbol}`}
+      </>
+    );
+    const getAlmostExceedsLimitUsd = (side: Side, remaining: BigNumber) => (
+      <>
+        {`Asset USD ${side} limit almost reached. Capacity remaining: `}
+        {formatUsd(remaining)}
+      </>
+    );
 
     const getExceedsLimitTooltip = (side: Side) =>
       `Asset ${side} limit reached.`;

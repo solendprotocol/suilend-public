@@ -79,7 +79,7 @@ const ActionsModalInput = forwardRef<HTMLInputElement, ActionsModalInputProps>(
             className="text-right"
             style={{ height: `${USD_LABEL_HEIGHT}px` }}
           >
-            ≈ {formatUsd(new BigNumber(value || "0").times(reserve.price))}
+            ≈{formatUsd(new BigNumber(value || "0").times(reserve.price))}
           </TLabel>
         </div>
       </div>

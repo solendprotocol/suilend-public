@@ -11,7 +11,7 @@ interface LabelWithValueProps {
   className?: ClassValue;
   label: string;
   labelTooltip?: string;
-  value: string | number | BigNumber;
+  value: string | number | BigNumber | ReactNode;
   url?: string;
   isId?: boolean;
   isType?: boolean;

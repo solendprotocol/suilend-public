@@ -37,24 +37,63 @@ export const formatNumber = (
     dp?: number;
     roundingMode?: BigNumber.RoundingMode;
     exact?: boolean;
+    fadeOutTrailingZeros?: boolean;
   },
 ) => {
   const prefix = options?.prefix ?? "";
   const dp = options?.dp ?? 2;
   const roundingMode = options?.roundingMode ?? BigNumber.ROUND_HALF_UP;
   const exact = options?.exact ?? false;
+  const fadeOutTrailingZeros = options?.fadeOutTrailingZeros ?? true;
 
-  // Zero
-  if (value.eq(0)) return `${prefix}0.${"0".repeat(dp)}`;
+  // Exact, zero, <min, or <1
+  if (
+    exact ||
+    value.eq(0) ||
+    value.lt(new BigNumber(10).pow(-dp)) ||
+    value.lt(1)
+  ) {
+    const [integers, decimals] = value.toFixed(dp, roundingMode).split(".");
+    const integersFormatted = formatInteger(parseInt(integers));
+    const decimalsFormatted = decimals !== undefined ? `.${decimals}` : "";
+    const formattedValue = `${prefix}${integersFormatted}${decimalsFormatted}`;
 
-  // <Min
-  const minValue = new BigNumber(10).pow(-dp);
-  if (value.lt(minValue)) return `<${prefix}${minValue.toFixed(dp)}`;
+    if (!fadeOutTrailingZeros) return formattedValue;
+    if (decimals === undefined) return formattedValue;
 
-  // <1
-  if (value.lt(1)) return `${prefix}${value.toFixed(dp, roundingMode)}`;
+    const lastNonZeroIndex = Math.max(
+      decimalsFormatted.lastIndexOf("1"),
+      decimalsFormatted.lastIndexOf("2"),
+      decimalsFormatted.lastIndexOf("3"),
+      decimalsFormatted.lastIndexOf("4"),
+      decimalsFormatted.lastIndexOf("5"),
+      decimalsFormatted.lastIndexOf("6"),
+      decimalsFormatted.lastIndexOf("7"),
+      decimalsFormatted.lastIndexOf("8"),
+      decimalsFormatted.lastIndexOf("9"),
+    );
 
-  if (!exact) {
+    if (lastNonZeroIndex === -1)
+      return (
+        <>
+          {prefix}
+          {integersFormatted}
+          <span className="opacity-50">{decimalsFormatted}</span>
+        </>
+      );
+    if (lastNonZeroIndex === decimalsFormatted.length - 1)
+      return formattedValue;
+    return (
+      <>
+        {prefix}
+        {integersFormatted}
+        {decimalsFormatted.slice(0, lastNonZeroIndex + 1)}
+        <span className="opacity-50">
+          {"0".repeat(decimalsFormatted.length - (lastNonZeroIndex + 1))}
+        </span>
+      </>
+    );
+  } else {
     let _value = value;
     let suffix = "";
     if (_value.lt(1000 ** 1)) {
@@ -90,12 +129,9 @@ export const formatNumber = (
 
     const integersFormatted = formatInteger(parseInt(integers));
     const decimalsFormatted = decimals !== undefined ? `.${decimals}` : "";
-    return `${prefix}${integersFormatted}${decimalsFormatted}${suffix}`;
-  } else {
-    const [integers, decimals] = value.toFixed(dp, roundingMode).split(".");
-    const integersFormatted = formatInteger(parseInt(integers));
-    const decimalsFormatted = decimals !== undefined ? `.${decimals}` : "";
-    return `${prefix}${integersFormatted}${decimalsFormatted}`;
+    const formattedValue = `${prefix}${integersFormatted}${decimalsFormatted}${suffix}`;
+
+    return formattedValue;
   }
 };
 
@@ -111,7 +147,8 @@ export const formatUsd = (
     dp,
     roundingMode: BigNumber.ROUND_HALF_UP,
     exact,
-  });
+    fadeOutTrailingZeros: false,
+  }) as string;
 };
 
 export const formatPrice = (value: BigNumber) => {
@@ -120,7 +157,8 @@ export const formatPrice = (value: BigNumber) => {
     dp: 2,
     roundingMode: BigNumber.ROUND_HALF_UP,
     exact: true,
-  });
+    fadeOutTrailingZeros: false,
+  }) as string;
 };
 
 export const formatPercent = (value: BigNumber, options?: { dp?: number }) => {
@@ -152,6 +190,7 @@ export const formatToken = (
     dp,
     roundingMode: BigNumber.ROUND_DOWN,
     exact,
+    fadeOutTrailingZeros: true,
   });
 };
 

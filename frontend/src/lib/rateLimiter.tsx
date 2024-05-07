@@ -12,9 +12,15 @@ export const getFormattedMaxOutflow = (rateLimiter: ParsedRateLimiter) => {
   } = rateLimiter;
 
   const formattedMaxOutflow =
-    maxOutflow === maxU64
-      ? "∞"
-      : `${formatUsd(new BigNumber(maxOutflow.toString()))} per ${formatDuration(new BigNumber(windowDuration.toString()))}`;
+    maxOutflow === maxU64 ? (
+      "∞"
+    ) : (
+      <>
+        {formatUsd(new BigNumber(maxOutflow.toString()))}
+        {" per "}
+        {formatDuration(new BigNumber(windowDuration.toString()))}
+      </>
+    );
   const maxOutflowTooltip =
     maxOutflow === maxU64
       ? "There is no limit on the amounts being withdrawn or borrowed from the pool."

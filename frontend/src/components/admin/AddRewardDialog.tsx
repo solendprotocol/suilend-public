@@ -204,9 +204,12 @@ export default function AddRewardDialog({
         <Input
           label="amount"
           labelRight={
-            coin
-              ? `Max: ${formatToken(coin.balance, { dp: coin.mintDecimals })}`
-              : undefined
+            coin ? (
+              <>
+                {"Max: "}
+                {formatToken(coin.balance, { dp: coin.mintDecimals })}
+              </>
+            ) : undefined
           }
           id="amount"
           type="number"

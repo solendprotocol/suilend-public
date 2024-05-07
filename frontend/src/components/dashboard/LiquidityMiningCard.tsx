@@ -97,7 +97,7 @@ export default function LiquidityMiningCard() {
             <div className="flex flex-row justify-between gap-2">
               <div className="flex flex-col gap-1">
                 <Tooltip
-                  title={`${formatToken(totalSuiRewards, { dp: 9 })} SUI`}
+                  title={<>{formatToken(totalSuiRewards, { dp: 9 })} SUI</>}
                 >
                   <TDisplay className="leading-5">
                     {formatToken(totalSuiRewards)} SUI

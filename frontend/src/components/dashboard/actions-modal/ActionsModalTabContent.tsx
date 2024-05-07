@@ -304,7 +304,17 @@ export default function ActionsModalTabContent({
           {action === Action.BORROW && (
             <LabelWithValue
               label="Borrow fee"
-              value={`${formatToken(new BigNumber(value || "0").times(reserve.config.borrowFeeBps).div(10000), { dp: reserve.mintDecimals })} ${reserve.symbol}`}
+              value={
+                <>
+                  {formatToken(
+                    new BigNumber(value || "0")
+                      .times(reserve.config.borrowFeeBps)
+                      .div(10000),
+                    { dp: reserve.mintDecimals },
+                  )}{" "}
+                  {reserve.symbol}
+                </>
+              }
               horizontal
             />
           )}
@@ -348,11 +358,13 @@ export default function ActionsModalTabContent({
 
       <div className="flex flex-row flex-wrap justify-between gap-x-2 gap-y-1">
         <TLabelSans onClick={setMaxValue}>
-          {`${formatToken(balance, { dp: reserve.mintDecimals })} ${reserve.symbol} in wallet`}
+          {formatToken(balance, { dp: reserve.mintDecimals })} {reserve.symbol}
+          {" in wallet"}
         </TLabelSans>
 
         <TLabelSans>
-          {`${formatToken(positionAmount, { dp: reserve.mintDecimals })} ${reserve.symbol} ${side === Side.DEPOSIT ? "deposited" : "borrowed"}`}
+          {formatToken(positionAmount, { dp: reserve.mintDecimals })}{" "}
+          {reserve.symbol} {side === Side.DEPOSIT ? "deposited" : "borrowed"}
         </TLabelSans>
       </div>
     </>
