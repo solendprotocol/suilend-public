@@ -7,6 +7,7 @@ import {
 } from "react";
 
 import { DialogProps as DialogRootProps } from "@radix-ui/react-dialog";
+import { ClassValue } from "clsx";
 
 import { TTitle } from "@/components/shared/Typography";
 import {
@@ -22,6 +23,7 @@ interface DialogProps extends PropsWithChildren {
   rootProps?: DialogRootProps;
   trigger: ReactNode;
   contentProps?: DialogContentProps;
+  headerClassName?: ClassValue;
   titleIcon?: ReactElement;
   title?: string;
   headerEndContent?: ReactNode;
@@ -31,6 +33,7 @@ export default function Dialog({
   rootProps,
   trigger,
   contentProps,
+  headerClassName,
   titleIcon,
   title,
   headerEndContent,
@@ -55,7 +58,12 @@ export default function Dialog({
         overlay={{ className: "bg-background/80" }}
         {...restContentProps}
       >
-        <DialogHeader className="relative h-max space-y-0 border-b p-4">
+        <DialogHeader
+          className={cn(
+            "relative h-max space-y-0 border-b p-4",
+            headerClassName,
+          )}
+        >
           <TTitle className="flex flex-row items-center gap-2 uppercase">
             {titleIcon &&
               cloneElement(titleIcon, {

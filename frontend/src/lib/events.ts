@@ -1,7 +1,6 @@
 import BigNumber from "bignumber.js";
 
 export enum EventType {
-  INTEREST_UPDATE = "interestUpdate",
   RESERVE_ASSET_DATA = "reserveAssetData",
   MINT = "mint",
   REDEEM = "redeem",
@@ -14,7 +13,6 @@ export enum EventType {
 }
 
 export const EventTypeNameMap: Record<EventType, string> = {
-  [EventType.INTEREST_UPDATE]: "Interest update",
   [EventType.RESERVE_ASSET_DATA]: "Reserve asset data",
   [EventType.MINT]: "Mint",
   [EventType.REDEEM]: "Redeem",
@@ -24,28 +22,6 @@ export const EventTypeNameMap: Record<EventType, string> = {
   [EventType.REPAY]: "Repay",
   [EventType.LIQUIDATE]: "Liquidation",
   [EventType.CLAIM_REWARD]: "Claim rewards",
-};
-
-export type InterestUpdateEvent = {
-  id: number;
-  lendingMarketId: string;
-  coinType: string;
-  reserveId: string;
-  cumulativeBorrowRate: string;
-  availableAmount: string;
-  borrowedAmount: string;
-  unclaimedSpreadFees: string;
-  ctokenSupply: string;
-  borrowInterestPaid: string;
-  spreadFee: string;
-  supplyInterestEarned: string;
-  borrowInterestPaidUsdEstimate: string;
-  protocolFeeUsdEstimate: string;
-  supplyInterestEarnedUsdEstimate: string;
-  timestamp: number;
-  digest: string;
-  eventIndex: number;
-  sender: string;
 };
 
 export type ReserveAssetDataEvent = {
