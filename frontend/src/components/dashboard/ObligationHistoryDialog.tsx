@@ -197,7 +197,9 @@ export default function ObligationHistoryDialog() {
           const amount = new BigNumber(borrowEvent.liquidityAmount).div(
             10 ** coinMetadata.decimals,
           );
-          const feesAmount = new BigNumber(0.000125);
+          const feesAmount = new BigNumber(
+            borrowEvent.originationFeeAmount ?? 0,
+          ).div(10 ** coinMetadata.decimals);
 
           return (
             <div className="flex w-max flex-col gap-1">
@@ -209,10 +211,12 @@ export default function ObligationHistoryDialog() {
                 decimals={coinMetadata.decimals}
               />
 
-              {/* <TLabelSans className="w-max">
-                +{formatToken(feesAmount, { dp: coinMetadata.decimals })}{" "}
-                {coinMetadata.symbol} in fees
-              </TLabelSans> */}
+              {feesAmount.gt(0) && (
+                <TLabelSans className="w-max">
+                  +{formatToken(feesAmount, { dp: coinMetadata.decimals })}{" "}
+                  {coinMetadata.symbol} in fees
+                </TLabelSans>
+              )}
             </div>
           );
         } else if (type === EventType.WITHDRAW) {
