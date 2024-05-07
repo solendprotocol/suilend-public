@@ -42,8 +42,7 @@ export function WormholeConnectContextProvider({
     <WormholeConnectContext.Provider value={contextValue}>
       <Script
         type="module"
-        src="https://www.unpkg.com/@wormhole-foundation/wormhole-connect@0.3.3/dist/main.js"
-        integrity="sha384-be7tSjGKf3akqV+FFKLt4241MoVYmg6rZKe9k3uQLePzk4lEY0t9VZvLjduwsVgG"
+        src="https://bt70tedhyxrom6ou.public.blob.vercel-storage.com/wormhole-connect@0.3.7-TxUXxgQRGaBAkWLNE54czD16ZJqdku.js"
         onLoad={() => setIsLoading(false)}
       />
       {children}
