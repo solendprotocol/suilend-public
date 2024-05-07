@@ -3,11 +3,9 @@ import { CSSProperties, useCallback, useEffect, useRef, useState } from "react";
 
 import { normalizeStructTag } from "@mysten/sui.js/utils";
 import { ColumnDef, Row } from "@tanstack/react-table";
-import axios from "axios";
 import BigNumber from "bignumber.js";
 import { formatDate } from "date-fns";
-import { ChevronDown, ChevronUp } from "lucide-react";
-import { FileClock, RefreshCcw } from "lucide-react";
+import { ChevronDown, ChevronUp, FileClock, RotateCw } from "lucide-react";
 
 import { WAD } from "@suilend/sdk/constants";
 
@@ -44,6 +42,7 @@ import {
   getDedupedClaimRewardEvents,
 } from "@/lib/events";
 import { formatToken } from "@/lib/format";
+import { API_URL } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 
 const getCtokenExchangeRate = (event: ReserveAssetDataEvent) =>
@@ -418,30 +417,31 @@ export default function ObligationHistoryDialog() {
       clearEventsData();
 
       try {
-        const response1 = await axios.get("/api/events", {
-          params: {
-            eventTypes: [
-              EventType.DEPOSIT,
-              EventType.WITHDRAW,
-              EventType.LIQUIDATE,
-            ].join(","),
-            obligationId,
-            joinEventTypes: EventType.RESERVE_ASSET_DATA,
-          },
-        });
-        const response2 = await axios.get("/api/events", {
-          params: {
-            eventTypes: [
-              EventType.BORROW,
-              EventType.REPAY,
-              EventType.CLAIM_REWARD,
-            ].join(","),
-            obligationId,
-          },
-        });
+        const url1 = `${API_URL}/events?${new URLSearchParams({
+          eventTypes: [
+            EventType.DEPOSIT,
+            EventType.WITHDRAW,
+            EventType.LIQUIDATE,
+          ].join(","),
+          obligationId,
+          joinEventTypes: EventType.RESERVE_ASSET_DATA,
+        })}`;
+        const res1 = await fetch(url1);
+        const json1 = await res1.json();
+
+        const url2 = `${API_URL}/events?${new URLSearchParams({
+          eventTypes: [
+            EventType.BORROW,
+            EventType.REPAY,
+            EventType.CLAIM_REWARD,
+          ].join(","),
+          obligationId,
+        })}`;
+        const res2 = await fetch(url2);
+        const json2 = await res2.json();
 
         // Parse
-        const data = { ...response1.data, ...response2.data } as EventsData;
+        const data = { ...json1, ...json2 } as EventsData;
         for (const event of [
           ...data.deposit,
           ...data.borrow,
@@ -453,7 +453,9 @@ export default function ObligationHistoryDialog() {
         }
 
         setEventsData({
-          reserveAssetData: data.reserveAssetData ?? [],
+          reserveAssetData: (data.reserveAssetData ?? [])
+            .slice()
+            .sort(eventSortAsc),
 
           deposit: (data.deposit ?? []).slice().sort(eventSortDesc),
           borrow: (data.borrow ?? []).slice().sort(eventSortDesc),
@@ -464,8 +466,8 @@ export default function ObligationHistoryDialog() {
             (data.claimReward ?? []).slice().sort(eventSortDesc),
           ),
         });
-      } catch (e) {
-        console.error(e);
+      } catch (err) {
+        console.error(err);
       }
     },
     [obligation?.id, clearEventsData],
@@ -558,9 +560,9 @@ export default function ObligationHistoryDialog() {
       isFetchingRef.current = false;
     }
   }, [isOpen, fetchEventsData, clearEventsData]);
+
   const onOpenChange = (_isOpen: boolean) => {
     const { history, ...restQuery } = router.query;
-
     router.push({
       query: _isOpen ? { ...restQuery, history: true } : restQuery,
     });
@@ -600,7 +602,7 @@ export default function ObligationHistoryDialog() {
             <Button
               className="text-muted-foreground"
               tooltip="Refresh"
-              icon={<RefreshCcw />}
+              icon={<RotateCw />}
               variant="ghost"
               size="icon"
               onClick={() => fetchEventsData()}

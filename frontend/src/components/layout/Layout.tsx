@@ -47,7 +47,7 @@ export default function Layout({ children }: PropsWithChildren) {
       className="relative flex min-h-dvh flex-col"
       style={
         {
-          background: "url('/footer.svg') bottom no-repeat",
+          background: "url('/assets/footer.svg') bottom no-repeat",
           "--header-top": `${bannerHeight ?? 0}px`,
         } as CSSProperties
       }

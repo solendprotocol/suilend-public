@@ -126,7 +126,7 @@ export default function Tooltip({
         {...portalProps}
       >
         <TooltipContent
-          className={cn("break-words", contentClassName)}
+          className={cn("z-[100] break-words", contentClassName)}
           collisionPadding={4}
           style={merge(
             {

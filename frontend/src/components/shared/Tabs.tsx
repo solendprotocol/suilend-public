@@ -9,6 +9,7 @@ interface Tab {
   id: string;
   title: string;
 }
+
 interface TabsProps extends PropsWithChildren {
   tabs: Tab[];
   selectedTab: string;

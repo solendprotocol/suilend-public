@@ -50,7 +50,7 @@ export default function AccountAssetTable({
         const { coinType, price, symbol, iconUrl } = row.original;
 
         return (
-          <div className="flex flex-row items-center gap-4">
+          <div className="flex flex-row items-center gap-3">
             <TokenIcon coinType={coinType} symbol={symbol} url={iconUrl} />
 
             <div className="flex flex-col gap-1">

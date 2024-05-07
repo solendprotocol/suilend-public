@@ -8,7 +8,10 @@ export default function ObligationDepositsCard() {
 
   if (!obligation) return null;
   return (
-    <Card id="assets-deposited" title="Assets deposited" noHeaderSeparator>
+    <Card
+      id="assets-deposited"
+      header={{ title: "Assets deposited", noSeparator: true }}
+    >
       <CardContent className="p-0">
         <AccountAssetTable
           assets={obligation.deposits.map((d) => ({
