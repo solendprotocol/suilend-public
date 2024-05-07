@@ -195,28 +195,34 @@ export default function ObligationHistoryDialog() {
           const borrowEvent = event as BorrowEvent;
           const coinMetadata = data.coinMetadataMap[borrowEvent.coinType];
 
-          const amount = new BigNumber(borrowEvent.liquidityAmount).div(
+          const incFeesAmount = new BigNumber(borrowEvent.liquidityAmount).div(
             10 ** coinMetadata.decimals,
           );
-          const feesAmount = new BigNumber(
-            borrowEvent.originationFeeAmount ?? 0,
-          ).div(10 ** coinMetadata.decimals);
+
+          const hasFeeField = borrowEvent.originationFeeAmount !== null;
+          const feesAmount = !hasFeeField
+            ? new BigNumber(0)
+            : new BigNumber(borrowEvent.originationFeeAmount).div(
+                10 ** coinMetadata.decimals,
+              );
 
           return (
             <div className="flex w-max flex-col gap-1">
               <TokenAmount
-                amount={amount}
+                amount={incFeesAmount.minus(feesAmount)}
                 coinType={borrowEvent.coinType}
                 symbol={coinMetadata.symbol}
                 iconUrl={coinMetadata.iconUrl}
                 decimals={coinMetadata.decimals}
               />
 
-              {feesAmount.gt(0) && (
+              {hasFeeField ? (
                 <TLabelSans className="w-max">
                   +{formatToken(feesAmount, { dp: coinMetadata.decimals })}{" "}
                   {coinMetadata.symbol} in fees
                 </TLabelSans>
+              ) : (
+                <TLabelSans className="w-max">Inclusive of fees</TLabelSans>
               )}
             </div>
           );
