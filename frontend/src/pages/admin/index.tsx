@@ -45,18 +45,18 @@ export default function Admin() {
 
   // Tabs
   enum Tab {
-    LENDING_MARKET = "lendingMarket",
     RESERVES = "reserves",
     RATE_LIMITER = "rateLimiter",
+    LENDING_MARKET = "lendingMarket",
     LIQUIDATE = "liquidate",
     OBLIGATIONS = "obligations",
   }
 
   const tabs = [
     [
-      { id: Tab.LENDING_MARKET, title: "Lending market" },
       { id: Tab.RESERVES, title: "Reserves" },
       { id: Tab.RATE_LIMITER, title: "Rate limiter" },
+      { id: Tab.LENDING_MARKET, title: "Lending market" },
     ],
     [
       { id: Tab.LIQUIDATE, title: "Liquidate" },
@@ -67,7 +67,7 @@ export default function Admin() {
   const selectedTab =
     tab && Object.values(Tab).includes(tab as Tab)
       ? (tab as Tab)
-      : Tab.LENDING_MARKET;
+      : Object.values(Tab)[0];
   const onSelectedTabChange = (tab: Tab) => {
     router.push({ query: { tab } });
   };
@@ -124,19 +124,6 @@ export default function Admin() {
             ))}
           </div>
 
-          {selectedTab === Tab.LENDING_MARKET && (
-            <Card>
-              <CardHeader>
-                <TTitle className="uppercase">Lending market</TTitle>
-              </CardHeader>
-              <CardContent className="flex flex-row flex-wrap gap-2">
-                <Button onClick={onMigrate} disabled={!isEditable}>
-                  Migrate
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-
           {selectedTab === Tab.RESERVES && (
             <div className="flex w-full flex-col gap-2">
               {data.lendingMarket.reserves.map((reserve) => {
@@ -174,6 +161,19 @@ export default function Admin() {
               <CardContent className="flex flex-row flex-wrap gap-2">
                 <RateLimiterConfigDialog />
                 <RateLimiterPropertiesDialog />
+              </CardContent>
+            </Card>
+          )}
+
+          {selectedTab === Tab.LENDING_MARKET && (
+            <Card>
+              <CardHeader>
+                <TTitle className="uppercase">Lending market</TTitle>
+              </CardHeader>
+              <CardContent className="flex flex-row flex-wrap gap-2">
+                <Button onClick={onMigrate} disabled={!isEditable}>
+                  Migrate
+                </Button>
               </CardContent>
             </Card>
           )}
