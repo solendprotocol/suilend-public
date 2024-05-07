@@ -8,10 +8,7 @@ import useSWR from "swr";
 
 import { phantom } from "@suilend/sdk/_generated/_framework/reified";
 import { LendingMarket } from "@suilend/sdk/_generated/suilend/lending-market/structs";
-import {
-  Reserve,
-  ReserveAssetDataEvent,
-} from "@suilend/sdk/_generated/suilend/reserve/structs";
+import { Reserve } from "@suilend/sdk/_generated/suilend/reserve/structs";
 import {
   LENDING_MARKET_ID,
   LENDING_MARKET_TYPE,
@@ -155,22 +152,6 @@ export function useFetchAppData(
     }
 
     const rewardMap = formatRewards(reserveMap, coinMetadataMap, obligations);
-
-    const weekAgo = new Date().getTime() - 7 * 24 * 60 * 60 * 1000;
-
-    await suiClient.queryEvents({
-      query: {
-        All: [
-          { MoveEventType: ReserveAssetDataEvent.$typeName },
-          {
-            TimeRange: {
-              startTime: weekAgo.toString(),
-              endTime: (weekAgo + 60 * 1000).toString(),
-            },
-          },
-        ],
-      },
-    });
 
     return {
       rawLendingMarket,
