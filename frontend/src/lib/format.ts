@@ -125,9 +125,11 @@ export const formatPrice = (value: BigNumber) => {
   });
 };
 
-export const formatPoints = (value: BigNumber) => {
+export const formatPoints = (value: BigNumber, options?: { dp?: number }) => {
+  const dp = options?.dp ?? 0;
+
   return formatNumber(value, {
-    dp: 0,
+    dp,
     roundingMode: BigNumber.ROUND_HALF_UP,
     exact: true,
   });
