@@ -43,7 +43,7 @@ export default function Document() {
         {/* Wormhole Connect */}
         <link
           rel="stylesheet"
-          href="https://bt70tedhyxrom6ou.public.blob.vercel-storage.com/wormhole-connect@0.3.7-FhOABSAeKnxtdcsxWvKbjbnzzf8n9P.css"
+          href="https://bt70tedhyxrom6ou.public.blob.vercel-storage.com/wormhole-connect@0.3.7/main.css"
         />
       </Head>
       <body>
