@@ -62,13 +62,9 @@ export default function ReserveRewardsDialog({
 
     const txb = new TransactionBlock();
 
-    const reserveArrayIndex = BigInt(
-      data.lendingMarket.reserves.findIndex((r) => r.id === reserve.id),
-    );
+    const reserveArrayIndex = reserve.arrayIndex;
     const isDepositReward = selectedTab === Tab.DEPOSITS;
-    const rewardIndex = BigInt(
-      poolRewardManager.poolRewards.findIndex((pr) => pr.id === poolReward.id),
-    );
+    const rewardIndex = BigInt(poolReward.rewardIndex);
     const rewardCoinType = poolReward.coinType;
 
     try {
@@ -107,13 +103,9 @@ export default function ReserveRewardsDialog({
 
     const txb = new TransactionBlock();
 
-    const reserveArrayIndex = BigInt(
-      data.lendingMarket.reserves.findIndex((r) => r.id === reserve.id),
-    );
+    const reserveArrayIndex = reserve.arrayIndex;
     const isDepositReward = selectedTab === Tab.DEPOSITS;
-    const rewardIndex = BigInt(
-      poolRewardManager.poolRewards.findIndex((pr) => pr.id === poolReward.id),
-    );
+    const rewardIndex = BigInt(poolReward.rewardIndex);
     const rewardCoinType = poolReward.coinType;
 
     try {

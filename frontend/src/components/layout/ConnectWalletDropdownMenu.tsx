@@ -107,6 +107,7 @@ export default function ConnectWalletDropdownMenu() {
     Suiet: {},
     "Sui Wallet": {
       downloadUrls: {
+        iOS: "https://apps.apple.com/us/app/sui-wallet-mobile/id6476572140",
         android:
           "https://play.google.com/store/apps/details?id=com.mystenlabs.suiwallet",
       },

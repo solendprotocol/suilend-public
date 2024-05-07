@@ -118,6 +118,7 @@ export type BorrowEvent = {
   reserveId: string;
   obligationId: string;
   liquidityAmount: string;
+  originationFeeAmount: string;
   timestamp: number;
   digest: string;
   eventIndex: number;

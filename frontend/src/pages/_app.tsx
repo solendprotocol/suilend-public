@@ -16,6 +16,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppContextProvider } from "@/contexts/AppContext";
 import { RefreshDataContextProvider } from "@/contexts/RefreshDataContext";
 import { WalletContextProvider } from "@/contexts/WalletContext";
+import { WormholeConnectContextProvider } from "@/contexts/WormholeConnectContext";
 import { fontClassNames } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
 
@@ -67,7 +68,9 @@ export default function App({
               <WalletContextProvider>
                 <AppContextProvider>
                   <RefreshDataContextProvider>
-                    {getLayout(<Component {...pageProps} />)}
+                    <WormholeConnectContextProvider>
+                      {getLayout(<Component {...pageProps} />)}
+                    </WormholeConnectContextProvider>
                   </RefreshDataContextProvider>
                 </AppContextProvider>
               </WalletContextProvider>

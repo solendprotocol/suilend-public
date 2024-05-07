@@ -123,9 +123,7 @@ export default function AddRewardDialog({
 
     const txb = new TransactionBlock();
 
-    const reserveArrayIndex = BigInt(
-      data.lendingMarket.reserves.findIndex((r) => r.id === reserve.id),
-    );
+    const reserveArrayIndex = reserve.arrayIndex;
     const rewardCoinType = coin.coinType;
     const rewardValue = new BigNumber(amount)
       .times(10 ** coin.mintDecimals)
