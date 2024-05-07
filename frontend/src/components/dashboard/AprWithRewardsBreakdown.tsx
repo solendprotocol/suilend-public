@@ -91,8 +91,8 @@ const formatPointsDailyReward = (
   showChange: boolean,
 ) =>
   showChange
-    ? `${formatPoints(value)} → ${isAprModifierInvalid ? "N/A" : formatPoints(newValue)}`
-    : formatPoints(value);
+    ? `${formatPoints(value, { dp: 4 })} → ${isAprModifierInvalid ? "N/A" : formatPoints(newValue, { dp: 4 })}`
+    : formatPoints(value, { dp: 4 });
 
 const formatTokenDailyReward = (
   value: BigNumber,
