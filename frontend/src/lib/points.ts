@@ -5,7 +5,7 @@ import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
 import { isSuilendPoints } from "@/lib/coinType";
 import { RewardMap, getFilteredRewards } from "@/lib/liquidityMining";
 
-const roundPoints = (value: BigNumber) =>
+export const roundPoints = (value: BigNumber) =>
   value.decimalPlaces(0, BigNumber.ROUND_HALF_UP);
 
 export const getPointsStats = (
@@ -70,12 +70,7 @@ export const getPointsStats = (
     });
   });
 
-  totalPoints.deposit = roundPoints(totalPoints.deposit);
-  totalPoints.borrow = roundPoints(totalPoints.borrow);
   totalPoints.total = totalPoints.deposit.plus(totalPoints.borrow);
-
-  pointsPerDay.deposit = roundPoints(pointsPerDay.deposit);
-  pointsPerDay.borrow = roundPoints(pointsPerDay.borrow);
   pointsPerDay.total = pointsPerDay.deposit.plus(pointsPerDay.borrow);
 
   return { totalPoints, pointsPerDay };

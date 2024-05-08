@@ -21,7 +21,7 @@ import { useAppContext } from "@/contexts/AppContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 import { formatRewards } from "@/lib/liquidityMining";
 import { API_URL } from "@/lib/navigation";
-import { getPointsStats } from "@/lib/points";
+import { getPointsStats, roundPoints } from "@/lib/points";
 
 export interface LeaderboardRowData {
   rank: number;
@@ -138,7 +138,9 @@ export function PointsContextProvider({ children }: PropsWithChildren) {
         const row = sortedRows[i];
         const lastRow = sortedRows[i - 1];
 
-        row.rank = row.totalPoints.eq(lastRow.totalPoints)
+        row.rank = roundPoints(row.totalPoints).eq(
+          roundPoints(lastRow.totalPoints),
+        )
           ? lastRow.rank
           : i + 1;
       }

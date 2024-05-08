@@ -93,7 +93,7 @@ export default function PointsLeaderboardTable() {
         columns={columns}
         data={leaderboardRows}
         noDataMessage="No users"
-        maxRows={100}
+        maxRows={250}
         container={{
           className: cn(!leaderboardRows && "-mb-6"),
         }}

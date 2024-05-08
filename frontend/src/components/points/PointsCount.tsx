@@ -2,6 +2,7 @@ import BigNumber from "bignumber.js";
 import { ClassValue } from "clsx";
 
 import PointsIcon from "@/components/points/PointsIcon";
+import Tooltip from "@/components/shared/Tooltip";
 import { TBody } from "@/components/shared/Typography";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatPoints } from "@/lib/format";
@@ -24,7 +25,9 @@ export default function PointsCount({
     <div className={cn("flex w-max flex-row items-center gap-1.5", className)}>
       <PointsIcon className={iconClassName} />
       {points !== undefined ? (
-        <TBody className={cn(labelClassName)}>{formatPoints(points)}</TBody>
+        <Tooltip title={formatPoints(points, { dp: 6 })}>
+          <TBody className={cn(labelClassName)}>{formatPoints(points)}</TBody>
+        </Tooltip>
       ) : (
         <Skeleton className="h-5 w-10" />
       )}
