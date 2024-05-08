@@ -26,7 +26,6 @@ import * as Sentry from "@sentry/nextjs";
 import { useWallet } from "@suiet/wallet-kit";
 import { useLDClient } from "launchdarkly-react-client-sdk";
 import { toast } from "sonner";
-import { useLocalStorage } from "usehooks-ts";
 
 export interface WalletContextValue {
   isConnectWalletDropdownOpen: boolean;
@@ -88,9 +87,14 @@ export function WalletContextProvider({ children }: PropsWithChildren) {
 
   // Account
   const [accounts, setAccounts] = useState<readonly WalletAccount[]>([]);
-  const [accountAddress, setAccountAddress] = useLocalStorage<
-    string | undefined
-  >("accountAddress", undefined);
+  const [accountAddress, setAccountAddress] = useState<string | undefined>(
+    undefined,
+  );
+  useEffect(() => {
+    setAccountAddress(
+      window.localStorage.getItem("accountAddress") ?? undefined,
+    );
+  }, []);
 
   useEffect(() => {
     if (connected) {
