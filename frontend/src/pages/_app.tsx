@@ -14,6 +14,7 @@ import Layout from "@/components/layout/Layout";
 import Toaster from "@/components/shared/Toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppContextProvider } from "@/contexts/AppContext";
+import { PointsContextProvider } from "@/contexts/PointsContext";
 import { RefreshDataContextProvider } from "@/contexts/RefreshDataContext";
 import { WalletContextProvider } from "@/contexts/WalletContext";
 import { WormholeConnectContextProvider } from "@/contexts/WormholeConnectContext";
@@ -68,9 +69,11 @@ export default function App({
               <WalletContextProvider>
                 <AppContextProvider>
                   <RefreshDataContextProvider>
-                    <WormholeConnectContextProvider>
-                      {getLayout(<Component {...pageProps} />)}
-                    </WormholeConnectContextProvider>
+                    <PointsContextProvider>
+                      <WormholeConnectContextProvider>
+                        {getLayout(<Component {...pageProps} />)}
+                      </WormholeConnectContextProvider>
+                    </PointsContextProvider>
                   </RefreshDataContextProvider>
                 </AppContextProvider>
               </WalletContextProvider>

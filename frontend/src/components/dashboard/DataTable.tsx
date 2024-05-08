@@ -181,6 +181,7 @@ interface DataTableProps<T> {
   noDataMessage: string;
   columnFilters?: ColumnFiltersState;
   skeletonRows?: number;
+  maxRows?: number;
   container?: TableContainerProps;
   tableClassName?: ClassValue;
   tableHeaderRowClassName?: ClassValue;
@@ -200,6 +201,7 @@ export default function DataTable<T>({
   noDataMessage,
   columnFilters,
   skeletonRows,
+  maxRows,
   container,
   tableClassName,
   tableHeaderRowClassName,
@@ -289,50 +291,54 @@ export default function DataTable<T>({
         ) : (
           <>
             {table.getRowModel().rows.length ? (
-              table.getRowModel().rows.map((row, index) => {
-                const children = (
-                  <TableRow
-                    className={cn(
-                      "hover:bg-transparent",
-                      (RowModal ||
-                        (onRowClick && onRowClick(row, index) !== undefined)) &&
-                        "cursor-pointer hover:bg-muted/10",
-                      tableRowClassName && tableRowClassName(row),
-                    )}
-                    style={{ appearance: "inherit" }}
-                    onClick={
-                      !RowModal && onRowClick
-                        ? onRowClick(row, index)
-                        : undefined
-                    }
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell
-                        key={cell.id}
-                        className={cn(
-                          "h-16",
-                          tableCellClassName && tableCellClassName(cell),
-                        )}
-                      >
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                );
+              table
+                .getRowModel()
+                .rows.slice(0, maxRows)
+                .map((row, index) => {
+                  const children = (
+                    <TableRow
+                      className={cn(
+                        "hover:bg-transparent",
+                        (RowModal ||
+                          (onRowClick &&
+                            onRowClick(row, index) !== undefined)) &&
+                          "cursor-pointer hover:bg-muted/10",
+                        tableRowClassName && tableRowClassName(row),
+                      )}
+                      style={{ appearance: "inherit" }}
+                      onClick={
+                        !RowModal && onRowClick
+                          ? onRowClick(row, index)
+                          : undefined
+                      }
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell
+                          key={cell.id}
+                          className={cn(
+                            "h-16",
+                            tableCellClassName && tableCellClassName(cell),
+                          )}
+                        >
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                          )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  );
 
-                return (
-                  <Fragment key={row.id}>
-                    {RowModal ? (
-                      <RowModal row={row.original}>{children}</RowModal>
-                    ) : (
-                      children
-                    )}
-                  </Fragment>
-                );
-              })
+                  return (
+                    <Fragment key={row.id}>
+                      {RowModal ? (
+                        <RowModal row={row.original}>{children}</RowModal>
+                      ) : (
+                        children
+                      )}
+                    </Fragment>
+                  );
+                })
             ) : (
               <TableRow
                 className={cn(

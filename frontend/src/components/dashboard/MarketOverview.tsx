@@ -11,25 +11,22 @@ export default function MarketOverview() {
 
   return (
     <Card
-      id="market-overview"
-      title="Pool overview"
-      headerEndContent={<MarketOverviewPopover />}
-      alwaysExpanded
+      header={{ title: "Pool overview", endContent: <MarketOverviewPopover /> }}
     >
-      <CardContent className="flex flex-row gap-4">
-        <div className="flex flex-1 flex-col gap-1">
+      <CardContent className="flex flex-row justify-between gap-4">
+        <div className="flex flex-col gap-1">
           <TLabel className="uppercase">Total deposits</TLabel>
           <TBody>{formatUsd(data.lendingMarket.depositedAmountUsd)}</TBody>
         </div>
 
-        <div className="flex flex-1 flex-col items-center gap-1">
+        <div className="flex flex-col items-center gap-1">
           <TLabel className="text-center uppercase">Total borrows</TLabel>
           <TBody className="text-center">
             {formatUsd(data.lendingMarket.borrowedAmountUsd)}
           </TBody>
         </div>
 
-        <div className="flex flex-1 flex-col items-end gap-1">
+        <div className="flex flex-col items-end gap-1">
           <TLabel className="text-right uppercase">TVL</TLabel>
           <TBody className="text-right">
             {formatUsd(data.lendingMarket.tvlUsd)}

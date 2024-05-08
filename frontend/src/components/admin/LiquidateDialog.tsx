@@ -290,6 +290,8 @@ export default function LiquidateDialog({
                   selected: deposit.reserve.symbol === selectedWithdrawAsset,
                 };
               })}
+              noDataMessage="No Deposits"
+              tableClassName="border-y-0"
               onRowClick={(row) => () => {
                 if (selectedWithdrawAsset === row.original.symbol) {
                   setSelectedWithdrawAsset("");
@@ -297,8 +299,6 @@ export default function LiquidateDialog({
                   setSelectedWithdrawAsset(row.original.symbol);
                 }
               }}
-              noDataMessage={"No Deposits"}
-              tableClassName="border-y-0"
             />
           </div>
           <div className="col-span-2 flex flex-row items-end gap-2">
@@ -312,6 +312,8 @@ export default function LiquidateDialog({
                   selected: borrow.reserve.symbol === selectedRepayAsset,
                 };
               })}
+              noDataMessage="No Borrows"
+              tableClassName="border-y-0"
               onRowClick={(row) => () => {
                 if (selectedRepayAsset === row.original.symbol) {
                   setSelectedRepayAsset("");
@@ -319,8 +321,6 @@ export default function LiquidateDialog({
                   setSelectedRepayAsset(row.original.symbol);
                 }
               }}
-              noDataMessage={"No Borrows"}
-              tableClassName="border-y-0"
             />
           </div>
           <div className="col-span-2 flex flex-row items-end gap-2">

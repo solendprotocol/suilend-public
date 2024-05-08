@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 
 import { useActionsModalContext } from "@/components/dashboard/actions-modal/ActionsModalContext";
+import Card from "@/components/dashboard/Card";
 import BorrowAprCell from "@/components/dashboard/market-table/BorrowAprCell";
 import DepositAprCell from "@/components/dashboard/market-table/DepositAprCell";
 import OpenLtvBwCell from "@/components/dashboard/market-table/OpenLtvBwCell";
@@ -21,11 +22,10 @@ import LabelWithTooltip from "@/components/shared/LabelWithTooltip";
 import Select from "@/components/shared/Select";
 import TokenIcon from "@/components/shared/TokenIcon";
 import { TBody, TLabel, TLabelSans } from "@/components/shared/Typography";
-import { Card } from "@/components/ui/card";
 import { SelectTrigger } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { OPEN_LTV_BW_TOOLTIP } from "@/lib/constants";
 import { formatPrice } from "@/lib/format";
+import { OPEN_LTV_BW_TOOLTIP } from "@/lib/tooltips";
 import { cn } from "@/lib/utils";
 
 interface MarketCardProps {
@@ -35,7 +35,10 @@ interface MarketCardProps {
 
 function MarketCard({ rowData, onClick }: MarketCardProps) {
   return (
-    <Card className="w-full cursor-pointer rounded-md" onClick={onClick}>
+    <Card
+      className="cursor-pointer transition-colors hover:bg-muted/10"
+      onClick={onClick}
+    >
       <div className="flex w-full flex-col items-center gap-4 p-4">
         <div className="flex w-full flex-col items-center gap-2">
           <div className="flex flex-row items-center gap-2">
@@ -163,6 +166,7 @@ export default function MarketCardList({
     },
   };
 
+  const [isSortByOpen, setIsSortByOpen] = useState<boolean>(false);
   const [sortBy, setSortBy] = useState<SortOption | undefined>(undefined);
   const onSortChange = (value: string) => setSortBy(value as SortOption);
 
@@ -205,10 +209,12 @@ export default function MarketCardList({
 
         <div className="flex h-5 flex-row items-center gap-1">
           <Select
+            root={{ open: isSortByOpen, onOpenChange: setIsSortByOpen }}
             trigger={
               <SelectTrigger
                 className={cn(
                   "h-8 w-fit gap-1 border-none p-0 uppercase text-muted-foreground ring-offset-transparent transition-colors hover:text-foreground focus:ring-transparent",
+                  isSortByOpen && "text-foreground",
                   sortBy && "!text-primary-foreground",
                 )}
                 icon={<SortByIcon className="h-3 w-3" />}

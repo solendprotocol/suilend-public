@@ -16,7 +16,7 @@ export default function Bridge() {
       </Head>
 
       <div className="flex w-full flex-col items-center">
-        <Alert className="mb-8 max-w-[650px]">
+        <Alert className="mb-8 max-w-[650px] rounded-sm">
           <Info className="my-0.5 h-4 w-4 !text-muted-foreground" />
           <AlertTitle
             className={cn(bodySansClassNames, "mb-0 tracking-normal")}

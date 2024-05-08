@@ -2,8 +2,6 @@ import BigNumber from "bignumber.js";
 
 export enum EventType {
   RESERVE_ASSET_DATA = "reserveAssetData",
-  MINT = "mint",
-  REDEEM = "redeem",
   DEPOSIT = "deposit",
   BORROW = "borrow",
   WITHDRAW = "withdraw",
@@ -14,8 +12,6 @@ export enum EventType {
 
 export const EventTypeNameMap: Record<EventType, string> = {
   [EventType.RESERVE_ASSET_DATA]: "Reserve asset data",
-  [EventType.MINT]: "Mint",
-  [EventType.REDEEM]: "Redeem",
   [EventType.DEPOSIT]: "Deposit",
   [EventType.BORROW]: "Borrow",
   [EventType.WITHDRAW]: "Withdraw",

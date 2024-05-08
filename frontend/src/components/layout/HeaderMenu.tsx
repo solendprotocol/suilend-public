@@ -15,16 +15,15 @@ export default function HeaderMenu() {
     >
       <div className="flex w-full flex-1 flex-col gap-8 px-6 py-6 md:pr-10">
         <div className="flex flex-1 flex-col">
-          <div className="flex flex-col gap-6">
-            <NavigationLinks className="lg:hidden" />
+          <div className="flex flex-col gap-6 lg:hidden">
+            <NavigationLinks />
           </div>
+          <Separator className="my-8 lg:hidden" />
 
-          <Separator className="my-8 md:hidden" />
           <div className="flex flex-col gap-6 md:hidden">
             <ExternalLinks />
           </div>
-
-          <Separator className="my-8 lg:hidden" />
+          <Separator className="my-8 md:hidden" />
 
           <div className="flex flex-col gap-6">
             <div className="flex flex-col gap-2 md:hidden">

@@ -1,6 +1,8 @@
 import { useSearchParams } from "next/navigation";
 import {
+  Dispatch,
   PropsWithChildren,
+  SetStateAction,
   createContext,
   useCallback,
   useContext,
@@ -27,6 +29,8 @@ import { toast } from "sonner";
 import { useLocalStorage } from "usehooks-ts";
 
 export interface WalletContextValue {
+  isConnectWalletDropdownOpen: boolean;
+  setIsConnectWalletDropdownOpen: Dispatch<SetStateAction<boolean>>;
   accounts: readonly WalletAccount[];
   account?: WalletAccount;
   selectAccount: (address: string) => void;
@@ -41,6 +45,10 @@ export interface WalletContextValue {
 }
 
 const WalletContext = createContext<WalletContextValue>({
+  isConnectWalletDropdownOpen: false,
+  setIsConnectWalletDropdownOpen: () => {
+    throw new Error("WalletContextProvider not initialized");
+  },
   accounts: [],
   account: undefined,
   selectAccount: async () => {
@@ -72,7 +80,11 @@ export function WalletContextProvider({ children }: PropsWithChildren) {
   } = useWallet();
 
   const searchParams = useSearchParams();
-  const impersonatedAddress = searchParams.get("wallet") ?? undefined;
+  const impersonatedAddress = searchParams?.get("wallet") ?? undefined;
+
+  // Wallet connect dropdown
+  const [isConnectWalletDropdownOpen, setIsConnectWalletDropdownOpen] =
+    useState<boolean>(false);
 
   // Account
   const [accounts, setAccounts] = useState<readonly WalletAccount[]>([]);
@@ -196,6 +208,8 @@ export function WalletContextProvider({ children }: PropsWithChildren) {
   // Context
   const contextValue = useMemo(
     () => ({
+      isConnectWalletDropdownOpen,
+      setIsConnectWalletDropdownOpen,
       accounts,
       account,
       selectAccount: (_address: string) => {
@@ -204,7 +218,8 @@ export function WalletContextProvider({ children }: PropsWithChildren) {
 
         setAccountAddress(_address);
         toast.info(
-          `Switched to ${[_account?.label, _address].filter(Boolean).join(" • ")}`,
+          `Switched to ${_account?.label ? _account.label : _address}`,
+          { description: _account?.label ? _address : undefined },
         );
       },
       address: impersonatedAddress ?? account?.address,
@@ -217,6 +232,7 @@ export function WalletContextProvider({ children }: PropsWithChildren) {
       signExecuteAndWaitTransactionBlock,
     }),
     [
+      isConnectWalletDropdownOpen,
       accounts,
       account,
       setAccountAddress,

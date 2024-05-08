@@ -98,7 +98,11 @@ function WalletDropdownItem({ wallet }: WalletDropdownItemProps) {
 }
 
 export default function ConnectWalletDropdownMenu() {
-  const { isImpersonatingAddress } = useWalletContext();
+  const {
+    isConnectWalletDropdownOpen,
+    setIsConnectWalletDropdownOpen,
+    isImpersonatingAddress,
+  } = useWalletContext();
 
   // Wallets
   const { configuredWallets, detectedWallets } = useWallet();
@@ -294,14 +298,16 @@ export default function ConnectWalletDropdownMenu() {
   );
 
   // State
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-  const Icon = isOpen ? ChevronUp : ChevronDown;
+  const Icon = isConnectWalletDropdownOpen ? ChevronUp : ChevronDown;
 
   const [showOtherWallets, setShowOtherWallets] = useState<boolean>(false);
 
   return (
     <DropdownMenu
-      root={{ open: isOpen, onOpenChange: setIsOpen }}
+      root={{
+        open: isConnectWalletDropdownOpen,
+        onOpenChange: setIsConnectWalletDropdownOpen,
+      }}
       trigger={
         <Button
           className="uppercase"

@@ -138,13 +138,14 @@ export default function ObligationPositionCard() {
   return (
     <Card
       id="position"
-      title="Account"
-      headerStartContent={<ObligationDetailsDialog />}
-      headerEndContent={
-        data.obligations &&
-        data.obligations.length > 1 && <ObligationSwitcherPopover />
-      }
-      noHeaderSeparator
+      header={{
+        title: "Account",
+        startContent: <ObligationDetailsDialog />,
+        endContent: data.obligations && data.obligations.length > 1 && (
+          <ObligationSwitcherPopover />
+        ),
+        noSeparator: true,
+      }}
     >
       <CardContent>
         {!address ? (

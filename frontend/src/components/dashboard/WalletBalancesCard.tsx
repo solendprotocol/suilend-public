@@ -18,9 +18,11 @@ export default function WalletBalancesCard() {
   return (
     <Card
       id="wallet-balances"
-      titleIcon={<Wallet />}
-      title="Wallet balances"
-      noHeaderSeparator
+      header={{
+        titleIcon: <Wallet />,
+        title: "Wallet balances",
+        noSeparator: true,
+      }}
     >
       <CardContent className="p-0">
         <AccountAssetTable

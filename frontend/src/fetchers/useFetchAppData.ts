@@ -8,7 +8,6 @@ import useSWR from "swr";
 
 import { phantom } from "@suilend/sdk/_generated/_framework/reified";
 import { LendingMarket } from "@suilend/sdk/_generated/suilend/lending-market/structs";
-import { Reserve } from "@suilend/sdk/_generated/suilend/reserve/structs";
 import {
   LENDING_MARKET_ID,
   LENDING_MARKET_TYPE,
@@ -26,7 +25,7 @@ import { ParsedCoinBalance, parseCoinBalances } from "@/lib/coinBalance";
 import { getCoinMetadataMap } from "@/lib/coinMetadata";
 import { formatRewards } from "@/lib/liquidityMining";
 
-export function useFetchAppData(
+export default function useFetchAppData(
   suiClient: SuiClient,
   address: string | undefined,
 ) {
@@ -42,16 +41,11 @@ export function useFetchAppData(
       LENDING_MARKET_ID,
     );
 
-    const connection = new SuiPriceServiceConnection(
-      "https://hermes.pyth.network",
-    );
-
-    let refreshedReserves = rawLendingMarket.reserves as Reserve<string>[];
-    refreshedReserves = await simulate.refreshReservePrice(
+    const refreshedRawReserves = await simulate.refreshReservePrice(
       rawLendingMarket.reserves.map((r) =>
         simulate.compoundReserveInterest(r, now),
       ),
-      connection,
+      new SuiPriceServiceConnection("https://hermes.pyth.network"),
     );
 
     if (!suilendClientRef.current) {
@@ -63,7 +57,7 @@ export function useFetchAppData(
     } else suilendClientRef.current.lendingMarket = rawLendingMarket;
 
     const coinTypes: string[] = [];
-    refreshedReserves.forEach((r) => {
+    refreshedRawReserves.forEach((r) => {
       coinTypes.push(normalizeStructTag(r.coinType.name));
 
       [
@@ -83,7 +77,7 @@ export function useFetchAppData(
 
     const lendingMarket = parseLendingMarket(
       rawLendingMarket,
-      refreshedReserves,
+      refreshedRawReserves,
       coinMetadataMap,
       now,
     );
@@ -121,15 +115,13 @@ export function useFetchAppData(
           ),
         );
 
-        const refreshedObligations = await Promise.all(
-          rawObligations.map((rawObligation) =>
-            simulate.refreshObligation(rawObligation, refreshedReserves),
-          ),
-        );
-
-        obligations = refreshedObligations.map((refreshedObligation) =>
-          parseObligation(refreshedObligation, reserveMap),
-        );
+        obligations = rawObligations
+          .map((rawObligation) =>
+            simulate.refreshObligation(rawObligation, refreshedRawReserves),
+          )
+          .map((refreshedObligation) =>
+            parseObligation(refreshedObligation, reserveMap),
+          );
       }
 
       // Wallet assets
@@ -154,9 +146,9 @@ export function useFetchAppData(
     const rewardMap = formatRewards(reserveMap, coinMetadataMap, obligations);
 
     return {
-      rawLendingMarket,
       lendingMarket,
       lendingMarketOwnerCapId: lendingMarketOwnerCapId ?? undefined,
+      reserveMap,
       obligationOwnerCaps,
       obligations,
       coinBalancesMap,

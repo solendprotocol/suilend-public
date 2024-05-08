@@ -41,6 +41,8 @@ export const EXPLORERS = [
   {
     id: Explorer.SUI_SCAN,
     name: "Suiscan",
+    buildAddressUrl: (address: string) =>
+      `https://suiscan.xyz/mainnet/account/${address}`,
     buildObjectUrl: (id: string) => `https://suiscan.xyz/mainnet/object/${id}`,
     buildCoinUrl: (coinType: string) =>
       `https://suiscan.xyz/mainnet/coin/${coinType}`,
@@ -49,12 +51,11 @@ export const EXPLORERS = [
   {
     id: Explorer.SUI_VISION,
     name: "SuiVision",
+    buildAddressUrl: (address: string) =>
+      `https://suivision.xyz/account/${address}`,
     buildObjectUrl: (id: string) => `https://suivision.xyz/object/${id}`,
     buildCoinUrl: (coinType: string) =>
       `https://suivision.xyz/coin/${coinType}`,
     buildTxUrl: (digest: string) => `https://suivision.xyz/txblock/${digest}`,
   },
 ];
-
-export const OPEN_LTV_BW_TOOLTIP =
-  "Open LTV is a ratio that determines how much borrow power is contributed by a deposited asset. Borrow weight (BW) is a multiplier on the value borrowed, used for borrow limit calculations.";

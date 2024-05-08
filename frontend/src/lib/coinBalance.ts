@@ -14,7 +14,7 @@ export type ParsedCoinBalance = {
   mintDecimals: number;
   price?: BigNumber;
   symbol: string;
-  iconUrl?: string;
+  iconUrl?: string | null;
   balance: BigNumber;
 };
 
