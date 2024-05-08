@@ -3,10 +3,10 @@ import { cn } from "@/lib/utils";
 function Skeleton({
   className,
   ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+}: React.HTMLAttributes<HTMLSpanElement>) {
   return (
     <span
-      className={cn("display animate-pulse bg-muted/25", className)}
+      className={cn("block animate-pulse bg-muted/25", className)}
       {...props}
     />
   );
