@@ -10,10 +10,5 @@ export function cn(...inputs: ClassValue[]) {
 export const hoverUnderlineClassName =
   "underline decoration-dotted decoration-1 underline-offset-2";
 
-export const sortInReserveOrder =
-  (reserves: ParsedReserve[]) =>
-  (aA: { reserve: ParsedReserve }, aB: { reserve: ParsedReserve }) => {
-    const aAReserveIndex = reserves.findIndex((r) => r.id === aA.reserve.id);
-    const aBReserveIndex = reserves.findIndex((r) => r.id === aB.reserve.id);
-    return aAReserveIndex - aBReserveIndex;
-  };
+export const reserveSort = (a: ParsedReserve, b: ParsedReserve) =>
+  Number(a?.arrayIndex ?? 0) - Number(b?.arrayIndex ?? 0);

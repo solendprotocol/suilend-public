@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { normalizeStructTag } from "@mysten/sui.js/utils";
 import { ColumnDef, Row } from "@tanstack/react-table";
@@ -15,16 +15,26 @@ import {
 } from "lucide-react";
 
 import { WAD } from "@suilend/sdk/constants";
+import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
 
-import DataTable, { tableHeader } from "@/components/dashboard/DataTable";
+import DataTable, {
+  decimalSortingFn,
+  tableHeader,
+} from "@/components/dashboard/DataTable";
 import Dialog from "@/components/dashboard/Dialog";
 import ObligationSwitcherPopover from "@/components/dashboard/ObligationSwitcherPopover";
 import Button from "@/components/shared/Button";
 import OpenOnExplorerButton from "@/components/shared/OpenOnExplorerButton";
 import Tabs from "@/components/shared/Tabs";
 import TokenIcon from "@/components/shared/TokenIcon";
-import { TBody, TLabel, TLabelSans } from "@/components/shared/Typography";
+import {
+  TBody,
+  TLabel,
+  TLabelSans,
+  TTitle,
+} from "@/components/shared/Typography";
 import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import {
   BorrowEvent,
@@ -40,9 +50,14 @@ import {
   eventSortDesc,
   getDedupedClaimRewardEvents,
 } from "@/lib/events";
-import { formatToken } from "@/lib/format";
+import { formatToken, formatUsd } from "@/lib/format";
 import { API_URL } from "@/lib/navigation";
-import { cn } from "@/lib/utils";
+import { cn, reserveSort } from "@/lib/utils";
+
+const getCtokenExchangeRate = (event: ReserveAssetDataEvent) =>
+  new BigNumber(new BigNumber(event.supplyAmount).div(WAD.toString())).div(
+    event.ctokenSupply,
+  );
 
 type EventsData = {
   reserveAssetData: ReserveAssetDataEvent[];
@@ -94,11 +109,6 @@ interface HistoryTabProps {
 function HistoryTab({ eventsData }: HistoryTabProps) {
   const { explorer, ...restAppContext } = useAppContext();
   const data = restAppContext.data as AppData;
-
-  const getCtokenExchangeRate = (event: ReserveAssetDataEvent) =>
-    new BigNumber(new BigNumber(event.supplyAmount).div(WAD.toString())).div(
-      event.ctokenSupply,
-    );
 
   // Columns
   interface RowData {
@@ -199,32 +209,25 @@ function HistoryTab({ eventsData }: HistoryTabProps) {
           const incFeesAmount = new BigNumber(borrowEvent.liquidityAmount).div(
             10 ** coinMetadata.decimals,
           );
-
-          const hasFeeField = borrowEvent.originationFeeAmount !== null;
-          const feesAmount = !hasFeeField
-            ? new BigNumber(0)
-            : new BigNumber(borrowEvent.originationFeeAmount).div(
-                10 ** coinMetadata.decimals,
-              );
+          const feesAmount = new BigNumber(
+            borrowEvent.originationFeeAmount,
+          ).div(10 ** coinMetadata.decimals);
+          const amount = incFeesAmount.minus(feesAmount);
 
           return (
             <div className="flex w-max flex-col gap-1">
               <TokenAmount
-                amount={incFeesAmount.minus(feesAmount)}
+                amount={amount}
                 coinType={borrowEvent.coinType}
                 symbol={coinMetadata.symbol}
                 iconUrl={coinMetadata.iconUrl}
                 decimals={coinMetadata.decimals}
               />
 
-              {hasFeeField ? (
-                <TLabelSans className="w-max">
-                  +{formatToken(feesAmount, { dp: coinMetadata.decimals })}{" "}
-                  {coinMetadata.symbol} in fees
-                </TLabelSans>
-              ) : (
-                <TLabelSans className="w-max">Inclusive of fees</TLabelSans>
-              )}
+              <TLabelSans className="w-max">
+                +{formatToken(feesAmount, { dp: coinMetadata.decimals })}{" "}
+                {coinMetadata.symbol} in fees
+              </TLabelSans>
             </div>
           );
         } else if (type === EventType.WITHDRAW) {
@@ -284,8 +287,8 @@ function HistoryTab({ eventsData }: HistoryTabProps) {
               </TLabelSans>
             );
 
-          let liquidatedAmount = new BigNumber(0);
-          let repaidAmount = new BigNumber(0);
+          let withdrawAmount = new BigNumber(0);
+          let repayAmount = new BigNumber(0);
 
           if (isGroupRow) {
             for (const subRow of row.subRows) {
@@ -298,12 +301,12 @@ function HistoryTab({ eventsData }: HistoryTabProps) {
               if (!reserveAssetDataEvent)
                 return <TLabelSans className="w-max">N/A</TLabelSans>;
 
-              liquidatedAmount = liquidatedAmount.plus(
+              withdrawAmount = withdrawAmount.plus(
                 new BigNumber(subRowLiquidateEvent.withdrawAmount)
                   .times(getCtokenExchangeRate(reserveAssetDataEvent))
                   .div(10 ** withdrawReserve.mintDecimals),
               );
-              repaidAmount = repaidAmount.plus(
+              repayAmount = repayAmount.plus(
                 new BigNumber(subRowLiquidateEvent.repayAmount).div(
                   10 ** repayReserve.mintDecimals,
                 ),
@@ -318,12 +321,12 @@ function HistoryTab({ eventsData }: HistoryTabProps) {
                 <TLabelSans className="w-max">See txn for details</TLabelSans>
               );
 
-            liquidatedAmount = liquidatedAmount.plus(
+            withdrawAmount = withdrawAmount.plus(
               new BigNumber(liquidateEvent.withdrawAmount)
                 .times(getCtokenExchangeRate(reserveAssetDataEvent))
                 .div(10 ** withdrawReserve.mintDecimals),
             );
-            repaidAmount = repaidAmount.plus(
+            repayAmount = repayAmount.plus(
               new BigNumber(liquidateEvent.repayAmount).div(
                 10 ** repayReserve.mintDecimals,
               ),
@@ -335,7 +338,7 @@ function HistoryTab({ eventsData }: HistoryTabProps) {
               <div className="flex w-max flex-row items-center gap-2">
                 <TLabelSans>Deposits liquidated</TLabelSans>
                 <TokenAmount
-                  amount={liquidatedAmount}
+                  amount={withdrawAmount}
                   coinType={withdrawReserve.coinType}
                   symbol={withdrawReserve.symbol}
                   iconUrl={withdrawReserve.iconUrl}
@@ -345,7 +348,7 @@ function HistoryTab({ eventsData }: HistoryTabProps) {
               <div className="flex w-max flex-row items-center gap-2">
                 <TLabelSans>Borrows repaid</TLabelSans>
                 <TokenAmount
-                  amount={repaidAmount}
+                  amount={repayAmount}
                   coinType={repayReserve.coinType}
                   symbol={repayReserve.symbol}
                   iconUrl={repayReserve.iconUrl}
@@ -476,7 +479,7 @@ function HistoryTab({ eventsData }: HistoryTabProps) {
 
   return (
     <>
-      <div className="flex flex-row flex-wrap gap-2 p-4 pt-0">
+      <div className="flex flex-row flex-wrap gap-2 p-4">
         {initialFilters.map((eventType) => (
           <Button
             key={eventType}
@@ -543,6 +546,405 @@ function HistoryTab({ eventsData }: HistoryTabProps) {
         }}
       />
     </>
+  );
+}
+
+interface EarningsTabProps {
+  eventsData: EventsData | undefined;
+}
+
+function EarningsTab({ eventsData }: EarningsTabProps) {
+  const appContext = useAppContext();
+  const data = appContext.data as AppData;
+  const obligation = appContext.obligation as ParsedObligation;
+
+  // Data
+  const interestEarned = useMemo(() => {
+    if (eventsData === undefined) return undefined;
+
+    const netDeposits: Record<string, BigNumber> = {};
+    const netDepositsUsd: Record<string, BigNumber> = {};
+
+    eventsData.deposit.forEach((depositEvent) => {
+      const reserveAssetDataEvent = eventsData.reserveAssetData.find(
+        (e) => e.digest === depositEvent.digest,
+      );
+      if (!reserveAssetDataEvent) return;
+
+      if (netDeposits[depositEvent.coinType] === undefined)
+        netDeposits[depositEvent.coinType] = new BigNumber(0);
+      if (netDepositsUsd[depositEvent.coinType] === undefined)
+        netDepositsUsd[depositEvent.coinType] = new BigNumber(0);
+
+      const coinMetadata = data.coinMetadataMap[depositEvent.coinType];
+
+      const amount = new BigNumber(depositEvent.ctokenAmount)
+        .times(getCtokenExchangeRate(reserveAssetDataEvent))
+        .div(10 ** coinMetadata.decimals);
+      const amountUsd = amount
+        .times(reserveAssetDataEvent.price)
+        .div(WAD.toString());
+
+      netDeposits[depositEvent.coinType] =
+        netDeposits[depositEvent.coinType].plus(amount);
+      netDepositsUsd[depositEvent.coinType] =
+        netDepositsUsd[depositEvent.coinType].plus(amountUsd);
+    });
+
+    eventsData.withdraw.forEach((withdrawEvent) => {
+      const reserveAssetDataEvent = eventsData.reserveAssetData.find(
+        (e) => e.digest === withdrawEvent.digest,
+      );
+      if (!reserveAssetDataEvent) return;
+
+      if (netDeposits[withdrawEvent.coinType] === undefined)
+        netDeposits[withdrawEvent.coinType] = new BigNumber(0);
+      if (netDepositsUsd[withdrawEvent.coinType] === undefined)
+        netDepositsUsd[withdrawEvent.coinType] = new BigNumber(0);
+
+      const coinMetadata = data.coinMetadataMap[withdrawEvent.coinType];
+
+      const amount = new BigNumber(withdrawEvent.ctokenAmount)
+        .times(getCtokenExchangeRate(reserveAssetDataEvent))
+        .div(10 ** coinMetadata.decimals);
+      const amountUsd = amount
+        .times(reserveAssetDataEvent.price)
+        .div(WAD.toString());
+
+      netDeposits[withdrawEvent.coinType] =
+        netDeposits[withdrawEvent.coinType].minus(amount);
+      netDepositsUsd[withdrawEvent.coinType] =
+        netDepositsUsd[withdrawEvent.coinType].minus(amountUsd);
+    });
+
+    eventsData.liquidate.forEach((liquidateEvent) => {
+      const reserveAssetDataEvent = eventsData.reserveAssetData.find(
+        (e) => e.digest === liquidateEvent.digest,
+      );
+      if (!reserveAssetDataEvent) return;
+
+      const withdrawReserve = data.lendingMarket.reserves.find(
+        (reserve) => reserve.id === liquidateEvent.withdrawReserveId,
+      );
+      if (!withdrawReserve) return;
+
+      if (netDeposits[withdrawReserve.coinType] === undefined)
+        netDeposits[withdrawReserve.coinType] = new BigNumber(0);
+      if (netDepositsUsd[withdrawReserve.coinType] === undefined)
+        netDepositsUsd[withdrawReserve.coinType] = new BigNumber(0);
+
+      const withdrawAmount = new BigNumber(liquidateEvent.withdrawAmount)
+        .times(getCtokenExchangeRate(reserveAssetDataEvent))
+        .div(10 ** withdrawReserve.mintDecimals);
+      const withdrawAmountUsd = withdrawAmount
+        .times(reserveAssetDataEvent.price)
+        .div(WAD.toString());
+
+      netDeposits[withdrawReserve.coinType] =
+        netDeposits[withdrawReserve.coinType].minus(withdrawAmount);
+      netDepositsUsd[withdrawReserve.coinType] =
+        netDepositsUsd[withdrawReserve.coinType].minus(withdrawAmountUsd);
+    });
+
+    const result: Record<string, BigNumber> = {};
+    Object.entries(netDeposits).forEach(([coinType, netDeposit]) => {
+      const currentDeposit = obligation.deposits.find(
+        (deposit) => deposit.coinType === coinType,
+      );
+
+      result[coinType] = new BigNumber(0)
+        .plus(currentDeposit?.depositedAmount ?? 0)
+        .minus(netDeposit);
+    });
+
+    // const totalInterestEarnedUsd: Record<string, BigNumber> = {};
+    // Object.entries(netDepositsUsd).forEach(([coinType, netDepositUsd]) => {
+    //   const currentDeposit = obligation.deposits.find(
+    //     (deposit) => deposit.coinType === coinType,
+    //   );
+
+    //   totalInterestEarnedUsd[coinType] = new BigNumber(0)
+    //     .plus(currentDeposit?.depositedAmountUsd ?? 0)
+    //     .minus(netDepositUsd);
+    // });
+
+    return result;
+  }, [
+    eventsData,
+    data.coinMetadataMap,
+    data.lendingMarket.reserves,
+    obligation.deposits,
+  ]);
+
+  const interestPaid = useMemo(() => {
+    if (eventsData === undefined) return undefined;
+
+    const netBorrows: Record<string, BigNumber> = {};
+
+    eventsData.borrow.forEach((borrowEvent) => {
+      if (netBorrows[borrowEvent.coinType] === undefined)
+        netBorrows[borrowEvent.coinType] = new BigNumber(0);
+
+      const coinMetadata = data.coinMetadataMap[borrowEvent.coinType];
+
+      const incFeesAmount = new BigNumber(borrowEvent.liquidityAmount).div(
+        10 ** coinMetadata.decimals,
+      );
+
+      netBorrows[borrowEvent.coinType] =
+        netBorrows[borrowEvent.coinType].plus(incFeesAmount);
+    });
+
+    eventsData.repay.forEach((repayEvent) => {
+      if (netBorrows[repayEvent.coinType] === undefined)
+        netBorrows[repayEvent.coinType] = new BigNumber(0);
+
+      const coinMetadata = data.coinMetadataMap[repayEvent.coinType];
+
+      const amount = new BigNumber(repayEvent.liquidityAmount).div(
+        10 ** coinMetadata.decimals,
+      );
+
+      netBorrows[repayEvent.coinType] =
+        netBorrows[repayEvent.coinType].minus(amount);
+    });
+
+    eventsData.liquidate.forEach((liquidateEvent) => {
+      const reserveAssetDataEvent = eventsData.reserveAssetData.find(
+        (e) => e.digest === liquidateEvent.digest,
+      );
+      if (!reserveAssetDataEvent) return;
+
+      const repayReserve = data.lendingMarket.reserves.find(
+        (reserve) => reserve.id === liquidateEvent.repayReserveId,
+      );
+      if (!repayReserve) return;
+
+      if (netBorrows[repayReserve.coinType] === undefined)
+        netBorrows[repayReserve.coinType] = new BigNumber(0);
+
+      const repayAmount = new BigNumber(liquidateEvent.repayAmount)
+        .times(getCtokenExchangeRate(reserveAssetDataEvent))
+        .div(10 ** repayReserve.mintDecimals);
+
+      netBorrows[repayReserve.coinType] =
+        netBorrows[repayReserve.coinType].minus(repayAmount);
+    });
+
+    const result: Record<string, BigNumber> = {};
+    Object.entries(netBorrows).forEach(([coinType, netBorrow]) => {
+      const currentBorrow = obligation.borrows.find(
+        (borrow) => borrow.coinType === coinType,
+      );
+
+      result[coinType] = new BigNumber(0)
+        .plus(currentBorrow?.borrowedAmount ?? 0)
+        .minus(netBorrow);
+    });
+
+    return result;
+  }, [
+    eventsData,
+    data.coinMetadataMap,
+    data.lendingMarket.reserves,
+    obligation.borrows,
+  ]);
+
+  // Totals
+  const totalInterestEarnedUsd =
+    interestEarned !== undefined
+      ? Object.entries(interestEarned).reduce((acc, [coinType, earned]) => {
+          const reserve = data.reserveMap[coinType];
+          if (!reserve) return acc;
+
+          return acc.plus(earned.times(reserve.price));
+        }, new BigNumber(0))
+      : undefined;
+  const totalInterestPaidUsd =
+    interestPaid !== undefined
+      ? Object.entries(interestPaid).reduce((acc, [coinType, paid]) => {
+          const reserve = data.reserveMap[coinType];
+          if (!reserve) return acc;
+
+          return acc.plus(paid.times(reserve.price));
+        }, new BigNumber(0))
+      : undefined;
+
+  const totalEarningsUsd =
+    totalInterestEarnedUsd !== undefined && totalInterestPaidUsd !== undefined
+      ? totalInterestEarnedUsd.minus(totalInterestPaidUsd)
+      : undefined;
+
+  // Columns
+  interface RowData {
+    coinType: string;
+    amount: BigNumber;
+  }
+
+  const columns = (amountTitle: string): ColumnDef<RowData>[] => [
+    {
+      accessorKey: "coinType",
+      sortingFn: "text",
+      header: ({ column }) => tableHeader(column, "Asset name"),
+      cell: ({ row }) => {
+        const { coinType } = row.original;
+
+        const coinMetadata = data.coinMetadataMap[coinType];
+
+        return (
+          <div className="flex w-max flex-row items-center gap-2">
+            <TokenIcon
+              className="h-4 w-4"
+              coinType={coinType}
+              symbol={coinMetadata.symbol}
+              url={coinMetadata.iconUrl}
+            />
+
+            <TBody>{coinMetadata.symbol}</TBody>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "amount",
+      sortingFn: decimalSortingFn("amount"),
+      header: ({ column }) =>
+        tableHeader(column, amountTitle, { isNumerical: true }),
+      cell: ({ row }) => {
+        const { coinType, amount } = row.original;
+
+        const coinMetadata = data.coinMetadataMap[coinType];
+
+        return (
+          <div className="flex flex-col items-end gap-1">
+            <TBody className="w-max text-right">
+              {formatToken(amount, { dp: coinMetadata.decimals })}{" "}
+              {coinMetadata.symbol}
+            </TBody>
+          </div>
+        );
+      },
+    },
+  ];
+
+  // Rows
+  const earnedRows = (() => {
+    if (interestEarned === undefined) return undefined;
+
+    return Object.entries(interestEarned)
+      .reduce(
+        (acc: RowData[], [coinType, earned]) => [
+          ...acc,
+          { coinType, amount: earned } as RowData,
+        ],
+        [],
+      )
+      .sort((a, b) =>
+        reserveSort(data.reserveMap[a.coinType], data.reserveMap[b.coinType]),
+      );
+  })();
+
+  const paidRows = (() => {
+    if (interestPaid === undefined) return undefined;
+
+    return Object.entries(interestPaid)
+      .reduce(
+        (acc: RowData[], [coinType, paid]) => [
+          ...acc,
+          { coinType, amount: paid } as RowData,
+        ],
+        [],
+      )
+      .sort((a, b) =>
+        reserveSort(data.reserveMap[a.coinType], data.reserveMap[b.coinType]),
+      );
+  })();
+
+  return (
+    <div className="flex flex-1 flex-col gap-8 overflow-auto pt-4">
+      <div className="flex flex-col gap-2">
+        <div className="mx-4 flex flex-row gap-4 rounded-sm bg-muted/10 p-4">
+          <div className="flex flex-1 flex-col items-center gap-1">
+            <TLabel className="text-center uppercase">Net earnings</TLabel>
+            <TBody
+              className={cn(
+                totalEarningsUsd !== undefined &&
+                  totalEarningsUsd.gt(0) &&
+                  "text-success",
+                totalEarningsUsd !== undefined &&
+                  totalEarningsUsd.lt(0) &&
+                  "text-destructive",
+              )}
+            >
+              {totalEarningsUsd !== undefined ? (
+                <>
+                  {totalEarningsUsd.lt(0) && "-"}
+                  {formatUsd(totalEarningsUsd.abs())}
+                </>
+              ) : (
+                <Skeleton className="h-5 w-12" />
+              )}
+            </TBody>
+          </div>
+
+          <div className="flex flex-1 flex-col items-center gap-1">
+            <TLabel className="text-center uppercase">Deposit interest</TLabel>
+            <TBody className="text-center">
+              {totalInterestEarnedUsd !== undefined ? (
+                formatUsd(totalInterestEarnedUsd)
+              ) : (
+                <Skeleton className="h-5 w-12" />
+              )}
+            </TBody>
+          </div>
+
+          <div className="flex flex-1 flex-col items-center gap-1">
+            <TLabel className="text-center uppercase">Borrow interest</TLabel>
+            <TBody className="text-right">
+              {totalInterestPaidUsd !== undefined ? (
+                formatUsd(totalInterestPaidUsd)
+              ) : (
+                <Skeleton className="h-5 w-12" />
+              )}
+            </TBody>
+          </div>
+        </div>
+
+        <TLabelSans className="px-4">
+          Note: USD values of earnings are calculated using current prices.
+        </TLabelSans>
+      </div>
+
+      <div className="flex flex-col gap-4">
+        <TTitle className="px-4 uppercase">Assets deposited</TTitle>
+        <DataTable<RowData>
+          columns={columns("Interest earned")}
+          data={earnedRows}
+          noDataMessage="No interest earned"
+          skeletonRows={data.lendingMarket.reserves.length}
+          container={{
+            className: "overflow-visible",
+          }}
+          tableClassName="border-t-0"
+          tableCellClassName={() => "py-0 h-12"}
+        />
+      </div>
+
+      <div className="flex flex-col gap-4">
+        <TTitle className="px-4 uppercase">Assets borrowed</TTitle>
+        <DataTable<RowData>
+          columns={columns("Interest paid")}
+          data={paidRows}
+          noDataMessage="No interest paid"
+          skeletonRows={data.lendingMarket.reserves.length}
+          container={{
+            className: "overflow-visible",
+          }}
+          tableClassName="border-t-0"
+          tableCellClassName={() => "py-0 h-12"}
+        />
+      </div>
+    </div>
   );
 }
 
@@ -704,9 +1106,10 @@ export default function ObligationDetailsDialog() {
           onTabChange={(tab) => setSelectedTab(tab as Tab)}
         />
       </div>
-      <Separator className="mb-4" />
+      <Separator />
 
       {selectedTab === Tab.HISTORY && <HistoryTab eventsData={eventsData} />}
+      {selectedTab === Tab.EARNINGS && <EarningsTab eventsData={eventsData} />}
     </Dialog>
   );
 }
