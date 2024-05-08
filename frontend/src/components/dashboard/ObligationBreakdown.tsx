@@ -14,13 +14,13 @@ import Collapsible from "@/components/shared/Collapsible";
 import LabelWithTooltip from "@/components/shared/LabelWithTooltip";
 import { TBody } from "@/components/shared/Typography";
 import { Separator } from "@/components/ui/separator";
-import { AppData, useAppContext } from "@/contexts/AppContext";
+import { useAppContext } from "@/contexts/AppContext";
 import { formatLtv, formatPrice, formatToken, formatUsd } from "@/lib/format";
 import {
   BORROW_LIMIT_PRICE_TOOLTIP,
   WEIGHTED_BORROWS_PRICE_TOOLTIP,
 } from "@/lib/tooltips";
-import { cn, sortInReserveOrder } from "@/lib/utils";
+import { cn, reserveSort } from "@/lib/utils";
 
 interface BreakdownColumn {
   title: string;
@@ -116,15 +116,14 @@ function BreakdownTable({
 
 export default function ObligationBreakdown() {
   const appContext = useAppContext();
-  const data = appContext.data as AppData;
   const obligation = appContext.obligation as ParsedObligation;
 
   const sortedDeposits = obligation.deposits
     .slice()
-    .sort(sortInReserveOrder(data.lendingMarket.reserves));
+    .sort((a, b) => reserveSort(a.reserve, b.reserve));
   const sortedBorrows = obligation.borrows
     .slice()
-    .sort(sortInReserveOrder(data.lendingMarket.reserves));
+    .sort((a, b) => reserveSort(a.reserve, b.reserve));
 
   // State
   const [isOpen, setIsOpen] = useLocalStorage<boolean>(

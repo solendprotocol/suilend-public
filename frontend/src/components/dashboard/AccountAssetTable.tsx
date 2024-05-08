@@ -10,9 +10,8 @@ import DataTable, {
 } from "@/components/dashboard/DataTable";
 import TokenIcon from "@/components/shared/TokenIcon";
 import { TBody, TLabel } from "@/components/shared/Typography";
-import { AppData, useAppContext } from "@/contexts/AppContext";
 import { formatPrice, formatToken, formatUsd } from "@/lib/format";
-import { sortInReserveOrder } from "@/lib/utils";
+import { reserveSort } from "@/lib/utils";
 
 interface RowData {
   coinType: string;
@@ -36,8 +35,6 @@ export default function AccountAssetTable({
   assets,
   noAssetsMessage,
 }: AccountAssetTableProps) {
-  const appContext = useAppContext();
-  const data = appContext.data as AppData;
   const { open: openActionsModal } = useActionsModalContext();
 
   // Columns
@@ -84,7 +81,7 @@ export default function AccountAssetTable({
   // Sort
   const sortedAssets = assets
     .slice()
-    .sort(sortInReserveOrder(data.lendingMarket.reserves));
+    .sort((a, b) => reserveSort(a.reserve, b.reserve));
 
   return (
     <div className="w-full">
