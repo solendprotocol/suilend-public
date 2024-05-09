@@ -56,14 +56,6 @@ function AccountPositionCardContent() {
   );
   const netAprPercent = aprWeightedNetValueUsd.div(obligation.netValueUsd);
 
-  console.log(
-    "XXX",
-    aprWeightedDepositsUsd.decimalPlaces(6).toString(),
-    aprWeightedBorrowsUsd.decimalPlaces(6).toString(),
-    aprWeightedNetValueUsd.decimalPlaces(6).toString(),
-    obligation.netValueUsd.decimalPlaces(6).toString(),
-  );
-
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-row justify-between gap-2">
