@@ -33,7 +33,7 @@ function AccountPositionCardContent() {
   const obligation = appContext.obligation as ParsedObligation;
 
   // APR
-  const weightedDepositsUsd = obligation.deposits.reduce((acc, deposit) => {
+  const aprWeightedDepositsUsd = obligation.deposits.reduce((acc, deposit) => {
     const totalAprPercent = getTotalAprPercent(
       deposit.reserve.depositAprPercent,
       getFilteredRewards(data.rewardMap[deposit.reserve.coinType].deposit),
@@ -42,7 +42,7 @@ function AccountPositionCardContent() {
     return acc.plus(totalAprPercent.times(deposit.depositedAmountUsd));
   }, new BigNumber(0));
 
-  const weightedBorrowsUsd = obligation.borrows.reduce((acc, borrow) => {
+  const aprWeightedBorrowsUsd = obligation.borrows.reduce((acc, borrow) => {
     const totalAprPercent = getTotalAprPercent(
       borrow.reserve.borrowAprPercent,
       getFilteredRewards(data.rewardMap[borrow.reserve.coinType].borrow),
@@ -51,8 +51,10 @@ function AccountPositionCardContent() {
     return acc.plus(totalAprPercent.times(borrow.borrowedAmountUsd));
   }, new BigNumber(0));
 
-  const weightedNetUsd = weightedDepositsUsd.minus(weightedBorrowsUsd);
-  const netAprPercent = weightedNetUsd.div(obligation.netValueUsd);
+  const aprWeightedNetValueUsd = aprWeightedDepositsUsd.minus(
+    aprWeightedBorrowsUsd,
+  );
+  const netAprPercent = aprWeightedNetValueUsd.div(obligation.netValueUsd);
 
   return (
     <div className="flex flex-col gap-4">
