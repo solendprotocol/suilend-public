@@ -7,10 +7,12 @@ import { toast } from "sonner";
 import Button from "@/components/shared/Button";
 
 interface CopyToClipboardButtonProps {
+  tooltip?: string;
   value: string;
 }
 
 export default function CopyToClipboardButton({
+  tooltip,
   value,
 }: CopyToClipboardButtonProps) {
   // State
@@ -48,7 +50,7 @@ export default function CopyToClipboardButton({
   return (
     <Button
       className="!bg-transparent text-muted-foreground"
-      tooltip="Copy to clipboard"
+      tooltip={tooltip ?? "Copy to clipboard"}
       icon={
         justCopied ? <Check className="text-primary-foreground" /> : <Copy />
       }

@@ -15,10 +15,12 @@ import { formatAddress } from "@/lib/format";
 
 interface ConnectedWalletDropdownMenuProps {
   formattedAddress: string;
+  accountNameServiceNames: Record<string, string | undefined>;
 }
 
 export default function ConnectedWalletDropdownMenu({
   formattedAddress,
+  accountNameServiceNames,
 }: ConnectedWalletDropdownMenuProps) {
   const {
     accounts,
@@ -39,20 +41,26 @@ export default function ConnectedWalletDropdownMenu({
       root={{ open: isOpen, onOpenChange: setIsOpen }}
       trigger={
         <Button
-          labelClassName="uppercase"
+          className="min-w-0"
+          labelClassName="uppercase text-ellipsis overflow-hidden"
           endIcon={<Icon />}
           disabled={isImpersonatingAddress}
         >
-          {formattedAddress}
+          {accountNameServiceNames[address] ?? formattedAddress}
         </Button>
       }
       title={account?.label ?? "Connected"}
       description={
         <div className="flex h-4 flex-row items-center gap-1">
           <Tooltip title={address}>
-            <TLabelSans>{formatAddress(address, 12)}</TLabelSans>
+            <TLabelSans>
+              {accountNameServiceNames[address] ?? formatAddress(address, 12)}
+            </TLabelSans>
           </Tooltip>
-          <CopyToClipboardButton value={address} />
+          <CopyToClipboardButton
+            tooltip="Copy address to clipboard"
+            value={address}
+          />
         </div>
       }
       items={
@@ -80,7 +88,8 @@ export default function ConnectedWalletDropdownMenu({
                       </TLabel>
                     )}
                     <TLabelSans className="text-inherit">
-                      {formatAddress(a.address, 12)}
+                      {accountNameServiceNames[a.address] ??
+                        formatAddress(a.address, 12)}
                     </TLabelSans>
                   </DropdownMenuItem>
                 ))}
