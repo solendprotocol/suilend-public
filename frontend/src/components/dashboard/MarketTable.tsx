@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { ReactNode, useMemo } from "react";
 
 import { ColumnDef } from "@tanstack/react-table";
 import BigNumber from "bignumber.js";
@@ -37,10 +37,10 @@ export interface ReservesRowData {
   borrowWeight: number;
   depositedAmount: BigNumber;
   depositedAmountUsd: BigNumber;
-  depositedAmountTooltip?: string;
+  depositedAmountTooltip?: string | ReactNode;
   borrowedAmount: BigNumber;
   borrowedAmountUsd: BigNumber;
-  borrowedAmountTooltip?: string;
+  borrowedAmountTooltip?: string | ReactNode;
   depositAprPercent: BigNumber;
   totalDepositAprPercent: BigNumber;
   borrowAprPercent: BigNumber;
