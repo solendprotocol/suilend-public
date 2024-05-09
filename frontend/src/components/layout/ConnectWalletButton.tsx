@@ -31,7 +31,7 @@ export default function ConnectWalletButton() {
   const [isConnectModalOpen, setIsConnectModalOpen] = useState<boolean>(false);
 
   // Sui Name Service lookup
-  const [accountNameServiceNames, setAccountNameServiceNames] = useState<
+  const [addressNameServiceNameMap, setAddressNameServiceNameMap] = useState<
     Record<string, string | undefined>
   >({});
 
@@ -46,10 +46,10 @@ export default function ConnectWalletButton() {
         ),
       ).filter(
         (_address) =>
-          !Object.keys(accountNameServiceNames).includes(_address) &&
+          !Object.keys(addressNameServiceNameMap).includes(_address) &&
           !addressesBeingLookedUpRef.current.includes(_address),
       ),
-    [address, accounts, accountNameServiceNames],
+    [address, accounts, addressNameServiceNameMap],
   );
 
   useEffect(() => {
@@ -65,7 +65,7 @@ export default function ConnectWalletButton() {
           ),
         );
 
-        setAccountNameServiceNames((o) =>
+        setAddressNameServiceNameMap((o) =>
           result.reduce(
             (acc, addressResult, index) => ({
               ...acc,
@@ -75,7 +75,7 @@ export default function ConnectWalletButton() {
           ),
         );
       } catch (err) {
-        setAccountNameServiceNames((o) =>
+        setAddressNameServiceNameMap((o) =>
           addressesToLookUp.reduce(
             (acc, _address) => ({ ...acc, [_address]: undefined }),
             o,
@@ -88,7 +88,7 @@ export default function ConnectWalletButton() {
   const isConnected =
     address &&
     formattedAddress &&
-    Object.keys(accountNameServiceNames).includes(address);
+    Object.keys(addressNameServiceNameMap).includes(address);
 
   return (
     <>
@@ -101,7 +101,7 @@ export default function ConnectWalletButton() {
       {isConnected ? (
         <ConnectedWalletDropdownMenu
           formattedAddress={formattedAddress}
-          accountNameServiceNames={accountNameServiceNames}
+          addressNameServiceNameMap={addressNameServiceNameMap}
         />
       ) : (
         <ConnectWalletDropdownMenu />
