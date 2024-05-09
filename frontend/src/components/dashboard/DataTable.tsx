@@ -137,7 +137,8 @@ export function tableHeader<T>(
     return !tooltip ? (
       <TLabel
         className={cn(
-          "flex h-full flex-col justify-center px-4 uppercase",
+          "flex h-full min-w-max flex-col justify-center px-4 uppercase",
+          isNumerical ? "items-end" : "items-start",
           borderBottom && "border-b",
         )}
       >
@@ -146,7 +147,8 @@ export function tableHeader<T>(
     ) : (
       <LabelWithTooltip
         className={cn(
-          "flex h-full flex-col justify-center px-4 uppercase",
+          "flex h-full min-w-max flex-col justify-center px-4 uppercase",
+          isNumerical ? "items-end" : "items-start",
           borderBottom && "border-b",
         )}
         tooltip={tooltip}
@@ -163,7 +165,7 @@ export function tableHeader<T>(
         borderBottom && "border-b",
         column.getIsSorted() && "!text-primary-foreground",
       )}
-      labelClassName="text-xs uppercase"
+      labelClassName="text-xs uppercase min-w-max"
       tooltip={sortState.tooltip}
       tooltipAlign={isNumerical ? "end" : "start"}
       endIcon={sortState.icon}
@@ -283,7 +285,7 @@ export default function DataTable<T>({
                     tableCellClassName && tableCellClassName(),
                   )}
                 >
-                  <Skeleton className="h-full w-full bg-muted/5" />
+                  <Skeleton className="h-full w-full bg-muted/10" />
                 </TableCell>
               </TableRow>
             ))}

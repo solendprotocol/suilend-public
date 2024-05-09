@@ -114,7 +114,7 @@ function BreakdownTable({
   );
 }
 
-export default function ObligationBreakdown() {
+export default function AccountBreakdown() {
   const appContext = useAppContext();
   const obligation = appContext.obligation as ParsedObligation;
 
