@@ -137,6 +137,7 @@ export default function EarningsTabContent({
       const claimedAmount = new BigNumber(claimRewardEvent.liquidityAmount).div(
         10 ** coinMetadata.decimals,
       );
+      if (claimedAmount.eq(0)) return;
 
       const side = claimRewardEvent.isDepositReward ? "deposit" : "borrow";
 
@@ -156,6 +157,7 @@ export default function EarningsTabContent({
         const claimableAmount =
           reward.obligationClaims[obligation.id]?.claimableAmount ??
           new BigNumber(0);
+        if (claimableAmount.eq(0)) return;
 
         const side = reward.stats.side;
 
@@ -537,7 +539,7 @@ export default function EarningsTabContent({
             tableClassName="border-t-0"
             tableCellClassName={(cell) =>
               cn(
-                cell && Object.entries(cell.row.original.rewards).length > 0
+                cell && Object.entries(cell.row.original.rewards).length > 1
                   ? "py-2 h-auto"
                   : "py-0 h-12",
               )
