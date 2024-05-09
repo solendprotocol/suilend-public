@@ -23,8 +23,18 @@
       "@suilend/sdk/*": ["../sdk/src/mainnet/*"],
       "@pyth-sdk": ["../pyth-sdk/src"],
       "@pyth-sdk/*": ["../pyth-sdk/src/*"]
-    }
+    },
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
-  "include": ["next-env.d.ts", "./src/**/*.ts", "./src/**/*.tsx"],
+  "include": [
+    "next-env.d.ts",
+    "./src/**/*.ts",
+    "./src/**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
   "exclude": ["node_modules"]
 }

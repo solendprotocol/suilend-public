@@ -1,7 +1,9 @@
 import {
+  Dispatch,
   ElementRef,
   PropsWithChildren,
   ReactNode,
+  SetStateAction,
   createContext,
   forwardRef,
   useContext,
@@ -28,7 +30,7 @@ import useIsTouchscreen from "@/hooks/useIsTouchscreen";
 import { cn } from "@/lib/utils";
 
 interface TooltipTriggerContext {
-  onOpenChange: (isOpen: boolean) => void;
+  onOpenChange: Dispatch<SetStateAction<boolean>>;
 }
 
 const TooltipTriggerContext = createContext<TooltipTriggerContext>({
@@ -79,7 +81,9 @@ const CustomTooltipTrigger = forwardRef<
       onClick={(e) => {
         if (!isTouchscreen) return;
         e.preventDefault();
-        onOpenChange(true);
+        e.stopPropagation();
+
+        onOpenChange((_isOpen) => !_isOpen);
       }}
       {...props}
     >
@@ -126,7 +130,7 @@ export default function Tooltip({
         {...portalProps}
       >
         <TooltipContent
-          className={cn("break-words", contentClassName)}
+          className={cn("z-[100] break-words", contentClassName)}
           collisionPadding={4}
           style={merge(
             {

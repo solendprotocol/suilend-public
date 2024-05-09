@@ -1,4 +1,4 @@
-import { PropsWithChildren } from "react";
+import { PropsWithChildren, ReactElement, cloneElement } from "react";
 
 import { ClassValue } from "clsx";
 
@@ -7,8 +7,10 @@ import { cn } from "@/lib/utils";
 
 interface Tab {
   id: string;
+  icon?: ReactElement;
   title: string;
 }
+
 interface TabsProps extends PropsWithChildren {
   tabs: Tab[];
   selectedTab: string;
@@ -34,9 +36,11 @@ export default function Tabs({
         {tabs.map((tab) => (
           <TabsTrigger
             key={tab.id}
-            className="h-11 flex-1 px-0 font-normal uppercase text-primary data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+            className="flex h-11 flex-1 flex-row items-center gap-2 px-0 font-normal uppercase text-primary data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
             value={tab.id}
           >
+            {tab.icon &&
+              cloneElement(tab.icon, { className: cn("w-4 h-4 shrink-0") })}
             {tab.title}
           </TabsTrigger>
         ))}

@@ -2,7 +2,6 @@ import * as React from "react";
 
 import * as SelectPrimitive from "@radix-ui/react-select";
 import { Check, ChevronDown, ChevronUp } from "lucide-react";
-import { DivProps } from "react-html-props";
 
 import { cn } from "@/lib/utils";
 
@@ -149,7 +148,7 @@ SelectLabel.displayName = SelectPrimitive.Label.displayName;
 const SelectItem = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Item>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item> & {
-    itemIndicatorContainer?: DivProps;
+    itemIndicatorContainer?: React.HTMLAttributes<HTMLDivElement>;
     itemIndicator?: React.ComponentPropsWithoutRef<
       typeof SelectPrimitive.ItemIndicator
     >;

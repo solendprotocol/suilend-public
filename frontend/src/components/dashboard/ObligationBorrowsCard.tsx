@@ -8,7 +8,10 @@ export default function ObligationBorrowsCard() {
 
   if (!obligation) return null;
   return (
-    <Card id="assets-borrowed" title="Assets borrowed" noHeaderSeparator>
+    <Card
+      id="assets-borrowed"
+      header={{ title: "Assets borrowed", noSeparator: true }}
+    >
       <CardContent className="p-0">
         <AccountAssetTable
           assets={obligation.borrows.map((b) => ({

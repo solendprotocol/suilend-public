@@ -40,7 +40,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <Tooltip title={tooltip} contentProps={{ align: tooltipAlign }}>
         <ButtonComponent
-          className={cn(className, "gap-1")}
+          className={cn("gap-1", className)}
           ref={ref}
           tag={tag}
           {...props}

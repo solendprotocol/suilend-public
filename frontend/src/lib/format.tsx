@@ -30,6 +30,8 @@ export const formatType = (
 export const formatInteger = (value: number) =>
   Intl.NumberFormat().format(value);
 
+export const formatRank = (rank: number) => `#${formatInteger(rank)}`;
+
 export const formatNumber = (
   value: BigNumber,
   options?: {
@@ -159,6 +161,16 @@ export const formatPrice = (value: BigNumber) => {
     exact: true,
     fadeOutTrailingZeros: false,
   }) as string;
+};
+
+export const formatPoints = (value: BigNumber, options?: { dp?: number }) => {
+  const dp = options?.dp ?? 0;
+
+  return formatNumber(value, {
+    dp,
+    roundingMode: BigNumber.ROUND_HALF_UP,
+    exact: true,
+  });
 };
 
 export const formatPercent = (value: BigNumber, options?: { dp?: number }) => {

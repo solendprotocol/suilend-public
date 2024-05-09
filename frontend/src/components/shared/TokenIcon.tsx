@@ -47,7 +47,7 @@ export default function TokenIcon({
         ) : undefined
       }
     >
-      <div className={cn("relative h-8 w-8", className)}>
+      <div className={cn("relative h-7 w-7", className)}>
         <AspectRatio ratio={1} className="relative z-[1]">
           {url ? (
             <Image

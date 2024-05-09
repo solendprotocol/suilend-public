@@ -2,14 +2,15 @@ import BigNumber from "bignumber.js";
 
 import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
 
+import AccountBreakdown from "@/components/dashboard/account/AccountBreakdown";
+import AccountDetailsDialog from "@/components/dashboard/account-details/AccountDetailsDialog";
 import Card from "@/components/dashboard/Card";
-import ObligationBreakdown from "@/components/dashboard/ObligationBreakdown";
-import ObligationHistoryDialog from "@/components/dashboard/ObligationHistoryDialog";
 import ObligationSwitcherPopover from "@/components/dashboard/ObligationSwitcherPopover";
 import UtilizationBar, {
   getWeightedBorrowsUsd,
 } from "@/components/dashboard/UtilizationBar";
 import LabelWithTooltip from "@/components/shared/LabelWithTooltip";
+import Tooltip from "@/components/shared/Tooltip";
 import { TBody, TLabel, TLabelSans } from "@/components/shared/Typography";
 import { CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -26,13 +27,13 @@ import {
   WEIGHTED_BORROWS_TOOLTIP,
 } from "@/lib/tooltips";
 
-function ObligationPositionCardContent() {
+function AccountPositionCardContent() {
   const appContext = useAppContext();
   const data = appContext.data as AppData;
   const obligation = appContext.obligation as ParsedObligation;
 
   // APR
-  const weightedDepositsUsd = obligation.deposits.reduce((acc, deposit) => {
+  const aprWeightedDepositsUsd = obligation.deposits.reduce((acc, deposit) => {
     const totalAprPercent = getTotalAprPercent(
       deposit.reserve.depositAprPercent,
       getFilteredRewards(data.rewardMap[deposit.reserve.coinType].deposit),
@@ -41,7 +42,7 @@ function ObligationPositionCardContent() {
     return acc.plus(totalAprPercent.times(deposit.depositedAmountUsd));
   }, new BigNumber(0));
 
-  const weightedBorrowsUsd = obligation.borrows.reduce((acc, borrow) => {
+  const aprWeightedBorrowsUsd = obligation.borrows.reduce((acc, borrow) => {
     const totalAprPercent = getTotalAprPercent(
       borrow.reserve.borrowAprPercent,
       getFilteredRewards(data.rewardMap[borrow.reserve.coinType].borrow),
@@ -50,8 +51,10 @@ function ObligationPositionCardContent() {
     return acc.plus(totalAprPercent.times(borrow.borrowedAmountUsd));
   }, new BigNumber(0));
 
-  const weightedNetUsd = weightedDepositsUsd.minus(weightedBorrowsUsd);
-  const netAprPercent = weightedNetUsd.div(obligation.netValueUsd);
+  const aprWeightedNetValueUsd = aprWeightedDepositsUsd.minus(
+    aprWeightedBorrowsUsd,
+  );
+  const netAprPercent = aprWeightedNetValueUsd.div(obligation.netValueUsd);
 
   return (
     <div className="flex flex-col gap-4">
@@ -60,7 +63,13 @@ function ObligationPositionCardContent() {
           <LabelWithTooltip tooltip={DEPOSITS_TOOLTIP}>
             Deposits
           </LabelWithTooltip>
-          <TBody>{formatUsd(obligation.depositedAmountUsd)}</TBody>
+          <Tooltip
+            title={formatUsd(obligation.depositedAmountUsd, { exact: true })}
+          >
+            <TBody className="w-max">
+              {formatUsd(obligation.depositedAmountUsd)}
+            </TBody>
+          </Tooltip>
         </div>
 
         <TLabel>-</TLabel>
@@ -69,9 +78,13 @@ function ObligationPositionCardContent() {
           <LabelWithTooltip className="text-center" tooltip={BORROWS_TOOLTIP}>
             Borrows
           </LabelWithTooltip>
-          <TBody className="text-center">
-            {formatUsd(obligation.borrowedAmountUsd)}
-          </TBody>
+          <Tooltip
+            title={formatUsd(obligation.borrowedAmountUsd, { exact: true })}
+          >
+            <TBody className="w-max text-center">
+              {formatUsd(obligation.borrowedAmountUsd)}
+            </TBody>
+          </Tooltip>
         </div>
 
         <TLabel>=</TLabel>
@@ -80,15 +93,19 @@ function ObligationPositionCardContent() {
           <LabelWithTooltip className="text-right" tooltip={EQUITY_TOOLTIP}>
             Equity
           </LabelWithTooltip>
-          <TBody className="text-right">
-            {formatUsd(obligation.netValueUsd)}
-          </TBody>
+          <Tooltip title={formatUsd(obligation.netValueUsd, { exact: true })}>
+            <TBody className="w-max text-right">
+              {formatUsd(obligation.netValueUsd)}
+            </TBody>
+          </Tooltip>
         </div>
       </div>
 
       <div className="flex flex-row items-center justify-between gap-2">
         <LabelWithTooltip>Net APR</LabelWithTooltip>
-        <TBody className="text-right">{formatPercent(netAprPercent)}</TBody>
+        <TBody className="w-max text-right">
+          {formatPercent(netAprPercent)}
+        </TBody>
       </div>
 
       <Separator />
@@ -98,7 +115,15 @@ function ObligationPositionCardContent() {
           <LabelWithTooltip tooltip={WEIGHTED_BORROWS_TOOLTIP}>
             Weighted borrows
           </LabelWithTooltip>
-          <TBody>{formatUsd(getWeightedBorrowsUsd(obligation))}</TBody>
+          <Tooltip
+            title={formatUsd(getWeightedBorrowsUsd(obligation), {
+              exact: true,
+            })}
+          >
+            <TBody className="w-max">
+              {formatUsd(getWeightedBorrowsUsd(obligation))}
+            </TBody>
+          </Tooltip>
         </div>
 
         <div className="flex flex-col items-end gap-1">
@@ -108,9 +133,15 @@ function ObligationPositionCardContent() {
           >
             Borrow limit
           </LabelWithTooltip>
-          <TBody className="text-right">
-            {formatUsd(obligation.minPriceBorrowLimitUsd)}
-          </TBody>
+          <Tooltip
+            title={formatUsd(obligation.minPriceBorrowLimitUsd, {
+              exact: true,
+            })}
+          >
+            <TBody className="w-max text-right">
+              {formatUsd(obligation.minPriceBorrowLimitUsd)}
+            </TBody>
+          </Tooltip>
         </div>
       </div>
 
@@ -120,17 +151,23 @@ function ObligationPositionCardContent() {
         <LabelWithTooltip tooltip={LIQUIDATION_THRESHOLD_TOOLTIP}>
           Liquidation threshold
         </LabelWithTooltip>
-        <TBody className="text-right">
-          {formatUsd(obligation.unhealthyBorrowValueUsd)}
-        </TBody>
+        <Tooltip
+          title={formatUsd(obligation.unhealthyBorrowValueUsd, {
+            exact: true,
+          })}
+        >
+          <TBody className="w-max text-right">
+            {formatUsd(obligation.unhealthyBorrowValueUsd)}
+          </TBody>
+        </Tooltip>
       </div>
 
-      <ObligationBreakdown />
+      <AccountBreakdown />
     </div>
   );
 }
 
-export default function ObligationPositionCard() {
+export default function AccountPositionCard() {
   const { address } = useWalletContext();
   const { obligation, ...restAppContext } = useAppContext();
   const data = restAppContext.data as AppData;
@@ -138,13 +175,14 @@ export default function ObligationPositionCard() {
   return (
     <Card
       id="position"
-      title="Account"
-      headerStartContent={<ObligationHistoryDialog />}
-      headerEndContent={
-        data.obligations &&
-        data.obligations.length > 1 && <ObligationSwitcherPopover />
-      }
-      noHeaderSeparator
+      header={{
+        title: "Account",
+        startContent: <AccountDetailsDialog />,
+        endContent: data.obligations && data.obligations.length > 1 && (
+          <ObligationSwitcherPopover />
+        ),
+        noSeparator: true,
+      }}
     >
       <CardContent>
         {!address ? (
@@ -154,7 +192,7 @@ export default function ObligationPositionCard() {
             No active positions. Get started by depositing assets.
           </TLabelSans>
         ) : (
-          <ObligationPositionCardContent />
+          <AccountPositionCardContent />
         )}
       </CardContent>
     </Card>

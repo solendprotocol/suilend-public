@@ -21,9 +21,10 @@ import { ObligationOwnerCap } from "@suilend/sdk/_generated/suilend/lending-mark
 import { SuilendClient } from "@suilend/sdk/client";
 import { ParsedLendingMarket } from "@suilend/sdk/parsers/lendingMarket";
 import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
+import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 
 import { useWalletContext } from "@/contexts/WalletContext";
-import { useFetchAppData } from "@/fetchers/useFetchData";
+import useFetchAppData from "@/fetchers/useFetchAppData";
 import { ParsedCoinBalance } from "@/lib/coinBalance";
 import { EXPLORERS, RPCS } from "@/lib/constants";
 import { RewardMap } from "@/lib/liquidityMining";
@@ -31,6 +32,7 @@ import { RewardMap } from "@/lib/liquidityMining";
 export interface AppData {
   lendingMarket: ParsedLendingMarket;
   lendingMarketOwnerCapId: string | undefined;
+  reserveMap: Record<string, ParsedReserve>;
   obligationOwnerCaps: ObligationOwnerCap<string>[] | undefined;
   obligations: ParsedObligation[] | undefined;
   coinBalancesMap: Record<string, ParsedCoinBalance>;

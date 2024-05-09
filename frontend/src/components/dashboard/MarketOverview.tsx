@@ -1,6 +1,6 @@
 import Card from "@/components/dashboard/Card";
 import MarketOverviewPopover from "@/components/dashboard/MarketOverviewPopover";
-import { TBody, TLabel } from "@/components/shared/Typography";
+import { TBody, TLabelSans } from "@/components/shared/Typography";
 import { CardContent } from "@/components/ui/card";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { formatUsd } from "@/lib/format";
@@ -11,26 +11,23 @@ export default function MarketOverview() {
 
   return (
     <Card
-      id="market-overview"
-      title="Pool overview"
-      headerEndContent={<MarketOverviewPopover />}
-      alwaysExpanded
+      header={{ title: "Pool overview", endContent: <MarketOverviewPopover /> }}
     >
-      <CardContent className="flex flex-row gap-4">
-        <div className="flex flex-1 flex-col gap-1">
-          <TLabel className="uppercase">Total deposits</TLabel>
+      <CardContent className="flex flex-row justify-between gap-4">
+        <div className="flex flex-col gap-1">
+          <TLabelSans>Total deposits</TLabelSans>
           <TBody>{formatUsd(data.lendingMarket.depositedAmountUsd)}</TBody>
         </div>
 
-        <div className="flex flex-1 flex-col items-center gap-1">
-          <TLabel className="text-center uppercase">Total borrows</TLabel>
+        <div className="flex flex-col items-center gap-1">
+          <TLabelSans className="text-center">Total borrows</TLabelSans>
           <TBody className="text-center">
             {formatUsd(data.lendingMarket.borrowedAmountUsd)}
           </TBody>
         </div>
 
-        <div className="flex flex-1 flex-col items-end gap-1">
-          <TLabel className="text-right uppercase">TVL</TLabel>
+        <div className="flex flex-col items-end gap-1">
+          <TLabelSans className="text-right">TVL</TLabelSans>
           <TBody className="text-right">
             {formatUsd(data.lendingMarket.tvlUsd)}
           </TBody>

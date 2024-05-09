@@ -35,6 +35,7 @@ const useLineChartDimensions = (containerRef: RefObject<HTMLDivElement>) => {
     const top = +yAttr;
     const right = containerRect.width - width - left;
     const bottom = containerRect.height - height - top;
+    if (right < 0 || bottom < 0) return;
 
     return { width, height, top, right, bottom, left };
   }, [containerRef]);

@@ -11,11 +11,14 @@ import Logo from "@/components/layout/Logo";
 import NavigationLinks from "@/components/layout/NavigationLinks";
 import RefreshDataButton from "@/components/layout/RefreshDataButton";
 import RpcSelect from "@/components/layout/RpcSelect";
+import HeaderPointsPopover from "@/components/points/HeaderPointsPopover";
 import Button from "@/components/shared/Button";
+import { useWalletContext } from "@/contexts/WalletContext";
 import { ROOT_URL } from "@/lib/navigation";
 
 export default function AppHeader() {
   const router = useRouter();
+  const { address } = useWalletContext();
 
   // Menu
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
@@ -61,6 +64,12 @@ export default function AppHeader() {
           <div className="hidden md:flex">
             <RpcSelect />
           </div>
+
+          {address && (
+            <div className="hidden sm:flex">
+              <HeaderPointsPopover />
+            </div>
+          )}
 
           <ConnectWalletButton />
 
