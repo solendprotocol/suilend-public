@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { ColumnDef, Row } from "@tanstack/react-table";
 import BigNumber from "bignumber.js";
@@ -30,6 +30,20 @@ import {
 import { formatToken } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
+interface RowData {
+  timestamp: number;
+  eventIndex: number;
+  type: EventType;
+  event:
+    | DepositEvent
+    | BorrowEvent
+    | WithdrawEvent
+    | RepayEvent
+    | LiquidateEvent
+    | ClaimRewardEvent;
+  subRows?: RowData[];
+}
+
 interface HistoryTabContentProps {
   eventsData: EventsData | undefined;
 }
@@ -41,299 +55,294 @@ export default function HistoryTabContent({
   const data = restAppContext.data as AppData;
 
   // Columns
-  interface RowData {
-    timestamp: number;
-    eventIndex: number;
-    type: EventType;
-    event:
-      | DepositEvent
-      | BorrowEvent
-      | WithdrawEvent
-      | RepayEvent
-      | LiquidateEvent
-      | ClaimRewardEvent;
-    subRows?: RowData[];
-  }
+  const columns: ColumnDef<RowData>[] = useMemo(
+    () => [
+      {
+        id: "date",
+        accessorKey: "date",
+        sortingFn: (rowA: Row<RowData>, rowB: Row<RowData>) =>
+          eventSortAsc(rowA.original, rowB.original),
+        header: ({ column }) =>
+          tableHeader(column, "Date", { isDate: true, borderBottom: true }),
+        cell: ({ row }) => {
+          const isGroupRow = row.getCanExpand() && row.subRows.length > 1;
+          const { timestamp } = row.original;
 
-  const columns: ColumnDef<RowData>[] = [
-    {
-      id: "date",
-      accessorKey: "date",
-      sortingFn: (rowA: Row<RowData>, rowB: Row<RowData>) =>
-        eventSortAsc(rowA.original, rowB.original),
-      header: ({ column }) =>
-        tableHeader(column, "Date", { isDate: true, borderBottom: true }),
-      cell: ({ row }) => {
-        const isGroupRow = row.getCanExpand() && row.subRows.length > 1;
-        const { timestamp } = row.original;
-
-        if (isGroupRow)
-          return <TLabel className="w-max uppercase">Multiple</TLabel>;
-        return (
-          <TBody className="w-max">
-            {formatDate(new Date(timestamp * 1000), "yyyy-MM-dd HH:mm:ss")}
-          </TBody>
-        );
-      },
-    },
-    {
-      id: "type",
-      accessorKey: "type",
-      enableSorting: false,
-      filterFn: (row, key, value: EventType[]) =>
-        value.includes(row.original.type),
-      header: ({ column }) =>
-        tableHeader(column, "Action", { borderBottom: true }),
-      cell: ({ row }) => {
-        const isGroupRow = row.getCanExpand() && row.subRows.length > 1;
-        const { type } = row.original;
-
-        return (
-          <TBody className="w-max uppercase">
-            {EventTypeNameMap[type]}
-            {isGroupRow && (
-              <span className="text-muted-foreground">{` (${row.subRows.length})`}</span>
-            )}
-          </TBody>
-        );
-      },
-    },
-    {
-      id: "details",
-      accessorKey: "details",
-      enableSorting: false,
-      header: ({ column }) =>
-        tableHeader(column, "Details", { borderBottom: true }),
-      cell: ({ row }) => {
-        const isGroupRow = row.getCanExpand() && row.subRows.length > 1;
-        const { type, event } = row.original;
-
-        if (type === EventType.DEPOSIT) {
-          const depositEvent = event as DepositEvent;
-          const coinMetadata = data.coinMetadataMap[depositEvent.coinType];
-
-          const reserveAssetDataEvent = eventsData?.reserveAssetData.find(
-            (e) => e.digest === depositEvent.digest,
+          if (isGroupRow)
+            return <TLabel className="w-max uppercase">Multiple</TLabel>;
+          return (
+            <TBody className="w-max">
+              {formatDate(new Date(timestamp * 1000), "yyyy-MM-dd HH:mm:ss")}
+            </TBody>
           );
-
-          let amount;
-          if (reserveAssetDataEvent) {
-            amount = new BigNumber(depositEvent.ctokenAmount)
-              .times(getCtokenExchangeRate(reserveAssetDataEvent))
-              .div(10 ** coinMetadata.decimals);
-          }
+        },
+      },
+      {
+        id: "type",
+        accessorKey: "type",
+        enableSorting: false,
+        filterFn: (row, key, value: EventType[]) =>
+          value.includes(row.original.type),
+        header: ({ column }) =>
+          tableHeader(column, "Action", { borderBottom: true }),
+        cell: ({ row }) => {
+          const isGroupRow = row.getCanExpand() && row.subRows.length > 1;
+          const { type } = row.original;
 
           return (
-            <TokenAmount
-              amount={amount}
-              coinType={depositEvent.coinType}
-              symbol={coinMetadata.symbol}
-              iconUrl={coinMetadata.iconUrl}
-              decimals={coinMetadata.decimals}
-            />
+            <TBody className="w-max uppercase">
+              {EventTypeNameMap[type]}
+              {isGroupRow && (
+                <span className="text-muted-foreground">{` (${row.subRows.length})`}</span>
+              )}
+            </TBody>
           );
-        } else if (type === EventType.BORROW) {
-          const borrowEvent = event as BorrowEvent;
-          const coinMetadata = data.coinMetadataMap[borrowEvent.coinType];
+        },
+      },
+      {
+        id: "details",
+        accessorKey: "details",
+        enableSorting: false,
+        header: ({ column }) =>
+          tableHeader(column, "Details", { borderBottom: true }),
+        cell: ({ row }) => {
+          const isGroupRow = row.getCanExpand() && row.subRows.length > 1;
+          const { type, event } = row.original;
 
-          const incFeesAmount = new BigNumber(borrowEvent.liquidityAmount).div(
-            10 ** coinMetadata.decimals,
-          );
-          const feesAmount = new BigNumber(
-            borrowEvent.originationFeeAmount,
-          ).div(10 ** coinMetadata.decimals);
-          const amount = incFeesAmount.minus(feesAmount);
+          if (type === EventType.DEPOSIT) {
+            const depositEvent = event as DepositEvent;
+            const coinMetadata = data.coinMetadataMap[depositEvent.coinType];
 
-          return (
-            <div className="flex w-max flex-col gap-1">
+            const reserveAssetDataEvent = eventsData?.reserveAssetData.find(
+              (e) => e.digest === depositEvent.digest,
+            );
+
+            let amount;
+            if (reserveAssetDataEvent) {
+              amount = new BigNumber(depositEvent.ctokenAmount)
+                .times(getCtokenExchangeRate(reserveAssetDataEvent))
+                .div(10 ** coinMetadata.decimals);
+            }
+
+            return (
               <TokenAmount
                 amount={amount}
-                coinType={borrowEvent.coinType}
+                coinType={depositEvent.coinType}
                 symbol={coinMetadata.symbol}
                 iconUrl={coinMetadata.iconUrl}
                 decimals={coinMetadata.decimals}
               />
+            );
+          } else if (type === EventType.BORROW) {
+            const borrowEvent = event as BorrowEvent;
+            const coinMetadata = data.coinMetadataMap[borrowEvent.coinType];
 
-              <TLabelSans className="w-max">
-                +{formatToken(feesAmount, { dp: coinMetadata.decimals })}{" "}
-                {coinMetadata.symbol} in fees
-              </TLabelSans>
-            </div>
-          );
-        } else if (type === EventType.WITHDRAW) {
-          const withdrawEvent = event as WithdrawEvent;
-          const coinMetadata = data.coinMetadataMap[withdrawEvent.coinType];
+            const incFeesAmount = new BigNumber(
+              borrowEvent.liquidityAmount,
+            ).div(10 ** coinMetadata.decimals);
+            const feesAmount = new BigNumber(
+              borrowEvent.originationFeeAmount,
+            ).div(10 ** coinMetadata.decimals);
+            const amount = incFeesAmount.minus(feesAmount);
 
-          const reserveAssetDataEvent = eventsData?.reserveAssetData.find(
-            (e) => e.digest === withdrawEvent.digest,
-          );
-
-          let amount;
-          if (reserveAssetDataEvent) {
-            amount = new BigNumber(withdrawEvent.ctokenAmount)
-              .times(getCtokenExchangeRate(reserveAssetDataEvent))
-              .div(10 ** coinMetadata.decimals);
-          }
-
-          return (
-            <TokenAmount
-              amount={amount}
-              coinType={withdrawEvent.coinType}
-              symbol={coinMetadata.symbol}
-              iconUrl={coinMetadata.iconUrl}
-              decimals={coinMetadata.decimals}
-            />
-          );
-        } else if (type === EventType.REPAY) {
-          const repayEvent = event as RepayEvent;
-          const coinMetadata = data.coinMetadataMap[repayEvent.coinType];
-
-          const amount = new BigNumber(repayEvent.liquidityAmount).div(
-            10 ** coinMetadata.decimals,
-          );
-
-          return (
-            <TokenAmount
-              amount={amount}
-              coinType={repayEvent.coinType}
-              symbol={coinMetadata.symbol}
-              iconUrl={coinMetadata.iconUrl}
-              decimals={coinMetadata.decimals}
-            />
-          );
-        } else if (type === EventType.LIQUIDATE) {
-          const liquidateEvent = event as LiquidateEvent;
-
-          const repayReserve = data.lendingMarket.reserves.find(
-            (reserve) => reserve.id === liquidateEvent.repayReserveId,
-          );
-          const withdrawReserve = data.lendingMarket.reserves.find(
-            (reserve) => reserve.id === liquidateEvent.withdrawReserveId,
-          );
-          if (!repayReserve || !withdrawReserve)
             return (
-              <TLabelSans className="w-max">
-                {isGroupRow ? "N/A" : "See txn for details"}
-              </TLabelSans>
+              <div className="flex w-max flex-col gap-1">
+                <TokenAmount
+                  amount={amount}
+                  coinType={borrowEvent.coinType}
+                  symbol={coinMetadata.symbol}
+                  iconUrl={coinMetadata.iconUrl}
+                  decimals={coinMetadata.decimals}
+                />
+
+                <TLabelSans className="w-max">
+                  +{formatToken(feesAmount, { dp: coinMetadata.decimals })}{" "}
+                  {coinMetadata.symbol} in fees
+                </TLabelSans>
+              </div>
+            );
+          } else if (type === EventType.WITHDRAW) {
+            const withdrawEvent = event as WithdrawEvent;
+            const coinMetadata = data.coinMetadataMap[withdrawEvent.coinType];
+
+            const reserveAssetDataEvent = eventsData?.reserveAssetData.find(
+              (e) => e.digest === withdrawEvent.digest,
             );
 
-          let withdrawAmount = new BigNumber(0);
-          let repayAmount = new BigNumber(0);
+            let amount;
+            if (reserveAssetDataEvent) {
+              amount = new BigNumber(withdrawEvent.ctokenAmount)
+                .times(getCtokenExchangeRate(reserveAssetDataEvent))
+                .div(10 ** coinMetadata.decimals);
+            }
 
-          if (isGroupRow) {
-            for (const subRow of row.subRows) {
-              const subRowLiquidateEvent = subRow.original
-                .event as LiquidateEvent;
+            return (
+              <TokenAmount
+                amount={amount}
+                coinType={withdrawEvent.coinType}
+                symbol={coinMetadata.symbol}
+                iconUrl={coinMetadata.iconUrl}
+                decimals={coinMetadata.decimals}
+              />
+            );
+          } else if (type === EventType.REPAY) {
+            const repayEvent = event as RepayEvent;
+            const coinMetadata = data.coinMetadataMap[repayEvent.coinType];
 
+            const amount = new BigNumber(repayEvent.liquidityAmount).div(
+              10 ** coinMetadata.decimals,
+            );
+
+            return (
+              <TokenAmount
+                amount={amount}
+                coinType={repayEvent.coinType}
+                symbol={coinMetadata.symbol}
+                iconUrl={coinMetadata.iconUrl}
+                decimals={coinMetadata.decimals}
+              />
+            );
+          } else if (type === EventType.LIQUIDATE) {
+            const liquidateEvent = event as LiquidateEvent;
+
+            const repayReserve = data.lendingMarket.reserves.find(
+              (reserve) => reserve.id === liquidateEvent.repayReserveId,
+            );
+            const withdrawReserve = data.lendingMarket.reserves.find(
+              (reserve) => reserve.id === liquidateEvent.withdrawReserveId,
+            );
+            if (!repayReserve || !withdrawReserve)
+              return (
+                <TLabelSans className="w-max">
+                  {isGroupRow ? "N/A" : "See txn for details"}
+                </TLabelSans>
+              );
+
+            let withdrawAmount = new BigNumber(0);
+            let repayAmount = new BigNumber(0);
+
+            if (isGroupRow) {
+              for (const subRow of row.subRows) {
+                const subRowLiquidateEvent = subRow.original
+                  .event as LiquidateEvent;
+
+                const reserveAssetDataEvent = eventsData?.reserveAssetData.find(
+                  (e) => e.digest === subRowLiquidateEvent.digest,
+                );
+                if (!reserveAssetDataEvent)
+                  return <TLabelSans className="w-max">N/A</TLabelSans>;
+
+                withdrawAmount = withdrawAmount.plus(
+                  new BigNumber(subRowLiquidateEvent.withdrawAmount)
+                    .times(getCtokenExchangeRate(reserveAssetDataEvent))
+                    .div(10 ** withdrawReserve.mintDecimals),
+                );
+                repayAmount = repayAmount.plus(
+                  new BigNumber(subRowLiquidateEvent.repayAmount).div(
+                    10 ** repayReserve.mintDecimals,
+                  ),
+                );
+              }
+            } else {
               const reserveAssetDataEvent = eventsData?.reserveAssetData.find(
-                (e) => e.digest === subRowLiquidateEvent.digest,
+                (e) => e.digest === liquidateEvent.digest,
               );
               if (!reserveAssetDataEvent)
-                return <TLabelSans className="w-max">N/A</TLabelSans>;
+                return (
+                  <TLabelSans className="w-max">See txn for details</TLabelSans>
+                );
 
               withdrawAmount = withdrawAmount.plus(
-                new BigNumber(subRowLiquidateEvent.withdrawAmount)
+                new BigNumber(liquidateEvent.withdrawAmount)
                   .times(getCtokenExchangeRate(reserveAssetDataEvent))
                   .div(10 ** withdrawReserve.mintDecimals),
               );
               repayAmount = repayAmount.plus(
-                new BigNumber(subRowLiquidateEvent.repayAmount).div(
+                new BigNumber(liquidateEvent.repayAmount).div(
                   10 ** repayReserve.mintDecimals,
                 ),
               );
             }
-          } else {
-            const reserveAssetDataEvent = eventsData?.reserveAssetData.find(
-              (e) => e.digest === liquidateEvent.digest,
-            );
-            if (!reserveAssetDataEvent)
-              return (
-                <TLabelSans className="w-max">See txn for details</TLabelSans>
-              );
 
-            withdrawAmount = withdrawAmount.plus(
-              new BigNumber(liquidateEvent.withdrawAmount)
-                .times(getCtokenExchangeRate(reserveAssetDataEvent))
-                .div(10 ** withdrawReserve.mintDecimals),
+            return (
+              <div className="flex w-max flex-col">
+                <div className="flex w-max flex-row items-center gap-2">
+                  <TLabelSans>Deposits liquidated</TLabelSans>
+                  <TokenAmount
+                    amount={withdrawAmount}
+                    coinType={withdrawReserve.coinType}
+                    symbol={withdrawReserve.symbol}
+                    iconUrl={withdrawReserve.iconUrl}
+                    decimals={withdrawReserve.mintDecimals}
+                  />
+                </div>
+                <div className="flex w-max flex-row items-center gap-2">
+                  <TLabelSans>Borrows repaid</TLabelSans>
+                  <TokenAmount
+                    amount={repayAmount}
+                    coinType={repayReserve.coinType}
+                    symbol={repayReserve.symbol}
+                    iconUrl={repayReserve.iconUrl}
+                    decimals={repayReserve.mintDecimals}
+                  />
+                </div>
+              </div>
             );
-            repayAmount = repayAmount.plus(
-              new BigNumber(liquidateEvent.repayAmount).div(
-                10 ** repayReserve.mintDecimals,
-              ),
+          } else if (type === EventType.CLAIM_REWARD) {
+            const claimRewardEvent = event as ClaimRewardEvent;
+            const coinMetadata =
+              data.coinMetadataMap[claimRewardEvent.coinType];
+
+            const claimedAmount = new BigNumber(
+              claimRewardEvent.liquidityAmount,
+            ).div(10 ** coinMetadata.decimals);
+
+            return (
+              <TokenAmount
+                amount={claimedAmount}
+                coinType={claimRewardEvent.coinType}
+                symbol={coinMetadata.symbol}
+                iconUrl={coinMetadata.iconUrl}
+                decimals={coinMetadata.decimals}
+              />
             );
           }
-
-          return (
-            <div className="flex w-max flex-col">
-              <div className="flex w-max flex-row items-center gap-2">
-                <TLabelSans>Deposits liquidated</TLabelSans>
-                <TokenAmount
-                  amount={withdrawAmount}
-                  coinType={withdrawReserve.coinType}
-                  symbol={withdrawReserve.symbol}
-                  iconUrl={withdrawReserve.iconUrl}
-                  decimals={withdrawReserve.mintDecimals}
-                />
-              </div>
-              <div className="flex w-max flex-row items-center gap-2">
-                <TLabelSans>Borrows repaid</TLabelSans>
-                <TokenAmount
-                  amount={repayAmount}
-                  coinType={repayReserve.coinType}
-                  symbol={repayReserve.symbol}
-                  iconUrl={repayReserve.iconUrl}
-                  decimals={repayReserve.mintDecimals}
-                />
-              </div>
-            </div>
-          );
-        } else if (type === EventType.CLAIM_REWARD) {
-          const claimRewardEvent = event as ClaimRewardEvent;
-          const coinMetadata = data.coinMetadataMap[claimRewardEvent.coinType];
-
-          const claimedAmount = new BigNumber(
-            claimRewardEvent.liquidityAmount,
-          ).div(10 ** coinMetadata.decimals);
-
-          return (
-            <TokenAmount
-              amount={claimedAmount}
-              coinType={claimRewardEvent.coinType}
-              symbol={coinMetadata.symbol}
-              iconUrl={coinMetadata.iconUrl}
-              decimals={coinMetadata.decimals}
-            />
-          );
-        }
+        },
       },
-    },
-    {
-      id: "digest",
-      accessorKey: "digest",
-      enableSorting: false,
-      header: ({ column }) =>
-        tableHeader(column, "Txn", { borderBottom: true }),
-      cell: ({ row }) => {
-        const isGroupRow = row.getCanExpand() && row.subRows.length > 1;
-        const { event } = row.original;
+      {
+        id: "digest",
+        accessorKey: "digest",
+        enableSorting: false,
+        header: ({ column }) =>
+          tableHeader(column, "Txn", { borderBottom: true }),
+        cell: ({ row }) => {
+          const isGroupRow = row.getCanExpand() && row.subRows.length > 1;
+          const { event } = row.original;
 
-        if (isGroupRow) {
-          const isExpanded = row.getIsExpanded();
-          const Icon = isExpanded ? ChevronUp : ChevronDown;
+          if (isGroupRow) {
+            const isExpanded = row.getIsExpanded();
+            const Icon = isExpanded ? ChevronUp : ChevronDown;
 
-          return (
-            <div className="flex h-8 w-8 flex-row items-center justify-center">
-              <Icon className="h-4 w-4 text-muted-foreground" />
-            </div>
-          );
-        } else {
-          return (
-            <OpenOnExplorerButton url={explorer.buildTxUrl(event.digest)} />
-          );
-        }
+            return (
+              <div className="flex h-8 w-8 flex-row items-center justify-center">
+                <Icon className="h-4 w-4 text-muted-foreground" />
+              </div>
+            );
+          } else {
+            return (
+              <OpenOnExplorerButton url={explorer.buildTxUrl(event.digest)} />
+            );
+          }
+        },
       },
-    },
-  ];
+    ],
+    [
+      data.coinMetadataMap,
+      eventsData?.reserveAssetData,
+      data.lendingMarket.reserves,
+      explorer,
+    ],
+  );
 
   // Filters
   const initialFilters = [
@@ -355,7 +364,7 @@ export default function HistoryTabContent({
   };
 
   // Rows
-  const rows = (() => {
+  const rows = useMemo(() => {
     if (eventsData === undefined) return undefined;
 
     const sortedRows = Object.entries(eventsData)
@@ -405,7 +414,7 @@ export default function HistoryTabContent({
     }
 
     return finalRows;
-  })();
+  }, [eventsData]);
 
   return (
     <>
