@@ -32,7 +32,7 @@ export interface WalletContextValue {
   setIsConnectWalletDropdownOpen: Dispatch<SetStateAction<boolean>>;
   accounts: readonly WalletAccount[];
   account?: WalletAccount;
-  selectAccount: (address: string) => void;
+  selectAccount: (address: string, addressNameServiceName?: string) => void;
   address?: string;
   isImpersonatingAddress?: boolean;
   selectWallet: (name: string) => Promise<void>;
@@ -50,7 +50,7 @@ const WalletContext = createContext<WalletContextValue>({
   },
   accounts: [],
   account: undefined,
-  selectAccount: async () => {
+  selectAccount: () => {
     throw new Error("WalletContextProvider not initialized");
   },
   address: undefined,
@@ -216,14 +216,18 @@ export function WalletContextProvider({ children }: PropsWithChildren) {
       setIsConnectWalletDropdownOpen,
       accounts,
       account,
-      selectAccount: (_address: string) => {
+      selectAccount: (_address: string, addressNameServiceName?: string) => {
         const _account = accounts.find((a) => a.address === _address);
         if (!_account) return;
 
         setAccountAddress(_address);
         toast.info(
-          `Switched to ${_account?.label ? _account.label : _address}`,
-          { description: _account?.label ? _address : undefined },
+          `Switched to ${_account?.label ? _account.label : addressNameServiceName ?? _address}`,
+          {
+            description: _account?.label
+              ? addressNameServiceName ?? _address
+              : undefined,
+          },
         );
       },
       address: impersonatedAddress ?? account?.address,

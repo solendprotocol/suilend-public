@@ -54,7 +54,9 @@ function AccountPositionCardContent() {
   const aprWeightedNetValueUsd = aprWeightedDepositsUsd.minus(
     aprWeightedBorrowsUsd,
   );
-  const netAprPercent = aprWeightedNetValueUsd.div(obligation.netValueUsd);
+  const netAprPercent = !obligation.netValueUsd.eq(0)
+    ? aprWeightedNetValueUsd.div(obligation.netValueUsd)
+    : new BigNumber(0);
 
   return (
     <div className="flex flex-col gap-4">
@@ -162,7 +164,7 @@ function AccountPositionCardContent() {
         </Tooltip>
       </div>
 
-      <AccountBreakdown />
+      {obligation.positionCount > 0 && <AccountBreakdown />}
     </div>
   );
 }

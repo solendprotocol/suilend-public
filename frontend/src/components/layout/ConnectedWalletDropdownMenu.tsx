@@ -15,12 +15,12 @@ import { formatAddress } from "@/lib/format";
 
 interface ConnectedWalletDropdownMenuProps {
   formattedAddress: string;
-  accountNameServiceNames: Record<string, string | undefined>;
+  addressNameServiceNameMap: Record<string, string | undefined>;
 }
 
 export default function ConnectedWalletDropdownMenu({
   formattedAddress,
-  accountNameServiceNames,
+  addressNameServiceNameMap,
 }: ConnectedWalletDropdownMenuProps) {
   const {
     accounts,
@@ -46,7 +46,7 @@ export default function ConnectedWalletDropdownMenu({
           endIcon={<Icon />}
           disabled={isImpersonatingAddress}
         >
-          {accountNameServiceNames[address] ?? formattedAddress}
+          {addressNameServiceNameMap[address] ?? formattedAddress}
         </Button>
       }
       title={account?.label ?? "Connected"}
@@ -54,7 +54,7 @@ export default function ConnectedWalletDropdownMenu({
         <div className="flex h-4 flex-row items-center gap-1">
           <Tooltip title={address}>
             <TLabelSans>
-              {accountNameServiceNames[address] ?? formatAddress(address, 12)}
+              {addressNameServiceNameMap[address] ?? formatAddress(address, 12)}
             </TLabelSans>
           </Tooltip>
           <CopyToClipboardButton
@@ -80,7 +80,12 @@ export default function ConnectedWalletDropdownMenu({
                   <DropdownMenuItem
                     key={a.address}
                     className="flex flex-col items-start gap-1"
-                    onClick={() => selectAccount(a.address)}
+                    onClick={() =>
+                      selectAccount(
+                        a.address,
+                        addressNameServiceNameMap[a.address],
+                      )
+                    }
                   >
                     {a.label && (
                       <TLabel className="max-w-full overflow-hidden text-ellipsis text-nowrap uppercase text-inherit">
@@ -88,7 +93,7 @@ export default function ConnectedWalletDropdownMenu({
                       </TLabel>
                     )}
                     <TLabelSans className="text-inherit">
-                      {accountNameServiceNames[a.address] ??
+                      {addressNameServiceNameMap[a.address] ??
                         formatAddress(a.address, 12)}
                     </TLabelSans>
                   </DropdownMenuItem>
