@@ -4,7 +4,7 @@ import { Info } from "lucide-react";
 
 import Button from "@/components/shared/Button";
 import Popover from "@/components/shared/Popover";
-import { TBody, TLabelSans, TTitle } from "@/components/shared/Typography";
+import { TBody, TLabel } from "@/components/shared/Typography";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { getFormattedMaxOutflow } from "@/lib/rateLimiter";
 import { cn } from "@/lib/utils";
@@ -36,21 +36,21 @@ export default function MarketOverviewPopover() {
       }
       contentProps={{
         align: "end",
-        className: "w-[300px] flex flex-col gap-2",
+        className: "w-[280px]",
       }}
     >
-      <TTitle className="uppercase">About this pool</TTitle>
+      <div className="flex w-full flex-col gap-2">
+        <div className="flex flex-row items-center justify-between gap-4">
+          <TLabel className="uppercase">Max outflow</TLabel>
+          <TBody className="text-right uppercase">
+            {formattedOutflow.formattedMaxOutflow}
+          </TBody>
+        </div>
 
-      <div className="flex flex-row items-center justify-between gap-4">
-        <TLabelSans>Max outflow</TLabelSans>
-        <TBody className="text-right uppercase">
-          {formattedOutflow.formattedMaxOutflow}
-        </TBody>
-      </div>
-
-      <div className="flex flex-row items-center justify-between gap-4">
-        <TLabelSans>Owner</TLabelSans>
-        <TBody className="text-right uppercase">Suilend</TBody>
+        <div className="flex flex-row items-center justify-between gap-4">
+          <TLabel className="uppercase">Owner</TLabel>
+          <TBody className="text-right uppercase">Suilend</TBody>
+        </div>
       </div>
     </Popover>
   );

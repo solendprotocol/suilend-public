@@ -1,11 +1,11 @@
 import Head from "next/head";
 
+import AccountPositionCard from "@/components/dashboard/account/AccountPositionCard";
 import ActionsModal from "@/components/dashboard/actions-modal/ActionsModal";
 import MarketOverview from "@/components/dashboard/MarketOverview";
 import MarketTable from "@/components/dashboard/MarketTable";
 import ObligationBorrowsCard from "@/components/dashboard/ObligationBorrowsCard";
 import ObligationDepositsCard from "@/components/dashboard/ObligationDepositsCard";
-import ObligationPositionCard from "@/components/dashboard/ObligationPositionCard";
 import ProtocolRewardsCard from "@/components/dashboard/ProtocolRewardsCard";
 import WalletAssetsCard from "@/components/dashboard/WalletBalancesCard";
 import ImpersonationModeBanner from "@/components/shared/ImpersonationModeBanner";
@@ -15,7 +15,7 @@ import useBreakpoint from "@/hooks/useBreakpoint";
 function Cards() {
   return (
     <>
-      <ObligationPositionCard />
+      <AccountPositionCard />
       <ObligationDepositsCard />
       <ObligationBorrowsCard />
       <WalletAssetsCard />

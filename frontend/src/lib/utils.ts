@@ -11,4 +11,4 @@ export const hoverUnderlineClassName =
   "underline decoration-dotted decoration-1 underline-offset-2";
 
 export const reserveSort = (a: ParsedReserve, b: ParsedReserve) =>
-  Number(a.arrayIndex) - Number(b.arrayIndex);
+  Number(a?.arrayIndex ?? 0) - Number(b?.arrayIndex ?? 0);

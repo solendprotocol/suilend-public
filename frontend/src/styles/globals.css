@@ -5,7 +5,7 @@
 @layer base {
   :root {
     /* colors */
-    --background: 219 85% 5%;
+    --background: 221 85% 5%;
     --foreground: 0 0% 100%;
 
     --card: 221 65% 9%;
@@ -35,9 +35,9 @@
     --destructive: 0 86% 60%;
     --destructive-foreground: 210 40% 98%; /* Not used */
 
-    --border: 211 44% 15%;
+    --border: 221 44% 15%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 211 44% 15%; /* same as border */
+    --ring: 221 44% 15%; /* same as border */
 
     --gold: 51 96% 67%;
     --silver: 132 6% 85%;

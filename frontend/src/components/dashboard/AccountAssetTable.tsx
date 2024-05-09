@@ -1,3 +1,5 @@
+import { useMemo } from "react";
+
 import { ColumnDef } from "@tanstack/react-table";
 import BigNumber from "bignumber.js";
 
@@ -38,45 +40,48 @@ export default function AccountAssetTable({
   const { open: openActionsModal } = useActionsModalContext();
 
   // Columns
-  const columns: ColumnDef<RowData>[] = [
-    {
-      accessorKey: "symbol",
-      sortingFn: "text",
-      header: ({ column }) => tableHeader(column, "Asset name"),
-      cell: ({ row }) => {
-        const { coinType, price, symbol, iconUrl } = row.original;
+  const columns: ColumnDef<RowData>[] = useMemo(
+    () => [
+      {
+        accessorKey: "symbol",
+        sortingFn: "text",
+        header: ({ column }) => tableHeader(column, "Asset name"),
+        cell: ({ row }) => {
+          const { coinType, price, symbol, iconUrl } = row.original;
 
-        return (
-          <div className="flex flex-row items-center gap-3">
-            <TokenIcon coinType={coinType} symbol={symbol} url={iconUrl} />
+          return (
+            <div className="flex flex-row items-center gap-3">
+              <TokenIcon coinType={coinType} symbol={symbol} url={iconUrl} />
 
-            <div className="flex flex-col gap-1">
-              <TBody>{symbol}</TBody>
-              <TLabel>{formatPrice(price)}</TLabel>
+              <div className="flex flex-col gap-1">
+                <TBody>{symbol}</TBody>
+                <TLabel>{formatPrice(price)}</TLabel>
+              </div>
             </div>
-          </div>
-        );
+          );
+        },
       },
-    },
-    {
-      accessorKey: "amount",
-      sortingFn: decimalSortingFn("amount"),
-      header: ({ column }) =>
-        tableHeader(column, amountTitle, { isNumerical: true }),
-      cell: ({ row }) => {
-        const { mintDecimals, amount, amountUsd } = row.original;
+      {
+        accessorKey: "amount",
+        sortingFn: decimalSortingFn("amount"),
+        header: ({ column }) =>
+          tableHeader(column, amountTitle, { isNumerical: true }),
+        cell: ({ row }) => {
+          const { mintDecimals, amount, amountUsd } = row.original;
 
-        return (
-          <div className="flex flex-col items-end gap-1">
-            <TBody className="text-right">
-              {formatToken(amount, { dp: mintDecimals })}
-            </TBody>
-            <TLabel className="text-right">{formatUsd(amountUsd)}</TLabel>
-          </div>
-        );
+          return (
+            <div className="flex flex-col items-end gap-1">
+              <TBody className="text-right">
+                {formatToken(amount, { dp: mintDecimals })}
+              </TBody>
+              <TLabel className="text-right">{formatUsd(amountUsd)}</TLabel>
+            </div>
+          );
+        },
       },
-    },
-  ];
+    ],
+    [amountTitle],
+  );
 
   // Sort
   const sortedAssets = assets

@@ -1,3 +1,5 @@
+import { useMemo } from "react";
+
 import { ColumnDef } from "@tanstack/react-table";
 import BigNumber from "bignumber.js";
 
@@ -50,213 +52,222 @@ export interface ReservesRowData {
   reserve: ParsedReserve;
 }
 
-const columns: ColumnDef<ReservesRowData>[] = [
-  {
-    accessorKey: "symbol",
-    sortingFn: "text",
-    header: ({ column }) => tableHeader(column, "Asset name"),
-    cell: ({ row }) => <AssetCell {...row.original} />,
-  },
-  {
-    accessorKey: "openLtvBw",
-    enableSorting: false,
-    header: ({ column }) =>
-      tableHeader(column, "LTV / BW", {
-        tooltip: OPEN_LTV_BW_TOOLTIP,
-      }),
-    cell: ({ row }) => <OpenLtvBwCell {...row.original} />,
-  },
-  {
-    accessorKey: "depositedAmount",
-    sortingFn: decimalSortingFn("depositedAmount"),
-    header: ({ column }) =>
-      tableHeader(column, "Deposits", { isNumerical: true }),
-    cell: ({ row }) => <TotalDepositsCell {...row.original} />,
-  },
-  {
-    accessorKey: "depositAprPercent",
-    sortingFn: decimalSortingFn("totalDepositAprPercent"),
-    header: ({ column }) =>
-      tableHeader(column, "Deposit APR", { isNumerical: true }),
-    cell: ({ row }) => (
-      <div className="flex flex-row justify-end">
-        <DepositAprCell {...row.original} />
-      </div>
-    ),
-  },
-  {
-    accessorKey: "borrowedAmount",
-    sortingFn: decimalSortingFn("borrowedAmount"),
-    header: ({ column }) =>
-      tableHeader(column, "Borrows", { isNumerical: true }),
-    cell: ({ row }) => <TotalBorrowsCell {...row.original} />,
-  },
-  {
-    accessorKey: "borrowAprPercent",
-    sortingFn: decimalSortingFn("totalBorrowAprPercent"),
-    header: ({ column }) =>
-      tableHeader(column, "Borrow APR", { isNumerical: true }),
-    cell: ({ row }) => (
-      <div className="flex flex-row justify-end">
-        <BorrowAprCell {...row.original} />
-      </div>
-    ),
-  },
-];
-
 export default function MarketTable() {
   const appContext = useAppContext();
   const data = appContext.data as AppData;
   const { open: openActionsModal } = useActionsModalContext();
 
-  const rowData = data.lendingMarket.reserves
-    .slice()
-    .sort(reserveSort)
-    .map((reserve) => {
-      const coinType = reserve.coinType;
-      const price = reserve.price;
-      const symbol = reserve.symbol;
-      const iconUrl = reserve.iconUrl;
-      const openLtvPct = reserve.config.openLtvPct;
-      const borrowWeight = new BigNumber(
-        reserve.config.borrowWeightBps.toString(),
-      )
-        .div(100 * 100)
-        .toNumber();
-      const depositedAmount = reserve.depositedAmount;
-      const depositedAmountUsd = reserve.depositedAmountUsd;
-      const borrowedAmount = reserve.borrowedAmount;
-      const borrowedAmountUsd = reserve.borrowedAmountUsd;
-      const depositAprPercent = reserve.depositAprPercent;
-      const totalDepositAprPercent = getTotalAprPercent(
-        reserve.depositAprPercent,
-        getFilteredRewards(data.rewardMap[coinType].deposit),
-      );
-      const borrowAprPercent = reserve.borrowAprPercent;
-      const totalBorrowAprPercent = getTotalAprPercent(
-        reserve.borrowAprPercent,
-        getFilteredRewards(data.rewardMap[coinType].borrow),
-      );
-      const rewards = data.rewardMap[coinType];
+  // Columns
+  const columns: ColumnDef<ReservesRowData>[] = useMemo(
+    () => [
+      {
+        accessorKey: "symbol",
+        sortingFn: "text",
+        header: ({ column }) => tableHeader(column, "Asset name"),
+        cell: ({ row }) => <AssetCell {...row.original} />,
+      },
+      {
+        accessorKey: "openLtvBw",
+        enableSorting: false,
+        header: ({ column }) =>
+          tableHeader(column, "LTV / BW", {
+            tooltip: OPEN_LTV_BW_TOOLTIP,
+          }),
+        cell: ({ row }) => <OpenLtvBwCell {...row.original} />,
+      },
+      {
+        accessorKey: "depositedAmount",
+        sortingFn: decimalSortingFn("depositedAmount"),
+        header: ({ column }) =>
+          tableHeader(column, "Deposits", { isNumerical: true }),
+        cell: ({ row }) => <TotalDepositsCell {...row.original} />,
+      },
+      {
+        accessorKey: "depositAprPercent",
+        sortingFn: decimalSortingFn("totalDepositAprPercent"),
+        header: ({ column }) =>
+          tableHeader(column, "Deposit APR", { isNumerical: true }),
+        cell: ({ row }) => (
+          <div className="flex flex-row justify-end">
+            <DepositAprCell {...row.original} />
+          </div>
+        ),
+      },
+      {
+        accessorKey: "borrowedAmount",
+        sortingFn: decimalSortingFn("borrowedAmount"),
+        header: ({ column }) =>
+          tableHeader(column, "Borrows", { isNumerical: true }),
+        cell: ({ row }) => <TotalBorrowsCell {...row.original} />,
+      },
+      {
+        accessorKey: "borrowAprPercent",
+        sortingFn: decimalSortingFn("totalBorrowAprPercent"),
+        header: ({ column }) =>
+          tableHeader(column, "Borrow APR", { isNumerical: true }),
+        cell: ({ row }) => (
+          <div className="flex flex-row justify-end">
+            <BorrowAprCell {...row.original} />
+          </div>
+        ),
+      },
+    ],
+    [],
+  );
 
-      const getAlmostExceedsLimit = (limit: BigNumber, total: BigNumber) =>
-        !limit.eq(0) &&
-        total.gte(limit.times(Math.min(0.9999, 1 - 1 / limit.toNumber())));
-      const getExceedsLimit = (limit: BigNumber, total: BigNumber) =>
-        limit.eq(0) || total.gte(limit);
+  // Rows
+  const rows: ReservesRowData[] = useMemo(
+    () =>
+      data.lendingMarket.reserves
+        .slice()
+        .sort(reserveSort)
+        .map((reserve) => {
+          const coinType = reserve.coinType;
+          const price = reserve.price;
+          const symbol = reserve.symbol;
+          const iconUrl = reserve.iconUrl;
+          const openLtvPct = reserve.config.openLtvPct;
+          const borrowWeight = new BigNumber(
+            reserve.config.borrowWeightBps.toString(),
+          )
+            .div(100 * 100)
+            .toNumber();
+          const depositedAmount = reserve.depositedAmount;
+          const depositedAmountUsd = reserve.depositedAmountUsd;
+          const borrowedAmount = reserve.borrowedAmount;
+          const borrowedAmountUsd = reserve.borrowedAmountUsd;
+          const depositAprPercent = reserve.depositAprPercent;
+          const totalDepositAprPercent = getTotalAprPercent(
+            reserve.depositAprPercent,
+            getFilteredRewards(data.rewardMap[coinType].deposit),
+          );
+          const borrowAprPercent = reserve.borrowAprPercent;
+          const totalBorrowAprPercent = getTotalAprPercent(
+            reserve.borrowAprPercent,
+            getFilteredRewards(data.rewardMap[coinType].borrow),
+          );
+          const rewards = data.rewardMap[coinType];
 
-      const almostExceedsDepositLimit = getAlmostExceedsLimit(
-        reserve.config.depositLimit,
-        depositedAmount,
-      );
-      const almostExceedsDepositLimitUsd = getAlmostExceedsLimit(
-        reserve.config.depositLimitUsd,
-        depositedAmountUsd,
-      );
+          const getAlmostExceedsLimit = (limit: BigNumber, total: BigNumber) =>
+            !limit.eq(0) &&
+            total.gte(limit.times(Math.min(0.9999, 1 - 1 / limit.toNumber())));
+          const getExceedsLimit = (limit: BigNumber, total: BigNumber) =>
+            limit.eq(0) || total.gte(limit);
 
-      const exceedsDepositLimit = getExceedsLimit(
-        reserve.config.depositLimit,
-        depositedAmount,
-      );
-      const exceedsDepositLimitUsd = getExceedsLimit(
-        reserve.config.depositLimitUsd,
-        depositedAmountUsd,
-      );
+          const almostExceedsDepositLimit = getAlmostExceedsLimit(
+            reserve.config.depositLimit,
+            depositedAmount,
+          );
+          const almostExceedsDepositLimitUsd = getAlmostExceedsLimit(
+            reserve.config.depositLimitUsd,
+            depositedAmountUsd,
+          );
 
-      const almostExceedsBorrowLimit = getAlmostExceedsLimit(
-        reserve.config.borrowLimit,
-        borrowedAmount,
-      );
-      const almostExceedsBorrowLimitUsd = getAlmostExceedsLimit(
-        reserve.config.borrowLimitUsd,
-        borrowedAmountUsd,
-      );
+          const exceedsDepositLimit = getExceedsLimit(
+            reserve.config.depositLimit,
+            depositedAmount,
+          );
+          const exceedsDepositLimitUsd = getExceedsLimit(
+            reserve.config.depositLimitUsd,
+            depositedAmountUsd,
+          );
 
-      const exceedsBorrowLimit = getExceedsLimit(
-        reserve.config.borrowLimit,
-        borrowedAmount,
-      );
-      const exceedsBorrowLimitUsd = getExceedsLimit(
-        reserve.config.borrowLimitUsd,
-        borrowedAmountUsd,
-      );
+          const almostExceedsBorrowLimit = getAlmostExceedsLimit(
+            reserve.config.borrowLimit,
+            borrowedAmount,
+          );
+          const almostExceedsBorrowLimitUsd = getAlmostExceedsLimit(
+            reserve.config.borrowLimitUsd,
+            borrowedAmountUsd,
+          );
 
-      const getAlmostExceedsLimitTooltip = (
-        side: Side,
-        remaining: BigNumber,
-        symbol: string,
-      ) =>
-        `Asset ${side} limit almost reached. Capacity remaining: ${formatToken(remaining, { dp: reserve.mintDecimals })} ${symbol}`;
-      const getAlmostExceedsLimitUsd = (side: Side, remaining: BigNumber) =>
-        `Asset USD ${side} limit almost reached. Capacity remaining: ${formatUsd(remaining)}`;
+          const exceedsBorrowLimit = getExceedsLimit(
+            reserve.config.borrowLimit,
+            borrowedAmount,
+          );
+          const exceedsBorrowLimitUsd = getExceedsLimit(
+            reserve.config.borrowLimitUsd,
+            borrowedAmountUsd,
+          );
 
-      const getExceedsLimitTooltip = (side: Side) =>
-        `Asset ${side} limit reached.`;
-      const getExceedsLimitUsdTooltip = (side: Side) =>
-        `Asset USD ${side} limit reached.`;
+          const getAlmostExceedsLimitTooltip = (
+            side: Side,
+            remaining: BigNumber,
+            symbol: string,
+          ) =>
+            `Asset ${side} limit almost reached. Capacity remaining: ${formatToken(remaining, { dp: reserve.mintDecimals })} ${symbol}`;
+          const getAlmostExceedsLimitUsd = (side: Side, remaining: BigNumber) =>
+            `Asset USD ${side} limit almost reached. Capacity remaining: ${formatUsd(remaining)}`;
 
-      const depositedAmountTooltip = exceedsDepositLimit
-        ? getExceedsLimitTooltip(Side.DEPOSIT)
-        : exceedsDepositLimitUsd
-          ? getExceedsLimitUsdTooltip(Side.DEPOSIT)
-          : almostExceedsDepositLimit
-            ? getAlmostExceedsLimitTooltip(
-                Side.DEPOSIT,
-                reserve.config.depositLimit.minus(depositedAmount),
-                symbol,
-              )
-            : almostExceedsDepositLimitUsd
-              ? getAlmostExceedsLimitUsd(
-                  Side.DEPOSIT,
-                  reserve.config.depositLimitUsd.minus(depositedAmountUsd),
-                )
-              : undefined;
+          const getExceedsLimitTooltip = (side: Side) =>
+            `Asset ${side} limit reached.`;
+          const getExceedsLimitUsdTooltip = (side: Side) =>
+            `Asset USD ${side} limit reached.`;
 
-      const borrowedAmountTooltip = exceedsBorrowLimit
-        ? getExceedsLimitTooltip(Side.DEPOSIT)
-        : exceedsBorrowLimitUsd
-          ? getExceedsLimitUsdTooltip(Side.DEPOSIT)
-          : almostExceedsBorrowLimit
-            ? getAlmostExceedsLimitTooltip(
-                Side.DEPOSIT,
-                reserve.config.borrowLimit.minus(borrowedAmount),
-                symbol,
-              )
-            : almostExceedsBorrowLimitUsd
-              ? getAlmostExceedsLimitUsd(
-                  Side.DEPOSIT,
-                  reserve.config.borrowLimitUsd.minus(borrowedAmountUsd),
-                )
-              : undefined;
+          const depositedAmountTooltip = exceedsDepositLimit
+            ? getExceedsLimitTooltip(Side.DEPOSIT)
+            : exceedsDepositLimitUsd
+              ? getExceedsLimitUsdTooltip(Side.DEPOSIT)
+              : almostExceedsDepositLimit
+                ? getAlmostExceedsLimitTooltip(
+                    Side.DEPOSIT,
+                    reserve.config.depositLimit.minus(depositedAmount),
+                    symbol,
+                  )
+                : almostExceedsDepositLimitUsd
+                  ? getAlmostExceedsLimitUsd(
+                      Side.DEPOSIT,
+                      reserve.config.depositLimitUsd.minus(depositedAmountUsd),
+                    )
+                  : undefined;
 
-      return {
-        coinType,
-        price,
-        symbol,
-        iconUrl,
-        openLtvPct,
-        borrowWeight,
-        depositedAmount,
-        depositedAmountUsd,
-        depositedAmountTooltip,
-        borrowedAmount,
-        borrowedAmountUsd,
-        borrowedAmountTooltip,
-        depositAprPercent,
-        totalDepositAprPercent,
-        borrowAprPercent,
-        totalBorrowAprPercent,
-        rewards,
-        reserve,
-      };
-    }) as ReservesRowData[];
+          const borrowedAmountTooltip = exceedsBorrowLimit
+            ? getExceedsLimitTooltip(Side.DEPOSIT)
+            : exceedsBorrowLimitUsd
+              ? getExceedsLimitUsdTooltip(Side.DEPOSIT)
+              : almostExceedsBorrowLimit
+                ? getAlmostExceedsLimitTooltip(
+                    Side.DEPOSIT,
+                    reserve.config.borrowLimit.minus(borrowedAmount),
+                    symbol,
+                  )
+                : almostExceedsBorrowLimitUsd
+                  ? getAlmostExceedsLimitUsd(
+                      Side.DEPOSIT,
+                      reserve.config.borrowLimitUsd.minus(borrowedAmountUsd),
+                    )
+                  : undefined;
+
+          return {
+            coinType,
+            price,
+            symbol,
+            iconUrl,
+            openLtvPct,
+            borrowWeight,
+            depositedAmount,
+            depositedAmountUsd,
+            depositedAmountTooltip,
+            borrowedAmount,
+            borrowedAmountUsd,
+            borrowedAmountTooltip,
+            depositAprPercent,
+            totalDepositAprPercent,
+            borrowAprPercent,
+            totalBorrowAprPercent,
+            rewards,
+            reserve,
+          };
+        }),
+    [data.lendingMarket.reserves, data.rewardMap],
+  );
 
   return (
     <div className="w-full">
       <div className="hidden w-full md:block">
         <DataTable<ReservesRowData>
           columns={columns}
-          data={rowData}
+          data={rows}
           noDataMessage="No assets"
           onRowClick={(row) => () =>
             openActionsModal(Number(row.original.reserve.arrayIndex))
@@ -264,7 +275,7 @@ export default function MarketTable() {
         />
       </div>
       <div className="w-full md:hidden">
-        <MarketCardList data={rowData} noDataMessage="No assets" />
+        <MarketCardList data={rows} noDataMessage="No assets" />
       </div>
     </div>
   );
