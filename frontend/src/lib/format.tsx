@@ -49,16 +49,16 @@ export const formatNumber = (
   const fadeOutTrailingZeros = options?.fadeOutTrailingZeros ?? true;
 
   // Exact, zero, <min, or <1
-  if (
-    exact ||
-    value.eq(0) ||
-    value.lt(new BigNumber(10).pow(-dp)) ||
-    value.lt(1)
-  ) {
-    const [integers, decimals] = value.toFixed(dp, roundingMode).split(".");
+  const minValue = new BigNumber(10).pow(-dp);
+  const isLtMinValue = !value.eq(0) && value.lt(minValue);
+  if (exact || value.eq(0) || isLtMinValue || value.lt(1)) {
+    const [integers, decimals] = (isLtMinValue ? minValue : value)
+      .toFixed(dp, roundingMode)
+      .split(".");
     const integersFormatted = formatInteger(parseInt(integers));
     const decimalsFormatted = decimals !== undefined ? `.${decimals}` : "";
-    const formattedValue = `${prefix}${integersFormatted}${decimalsFormatted}`;
+    const minValuePrefix = isLtMinValue ? "<" : "";
+    const formattedValue = `${minValuePrefix}${prefix}${integersFormatted}${decimalsFormatted}`;
 
     if (!fadeOutTrailingZeros) return formattedValue;
     if (decimals === undefined) return formattedValue;
@@ -80,7 +80,7 @@ export const formatNumber = (
         <>
           {prefix}
           {integersFormatted}
-          <span className="opacity-50">{decimalsFormatted}</span>
+          <span className="opacity-30">{decimalsFormatted}</span>
         </>
       );
     if (lastNonZeroIndex === decimalsFormatted.length - 1)
@@ -90,7 +90,7 @@ export const formatNumber = (
         {prefix}
         {integersFormatted}
         {decimalsFormatted.slice(0, lastNonZeroIndex + 1)}
-        <span className="opacity-50">
+        <span className="opacity-30">
           {"0".repeat(decimalsFormatted.length - (lastNonZeroIndex + 1))}
         </span>
       </>

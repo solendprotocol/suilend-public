@@ -69,7 +69,12 @@ function LimitsPanel({ reserve }: PanelProps) {
     <>
       <LabelWithValue
         label="Deposit limit"
-        value={`${formatToken(reserve.config.depositLimit, { dp: 0 })} ${reserve.symbol}`}
+        value={
+          <>
+            {formatToken(reserve.config.depositLimit, { dp: 0 })}{" "}
+            {reserve.symbol}
+          </>
+        }
         horizontal
       />
       <LabelWithValue
@@ -82,7 +87,12 @@ function LimitsPanel({ reserve }: PanelProps) {
       />
       <LabelWithValue
         label="Borrow limit"
-        value={`${formatToken(reserve.config.borrowLimit, { dp: 0 })} ${reserve.symbol}`}
+        value={
+          <>
+            {formatToken(reserve.config.borrowLimit, { dp: 0 })}{" "}
+            {reserve.symbol}
+          </>
+        }
         horizontal
       />
       <LabelWithValue
