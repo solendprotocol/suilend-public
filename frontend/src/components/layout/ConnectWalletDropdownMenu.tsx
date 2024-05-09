@@ -105,7 +105,7 @@ export default function ConnectWalletDropdownMenu() {
       }}
       trigger={
         <Button
-          className="uppercase"
+          labelClassName="uppercase"
           endIcon={<Icon />}
           disabled={isImpersonatingAddress}
         >

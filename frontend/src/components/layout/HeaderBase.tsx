@@ -27,7 +27,7 @@ export default function HeaderBase({ className, children }: HeaderBaseProps) {
       >
         <Container>
           <div
-            className="flex w-full flex-row items-center justify-between"
+            className="flex w-full flex-row items-center justify-between gap-4"
             style={{ height: `${headerHeight}px` }}
           >
             {children}
