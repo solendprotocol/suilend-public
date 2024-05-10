@@ -188,12 +188,8 @@ function ObjectsPanel({ reserve }: PanelProps) {
       {pythOracleUrl && (
         <LabelWithValue
           label="Oracle"
-          value={
-            <div className="flex flex-row items-center gap-1">
-              {PYTH_PRICE_ID_SYMBOL_MAP[reserve.priceIdentifier]}
-              <PythLogo />
-            </div>
-          }
+          value={PYTH_PRICE_ID_SYMBOL_MAP[reserve.priceIdentifier]}
+          valueEndDecorator={<PythLogo className="my-0.5" />}
           url={pythOracleUrl}
           urlTooltip="View price feed"
           horizontal
@@ -202,6 +198,7 @@ function ObjectsPanel({ reserve }: PanelProps) {
       <LabelWithValue
         label="Price ID"
         value={reserve.priceIdentifier}
+        valueEndDecorator={<PythLogo className="my-0.5" />}
         isId
         horizontal
       />

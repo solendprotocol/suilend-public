@@ -11,7 +11,9 @@ interface LabelWithValueProps {
   className?: ClassValue;
   label: string;
   labelTooltip?: string;
-  value: string | number | BigNumber | ReactNode;
+  valueStartDecorator?: ReactNode;
+  value: string | number | BigNumber;
+  valueEndDecorator?: ReactNode;
   isId?: boolean;
   isType?: boolean;
   isUsd?: boolean;
@@ -27,7 +29,9 @@ export default function LabelWithValue({
   className,
   label,
   labelTooltip,
+  valueStartDecorator,
   value,
+  valueEndDecorator,
   isId,
   isType,
   isUsd,
@@ -52,7 +56,9 @@ export default function LabelWithValue({
 
       {customChild ?? (
         <Value
+          valueStartDecorator={valueStartDecorator}
           value={value}
+          valueEndDecorator={valueEndDecorator}
           isId={isId}
           isType={isType}
           isUsd={isUsd}

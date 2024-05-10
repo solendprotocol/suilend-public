@@ -10,7 +10,9 @@ import { TBody } from "@/components/shared/Typography";
 import { formatId, formatType, formatUsd } from "@/lib/format";
 
 interface ValueProps {
-  value: string | number | BigNumber | ReactNode;
+  valueStartDecorator?: ReactNode;
+  value: string | number | BigNumber;
+  valueEndDecorator?: ReactNode;
   isId?: boolean;
   isType?: boolean;
   isUsd?: boolean;
@@ -20,7 +22,9 @@ interface ValueProps {
 }
 
 export default function Value({
+  valueStartDecorator,
   value,
+  valueEndDecorator,
   isId,
   isType,
   isUsd,
@@ -30,32 +34,34 @@ export default function Value({
 }: ValueProps) {
   return (
     <div className="flex flex-row gap-1">
+      {valueStartDecorator}
       {isId || isType ? (
         <>
           <Tooltip title={value as string}>
-            <TBody className="w-fit break-all">
-              {(isId ? formatId : formatType)((value as string).toString())}
+            <TBody className="w-fit break-all uppercase">
+              {(isId ? formatId : formatType)(value.toString())}
             </TBody>
           </Tooltip>
-
-          <CopyToClipboardButton
-            className="-my-1.5"
-            value={(value as string).toString()}
-          />
         </>
       ) : isUsd ? (
         <TBody>{formatUsd(value as BigNumber)}</TBody>
       ) : (
-        <TBody>{value as string | number | ReactNode}</TBody>
+        <TBody>{value as string | number}</TBody>
       )}
+      {valueEndDecorator}
 
-      {url && (
-        <div className="-my-1.5">
-          {isExplorerUrl ? (
-            <OpenOnExplorerButton url={url} />
-          ) : (
-            <OpenURLButton url={url}>{urlTooltip}</OpenURLButton>
+      {(isId || isType || url) && (
+        <div className="-mt-1.5 flex flex-row">
+          {(isId || isType) && (
+            <CopyToClipboardButton value={value.toString()} />
           )}
+
+          {url &&
+            (isExplorerUrl ? (
+              <OpenOnExplorerButton url={url} />
+            ) : (
+              <OpenURLButton url={url}>{urlTooltip}</OpenURLButton>
+            ))}
         </div>
       )}
     </div>
