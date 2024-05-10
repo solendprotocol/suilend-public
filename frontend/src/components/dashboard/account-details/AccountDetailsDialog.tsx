@@ -102,7 +102,7 @@ export default function AccountDetailsDialog() {
   const accountDetailsTab = router.query.accountDetailsTab as
     | string
     | undefined;
-  const { obligation, ...restAppContext } = useAppContext();
+  const { refreshData, obligation, ...restAppContext } = useAppContext();
   const data = restAppContext.data as AppData;
 
   // Tabs
@@ -197,6 +197,12 @@ export default function AccountDetailsDialog() {
     [obligation?.id, clearEventsData],
   );
 
+  // Refresh
+  const refresh = () => {
+    if (selectedTab === Tab.EARNINGS) refreshData();
+    fetchEventsData();
+  };
+
   // State
   const isOpen = router.query.accountDetails !== undefined;
 
@@ -242,7 +248,7 @@ export default function AccountDetailsDialog() {
       headerEndContent={
         <>
           {data.obligations && data.obligations.length > 1 && (
-            <ObligationSwitcherPopover onSelect={fetchEventsData} />
+            <ObligationSwitcherPopover onSelect={refresh} />
           )}
 
           <Button
@@ -251,7 +257,7 @@ export default function AccountDetailsDialog() {
             icon={<RotateCw />}
             variant="ghost"
             size="icon"
-            onClick={() => fetchEventsData()}
+            onClick={refresh}
           >
             Refresh
           </Button>
