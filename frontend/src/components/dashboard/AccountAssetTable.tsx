@@ -10,7 +10,7 @@ import DataTable, {
   decimalSortingFn,
   tableHeader,
 } from "@/components/dashboard/DataTable";
-import TokenIcon from "@/components/shared/TokenIcon";
+import TokenLogo from "@/components/shared/TokenLogo";
 import { TBody, TLabel } from "@/components/shared/Typography";
 import { formatPrice, formatToken, formatUsd } from "@/lib/format";
 import { reserveSort } from "@/lib/utils";
@@ -51,7 +51,7 @@ export default function AccountAssetTable({
 
           return (
             <div className="flex flex-row items-center gap-3">
-              <TokenIcon coinType={coinType} symbol={symbol} url={iconUrl} />
+              <TokenLogo coinType={coinType} symbol={symbol} src={iconUrl} />
 
               <div className="flex flex-col gap-1">
                 <TBody>{symbol}</TBody>

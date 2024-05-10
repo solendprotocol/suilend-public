@@ -11,7 +11,7 @@ import {
   getCtokenExchangeRate,
 } from "@/components/dashboard/account-details/AccountDetailsDialog";
 import DataTable, { tableHeader } from "@/components/dashboard/DataTable";
-import TokenIcon from "@/components/shared/TokenIcon";
+import TokenLogo from "@/components/shared/TokenLogo";
 import Tooltip from "@/components/shared/Tooltip";
 import { TBody, TLabelSans, TTitle } from "@/components/shared/Typography";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -322,11 +322,11 @@ export default function EarningsTabContent({
 
           return (
             <div className="flex w-max flex-row items-center gap-2">
-              <TokenIcon
+              <TokenLogo
                 className="h-4 w-4"
                 coinType={coinType}
                 symbol={coinMetadata.symbol}
-                url={coinMetadata.iconUrl}
+                src={coinMetadata.iconUrl}
               />
 
               <TBody className="w-max">{coinMetadata.symbol}</TBody>
@@ -373,7 +373,7 @@ export default function EarningsTabContent({
                       amount={earned}
                       coinType={coinType}
                       symbol={coinMetadata.symbol}
-                      iconUrl={coinMetadata.iconUrl}
+                      src={coinMetadata.iconUrl}
                       decimals={coinMetadata.decimals}
                     />
                   );

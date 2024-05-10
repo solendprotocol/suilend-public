@@ -10,7 +10,7 @@ import PointsRank from "@/components/points/PointsRank";
 import Button from "@/components/shared/Button";
 import Spinner from "@/components/shared/Spinner";
 import TextLink from "@/components/shared/TextLink";
-import TokenIcon from "@/components/shared/TokenIcon";
+import TokenLogo from "@/components/shared/TokenLogo";
 import Tooltip from "@/components/shared/Tooltip";
 import {
   TBody,
@@ -42,11 +42,11 @@ function PendingRewards({ totalSuiRewards, isCentered }: PendingRewardsProps) {
     <div className={cn("flex flex-col gap-1", isCentered && "items-center")}>
       <TLabel className="uppercase">Pending rewards</TLabel>
       <div className="flex flex-row items-center gap-1.5">
-        <TokenIcon
+        <TokenLogo
           className="h-4 w-4"
           coinType={NORMALIZED_SUI_COINTYPE}
           symbol="SUI"
-          url={LOGO_MAP[NORMALIZED_SUI_COINTYPE]}
+          src={LOGO_MAP[NORMALIZED_SUI_COINTYPE]}
         />
         <Tooltip title={formatToken(totalSuiRewards, { dp: 9 })}>
           <TBody>{formatToken(totalSuiRewards)}</TBody>

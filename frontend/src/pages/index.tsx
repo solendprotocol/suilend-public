@@ -10,7 +10,7 @@ import Logo from "@/components/layout/Logo";
 import Lava from "@/components/public/Lava";
 import Button from "@/components/shared/Button";
 import Ticker from "@/components/shared/Ticker";
-import TokenIcon from "@/components/shared/TokenIcon";
+import TokenLogo from "@/components/shared/TokenLogo";
 import { TBody, TDisplay, TTitle } from "@/components/shared/Typography";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAppContext } from "@/contexts/AppContext";
@@ -61,9 +61,9 @@ export default function Home() {
                 <Image
                   className="max-md:hidden"
                   src={suilendLogo}
+                  alt="Suilend logo"
                   width={64}
                   height={64}
-                  alt="Suilend logo"
                 />
 
                 <TDisplay className="w-full max-w-[800px] text-[32px] uppercase md:text-[48px]">
@@ -164,10 +164,10 @@ export default function Home() {
                     key={reserve.coinType}
                     className="flex flex-row items-center gap-3 py-2"
                   >
-                    <TokenIcon
+                    <TokenLogo
                       coinType={reserve.coinType}
                       symbol={reserve.symbol}
-                      url={reserve.iconUrl}
+                      src={reserve.iconUrl}
                     />
                     <TBody>{reserve.symbol}</TBody>
                     <TBody className="text-muted-foreground">

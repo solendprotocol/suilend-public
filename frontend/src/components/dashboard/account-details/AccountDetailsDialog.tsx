@@ -13,7 +13,7 @@ import Dialog from "@/components/dashboard/Dialog";
 import ObligationSwitcherPopover from "@/components/dashboard/ObligationSwitcherPopover";
 import Button from "@/components/shared/Button";
 import Tabs from "@/components/shared/Tabs";
-import TokenIcon from "@/components/shared/TokenIcon";
+import TokenLogo from "@/components/shared/TokenLogo";
 import Tooltip from "@/components/shared/Tooltip";
 import { TBody } from "@/components/shared/Typography";
 import { Separator } from "@/components/ui/separator";
@@ -55,7 +55,7 @@ interface TokenAmountProps {
   amount?: BigNumber;
   coinType: string;
   symbol: string;
-  iconUrl?: string | null;
+  src?: string | null;
   decimals: number;
 }
 
@@ -63,16 +63,16 @@ export function TokenAmount({
   amount,
   coinType,
   symbol,
-  iconUrl,
+  src,
   decimals,
 }: TokenAmountProps) {
   return (
     <div className="flex w-max flex-row items-center gap-2">
-      <TokenIcon
+      <TokenLogo
         className="h-4 w-4"
         coinType={coinType}
         symbol={symbol}
-        url={iconUrl}
+        src={src}
       />
 
       <Tooltip
