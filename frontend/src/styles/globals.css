@@ -332,3 +332,9 @@ body {
     border-radius: 38% 52% 75% 36% / 50% 40% 50% 60%;
   }
 }
+
+/* LaTeX */
+.katex-display {
+  width: max-content;
+  margin: 6px 0 !important;
+}

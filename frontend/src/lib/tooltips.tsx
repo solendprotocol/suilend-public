@@ -1,4 +1,7 @@
+import Latex from "react-latex-next";
+
 import TextLink from "@/components/shared/TextLink";
+import "katex/dist/katex.min.css";
 
 export const OPEN_LTV_BW_TOOLTIP =
   "Open LTV is a ratio that determines how much borrow power is contributed by a deposited asset. Borrow weight (BW) is a multiplier on the value borrowed, used for borrow limit calculations.";
@@ -17,6 +20,24 @@ export const EQUITY_TOOLTIP = (
       Formula:
       <br />
       <span className="uppercase">Deposits - Borrows</span>
+    </span>
+  </>
+);
+
+export const NET_APR_TOOLTIP = (
+  <>
+    If your account is worth $X, assuming no prices or rates change, in 1 year
+    it will be worth $X * (1 + Net APR).
+    <br />
+    <br />
+    <span className="font-mono text-muted-foreground">
+      Formula:
+      <br />
+      <Latex>
+        {
+          "$$\\frac{\\sum_{Deposits} d_{USD,i} \\times d_{APR,i} - \\sum_{Borrows} b_{USD,i} \\times b_{APR,i}}{d_{USD} - b_{USD}}$$"
+        }
+      </Latex>
     </span>
   </>
 );
