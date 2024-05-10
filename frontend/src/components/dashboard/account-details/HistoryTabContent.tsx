@@ -46,7 +46,7 @@ interface RowData {
   subRows?: RowData[];
 }
 
-enum ColumnHeaderId {
+enum ColumnId {
   DATE = "date",
   EVENT_TYPE = "eventType",
   DETAILS = "details",
@@ -67,7 +67,7 @@ export default function HistoryTabContent({
   const columns: ColumnDef<RowData>[] = useMemo(
     () => [
       {
-        id: ColumnHeaderId.DATE,
+        id: ColumnId.DATE,
         accessorKey: "date",
         sortingFn: (rowA: Row<RowData>, rowB: Row<RowData>) =>
           eventSortAsc(rowA.original, rowB.original),
@@ -91,7 +91,7 @@ export default function HistoryTabContent({
         },
       },
       {
-        id: ColumnHeaderId.EVENT_TYPE,
+        id: ColumnId.EVENT_TYPE,
         accessorKey: "eventType",
         enableSorting: false,
         filterFn: (row, key, value: EventType[]) =>
@@ -113,7 +113,7 @@ export default function HistoryTabContent({
         },
       },
       {
-        id: ColumnHeaderId.DETAILS,
+        id: ColumnId.DETAILS,
         accessorKey: "details",
         enableSorting: false,
         filterFn: (row, key, value: string[]) => {
@@ -366,7 +366,7 @@ export default function HistoryTabContent({
         },
       },
       {
-        id: ColumnHeaderId.DIGEST,
+        id: ColumnId.DIGEST,
         accessorKey: "digest",
         enableSorting: false,
         header: ({ column }) =>
@@ -580,11 +580,11 @@ export default function HistoryTabContent({
         }
         columnFilters={[
           {
-            id: ColumnHeaderId.EVENT_TYPE,
+            id: ColumnId.EVENT_TYPE,
             value: eventTypes.filter(isNotFilteredOutEventType),
           },
           {
-            id: ColumnHeaderId.DETAILS,
+            id: ColumnId.DETAILS,
             value: coinTypes.filter(isNotFilteredOutCoinType),
           },
         ]}
@@ -597,7 +597,7 @@ export default function HistoryTabContent({
         tableHeadClassName={(header) =>
           cn(
             "sticky bg-popover top-0 z-[2]",
-            header.id === ColumnHeaderId.DIGEST ? "w-16" : "w-auto",
+            header.id === ColumnId.DIGEST ? "w-16" : "w-auto",
           )
         }
         tableRowClassName={(row) => {
