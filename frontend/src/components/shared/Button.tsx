@@ -1,4 +1,4 @@
-import { ReactElement, cloneElement, forwardRef } from "react";
+import { ReactElement, ReactNode, cloneElement, forwardRef } from "react";
 
 import { TooltipContentProps } from "@radix-ui/react-tooltip";
 import { ClassValue } from "clsx";
@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 
 export interface ButtonProps extends ButtonComponentProps {
   labelClassName?: ClassValue;
-  tooltip?: string;
+  tooltip?: string | ReactNode;
   tooltipAlign?: TooltipContentProps["align"];
   startIcon?: ReactElement;
   icon?: ReactElement;

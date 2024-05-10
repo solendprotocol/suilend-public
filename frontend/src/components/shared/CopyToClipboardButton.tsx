@@ -1,17 +1,21 @@
 import { useEffect, useRef, useState } from "react";
 
 import * as Sentry from "@sentry/nextjs";
+import { ClassValue } from "clsx";
 import { Check, Copy } from "lucide-react";
 import { toast } from "sonner";
 
 import Button from "@/components/shared/Button";
+import { cn } from "@/lib/utils";
 
 interface CopyToClipboardButtonProps {
+  className?: ClassValue;
   tooltip?: string;
   value: string;
 }
 
 export default function CopyToClipboardButton({
+  className,
   tooltip,
   value,
 }: CopyToClipboardButtonProps) {
@@ -49,7 +53,7 @@ export default function CopyToClipboardButton({
 
   return (
     <Button
-      className="!bg-transparent text-muted-foreground"
+      className={cn("!bg-transparent text-muted-foreground", className)}
       tooltip={tooltip ?? "Copy to clipboard"}
       icon={
         justCopied ? <Check className="text-primary-foreground" /> : <Copy />

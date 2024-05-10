@@ -5,7 +5,7 @@ import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 import { Side } from "@suilend/sdk/types";
 
 import RewardChip from "@/components/shared/RewardChip";
-import TokenIcon from "@/components/shared/TokenIcon";
+import TokenLogo from "@/components/shared/TokenLogo";
 import Tooltip from "@/components/shared/Tooltip";
 import {
   TBody,
@@ -125,11 +125,11 @@ function AprRewardRow({
       />
 
       <div className="flex flex-row items-center gap-1.5">
-        <TokenIcon
+        <TokenLogo
           className="h-4 w-4"
           coinType={reward.stats.rewardCoinType}
           symbol={reward.stats.rewardSymbol}
-          url={reward.stats.iconUrl}
+          src={reward.stats.iconUrl}
         />
         <TBody className="text-primary-foreground">
           {formatApr(
@@ -168,11 +168,11 @@ function DailyRewardRow({
 
       <div className="flex flex-col items-end gap-0.5">
         <div className="flex flex-row items-center gap-1.5">
-          <TokenIcon
+          <TokenLogo
             className="h-4 w-4"
             coinType={reward.stats.rewardCoinType}
             symbol={reward.stats.rewardSymbol}
-            url={reward.stats.iconUrl}
+            src={reward.stats.iconUrl}
           />
           <TBody className="text-primary-foreground">
             {(isSuilendPoints(reward.stats.rewardCoinType)
@@ -396,12 +396,12 @@ export default function AprWithRewardsBreakdown({
           {[...pointsDailyRewards, ...aprRewards, ...nonPointsDailyRewards].map(
             (reward, index) => {
               return (
-                <TokenIcon
+                <TokenLogo
                   key={index}
                   className="h-4 w-4"
                   coinType={reward.stats.rewardCoinType}
                   symbol={reward.stats.rewardSymbol}
-                  url={reward.stats.iconUrl}
+                  src={reward.stats.iconUrl}
                 />
               );
             },

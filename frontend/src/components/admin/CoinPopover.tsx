@@ -4,7 +4,7 @@ import { ChevronsUpDown } from "lucide-react";
 
 import Button from "@/components/shared/Button";
 import Popover from "@/components/shared/Popover";
-import TokenIcon from "@/components/shared/TokenIcon";
+import TokenLogo from "@/components/shared/TokenLogo";
 import { TLabel, TLabelSans } from "@/components/shared/Typography";
 import { Command, CommandGroup, CommandItem } from "@/components/ui/command";
 import { ParsedCoinBalance } from "@/lib/coinBalance";
@@ -68,11 +68,11 @@ export default function CoinPopover({
               className="flex cursor-pointer flex-row items-center text-foreground aria-selected:text-foreground"
             >
               <div className="mr-2">
-                <TokenIcon
+                <TokenLogo
                   className="h-4 w-4"
                   coinType={cb.coinType}
                   symbol={cb.symbol}
-                  url={cb.iconUrl}
+                  src={cb.iconUrl}
                 />
               </div>
 

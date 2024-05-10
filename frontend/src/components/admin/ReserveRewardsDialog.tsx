@@ -156,8 +156,9 @@ export default function ReserveRewardsDialog({
           <TBody>{reserve.symbol}</TBody>
           <Value
             value={reserve.id}
-            url={explorer.buildObjectUrl(reserve.id)}
             isId
+            url={explorer.buildObjectUrl(reserve.id)}
+            isExplorerUrl
           />
         </div>
       }

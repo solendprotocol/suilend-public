@@ -129,7 +129,7 @@ export default function HistoryTabContent({
                 amount={amount}
                 coinType={depositEvent.coinType}
                 symbol={coinMetadata.symbol}
-                iconUrl={coinMetadata.iconUrl}
+                src={coinMetadata.iconUrl}
                 decimals={coinMetadata.decimals}
               />
             );
@@ -151,7 +151,7 @@ export default function HistoryTabContent({
                   amount={amount}
                   coinType={borrowEvent.coinType}
                   symbol={coinMetadata.symbol}
-                  iconUrl={coinMetadata.iconUrl}
+                  src={coinMetadata.iconUrl}
                   decimals={coinMetadata.decimals}
                 />
 
@@ -181,7 +181,7 @@ export default function HistoryTabContent({
                 amount={amount}
                 coinType={withdrawEvent.coinType}
                 symbol={coinMetadata.symbol}
-                iconUrl={coinMetadata.iconUrl}
+                src={coinMetadata.iconUrl}
                 decimals={coinMetadata.decimals}
               />
             );
@@ -198,7 +198,7 @@ export default function HistoryTabContent({
                 amount={amount}
                 coinType={repayEvent.coinType}
                 symbol={coinMetadata.symbol}
-                iconUrl={coinMetadata.iconUrl}
+                src={coinMetadata.iconUrl}
                 decimals={coinMetadata.decimals}
               />
             );
@@ -272,7 +272,7 @@ export default function HistoryTabContent({
                     amount={withdrawAmount}
                     coinType={withdrawReserve.coinType}
                     symbol={withdrawReserve.symbol}
-                    iconUrl={withdrawReserve.iconUrl}
+                    src={withdrawReserve.iconUrl}
                     decimals={withdrawReserve.mintDecimals}
                   />
                 </div>
@@ -282,7 +282,7 @@ export default function HistoryTabContent({
                     amount={repayAmount}
                     coinType={repayReserve.coinType}
                     symbol={repayReserve.symbol}
-                    iconUrl={repayReserve.iconUrl}
+                    src={repayReserve.iconUrl}
                     decimals={repayReserve.mintDecimals}
                   />
                 </div>
@@ -302,7 +302,7 @@ export default function HistoryTabContent({
                 amount={claimedAmount}
                 coinType={claimRewardEvent.coinType}
                 symbol={coinMetadata.symbol}
-                iconUrl={coinMetadata.iconUrl}
+                src={coinMetadata.iconUrl}
                 decimals={coinMetadata.decimals}
               />
             );

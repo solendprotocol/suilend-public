@@ -20,7 +20,7 @@ import { ReservesRowData } from "@/components/dashboard/MarketTable";
 import Button from "@/components/shared/Button";
 import LabelWithTooltip from "@/components/shared/LabelWithTooltip";
 import Select from "@/components/shared/Select";
-import TokenIcon from "@/components/shared/TokenIcon";
+import TokenLogo from "@/components/shared/TokenLogo";
 import { TBody, TLabel, TLabelSans } from "@/components/shared/Typography";
 import { SelectTrigger } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
@@ -42,10 +42,10 @@ function MarketCard({ rowData, onClick }: MarketCardProps) {
       <div className="flex w-full flex-col items-center gap-4 p-4">
         <div className="flex w-full flex-col items-center gap-2">
           <div className="flex flex-row items-center gap-2">
-            <TokenIcon
+            <TokenLogo
               coinType={rowData.coinType}
               symbol={rowData.symbol}
-              url={rowData.iconUrl}
+              src={rowData.iconUrl}
             />
             <TBody>{rowData.symbol}</TBody>
           </div>

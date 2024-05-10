@@ -5,24 +5,25 @@ import { ClassValue } from "clsx";
 import TextLink from "@/components/shared/TextLink";
 import Tooltip from "@/components/shared/Tooltip";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { LOGO_MAP, NORMALIZED_USDT_ET_COINTYPE } from "@/lib/coinType";
+import { NORMALIZED_USDT_ET_COINTYPE } from "@/lib/coinType";
 import { NORMALIZED_USDC_ET_COINTYPE } from "@/lib/coinType";
 import { DOCS_BRIDGE_LEARN_MORE_URL } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
+import wormholeLogo from "@/public/assets/wormhole.png";
 
-interface TokenIconProps {
+interface TokenLogoProps {
   className?: ClassValue;
   coinType: string;
   symbol: string;
-  url?: string | null;
+  src?: string | null;
 }
 
-export default function TokenIcon({
+export default function TokenLogo({
   className,
   coinType,
   symbol,
-  url,
-}: TokenIconProps) {
+  src,
+}: TokenLogoProps) {
   const nativeAssetMap = {
     [NORMALIZED_USDC_ET_COINTYPE]: {
       fullName: "Wormhole Wrapped Ethereum-native USDC",
@@ -49,12 +50,12 @@ export default function TokenIcon({
     >
       <div className={cn("relative h-7 w-7", className)}>
         <AspectRatio ratio={1} className="relative z-[1]">
-          {url ? (
+          {src ? (
             <Image
-              src={url}
+              className="object-cover"
+              src={src}
               alt={`${symbol} logo`}
               fill
-              className="object-cover"
             />
           ) : (
             <div className="h-full w-full rounded-full bg-gray-200" />
@@ -64,10 +65,10 @@ export default function TokenIcon({
         {nativeAsset && (
           <div className="absolute -bottom-0.5 -right-0.5 z-[2] rounded-full border border-background bg-background">
             <Image
-              src={LOGO_MAP.WORMHOLE}
+              src={wormholeLogo}
+              alt="Wormhole logo"
               width={wormholeLogoSize}
               height={wormholeLogoSize}
-              alt="Wormhole logo"
             />
           </div>
         )}
