@@ -6,12 +6,14 @@ import { SuilendClient } from "@suilend/sdk/client";
 import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 
 import { useActionsModalContext } from "@/components/dashboard/actions-modal/ActionsModalContext";
+import PythLogo from "@/components/dashboard/actions-modal/PythLogo";
 import AprLineChart from "@/components/shared/AprLineChart";
 import Button from "@/components/shared/Button";
 import LabelWithValue from "@/components/shared/LabelWithValue";
 import { Separator } from "@/components/ui/separator";
 import { useAppContext } from "@/contexts/AppContext";
 import { formatLtv, formatPercent, formatToken, formatUsd } from "@/lib/format";
+import { PYTH_PRICE_ID_SYMBOL_MAP, getPythOracleUrl } from "@/lib/pyth";
 import { cn } from "@/lib/utils";
 
 export enum Panel {
@@ -22,46 +24,6 @@ export enum Panel {
 
 interface PanelProps {
   reserve: ParsedReserve;
-}
-
-function ObjectsPanel({ reserve }: PanelProps) {
-  const { explorer, obligation, ...restAppContext } = useAppContext();
-  const suilendClient = restAppContext.suilendClient as SuilendClient<string>;
-
-  return (
-    <>
-      <LabelWithValue
-        label="Coin"
-        value={reserve.coinType}
-        url={explorer.buildCoinUrl(reserve.coinType)}
-        isType
-        horizontal
-      />
-      <LabelWithValue
-        label="Lending market"
-        value={suilendClient.lendingMarket.id}
-        url={explorer.buildObjectUrl(suilendClient.lendingMarket.id)}
-        isId
-        horizontal
-      />
-      <LabelWithValue label="Reserve ID" value={reserve.id} isId horizontal />
-      <LabelWithValue
-        label="Price ID"
-        value={reserve.priceIdentifier}
-        isId
-        horizontal
-      />
-      {obligation?.id && (
-        <LabelWithValue
-          label="Obligation"
-          value={obligation.id}
-          url={explorer.buildObjectUrl(obligation.id)}
-          isId
-          horizontal
-        />
-      )}
-    </>
-  );
 }
 
 function LimitsPanel({ reserve }: PanelProps) {
@@ -171,7 +133,7 @@ function RatesPanel({ reserve }: PanelProps) {
   return (
     <>
       <LabelWithValue
-        label="Current asset utilization"
+        label="Current utilization"
         value={formatPercent(reserve.utilizationPercent)}
         horizontal
       />
@@ -194,6 +156,65 @@ function RatesPanel({ reserve }: PanelProps) {
           />
         </Fragment>
       ))}
+    </>
+  );
+}
+
+function ObjectsPanel({ reserve }: PanelProps) {
+  const { explorer, obligation, ...restAppContext } = useAppContext();
+  const suilendClient = restAppContext.suilendClient as SuilendClient<string>;
+
+  const pythOracleUrl = getPythOracleUrl(reserve.priceIdentifier);
+
+  return (
+    <>
+      <LabelWithValue
+        label="Coin"
+        value={reserve.coinType}
+        isType
+        url={explorer.buildCoinUrl(reserve.coinType)}
+        isExplorerUrl
+        horizontal
+      />
+      <LabelWithValue
+        label="Lending market"
+        value={suilendClient.lendingMarket.id}
+        isId
+        url={explorer.buildObjectUrl(suilendClient.lendingMarket.id)}
+        isExplorerUrl
+        horizontal
+      />
+      <LabelWithValue label="Reserve ID" value={reserve.id} isId horizontal />
+      {pythOracleUrl && (
+        <LabelWithValue
+          label="Oracle"
+          value={
+            <div className="flex flex-row items-center gap-1">
+              {PYTH_PRICE_ID_SYMBOL_MAP[reserve.priceIdentifier]}
+              <PythLogo />
+            </div>
+          }
+          url={pythOracleUrl}
+          urlTooltip="View price feed"
+          horizontal
+        />
+      )}
+      <LabelWithValue
+        label="Price ID"
+        value={reserve.priceIdentifier}
+        isId
+        horizontal
+      />
+      {obligation?.id && (
+        <LabelWithValue
+          label="Obligation"
+          value={obligation.id}
+          isId
+          url={explorer.buildObjectUrl(obligation.id)}
+          isExplorerUrl
+          horizontal
+        />
+      )}
     </>
   );
 }
