@@ -43,6 +43,7 @@ function MarketCard({ rowData, onClick }: MarketCardProps) {
         <div className="flex w-full flex-col items-center gap-2">
           <div className="flex flex-row items-center gap-2">
             <TokenLogo
+              showTooltip
               coinType={rowData.coinType}
               symbol={rowData.symbol}
               src={rowData.iconUrl}

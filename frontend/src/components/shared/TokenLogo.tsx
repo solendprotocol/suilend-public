@@ -13,6 +13,7 @@ import wormholeLogo from "@/public/assets/wormhole.png";
 
 interface TokenLogoProps {
   className?: ClassValue;
+  showTooltip?: boolean;
   coinType: string;
   symbol: string;
   src?: string | null;
@@ -20,6 +21,7 @@ interface TokenLogoProps {
 
 export default function TokenLogo({
   className,
+  showTooltip,
   coinType,
   symbol,
   src,
@@ -40,7 +42,7 @@ export default function TokenLogo({
   return (
     <Tooltip
       title={
-        nativeAsset ? (
+        showTooltip && nativeAsset ? (
           <>
             {`${nativeAsset.fullName}. `}
             <TextLink href={DOCS_BRIDGE_LEARN_MORE_URL}>Learn more</TextLink>
