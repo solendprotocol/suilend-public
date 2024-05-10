@@ -165,7 +165,6 @@ export default function Home() {
                     className="flex flex-row items-center gap-3 py-2"
                   >
                     <TokenLogo
-                      showTooltip
                       coinType={reserve.coinType}
                       symbol={reserve.symbol}
                       src={reserve.iconUrl}
