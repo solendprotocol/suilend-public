@@ -160,7 +160,8 @@ export default function AccountBreakdown() {
               },
               { title: "×" },
               {
-                title: "Weight",
+                title: "BW",
+                titleTooltip: "Borrow weight",
                 data: sortedBorrows.map((b) =>
                   (b.reserve.config.borrowWeightBps / 10000).toString(),
                 ),
