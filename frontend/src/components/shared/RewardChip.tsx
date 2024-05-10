@@ -15,7 +15,7 @@ export default function RewardChip({ coinType, symbol }: RewardChipProps) {
 
       <div className="flex h-6 flex-col justify-center rounded-full border border-secondary px-2">
         <TLabel className="uppercase text-primary-foreground">
-          {isSuilendPoints(coinType) ? "Suilend Pts" : `${symbol} rewards`}
+          {isSuilendPoints(coinType) ? symbol : `${symbol} rewards`}
         </TLabel>
       </div>
     </div>
