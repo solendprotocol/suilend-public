@@ -51,7 +51,12 @@ export default function AccountAssetTable({
 
           return (
             <div className="flex flex-row items-center gap-3">
-              <TokenLogo coinType={coinType} symbol={symbol} src={iconUrl} />
+              <TokenLogo
+                showTooltip
+                coinType={coinType}
+                symbol={symbol}
+                src={iconUrl}
+              />
 
               <div className="flex flex-col gap-1">
                 <TBody>{symbol}</TBody>

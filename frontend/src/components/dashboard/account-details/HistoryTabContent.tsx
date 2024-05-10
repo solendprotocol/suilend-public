@@ -1,9 +1,10 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 
 import { ColumnDef, Row } from "@tanstack/react-table";
 import BigNumber from "bignumber.js";
 import { formatDate } from "date-fns";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { useLocalStorage } from "usehooks-ts";
 
 import {
   EventsData,
@@ -13,7 +14,8 @@ import {
 import DataTable, { tableHeader } from "@/components/dashboard/DataTable";
 import Button from "@/components/shared/Button";
 import OpenOnExplorerButton from "@/components/shared/OpenOnExplorerButton";
-import { TBody, TLabel, TLabelSans } from "@/components/shared/Typography";
+import TokenLogo from "@/components/shared/TokenLogo";
+import { TBody, TLabelSans } from "@/components/shared/Typography";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import {
   BorrowEvent,
@@ -33,7 +35,7 @@ import { cn } from "@/lib/utils";
 interface RowData {
   timestamp: number;
   eventIndex: number;
-  type: EventType;
+  eventType: EventType;
   event:
     | DepositEvent
     | BorrowEvent
@@ -42,6 +44,13 @@ interface RowData {
     | LiquidateEvent
     | ClaimRewardEvent;
   subRows?: RowData[];
+}
+
+enum ColumnId {
+  DATE = "date",
+  EVENT_TYPE = "eventType",
+  DETAILS = "details",
+  DIGEST = "digest",
 }
 
 interface HistoryTabContentProps {
@@ -58,7 +67,7 @@ export default function HistoryTabContent({
   const columns: ColumnDef<RowData>[] = useMemo(
     () => [
       {
-        id: "date",
+        id: ColumnId.DATE,
         accessorKey: "date",
         sortingFn: (rowA: Row<RowData>, rowB: Row<RowData>) =>
           eventSortAsc(rowA.original, rowB.original),
@@ -69,7 +78,11 @@ export default function HistoryTabContent({
           const { timestamp } = row.original;
 
           if (isGroupRow)
-            return <TLabel className="w-max uppercase">Multiple</TLabel>;
+            return (
+              <TBody className="w-max uppercase text-muted-foreground">
+                Multiple
+              </TBody>
+            );
           return (
             <TBody className="w-max">
               {formatDate(new Date(timestamp * 1000), "yyyy-MM-dd HH:mm:ss")}
@@ -78,20 +91,20 @@ export default function HistoryTabContent({
         },
       },
       {
-        id: "type",
-        accessorKey: "type",
+        id: ColumnId.EVENT_TYPE,
+        accessorKey: "eventType",
         enableSorting: false,
         filterFn: (row, key, value: EventType[]) =>
-          value.includes(row.original.type),
+          value.includes(row.original.eventType),
         header: ({ column }) =>
           tableHeader(column, "Action", { borderBottom: true }),
         cell: ({ row }) => {
           const isGroupRow = row.getCanExpand() && row.subRows.length > 1;
-          const { type } = row.original;
+          const { eventType } = row.original;
 
           return (
             <TBody className="w-max uppercase">
-              {EventTypeNameMap[type]}
+              {EventTypeNameMap[eventType]}
               {isGroupRow && (
                 <span className="text-muted-foreground">{` (${row.subRows.length})`}</span>
               )}
@@ -100,16 +113,57 @@ export default function HistoryTabContent({
         },
       },
       {
-        id: "details",
+        id: ColumnId.DETAILS,
         accessorKey: "details",
         enableSorting: false,
+        filterFn: (row, key, value: string[]) => {
+          const { eventType, event } = row.original;
+
+          if (
+            [
+              EventType.DEPOSIT,
+              EventType.BORROW,
+              EventType.WITHDRAW,
+              EventType.REPAY,
+              EventType.CLAIM_REWARD,
+            ].includes(eventType)
+          ) {
+            return value.includes(
+              (
+                event as
+                  | DepositEvent
+                  | BorrowEvent
+                  | WithdrawEvent
+                  | RepayEvent
+                  | ClaimRewardEvent
+              ).coinType,
+            );
+          } else if (eventType === EventType.LIQUIDATE) {
+            const liquidateEvent = event as LiquidateEvent;
+
+            const repayReserve = data.lendingMarket.reserves.find(
+              (reserve) => reserve.id === liquidateEvent.repayReserveId,
+            );
+            const withdrawReserve = data.lendingMarket.reserves.find(
+              (reserve) => reserve.id === liquidateEvent.withdrawReserveId,
+            );
+
+            return (
+              [repayReserve?.coinType, withdrawReserve?.coinType].filter(
+                Boolean,
+              ) as string[]
+            ).reduce((acc, coinType) => acc && value.includes(coinType), true);
+          }
+
+          return false;
+        },
         header: ({ column }) =>
           tableHeader(column, "Details", { borderBottom: true }),
         cell: ({ row }) => {
           const isGroupRow = row.getCanExpand() && row.subRows.length > 1;
-          const { type, event } = row.original;
+          const { eventType, event } = row.original;
 
-          if (type === EventType.DEPOSIT) {
+          if (eventType === EventType.DEPOSIT) {
             const depositEvent = event as DepositEvent;
             const coinMetadata = data.coinMetadataMap[depositEvent.coinType];
 
@@ -133,7 +187,7 @@ export default function HistoryTabContent({
                 decimals={coinMetadata.decimals}
               />
             );
-          } else if (type === EventType.BORROW) {
+          } else if (eventType === EventType.BORROW) {
             const borrowEvent = event as BorrowEvent;
             const coinMetadata = data.coinMetadataMap[borrowEvent.coinType];
 
@@ -161,7 +215,7 @@ export default function HistoryTabContent({
                 </TLabelSans>
               </div>
             );
-          } else if (type === EventType.WITHDRAW) {
+          } else if (eventType === EventType.WITHDRAW) {
             const withdrawEvent = event as WithdrawEvent;
             const coinMetadata = data.coinMetadataMap[withdrawEvent.coinType];
 
@@ -185,7 +239,7 @@ export default function HistoryTabContent({
                 decimals={coinMetadata.decimals}
               />
             );
-          } else if (type === EventType.REPAY) {
+          } else if (eventType === EventType.REPAY) {
             const repayEvent = event as RepayEvent;
             const coinMetadata = data.coinMetadataMap[repayEvent.coinType];
 
@@ -202,7 +256,7 @@ export default function HistoryTabContent({
                 decimals={coinMetadata.decimals}
               />
             );
-          } else if (type === EventType.LIQUIDATE) {
+          } else if (eventType === EventType.LIQUIDATE) {
             const liquidateEvent = event as LiquidateEvent;
 
             const repayReserve = data.lendingMarket.reserves.find(
@@ -288,7 +342,7 @@ export default function HistoryTabContent({
                 </div>
               </div>
             );
-          } else if (type === EventType.CLAIM_REWARD) {
+          } else if (eventType === EventType.CLAIM_REWARD) {
             const claimRewardEvent = event as ClaimRewardEvent;
             const coinMetadata =
               data.coinMetadataMap[claimRewardEvent.coinType];
@@ -307,10 +361,12 @@ export default function HistoryTabContent({
               />
             );
           }
+
+          return null;
         },
       },
       {
-        id: "digest",
+        id: ColumnId.DIGEST,
         accessorKey: "digest",
         enableSorting: false,
         header: ({ column }) =>
@@ -345,7 +401,29 @@ export default function HistoryTabContent({
   );
 
   // Filters
-  const initialFilters = [
+  const [filteredOutEventTypes, setFilteredOutEventTypes] = useLocalStorage<
+    EventType[]
+  >("accountDetailsHistoryFilteredOutEventTypes", []);
+  const toggleEventTypeFilter = (eventType: EventType) => {
+    setFilteredOutEventTypes((arr) =>
+      arr.includes(eventType)
+        ? arr.filter((f) => f !== eventType)
+        : [...arr, eventType],
+    );
+  };
+
+  const [filteredOutCoinTypes, setFilteredOutCoinTypes] = useLocalStorage<
+    string[]
+  >("accountDetailsHistoryFilteredOutCoinTypes", []);
+  const toggleCoinTypeFilter = (coinType: string) => {
+    setFilteredOutCoinTypes((arr) =>
+      arr.includes(coinType)
+        ? arr.filter((f) => f !== coinType)
+        : [...arr, coinType],
+    );
+  };
+
+  const eventTypes = [
     EventType.DEPOSIT,
     EventType.BORROW,
     EventType.WITHDRAW,
@@ -353,15 +431,44 @@ export default function HistoryTabContent({
     EventType.LIQUIDATE,
     EventType.CLAIM_REWARD,
   ];
-  const [filters, setFilters] = useState<EventType[]>(initialFilters);
+  const isNotFilteredOutEventType = (eventType: EventType) =>
+    !filteredOutEventTypes.includes(eventType);
 
-  const toggleFilter = (eventType: EventType) => {
-    setFilters((arr) =>
-      arr.includes(eventType)
-        ? arr.filter((f) => f !== eventType)
-        : [...arr, eventType],
-    );
-  };
+  const coinTypes = useMemo(
+    () =>
+      eventsData === undefined
+        ? []
+        : Array.from(
+            new Set([
+              ...[
+                ...eventsData.deposit,
+                ...eventsData.borrow,
+                ...eventsData.withdraw,
+                ...eventsData.repay,
+                ...eventsData.claimReward,
+              ].map((event) => event.coinType),
+              ...eventsData.liquidate
+                .map((liquidateEvent) => {
+                  const repayReserve = data.lendingMarket.reserves.find(
+                    (reserve) => reserve.id === liquidateEvent.repayReserveId,
+                  );
+                  const withdrawReserve = data.lendingMarket.reserves.find(
+                    (reserve) =>
+                      reserve.id === liquidateEvent.withdrawReserveId,
+                  );
+
+                  return [
+                    repayReserve?.coinType,
+                    withdrawReserve?.coinType,
+                  ].filter(Boolean) as string[];
+                })
+                .flat(),
+            ]),
+          ),
+    [eventsData, data.lendingMarket.reserves],
+  );
+  const isNotFilteredOutCoinType = (coinType: string) =>
+    !filteredOutCoinTypes.includes(coinType);
 
   // Rows
   const rows = useMemo(() => {
@@ -378,7 +485,7 @@ export default function HistoryTabContent({
               ({
                 timestamp: event.timestamp,
                 eventIndex: event.eventIndex,
-                type: key as EventType,
+                eventType: key as EventType,
                 event,
               }) as RowData,
           ),
@@ -391,13 +498,13 @@ export default function HistoryTabContent({
     for (let i = 0; i < sortedRows.length; i++) {
       const row = sortedRows[i];
 
-      if (row.type !== EventType.LIQUIDATE) finalRows.push(row);
+      if (row.eventType !== EventType.LIQUIDATE) finalRows.push(row);
       else {
         const lastRow = finalRows[finalRows.length - 1];
 
         if (
           !lastRow ||
-          lastRow.type !== EventType.LIQUIDATE ||
+          lastRow.eventType !== EventType.LIQUIDATE ||
           (lastRow.event as LiquidateEvent).repayReserveId !==
             (row.event as LiquidateEvent).repayReserveId ||
           (lastRow.event as LiquidateEvent).withdrawReserveId !==
@@ -419,33 +526,68 @@ export default function HistoryTabContent({
   return (
     <>
       <div className="flex flex-row flex-wrap gap-2 p-4">
-        {initialFilters.map((eventType) => (
+        {eventTypes.map((eventType) => (
           <Button
             key={eventType}
             labelClassName="text-xs font-sans"
             className={cn(
               "rounded-full",
-              filters.includes(eventType) &&
+              isNotFilteredOutEventType(eventType) &&
                 "border-secondary bg-secondary/5 text-primary-foreground",
             )}
             variant="secondaryOutline"
             size="sm"
-            onClick={() => toggleFilter(eventType)}
+            onClick={() => toggleEventTypeFilter(eventType)}
           >
             {EventTypeNameMap[eventType]}
           </Button>
         ))}
+        {coinTypes.map((coinType) => {
+          const coinMetadata = data.coinMetadataMap[coinType];
+
+          return (
+            <Button
+              key={coinType}
+              className={cn(
+                "h-6 rounded-full",
+                isNotFilteredOutCoinType(coinType) &&
+                  "border-secondary bg-secondary/5 text-primary-foreground",
+              )}
+              icon={
+                <TokenLogo
+                  coinType={coinType}
+                  symbol={coinMetadata.symbol}
+                  src={coinMetadata.iconUrl}
+                />
+              }
+              variant="secondaryOutline"
+              size="icon"
+              onClick={() => toggleCoinTypeFilter(coinType)}
+            >
+              {coinMetadata.symbol}
+            </Button>
+          );
+        })}
       </div>
 
       <DataTable<RowData>
         columns={columns}
         data={rows}
         noDataMessage={
-          filters.length === initialFilters.length
+          filteredOutEventTypes.length + filteredOutCoinTypes.length === 0
             ? "No history"
             : "No history for the active filters"
         }
-        columnFilters={[{ id: "type", value: filters }]}
+        columnFilters={[
+          {
+            id: ColumnId.EVENT_TYPE,
+            value: eventTypes.filter(isNotFilteredOutEventType),
+          },
+          {
+            id: ColumnId.DETAILS,
+            value: coinTypes.filter(isNotFilteredOutCoinType),
+          },
+        ]}
         skeletonRows={20}
         container={{
           className: cn(rows === undefined && "overflow-y-hidden"),
@@ -455,7 +597,7 @@ export default function HistoryTabContent({
         tableHeadClassName={(header) =>
           cn(
             "sticky bg-popover top-0 z-[2]",
-            header.id === "digest" ? "w-16" : "w-auto",
+            header.id === ColumnId.DIGEST ? "w-16" : "w-auto",
           )
         }
         tableRowClassName={(row) => {
@@ -473,7 +615,7 @@ export default function HistoryTabContent({
             "z-[1]",
             cell &&
               [EventType.BORROW, EventType.LIQUIDATE].includes(
-                cell.row.original.type,
+                cell.row.original.eventType,
               )
               ? "py-2 h-auto"
               : "py-0 h-12",
