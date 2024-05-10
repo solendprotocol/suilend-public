@@ -11,11 +11,13 @@ interface LabelWithValueProps {
   className?: ClassValue;
   label: string;
   labelTooltip?: string;
-  value: string | number | BigNumber;
-  url?: string;
+  value: string | number | BigNumber | ReactNode;
   isId?: boolean;
   isType?: boolean;
   isUsd?: boolean;
+  url?: string;
+  urlTooltip?: string;
+  isExplorerUrl?: boolean;
   horizontal?: boolean;
   monoLabel?: boolean;
   customChild?: ReactNode;
@@ -26,10 +28,12 @@ export default function LabelWithValue({
   label,
   labelTooltip,
   value,
-  url,
   isId,
   isType,
   isUsd,
+  url,
+  urlTooltip,
+  isExplorerUrl,
   horizontal,
   monoLabel,
   customChild,
@@ -49,10 +53,12 @@ export default function LabelWithValue({
       {customChild ?? (
         <Value
           value={value}
-          url={url}
           isId={isId}
           isType={isType}
           isUsd={isUsd}
+          url={url}
+          urlTooltip={urlTooltip}
+          isExplorerUrl={isExplorerUrl}
         />
       )}
     </div>

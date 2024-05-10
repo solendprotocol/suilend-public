@@ -134,8 +134,9 @@ export default function Admin() {
                       <CardDescription>
                         <Value
                           value={reserve.id}
-                          url={explorer.buildObjectUrl(reserve.id)}
                           isId
+                          url={explorer.buildObjectUrl(reserve.id)}
+                          isExplorerUrl
                         />
                       </CardDescription>
                     </CardHeader>

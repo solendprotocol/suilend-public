@@ -38,8 +38,9 @@ export default function ReservePropertiesDialog({
           <TBody>{reserve.symbol}</TBody>
           <Value
             value={reserve.id}
-            url={explorer.buildObjectUrl(reserve.id)}
             isId
+            url={explorer.buildObjectUrl(reserve.id)}
+            isExplorerUrl
           />
         </div>
       }
@@ -50,14 +51,16 @@ export default function ReservePropertiesDialog({
         <LabelWithValue
           label="id"
           value={reserve.id}
-          url={explorer.buildObjectUrl(reserve.id)}
           isId
+          url={explorer.buildObjectUrl(reserve.id)}
+          isExplorerUrl
         />
         <LabelWithValue
           label="coinType"
           value={reserve.coinType}
-          url={explorer.buildCoinUrl(reserve.coinType)}
           isType
+          url={explorer.buildCoinUrl(reserve.coinType)}
+          isExplorerUrl
         />
         <LabelWithValue label="mintDecimals" value={reserve.mintDecimals} />
         <LabelWithValue
