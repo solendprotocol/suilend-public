@@ -27,7 +27,7 @@ export const EQUITY_TOOLTIP = (
 export const NET_APR_TOOLTIP = (
   <>
     If your account is worth $X, assuming no prices or rates change, in 1 year
-    it will be worth $X * (1 + Net APR).
+    it will be worth $X × (1 + Net APR).
     <br />
     <br />
     <span className="font-mono text-muted-foreground">
@@ -35,7 +35,7 @@ export const NET_APR_TOOLTIP = (
       <br />
       <Latex>
         {
-          "$$\\frac{\\sum_{Deposits} d_{USD,i} \\times d_{APR,i} - \\sum_{Borrows} b_{USD,i} \\times b_{APR,i}}{d_{USD} - b_{USD}}$$"
+          "$$D = \\sum_{i=0}^{N(Deposits)} U(d_i) \\times APR(d_i)\\B = \\sum_{i = 0}^{N(Borrows)} U(b_i) \\times APR(b_i)\\ \\frac{D-B}{U(d) - U(b)}$$"
         }
       </Latex>
     </span>
