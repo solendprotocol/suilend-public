@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { normalizeStructTag } from "@mysten/sui.js/utils";
 import BigNumber from "bignumber.js";
-import { DollarSign, FileClock, RotateCw, TableProperties } from "lucide-react";
+import { Banknote, FileClock, RotateCw, TableProperties } from "lucide-react";
 
 import { WAD } from "@suilend/sdk/constants";
 
@@ -112,7 +112,7 @@ export default function AccountDetailsDialog() {
 
   const tabs = [
     { id: Tab.HISTORY, icon: <FileClock />, title: "History" },
-    { id: Tab.EARNINGS, icon: <DollarSign />, title: "Earnings" },
+    { id: Tab.EARNINGS, icon: <Banknote />, title: "Earnings" },
   ];
 
   const selectedTab =
