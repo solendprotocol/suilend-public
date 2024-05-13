@@ -1,3 +1,5 @@
+import { PiggyBank } from "lucide-react";
+
 import AccountAssetTable from "@/components/dashboard/AccountAssetTable";
 import Card from "@/components/dashboard/Card";
 import { CardContent } from "@/components/ui/card";
@@ -10,7 +12,11 @@ export default function ObligationDepositsCard() {
   return (
     <Card
       id="assets-deposited"
-      header={{ title: "Assets deposited", noSeparator: true }}
+      header={{
+        titleIcon: <PiggyBank />,
+        title: "Assets deposited",
+        noSeparator: true,
+      }}
     >
       <CardContent className="p-0">
         <AccountAssetTable

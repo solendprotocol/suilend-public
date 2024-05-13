@@ -51,7 +51,7 @@ export default function ActionsModal() {
         >
           {reserve && (
             <>
-              <div className="flex h-full w-full flex-col gap-4 md:h-auto md:w-[400px]">
+              <div className="flex h-full w-full flex-col gap-4 md:h-auto md:w-[420px]">
                 {selectedTab === Tab.DEPOSIT && (
                   <DepositTabContent reserve={reserve} />
                 )}

@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { ChevronsUpDown, User } from "lucide-react";
+import { ChevronsUpDown } from "lucide-react";
 
 import Button from "@/components/shared/Button";
 import Popover from "@/components/shared/Popover";
@@ -42,7 +42,6 @@ export default function ObligationSwitcherPopover({
             isOpen && "border-secondary bg-secondary/5 text-primary-foreground",
           )}
           labelClassName="text-xs"
-          startIcon={<User />}
           endIcon={<ChevronsUpDown />}
           variant="secondaryOutline"
           role="combobox"

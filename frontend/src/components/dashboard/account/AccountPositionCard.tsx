@@ -1,4 +1,5 @@
 import BigNumber from "bignumber.js";
+import { User } from "lucide-react";
 
 import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
 
@@ -179,10 +180,15 @@ export default function AccountPositionCard() {
     <Card
       id="position"
       header={{
+        titleIcon: <User />,
         title: "Account",
-        startContent: <AccountDetailsDialog />,
-        endContent: data.obligations && data.obligations.length > 1 && (
-          <ObligationSwitcherPopover />
+        endContent: (
+          <>
+            {data.obligations && data.obligations.length > 1 && (
+              <ObligationSwitcherPopover />
+            )}
+            <AccountDetailsDialog />
+          </>
         ),
         noSeparator: true,
       }}
