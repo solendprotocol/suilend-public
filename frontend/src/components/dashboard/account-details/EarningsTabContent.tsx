@@ -4,6 +4,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import BigNumber from "bignumber.js";
 
 import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
+import { Side } from "@suilend/sdk/types";
 
 import {
   EventsData,
@@ -139,7 +140,9 @@ export default function EarningsTabContent({
       );
       if (claimedAmount.eq(0)) return;
 
-      const side = claimRewardEvent.isDepositReward ? "deposit" : "borrow";
+      const side = claimRewardEvent.isDepositReward
+        ? Side.DEPOSIT
+        : Side.BORROW;
 
       result[side][reserve.coinType] = result[side][reserve.coinType] ?? {};
       result[side][reserve.coinType][claimRewardEvent.coinType] =

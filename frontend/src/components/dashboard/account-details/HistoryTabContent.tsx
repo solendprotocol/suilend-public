@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { ColumnDef, Row } from "@tanstack/react-table";
 import BigNumber from "bignumber.js";
 import { formatDate } from "date-fns";
+import { cloneDeep } from "lodash";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useLocalStorage } from "usehooks-ts";
 
@@ -493,30 +494,65 @@ export default function HistoryTabContent({
       }, [])
       .sort(eventSortDesc);
 
-    // Group liquidate events
     const finalRows: RowData[] = [];
     for (let i = 0; i < sortedRows.length; i++) {
       const row = sortedRows[i];
 
-      if (row.eventType !== EventType.LIQUIDATE) finalRows.push(row);
-      else {
-        const lastRow = finalRows[finalRows.length - 1];
+      switch (row.eventType) {
+        // Dedupe CLAIM_REWARD events
+        case EventType.CLAIM_REWARD: {
+          const claimRewardEvent = row.event as ClaimRewardEvent;
 
-        if (
-          !lastRow ||
-          lastRow.eventType !== EventType.LIQUIDATE ||
-          (lastRow.event as LiquidateEvent).repayReserveId !==
-            (row.event as LiquidateEvent).repayReserveId ||
-          (lastRow.event as LiquidateEvent).withdrawReserveId !==
-            (row.event as LiquidateEvent).withdrawReserveId
-        ) {
-          finalRows.push({
-            ...row,
-            subRows: [row],
-          });
-        } else {
-          (lastRow.subRows as RowData[]).push(row);
+          const lastRow = finalRows[finalRows.length - 1];
+          if (!lastRow || lastRow.eventType !== EventType.CLAIM_REWARD)
+            finalRows.push(cloneDeep(row));
+          else {
+            const lastClaimRewardEvent = lastRow.event as ClaimRewardEvent;
+
+            if (
+              lastClaimRewardEvent.coinType === claimRewardEvent.coinType &&
+              lastClaimRewardEvent.isDepositReward ===
+                claimRewardEvent.isDepositReward &&
+              lastClaimRewardEvent.timestamp === claimRewardEvent.timestamp &&
+              lastClaimRewardEvent.digest === claimRewardEvent.digest
+            ) {
+              (
+                finalRows[finalRows.length - 1].event as ClaimRewardEvent
+              ).liquidityAmount = new BigNumber(
+                lastClaimRewardEvent.liquidityAmount,
+              )
+                .plus(claimRewardEvent.liquidityAmount)
+                .toString();
+            } else finalRows.push(row);
+          }
+
+          break;
         }
+
+        // Group LIQUIDATE events
+        case EventType.LIQUIDATE: {
+          const liquidateEvent = row.event as LiquidateEvent;
+
+          const lastRow = finalRows[finalRows.length - 1];
+          if (!lastRow || lastRow.eventType !== EventType.LIQUIDATE)
+            finalRows.push({ ...row, subRows: [row] });
+          else {
+            const lastLiquidateEvent = lastRow.event as LiquidateEvent;
+
+            if (
+              lastLiquidateEvent.repayReserveId ===
+                liquidateEvent.repayReserveId &&
+              lastLiquidateEvent.withdrawReserveId ===
+                liquidateEvent.withdrawReserveId
+            )
+              (lastRow.subRows as RowData[]).push(row);
+            else finalRows.push({ ...row, subRows: [row] });
+          }
+
+          break;
+        }
+        default:
+          finalRows.push(row);
       }
     }
 

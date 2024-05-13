@@ -1,5 +1,3 @@
-import BigNumber from "bignumber.js";
-
 export enum EventType {
   RESERVE_ASSET_DATA = "reserveAssetData",
   DEPOSIT = "deposit",
@@ -169,29 +167,3 @@ export const eventSortDesc = (a: EventRow, b: EventRow) => {
 
 export const eventSortAsc = (a: EventRow, b: EventRow) =>
   -1 * eventSortDesc(a, b);
-
-export const getDedupedClaimRewardEvents = (events: ClaimRewardEvent[]) => {
-  const dedupedClaimRewardEvents: ClaimRewardEvent[] = [];
-  for (const event of events) {
-    const lastEvent =
-      dedupedClaimRewardEvents[dedupedClaimRewardEvents.length - 1];
-
-    if (!lastEvent) dedupedClaimRewardEvents.push(event);
-    else {
-      if (
-        lastEvent.coinType === event.coinType &&
-        lastEvent.isDepositReward === event.isDepositReward &&
-        lastEvent.timestamp === event.timestamp &&
-        lastEvent.digest === event.digest
-      ) {
-        dedupedClaimRewardEvents[
-          dedupedClaimRewardEvents.length - 1
-        ].liquidityAmount = new BigNumber(lastEvent.liquidityAmount)
-          .plus(event.liquidityAmount)
-          .toString();
-      } else dedupedClaimRewardEvents.push(event);
-    }
-  }
-
-  return dedupedClaimRewardEvents;
-};

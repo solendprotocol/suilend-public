@@ -30,7 +30,6 @@ import {
   WithdrawEvent,
   eventSortAsc,
   eventSortDesc,
-  getDedupedClaimRewardEvents,
 } from "@/lib/events";
 import { formatPoints, formatToken } from "@/lib/format";
 import { API_URL } from "@/lib/navigation";
@@ -186,9 +185,7 @@ export default function AccountDetailsDialog() {
           withdraw: (data.withdraw ?? []).slice().sort(eventSortDesc),
           repay: (data.repay ?? []).slice().sort(eventSortDesc),
           liquidate: (data.liquidate ?? []).slice().sort(eventSortDesc),
-          claimReward: getDedupedClaimRewardEvents(
-            (data.claimReward ?? []).slice().sort(eventSortDesc),
-          ),
+          claimReward: (data.claimReward ?? []).slice().sort(eventSortDesc),
         });
       } catch (err) {
         console.error(err);
