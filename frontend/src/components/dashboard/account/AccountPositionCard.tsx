@@ -24,6 +24,7 @@ import {
   DEPOSITS_TOOLTIP,
   EQUITY_TOOLTIP,
   LIQUIDATION_THRESHOLD_TOOLTIP,
+  NET_APR_TOOLTIP,
   WEIGHTED_BORROWS_TOOLTIP,
 } from "@/lib/tooltips";
 
@@ -104,10 +105,7 @@ function AccountPositionCardContent() {
       </div>
 
       <div className="flex flex-row items-center justify-between gap-2">
-        <LabelWithTooltip
-        >
-          Net APR
-        </LabelWithTooltip>
+        <LabelWithTooltip tooltip={NET_APR_TOOLTIP}>Net APR</LabelWithTooltip>
         <TBody className="w-max text-right">
           {formatPercent(netAprPercent)}
         </TBody>
