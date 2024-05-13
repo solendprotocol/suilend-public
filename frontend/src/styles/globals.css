@@ -336,5 +336,5 @@ body {
 /* LaTeX */
 .katex-display {
   width: max-content;
-  margin: 8px 0 !important;
+  margin: 12px 0 !important;
 }

@@ -105,17 +105,7 @@ function AccountPositionCardContent() {
       </div>
 
       <div className="flex flex-row items-center justify-between gap-2">
-        <LabelWithTooltip
-          tooltip={NET_APR_TOOLTIP}
-          tooltipContentProps={{
-            style: {
-              maxWidth:
-                "min(var(--radix-tooltip-content-available-width), 360px)",
-            },
-          }}
-        >
-          Net APR
-        </LabelWithTooltip>
+        <LabelWithTooltip tooltip={NET_APR_TOOLTIP}>Net APR</LabelWithTooltip>
         <TBody className="w-max text-right">
           {formatPercent(netAprPercent)}
         </TBody>
