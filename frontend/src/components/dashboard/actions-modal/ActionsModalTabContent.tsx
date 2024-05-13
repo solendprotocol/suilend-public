@@ -2,7 +2,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import BigNumber from "bignumber.js";
 import { capitalize } from "lodash";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  HandCoins,
+  PiggyBank,
+  Wallet,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { maxU64 } from "@suilend/sdk/constants";
@@ -17,7 +23,7 @@ import Button from "@/components/shared/Button";
 import LabelWithValue from "@/components/shared/LabelWithValue";
 import Spinner from "@/components/shared/Spinner";
 import TextLink from "@/components/shared/TextLink";
-import { TLabelSans } from "@/components/shared/Typography";
+import { TBody } from "@/components/shared/Typography";
 import { Separator } from "@/components/ui/separator";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { ActionSignature } from "@/contexts/DashboardContext";
@@ -32,6 +38,7 @@ import {
   formatUsd,
 } from "@/lib/format";
 import { Action } from "@/lib/types";
+import { cn, hoverUnderlineClassName } from "@/lib/utils";
 
 export type SubmitButtonState = {
   isLoading?: boolean;
@@ -240,14 +247,71 @@ export default function ActionsModalTabContent({
 
   return (
     <>
-      <ActionsModalInput
-        ref={inputRef}
-        value={value}
-        onChange={onValueChange}
-        reserve={reserve}
-        useMaxAmount={useMaxAmount}
-        onMaxClick={setMaxValue}
-      />
+      <div className="flex w-full flex-col">
+        <div className="relative z-[2] w-full">
+          <ActionsModalInput
+            ref={inputRef}
+            value={value}
+            onChange={onValueChange}
+            reserve={reserve}
+            useMaxAmount={useMaxAmount}
+            onMaxClick={setMaxValue}
+          />
+        </div>
+
+        <div className="relative z-[1] -mt-2 flex w-full flex-row flex-wrap justify-between gap-x-2 gap-y-1 rounded-b-md bg-card px-2 pb-2 pt-4">
+          <div
+            className={cn(
+              "flex flex-row items-center gap-1",
+              [Action.DEPOSIT].includes(action) && "cursor-pointer",
+            )}
+            onClick={
+              [Action.DEPOSIT].includes(action) ? setMaxValue : undefined
+            }
+          >
+            <Wallet className="h-3 w-3 text-foreground" />
+            <TBody
+              className={cn(
+                "text-xs",
+                [Action.DEPOSIT].includes(action) &&
+                  cn("decoration-foreground/50", hoverUnderlineClassName),
+              )}
+            >
+              {formatToken(balance, { dp: reserve.mintDecimals })}{" "}
+              {reserve.symbol}
+            </TBody>
+          </div>
+
+          <div
+            className={cn(
+              "flex flex-row items-center gap-1",
+              [Action.WITHDRAW, Action.REPAY].includes(action) &&
+                "cursor-pointer",
+            )}
+            onClick={
+              [Action.WITHDRAW, Action.REPAY].includes(action)
+                ? setMaxValue
+                : undefined
+            }
+          >
+            {side === Side.DEPOSIT ? (
+              <PiggyBank className="h-3 w-3 text-foreground" />
+            ) : (
+              <HandCoins className="h-3 w-3 text-foreground" />
+            )}
+            <TBody
+              className={cn(
+                "text-xs",
+                [Action.WITHDRAW, Action.REPAY].includes(action) &&
+                  cn("decoration-foreground/50", hoverUnderlineClassName),
+              )}
+            >
+              {formatToken(positionAmount, { dp: reserve.mintDecimals })}{" "}
+              {reserve.symbol}
+            </TBody>
+          </div>
+        </div>
+      </div>
 
       <div className="-m-4 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-4 md:min-h-[200px]">
         <div
@@ -344,16 +408,6 @@ export default function ActionsModalTabContent({
             submitButtonState.title
           )}
         </Button>
-      </div>
-
-      <div className="flex flex-row flex-wrap justify-between gap-x-2 gap-y-1">
-        <TLabelSans onClick={setMaxValue}>
-          {`${formatToken(balance, { dp: reserve.mintDecimals })} ${reserve.symbol} in wallet`}
-        </TLabelSans>
-
-        <TLabelSans>
-          {`${formatToken(positionAmount, { dp: reserve.mintDecimals })} ${reserve.symbol} ${side === Side.DEPOSIT ? "deposited" : "borrowed"}`}
-        </TLabelSans>
       </div>
     </>
   );

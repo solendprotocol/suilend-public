@@ -1,3 +1,5 @@
+import { HandCoins } from "lucide-react";
+
 import AccountAssetTable from "@/components/dashboard/AccountAssetTable";
 import Card from "@/components/dashboard/Card";
 import { CardContent } from "@/components/ui/card";
@@ -10,7 +12,11 @@ export default function ObligationBorrowsCard() {
   return (
     <Card
       id="assets-borrowed"
-      header={{ title: "Assets borrowed", noSeparator: true }}
+      header={{
+        titleIcon: <HandCoins />,
+        title: "Assets borrowed",
+        noSeparator: true,
+      }}
     >
       <CardContent className="p-0">
         <AccountAssetTable
