@@ -14,7 +14,7 @@ export default function PointsHeader() {
       >
         <div className="flex h-6 w-max flex-col justify-center rounded-md bg-secondary px-3">
           <TLabel className="font-bold uppercase text-secondary-foreground">
-            Points hub
+            Leaderboard
           </TLabel>
         </div>
 

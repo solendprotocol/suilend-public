@@ -85,7 +85,7 @@ export default function PointsLeaderboardTable() {
   );
 
   return (
-    <div className="flex w-full max-w-[960px] flex-col gap-6">
+    <div className="flex w-full max-w-[960px] flex-col gap-4">
       {leaderboardRows ? (
         <TLabelSans>
           <LeaderboardDataUsers />
