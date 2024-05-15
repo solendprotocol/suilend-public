@@ -9,7 +9,6 @@ import {
 } from "react";
 
 import BigNumber from "bignumber.js";
-import { strFromU8, unzlibSync } from "fflate";
 
 import { Obligation } from "@suilend/sdk/_generated/suilend/obligation/structs";
 import {
@@ -72,13 +71,9 @@ export function PointsContextProvider({ children }: PropsWithChildren) {
 
       isFetchingObligationsRef.current = true;
       try {
-        const url = `${API_URL}/obligations/all?compressed=true`;
-
+        const url = `${API_URL}/obligations/all`;
         const res = await fetch(url);
-        const compressedJson = await res.json();
-        const json = JSON.parse(
-          strFromU8(unzlibSync(Buffer.from(compressedJson.data, "base64"))),
-        );
+        const json = await res.json();
 
         setRefreshedObligations(json.obligations);
         setRefreshedObligationsUpdatedAt(new Date(json.updatedAt * 1000));
