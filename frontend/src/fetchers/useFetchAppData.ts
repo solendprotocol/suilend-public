@@ -20,7 +20,7 @@ import * as simulate from "@suilend/sdk/utils/simulate";
 
 import { SuiPriceServiceConnection } from "@pyth-sdk";
 
-import { AppContextValue, AppData } from "@/contexts/AppContext";
+import { AppContext, AppData } from "@/contexts/AppContext";
 import { ParsedCoinBalance, parseCoinBalances } from "@/lib/coinBalance";
 import { getCoinMetadataMap } from "@/lib/coinMetadata";
 import { formatRewards } from "@/lib/liquidityMining";
@@ -30,7 +30,7 @@ export default function useFetchAppData(
   address: string | undefined,
 ) {
   // Suilend client
-  const suilendClientRef = useRef<AppContextValue["suilendClient"]>(null);
+  const suilendClientRef = useRef<AppContext["suilendClient"]>(null);
 
   // Data
   const dataFetcher = async () => {
@@ -158,7 +158,7 @@ export default function useFetchAppData(
     } as AppData;
   };
 
-  const { data, mutate } = useSWR<AppContextValue["data"]>(
+  const { data, mutate } = useSWR<AppContext["data"]>(
     `appData-${address}`,
     dataFetcher,
     {

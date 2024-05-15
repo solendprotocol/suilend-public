@@ -13,25 +13,24 @@ import { useAppContext } from "@/contexts/AppContext";
 
 export const AUTO_REFRESH_DATA_INTERVAL = 30; // Seconds
 
-interface RefreshDataContextValue {
+interface RefreshDataContext {
   autoRefreshCountdown: number;
   manuallyRefreshData: () => Promise<void>;
   isRefreshing: boolean;
 }
 
-const RefreshDataContext = createContext<RefreshDataContextValue | undefined>(
-  undefined,
-);
-
-export const useRefreshDataContext = () => {
-  const context = useContext(RefreshDataContext);
-  if (!context) {
-    throw new Error(
-      "useRefreshDataContext must be used within a RefreshDataContextProvider",
-    );
-  }
-  return context;
+const defaultContextValue: RefreshDataContext = {
+  autoRefreshCountdown: 0,
+  manuallyRefreshData: async () => {
+    throw Error("RefreshDataContextProvider not initialized");
+  },
+  isRefreshing: false,
 };
+
+const RefreshDataContext =
+  createContext<RefreshDataContext>(defaultContextValue);
+
+export const useRefreshDataContext = () => useContext(RefreshDataContext);
 
 export function RefreshDataContextProvider({ children }: PropsWithChildren) {
   const { refreshData: silentlyRefreshData } = useAppContext();
@@ -105,7 +104,7 @@ export function RefreshDataContextProvider({ children }: PropsWithChildren) {
   }, [countdown, refreshData]);
 
   // Context
-  const contextValue: RefreshDataContextValue = useMemo(
+  const contextValue: RefreshDataContext = useMemo(
     () => ({
       autoRefreshCountdown: countdown,
       manuallyRefreshData: refreshData,

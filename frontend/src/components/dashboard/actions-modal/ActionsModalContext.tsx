@@ -33,7 +33,7 @@ interface ActionsModalContext {
   setActivePanel: Dispatch<SetStateAction<Panel>>;
 }
 
-const ActionsModalContext = createContext<ActionsModalContext>({
+const defaultContextValue: ActionsModalContext = {
   reserveIndex: undefined,
   isOpen: false,
   open: () => {
@@ -55,17 +55,12 @@ const ActionsModalContext = createContext<ActionsModalContext>({
   setActivePanel: () => {
     throw Error("ActionsModalContextProvider not initialized");
   },
-});
-
-export const useActionsModalContext = () => {
-  const context = useContext(ActionsModalContext);
-  if (!context) {
-    throw new Error(
-      "useActionsModalContext must be used within a ActionsModalContextProvider",
-    );
-  }
-  return context;
 };
+
+const ActionsModalContext =
+  createContext<ActionsModalContext>(defaultContextValue);
+
+export const useActionsModalContext = () => useContext(ActionsModalContext);
 
 export function ActionsModalContextProvider({ children }: PropsWithChildren) {
   const [reserveIndex, setReserveIndex] = useState<number | undefined>(
@@ -78,6 +73,7 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
     useLocalStorage<boolean>("isActionsModalMoreParametersOpen", false);
   const [activePanel, setActivePanel] = useState<Panel>(Panel.LIMITS);
 
+  // Context
   const contextValue = useMemo(
     () => ({
       reserveIndex,

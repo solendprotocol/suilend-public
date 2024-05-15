@@ -7,31 +7,29 @@ import {
   useState,
 } from "react";
 
-interface WormholeConnectContextValue {
+interface WormholeConnectContext {
   isLoading: boolean;
 }
 
-const WormholeConnectContext = createContext<
-  WormholeConnectContextValue | undefined
->(undefined);
-
-export const useWormholeConnectContext = () => {
-  const context = useContext(WormholeConnectContext);
-  if (!context) {
-    throw new Error(
-      "useWormholeConnectContext must be used within a WormholeConnectContextProvider",
-    );
-  }
-  return context;
+const defaultContextValue: WormholeConnectContext = {
+  isLoading: true,
 };
+
+const WormholeConnectContext =
+  createContext<WormholeConnectContext>(defaultContextValue);
+
+export const useWormholeConnectContext = () =>
+  useContext(WormholeConnectContext);
 
 export function WormholeConnectContextProvider({
   children,
 }: PropsWithChildren) {
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<
+    WormholeConnectContext["isLoading"]
+  >(defaultContextValue.isLoading);
 
   // Context
-  const contextValue: WormholeConnectContextValue = useMemo(
+  const contextValue: WormholeConnectContext = useMemo(
     () => ({
       isLoading,
     }),
