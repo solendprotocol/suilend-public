@@ -41,7 +41,7 @@ export interface AppData {
   coinBalancesRaw: CoinBalance[];
 }
 
-export interface AppContextValue {
+export interface AppContext {
   suiClient: SuiClient | null;
   suilendClient: SuilendClient<string> | null;
   data: AppData | null;
@@ -57,7 +57,7 @@ export interface AppContextValue {
   ) => Promise<SuiTransactionBlockResponse>;
 }
 
-const defaultContextValues: AppContextValue = {
+const defaultContextValue: AppContext = {
   suiClient: null,
   suilendClient: null,
   data: null,
@@ -81,7 +81,7 @@ const defaultContextValues: AppContextValue = {
   },
 };
 
-const AppContext = createContext<AppContextValue>(defaultContextValues);
+const AppContext = createContext<AppContext>(defaultContextValue);
 
 export const useAppContext = () => useContext(AppContext);
 
@@ -91,14 +91,14 @@ export function AppContextProvider({ children }: PropsWithChildren) {
   // RPC
   const [rpcId, setRpcId] = useLocalStorage<string>(
     "selectedRpc",
-    defaultContextValues.rpc.id,
+    defaultContextValue.rpc.id,
   );
   const rpc = RPCS.find((rpc) => rpc.id === rpcId) ?? RPCS[0];
 
   // Explorer
   const [explorerId, setExplorerId] = useLocalStorage<string>(
     "selectedExplorer",
-    defaultContextValues.explorer.id,
+    defaultContextValue.explorer.id,
   );
   const explorer =
     EXPLORERS.find((explorer) => explorer.id === explorerId) ?? EXPLORERS[0];
@@ -120,7 +120,7 @@ export function AppContextProvider({ children }: PropsWithChildren) {
   );
 
   // Context
-  const contextValue: AppContextValue = useMemo(
+  const contextValue: AppContext = useMemo(
     () => ({
       suiClient,
       suilendClient,

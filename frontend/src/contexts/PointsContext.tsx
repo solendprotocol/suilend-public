@@ -33,21 +33,21 @@ type ObligationWithOwner = Obligation<string> & {
   owner: string;
 };
 
-export interface PointsContextValue {
+interface PointsContext {
   refreshedObligations?: ObligationWithOwner[];
   refreshedObligationsUpdatedAt?: Date;
   leaderboardRows?: LeaderboardRowData[];
   rank?: number | null;
 }
 
-const defaultContextValues: PointsContextValue = {
+const defaultContextValue: PointsContext = {
   refreshedObligations: undefined,
   refreshedObligationsUpdatedAt: undefined,
   leaderboardRows: undefined,
   rank: undefined,
 };
 
-const PointsContext = createContext<PointsContextValue>(defaultContextValues);
+const PointsContext = createContext<PointsContext>(defaultContextValue);
 
 export const usePointsContext = () => useContext(PointsContext);
 
@@ -57,11 +57,11 @@ export function PointsContextProvider({ children }: PropsWithChildren) {
 
   // Obligations
   const [refreshedObligations, setRefreshedObligations] = useState<
-    PointsContextValue["refreshedObligations"]
-  >(defaultContextValues["refreshedObligations"]);
+    PointsContext["refreshedObligations"]
+  >(defaultContextValue["refreshedObligations"]);
   const [refreshedObligationsUpdatedAt, setRefreshedObligationsUpdatedAt] =
-    useState<PointsContextValue["refreshedObligationsUpdatedAt"]>(
-      defaultContextValues["refreshedObligationsUpdatedAt"],
+    useState<PointsContext["refreshedObligationsUpdatedAt"]>(
+      defaultContextValue["refreshedObligationsUpdatedAt"],
     );
 
   const isFetchingObligationsRef = useRef<boolean>(false);
@@ -81,12 +81,12 @@ export function PointsContextProvider({ children }: PropsWithChildren) {
         console.error(err);
       }
     })();
-  }, [data]);
+  }, []);
 
   // Leaderboard
   const [leaderboardRows, setLeaderboardRows] = useState<
-    PointsContextValue["leaderboardRows"]
-  >(defaultContextValues["leaderboardRows"]);
+    PointsContext["leaderboardRows"]
+  >(defaultContextValue["leaderboardRows"]);
 
   const isProcessingLeaderboardRowsRef = useRef<boolean>(false);
   useEffect(() => {
@@ -145,8 +145,8 @@ export function PointsContextProvider({ children }: PropsWithChildren) {
   }, [refreshedObligations, data]);
 
   // Rank
-  const [rank, setRank] = useState<PointsContextValue["rank"]>(
-    defaultContextValues["rank"],
+  const [rank, setRank] = useState<PointsContext["rank"]>(
+    defaultContextValue["rank"],
   );
 
   useEffect(() => {
@@ -165,7 +165,7 @@ export function PointsContextProvider({ children }: PropsWithChildren) {
   }, [address, leaderboardRows]);
 
   // Context
-  const contextValue: PointsContextValue = useMemo(
+  const contextValue: PointsContext = useMemo(
     () => ({
       refreshedObligationsUpdatedAt,
       leaderboardRows,

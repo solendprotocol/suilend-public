@@ -27,7 +27,7 @@ import { useWallet } from "@suiet/wallet-kit";
 import { useLDClient } from "launchdarkly-react-client-sdk";
 import { toast } from "sonner";
 
-export interface WalletContextValue {
+interface WalletContext {
   isConnectWalletDropdownOpen: boolean;
   setIsConnectWalletDropdownOpen: Dispatch<SetStateAction<boolean>>;
   accounts: readonly WalletAccount[];
@@ -43,7 +43,7 @@ export interface WalletContextValue {
   ) => Promise<SuiTransactionBlockResponse>;
 }
 
-const WalletContext = createContext<WalletContextValue>({
+const WalletContext = createContext<WalletContext>({
   isConnectWalletDropdownOpen: false,
   setIsConnectWalletDropdownOpen: () => {
     throw new Error("WalletContextProvider not initialized");
