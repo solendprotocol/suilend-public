@@ -153,7 +153,7 @@ export default function HistoryTabContent({
               [repayReserve?.coinType, withdrawReserve?.coinType].filter(
                 Boolean,
               ) as string[]
-            ).reduce((acc, coinType) => acc && value.includes(coinType), true);
+            ).reduce((acc, coinType) => acc || value.includes(coinType), false);
           }
 
           return false;
