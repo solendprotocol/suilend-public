@@ -2,12 +2,15 @@ import NextLink from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
+import { ExternalLink } from "lucide-react";
+
 import PointsCount from "@/components/points/PointsCount";
 import PointsIcon from "@/components/points/PointsIcon";
 import PointsRank from "@/components/points/PointsRank";
 import Button from "@/components/shared/Button";
 import Popover from "@/components/shared/Popover";
-import { TLabel } from "@/components/shared/Typography";
+import { TLabel, TTitle } from "@/components/shared/Typography";
+import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAppContext } from "@/contexts/AppContext";
 import { usePointsContext } from "@/contexts/PointsContext";
@@ -49,7 +52,12 @@ export default function PointsCountPopover() {
         className: "w-[280px]",
       }}
     >
-      <div className="flex flex-col items-center gap-4">
+      <div className="flex flex-col gap-4">
+        <div className="flex w-full flex-col gap-2">
+          <TTitle className="uppercase">Points hub</TTitle>
+          <Separator />
+        </div>
+
         <div className="flex w-full flex-col gap-2">
           <div className="flex flex-row items-center justify-between gap-4">
             <TLabel className="uppercase">Total points</TLabel>
@@ -73,9 +81,10 @@ export default function PointsCountPopover() {
               className="w-full border-secondary text-primary-foreground"
               labelClassName="uppercase"
               variant="secondaryOutline"
+              endIcon={<ExternalLink />}
               onClick={() => setIsOpen(false)}
             >
-              Points hub
+              Leaderboard
             </Button>
           </NextLink>
         )}

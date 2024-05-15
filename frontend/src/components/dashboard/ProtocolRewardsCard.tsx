@@ -2,6 +2,7 @@ import NextLink from "next/link";
 import React, { useState } from "react";
 
 import BigNumber from "bignumber.js";
+import { ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 
 import Card from "@/components/dashboard/Card";
@@ -216,9 +217,10 @@ export default function ProtocolRewardsCard() {
                   <Button
                     className="w-full border-secondary text-primary-foreground"
                     labelClassName="uppercase"
+                    endIcon={<ExternalLink />}
                     variant="secondaryOutline"
                   >
-                    Points hub
+                    Leaderboard
                   </Button>
                 </NextLink>
               </div>
