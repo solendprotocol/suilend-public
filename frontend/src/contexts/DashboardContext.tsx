@@ -11,7 +11,7 @@ import { TransactionBlock } from "@mysten/sui.js/transactions";
 import * as Sentry from "@sentry/nextjs";
 
 import { ActionsModalContextProvider } from "@/components/dashboard/actions-modal/ActionsModalContext";
-import { useAppContext } from "@/contexts/AppContext";
+import { AppData, useAppContext } from "@/contexts/AppContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 import { RewardSummary } from "@/lib/liquidityMining";
 
@@ -20,7 +20,7 @@ export type ActionSignature = (
   value: string,
 ) => Promise<SuiTransactionBlockResponse>;
 
-interface DashboardContextValue {
+interface DashboardContext {
   deposit: ActionSignature;
   borrow: ActionSignature;
   withdraw: ActionSignature;
@@ -30,29 +30,39 @@ interface DashboardContextValue {
   ) => Promise<SuiTransactionBlockResponse>;
 }
 
-const DashboardContext = createContext<DashboardContextValue | undefined>(
-  undefined,
-);
-
-export const useDashboardContext = () => {
-  const context = useContext(DashboardContext);
-  if (!context) {
-    throw new Error(
-      "useDashboardContext must be used within a DashboardContextProvider",
-    );
-  }
-  return context;
+const defaultContextValue: DashboardContext = {
+  deposit: async () => {
+    throw Error("DashboardContextProvider not initialized");
+  },
+  borrow: async () => {
+    throw Error("DashboardContextProvider not initialized");
+  },
+  withdraw: async () => {
+    throw Error("DashboardContextProvider not initialized");
+  },
+  repay: async () => {
+    throw Error("DashboardContextProvider not initialized");
+  },
+  claimRewards: async () => {
+    throw Error("DashboardContextProvider not initialized");
+  },
 };
+
+const DashboardContext = createContext<DashboardContext>(defaultContextValue);
+
+export const useDashboardContext = () => useContext(DashboardContext);
 
 export function DashboardContextProvider({ children }: PropsWithChildren) {
   const { address } = useWalletContext();
   const {
     suilendClient,
-    data,
     obligation,
     signExecuteAndWaitTransactionBlock,
+    ...restAppContext
   } = useAppContext();
-  const obligationOwnerCap = data?.obligationOwnerCaps?.find(
+  const data = restAppContext.data as AppData;
+
+  const obligationOwnerCap = data.obligationOwnerCaps?.find(
     (o) => o.obligationId === obligation?.id,
   );
 
@@ -227,7 +237,7 @@ export function DashboardContextProvider({ children }: PropsWithChildren) {
   );
 
   // Context
-  const contextValue: DashboardContextValue = useMemo(
+  const contextValue: DashboardContext = useMemo(
     () => ({
       deposit,
       borrow,
