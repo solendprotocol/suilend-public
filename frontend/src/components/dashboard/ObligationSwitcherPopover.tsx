@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import { ChevronsUpDown } from "lucide-react";
 
+import UtilizationBar from "@/components/dashboard/UtilizationBar";
 import Button from "@/components/shared/Button";
 import Popover from "@/components/shared/Popover";
 import { TLabel, TLabelSans } from "@/components/shared/Typography";
@@ -78,6 +79,10 @@ export default function ObligationSwitcherPopover({
                 <TLabelSans className="text-right">
                   {formatUsd(o.borrowedAmountUsd)} borrowed
                 </TLabelSans>
+              </div>
+
+              <div className="mt-1 w-full">
+                <UtilizationBar obligation={o} />
               </div>
             </CommandItem>
           ))}
