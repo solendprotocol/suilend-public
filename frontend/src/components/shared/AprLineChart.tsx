@@ -197,8 +197,8 @@ export default function AprLineChart({
       >
         <Recharts.LineChart data={transformedData} onMouseMove={onMouseMove}>
           <Recharts.CartesianGrid
-            strokeDasharray="3 2"
-            stroke="hsla(var(--muted) / 20%)"
+            strokeDasharray="1 4"
+            stroke="hsla(var(--secondary) / 25%)"
           />
           <Recharts.XAxis
             dataKey="x"
@@ -280,7 +280,7 @@ export default function AprLineChart({
               strokeWidth: 0,
               fill: "transparent",
             }}
-            strokeWidth={3}
+            strokeWidth={2}
           />
           {reference && (
             <Recharts.ReferenceDot

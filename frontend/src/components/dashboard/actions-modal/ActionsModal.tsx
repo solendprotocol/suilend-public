@@ -130,7 +130,7 @@ export default function ActionsModal() {
             .times(reserve.config.openLtvPct / 100),
         );
         const newBorrowUtilization =
-          newBorrowLimitUsd && !newBorrowLimitUsd.isZero()
+          newBorrowLimitUsd && !newBorrowLimitUsd.eq(0)
             ? obligation.maxPriceWeightedBorrowsUsd.div(newBorrowLimitUsd)
             : null;
 
@@ -262,7 +262,7 @@ export default function ActionsModal() {
           };
 
         const newBorrowUtilization =
-          !valueObj.isNaN() && !obligation.minPriceBorrowLimitUsd.isZero()
+          !valueObj.isNaN() && !obligation.minPriceBorrowLimitUsd.eq(0)
             ? obligation.maxPriceWeightedBorrowsUsd
                 .plus(
                   valueObj
@@ -402,7 +402,7 @@ export default function ActionsModal() {
           : null;
 
         const newBorrowUtilization =
-          newBorrowLimitUsd && !newBorrowLimitUsd.isZero()
+          newBorrowLimitUsd && !newBorrowLimitUsd.eq(0)
             ? obligation.borrowedAmountUsd.div(newBorrowLimitUsd)
             : null;
 
@@ -484,7 +484,7 @@ export default function ActionsModal() {
           };
 
         const newBorrowUtilization =
-          !valueObj.isNaN() && !obligation.minPriceBorrowLimitUsd.isZero()
+          !valueObj.isNaN() && !obligation.minPriceBorrowLimitUsd.eq(0)
             ? obligation.borrowedAmountUsd
                 .minus(
                   valueObj

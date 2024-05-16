@@ -17,6 +17,7 @@ import { Side } from "@suilend/sdk/types";
 
 import { useActionsModalContext } from "@/components/dashboard/actions-modal/ActionsModalContext";
 import ActionsModalInput from "@/components/dashboard/actions-modal/ActionsModalInput";
+import HistoricalAprLineChart from "@/components/dashboard/actions-modal/HistoricalAprLineChart";
 import ParametersPanel from "@/components/dashboard/actions-modal/ParametersPanel";
 import PythLogo from "@/components/dashboard/actions-modal/PythLogo";
 import AprWithRewardsBreakdown from "@/components/dashboard/AprWithRewardsBreakdown";
@@ -373,8 +374,8 @@ export default function ActionsModalTabContent({
           />
         </div>
 
-        <div className="h-[120px] w-full flex-shrink-0 bg-muted/25 md:h-[160px]">
-          {/* <HistoricalAprLineChart reserveId={reserve.id} /> */}
+        <div className="h-[120px] w-full flex-shrink-0 md:h-[160px]">
+          <HistoricalAprLineChart reserveId={reserve.id} />
         </div>
 
         {!md && isMoreParametersOpen && (

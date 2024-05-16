@@ -1,3 +1,8 @@
+import BigNumber from "bignumber.js";
+
+import { WAD } from "@suilend/sdk/constants";
+import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
+
 export enum EventType {
   RESERVE_ASSET_DATA = "reserveAssetData",
   DEPOSIT = "deposit",
@@ -167,3 +172,67 @@ export const eventSortDesc = (a: EventRow, b: EventRow) => {
 
 export const eventSortAsc = (a: EventRow, b: EventRow) =>
   -1 * eventSortDesc(a, b);
+
+// APRs
+export const calculateUtilizationPercent = (
+  reserve: ParsedReserve,
+  event: ReserveAssetDataEvent,
+) => {
+  const availableAmount = new BigNumber(event.availableAmount)
+    .div(WAD.toString())
+    .div(10 ** reserve.mintDecimals);
+  const borrowedAmount = new BigNumber(event.borrowedAmount)
+    .div(WAD.toString())
+    .div(10 ** reserve.mintDecimals);
+  const depositedAmount = borrowedAmount.plus(availableAmount);
+
+  if (depositedAmount.eq(0)) return new BigNumber(0);
+  return borrowedAmount.div(depositedAmount).times(100);
+};
+
+export const calculateBorrowAprPercent = (
+  reserve: ParsedReserve,
+  event: ReserveAssetDataEvent,
+) => {
+  const config = reserve.config;
+  const currentUtilPercent = calculateUtilizationPercent(reserve, event);
+
+  let i = 1;
+  while (i < config.interestRate.length) {
+    const leftUtilPercent = config.interestRate[i - 1].utilPercent;
+    const leftAprPercent = config.interestRate[i - 1].aprPercent;
+
+    const rightUtilPercent = config.interestRate[i].utilPercent;
+    const rightAprPercent = config.interestRate[i].aprPercent;
+
+    if (
+      currentUtilPercent.gte(leftUtilPercent) &&
+      currentUtilPercent.lte(rightUtilPercent)
+    ) {
+      const weight = new BigNumber(
+        currentUtilPercent.minus(leftUtilPercent),
+      ).div(rightUtilPercent.minus(leftUtilPercent));
+
+      return leftAprPercent.plus(
+        weight.times(rightAprPercent.minus(leftAprPercent)),
+      );
+    }
+    i = i + 1;
+  }
+  // Should never reach here
+  return new BigNumber(0);
+};
+
+export const calculateDepositAprPercent = (
+  reserve: ParsedReserve,
+  event: ReserveAssetDataEvent,
+) => {
+  const currentUtilPercent = calculateUtilizationPercent(reserve, event);
+  const borrowAprPercent = calculateBorrowAprPercent(reserve, event);
+  const spreadFeePercent = new BigNumber(reserve.config.spreadFeeBps).div(100);
+
+  return currentUtilPercent
+    .div(100)
+    .times(borrowAprPercent)
+    .times(new BigNumber(1).minus(spreadFeePercent.div(100)));
+};

@@ -278,17 +278,17 @@ export default function ParametersPanel({ reserve }: ParametersPanelProps) {
 
       <div className="h-[160px] w-full flex-shrink-0 md:h-[160px]">
         <AprLineChart
-          id="apr-chart"
+          id="apr-line-chart"
           data={reserve.config.interestRate
             .slice()
-            .sort((a, b) => Number(a.utilPercent) - Number(b.utilPercent))
+            .sort((a, b) => +a.utilPercent - +b.utilPercent)
             .map((row) => ({
               x: +row.utilPercent,
-              y: Number(row.aprPercent),
+              y: +row.aprPercent,
             }))}
           reference={{
-            x: reserve.utilizationPercent.toNumber(),
-            y: reserve.borrowAprPercent.toNumber(),
+            x: +reserve.utilizationPercent,
+            y: +reserve.borrowAprPercent,
           }}
           xAxisLabel="Utilization"
           yAxisLabel="Borrow APR"
