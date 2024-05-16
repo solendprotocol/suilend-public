@@ -10,7 +10,6 @@ import PointsRank from "@/components/points/PointsRank";
 import Button from "@/components/shared/Button";
 import Popover from "@/components/shared/Popover";
 import { TLabel, TTitle } from "@/components/shared/Typography";
-import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAppContext } from "@/contexts/AppContext";
 import { usePointsContext } from "@/contexts/PointsContext";
@@ -53,10 +52,7 @@ export default function PointsCountPopover() {
       }}
     >
       <div className="flex flex-col gap-4">
-        <div className="flex w-full flex-col gap-2">
-          <TTitle className="uppercase">Points hub</TTitle>
-          <Separator />
-        </div>
+        <TTitle className="uppercase">Points hub</TTitle>
 
         <div className="flex w-full flex-col gap-2">
           <div className="flex flex-row items-center justify-between gap-4">

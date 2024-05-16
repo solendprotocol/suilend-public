@@ -85,9 +85,13 @@ function Threshold({ className, leftPercent }: ThresholdProps) {
 
 interface UtilizationBarProps {
   obligation?: ParsedObligation | null;
+  noTooltip?: boolean;
 }
 
-export default function UtilizationBar({ obligation }: UtilizationBarProps) {
+export default function UtilizationBar({
+  obligation,
+  noTooltip,
+}: UtilizationBarProps) {
   const appContext = useAppContext();
 
   if (!obligation) obligation = appContext.obligation;
@@ -265,30 +269,37 @@ export default function UtilizationBar({ obligation }: UtilizationBarProps) {
         align: "start",
       }}
       content={
-        <>
-          <div className="flex flex-col gap-2">
-            <WeightedBorrowsTitle
-              labelClassName="uppercase font-mono"
-              noTooltip
-            />
-            <TBodySans className="text-xs">{weightedBorrowsTooltip}</TBodySans>
-          </div>
+        noTooltip ? undefined : (
+          <>
+            <div className="flex flex-col gap-2">
+              <WeightedBorrowsTitle
+                labelClassName="uppercase font-mono"
+                noTooltip
+              />
+              <TBodySans className="text-xs">
+                {weightedBorrowsTooltip}
+              </TBodySans>
+            </div>
 
-          <div className="flex flex-col gap-2">
-            <BorrowLimitTitle labelClassName="uppercase font-mono" noTooltip />
-            <TBodySans className="text-xs">{borrowLimitTooltip}</TBodySans>
-          </div>
+            <div className="flex flex-col gap-2">
+              <BorrowLimitTitle
+                labelClassName="uppercase font-mono"
+                noTooltip
+              />
+              <TBodySans className="text-xs">{borrowLimitTooltip}</TBodySans>
+            </div>
 
-          <div className="flex flex-col gap-2">
-            <LiquidationThresholdTitle
-              labelClassName="uppercase font-mono"
-              noTooltip
-            />
-            <TBodySans className="text-xs">
-              {liquidationThresholdTooltip}
-            </TBodySans>
-          </div>
-        </>
+            <div className="flex flex-col gap-2">
+              <LiquidationThresholdTitle
+                labelClassName="uppercase font-mono"
+                noTooltip
+              />
+              <TBodySans className="text-xs">
+                {liquidationThresholdTooltip}
+              </TBodySans>
+            </div>
+          </>
+        )
       }
     >
       <div className="relative flex h-2.5 w-full cursor-pointer flex-row">
