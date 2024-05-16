@@ -9,6 +9,7 @@ import Button from "@/components/shared/Button";
 import { TBody, TLabel } from "@/components/shared/Typography";
 import { Input as InputComponent } from "@/components/ui/input";
 import { formatUsd } from "@/lib/format";
+import { Action } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 export const getActionInputId = (id: string) => `action-input.${id}`;
@@ -17,18 +18,19 @@ interface ActionsModalInputProps {
   value: string;
   onChange: (value: string) => void;
   reserve: ParsedReserve;
+  action: Action;
   useMaxAmount: boolean;
   onMaxClick: () => void;
 }
 
 const ActionsModalInput = forwardRef<HTMLInputElement, ActionsModalInputProps>(
-  ({ value, onChange, reserve, useMaxAmount, onMaxClick }, ref) => {
+  ({ value, onChange, reserve, action, useMaxAmount, onMaxClick }, ref) => {
     const actionInputId = getActionInputId("value");
 
     const localRef = useRef<HTMLInputElement>(null);
     useEffect(() => {
       setTimeout(() => localRef.current?.focus());
-    }, []);
+    }, [action]);
 
     const INPUT_HEIGHT = 70; // px
     const INPUT_BORDER_Y = 1; // px
@@ -82,7 +84,7 @@ const ActionsModalInput = forwardRef<HTMLInputElement, ActionsModalInputProps>(
             className="text-right"
             style={{ height: `${USD_LABEL_HEIGHT}px` }}
           >
-            ≈{formatUsd(new BigNumber(value ?? "0").times(reserve.price))}
+            ≈{formatUsd(new BigNumber(value || "0").times(reserve.price))}
           </TLabel>
         </div>
       </div>

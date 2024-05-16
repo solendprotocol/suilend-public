@@ -18,6 +18,7 @@ import { Side } from "@suilend/sdk/types";
 import { useActionsModalContext } from "@/components/dashboard/actions-modal/ActionsModalContext";
 import ActionsModalInput from "@/components/dashboard/actions-modal/ActionsModalInput";
 import ParametersPanel from "@/components/dashboard/actions-modal/ParametersPanel";
+import PythLogo from "@/components/dashboard/actions-modal/PythLogo";
 import AprWithRewardsBreakdown from "@/components/dashboard/AprWithRewardsBreakdown";
 import Button from "@/components/shared/Button";
 import LabelWithValue from "@/components/shared/LabelWithValue";
@@ -44,31 +45,85 @@ export type SubmitButtonState = {
   isLoading?: boolean;
   isDisabled?: boolean;
   title?: string;
+  description?: string;
 };
 
-interface ActionsModalTabContentProps {
-  action: Action;
-  actionPastTense: string;
+interface BelowFoldParametersProps {
+  value: string;
   reserve: ParsedReserve;
-  getMaxValue: () => string;
-  getSubmitButtonNoValueState?: () => SubmitButtonState | undefined;
-  getSubmitButtonState: (value: string) => SubmitButtonState | undefined;
-  submit: ActionSignature;
   getNewCalculations: (value: string) => {
     newBorrowLimitUsd: BigNumber | null;
     newBorrowUtilization: BigNumber | null;
   };
 }
 
+function BelowFoldParameters({
+  value,
+  reserve,
+  getNewCalculations,
+}: BelowFoldParametersProps) {
+  const { obligation } = useAppContext();
+
+  const { newBorrowLimitUsd, newBorrowUtilization } = getNewCalculations(value);
+
+  return (
+    <>
+      <LabelWithValue
+        label="Price"
+        value={formatPrice(reserve.price)}
+        labelEndDecorator={<PythLogo />}
+        horizontal
+      />
+      <LabelWithValue
+        label="Your borrow limit"
+        value={
+          newBorrowLimitUsd
+            ? `${formatUsd(obligation?.minPriceBorrowLimitUsd ?? new BigNumber("0"))} → ${formatUsd(newBorrowLimitUsd)}`
+            : formatUsd(
+                obligation?.minPriceBorrowLimitUsd ?? new BigNumber("0"),
+              )
+        }
+        horizontal
+      />
+      <LabelWithValue
+        label="Your utilization"
+        value={
+          newBorrowUtilization
+            ? `${formatPercent(obligation?.weightedConservativeBorrowUtilizationPercent ?? new BigNumber(0))} → ${formatPercent(newBorrowUtilization.times(100))}`
+            : formatPercent(
+                obligation?.weightedConservativeBorrowUtilizationPercent ??
+                  new BigNumber(0),
+              )
+        }
+        horizontal
+      />
+    </>
+  );
+}
+
+interface ActionsModalTabContentProps {
+  reserve: ParsedReserve;
+  action: Action;
+  actionPastTense: string;
+  getMaxValue: () => string;
+  getNewCalculations: (value: string) => {
+    newBorrowLimitUsd: BigNumber | null;
+    newBorrowUtilization: BigNumber | null;
+  };
+  getSubmitButtonNoValueState?: () => SubmitButtonState | undefined;
+  getSubmitButtonState: (value: string) => SubmitButtonState | undefined;
+  submit: ActionSignature;
+}
+
 export default function ActionsModalTabContent({
+  reserve,
   action,
   actionPastTense,
-  reserve,
   getMaxValue,
+  getNewCalculations,
   getSubmitButtonNoValueState,
   getSubmitButtonState,
   submit,
-  getNewCalculations,
 }: ActionsModalTabContentProps) {
   const { address } = useWalletContext();
   const { refreshData, explorer, obligation, ...restAppContext } =
@@ -107,7 +162,6 @@ export default function ActionsModalTabContent({
 
   const inputRef = useRef<HTMLInputElement>(null);
   const [value, setValue] = useState<string>("");
-  const { newBorrowLimitUsd, newBorrowUtilization } = getNewCalculations(value);
 
   const onValueChangeCore = useCallback(
     (_value: string) => {
@@ -140,8 +194,10 @@ export default function ActionsModalTabContent({
 
   const formattedValue = `${value} ${reserve.symbol}`;
 
-  // Rewards
-  const rewards = data.rewardMap[reserve.coinType];
+  // Borrow fee
+  const borrowFee = new BigNumber(value || "0")
+    .times(reserve.config.borrowFeeBps)
+    .div(10000);
 
   // Submit
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -167,6 +223,10 @@ export default function ActionsModalTabContent({
 
     return {
       title: `${capitalize(action)} ${formattedValue}`,
+      description:
+        action === Action.BORROW
+          ? `+${formatToken(borrowFee, { dp: reserve.mintDecimals })} ${reserve.symbol} in fees`
+          : undefined,
     };
   };
   const submitButtonState = getSubmitButtonStateWrapper();
@@ -254,6 +314,7 @@ export default function ActionsModalTabContent({
             value={value}
             onChange={onValueChange}
             reserve={reserve}
+            action={action}
             useMaxAmount={useMaxAmount}
             onMaxClick={setMaxValue}
           />
@@ -313,40 +374,15 @@ export default function ActionsModalTabContent({
         </div>
       </div>
 
-      <div className="-m-4 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-4 md:min-h-[200px]">
-        <div
-          className="flex flex-col gap-3"
-          style={{ height: 5 * 20 + (5 - 1) * (3 * 4) }}
-        >
-          <LabelWithValue
-            label="Price"
-            value={formatPrice(reserve.price)}
-            labelTooltip="The price of the asset in USD"
-            horizontal
-          />
-          <LabelWithValue
-            label="User borrow limit"
-            value={
-              newBorrowLimitUsd
-                ? `${formatUsd(obligation?.minPriceBorrowLimitUsd ?? new BigNumber("0"))} → ${formatUsd(newBorrowLimitUsd)}`
-                : formatUsd(
-                    obligation?.minPriceBorrowLimitUsd ?? new BigNumber("0"),
-                  )
-            }
-            horizontal
-          />
-          <LabelWithValue
-            label="Utilization"
-            value={
-              newBorrowUtilization
-                ? `${formatPercent(obligation?.weightedConservativeBorrowUtilizationPercent ?? new BigNumber(0))} → ${formatPercent(newBorrowUtilization.times(100))}`
-                : formatPercent(
-                    obligation?.weightedConservativeBorrowUtilizationPercent ??
-                      new BigNumber(0),
-                  )
-            }
-            horizontal
-          />
+      <div className="-m-4 flex min-h-0 flex-1 flex-col justify-between gap-4 overflow-y-auto p-4 pb-6">
+        <div className="flex flex-col gap-3">
+          {md && (
+            <BelowFoldParameters
+              value={value}
+              reserve={reserve}
+              getNewCalculations={getNewCalculations}
+            />
+          )}
           <LabelWithValue
             label={`${capitalize(side)} APR`}
             customChild={
@@ -357,7 +393,7 @@ export default function ActionsModalTabContent({
                     ? reserve.depositAprPercent
                     : reserve.borrowAprPercent
                 }
-                rewards={rewards?.[side] ?? []}
+                rewards={data.rewardMap[reserve.coinType]?.[side] ?? []}
                 reserve={reserve}
                 amountChange={valueChange}
               />
@@ -365,24 +401,44 @@ export default function ActionsModalTabContent({
             horizontal
             value="0"
           />
-          {action === Action.BORROW && (
-            <LabelWithValue
-              label="Borrow fee"
-              value={`${formatToken(new BigNumber(value || "0").times(reserve.config.borrowFeeBps).div(10000), { dp: reserve.mintDecimals })} ${reserve.symbol}`}
-              horizontal
-            />
-          )}
+        </div>
+
+        <div className="h-[160px] w-full flex-shrink-0 bg-muted/25 md:h-[200px]">
+          {/* <AprLineChart
+            id="apr-chart2"
+            data={reserve.config.interestRate
+              .slice()
+              .sort((a, b) => Number(a.utilPercent) - Number(b.utilPercent))
+              .map((row) => ({
+                x: +row.utilPercent,
+                y: Number(row.aprPercent),
+              }))}
+            reference={{
+              x: reserve.utilizationPercent.toNumber(),
+              y: reserve.borrowAprPercent.toNumber(),
+            }}
+            xAxisLabel="Utilization"
+            yAxisLabel="Borrow APR"
+          /> */}
         </div>
 
         {!md && isMoreParametersOpen && (
           <>
             <Separator />
+            <div className="flex flex-col gap-3">
+              <BelowFoldParameters
+                value={value}
+                reserve={reserve}
+                getNewCalculations={getNewCalculations}
+              />
+            </div>
+
             <ParametersPanel reserve={reserve} />
           </>
         )}
       </div>
 
-      <div className="flex w-full flex-col gap-2">
+      <div className="flex w-full flex-col gap-[2px]">
         {!md && (
           <Button
             className="justify-between"
@@ -406,6 +462,12 @@ export default function ActionsModalTabContent({
             <Spinner size="md" />
           ) : (
             submitButtonState.title
+          )}
+
+          {submitButtonState.description && (
+            <span className="block font-sans text-xs normal-case opacity-75">
+              {submitButtonState.description}
+            </span>
           )}
         </Button>
       </div>
