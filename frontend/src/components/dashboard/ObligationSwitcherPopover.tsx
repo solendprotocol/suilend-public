@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import { ChevronsUpDown } from "lucide-react";
 
+import UtilizationBar from "@/components/dashboard/UtilizationBar";
 import Button from "@/components/shared/Button";
 import Popover from "@/components/shared/Popover";
 import { TLabel, TLabelSans } from "@/components/shared/Typography";
@@ -62,11 +63,13 @@ export default function ObligationSwitcherPopover({
               key={o.id}
               value={o.id}
               onSelect={() => onSelectWrapper(o.id)}
-              className="flex cursor-pointer flex-col items-center gap-1 text-foreground aria-selected:text-foreground"
+              className="flex cursor-pointer flex-col items-center gap-1 text-foreground aria-selected:bg-muted/10 aria-selected:text-foreground"
             >
               <div className="flex w-full justify-between">
-                <TLabel className="text-inherit">Subaccount {index + 1}</TLabel>
-                <TLabel className="text-inherit">
+                <TLabel className="uppercase text-inherit">
+                  Subaccount {index + 1}
+                </TLabel>
+                <TLabel className="uppercase text-inherit">
                   {o.positionCount} position{o.positionCount > 1 ? "s" : ""}
                 </TLabel>
               </div>
@@ -78,6 +81,10 @@ export default function ObligationSwitcherPopover({
                 <TLabelSans className="text-right">
                   {formatUsd(o.borrowedAmountUsd)} borrowed
                 </TLabelSans>
+              </div>
+
+              <div className="mt-1 w-full">
+                <UtilizationBar obligation={o} noTooltip />
               </div>
             </CommandItem>
           ))}
