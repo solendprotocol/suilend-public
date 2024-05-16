@@ -9,7 +9,9 @@ import { cn } from "@/lib/utils";
 
 interface LabelWithValueProps {
   className?: ClassValue;
+  labelStartDecorator?: ReactNode;
   label: string;
+  labelEndDecorator?: ReactNode;
   labelTooltip?: string;
   valueStartDecorator?: ReactNode;
   value: string | number | BigNumber;
@@ -27,7 +29,9 @@ interface LabelWithValueProps {
 
 export default function LabelWithValue({
   className,
+  labelStartDecorator,
   label,
+  labelEndDecorator,
   labelTooltip,
   valueStartDecorator,
   value,
@@ -50,7 +54,12 @@ export default function LabelWithValue({
         horizontal ? "flex-row items-center gap-2" : "h-min flex-col gap-1",
       )}
     >
-      <LabelWithTooltip tooltip={labelTooltip} isMono={monoLabel}>
+      <LabelWithTooltip
+        tooltip={labelTooltip}
+        startDecorator={labelStartDecorator}
+        endDecorator={labelEndDecorator}
+        isMono={monoLabel}
+      >
         {label}
       </LabelWithTooltip>
 
