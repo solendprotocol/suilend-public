@@ -268,7 +268,7 @@ export default function ParametersPanel({ reserve }: ParametersPanelProps) {
         </PanelButton>
       </div>
 
-      <div className="flex flex-col gap-3 md:-m-4 md:h-[250px] md:overflow-y-auto md:p-4">
+      <div className="flex flex-col gap-2.5 md:-m-4 md:h-[236px] md:overflow-y-auto md:p-4">
         {activePanel === Panel.LIMITS && <LimitsPanel reserve={reserve} />}
         {activePanel === Panel.RATES && <RatesPanel reserve={reserve} />}
         {activePanel === Panel.OBJECTS && <ObjectsPanel reserve={reserve} />}
@@ -276,7 +276,7 @@ export default function ParametersPanel({ reserve }: ParametersPanelProps) {
 
       <Separator className="hidden md:block" />
 
-      <div className="h-[160px] w-full flex-shrink-0 md:h-[200px]">
+      <div className="h-[160px] w-full flex-shrink-0 md:h-[160px]">
         <AprLineChart
           id="apr-chart"
           data={reserve.config.interestRate

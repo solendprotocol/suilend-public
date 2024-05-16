@@ -3,9 +3,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import BigNumber from "bignumber.js";
 import { capitalize } from "lodash";
 import {
-  ChevronDown,
-  ChevronUp,
   HandCoins,
+  Maximize2,
+  Minimize2,
   PiggyBank,
   Wallet,
 } from "lucide-react";
@@ -48,59 +48,6 @@ export type SubmitButtonState = {
   description?: string;
 };
 
-interface BelowFoldParametersProps {
-  value: string;
-  reserve: ParsedReserve;
-  getNewCalculations: (value: string) => {
-    newBorrowLimitUsd: BigNumber | null;
-    newBorrowUtilization: BigNumber | null;
-  };
-}
-
-function BelowFoldParameters({
-  value,
-  reserve,
-  getNewCalculations,
-}: BelowFoldParametersProps) {
-  const { obligation } = useAppContext();
-
-  const { newBorrowLimitUsd, newBorrowUtilization } = getNewCalculations(value);
-
-  return (
-    <>
-      <LabelWithValue
-        label="Price"
-        value={formatPrice(reserve.price)}
-        labelEndDecorator={<PythLogo />}
-        horizontal
-      />
-      <LabelWithValue
-        label="Your borrow limit"
-        value={
-          newBorrowLimitUsd
-            ? `${formatUsd(obligation?.minPriceBorrowLimitUsd ?? new BigNumber("0"))} → ${formatUsd(newBorrowLimitUsd)}`
-            : formatUsd(
-                obligation?.minPriceBorrowLimitUsd ?? new BigNumber("0"),
-              )
-        }
-        horizontal
-      />
-      <LabelWithValue
-        label="Your utilization"
-        value={
-          newBorrowUtilization
-            ? `${formatPercent(obligation?.weightedConservativeBorrowUtilizationPercent ?? new BigNumber(0))} → ${formatPercent(newBorrowUtilization.times(100))}`
-            : formatPercent(
-                obligation?.weightedConservativeBorrowUtilizationPercent ??
-                  new BigNumber(0),
-              )
-        }
-        horizontal
-      />
-    </>
-  );
-}
-
 interface ActionsModalTabContentProps {
   reserve: ParsedReserve;
   action: Action;
@@ -129,10 +76,9 @@ export default function ActionsModalTabContent({
   const { refreshData, explorer, obligation, ...restAppContext } =
     useAppContext();
   const data = restAppContext.data as AppData;
-
   const { isMoreParametersOpen, setIsMoreParametersOpen } =
     useActionsModalContext();
-  const MoreParametersIcon = isMoreParametersOpen ? ChevronUp : ChevronDown;
+  const MoreParametersIcon = isMoreParametersOpen ? Minimize2 : Maximize2;
 
   const { md } = useBreakpoint();
 
@@ -191,6 +137,8 @@ export default function ActionsModalTabContent({
     // even if the max value updates
     if (useMaxAmount) onValueChangeCore(maxAmount);
   }, [useMaxAmount, maxAmount, onValueChangeCore]);
+
+  const { newBorrowLimitUsd, newBorrowUtilization } = getNewCalculations(value);
 
   const formattedValue = `${value} ${reserve.symbol}`;
 
@@ -374,15 +322,14 @@ export default function ActionsModalTabContent({
         </div>
       </div>
 
-      <div className="-m-4 flex min-h-0 flex-1 flex-col justify-between gap-4 overflow-y-auto p-4 pb-6">
-        <div className="flex flex-col gap-3">
-          {md && (
-            <BelowFoldParameters
-              value={value}
-              reserve={reserve}
-              getNewCalculations={getNewCalculations}
-            />
-          )}
+      <div className="-m-4 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-4">
+        <div className="flex flex-col gap-2.5">
+          <LabelWithValue
+            label="Price"
+            value={formatPrice(reserve.price)}
+            labelEndDecorator={<PythLogo />}
+            horizontal
+          />
           <LabelWithValue
             label={`${capitalize(side)} APR`}
             customChild={
@@ -401,58 +348,58 @@ export default function ActionsModalTabContent({
             horizontal
             value="0"
           />
+          <LabelWithValue
+            label="Your borrow limit"
+            value={
+              newBorrowLimitUsd
+                ? `${formatUsd(obligation?.minPriceBorrowLimitUsd ?? new BigNumber("0"))} → ${formatUsd(newBorrowLimitUsd)}`
+                : formatUsd(
+                    obligation?.minPriceBorrowLimitUsd ?? new BigNumber("0"),
+                  )
+            }
+            horizontal
+          />
+          <LabelWithValue
+            label="Your utilization"
+            value={
+              newBorrowUtilization
+                ? `${formatPercent(obligation?.weightedConservativeBorrowUtilizationPercent ?? new BigNumber(0))} → ${formatPercent(newBorrowUtilization.times(100))}`
+                : formatPercent(
+                    obligation?.weightedConservativeBorrowUtilizationPercent ??
+                      new BigNumber(0),
+                  )
+            }
+            horizontal
+          />
         </div>
 
-        <div className="h-[160px] w-full flex-shrink-0 bg-muted/25 md:h-[200px]">
-          {/* <AprLineChart
-            id="apr-chart2"
-            data={reserve.config.interestRate
-              .slice()
-              .sort((a, b) => Number(a.utilPercent) - Number(b.utilPercent))
-              .map((row) => ({
-                x: +row.utilPercent,
-                y: Number(row.aprPercent),
-              }))}
-            reference={{
-              x: reserve.utilizationPercent.toNumber(),
-              y: reserve.borrowAprPercent.toNumber(),
-            }}
-            xAxisLabel="Utilization"
-            yAxisLabel="Borrow APR"
-          /> */}
+        <div className="h-[120px] w-full flex-shrink-0 bg-muted/25 md:h-[160px]">
+          {/* <HistoricalAprLineChart reserveId={reserve.id} /> */}
         </div>
 
         {!md && isMoreParametersOpen && (
           <>
             <Separator />
-            <div className="flex flex-col gap-3">
-              <BelowFoldParameters
-                value={value}
-                reserve={reserve}
-                getNewCalculations={getNewCalculations}
-              />
-            </div>
-
             <ParametersPanel reserve={reserve} />
           </>
         )}
       </div>
 
-      <div className="flex w-full flex-col gap-[2px]">
+      <div className="flex w-full flex-row items-stretch gap-[2px]">
         {!md && (
           <Button
-            className="justify-between"
-            labelClassName="uppercase"
-            endIcon={<MoreParametersIcon className="h-4 w-4" />}
+            className="h-auto w-14 flex-col px-0 py-0"
+            labelClassName="uppercase text-xs"
+            startIcon={<MoreParametersIcon className="h-4 w-4" />}
             variant="secondary"
             onClick={() => setIsMoreParametersOpen((o) => !o)}
           >
-            {isMoreParametersOpen ? "Hide" : "Show"} more parameters
+            Params
           </Button>
         )}
 
         <Button
-          className="h-auto min-h-14"
+          className="h-auto min-h-12 flex-1 md:min-h-14"
           labelClassName="text-wrap uppercase"
           style={{ overflowWrap: "anywhere" }}
           disabled={submitButtonState.isDisabled}
