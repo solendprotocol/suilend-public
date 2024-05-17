@@ -3,9 +3,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import BigNumber from "bignumber.js";
 import { capitalize } from "lodash";
 import {
+  ChevronsDownUp,
+  ChevronsUpDown,
   HandCoins,
-  Maximize2,
-  Minimize2,
   PiggyBank,
   Wallet,
 } from "lucide-react";
@@ -79,7 +79,9 @@ export default function ActionsModalTabContent({
   const data = restAppContext.data as AppData;
   const { isMoreParametersOpen, setIsMoreParametersOpen } =
     useActionsModalContext();
-  const MoreParametersIcon = isMoreParametersOpen ? Minimize2 : Maximize2;
+  const MoreParametersIcon = isMoreParametersOpen
+    ? ChevronsDownUp
+    : ChevronsUpDown;
 
   const { md } = useBreakpoint();
 
@@ -323,7 +325,7 @@ export default function ActionsModalTabContent({
         </div>
       </div>
 
-      <div className="-m-4 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-4">
+      <div className="-m-4 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-4 pb-6">
         <div className="flex flex-col gap-2.5">
           <LabelWithValue
             label="Price"
@@ -374,9 +376,7 @@ export default function ActionsModalTabContent({
           />
         </div>
 
-        <div className="h-[120px] w-full flex-shrink-0 md:h-[160px]">
-          <HistoricalAprLineChart reserveId={reserve.id} />
-        </div>
+        <HistoricalAprLineChart reserveId={reserve.id} side={side} />
 
         {!md && isMoreParametersOpen && (
           <>
@@ -400,7 +400,7 @@ export default function ActionsModalTabContent({
         )}
 
         <Button
-          className="h-auto min-h-12 flex-1 md:min-h-14"
+          className="h-auto min-h-12 flex-1 py-1 md:min-h-14 md:py-2"
           labelClassName="text-wrap uppercase"
           style={{ overflowWrap: "anywhere" }}
           disabled={submitButtonState.isDisabled}

@@ -341,3 +341,18 @@ body {
   width: max-content;
   margin: 12px 0 !important;
 }
+
+#historical-apr-line-chart .recharts-active-dot .recharts-dot {
+  stroke: transparent;
+  fill: hsl(var(--foreground));
+}
+
+#historical-apr-line-chart[is-loading="true"]
+  .recharts-cartesian-grid
+  .recharts-cartesian-grid-bg {
+  fill: hsla(var(--muted) / 10%);
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; /* animate-pulse */
+}
+#historical-apr-line-chart[is-loading="true"] .recharts-line path {
+  stroke: hsl(var(--muted));
+}

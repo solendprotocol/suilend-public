@@ -4,7 +4,7 @@ import BigNumber from "bignumber.js";
 import * as Recharts from "recharts";
 import { CategoricalChartState } from "recharts/types/chart/types";
 
-import styles from "@/components/shared/AprLineChart.module.scss";
+import styles from "@/components/shared/BorrowAprLineChart.module.scss";
 import Tooltip from "@/components/shared/Tooltip";
 import { TBody, TLabelSans } from "@/components/shared/Typography";
 import useLineChartDimensions from "@/hooks/useLineChartDimensions";
@@ -25,7 +25,7 @@ function TooltipContent({ utilization, apr }: TooltipContentProps) {
       </div>
 
       <div className="flex flex-row items-baseline gap-2">
-        <TLabelSans>APR</TLabelSans>
+        <TLabelSans>Borrow APR</TLabelSans>
         <TBody>{formatPercent(new BigNumber(apr))}</TBody>
       </div>
     </div>
@@ -37,21 +37,15 @@ type ChartData = {
   y: number;
 };
 
-interface AprLineChartProps {
-  id: string;
+interface BorrowAprLineChartProps {
   data: ChartData[];
   reference?: ChartData;
-  xAxisLabel?: string;
-  yAxisLabel?: string;
 }
 
-export default function AprLineChart({
-  id,
+export default function BorrowAprLineChart({
   data,
   reference,
-  xAxisLabel,
-  yAxisLabel,
-}: AprLineChartProps) {
+}: BorrowAprLineChartProps) {
   // Data
   const transform = (value: number) => Math.pow(value, 1 / 2);
   const inverseTransform = (value: number) => Math.pow(value, 2);
@@ -190,58 +184,62 @@ export default function AprLineChart({
       </Tooltip>
 
       <Recharts.ResponsiveContainer
-        id={id}
         width="100%"
         height="100%"
         className="relative z-[1]"
       >
-        <Recharts.LineChart data={transformedData} onMouseMove={onMouseMove}>
+        <Recharts.LineChart
+          data={transformedData}
+          onMouseMove={onMouseMove}
+          margin={{ top: 8, right: 16, bottom: 5, left: -5 }}
+        >
           <Recharts.CartesianGrid
             strokeDasharray="1 4"
             stroke="hsla(var(--secondary) / 25%)"
           />
           <Recharts.XAxis
-            dataKey="x"
-            domain={xAxisDomain}
             type="number"
+            dataKey="x"
+            tickMargin={2}
             tick={{
-              fontSize: 12,
+              fontSize: 11,
               fontFamily: "var(--font-geist-sans)",
               fill: "hsl(var(--muted-foreground))",
+            }}
+            axisLine={{
+              stroke: "#1A4176", // 25% var(--secondary) on var(--popover)
             }}
             tickLine={{
               stroke: "transparent",
             }}
-            axisLine={{
-              stroke:
-                "color-mix(in hsl, hsl(var(--secondary)) 25%, hsl(var(--popover)))",
-            }}
+            domain={xAxisDomain}
             unit="%"
           >
-            {xAxisLabel && (
-              <Recharts.Label
-                value={xAxisLabel}
-                offset={-4}
-                style={{
-                  fontSize: 12,
-                  fontFamily: "var(--font-geist-sans)",
-                  fontWeight: 400,
-                  lineHeight: "12px",
-                  fill: "hsl(var(--muted-foreground))",
-                }}
-                position="insideBottom"
-              />
-            )}
+            <Recharts.Label
+              value="Utilization"
+              offset={-4}
+              style={{
+                fontSize: 12,
+                fontFamily: "var(--font-geist-sans)",
+                fontWeight: 400,
+                lineHeight: "12px",
+                fill: "hsl(var(--muted-foreground))",
+              }}
+              position="insideBottom"
+            />
           </Recharts.XAxis>
           <Recharts.YAxis
-            ticks={ticks}
-            dataKey="y"
-            domain={yAxisDomain}
             type="number"
+            dataKey="y"
+            ticks={ticks}
+            tickMargin={2}
             tick={{
-              fontSize: 12,
+              fontSize: 11,
               fontFamily: "var(--font-geist-sans)",
               fill: "hsl(var(--muted-foreground))",
+            }}
+            axisLine={{
+              stroke: "#1A4176", // 25% var(--secondary) on var(--popover)
             }}
             tickLine={{
               stroke: "transparent",
@@ -249,27 +247,23 @@ export default function AprLineChart({
             tickFormatter={(value: number) =>
               Math.round(inverseTransform(value)).toString()
             }
-            axisLine={{
-              stroke:
-                "color-mix(in hsl, hsl(var(--secondary)) 25%, hsl(var(--popover)))",
-            }}
+            domain={yAxisDomain}
             unit="%"
           >
-            {yAxisLabel && (
-              <Recharts.Label
-                value={yAxisLabel}
-                style={{
-                  fontSize: 12,
-                  fontFamily: "var(--font-geist-sans)",
-                  fontWeight: 400,
-                  lineHeight: "12px",
-                  textAnchor: "middle",
-                  fill: "hsl(var(--muted-foreground))",
-                }}
-                position="insideLeft"
-                angle={-90}
-              />
-            )}
+            <Recharts.Label
+              value="Borrow APR"
+              style={{
+                fontSize: 12,
+                fontFamily: "var(--font-geist-sans)",
+                fontWeight: 400,
+                lineHeight: "12px",
+                textAnchor: "middle",
+                fill: "hsl(var(--muted-foreground))",
+              }}
+              position="insideLeft"
+              angle={-90}
+              offset={10}
+            />
           </Recharts.YAxis>
           <Recharts.Line
             dataKey="y"

@@ -7,7 +7,7 @@ import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 
 import { useActionsModalContext } from "@/components/dashboard/actions-modal/ActionsModalContext";
 import PythLogo from "@/components/dashboard/actions-modal/PythLogo";
-import AprLineChart from "@/components/shared/AprLineChart";
+import BorrowAprLineChart from "@/components/shared/BorrowAprLineChart";
 import Button from "@/components/shared/Button";
 import LabelWithValue from "@/components/shared/LabelWithValue";
 import { Separator } from "@/components/ui/separator";
@@ -268,7 +268,7 @@ export default function ParametersPanel({ reserve }: ParametersPanelProps) {
         </PanelButton>
       </div>
 
-      <div className="flex flex-col gap-2.5 md:-m-4 md:h-[236px] md:overflow-y-auto md:p-4">
+      <div className="flex flex-col gap-2.5 md:-m-4 md:h-[266px] md:overflow-y-auto md:p-4">
         {activePanel === Panel.LIMITS && <LimitsPanel reserve={reserve} />}
         {activePanel === Panel.RATES && <RatesPanel reserve={reserve} />}
         {activePanel === Panel.OBJECTS && <ObjectsPanel reserve={reserve} />}
@@ -277,8 +277,7 @@ export default function ParametersPanel({ reserve }: ParametersPanelProps) {
       <Separator className="hidden md:block" />
 
       <div className="h-[160px] w-full flex-shrink-0 md:h-[160px]">
-        <AprLineChart
-          id="apr-line-chart"
+        <BorrowAprLineChart
           data={reserve.config.interestRate
             .slice()
             .sort((a, b) => +a.utilPercent - +b.utilPercent)
@@ -290,8 +289,6 @@ export default function ParametersPanel({ reserve }: ParametersPanelProps) {
             x: +reserve.utilizationPercent,
             y: +reserve.borrowAprPercent,
           }}
-          xAxisLabel="Utilization"
-          yAxisLabel="Borrow APR"
         />
       </div>
     </>
