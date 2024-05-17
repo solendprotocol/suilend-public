@@ -9,13 +9,17 @@ import { useLocalStorage } from "usehooks-ts";
 
 import { Side } from "@suilend/sdk/types";
 
+import { useActionsModalContext } from "@/components/dashboard/actions-modal/ActionsModalContext";
 import Button from "@/components/shared/Button";
 import { TBody, TLabelSans } from "@/components/shared/Typography";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import useBreakpoint from "@/hooks/useBreakpoint";
 import useIsTouchscreen from "@/hooks/useIsTouchscreen";
 import {
-  ReserveAssetDataEvent,
+  DAYS,
+  Days,
+  DownsampledReserveAssetDataEvent,
+  RESERVE_EVENT_SAMPLE_INTERVAL_S_MAP,
   calculateBorrowAprPercent,
   calculateDepositAprPercent,
 } from "@/lib/events";
@@ -24,10 +28,6 @@ import { API_URL } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 
 const DAY_S = 24 * 60 * 60;
-
-type DownsampledReserveAssetDataEvent = ReserveAssetDataEvent & {
-  sampletimestamp: number;
-};
 
 type ChartData = {
   index: number;
@@ -95,7 +95,6 @@ function Chart({ side, isLoading, data }: ChartProps) {
         if (days === 1) return d.timestampS % ((sm ? 4 : 8) * 60 * 60) === 0;
         if (days === 7) return d.timestampS % ((sm ? 1 : 2) * DAY_S) === 0;
         if (days === 30) return d.timestampS % ((sm ? 5 : 10) * DAY_S) === 0;
-        if (days === 90) return d.timestampS % ((sm ? 15 : 30) * DAY_S) === 0;
         return false;
       })
       .map((d) => d.timestampS);
@@ -229,19 +228,26 @@ export default function HistoricalAprLineChart({
 }: HistoricalAprLineChartProps) {
   const appContext = useAppContext();
   const data = appContext.data as AppData;
+  const { suiReserveEventMap } = useActionsModalContext();
 
   const reserveMapRef = useRef<AppData["reserveMap"]>(data.reserveMap);
 
-  // Data
+  // Events
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [chartData, setChartData] = useState<ChartData[]>([]);
+  const [eventData, setEventData] = useState<
+    | {
+        days: Days;
+        sampleIntervalS: number;
+        events: DownsampledReserveAssetDataEvent[];
+      }
+    | undefined
+  >(undefined);
 
-  const [days, setDays] = useLocalStorage<number>(
+  const [days, setDays] = useLocalStorage<Days>(
     "historicalAprLineChartDays",
     7,
   );
-
-  const onDaysClick = (value: number) => {
+  const onDaysClick = (value: Days) => {
     if (!isLoading) setDays(value);
   };
 
@@ -254,14 +260,7 @@ export default function HistoricalAprLineChart({
       setIsLoading(true);
 
       try {
-        // Events
-        const sampleIntervalS = (() => {
-          if (days === 1) return 15 * 60;
-          if (days === 7) return 2 * 60 * 60;
-          if (days === 30) return 8 * 60 * 60;
-          if (days === 90) return 24 * 60 * 60;
-          return 24 * 60 * 60;
-        })();
+        const sampleIntervalS = RESERVE_EVENT_SAMPLE_INTERVAL_S_MAP[days];
 
         const url = `${API_URL}/events/downsampled-reserve-asset-data?reserveId=${reserveId}&days=${days}&sampleIntervalS=${sampleIntervalS}`;
         const res = await fetch(url);
@@ -271,55 +270,77 @@ export default function HistoricalAprLineChart({
           event.coinType = normalizeStructTag(event.coinType);
         }
 
-        // Data
-        const daysS = days * DAY_S;
-        const n = daysS / sampleIntervalS;
-
-        const lastTimestampS =
-          Date.now() / 1000 - ((Date.now() / 1000) % sampleIntervalS);
-        const timestampsS = Array.from({ length: n })
-          .map((_, index) => lastTimestampS - index * sampleIntervalS)
-          .reverse();
-
-        const result: ChartData[] = [];
-        timestampsS.forEach((timestampS, index) => {
-          let depositAprPercent: number | undefined = undefined;
-          let borrowAprPercent: number | undefined = undefined;
-
-          const event = json.find(
-            (event) => event.sampletimestamp === timestampS,
-          );
-          if (event) {
-            const reserve = reserveMapRef.current[event.coinType];
-            depositAprPercent = +calculateDepositAprPercent(reserve, event);
-            borrowAprPercent = +calculateBorrowAprPercent(reserve, event);
-          } else {
-            const prevDatum = result.findLast(
-              (d) =>
-                d.depositAprPercent !== undefined &&
-                d.borrowAprPercent !== undefined,
-            );
-            depositAprPercent = prevDatum?.depositAprPercent;
-            borrowAprPercent = prevDatum?.borrowAprPercent;
-          }
-
-          result.push({
-            index,
-            timestampS,
-            depositAprPercent,
-            borrowAprPercent,
-          });
+        setEventData({
+          days,
+          sampleIntervalS,
+          events: json,
         });
-
-        setChartData(result);
       } catch (err) {
         console.error(err);
       } finally {
         isFetchingEventsRef.current = false;
-        setIsLoading(false);
       }
     })();
   }, [reserveId, days]);
+
+  // Data
+  const [chartData, setChartData] = useState<ChartData[]>([]);
+
+  useEffect(() => {
+    if (suiReserveEventMap === undefined) return;
+    if (eventData === undefined) return;
+
+    // Data
+    const { days, sampleIntervalS, events } = eventData;
+    const daysS = days * DAY_S;
+    const n = daysS / sampleIntervalS;
+
+    const lastTimestampS =
+      Date.now() / 1000 - ((Date.now() / 1000) % sampleIntervalS);
+    const timestampsS = Array.from({ length: n })
+      .map((_, index) => lastTimestampS - index * sampleIntervalS)
+      .reverse();
+
+    const result: ChartData[] = [];
+    timestampsS.forEach((timestampS, index) => {
+      let depositAprPercent: number | undefined = undefined;
+      let borrowAprPercent: number | undefined = undefined;
+
+      const event = events.find(
+        (event) => event.sampletimestamp === timestampS,
+      );
+      if (event) {
+        const reserve = reserveMapRef.current[event.coinType];
+        depositAprPercent = calculateDepositAprPercent(
+          reserve,
+          event,
+          suiReserveEventMap[days],
+        );
+        borrowAprPercent = calculateBorrowAprPercent(reserve, event);
+      }
+
+      if (depositAprPercent === undefined) {
+        depositAprPercent = result.findLast(
+          (d) => d.depositAprPercent !== undefined,
+        )?.depositAprPercent;
+      }
+      if (borrowAprPercent === undefined) {
+        borrowAprPercent = result.findLast(
+          (d) => d.borrowAprPercent !== undefined,
+        )?.borrowAprPercent;
+      }
+
+      result.push({
+        index,
+        timestampS,
+        depositAprPercent,
+        borrowAprPercent,
+      });
+    });
+
+    setChartData(result);
+    setIsLoading(false);
+  }, [suiReserveEventMap, eventData]);
 
   // Chart
   const containerRef = useRef<HTMLDivElement>(null);
@@ -327,7 +348,7 @@ export default function HistoricalAprLineChart({
   return (
     <div className="flex w-full flex-col items-end">
       <div className="relative z-[2] -mb-1 -mt-2 mr-4 flex flex-row md:-mt-1">
-        {[1, 7, 30, 90].map((_days) => (
+        {DAYS.map((_days) => (
           <Button
             key={_days}
             className="px-2 text-muted-foreground hover:bg-transparent"

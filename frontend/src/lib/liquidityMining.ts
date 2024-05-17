@@ -97,7 +97,7 @@ export function formatRewards(
         id: poolReward.id,
         active:
           currentTime >= poolReward.startTimeMs &&
-          currentTime <= poolReward.endTimeMs,
+          currentTime < poolReward.endTimeMs,
         rewardIndex: poolReward.rewardIndex,
         reserveCoinType: reserve.coinType,
         rewardCoinType: poolReward.coinType,

@@ -3,6 +3,14 @@ import BigNumber from "bignumber.js";
 import { WAD } from "@suilend/sdk/constants";
 import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 
+import {
+  NORMALIZED_SUI_COINTYPE,
+  NORMALIZED_USDC_ET_COINTYPE,
+  NORMALIZED_USDT_ET_COINTYPE,
+  isSui,
+} from "@/lib/coinType";
+import { msPerYear } from "@/lib/constants";
+
 export enum EventType {
   RESERVE_ASSET_DATA = "reserveAssetData",
   DEPOSIT = "deposit",
@@ -173,18 +181,51 @@ export const eventSortDesc = (a: EventRow, b: EventRow) => {
 export const eventSortAsc = (a: EventRow, b: EventRow) =>
   -1 * eventSortDesc(a, b);
 
-// APRs
-export const calculateUtilizationPercent = (
+// ReserveAssetDataEvent
+export type DownsampledReserveAssetDataEvent = ReserveAssetDataEvent & {
+  sampletimestamp: number;
+};
+
+export type SuiReserveEventMap = Record<
+  Days,
+  DownsampledReserveAssetDataEvent[]
+>;
+
+export type Days = 1 | 7 | 30;
+export const DAYS: Days[] = [1, 7, 30];
+export const RESERVE_EVENT_SAMPLE_INTERVAL_S_MAP: Record<Days, number> = {
+  1: 15 * 60,
+  7: 2 * 60 * 60,
+  30: 8 * 60 * 60,
+};
+
+export const getBorrowedAmount = (
   reserve: ParsedReserve,
-  event: ReserveAssetDataEvent,
+  event: DownsampledReserveAssetDataEvent,
+) => {
+  return new BigNumber(event.borrowedAmount)
+    .div(WAD.toString())
+    .div(10 ** reserve.mintDecimals);
+};
+
+export const getDepositedAmount = (
+  reserve: ParsedReserve,
+  event: DownsampledReserveAssetDataEvent,
 ) => {
   const availableAmount = new BigNumber(event.availableAmount)
     .div(WAD.toString())
     .div(10 ** reserve.mintDecimals);
-  const borrowedAmount = new BigNumber(event.borrowedAmount)
-    .div(WAD.toString())
-    .div(10 ** reserve.mintDecimals);
-  const depositedAmount = borrowedAmount.plus(availableAmount);
+  const borrowedAmount = getBorrowedAmount(reserve, event);
+
+  return borrowedAmount.plus(availableAmount);
+};
+
+export const calculateUtilizationPercent = (
+  reserve: ParsedReserve,
+  event: DownsampledReserveAssetDataEvent,
+) => {
+  const depositedAmount = getDepositedAmount(reserve, event);
+  const borrowedAmount = getBorrowedAmount(reserve, event);
 
   if (depositedAmount.eq(0)) return new BigNumber(0);
   return borrowedAmount.div(depositedAmount).times(100);
@@ -192,7 +233,7 @@ export const calculateUtilizationPercent = (
 
 export const calculateBorrowAprPercent = (
   reserve: ParsedReserve,
-  event: ReserveAssetDataEvent,
+  event: DownsampledReserveAssetDataEvent,
 ) => {
   const config = reserve.config;
   const currentUtilPercent = calculateUtilizationPercent(reserve, event);
@@ -213,26 +254,95 @@ export const calculateBorrowAprPercent = (
         currentUtilPercent.minus(leftUtilPercent),
       ).div(rightUtilPercent.minus(leftUtilPercent));
 
-      return leftAprPercent.plus(
+      return +leftAprPercent.plus(
         weight.times(rightAprPercent.minus(leftAprPercent)),
       );
     }
     i = i + 1;
   }
   // Should never reach here
-  return new BigNumber(0);
+  return +new BigNumber(0);
 };
 
 export const calculateDepositAprPercent = (
   reserve: ParsedReserve,
-  event: ReserveAssetDataEvent,
+  event: DownsampledReserveAssetDataEvent,
+  suiReserveEvents: DownsampledReserveAssetDataEvent[],
 ) => {
   const currentUtilPercent = calculateUtilizationPercent(reserve, event);
   const borrowAprPercent = calculateBorrowAprPercent(reserve, event);
   const spreadFeePercent = new BigNumber(reserve.config.spreadFeeBps).div(100);
 
-  return currentUtilPercent
+  const depositAprPercent = currentUtilPercent
     .div(100)
     .times(borrowAprPercent)
     .times(new BigNumber(1).minus(spreadFeePercent.div(100)));
+
+  type ReducedPoolReward = {
+    coinType: string;
+    totalRewards: BigNumber;
+    startTimeMs: number;
+    endTimeMs: number;
+  };
+
+  const historicalSuiRewardMap: Record<string, ReducedPoolReward[]> = {
+    [NORMALIZED_SUI_COINTYPE]: [
+      {
+        coinType: NORMALIZED_SUI_COINTYPE,
+        totalRewards: new BigNumber(93613.13),
+        startTimeMs: 1713225600000,
+        endTimeMs: 1713830400000,
+      },
+    ],
+    [NORMALIZED_USDC_ET_COINTYPE]: [
+      {
+        coinType: NORMALIZED_SUI_COINTYPE,
+        totalRewards: new BigNumber(75915.32),
+        startTimeMs: 1713225600000,
+        endTimeMs: 1713830400000,
+      },
+    ],
+    [NORMALIZED_USDT_ET_COINTYPE]: [
+      {
+        coinType: NORMALIZED_SUI_COINTYPE,
+        totalRewards: new BigNumber(64602.32),
+        startTimeMs: 1713225600000,
+        endTimeMs: 1713830400000,
+      },
+    ],
+  };
+  const historicalSuiRewards = historicalSuiRewardMap[event.coinType] ?? [];
+
+  const poolRewards = [
+    ...historicalSuiRewards,
+    ...reserve.depositsPoolRewardManager.poolRewards,
+  ].filter(
+    (pr) =>
+      isSui(pr.coinType) &&
+      event.timestamp >= pr.startTimeMs / 1000 &&
+      event.timestamp < pr.endTimeMs / 1000,
+  );
+  if (poolRewards.length === 0) return +depositAprPercent;
+
+  const suiReserveEvent = suiReserveEvents.findLast(
+    (e) => e.sampletimestamp <= event.sampletimestamp,
+  );
+  if (!suiReserveEvent) return undefined;
+
+  const suiPrice = new BigNumber(suiReserveEvent.price).div(WAD.toString());
+
+  const price = new BigNumber(event.price).div(WAD.toString());
+  const depositedAmountUsd = getDepositedAmount(reserve, event).times(price);
+
+  const rewardsAprPercent = poolRewards.reduce((acc, pr) => {
+    const aprPercent = pr.totalRewards
+      .times(suiPrice)
+      .times(new BigNumber(msPerYear).div(pr.endTimeMs - pr.startTimeMs))
+      .div(depositedAmountUsd)
+      .times(100);
+
+    return acc.plus(aprPercent);
+  }, new BigNumber(0));
+
+  return +depositAprPercent.plus(rewardsAprPercent);
 };

@@ -4,13 +4,25 @@ import {
   SetStateAction,
   createContext,
   useContext,
+  useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
+import { normalizeStructTag } from "@mysten/sui.js/utils";
 import { useLocalStorage } from "usehooks-ts";
 
 import { Panel } from "@/components/dashboard/actions-modal/ParametersPanel";
+import { AppData, useAppContext } from "@/contexts/AppContext";
+import { isSui } from "@/lib/coinType";
+import {
+  DAYS,
+  DownsampledReserveAssetDataEvent,
+  RESERVE_EVENT_SAMPLE_INTERVAL_S_MAP,
+  SuiReserveEventMap,
+} from "@/lib/events";
+import { API_URL } from "@/lib/navigation";
 
 export enum Tab {
   DEPOSIT = "deposit",
@@ -31,6 +43,8 @@ interface ActionsModalContext {
   setIsMoreParametersOpen: Dispatch<SetStateAction<boolean>>;
   activePanel: Panel;
   setActivePanel: Dispatch<SetStateAction<Panel>>;
+
+  suiReserveEventMap?: SuiReserveEventMap;
 }
 
 const defaultContextValue: ActionsModalContext = {
@@ -55,6 +69,8 @@ const defaultContextValue: ActionsModalContext = {
   setActivePanel: () => {
     throw Error("ActionsModalContextProvider not initialized");
   },
+
+  suiReserveEventMap: undefined,
 };
 
 const ActionsModalContext =
@@ -63,15 +79,71 @@ const ActionsModalContext =
 export const useActionsModalContext = () => useContext(ActionsModalContext);
 
 export function ActionsModalContextProvider({ children }: PropsWithChildren) {
-  const [reserveIndex, setReserveIndex] = useState<number | undefined>(
-    undefined,
-  );
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const appContext = useAppContext();
+  const data = appContext.data as AppData;
 
-  const [selectedTab, setSelectedTab] = useState<Tab>(Tab.DEPOSIT);
-  const [isMoreParametersOpen, setIsMoreParametersOpen] =
-    useLocalStorage<boolean>("isActionsModalMoreParametersOpen", false);
-  const [activePanel, setActivePanel] = useState<Panel>(Panel.LIMITS);
+  // Index
+  const [reserveIndex, setReserveIndex] = useState<
+    ActionsModalContext["reserveIndex"]
+  >(defaultContextValue.reserveIndex);
+  const [isOpen, setIsOpen] = useState<ActionsModalContext["isOpen"]>(
+    defaultContextValue.isOpen,
+  );
+
+  // Tabs
+  const [selectedTab, setSelectedTab] = useState<
+    ActionsModalContext["selectedTab"]
+  >(defaultContextValue.selectedTab);
+  const [isMoreParametersOpen, setIsMoreParametersOpen] = useLocalStorage<
+    ActionsModalContext["isMoreParametersOpen"]
+  >(
+    "isActionsModalMoreParametersOpen",
+    defaultContextValue.isMoreParametersOpen,
+  );
+  const [activePanel, setActivePanel] = useState<
+    ActionsModalContext["activePanel"]
+  >(defaultContextValue.activePanel);
+
+  // Sui reserve event map
+  const [suiReserveEventMap, setSuiReserveEventMap] = useState<
+    ActionsModalContext["suiReserveEventMap"]
+  >(defaultContextValue.suiReserveEventMap);
+
+  const suiReserveId = data.lendingMarket.reserves.find((r) =>
+    isSui(r.coinType),
+  )?.id;
+
+  const isFetchingEventsRef = useRef<boolean>(false);
+  useEffect(() => {
+    (async () => {
+      if (isFetchingEventsRef.current) return;
+
+      isFetchingEventsRef.current = true;
+      try {
+        const urls = Object.entries(RESERVE_EVENT_SAMPLE_INTERVAL_S_MAP).map(
+          ([days, sampleIntervalS]) =>
+            `${API_URL}/events/downsampled-reserve-asset-data?reserveId=${suiReserveId}&days=${days}&sampleIntervalS=${sampleIntervalS}`,
+        );
+        const res = await Promise.all(urls.map((url) => fetch(url)));
+        const json = (await Promise.all(
+          res.map((r) => r.json()),
+        )) as DownsampledReserveAssetDataEvent[][];
+
+        for (const event of [...json[0], ...json[1], ...json[2]]) {
+          event.coinType = normalizeStructTag(event.coinType);
+        }
+
+        setSuiReserveEventMap(
+          DAYS.reduce(
+            (acc, days, index) => ({ ...acc, [days]: json[index] }),
+            {},
+          ) as ActionsModalContext["suiReserveEventMap"],
+        );
+      } catch (err) {
+        console.error(err);
+      }
+    })();
+  }, [suiReserveId]);
 
   // Context
   const contextValue = useMemo(
@@ -92,6 +164,8 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
       setIsMoreParametersOpen,
       activePanel,
       setActivePanel,
+
+      suiReserveEventMap,
     }),
     [
       reserveIndex,
@@ -100,6 +174,7 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
       isMoreParametersOpen,
       setIsMoreParametersOpen,
       activePanel,
+      suiReserveEventMap,
     ],
   );
 
