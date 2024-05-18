@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from "uuid";
 import { CreateReserveConfigArgs } from "@suilend/sdk/_generated/suilend/reserve-config/functions";
 
 import Input, { getInputId } from "@/components/admin/Input";
-import BorrowAprLineChart from "@/components/shared/BorrowAprLineChart";
+import AprLineChart from "@/components/shared/AprLineChart";
 import Button from "@/components/shared/Button";
 import Switch from "@/components/shared/Switch";
 import { TLabelSans } from "@/components/shared/Typography";
@@ -351,7 +351,7 @@ export default function ReserveConfig({
           </Button>
 
           <div className="mt-4 h-[150px] sm:h-[250px]">
-            <BorrowAprLineChart
+            <AprLineChart
               data={sortedInterestRate.map((row) => ({
                 x: +row.utilPercent,
                 y: +row.aprPercent,

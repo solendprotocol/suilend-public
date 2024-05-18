@@ -4,7 +4,7 @@ import BigNumber from "bignumber.js";
 import * as Recharts from "recharts";
 import { CategoricalChartState } from "recharts/types/chart/types";
 
-import styles from "@/components/shared/BorrowAprLineChart.module.scss";
+import styles from "@/components/shared/AprLineChart.module.scss";
 import Tooltip from "@/components/shared/Tooltip";
 import { TBody, TLabelSans } from "@/components/shared/Typography";
 import useLineChartDimensions from "@/hooks/useLineChartDimensions";
@@ -37,15 +37,12 @@ type ChartData = {
   y: number;
 };
 
-interface BorrowAprLineChartProps {
+interface AprLineChartProps {
   data: ChartData[];
   reference?: ChartData;
 }
 
-export default function BorrowAprLineChart({
-  data,
-  reference,
-}: BorrowAprLineChartProps) {
+export default function AprLineChart({ data, reference }: AprLineChartProps) {
   // Data
   const transform = (value: number) => Math.pow(value, 1 / 2);
   const inverseTransform = (value: number) => Math.pow(value, 2);

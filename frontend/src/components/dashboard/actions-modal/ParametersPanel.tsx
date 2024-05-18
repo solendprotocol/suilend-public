@@ -7,7 +7,7 @@ import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 
 import { useActionsModalContext } from "@/components/dashboard/actions-modal/ActionsModalContext";
 import PythLogo from "@/components/dashboard/actions-modal/PythLogo";
-import BorrowAprLineChart from "@/components/shared/BorrowAprLineChart";
+import AprLineChart from "@/components/shared/AprLineChart";
 import Button from "@/components/shared/Button";
 import LabelWithValue from "@/components/shared/LabelWithValue";
 import { Separator } from "@/components/ui/separator";
@@ -277,7 +277,7 @@ export default function ParametersPanel({ reserve }: ParametersPanelProps) {
       <Separator className="hidden md:block" />
 
       <div className="h-[160px] w-full flex-shrink-0 md:h-[160px]">
-        <BorrowAprLineChart
+        <AprLineChart
           data={reserve.config.interestRate
             .slice()
             .sort((a, b) => +a.utilPercent - +b.utilPercent)
