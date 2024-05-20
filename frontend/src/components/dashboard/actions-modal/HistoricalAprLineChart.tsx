@@ -198,9 +198,7 @@ function Chart({ side, isLoading, data }: ChartProps) {
           strokeDasharray="1 4"
           stroke="hsla(var(--secondary) / 20%)"
           fill="transparent"
-        >
-          <div className="inset absolute bg-[red]" />
-        </Recharts.CartesianGrid>
+        />
         <Recharts.XAxis
           type="number"
           dataKey="timestampS"
@@ -251,6 +249,7 @@ function Chart({ side, isLoading, data }: ChartProps) {
           isAnimationActive={false}
           stroke="hsl(var(--success))"
           fill="hsla(var(--success) / 25%)"
+          fillOpacity={1}
           dot={{
             stroke: "transparent",
             strokeWidth: 0,
@@ -266,6 +265,7 @@ function Chart({ side, isLoading, data }: ChartProps) {
             isAnimationActive={false}
             stroke="hsl(var(--secondary))"
             fill="hsla(var(--secondary) / 25%)"
+            fillOpacity={1}
             dot={{
               stroke: "transparent",
               strokeWidth: 0,
