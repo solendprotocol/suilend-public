@@ -1,7 +1,7 @@
 import BigNumber from "bignumber.js";
 
+import { ParsedDownsampledApiReserveAssetDataEvent } from "@suilend/sdk/parsers/apiReserveAssetDataEvent";
 import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
-import { ParsedDownsampledReserveAssetDataEvent } from "@suilend/sdk/parsers/reserveAssetDataEvent";
 
 import {
   NORMALIZED_SUI_COINTYPE,
@@ -31,30 +31,6 @@ export const EventTypeNameMap: Record<EventType, string> = {
   [EventType.CLAIM_REWARD]: "Claim rewards",
 };
 
-export type ReserveAssetDataEvent = {
-  id: number;
-  lendingMarketId: string;
-  coinType: string;
-  reserveId: string;
-  availableAmount: string;
-  supplyAmount: string;
-  borrowedAmount: string;
-  availableAmountUsdEstimate: string;
-  supplyAmountUsdEstimate: string;
-  borrowedAmountUsdEstimate: string;
-  borrowApr: string;
-  supplyApr: string;
-  ctokenSupply: string;
-  cumulativeBorrowRate: string;
-  price: string;
-  smoothedPrice: string;
-  priceLastUpdateTimestampS: number;
-  timestamp: number;
-  digest: string;
-  eventIndex: number;
-  sender: string;
-};
-
 export type MintEvent = {
   id: number;
   lendingMarketId: string;
@@ -81,7 +57,7 @@ export type RedeemEvent = {
   sender: string;
 };
 
-export type DepositEvent = {
+export type ApiDepositEvent = {
   id: number;
   lendingMarketId: string;
   coinType: string;
@@ -94,7 +70,7 @@ export type DepositEvent = {
   sender: string;
 };
 
-export type BorrowEvent = {
+export type ApiBorrowEvent = {
   id: number;
   lendingMarketId: string;
   coinType: string;
@@ -108,7 +84,7 @@ export type BorrowEvent = {
   sender: string;
 };
 
-export type WithdrawEvent = {
+export type ApiWithdrawEvent = {
   id: number;
   lendingMarketId: string;
   coinType: string;
@@ -121,7 +97,7 @@ export type WithdrawEvent = {
   sender: string;
 };
 
-export type RepayEvent = {
+export type ApiRepayEvent = {
   id: number;
   lendingMarketId: string;
   coinType: string;
@@ -134,7 +110,7 @@ export type RepayEvent = {
   sender: string;
 };
 
-export type LiquidateEvent = {
+export type ApiLiquidateEvent = {
   id: number;
   lendingMarketId: string;
   repayReserveId: string;
@@ -150,7 +126,7 @@ export type LiquidateEvent = {
   sender: string;
 };
 
-export type ClaimRewardEvent = {
+export type ApiClaimRewardEvent = {
   id: number;
   coinType: string;
   isDepositReward: boolean;
@@ -181,7 +157,7 @@ export const eventSortDesc = (a: EventRow, b: EventRow) => {
 export const eventSortAsc = (a: EventRow, b: EventRow) =>
   -1 * eventSortDesc(a, b);
 
-// DownsampledReserveAssetDataEvent
+// DownsampledApiReserveAssetDataEvent
 export type Days = 1 | 7 | 30;
 export const DAYS: Days[] = [1, 7, 30];
 export const RESERVE_EVENT_SAMPLE_INTERVAL_S_MAP: Record<Days, number> = {
@@ -198,8 +174,8 @@ type ReducedPoolReward = {
 };
 
 export const calculateSuiRewardsDepositAprPercent = (
-  event: ParsedDownsampledReserveAssetDataEvent,
-  suiEvents: ParsedDownsampledReserveAssetDataEvent[],
+  event: ParsedDownsampledApiReserveAssetDataEvent,
+  suiEvents: ParsedDownsampledApiReserveAssetDataEvent[],
   reserve: ParsedReserve,
 ) => {
   const historicalSuiRewardMap: Record<string, ReducedPoolReward[]> = {
