@@ -53,7 +53,7 @@ function TooltipContent({ side, data }: TooltipContentProps) {
 
   return (
     // TooltipContent className
-    <div className="w-[200px] rounded-md border bg-popover px-3 py-1.5 shadow-md animate-in fade-in-0 zoom-in-95">
+    <div className="rounded-md border bg-popover px-3 py-1.5 shadow-md animate-in fade-in-0 zoom-in-95">
       <div className="flex w-full flex-col gap-1">
         <TLabelSans>
           {format(new Date(data.timestampS * 1000), "MM/dd HH:mm")}
@@ -61,16 +61,16 @@ function TooltipContent({ side, data }: TooltipContentProps) {
 
         {side === Side.DEPOSIT && data.depositAprPercent !== undefined ? (
           <>
-            <div className="mt-1 flex w-full flex-row items-center justify-between">
+            <div className="mt-1 flex w-full flex-row items-center justify-between gap-4">
               <TLabel className="uppercase">Base APR</TLabel>
-              <TBody>
+              <TBody className="text-success">
                 {formatPercent(new BigNumber(data.depositAprPercent))}
               </TBody>
             </div>
 
             {data.depositSuiRewardsAprPercent !== undefined && (
               <>
-                <div className="flex w-full flex-row items-center justify-between">
+                <div className="flex w-full flex-row items-center justify-between gap-4">
                   <TLabel className="uppercase">SUI Rewards</TLabel>
 
                   <div className="flex flex-row items-center gap-1.5">
@@ -90,7 +90,7 @@ function TooltipContent({ side, data }: TooltipContentProps) {
 
                 <Separator />
 
-                <div className="flex w-full flex-row items-center justify-between">
+                <div className="flex w-full flex-row items-center justify-between gap-4">
                   <TTitle className="text-xs uppercase">Total APR</TTitle>
                   <TBody>
                     {formatPercent(
@@ -106,9 +106,9 @@ function TooltipContent({ side, data }: TooltipContentProps) {
           </>
         ) : side === Side.BORROW && data.borrowAprPercent !== undefined ? (
           <>
-            <div className="mt-1 flex w-full flex-row items-center justify-between">
+            <div className="flex w-full flex-row items-center justify-between gap-4">
               <TLabel className="uppercase">Base APR</TLabel>
-              <TBody>
+              <TBody className="text-success">
                 {formatPercent(new BigNumber(data.borrowAprPercent))}
               </TBody>
             </div>
