@@ -403,8 +403,8 @@ export default function HistoricalAprLineChart({
   const containerRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="flex w-full flex-col items-end">
-      <div className="relative z-[2] -mb-1 -mt-2 mr-4 flex flex-row md:-mt-1">
+    <div className="-mr-4 flex flex-col items-end">
+      <div className="relative z-[2] -mb-1 -mt-2 flex flex-row pr-4 md:-mt-1">
         {DAYS.map((_days) => (
           <Button
             key={_days}
