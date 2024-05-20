@@ -10,6 +10,8 @@ interface LabelProps extends PropsWithChildren {
   className?: ClassValue;
   tooltip?: string | ReactNode;
   tooltipContentProps?: TooltipProps["contentProps"];
+  startDecorator?: ReactNode;
+  endDecorator?: ReactNode;
   isMono?: boolean;
 }
 
@@ -17,6 +19,8 @@ export default function LabelWithTooltip({
   className,
   tooltip,
   tooltipContentProps,
+  startDecorator,
+  endDecorator,
   isMono,
   children,
 }: LabelProps) {
@@ -27,12 +31,15 @@ export default function LabelWithTooltip({
       <Component
         className={cn(
           "w-max",
+          (!!startDecorator || !!endDecorator) && "flex flex-row gap-1",
           className,
           !!tooltip &&
             cn("decoration-muted-foreground/50", hoverUnderlineClassName),
         )}
       >
+        {startDecorator}
         {children}
+        {endDecorator}
       </Component>
     </Tooltip>
   );

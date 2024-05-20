@@ -352,13 +352,10 @@ export default function ReserveConfig({
 
           <div className="mt-4 h-[150px] sm:h-[250px]">
             <AprLineChart
-              id="apr-chart"
               data={sortedInterestRate.map((row) => ({
                 x: +row.utilPercent,
                 y: +row.aprPercent,
               }))}
-              xAxisLabel="Utilization"
-              yAxisLabel="APR"
             />
           </div>
         </div>

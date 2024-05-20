@@ -134,7 +134,7 @@ export const parseObligation = (
   const netValueUsd = totalDepositedAmountUsd.minus(totalBorrowedAmountUsd);
 
   const weightedConservativeBorrowUtilizationPercent =
-    minPriceBorrowLimitUsd.isZero()
+    minPriceBorrowLimitUsd.eq(0)
       ? new BigNumber(0)
       : maxPriceWeightedBorrowsUsd.div(minPriceBorrowLimitUsd).times(100);
 

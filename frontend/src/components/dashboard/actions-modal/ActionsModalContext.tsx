@@ -3,14 +3,27 @@ import {
   PropsWithChildren,
   SetStateAction,
   createContext,
+  useCallback,
   useContext,
+  useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
+import { normalizeStructTag } from "@mysten/sui.js/utils";
 import { useLocalStorage } from "usehooks-ts";
 
 import { Panel } from "@/components/dashboard/actions-modal/ParametersPanel";
+import { AppData, useAppContext } from "@/contexts/AppContext";
+import { isSui } from "@/lib/coinType";
+import {
+  DAYS,
+  Days,
+  DownsampledReserveAssetDataEvent,
+  RESERVE_EVENT_SAMPLE_INTERVAL_S_MAP,
+} from "@/lib/events";
+import { API_URL } from "@/lib/navigation";
 
 export enum Tab {
   DEPOSIT = "deposit",
@@ -18,6 +31,11 @@ export enum Tab {
   WITHDRAW = "withdraw",
   REPAY = "repay",
 }
+
+type ReserveAssetDataEventsMap = Record<
+  string,
+  Record<Days, DownsampledReserveAssetDataEvent[]>
+>;
 
 interface ActionsModalContext {
   reserveIndex?: number;
@@ -31,6 +49,9 @@ interface ActionsModalContext {
   setIsMoreParametersOpen: Dispatch<SetStateAction<boolean>>;
   activePanel: Panel;
   setActivePanel: Dispatch<SetStateAction<Panel>>;
+
+  reserveAssetDataEventsMap?: ReserveAssetDataEventsMap;
+  fetchReserveAssetDataEvents: (reserveId: string, days: Days) => Promise<void>;
 }
 
 const defaultContextValue: ActionsModalContext = {
@@ -55,6 +76,11 @@ const defaultContextValue: ActionsModalContext = {
   setActivePanel: () => {
     throw Error("ActionsModalContextProvider not initialized");
   },
+
+  reserveAssetDataEventsMap: undefined,
+  fetchReserveAssetDataEvents: () => {
+    throw Error("ActionsModalContextProvider not initialized");
+  },
 };
 
 const ActionsModalContext =
@@ -63,15 +89,77 @@ const ActionsModalContext =
 export const useActionsModalContext = () => useContext(ActionsModalContext);
 
 export function ActionsModalContextProvider({ children }: PropsWithChildren) {
-  const [reserveIndex, setReserveIndex] = useState<number | undefined>(
-    undefined,
-  );
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const appContext = useAppContext();
+  const data = appContext.data as AppData;
 
-  const [selectedTab, setSelectedTab] = useState<Tab>(Tab.DEPOSIT);
-  const [isMoreParametersOpen, setIsMoreParametersOpen] =
-    useLocalStorage<boolean>("isActionsModalMoreParametersOpen", false);
-  const [activePanel, setActivePanel] = useState<Panel>(Panel.LIMITS);
+  // Index
+  const [reserveIndex, setReserveIndex] = useState<
+    ActionsModalContext["reserveIndex"]
+  >(defaultContextValue.reserveIndex);
+  const [isOpen, setIsOpen] = useState<ActionsModalContext["isOpen"]>(
+    defaultContextValue.isOpen,
+  );
+
+  // Tabs
+  const [selectedTab, setSelectedTab] = useState<
+    ActionsModalContext["selectedTab"]
+  >(defaultContextValue.selectedTab);
+  const [isMoreParametersOpen, setIsMoreParametersOpen] = useLocalStorage<
+    ActionsModalContext["isMoreParametersOpen"]
+  >(
+    "isActionsModalMoreParametersOpen",
+    defaultContextValue.isMoreParametersOpen,
+  );
+  const [activePanel, setActivePanel] = useState<
+    ActionsModalContext["activePanel"]
+  >(defaultContextValue.activePanel);
+
+  // ReserveAssetData events
+  const [reserveAssetDataEventsMap, setReserveAssetDataEventsMap] = useState<
+    ActionsModalContext["reserveAssetDataEventsMap"]
+  >(defaultContextValue.reserveAssetDataEventsMap);
+
+  const fetchReserveAssetDataEvents = useCallback(
+    async (reserveId: string, days: Days) => {
+      try {
+        const sampleIntervalS = RESERVE_EVENT_SAMPLE_INTERVAL_S_MAP[days];
+
+        const url = `${API_URL}/events/downsampled-reserve-asset-data?reserveId=${reserveId}&days=${days}&sampleIntervalS=${sampleIntervalS}`;
+        const res = await fetch(url);
+        const json = (await res.json()) as DownsampledReserveAssetDataEvent[];
+
+        for (const event of json) {
+          event.coinType = normalizeStructTag(event.coinType);
+        }
+
+        setReserveAssetDataEventsMap((_eventsMap) => ({
+          ..._eventsMap,
+          [reserveId]: {
+            ...((_eventsMap !== undefined && _eventsMap[reserveId]
+              ? _eventsMap[reserveId]
+              : {}) as Record<Days, DownsampledReserveAssetDataEvent[]>),
+            [days]: json,
+          },
+        }));
+      } catch (err) {
+        console.error(err);
+      }
+    },
+    [],
+  );
+
+  const suiReserveId = data.lendingMarket.reserves.find((r) =>
+    isSui(r.coinType),
+  )?.id;
+
+  const didFetchSuiReserveAssetDataEventsRef = useRef<boolean>(false);
+  useEffect(() => {
+    if (!suiReserveId) return;
+    if (didFetchSuiReserveAssetDataEventsRef.current) return;
+
+    for (const days of DAYS) fetchReserveAssetDataEvents(suiReserveId, days);
+    didFetchSuiReserveAssetDataEventsRef.current = true;
+  }, [suiReserveId, fetchReserveAssetDataEvents]);
 
   // Context
   const contextValue = useMemo(
@@ -92,6 +180,9 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
       setIsMoreParametersOpen,
       activePanel,
       setActivePanel,
+
+      reserveAssetDataEventsMap,
+      fetchReserveAssetDataEvents,
     }),
     [
       reserveIndex,
@@ -100,6 +191,8 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
       isMoreParametersOpen,
       setIsMoreParametersOpen,
       activePanel,
+      reserveAssetDataEventsMap,
+      fetchReserveAssetDataEvents,
     ],
   );
 

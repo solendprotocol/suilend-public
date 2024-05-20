@@ -51,7 +51,7 @@ export default function Value({
       {valueEndDecorator}
 
       {(isId || isType || url) && (
-        <div className="-mt-1.5 flex flex-row">
+        <div className="-my-1.5 flex flex-row">
           {(isId || isType) && (
             <CopyToClipboardButton value={value.toString()} />
           )}

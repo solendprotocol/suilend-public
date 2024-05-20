@@ -27,52 +27,53 @@ import {
 } from "@/lib/liquidityMining";
 import { cn, hoverUnderlineClassName } from "@/lib/utils";
 
-function calculateUtilizationRate(reserve: ParsedReserve) {
-  // Units are decimal
-  const totalSupplyExcludingFees = reserve.availableAmount.plus(
-    reserve.borrowedAmount,
-  );
-  if (totalSupplyExcludingFees.isZero()) {
-    return new BigNumber(0);
-  }
-  return reserve.borrowedAmount.div(totalSupplyExcludingFees);
-}
+const calculateUtilizationPercent = (reserve: ParsedReserve) => {
+  const depositedAmount = reserve.availableAmount.plus(reserve.borrowedAmount);
 
-function calculateBorrowAprPercent(reserve: ParsedReserve) {
+  if (depositedAmount.eq(0)) return new BigNumber(0);
+  return reserve.borrowedAmount.div(depositedAmount).times(100);
+};
+
+const calculateBorrowAprPercent = (reserve: ParsedReserve) => {
   const config = reserve.config;
-  const length = config.interestRate.length;
-  const currentUtil = calculateUtilizationRate(reserve);
-  let i = 1;
-  while (i < length) {
-    const leftUtil = config.interestRate[i - 1].utilPercent.div(100);
-    const rightUtil = config.interestRate[i].utilPercent.div(100);
-    if (currentUtil >= leftUtil && currentUtil <= rightUtil) {
-      const leftAprPercent = config.interestRate[i - 1].aprPercent;
-      const rightAprPercent = config.interestRate[i].aprPercent;
-      const weight = currentUtil.minus(leftUtil).div(rightUtil.minus(leftUtil));
-      const aprPercentDiff = rightAprPercent.minus(leftAprPercent);
+  const currentUtilPercent = calculateUtilizationPercent(reserve);
 
-      return new BigNumber(
-        leftAprPercent.plus(
-          new BigNumber(weight).times(new BigNumber(aprPercentDiff)),
-        ),
+  let i = 1;
+  while (i < config.interestRate.length) {
+    const leftUtilPercent = config.interestRate[i - 1].utilPercent;
+    const leftAprPercent = config.interestRate[i - 1].aprPercent;
+
+    const rightUtilPercent = config.interestRate[i].utilPercent;
+    const rightAprPercent = config.interestRate[i].aprPercent;
+
+    if (
+      currentUtilPercent.gte(leftUtilPercent) &&
+      currentUtilPercent.lte(rightUtilPercent)
+    ) {
+      const weight = new BigNumber(
+        currentUtilPercent.minus(leftUtilPercent),
+      ).div(rightUtilPercent.minus(leftUtilPercent));
+
+      return leftAprPercent.plus(
+        weight.times(rightAprPercent.minus(leftAprPercent)),
       );
     }
     i = i + 1;
   }
   // Should never reach here
   return new BigNumber(0);
-}
+};
 
-function calculateDepositAprPercent(reserve: ParsedReserve) {
+const calculateDepositAprPercent = (reserve: ParsedReserve) => {
+  const currentUtilPercent = calculateUtilizationPercent(reserve);
   const borrowAprPercent = calculateBorrowAprPercent(reserve);
-  const currentUtil = calculateUtilizationRate(reserve);
-  const protocolTakePercentage = new BigNumber(1).minus(
-    new BigNumber(reserve.config.spreadFeeBps?.toString() || 0).div(10000),
-  );
+  const spreadFeePercent = new BigNumber(reserve.config.spreadFeeBps).div(100);
 
-  return currentUtil.times(borrowAprPercent).times(protocolTakePercentage);
-}
+  return currentUtilPercent
+    .div(100)
+    .times(borrowAprPercent)
+    .times(new BigNumber(1).minus(spreadFeePercent.div(100)));
+};
 
 const formatApr = (
   value: BigNumber,
@@ -239,7 +240,7 @@ export default function AprWithRewardsBreakdown({
         : calculateBorrowAprPercent(modifiedReserve);
     const poolTotal =
       side === Side.DEPOSIT ? reserve.depositedAmount : reserve.borrowedAmount;
-    aprModifier = amountChange.plus(poolTotal).isZero()
+    aprModifier = amountChange.plus(poolTotal).eq(0)
       ? new BigNumber(-1)
       : poolTotal.div(amountChange.plus(poolTotal));
   }
