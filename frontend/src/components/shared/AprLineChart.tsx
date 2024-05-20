@@ -204,7 +204,7 @@ export default function AprLineChart({ data, reference }: AprLineChartProps) {
               fill: "hsl(var(--muted-foreground))",
             }}
             axisLine={{
-              stroke: "hsl(222 68% 24%)", // 25% var(--primary) on var(--popover)
+              stroke: "hsl(209 36% 28%)", // 25% var(--secondary) on var(--popover)
             }}
             tickLine={{
               stroke: "transparent",
@@ -236,7 +236,7 @@ export default function AprLineChart({ data, reference }: AprLineChartProps) {
               fill: "hsl(var(--muted-foreground))",
             }}
             axisLine={{
-              stroke: "hsl(222 68% 24%)", // 25% var(--primary) on var(--popover)
+              stroke: "hsl(209 36% 28%)", // 25% var(--secondary) on var(--popover)
             }}
             tickLine={{
               stroke: "transparent",

@@ -206,7 +206,7 @@ function Chart({ side, isLoading, data }: ChartProps) {
           tickMargin={tickMargin}
           tick={tick}
           axisLine={{
-            stroke: "hsl(222 68% 24%)", // 25% var(--primary) on var(--popover)
+            stroke: "hsl(209 36% 28%)", // 25% var(--secondary) on var(--popover)
           }}
           tickLine={tickLine}
           tickFormatter={tickXFormatter}
@@ -218,7 +218,7 @@ function Chart({ side, isLoading, data }: ChartProps) {
           tickMargin={tickMargin}
           tick={tick}
           axisLine={{
-            stroke: "hsl(222 68% 24%)", // 25% var(--primary) on var(--popover)
+            stroke: "hsl(209 36% 28%)", // 25% var(--secondary) on var(--popover)
           }}
           tickLine={tickLine}
           tickFormatter={tickYFormatter}
