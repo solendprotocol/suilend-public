@@ -259,7 +259,7 @@ export default function AprLineChart({ data, reference }: AprLineChartProps) {
               }}
               position="insideLeft"
               angle={-90}
-              offset={10}
+              offset={5 + 5}
             />
           </Recharts.YAxis>
           <Recharts.Line

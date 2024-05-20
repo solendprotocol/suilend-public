@@ -52,8 +52,8 @@ function TooltipContent({ side, data }: TooltipContentProps) {
   if (!data) return null;
 
   return (
-    // TooltipContent className
-    <div className="rounded-md border bg-popover px-3 py-1.5 shadow-md animate-in fade-in-0 zoom-in-95">
+    // Subset of TooltipContent className
+    <div className="rounded-md border bg-popover px-3 py-1.5 shadow-md">
       <div className="flex w-full flex-col gap-1">
         <TLabelSans>
           {format(new Date(data.timestampS * 1000), "MM/dd HH:mm")}
@@ -192,7 +192,7 @@ function Chart({ side, isLoading, data }: ChartProps) {
     >
       <Recharts.AreaChart
         data={data}
-        margin={{ top: 8, right: 16, bottom: -12, left: -15 }}
+        margin={{ top: 8, right: 16, bottom: -12, left: -5 }}
       >
         <Recharts.CartesianGrid
           strokeDasharray="1 4"
@@ -237,7 +237,7 @@ function Chart({ side, isLoading, data }: ChartProps) {
             }}
             position="insideLeft"
             angle={-90}
-            offset={20}
+            offset={5 + 5}
           />
         </Recharts.YAxis>
         <Recharts.Area
@@ -280,6 +280,7 @@ function Chart({ side, isLoading, data }: ChartProps) {
             filterNull={false}
             cursor={{ stroke: "hsl(var(--foreground))", strokeWidth: 1 }}
             trigger={isTouchscreen ? "hover" : "hover"}
+            position={{ y: 0 }}
             content={({ active, payload }) => (
               <TooltipContent
                 side={side}
@@ -425,7 +426,7 @@ export default function HistoricalAprLineChart({
       <div
         ref={containerRef}
         id="historical-apr-line-chart"
-        className="relative z-[1] h-[95px] w-full flex-shrink-0 transform-gpu sm:h-[160px]"
+        className="relative z-[1] h-[100px] w-full flex-shrink-0 transform-gpu sm:h-[160px]"
         is-loading={isLoading ? "true" : "false"}
       >
         <Chart side={side} isLoading={isLoading} data={chartData ?? []} />
