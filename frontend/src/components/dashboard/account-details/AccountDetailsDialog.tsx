@@ -35,9 +35,7 @@ import { formatPoints, formatToken } from "@/lib/format";
 import { API_URL } from "@/lib/navigation";
 
 export const getCtokenExchangeRate = (event: ReserveAssetDataEvent) =>
-  new BigNumber(new BigNumber(event.supplyAmount).div(WAD.toString())).div(
-    event.ctokenSupply,
-  );
+  new BigNumber(event.supplyAmount).div(WAD).div(event.ctokenSupply);
 
 export type EventsData = {
   reserveAssetData: ReserveAssetDataEvent[];

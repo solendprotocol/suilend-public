@@ -166,7 +166,7 @@ function getObligationClaims(
     // Lifetime earned amount is not available right yet as a result.
     claimableAmount: userReward?.earnedRewards
       ? new BigNumber(userReward.earnedRewards.value.toString())
-          .div(WAD.toString())
+          .div(WAD)
           .div(10 ** poolReward.mintDecimals)
       : new BigNumber(0),
     reserveArrayIndex,

@@ -375,7 +375,7 @@ export default function ActionsModalTabContent({
           />
         </div>
 
-        <HistoricalAprLineChart reserveId={reserve.id} side={side} />
+        <HistoricalAprLineChart reserve={reserve} side={side} />
 
         {!md && isMoreParametersOpen && (
           <>

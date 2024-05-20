@@ -307,3 +307,31 @@ export interface MigrateArgs {
   lendingMarketOwnerCap: ObjectArg;
   lendingMarket: ObjectArg;
 }
+
+export type ReserveAssetDataEvent = {
+  id: number;
+  lendingMarketId: string;
+  coinType: string;
+  reserveId: string;
+  availableAmount: string;
+  supplyAmount: string;
+  borrowedAmount: string;
+  availableAmountUsdEstimate: string;
+  supplyAmountUsdEstimate: string;
+  borrowedAmountUsdEstimate: string;
+  borrowApr: string;
+  supplyApr: string;
+  ctokenSupply: string;
+  cumulativeBorrowRate: string;
+  price: string;
+  smoothedPrice: string;
+  priceLastUpdateTimestampS: number;
+  timestamp: number;
+  digest: string;
+  eventIndex: number;
+  sender: string;
+};
+
+export type DownsampledReserveAssetDataEvent = ReserveAssetDataEvent & {
+  sampletimestamp: number;
+};

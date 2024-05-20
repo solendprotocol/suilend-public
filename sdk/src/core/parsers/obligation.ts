@@ -90,11 +90,11 @@ export const parseObligation = (
 
     const cumulativeBorrowRate = new BigNumber(
       borrow.cumulativeBorrowRate.value.toString(),
-    ).div(WAD.toString());
+    ).div(WAD);
     const borrowedAmountInitial = new BigNumber(
       borrow.borrowedAmount.value.toString(),
     )
-      .div(WAD.toString())
+      .div(WAD)
       .div(10 ** reserve.mintDecimals);
     const borrowInterestIndex =
       reserve.cumulativeBorrowRate.div(cumulativeBorrowRate);
