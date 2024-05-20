@@ -68,7 +68,7 @@ const ActionsModalInput = forwardRef<HTMLInputElement, ActionsModalInputProps>(
           onChange={(e) => onChange(e.target.value)}
           style={{
             height: `${INPUT_HEIGHT}px`,
-            paddingLeft: `${3 * 4 + MAX_BUTTON_WIDTH + 2 * 4}px`,
+            paddingLeft: `${3 * 4 + MAX_BUTTON_WIDTH + 3 * 4}px`,
             paddingRight: `${3 * 4 + reserve.symbol.length * 14.4 + 4 * 4}px`,
             paddingTop: `${(INPUT_INNER_HEIGHT - MAX_BUTTON_HEIGHT) / 2}px`,
             paddingBottom: `${(INPUT_INNER_HEIGHT - MAX_BUTTON_HEIGHT) / 2 + USD_LABEL_HEIGHT}px`,
