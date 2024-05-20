@@ -19,14 +19,14 @@ import TokenLogo from "@/components/shared/TokenLogo";
 import { TBody, TLabelSans } from "@/components/shared/Typography";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import {
-  BorrowEvent,
-  ClaimRewardEvent,
-  DepositEvent,
+  ApiBorrowEvent,
+  ApiClaimRewardEvent,
+  ApiDepositEvent,
+  ApiLiquidateEvent,
+  ApiRepayEvent,
+  ApiWithdrawEvent,
   EventType,
   EventTypeNameMap,
-  LiquidateEvent,
-  RepayEvent,
-  WithdrawEvent,
   eventSortAsc,
   eventSortDesc,
 } from "@/lib/events";
@@ -38,12 +38,12 @@ interface RowData {
   eventIndex: number;
   eventType: EventType;
   event:
-    | DepositEvent
-    | BorrowEvent
-    | WithdrawEvent
-    | RepayEvent
-    | LiquidateEvent
-    | ClaimRewardEvent;
+    | ApiDepositEvent
+    | ApiBorrowEvent
+    | ApiWithdrawEvent
+    | ApiRepayEvent
+    | ApiLiquidateEvent
+    | ApiClaimRewardEvent;
   subRows?: RowData[];
 }
 
@@ -132,15 +132,15 @@ export default function HistoryTabContent({
             return value.includes(
               (
                 event as
-                  | DepositEvent
-                  | BorrowEvent
-                  | WithdrawEvent
-                  | RepayEvent
-                  | ClaimRewardEvent
+                  | ApiDepositEvent
+                  | ApiBorrowEvent
+                  | ApiWithdrawEvent
+                  | ApiRepayEvent
+                  | ApiClaimRewardEvent
               ).coinType,
             );
           } else if (eventType === EventType.LIQUIDATE) {
-            const liquidateEvent = event as LiquidateEvent;
+            const liquidateEvent = event as ApiLiquidateEvent;
 
             const repayReserve = data.lendingMarket.reserves.find(
               (reserve) => reserve.id === liquidateEvent.repayReserveId,
@@ -165,7 +165,7 @@ export default function HistoryTabContent({
           const { eventType, event } = row.original;
 
           if (eventType === EventType.DEPOSIT) {
-            const depositEvent = event as DepositEvent;
+            const depositEvent = event as ApiDepositEvent;
             const coinMetadata = data.coinMetadataMap[depositEvent.coinType];
 
             const reserveAssetDataEvent = eventsData?.reserveAssetData.find(
@@ -189,7 +189,7 @@ export default function HistoryTabContent({
               />
             );
           } else if (eventType === EventType.BORROW) {
-            const borrowEvent = event as BorrowEvent;
+            const borrowEvent = event as ApiBorrowEvent;
             const coinMetadata = data.coinMetadataMap[borrowEvent.coinType];
 
             const incFeesAmount = new BigNumber(
@@ -217,7 +217,7 @@ export default function HistoryTabContent({
               </div>
             );
           } else if (eventType === EventType.WITHDRAW) {
-            const withdrawEvent = event as WithdrawEvent;
+            const withdrawEvent = event as ApiWithdrawEvent;
             const coinMetadata = data.coinMetadataMap[withdrawEvent.coinType];
 
             const reserveAssetDataEvent = eventsData?.reserveAssetData.find(
@@ -241,7 +241,7 @@ export default function HistoryTabContent({
               />
             );
           } else if (eventType === EventType.REPAY) {
-            const repayEvent = event as RepayEvent;
+            const repayEvent = event as ApiRepayEvent;
             const coinMetadata = data.coinMetadataMap[repayEvent.coinType];
 
             const amount = new BigNumber(repayEvent.liquidityAmount).div(
@@ -258,7 +258,7 @@ export default function HistoryTabContent({
               />
             );
           } else if (eventType === EventType.LIQUIDATE) {
-            const liquidateEvent = event as LiquidateEvent;
+            const liquidateEvent = event as ApiLiquidateEvent;
 
             const repayReserve = data.lendingMarket.reserves.find(
               (reserve) => reserve.id === liquidateEvent.repayReserveId,
@@ -279,7 +279,7 @@ export default function HistoryTabContent({
             if (isGroupRow) {
               for (const subRow of row.subRows) {
                 const subRowLiquidateEvent = subRow.original
-                  .event as LiquidateEvent;
+                  .event as ApiLiquidateEvent;
 
                 const reserveAssetDataEvent = eventsData?.reserveAssetData.find(
                   (e) => e.digest === subRowLiquidateEvent.digest,
@@ -344,7 +344,7 @@ export default function HistoryTabContent({
               </div>
             );
           } else if (eventType === EventType.CLAIM_REWARD) {
-            const claimRewardEvent = event as ClaimRewardEvent;
+            const claimRewardEvent = event as ApiClaimRewardEvent;
             const coinMetadata =
               data.coinMetadataMap[claimRewardEvent.coinType];
 
@@ -501,13 +501,13 @@ export default function HistoryTabContent({
       switch (row.eventType) {
         // Dedupe CLAIM_REWARD events
         case EventType.CLAIM_REWARD: {
-          const claimRewardEvent = row.event as ClaimRewardEvent;
+          const claimRewardEvent = row.event as ApiClaimRewardEvent;
 
           const lastRow = finalRows[finalRows.length - 1];
           if (!lastRow || lastRow.eventType !== EventType.CLAIM_REWARD)
             finalRows.push(cloneDeep(row));
           else {
-            const lastClaimRewardEvent = lastRow.event as ClaimRewardEvent;
+            const lastClaimRewardEvent = lastRow.event as ApiClaimRewardEvent;
 
             if (
               lastClaimRewardEvent.coinType === claimRewardEvent.coinType &&
@@ -517,7 +517,7 @@ export default function HistoryTabContent({
               lastClaimRewardEvent.digest === claimRewardEvent.digest
             ) {
               (
-                finalRows[finalRows.length - 1].event as ClaimRewardEvent
+                finalRows[finalRows.length - 1].event as ApiClaimRewardEvent
               ).liquidityAmount = new BigNumber(
                 lastClaimRewardEvent.liquidityAmount,
               )
@@ -531,13 +531,13 @@ export default function HistoryTabContent({
 
         // Group LIQUIDATE events
         case EventType.LIQUIDATE: {
-          const liquidateEvent = row.event as LiquidateEvent;
+          const liquidateEvent = row.event as ApiLiquidateEvent;
 
           const lastRow = finalRows[finalRows.length - 1];
           if (!lastRow || lastRow.eventType !== EventType.LIQUIDATE)
             finalRows.push({ ...row, subRows: [row] });
           else {
-            const lastLiquidateEvent = lastRow.event as LiquidateEvent;
+            const lastLiquidateEvent = lastRow.event as ApiLiquidateEvent;
 
             if (
               lastLiquidateEvent.repayReserveId ===

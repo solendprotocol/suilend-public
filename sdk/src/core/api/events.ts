@@ -1,6 +1,6 @@
-import { DownsampledReserveAssetDataEvent } from "../types";
+import { DownsampledApiReserveAssetDataEvent } from "../types";
 
-export const fetchDownsampledReserveAssetDataEvents = async (
+export const fetchDownsampledApiReserveAssetDataEvents = async (
   reserveId: string,
   days: number,
   sampleIntervalS: number,
@@ -9,5 +9,5 @@ export const fetchDownsampledReserveAssetDataEvents = async (
   const res = await fetch(url);
   const json = await res.json();
 
-  return json as DownsampledReserveAssetDataEvent[];
+  return json as DownsampledApiReserveAssetDataEvent[];
 };

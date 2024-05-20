@@ -3,8 +3,8 @@ import BigNumber from "bignumber.js";
 
 import { WAD } from "../constants";
 import {
-  DownsampledReserveAssetDataEvent,
-  ReserveAssetDataEvent,
+  ApiReserveAssetDataEvent,
+  DownsampledApiReserveAssetDataEvent,
 } from "../types";
 
 import { ParsedReserve } from "./reserve";
@@ -46,7 +46,7 @@ const calculateBorrowAprPercent = (
 };
 
 export const parseReserveAssetDataEvent = (
-  event: ReserveAssetDataEvent,
+  event: ApiReserveAssetDataEvent,
   reserve: ParsedReserve,
 ) => {
   const depositedAmount = new BigNumber(event.supplyAmount)
@@ -117,12 +117,12 @@ export const parseReserveAssetDataEvent = (
   };
 };
 
-export type ParsedDownsampledReserveAssetDataEvent = ReturnType<
-  typeof parseDownsampledReserveAssetDataEvent
+export type ParsedDownsampledApiReserveAssetDataEvent = ReturnType<
+  typeof parseDownsampledApiReserveAssetDataEvent
 >;
 
-export const parseDownsampledReserveAssetDataEvent = (
-  event: DownsampledReserveAssetDataEvent,
+export const parseDownsampledApiReserveAssetDataEvent = (
+  event: DownsampledApiReserveAssetDataEvent,
   reserve: ParsedReserve,
 ) => {
   return {

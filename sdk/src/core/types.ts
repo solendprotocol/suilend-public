@@ -308,7 +308,7 @@ export interface MigrateArgs {
   lendingMarket: ObjectArg;
 }
 
-export type ReserveAssetDataEvent = {
+export type ApiReserveAssetDataEvent = {
   id: number;
   lendingMarketId: string;
   coinType: string;
@@ -332,6 +332,6 @@ export type ReserveAssetDataEvent = {
   sender: string;
 };
 
-export type DownsampledReserveAssetDataEvent = ReserveAssetDataEvent & {
+export type DownsampledApiReserveAssetDataEvent = ApiReserveAssetDataEvent & {
   sampletimestamp: number;
 };

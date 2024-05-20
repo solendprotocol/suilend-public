@@ -13,12 +13,12 @@ import {
 
 import { useLocalStorage } from "usehooks-ts";
 
-import { fetchDownsampledReserveAssetDataEvents } from "@suilend/sdk/api/events";
-import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
+import { fetchDownsampledApiReserveAssetDataEvents } from "@suilend/sdk/api/events";
 import {
-  ParsedDownsampledReserveAssetDataEvent,
-  parseDownsampledReserveAssetDataEvent,
-} from "@suilend/sdk/parsers/reserveAssetDataEvent";
+  ParsedDownsampledApiReserveAssetDataEvent,
+  parseDownsampledApiReserveAssetDataEvent,
+} from "@suilend/sdk/parsers/apiReserveAssetDataEvent";
+import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 
 import { Panel } from "@/components/dashboard/actions-modal/ParametersPanel";
 import { AppData, useAppContext } from "@/contexts/AppContext";
@@ -34,7 +34,7 @@ export enum Tab {
 
 type ReserveAssetDataEventsMap = Record<
   string,
-  Record<Days, ParsedDownsampledReserveAssetDataEvent[]>
+  Record<Days, ParsedDownsampledApiReserveAssetDataEvent[]>
 >;
 
 interface ActionsModalContext {
@@ -127,13 +127,13 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
       try {
         const sampleIntervalS = RESERVE_EVENT_SAMPLE_INTERVAL_S_MAP[days];
 
-        const events = await fetchDownsampledReserveAssetDataEvents(
+        const events = await fetchDownsampledApiReserveAssetDataEvents(
           reserve.id,
           days,
           sampleIntervalS,
         );
         const parsedEvents = events.map((event) =>
-          parseDownsampledReserveAssetDataEvent(event, reserve),
+          parseDownsampledApiReserveAssetDataEvent(event, reserve),
         );
 
         setReserveAssetDataEventsMap((_eventsMap) => ({
@@ -141,7 +141,10 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
           [reserve.id]: {
             ...((_eventsMap !== undefined && _eventsMap[reserve.id]
               ? _eventsMap[reserve.id]
-              : {}) as Record<Days, ParsedDownsampledReserveAssetDataEvent[]>),
+              : {}) as Record<
+              Days,
+              ParsedDownsampledApiReserveAssetDataEvent[]
+            >),
             [days]: parsedEvents,
           },
         }));

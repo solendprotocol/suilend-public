@@ -6,6 +6,7 @@ import BigNumber from "bignumber.js";
 import { FileClock, RotateCw, TableProperties, TrendingUp } from "lucide-react";
 
 import { WAD } from "@suilend/sdk/constants";
+import { ApiReserveAssetDataEvent } from "@suilend/sdk/types";
 
 import EarningsTabContent from "@/components/dashboard/account-details/EarningsTabContent";
 import HistoryTabContent from "@/components/dashboard/account-details/HistoryTabContent";
@@ -20,32 +21,31 @@ import { Separator } from "@/components/ui/separator";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { isSuilendPoints } from "@/lib/coinType";
 import {
-  BorrowEvent,
-  ClaimRewardEvent,
-  DepositEvent,
+  ApiBorrowEvent,
+  ApiClaimRewardEvent,
+  ApiDepositEvent,
+  ApiLiquidateEvent,
+  ApiRepayEvent,
+  ApiWithdrawEvent,
   EventType,
-  LiquidateEvent,
-  RepayEvent,
-  ReserveAssetDataEvent,
-  WithdrawEvent,
   eventSortAsc,
   eventSortDesc,
 } from "@/lib/events";
 import { formatPoints, formatToken } from "@/lib/format";
 import { API_URL } from "@/lib/navigation";
 
-export const getCtokenExchangeRate = (event: ReserveAssetDataEvent) =>
+export const getCtokenExchangeRate = (event: ApiReserveAssetDataEvent) =>
   new BigNumber(event.supplyAmount).div(WAD).div(event.ctokenSupply);
 
 export type EventsData = {
-  reserveAssetData: ReserveAssetDataEvent[];
+  reserveAssetData: ApiReserveAssetDataEvent[];
 
-  deposit: DepositEvent[];
-  borrow: BorrowEvent[];
-  withdraw: WithdrawEvent[];
-  repay: RepayEvent[];
-  liquidate: LiquidateEvent[];
-  claimReward: ClaimRewardEvent[];
+  deposit: ApiDepositEvent[];
+  borrow: ApiBorrowEvent[];
+  withdraw: ApiWithdrawEvent[];
+  repay: ApiRepayEvent[];
+  liquidate: ApiLiquidateEvent[];
+  claimReward: ApiClaimRewardEvent[];
 };
 
 interface TokenAmountProps {
