@@ -6,6 +6,7 @@ import { capitalize } from "lodash";
 import * as Recharts from "recharts";
 import { useLocalStorage } from "usehooks-ts";
 
+import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 import { Side } from "@suilend/sdk/types";
 
 import { useActionsModalContext } from "@/components/dashboard/actions-modal/ActionsModalContext";
@@ -26,8 +27,6 @@ import {
   DAYS,
   Days,
   RESERVE_EVENT_SAMPLE_INTERVAL_S_MAP,
-  calculateBorrowAprPercent,
-  calculateDepositAprPercent,
   calculateSuiRewardsDepositAprPercent,
 } from "@/lib/events";
 import { formatPercent } from "@/lib/format";
@@ -295,20 +294,18 @@ function Chart({ side, isLoading, data }: ChartProps) {
 }
 
 interface HistoricalAprLineChartProps {
-  reserveId: string;
+  reserve: ParsedReserve;
   side: Side;
 }
 
 export default function HistoricalAprLineChart({
-  reserveId,
+  reserve,
   side,
 }: HistoricalAprLineChartProps) {
   const appContext = useAppContext();
   const data = appContext.data as AppData;
   const { reserveAssetDataEventsMap, fetchReserveAssetDataEvents } =
     useActionsModalContext();
-
-  const reserveMapRef = useRef<AppData["reserveMap"]>(data.reserveMap);
 
   // Events
   const [days, setDays] = useLocalStorage<Days>(
@@ -324,25 +321,25 @@ export default function HistoricalAprLineChart({
 
   const didFetchInitialReserveAssetDataEventsRef = useRef<boolean>(false);
   useEffect(() => {
-    const events = reserveAssetDataEventsMap?.[reserveId]?.[days];
+    const events = reserveAssetDataEventsMap?.[reserve.id]?.[days];
     if (events === undefined) {
       if (didFetchInitialReserveAssetDataEventsRef.current) return;
 
-      fetchReserveAssetDataEvents(reserveId, days);
+      fetchReserveAssetDataEvents(reserve, days);
       didFetchInitialReserveAssetDataEventsRef.current = true;
     }
-  }, [reserveAssetDataEventsMap, reserveId, days, fetchReserveAssetDataEvents]);
+  }, [reserveAssetDataEventsMap, reserve, days, fetchReserveAssetDataEvents]);
 
   const onDaysClick = (value: Days) => {
     setDays(value);
 
-    const events = reserveAssetDataEventsMap?.[reserveId]?.[value];
-    if (events === undefined) fetchReserveAssetDataEvents(reserveId, value);
+    const events = reserveAssetDataEventsMap?.[reserve.id]?.[value];
+    if (events === undefined) fetchReserveAssetDataEvents(reserve, value);
   };
 
   // Data
   const chartData = useMemo(() => {
-    const events = reserveAssetDataEventsMap?.[reserveId]?.[days];
+    const events = reserveAssetDataEventsMap?.[reserve.id]?.[days];
     if (events === undefined) return;
 
     if (suiEvents === undefined) return;
@@ -362,46 +359,25 @@ export default function HistoricalAprLineChart({
 
     const result: ChartData[] = [];
     timestampsS.forEach((timestampS, index) => {
-      let depositAprPercent: number | undefined = undefined;
-      let depositSuiRewardsAprPercent: number | undefined = undefined;
-      let borrowAprPercent: number | undefined = undefined;
-
-      const event = events.findLast((e) => e.sampletimestamp <= timestampS);
-      if (!event) {
-        result.push({
-          index,
-          timestampS,
-          depositAprPercent,
-          depositSuiRewardsAprPercent,
-          borrowAprPercent,
-        });
-        return;
-      }
-
-      const reserve = reserveMapRef.current[event.coinType];
-      depositAprPercent = calculateDepositAprPercent(reserve, event);
-      depositSuiRewardsAprPercent = calculateSuiRewardsDepositAprPercent(
-        reserve,
-        event,
-        suiEvents[days],
-      );
-      borrowAprPercent = calculateBorrowAprPercent(reserve, event);
-
+      const event = events.findLast((e) => e.sampleTimestampS <= timestampS);
       result.push({
         index,
         timestampS,
-        depositAprPercent,
-        depositSuiRewardsAprPercent,
-        borrowAprPercent,
+        depositAprPercent: event ? +event.depositAprPercent : undefined,
+        depositSuiRewardsAprPercent: event
+          ? calculateSuiRewardsDepositAprPercent(
+              event,
+              suiEvents[days],
+              reserve,
+            )
+          : undefined,
+        borrowAprPercent: event ? +event.borrowAprPercent : undefined,
       });
     });
 
     return result;
-  }, [reserveAssetDataEventsMap, reserveId, days, suiEvents]);
+  }, [reserveAssetDataEventsMap, reserve, days, suiEvents]);
   const isLoading = chartData === undefined;
-
-  // Chart
-  const containerRef = useRef<HTMLDivElement>(null);
 
   return (
     <div className="-mr-4 flex flex-col items-end">
@@ -424,7 +400,6 @@ export default function HistoricalAprLineChart({
       </div>
 
       <div
-        ref={containerRef}
         id="historical-apr-line-chart"
         className="relative z-[1] h-[100px] w-full flex-shrink-0 transform-gpu sm:h-[160px]"
         is-loading={isLoading ? "true" : "false"}

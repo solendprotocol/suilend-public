@@ -34,12 +34,10 @@ export const parseReserve = (
 
   const mintDecimals = reserve.mintDecimals;
   const priceIdentifier = `0x${toHexString(reserve.priceIdentifier.bytes)}`;
-  const price = new BigNumber(reserve.price.value.toString()).div(
-    WAD.toString(),
-  );
+  const price = new BigNumber(reserve.price.value.toString()).div(WAD);
   const smoothedPrice = new BigNumber(
     reserve.smoothedPrice.value.toString(),
-  ).div(WAD.toString());
+  ).div(WAD);
   const minPrice = BigNumber.min(price, smoothedPrice);
   const maxPrice = BigNumber.max(price, smoothedPrice);
   const priceLastUpdateTimestampS = reserve.priceLastUpdateTimestampS;
@@ -50,16 +48,16 @@ export const parseReserve = (
     10 ** mintDecimals,
   );
   const borrowedAmount = new BigNumber(reserve.borrowedAmount.value.toString())
-    .div(WAD.toString())
+    .div(WAD)
     .div(10 ** mintDecimals);
   const cumulativeBorrowRate = new BigNumber(
     reserve.cumulativeBorrowRate.value.toString(),
-  ).div(WAD.toString());
+  ).div(WAD);
   const interestLastUpdateTimestampS = reserve.interestLastUpdateTimestampS;
   const unclaimedSpreadFees = new BigNumber(
     reserve.unclaimedSpreadFees.value.toString(),
   )
-    .div(WAD.toString())
+    .div(WAD)
     .div(10 ** mintDecimals);
   const attributedBorrowValue = new BigNumber(
     reserve.attributedBorrowValue.value.toString(),
@@ -268,12 +266,12 @@ export const parsePoolReward = (
   const allocatedRewards = new BigNumber(
     poolReward.allocatedRewards.value.toString(),
   )
-    .div(WAD.toString())
+    .div(WAD)
     .div(10 ** coinMetadata.decimals);
   const cumulativeRewardsPerShare = new BigNumber(
     poolReward.cumulativeRewardsPerShare.value.toString(),
   )
-    .div(WAD.toString())
+    .div(WAD)
     .div(10 ** coinMetadata.decimals);
   const numUserRewardManagers = poolReward.numUserRewardManagers;
   // additionalFields

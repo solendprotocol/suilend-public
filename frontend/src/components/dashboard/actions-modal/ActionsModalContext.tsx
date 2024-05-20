@@ -11,19 +11,19 @@ import {
   useState,
 } from "react";
 
-import { normalizeStructTag } from "@mysten/sui.js/utils";
 import { useLocalStorage } from "usehooks-ts";
+
+import { fetchDownsampledReserveAssetDataEvents } from "@suilend/sdk/api/events";
+import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
+import {
+  ParsedDownsampledReserveAssetDataEvent,
+  parseDownsampledReserveAssetDataEvent,
+} from "@suilend/sdk/parsers/reserveAssetDataEvent";
 
 import { Panel } from "@/components/dashboard/actions-modal/ParametersPanel";
 import { AppData, useAppContext } from "@/contexts/AppContext";
-import { isSui } from "@/lib/coinType";
-import {
-  DAYS,
-  Days,
-  DownsampledReserveAssetDataEvent,
-  RESERVE_EVENT_SAMPLE_INTERVAL_S_MAP,
-} from "@/lib/events";
-import { API_URL } from "@/lib/navigation";
+import { NORMALIZED_SUI_COINTYPE } from "@/lib/coinType";
+import { DAYS, Days, RESERVE_EVENT_SAMPLE_INTERVAL_S_MAP } from "@/lib/events";
 
 export enum Tab {
   DEPOSIT = "deposit",
@@ -34,7 +34,7 @@ export enum Tab {
 
 type ReserveAssetDataEventsMap = Record<
   string,
-  Record<Days, DownsampledReserveAssetDataEvent[]>
+  Record<Days, ParsedDownsampledReserveAssetDataEvent[]>
 >;
 
 interface ActionsModalContext {
@@ -51,7 +51,10 @@ interface ActionsModalContext {
   setActivePanel: Dispatch<SetStateAction<Panel>>;
 
   reserveAssetDataEventsMap?: ReserveAssetDataEventsMap;
-  fetchReserveAssetDataEvents: (reserveId: string, days: Days) => Promise<void>;
+  fetchReserveAssetDataEvents: (
+    reserve: ParsedReserve,
+    days: Days,
+  ) => Promise<void>;
 }
 
 const defaultContextValue: ActionsModalContext = {
@@ -120,25 +123,26 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
   >(defaultContextValue.reserveAssetDataEventsMap);
 
   const fetchReserveAssetDataEvents = useCallback(
-    async (reserveId: string, days: Days) => {
+    async (reserve: ParsedReserve, days: Days) => {
       try {
         const sampleIntervalS = RESERVE_EVENT_SAMPLE_INTERVAL_S_MAP[days];
 
-        const url = `${API_URL}/events/downsampled-reserve-asset-data?reserveId=${reserveId}&days=${days}&sampleIntervalS=${sampleIntervalS}`;
-        const res = await fetch(url);
-        const json = (await res.json()) as DownsampledReserveAssetDataEvent[];
-
-        for (const event of json) {
-          event.coinType = normalizeStructTag(event.coinType);
-        }
+        const events = await fetchDownsampledReserveAssetDataEvents(
+          reserve.id,
+          days,
+          sampleIntervalS,
+        );
+        const parsedEvents = events.map((event) =>
+          parseDownsampledReserveAssetDataEvent(event, reserve),
+        );
 
         setReserveAssetDataEventsMap((_eventsMap) => ({
           ..._eventsMap,
-          [reserveId]: {
-            ...((_eventsMap !== undefined && _eventsMap[reserveId]
-              ? _eventsMap[reserveId]
-              : {}) as Record<Days, DownsampledReserveAssetDataEvent[]>),
-            [days]: json,
+          [reserve.id]: {
+            ...((_eventsMap !== undefined && _eventsMap[reserve.id]
+              ? _eventsMap[reserve.id]
+              : {}) as Record<Days, ParsedDownsampledReserveAssetDataEvent[]>),
+            [days]: parsedEvents,
           },
         }));
       } catch (err) {
@@ -148,18 +152,16 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
     [],
   );
 
-  const suiReserveId = data.lendingMarket.reserves.find((r) =>
-    isSui(r.coinType),
-  )?.id;
+  const suiReserve = data.reserveMap[NORMALIZED_SUI_COINTYPE];
 
   const didFetchSuiReserveAssetDataEventsRef = useRef<boolean>(false);
   useEffect(() => {
-    if (!suiReserveId) return;
+    if (!suiReserve) return;
     if (didFetchSuiReserveAssetDataEventsRef.current) return;
 
-    for (const days of DAYS) fetchReserveAssetDataEvents(suiReserveId, days);
+    for (const days of DAYS) fetchReserveAssetDataEvents(suiReserve, days);
     didFetchSuiReserveAssetDataEventsRef.current = true;
-  }, [suiReserveId, fetchReserveAssetDataEvents]);
+  }, [suiReserve, fetchReserveAssetDataEvents]);
 
   // Context
   const contextValue = useMemo(

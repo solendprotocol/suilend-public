@@ -363,6 +363,3 @@ body {
   line {
   stroke: transparent;
 } */
-#historical-apr-line-chart[is-loading="true"] .recharts-line path {
-  stroke: hsl(var(--muted));
-}
