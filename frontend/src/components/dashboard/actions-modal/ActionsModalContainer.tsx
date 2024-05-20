@@ -66,7 +66,7 @@ export default function ActionsModalContainer({ children }: PropsWithChildren) {
     return (
       <Dialog open={isOpen}>
         <DialogContent
-          className="grid h-dvh max-w-none place-items-center overflow-auto border-none bg-transparent p-0 px-10 py-8"
+          className="grid h-dvh max-w-none place-items-center overflow-y-auto overflow-x-hidden border-none bg-transparent p-0 px-10 py-8"
           onOpenAutoFocus={(e) => e.preventDefault()}
           onEscapeKeyDown={() => close()}
           overlay={{

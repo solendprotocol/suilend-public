@@ -132,7 +132,6 @@ export default function ActionsModalTabContent({
   const setMaxValue = () => {
     setUseMaxAmount(true);
     onValueChangeCore(maxAmount);
-    inputRef.current?.focus();
   };
 
   useEffect(() => {
@@ -325,7 +324,7 @@ export default function ActionsModalTabContent({
         </div>
       </div>
 
-      <div className="-m-4 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-4 pb-6">
+      <div className="-m-4 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overflow-x-hidden p-4 pb-6">
         <div className="flex flex-col gap-2.5">
           <LabelWithValue
             label="Price"

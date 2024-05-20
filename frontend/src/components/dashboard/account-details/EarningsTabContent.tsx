@@ -504,10 +504,7 @@ export default function EarningsTabContent({
             </div>
           </div>
         ) : (
-          <Skeleton
-            className="w-full bg-muted/10"
-            style={{ height: `${(4 + 4 + 1 + 5 + 4) * 4}px` }}
-          />
+          <Skeleton className="h-[calc((4px+10px+4px+10px+4px)*4)] w-full bg-muted/10 md:h-[calc((4px+10px+4px)*4)]" />
         )}
 
         <TLabelSans className="px-4">
