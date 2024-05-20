@@ -1,6 +1,6 @@
 {
   "name": "@suilend/sdk",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "private": true,
   "description": "A TypeScript SDK for interacting with the Suilend program",
   "author": "Suilend",
