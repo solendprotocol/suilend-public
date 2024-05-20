@@ -353,6 +353,16 @@ body {
   fill: hsla(var(--muted) / 10%);
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; /* animate-pulse */
 }
+#historical-apr-line-chart[is-loading="true"]
+  .recharts-cartesian-grid
+  .recharts-cartesian-grid-horizontal
+  line,
+#historical-apr-line-chart[is-loading="true"]
+  .recharts-cartesian-grid
+  .recharts-cartesian-grid-vertical
+  line {
+  stroke: transparent;
+}
 #historical-apr-line-chart[is-loading="true"] .recharts-line path {
   stroke: hsl(var(--muted));
 }

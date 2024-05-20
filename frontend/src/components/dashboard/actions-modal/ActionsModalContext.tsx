@@ -3,6 +3,7 @@ import {
   PropsWithChildren,
   SetStateAction,
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -18,9 +19,9 @@ import { AppData, useAppContext } from "@/contexts/AppContext";
 import { isSui } from "@/lib/coinType";
 import {
   DAYS,
+  Days,
   DownsampledReserveAssetDataEvent,
   RESERVE_EVENT_SAMPLE_INTERVAL_S_MAP,
-  SuiReserveEventMap,
 } from "@/lib/events";
 import { API_URL } from "@/lib/navigation";
 
@@ -30,6 +31,11 @@ export enum Tab {
   WITHDRAW = "withdraw",
   REPAY = "repay",
 }
+
+type ReserveAssetDataEventsMap = Record<
+  string,
+  Record<Days, DownsampledReserveAssetDataEvent[]>
+>;
 
 interface ActionsModalContext {
   reserveIndex?: number;
@@ -44,7 +50,8 @@ interface ActionsModalContext {
   activePanel: Panel;
   setActivePanel: Dispatch<SetStateAction<Panel>>;
 
-  suiReserveEventMap?: SuiReserveEventMap;
+  reserveAssetDataEventsMap?: ReserveAssetDataEventsMap;
+  fetchReserveAssetDataEvents: (reserveId: string, days: Days) => Promise<void>;
 }
 
 const defaultContextValue: ActionsModalContext = {
@@ -70,7 +77,10 @@ const defaultContextValue: ActionsModalContext = {
     throw Error("ActionsModalContextProvider not initialized");
   },
 
-  suiReserveEventMap: undefined,
+  reserveAssetDataEventsMap: undefined,
+  fetchReserveAssetDataEvents: () => {
+    throw Error("ActionsModalContextProvider not initialized");
+  },
 };
 
 const ActionsModalContext =
@@ -104,46 +114,52 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
     ActionsModalContext["activePanel"]
   >(defaultContextValue.activePanel);
 
-  // Sui reserve event map
-  const [suiReserveEventMap, setSuiReserveEventMap] = useState<
-    ActionsModalContext["suiReserveEventMap"]
-  >(defaultContextValue.suiReserveEventMap);
+  // ReserveAssetData events
+  const [reserveAssetDataEventsMap, setReserveAssetDataEventsMap] = useState<
+    ActionsModalContext["reserveAssetDataEventsMap"]
+  >(defaultContextValue.reserveAssetDataEventsMap);
+
+  const fetchReserveAssetDataEvents = useCallback(
+    async (reserveId: string, days: Days) => {
+      try {
+        const sampleIntervalS = RESERVE_EVENT_SAMPLE_INTERVAL_S_MAP[days];
+
+        const url = `${API_URL}/events/downsampled-reserve-asset-data?reserveId=${reserveId}&days=${days}&sampleIntervalS=${sampleIntervalS}`;
+        const res = await fetch(url);
+        const json = (await res.json()) as DownsampledReserveAssetDataEvent[];
+
+        for (const event of json) {
+          event.coinType = normalizeStructTag(event.coinType);
+        }
+
+        setReserveAssetDataEventsMap((_eventsMap) => ({
+          ..._eventsMap,
+          [reserveId]: {
+            ...((_eventsMap !== undefined && _eventsMap[reserveId]
+              ? _eventsMap[reserveId]
+              : {}) as Record<Days, DownsampledReserveAssetDataEvent[]>),
+            [days]: json,
+          },
+        }));
+      } catch (err) {
+        console.error(err);
+      }
+    },
+    [],
+  );
 
   const suiReserveId = data.lendingMarket.reserves.find((r) =>
     isSui(r.coinType),
   )?.id;
 
-  const isFetchingEventsRef = useRef<boolean>(false);
+  const didFetchSuiReserveAssetDataEventsRef = useRef<boolean>(false);
   useEffect(() => {
-    (async () => {
-      if (isFetchingEventsRef.current) return;
+    if (!suiReserveId) return;
+    if (didFetchSuiReserveAssetDataEventsRef.current) return;
 
-      isFetchingEventsRef.current = true;
-      try {
-        const urls = Object.entries(RESERVE_EVENT_SAMPLE_INTERVAL_S_MAP).map(
-          ([days, sampleIntervalS]) =>
-            `${API_URL}/events/downsampled-reserve-asset-data?reserveId=${suiReserveId}&days=${days}&sampleIntervalS=${sampleIntervalS}`,
-        );
-        const res = await Promise.all(urls.map((url) => fetch(url)));
-        const json = (await Promise.all(
-          res.map((r) => r.json()),
-        )) as DownsampledReserveAssetDataEvent[][];
-
-        for (const event of [...json[0], ...json[1], ...json[2]]) {
-          event.coinType = normalizeStructTag(event.coinType);
-        }
-
-        setSuiReserveEventMap(
-          DAYS.reduce(
-            (acc, days, index) => ({ ...acc, [days]: json[index] }),
-            {},
-          ) as ActionsModalContext["suiReserveEventMap"],
-        );
-      } catch (err) {
-        console.error(err);
-      }
-    })();
-  }, [suiReserveId]);
+    for (const days of DAYS) fetchReserveAssetDataEvents(suiReserveId, days);
+    didFetchSuiReserveAssetDataEventsRef.current = true;
+  }, [suiReserveId, fetchReserveAssetDataEvents]);
 
   // Context
   const contextValue = useMemo(
@@ -165,7 +181,8 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
       activePanel,
       setActivePanel,
 
-      suiReserveEventMap,
+      reserveAssetDataEventsMap,
+      fetchReserveAssetDataEvents,
     }),
     [
       reserveIndex,
@@ -174,7 +191,8 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
       isMoreParametersOpen,
       setIsMoreParametersOpen,
       activePanel,
-      suiReserveEventMap,
+      reserveAssetDataEventsMap,
+      fetchReserveAssetDataEvents,
     ],
   );
 

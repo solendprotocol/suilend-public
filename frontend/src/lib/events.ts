@@ -186,11 +186,6 @@ export type DownsampledReserveAssetDataEvent = ReserveAssetDataEvent & {
   sampletimestamp: number;
 };
 
-export type SuiReserveEventMap = Record<
-  Days,
-  DownsampledReserveAssetDataEvent[]
->;
-
 export type Days = 1 | 7 | 30;
 export const DAYS: Days[] = [1, 7, 30];
 export const RESERVE_EVENT_SAMPLE_INTERVAL_S_MAP: Record<Days, number> = {
@@ -267,24 +262,29 @@ export const calculateBorrowAprPercent = (
 export const calculateDepositAprPercent = (
   reserve: ParsedReserve,
   event: DownsampledReserveAssetDataEvent,
-  suiReserveEvents: DownsampledReserveAssetDataEvent[],
 ) => {
   const currentUtilPercent = calculateUtilizationPercent(reserve, event);
   const borrowAprPercent = calculateBorrowAprPercent(reserve, event);
   const spreadFeePercent = new BigNumber(reserve.config.spreadFeeBps).div(100);
 
-  const depositAprPercent = currentUtilPercent
+  return +currentUtilPercent
     .div(100)
     .times(borrowAprPercent)
     .times(new BigNumber(1).minus(spreadFeePercent.div(100)));
+};
 
-  type ReducedPoolReward = {
-    coinType: string;
-    totalRewards: BigNumber;
-    startTimeMs: number;
-    endTimeMs: number;
-  };
+type ReducedPoolReward = {
+  coinType: string;
+  totalRewards: BigNumber;
+  startTimeMs: number;
+  endTimeMs: number;
+};
 
+export const calculateSuiRewardsDepositAprPercent = (
+  reserve: ParsedReserve,
+  event: DownsampledReserveAssetDataEvent,
+  suiEvents: DownsampledReserveAssetDataEvent[],
+) => {
   const historicalSuiRewardMap: Record<string, ReducedPoolReward[]> = {
     [NORMALIZED_SUI_COINTYPE]: [
       {
@@ -311,10 +311,9 @@ export const calculateDepositAprPercent = (
       },
     ],
   };
-  const historicalSuiRewards = historicalSuiRewardMap[event.coinType] ?? [];
 
   const poolRewards = [
-    ...historicalSuiRewards,
+    ...(historicalSuiRewardMap[event.coinType] ?? []),
     ...reserve.depositsPoolRewardManager.poolRewards,
   ].filter(
     (pr) =>
@@ -322,14 +321,14 @@ export const calculateDepositAprPercent = (
       event.timestamp >= pr.startTimeMs / 1000 &&
       event.timestamp < pr.endTimeMs / 1000,
   );
-  if (poolRewards.length === 0) return +depositAprPercent;
+  if (poolRewards.length === 0) return 0;
 
-  const suiReserveEvent = suiReserveEvents.findLast(
+  const suiEvent = suiEvents.findLast(
     (e) => e.sampletimestamp <= event.sampletimestamp,
   );
-  if (!suiReserveEvent) return undefined;
+  if (!suiEvent) return undefined;
 
-  const suiPrice = new BigNumber(suiReserveEvent.price).div(WAD.toString());
+  const suiPrice = new BigNumber(suiEvent.price).div(WAD.toString());
 
   const price = new BigNumber(event.price).div(WAD.toString());
   const depositedAmountUsd = getDepositedAmount(reserve, event).times(price);
@@ -344,5 +343,5 @@ export const calculateDepositAprPercent = (
     return acc.plus(aprPercent);
   }, new BigNumber(0));
 
-  return +depositAprPercent.plus(rewardsAprPercent);
+  return +rewardsAprPercent;
 };

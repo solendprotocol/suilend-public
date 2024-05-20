@@ -1,6 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
-import { normalizeStructTag } from "@mysten/sui.js/utils";
 import BigNumber from "bignumber.js";
 import { format } from "date-fns";
 import { capitalize } from "lodash";
@@ -11,20 +10,27 @@ import { Side } from "@suilend/sdk/types";
 
 import { useActionsModalContext } from "@/components/dashboard/actions-modal/ActionsModalContext";
 import Button from "@/components/shared/Button";
-import { TBody, TLabelSans } from "@/components/shared/Typography";
+import TokenLogo from "@/components/shared/TokenLogo";
+import {
+  TBody,
+  TLabel,
+  TLabelSans,
+  TTitle,
+} from "@/components/shared/Typography";
+import { Separator } from "@/components/ui/separator";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import useBreakpoint from "@/hooks/useBreakpoint";
 import useIsTouchscreen from "@/hooks/useIsTouchscreen";
+import { LOGO_MAP, NORMALIZED_SUI_COINTYPE } from "@/lib/coinType";
 import {
   DAYS,
   Days,
-  DownsampledReserveAssetDataEvent,
   RESERVE_EVENT_SAMPLE_INTERVAL_S_MAP,
   calculateBorrowAprPercent,
   calculateDepositAprPercent,
+  calculateSuiRewardsDepositAprPercent,
 } from "@/lib/events";
 import { formatPercent } from "@/lib/format";
-import { API_URL } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 
 const DAY_S = 24 * 60 * 60;
@@ -33,6 +39,7 @@ type ChartData = {
   index: number;
   timestampS: number;
   depositAprPercent?: number;
+  depositSuiRewardsAprPercent?: number;
   borrowAprPercent?: number;
 };
 
@@ -44,22 +51,70 @@ interface TooltipContentProps {
 function TooltipContent({ side, data }: TooltipContentProps) {
   if (!data) return null;
 
-  const aprPercent =
-    side === Side.DEPOSIT ? data.depositAprPercent : data.borrowAprPercent;
-
   return (
     // TooltipContent className
-    <div className="flex flex-col items-end rounded-md border bg-popover px-3 py-1.5 shadow-md animate-in fade-in-0 zoom-in-95">
-      <TLabelSans>
-        {format(new Date(data.timestampS * 1000), "MM/dd HH:mm")}
-      </TLabelSans>
+    <div className="w-[200px] rounded-md border bg-popover px-3 py-1.5 shadow-md animate-in fade-in-0 zoom-in-95">
+      <div className="flex w-full flex-col gap-1">
+        <TLabelSans>
+          {format(new Date(data.timestampS * 1000), "MM/dd HH:mm")}
+        </TLabelSans>
 
-      {aprPercent !== undefined && (
-        <div className="flex flex-row items-baseline gap-2">
-          <TLabelSans>{capitalize(side)} APR</TLabelSans>
-          <TBody>{formatPercent(new BigNumber(aprPercent))}</TBody>
-        </div>
-      )}
+        {side === Side.DEPOSIT && data.depositAprPercent !== undefined ? (
+          <>
+            <div className="mt-1 flex w-full flex-row items-center justify-between">
+              <TLabel className="uppercase">Base APR</TLabel>
+              <TBody>
+                {formatPercent(new BigNumber(data.depositAprPercent))}
+              </TBody>
+            </div>
+
+            {data.depositSuiRewardsAprPercent !== undefined && (
+              <>
+                <div className="flex w-full flex-row items-center justify-between">
+                  <TLabel className="uppercase">SUI Rewards</TLabel>
+
+                  <div className="flex flex-row items-center gap-1.5">
+                    <TokenLogo
+                      className="h-4 w-4"
+                      coinType={NORMALIZED_SUI_COINTYPE}
+                      symbol="SUI"
+                      src={LOGO_MAP[NORMALIZED_SUI_COINTYPE]}
+                    />
+                    <TBody className="text-primary-foreground">
+                      {formatPercent(
+                        new BigNumber(data.depositSuiRewardsAprPercent),
+                      )}
+                    </TBody>
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div className="flex w-full flex-row items-center justify-between">
+                  <TTitle className="text-xs uppercase">Total APR</TTitle>
+                  <TBody>
+                    {formatPercent(
+                      new BigNumber(
+                        data.depositAprPercent +
+                          data.depositSuiRewardsAprPercent,
+                      ),
+                    )}
+                  </TBody>
+                </div>
+              </>
+            )}
+          </>
+        ) : side === Side.BORROW && data.borrowAprPercent !== undefined ? (
+          <>
+            <div className="mt-1 flex w-full flex-row items-center justify-between">
+              <TLabel className="uppercase">Base APR</TLabel>
+              <TBody>
+                {formatPercent(new BigNumber(data.borrowAprPercent))}
+              </TBody>
+            </div>
+          </>
+        ) : null}
+      </div>
     </div>
   );
 }
@@ -83,7 +138,9 @@ function Chart({ side, isLoading, data }: ChartProps) {
   const maxY = Math.max(
     ...(data
       .map((d) =>
-        side === Side.DEPOSIT ? d.depositAprPercent : d.borrowAprPercent,
+        side === Side.DEPOSIT
+          ? (d.depositAprPercent ?? 0) + (d.depositSuiRewardsAprPercent ?? 0)
+          : d.borrowAprPercent,
       )
       .filter(Boolean) as number[]),
   );
@@ -133,13 +190,13 @@ function Chart({ side, isLoading, data }: ChartProps) {
       className="relative z-[1]"
       data-loading={data.length > 0}
     >
-      <Recharts.LineChart
+      <Recharts.AreaChart
         data={data}
         margin={{ top: 8, right: 16, bottom: -12, left: -15 }}
       >
         <Recharts.CartesianGrid
           strokeDasharray="1 4"
-          stroke="hsla(var(--secondary) / 25%)"
+          stroke="hsla(var(--secondary) / 20%)"
           fill="transparent"
         >
           <div className="inset absolute bg-[red]" />
@@ -185,12 +242,15 @@ function Chart({ side, isLoading, data }: ChartProps) {
             offset={20}
           />
         </Recharts.YAxis>
-        <Recharts.Line
+        <Recharts.Area
+          type="monotone"
+          stackId="1"
           dataKey={
             side === Side.DEPOSIT ? "depositAprPercent" : "borrowAprPercent"
           }
           isAnimationActive={false}
           stroke="hsl(var(--success))"
+          fill="hsla(var(--success) / 25%)"
           dot={{
             stroke: "transparent",
             strokeWidth: 0,
@@ -198,6 +258,22 @@ function Chart({ side, isLoading, data }: ChartProps) {
           }}
           strokeWidth={2}
         />
+        {side === Side.DEPOSIT && (
+          <Recharts.Area
+            type="monotone"
+            stackId="1"
+            dataKey="depositSuiRewardsAprPercent"
+            isAnimationActive={false}
+            stroke="hsl(var(--secondary))"
+            fill="hsla(var(--secondary) / 25%)"
+            dot={{
+              stroke: "transparent",
+              strokeWidth: 0,
+              fill: "transparent",
+            }}
+            strokeWidth={2}
+          />
+        )}
         {!isLoading && (
           <Recharts.Tooltip
             isAnimationActive={false}
@@ -212,7 +288,7 @@ function Chart({ side, isLoading, data }: ChartProps) {
             )}
           />
         )}
-      </Recharts.LineChart>
+      </Recharts.AreaChart>
     </Recharts.ResponsiveContainer>
   );
 }
@@ -228,70 +304,52 @@ export default function HistoricalAprLineChart({
 }: HistoricalAprLineChartProps) {
   const appContext = useAppContext();
   const data = appContext.data as AppData;
-  const { suiReserveEventMap } = useActionsModalContext();
+  const { reserveAssetDataEventsMap, fetchReserveAssetDataEvents } =
+    useActionsModalContext();
 
   const reserveMapRef = useRef<AppData["reserveMap"]>(data.reserveMap);
 
   // Events
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [eventData, setEventData] = useState<
-    | {
-        days: Days;
-        sampleIntervalS: number;
-        events: DownsampledReserveAssetDataEvent[];
-      }
-    | undefined
-  >(undefined);
-
   const [days, setDays] = useLocalStorage<Days>(
     "historicalAprLineChartDays",
     7,
   );
+
+  const suiReserveId = data.reserveMap[NORMALIZED_SUI_COINTYPE].id;
+  const suiEvents = useMemo(
+    () => reserveAssetDataEventsMap?.[suiReserveId],
+    [reserveAssetDataEventsMap, suiReserveId],
+  );
+
+  const didFetchInitialReserveAssetDataEventsRef = useRef<boolean>(false);
+  useEffect(() => {
+    const events = reserveAssetDataEventsMap?.[reserveId]?.[days];
+    if (events === undefined) {
+      if (didFetchInitialReserveAssetDataEventsRef.current) return;
+
+      fetchReserveAssetDataEvents(reserveId, days);
+      didFetchInitialReserveAssetDataEventsRef.current = true;
+    }
+  }, [reserveAssetDataEventsMap, reserveId, days, fetchReserveAssetDataEvents]);
+
   const onDaysClick = (value: Days) => {
-    if (!isLoading) setDays(value);
+    setDays(value);
+
+    const events = reserveAssetDataEventsMap?.[reserveId]?.[value];
+    if (events === undefined) fetchReserveAssetDataEvents(reserveId, value);
   };
 
-  const isFetchingEventsRef = useRef<boolean>(false);
-  useEffect(() => {
-    (async () => {
-      if (isFetchingEventsRef.current) return;
-
-      isFetchingEventsRef.current = true;
-      setIsLoading(true);
-
-      try {
-        const sampleIntervalS = RESERVE_EVENT_SAMPLE_INTERVAL_S_MAP[days];
-
-        const url = `${API_URL}/events/downsampled-reserve-asset-data?reserveId=${reserveId}&days=${days}&sampleIntervalS=${sampleIntervalS}`;
-        const res = await fetch(url);
-        const json = (await res.json()) as DownsampledReserveAssetDataEvent[];
-
-        for (const event of json) {
-          event.coinType = normalizeStructTag(event.coinType);
-        }
-
-        setEventData({
-          days,
-          sampleIntervalS,
-          events: json,
-        });
-      } catch (err) {
-        console.error(err);
-      } finally {
-        isFetchingEventsRef.current = false;
-      }
-    })();
-  }, [reserveId, days]);
-
   // Data
-  const [chartData, setChartData] = useState<ChartData[]>([]);
+  const chartData = useMemo(() => {
+    const events = reserveAssetDataEventsMap?.[reserveId]?.[days];
+    if (events === undefined) return;
 
-  useEffect(() => {
-    if (suiReserveEventMap === undefined) return;
-    if (eventData === undefined) return;
+    if (suiEvents === undefined) return;
+    for (const days of DAYS) if (suiEvents[days] === undefined) return;
 
     // Data
-    const { days, sampleIntervalS, events } = eventData;
+    const sampleIntervalS = RESERVE_EVENT_SAMPLE_INTERVAL_S_MAP[days];
+
     const daysS = days * DAY_S;
     const n = daysS / sampleIntervalS;
 
@@ -304,43 +362,42 @@ export default function HistoricalAprLineChart({
     const result: ChartData[] = [];
     timestampsS.forEach((timestampS, index) => {
       let depositAprPercent: number | undefined = undefined;
+      let depositSuiRewardsAprPercent: number | undefined = undefined;
       let borrowAprPercent: number | undefined = undefined;
 
-      const event = events.find(
-        (event) => event.sampletimestamp === timestampS,
-      );
-      if (event) {
-        const reserve = reserveMapRef.current[event.coinType];
-        depositAprPercent = calculateDepositAprPercent(
-          reserve,
-          event,
-          suiReserveEventMap[days],
-        );
-        borrowAprPercent = calculateBorrowAprPercent(reserve, event);
+      const event = events.findLast((e) => e.sampletimestamp <= timestampS);
+      if (!event) {
+        result.push({
+          index,
+          timestampS,
+          depositAprPercent,
+          depositSuiRewardsAprPercent,
+          borrowAprPercent,
+        });
+        return;
       }
 
-      if (depositAprPercent === undefined) {
-        depositAprPercent = result.findLast(
-          (d) => d.depositAprPercent !== undefined,
-        )?.depositAprPercent;
-      }
-      if (borrowAprPercent === undefined) {
-        borrowAprPercent = result.findLast(
-          (d) => d.borrowAprPercent !== undefined,
-        )?.borrowAprPercent;
-      }
+      const reserve = reserveMapRef.current[event.coinType];
+      depositAprPercent = calculateDepositAprPercent(reserve, event);
+      depositSuiRewardsAprPercent = calculateSuiRewardsDepositAprPercent(
+        reserve,
+        event,
+        suiEvents[days],
+      );
+      borrowAprPercent = calculateBorrowAprPercent(reserve, event);
 
       result.push({
         index,
         timestampS,
         depositAprPercent,
+        depositSuiRewardsAprPercent,
         borrowAprPercent,
       });
     });
 
-    setChartData(result);
-    setIsLoading(false);
-  }, [suiReserveEventMap, eventData]);
+    return result;
+  }, [reserveAssetDataEventsMap, reserveId, days, suiEvents]);
+  const isLoading = chartData === undefined;
 
   // Chart
   const containerRef = useRef<HTMLDivElement>(null);
@@ -371,7 +428,7 @@ export default function HistoricalAprLineChart({
         className="relative z-[1] h-[95px] w-full flex-shrink-0 transform-gpu sm:h-[160px]"
         is-loading={isLoading ? "true" : "false"}
       >
-        <Chart side={side} isLoading={isLoading} data={chartData} />
+        <Chart side={side} isLoading={isLoading} data={chartData ?? []} />
       </div>
     </div>
   );

@@ -192,7 +192,7 @@ export default function AprLineChart({ data, reference }: AprLineChartProps) {
         >
           <Recharts.CartesianGrid
             strokeDasharray="1 4"
-            stroke="hsla(var(--secondary) / 25%)"
+            stroke="hsla(var(--secondary) / 20%)"
           />
           <Recharts.XAxis
             type="number"
