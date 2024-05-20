@@ -334,6 +334,24 @@ export default function ActionsModalTabContent({
             horizontal
           />
           <LabelWithValue
+            label={`${capitalize(side)} APR`}
+            customChild={
+              <AprWithRewardsBreakdown
+                side={side}
+                aprPercent={
+                  side === Side.DEPOSIT
+                    ? reserve.depositAprPercent
+                    : reserve.borrowAprPercent
+                }
+                rewards={data.rewardMap[reserve.coinType]?.[side] ?? []}
+                reserve={reserve}
+                amountChange={valueChange}
+              />
+            }
+            horizontal
+            value="0"
+          />
+          <LabelWithValue
             label="Your borrow limit"
             value={
               newBorrowLimitUsd
@@ -355,24 +373,6 @@ export default function ActionsModalTabContent({
                   )
             }
             horizontal
-          />
-          <LabelWithValue
-            label={`${capitalize(side)} APR`}
-            customChild={
-              <AprWithRewardsBreakdown
-                side={side}
-                aprPercent={
-                  side === Side.DEPOSIT
-                    ? reserve.depositAprPercent
-                    : reserve.borrowAprPercent
-                }
-                rewards={data.rewardMap[reserve.coinType]?.[side] ?? []}
-                reserve={reserve}
-                amountChange={valueChange}
-              />
-            }
-            horizontal
-            value="0"
           />
         </div>
 
