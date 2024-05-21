@@ -4,6 +4,7 @@ import BigNumber from "bignumber.js";
 import { format } from "date-fns";
 import { capitalize } from "lodash";
 import * as Recharts from "recharts";
+import { Coordinate } from "recharts/types/util/types";
 import { useLocalStorage } from "usehooks-ts";
 
 import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
@@ -45,14 +46,56 @@ type ChartData = {
 interface TooltipContentProps {
   side: Side;
   data?: ChartData;
+  viewBox: {
+    width: number;
+    height: number;
+    top: number;
+    right: number;
+    bottom: number;
+    left: number;
+  };
+  coordinate?: Partial<Coordinate>;
 }
 
-function TooltipContent({ side, data }: TooltipContentProps) {
-  if (!data) return null;
+function TooltipContent({
+  side,
+  data,
+  viewBox,
+  coordinate,
+}: TooltipContentProps) {
+  const getStyle = () => {
+    if (coordinate?.x === undefined) return undefined;
 
+    const width = side === Side.DEPOSIT ? 200 : 160;
+    const top = viewBox.top;
+    let left: string | number = "auto";
+    let right: string | number = "auto";
+    const offset = 10;
+
+    const isOverHalfway = coordinate.x - viewBox.left > viewBox.width / 2;
+    if (isOverHalfway) {
+      right = Math.min(
+        viewBox.left + viewBox.width + viewBox.right - width,
+        viewBox.left + viewBox.width + viewBox.right - (coordinate.x - offset),
+      );
+    } else {
+      left = Math.min(
+        viewBox.left + viewBox.width + viewBox.right - width,
+        coordinate.x + offset,
+      );
+    }
+
+    return { width, top, left, right };
+  };
+
+  if (!data) return null;
+  if (!coordinate?.x || !viewBox) return null;
   return (
     // Subset of TooltipContent className
-    <div className="rounded-md border bg-popover px-3 py-1.5 shadow-md">
+    <div
+      className="absolute rounded-md border bg-popover px-3 py-1.5 shadow-md"
+      style={getStyle()}
+    >
       <div className="flex w-full flex-col gap-1">
         <TLabelSans>
           {format(new Date(data.timestampS * 1000), "MM/dd HH:mm")}
@@ -184,9 +227,9 @@ function Chart({ side, isLoading, data }: ChartProps) {
 
   return (
     <Recharts.ResponsiveContainer
+      className="relative z-[1]"
       width="100%"
       height="100%"
-      className="relative z-[1]"
       data-loading={data.length > 0}
     >
       <Recharts.AreaChart
@@ -247,14 +290,14 @@ function Chart({ side, isLoading, data }: ChartProps) {
           }
           isAnimationActive={false}
           stroke="hsl(var(--success))"
-          fill="hsla(var(--success) / 25%)"
+          fill="hsla(var(--success) / 10%)"
           fillOpacity={1}
           dot={{
             stroke: "transparent",
             strokeWidth: 0,
             fill: "transparent",
           }}
-          strokeWidth={2}
+          strokeWidth={1.5}
         />
         {side === Side.DEPOSIT && (
           <Recharts.Area
@@ -263,14 +306,14 @@ function Chart({ side, isLoading, data }: ChartProps) {
             dataKey="depositSuiRewardsAprPercent"
             isAnimationActive={false}
             stroke="hsl(var(--secondary))"
-            fill="hsla(var(--secondary) / 25%)"
+            fill="hsla(var(--secondary) / 10%)"
             fillOpacity={1}
             dot={{
               stroke: "transparent",
               strokeWidth: 0,
               fill: "transparent",
             }}
-            strokeWidth={2}
+            strokeWidth={1.5}
           />
         )}
         {!isLoading && (
@@ -279,11 +322,18 @@ function Chart({ side, isLoading, data }: ChartProps) {
             filterNull={false}
             cursor={{ stroke: "hsl(var(--foreground))", strokeWidth: 1 }}
             trigger={isTouchscreen ? "hover" : "hover"}
-            position={{ y: 0 }}
-            content={({ active, payload }) => (
+            wrapperStyle={{
+              transform: undefined,
+              position: undefined,
+              top: undefined,
+              left: undefined,
+            }}
+            content={({ active, payload, viewBox, coordinate }) => (
               <TooltipContent
                 side={side}
                 data={!!active ? payload?.[0]?.payload : undefined}
+                viewBox={viewBox as any}
+                coordinate={coordinate}
               />
             )}
           />
@@ -387,7 +437,7 @@ export default function HistoricalAprLineChart({
             key={_days}
             className="px-2 text-muted-foreground hover:bg-transparent"
             labelClassName={cn(
-              "text-xs uppercase",
+              "text-xs font-sans uppercase",
               days === _days && "text-primary-foreground",
             )}
             variant="ghost"

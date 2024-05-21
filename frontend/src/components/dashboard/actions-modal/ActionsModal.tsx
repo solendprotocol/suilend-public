@@ -548,7 +548,7 @@ export default function ActionsModal() {
         >
           {reserve && tabConfig && (
             <>
-              <div className="flex h-full w-full flex-col gap-4 md:h-auto md:w-[420px]">
+              <div className="flex h-full w-full flex-col gap-4 md:h-auto md:w-[460px]">
                 <ActionsModalTabContent reserve={reserve} {...tabConfig} />
               </div>
 
