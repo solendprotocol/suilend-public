@@ -19,7 +19,6 @@ import { useActionsModalContext } from "@/components/dashboard/actions-modal/Act
 import ActionsModalInput from "@/components/dashboard/actions-modal/ActionsModalInput";
 import HistoricalAprLineChart from "@/components/dashboard/actions-modal/HistoricalAprLineChart";
 import ParametersPanel from "@/components/dashboard/actions-modal/ParametersPanel";
-import PythLogo from "@/components/dashboard/actions-modal/PythLogo";
 import AprWithRewardsBreakdown from "@/components/dashboard/AprWithRewardsBreakdown";
 import Button from "@/components/shared/Button";
 import LabelWithValue from "@/components/shared/LabelWithValue";
@@ -329,7 +328,6 @@ export default function ActionsModalTabContent({
           <LabelWithValue
             label="Price"
             value={formatPrice(reserve.price)}
-            labelEndDecorator={<PythLogo />}
             horizontal
           />
           <LabelWithValue
