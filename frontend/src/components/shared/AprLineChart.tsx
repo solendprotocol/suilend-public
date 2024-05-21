@@ -271,7 +271,7 @@ export default function AprLineChart({ data, reference }: AprLineChartProps) {
               strokeWidth: 0,
               fill: "transparent",
             }}
-            strokeWidth={2}
+            strokeWidth={1.5}
           />
           {reference && (
             <Recharts.ReferenceDot
