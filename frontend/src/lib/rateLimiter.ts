@@ -11,14 +11,14 @@ export const getFormattedMaxOutflow = (rateLimiter: ParsedRateLimiter) => {
     remainingOutflow,
   } = rateLimiter;
 
-  const formattedMaxOutflow =
-    maxOutflow === maxU64
-      ? "∞"
-      : `${formatUsd(new BigNumber(maxOutflow.toString()))} per ${formatDuration(new BigNumber(windowDuration.toString()))}`;
-  const maxOutflowTooltip =
-    maxOutflow === maxU64
-      ? "There is no limit on the amounts being withdrawn or borrowed from the pool."
-      : `For the safety of the pool, amounts being withdrawn or borrowed from the pool are limited by this rate. Remaining outflow this window: ${remainingOutflow ? formatUsd(remainingOutflow) : "N/A"}`;
+  const isMax = new BigNumber(maxOutflow).eq(maxU64);
+
+  const formattedMaxOutflow = isMax
+    ? "∞"
+    : `${formatUsd(new BigNumber(maxOutflow.toString()))} per ${formatDuration(new BigNumber(windowDuration.toString()))}`;
+  const maxOutflowTooltip = isMax
+    ? "There is no limit on the amounts being withdrawn or borrowed from the pool."
+    : `For the safety of the pool, amounts being withdrawn or borrowed from the pool are limited by this rate. Remaining outflow this window: ${remainingOutflow ? formatUsd(remainingOutflow) : "N/A"}`;
 
   return {
     formattedMaxOutflow,
