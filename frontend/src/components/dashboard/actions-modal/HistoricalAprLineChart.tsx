@@ -35,12 +35,21 @@ import { cn } from "@/lib/utils";
 
 const DAY_S = 24 * 60 * 60;
 
+type AprFields =
+  | "depositAprPercent"
+  | "depositSuiRewardsAprPercent"
+  | "borrowAprPercent";
+const aprFields: AprFields[] = [
+  "depositAprPercent",
+  "depositSuiRewardsAprPercent",
+  "borrowAprPercent",
+];
+
 type ChartData = {
   index: number;
   timestampS: number;
-  depositAprPercent?: number;
-  depositSuiRewardsAprPercent?: number;
-  borrowAprPercent?: number;
+} & {
+  [key in AprFields]?: number;
 };
 
 interface TooltipContentProps {
@@ -363,13 +372,10 @@ export default function HistoricalAprLineChart({
     7,
   );
 
-  const suiReserveId = data.reserveMap[NORMALIZED_SUI_COINTYPE].id;
-  const suiEvents = useMemo(
-    () => reserveAssetDataEventsMap?.[suiReserveId],
-    [reserveAssetDataEventsMap, suiReserveId],
-  );
+  const suiReserve = data.reserveMap[NORMALIZED_SUI_COINTYPE];
 
   const didFetchInitialReserveAssetDataEventsRef = useRef<boolean>(false);
+  const didFetchInitialSuiReserveAssetDataEventsRef = useRef<boolean>(false);
   useEffect(() => {
     const events = reserveAssetDataEventsMap?.[reserve.id]?.[days];
     if (events === undefined) {
@@ -378,13 +384,32 @@ export default function HistoricalAprLineChart({
       fetchReserveAssetDataEvents(reserve, days);
       didFetchInitialReserveAssetDataEventsRef.current = true;
     }
-  }, [reserveAssetDataEventsMap, reserve, days, fetchReserveAssetDataEvents]);
+
+    if (reserve.id === suiReserve.id) return;
+    const suiEvents = reserveAssetDataEventsMap?.[suiReserve.id]?.[days];
+    if (suiEvents === undefined) {
+      if (didFetchInitialSuiReserveAssetDataEventsRef.current) return;
+
+      fetchReserveAssetDataEvents(suiReserve, days);
+      didFetchInitialSuiReserveAssetDataEventsRef.current = true;
+    }
+  }, [
+    reserveAssetDataEventsMap,
+    reserve,
+    days,
+    fetchReserveAssetDataEvents,
+    suiReserve,
+  ]);
 
   const onDaysClick = (value: Days) => {
     setDays(value);
 
     const events = reserveAssetDataEventsMap?.[reserve.id]?.[value];
     if (events === undefined) fetchReserveAssetDataEvents(reserve, value);
+
+    if (reserve.id === suiReserve.id) return;
+    const suiEvents = reserveAssetDataEventsMap?.[suiReserve.id]?.[value];
+    if (suiEvents === undefined) fetchReserveAssetDataEvents(suiReserve, value);
   };
 
   // Data
@@ -392,8 +417,8 @@ export default function HistoricalAprLineChart({
     const events = reserveAssetDataEventsMap?.[reserve.id]?.[days];
     if (events === undefined) return;
 
+    const suiEvents = reserveAssetDataEventsMap?.[suiReserve.id]?.[days];
     if (suiEvents === undefined) return;
-    for (const days of DAYS) if (suiEvents[days] === undefined) return;
 
     // Data
     const sampleIntervalS = RESERVE_EVENT_SAMPLE_INTERVAL_S_MAP[days];
@@ -415,18 +440,25 @@ export default function HistoricalAprLineChart({
         timestampS,
         depositAprPercent: event ? +event.depositAprPercent : undefined,
         depositSuiRewardsAprPercent: event
-          ? calculateSuiRewardsDepositAprPercent(
-              event,
-              suiEvents[days],
-              reserve,
-            )
+          ? calculateSuiRewardsDepositAprPercent(event, suiEvents, reserve)
           : undefined,
         borrowAprPercent: event ? +event.borrowAprPercent : undefined,
       });
     });
 
+    for (const d of result) {
+      let hasUndefined = false;
+      for (const field of aprFields) {
+        if (d[field] === undefined) {
+          d[field] = result.find((_d) => _d[field] !== undefined)?.[field];
+          hasUndefined = true;
+        }
+      }
+      if (!hasUndefined) break;
+    }
+
     return result;
-  }, [reserveAssetDataEventsMap, reserve, days, suiEvents]);
+  }, [reserveAssetDataEventsMap, reserve, days, suiReserve.id]);
   const isLoading = chartData === undefined;
 
   return (
