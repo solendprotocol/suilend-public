@@ -11,6 +11,7 @@ import {
   useState,
 } from "react";
 
+import pLimit from "p-limit";
 import { useLocalStorage } from "usehooks-ts";
 
 import { fetchDownsampledApiReserveAssetDataEvents } from "@suilend/sdk/api/events";
@@ -22,7 +23,6 @@ import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 
 import { Panel } from "@/components/dashboard/actions-modal/ParametersPanel";
 import { AppData, useAppContext } from "@/contexts/AppContext";
-import { NORMALIZED_SUI_COINTYPE } from "@/lib/coinType";
 import { DAYS, Days, RESERVE_EVENT_SAMPLE_INTERVAL_S_MAP } from "@/lib/events";
 
 export enum Tab {
@@ -155,16 +155,18 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
     [],
   );
 
-  const suiReserve = data.reserveMap[NORMALIZED_SUI_COINTYPE];
-
-  const didFetchSuiReserveAssetDataEventsRef = useRef<boolean>(false);
+  // Prefetch
+  const didFetchReserveAssetDataEventsRef = useRef<boolean>(false);
   useEffect(() => {
-    if (!suiReserve) return;
-    if (didFetchSuiReserveAssetDataEventsRef.current) return;
+    if (didFetchReserveAssetDataEventsRef.current) return;
 
-    for (const days of DAYS) fetchReserveAssetDataEvents(suiReserve, days);
-    didFetchSuiReserveAssetDataEventsRef.current = true;
-  }, [suiReserve, fetchReserveAssetDataEvents]);
+    const limit = pLimit(3);
+    for (const reserve of data.lendingMarket.reserves) {
+      for (const days of DAYS)
+        limit(async () => await fetchReserveAssetDataEvents(reserve, days));
+    }
+    didFetchReserveAssetDataEventsRef.current = true;
+  }, [data.lendingMarket.reserves, fetchReserveAssetDataEvents]);
 
   // Context
   const contextValue = useMemo(
