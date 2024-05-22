@@ -84,11 +84,9 @@ export const parseReserve = (
 
   const cTokenExchangeRate = simulate.cTokenRatio(reserve);
 
-  const borrowAprPercent = simulate.calculateBorrowApr(reserve);
-  const depositAprPercent = simulate.calculateSupplyApr(reserve);
-  const utilizationPercent = simulate
-    .calculateUtilizationRate(reserve)
-    .times(100);
+  const borrowAprPercent = simulate.calculateBorrowAprPercent(reserve);
+  const depositAprPercent = simulate.calculateDepositAprPercent(reserve);
+  const utilizationPercent = simulate.calculateUtilizationPercent(reserve);
 
   const symbol = coinMetadata.symbol;
   const name = coinMetadata.name;

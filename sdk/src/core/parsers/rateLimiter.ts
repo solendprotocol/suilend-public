@@ -1,5 +1,7 @@
 import BigNumber from "bignumber.js";
 
+import { WAD } from "../constants";
+
 import { Deps } from "./deps";
 
 export type ParsedRateLimiter = ReturnType<typeof parseRateLimiter>;
@@ -24,7 +26,7 @@ export const parseRateLimiter = (
   const currentOutflow = prevWeight
     .times(new BigNumber(prevQty.toString()))
     .plus(new BigNumber(curQty.toString()))
-    .div(10 ** 18);
+    .div(WAD);
 
   const remainingOutflow = currentOutflow.gt(config.maxOutflow.toString())
     ? new BigNumber(0)

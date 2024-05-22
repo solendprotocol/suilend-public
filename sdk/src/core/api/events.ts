@@ -1,5 +1,8 @@
 import { DownsampledApiReserveAssetDataEvent } from "../types";
 
+/**
+ * Note: This SDK function is experimental and may change or require authentication in the future.
+ */
 export const fetchDownsampledApiReserveAssetDataEvents = async (
   reserveId: string,
   days: number,

@@ -147,17 +147,18 @@ function splitIntoChunks(arr: string[], chunkSize: number): string[][] {
   return result;
 }
 
-export type formattedObligationHistory =
-  | nonLiquidationHistoryEvent
-  | liquidationHistoryEvent;
-export type nonLiquidationHistoryEvent = {
+export type FormattedObligationHistory =
+  | NonLiquidationHistoryEvent
+  | LiquidationHistoryEvent;
+
+export type NonLiquidationHistoryEvent = {
   reserveId: string;
   quantity: number;
   action: string;
   timestampMs: number;
   digest: string;
 };
-export type liquidationHistoryEvent = {
+export type LiquidationHistoryEvent = {
   repayReserveId: string;
   repayQuantity: number;
   withdrawReserveId: string;
@@ -189,7 +190,7 @@ export async function getObligationHistoryPage(
       showEvents: true,
     },
   });
-  let formattedEvents: formattedObligationHistory[] = [];
+  let formattedEvents: FormattedObligationHistory[] = [];
   for (const data of payload.data) {
     const events = data.events?.filter((e) => e.packageId === PACKAGE_ID) || [];
     formattedEvents = formattedEvents.concat(
@@ -213,7 +214,7 @@ function formatEventsToHistory(
   data: SuiTransactionBlockResponse,
   events: SuiEvent[],
 ) {
-  const formattedEvents: formattedObligationHistory[] = [];
+  const formattedEvents: FormattedObligationHistory[] = [];
   for (const [, event] of events.entries()) {
     const eventComponents = event.type.split("::");
     const eventType = eventComponents[eventComponents.length - 1];

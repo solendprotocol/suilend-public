@@ -7,10 +7,10 @@ export interface Deps {
   PoolRewardManager: any;
   PoolReward: any;
   simulate: {
+    calculateUtilizationPercent: (reserve: Deps["Reserve"]) => BigNumber;
+    calculateBorrowAprPercent: (reserve: Deps["Reserve"]) => BigNumber;
+    calculateDepositAprPercent: (reserve: Deps["Reserve"]) => BigNumber;
     cTokenRatio: (reserve: Deps["Reserve"]) => BigNumber;
-    calculateBorrowApr: (reserve: Deps["Reserve"]) => BigNumber;
-    calculateSupplyApr: (reserve: Deps["Reserve"]) => BigNumber;
-    calculateUtilizationRate: (reserve: Deps["Reserve"]) => BigNumber;
   };
   RateLimiter: any;
 }
