@@ -31,122 +31,12 @@ export const EventTypeNameMap: Record<EventType, string> = {
   [EventType.CLAIM_REWARD]: "Claim rewards",
 };
 
-export type MintEvent = {
-  id: number;
-  lendingMarketId: string;
-  coinType: string;
-  reserveId: string;
-  liquidityAmount: string;
-  ctokenAmount: string;
-  timestamp: number;
-  digest: string;
-  eventIndex: number;
-  sender: string;
-};
-
-export type RedeemEvent = {
-  id: number;
-  lendingMarketId: string;
-  coinType: string;
-  reserveId: string;
-  ctokenAmount: string;
-  liquidityAmount: string;
-  timestamp: number;
-  digest: string;
-  eventIndex: number;
-  sender: string;
-};
-
-export type ApiDepositEvent = {
-  id: number;
-  lendingMarketId: string;
-  coinType: string;
-  reserveId: string;
-  obligationId: string;
-  ctokenAmount: string;
-  timestamp: number;
-  digest: string;
-  eventIndex: number;
-  sender: string;
-};
-
-export type ApiBorrowEvent = {
-  id: number;
-  lendingMarketId: string;
-  coinType: string;
-  reserveId: string;
-  obligationId: string;
-  liquidityAmount: string;
-  originationFeeAmount: string;
-  timestamp: number;
-  digest: string;
-  eventIndex: number;
-  sender: string;
-};
-
-export type ApiWithdrawEvent = {
-  id: number;
-  lendingMarketId: string;
-  coinType: string;
-  reserveId: string;
-  obligationId: string;
-  ctokenAmount: string;
-  timestamp: number;
-  digest: string;
-  eventIndex: number;
-  sender: string;
-};
-
-export type ApiRepayEvent = {
-  id: number;
-  lendingMarketId: string;
-  coinType: string;
-  reserveId: string;
-  obligationId: string;
-  liquidityAmount: string;
-  timestamp: number;
-  digest: string;
-  eventIndex: number;
-  sender: string;
-};
-
-export type ApiLiquidateEvent = {
-  id: number;
-  lendingMarketId: string;
-  repayReserveId: string;
-  withdrawReserveId: string;
-  obligationId: string;
-  repayAmount: string;
-  withdrawAmount: string;
-  protocolFeeAmount: string;
-  liquidatorBonusAmount: string;
-  timestamp: number;
-  digest: string;
-  eventIndex: number;
-  sender: string;
-};
-
-export type ApiClaimRewardEvent = {
-  id: number;
-  coinType: string;
-  isDepositReward: boolean;
-  lendingMarketId: string;
-  liquidityAmount: string;
-  obligationId: string;
-  poolRewardId: string;
-  reserveId: string;
-  timestamp: number;
-  digest: string;
-  eventIndex: number;
-  sender: string;
-};
-
 type EventRow = {
   timestamp: number;
   eventIndex: number;
 };
 
-export const eventSortDesc = (a: EventRow, b: EventRow) => {
+export const apiEventSortDesc = (a: EventRow, b: EventRow) => {
   const aDate = new Date(a.timestamp * 1000).getTime();
   const bDate = new Date(b.timestamp * 1000).getTime();
   if (aDate !== bDate) return bDate - aDate;
@@ -155,7 +45,7 @@ export const eventSortDesc = (a: EventRow, b: EventRow) => {
 };
 
 export const eventSortAsc = (a: EventRow, b: EventRow) =>
-  -1 * eventSortDesc(a, b);
+  -1 * apiEventSortDesc(a, b);
 
 // DownsampledApiReserveAssetDataEvent
 export type Days = 1 | 7 | 30;

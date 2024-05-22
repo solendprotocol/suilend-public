@@ -8,6 +8,15 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { useLocalStorage } from "usehooks-ts";
 
 import {
+  ApiBorrowEvent,
+  ApiClaimRewardEvent,
+  ApiDepositEvent,
+  ApiLiquidateEvent,
+  ApiRepayEvent,
+  ApiWithdrawEvent,
+} from "@suilend/sdk/types";
+
+import {
   EventsData,
   TokenAmount,
   getCtokenExchangeRate,
@@ -19,16 +28,10 @@ import TokenLogo from "@/components/shared/TokenLogo";
 import { TBody, TLabelSans } from "@/components/shared/Typography";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import {
-  ApiBorrowEvent,
-  ApiClaimRewardEvent,
-  ApiDepositEvent,
-  ApiLiquidateEvent,
-  ApiRepayEvent,
-  ApiWithdrawEvent,
   EventType,
   EventTypeNameMap,
+  apiEventSortDesc,
   eventSortAsc,
-  eventSortDesc,
 } from "@/lib/events";
 import { formatToken } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -492,7 +495,7 @@ export default function HistoryTabContent({
           ),
         ];
       }, [])
-      .sort(eventSortDesc);
+      .sort(apiEventSortDesc);
 
     const finalRows: RowData[] = [];
     for (let i = 0; i < sortedRows.length; i++) {

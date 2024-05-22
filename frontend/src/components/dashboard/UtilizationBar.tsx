@@ -110,7 +110,6 @@ export default function UtilizationBar({
   const weightedBorrowsColor = getWeightedBorrowsColor(obligation);
   const WEIGHTED_BORROWS_SEGMENT_STYLE = {
     backgroundColor: `hsl(var(--${weightedBorrowsColor}))`,
-    boxShadow: `0 0 14px 2px  hsl(var(--${weightedBorrowsColor}))`,
   };
 
   const toPercent = (value: BigNumber) =>
@@ -174,11 +173,11 @@ export default function UtilizationBar({
   const thresholds = [
     {
       leftPercent: toPercent(borrowLimitUsd),
-      className: "bg-primary shadow-0primary",
+      className: "bg-primary",
     },
     {
       leftPercent: toPercent(liquidationThresholdUsd),
-      className: "bg-secondary shadow-0secondary",
+      className: "bg-secondary",
     },
   ];
 

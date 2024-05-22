@@ -6,7 +6,15 @@ import BigNumber from "bignumber.js";
 import { FileClock, RotateCw, TableProperties, TrendingUp } from "lucide-react";
 
 import { WAD } from "@suilend/sdk/constants";
-import { ApiReserveAssetDataEvent } from "@suilend/sdk/types";
+import {
+  ApiBorrowEvent,
+  ApiClaimRewardEvent,
+  ApiDepositEvent,
+  ApiLiquidateEvent,
+  ApiRepayEvent,
+  ApiReserveAssetDataEvent,
+  ApiWithdrawEvent,
+} from "@suilend/sdk/types";
 
 import EarningsTabContent from "@/components/dashboard/account-details/EarningsTabContent";
 import HistoryTabContent from "@/components/dashboard/account-details/HistoryTabContent";
@@ -20,22 +28,14 @@ import { TBody } from "@/components/shared/Typography";
 import { Separator } from "@/components/ui/separator";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { isSuilendPoints } from "@/lib/coinType";
-import {
-  ApiBorrowEvent,
-  ApiClaimRewardEvent,
-  ApiDepositEvent,
-  ApiLiquidateEvent,
-  ApiRepayEvent,
-  ApiWithdrawEvent,
-  EventType,
-  eventSortAsc,
-  eventSortDesc,
-} from "@/lib/events";
+import { EventType, apiEventSortDesc, eventSortAsc } from "@/lib/events";
 import { formatPoints, formatToken } from "@/lib/format";
 import { API_URL } from "@/lib/navigation";
 
 export const getCtokenExchangeRate = (event: ApiReserveAssetDataEvent) =>
-  new BigNumber(event.supplyAmount).div(WAD).div(event.ctokenSupply);
+  new BigNumber(event.ctokenSupply).eq(0)
+    ? new BigNumber(1)
+    : new BigNumber(event.supplyAmount).div(WAD).div(event.ctokenSupply);
 
 export type EventsData = {
   reserveAssetData: ApiReserveAssetDataEvent[];
@@ -178,12 +178,12 @@ export default function AccountDetailsDialog() {
             .slice()
             .sort(eventSortAsc),
 
-          deposit: (data.deposit ?? []).slice().sort(eventSortDesc),
-          borrow: (data.borrow ?? []).slice().sort(eventSortDesc),
-          withdraw: (data.withdraw ?? []).slice().sort(eventSortDesc),
-          repay: (data.repay ?? []).slice().sort(eventSortDesc),
-          liquidate: (data.liquidate ?? []).slice().sort(eventSortDesc),
-          claimReward: (data.claimReward ?? []).slice().sort(eventSortDesc),
+          deposit: (data.deposit ?? []).slice().sort(apiEventSortDesc),
+          borrow: (data.borrow ?? []).slice().sort(apiEventSortDesc),
+          withdraw: (data.withdraw ?? []).slice().sort(apiEventSortDesc),
+          repay: (data.repay ?? []).slice().sort(apiEventSortDesc),
+          liquidate: (data.liquidate ?? []).slice().sort(apiEventSortDesc),
+          claimReward: (data.claimReward ?? []).slice().sort(apiEventSortDesc),
         });
       } catch (err) {
         console.error(err);

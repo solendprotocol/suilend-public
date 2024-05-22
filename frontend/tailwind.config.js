@@ -17,14 +17,6 @@ module.exports = {
       },
     },
     extend: {
-      boxShadow: {
-        "3xl": "inset 0 0 7px 0px var(--primary)",
-        "0foreground": "0 0 14px 0px hsl(var(--foreground))",
-        "0primary": "0 0 14px 2px hsl(var(--primary))",
-        "0secondary": "0 0 14px 2px hsl(var(--secondary))",
-        "0warning": "0 0 14px 2px hsl(var(--warning))",
-        "0destructive": "0 0 14px 2px hsl(var(--destructive))",
-      },
       colors: {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",

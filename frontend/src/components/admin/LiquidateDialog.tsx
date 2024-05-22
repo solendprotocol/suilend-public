@@ -26,10 +26,10 @@ import {
 } from "@suilend/sdk/parsers/obligation";
 import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 import {
-  formattedObligationHistory,
+  FormattedObligationHistory,
+  LiquidationHistoryEvent,
+  NonLiquidationHistoryEvent,
   getObligationHistoryPage,
-  liquidationHistoryEvent,
-  nonLiquidationHistoryEvent,
 } from "@suilend/sdk/utils/obligation";
 import * as simulate from "@suilend/sdk/utils/simulate";
 
@@ -81,7 +81,7 @@ export default function LiquidateDialog({
   const [historyCursor, setHistoryCursor] = useState<string | null>(null);
 
   const [obligationHistory, setObligationHistory] = useState<
-    formattedObligationHistory[]
+    FormattedObligationHistory[]
   >([]);
   const reserveMap = data.lendingMarket.reserves.reduce(
     (acc, reserve) => ({ ...acc, [reserve.coinType]: reserve }),
@@ -341,7 +341,7 @@ export default function LiquidateDialog({
             </Button>
           </div>
           <div className="col-span-2 flex flex-row items-end gap-2">
-            <DataTable<formattedObligationHistory>
+            <DataTable<FormattedObligationHistory>
               columns={historyColumnDefinition(data.lendingMarket.reserves)}
               data={obligationHistory}
               noDataMessage={"Loading obligation history"}
@@ -413,7 +413,7 @@ function getColumnDefinition(isBorrow: boolean) {
 }
 
 function historyColumnDefinition(reserves: ParsedReserve[]) {
-  const columns: ColumnDef<formattedObligationHistory>[] = [
+  const columns: ColumnDef<FormattedObligationHistory>[] = [
     {
       accessorKey: "timestampMs",
       header: ({ column }) => tableHeader(column, "Timestamp"),
@@ -436,7 +436,7 @@ function historyColumnDefinition(reserves: ParsedReserve[]) {
       header: ({ column }) => tableHeader(column, "symbol"),
       cell: ({ row }) => {
         if (row.original.action === "Liquidation") {
-          const original = row.original as liquidationHistoryEvent;
+          const original = row.original as LiquidationHistoryEvent;
           const repayReserve = reserves.find(
             (r) => r.id === original.repayReserveId,
           );
@@ -449,7 +449,7 @@ function historyColumnDefinition(reserves: ParsedReserve[]) {
             </TBody>
           );
         } else {
-          const original = row.original as nonLiquidationHistoryEvent;
+          const original = row.original as NonLiquidationHistoryEvent;
           const reserve = reserves.find((r) => r.id === original.reserveId);
           return <TBody>{reserve?.symbol}</TBody>;
         }
@@ -460,7 +460,7 @@ function historyColumnDefinition(reserves: ParsedReserve[]) {
       header: ({ column }) => tableHeader(column, "Quantity"),
       cell: ({ row }) => {
         if (row.original.action === "Liquidation") {
-          const original = row.original as liquidationHistoryEvent;
+          const original = row.original as LiquidationHistoryEvent;
           const repayReserve = reserves.find(
             (r) => r.id === original.repayReserveId,
           );
@@ -482,7 +482,7 @@ function historyColumnDefinition(reserves: ParsedReserve[]) {
             </TBody>
           );
         } else {
-          const original = row.original as nonLiquidationHistoryEvent;
+          const original = row.original as NonLiquidationHistoryEvent;
           const reserve = reserves.find((r) => r.id === original.reserveId);
           if (!reserve) {
             return;
