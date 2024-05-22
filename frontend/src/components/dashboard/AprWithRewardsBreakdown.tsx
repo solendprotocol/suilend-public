@@ -28,54 +28,51 @@ import {
 import { cn, hoverUnderlineClassName } from "@/lib/utils";
 
 const calculateUtilizationPercent = (reserve: ParsedReserve) => {
-  const depositedAmount = reserve.availableAmount.plus(reserve.borrowedAmount);
+  const depositedAmount = reserve.borrowedAmount
+    .plus(reserve.availableAmount)
+    .minus(reserve.unclaimedSpreadFees);
+  const borrowedAmount = reserve.borrowedAmount;
 
-  if (depositedAmount.eq(0)) return new BigNumber(0);
-  return reserve.borrowedAmount.div(depositedAmount).times(100);
+  return depositedAmount.eq(0)
+    ? new BigNumber(0)
+    : borrowedAmount.div(depositedAmount).times(100);
 };
 
 const calculateBorrowAprPercent = (reserve: ParsedReserve) => {
   const config = reserve.config;
-  const currentUtilPercent = calculateUtilizationPercent(reserve);
+  const utilizationPercent = calculateUtilizationPercent(reserve);
 
   let i = 1;
   while (i < config.interestRate.length) {
-    const leftUtilPercent = config.interestRate[i - 1].utilPercent;
-    const leftAprPercent = config.interestRate[i - 1].aprPercent;
-
-    const rightUtilPercent = config.interestRate[i].utilPercent;
-    const rightAprPercent = config.interestRate[i].aprPercent;
+    const left = config.interestRate[i - 1];
+    const right = config.interestRate[i];
 
     if (
-      currentUtilPercent.gte(leftUtilPercent) &&
-      currentUtilPercent.lte(rightUtilPercent)
+      utilizationPercent.gte(left.utilPercent) &&
+      utilizationPercent.lte(right.utilPercent)
     ) {
       const weight = new BigNumber(
-        currentUtilPercent.minus(leftUtilPercent),
-      ).div(rightUtilPercent.minus(leftUtilPercent));
+        utilizationPercent.minus(left.utilPercent),
+      ).div(right.utilPercent.minus(left.utilPercent));
 
-      return leftAprPercent.plus(
-        weight.times(rightAprPercent.minus(leftAprPercent)),
+      return left.aprPercent.plus(
+        weight.times(right.aprPercent.minus(left.aprPercent)),
       );
     }
     i = i + 1;
   }
+
   // Should never reach here
   return new BigNumber(0);
 };
 
-const calculateDepositAprPercent = (reserve: ParsedReserve) => {
-  const currentUtilPercent = calculateUtilizationPercent(reserve);
-  const borrowAprPercent = calculateBorrowAprPercent(reserve);
-  const spreadFeePercent = new BigNumber(reserve.config.spreadFeeBps).div(100);
+const calculateDepositAprPercent = (reserve: ParsedReserve) =>
+  new BigNumber(calculateUtilizationPercent(reserve).div(100))
+    .times(calculateBorrowAprPercent(reserve).div(100))
+    .times(1 - reserve.config.spreadFeeBps / 10000)
+    .times(100);
 
-  return currentUtilPercent
-    .div(100)
-    .times(borrowAprPercent)
-    .times(new BigNumber(1).minus(spreadFeePercent.div(100)));
-};
-
-const formatApr = (
+const formatAprPercent = (
   value: BigNumber,
   newValue: BigNumber,
   isAprModifierInvalid: boolean,
@@ -133,7 +130,7 @@ function AprRewardRow({
           src={reward.stats.iconUrl}
         />
         <TBody className="text-primary-foreground">
-          {formatApr(
+          {formatAprPercent(
             reward.stats.aprPercent,
             newReward.stats.aprPercent,
             isAprModifierInvalid,
@@ -295,7 +292,7 @@ export default function AprWithRewardsBreakdown({
   if (filteredRewards.length === 0)
     return (
       <TBody>
-        {formatApr(
+        {formatAprPercent(
           totalAprPercent,
           newTotalAprPercent,
           isAprModifierInvalid,
@@ -341,7 +338,7 @@ export default function AprWithRewardsBreakdown({
             <div className="flex flex-row items-center justify-between gap-6">
               <TLabel className="uppercase">{capitalize(side)} APR</TLabel>
               <TBody>
-                {formatApr(
+                {formatAprPercent(
                   aprPercent,
                   newAprPercent,
                   isAprModifierInvalid,
@@ -382,7 +379,7 @@ export default function AprWithRewardsBreakdown({
             <div className="flex flex-row items-center justify-between gap-6">
               <TTitle className="uppercase">Total APR</TTitle>
               <TBody>
-                {formatApr(
+                {formatAprPercent(
                   totalAprPercent,
                   newTotalAprPercent,
                   isAprModifierInvalid,
@@ -414,7 +411,7 @@ export default function AprWithRewardsBreakdown({
               hoverUnderlineClassName,
             )}
           >
-            {formatApr(
+            {formatAprPercent(
               totalAprPercent,
               newTotalAprPercent,
               isAprModifierInvalid,
