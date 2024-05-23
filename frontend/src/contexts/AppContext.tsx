@@ -3,8 +3,11 @@ import {
   PropsWithChildren,
   SetStateAction,
   createContext,
+  useCallback,
   useContext,
+  useEffect,
   useMemo,
+  useRef,
 } from "react";
 
 import {
@@ -14,6 +17,7 @@ import {
   SuiTransactionBlockResponse,
 } from "@mysten/sui.js/client";
 import { TransactionBlock } from "@mysten/sui.js/transactions";
+import { isEqual } from "lodash";
 import { toast } from "sonner";
 import { useLocalStorage } from "usehooks-ts";
 
@@ -113,11 +117,63 @@ export function AppContextProvider({ children }: PropsWithChildren) {
     suilendClient,
   } = useFetchAppData(suiClient, address);
 
+  const refreshData = useCallback(async () => {
+    await mutateData();
+  }, [mutateData]);
+
   // Obligation
   const [obligationId, setObligationId] = useLocalStorage<string | null>(
     "obligationId",
     null,
   );
+
+  // Poll for balance changes
+  // const unsubscribeRef = useRef<(() => void) | undefined>(undefined);
+  const previousBalancesRef = useRef<CoinBalance[] | undefined>(undefined);
+  useEffect(() => {
+    // if (unsubscribeRef.current !== undefined) {
+    //   unsubscribeRef.current();
+    //   unsubscribeRef.current = undefined;
+    // }
+    previousBalancesRef.current = undefined;
+
+    if (!address) return;
+    if (!suiClient) return;
+
+    // suiClient
+    //   .subscribeTransaction({
+    //     filter: {
+    //       FromAddress: address,
+    //     },
+    //     onMessage: async (event: TransactionEffects) => {
+    //       await refreshData();
+    //     },
+    //   })
+    //   .then((unsubscribe) => {
+    //     unsubscribeRef.current = unsubscribe;
+    //   });
+
+    const interval = setInterval(async () => {
+      const balances = await suiClient.getAllBalances({
+        owner: address,
+      });
+
+      if (
+        previousBalancesRef.current !== undefined &&
+        !isEqual(balances, previousBalancesRef.current)
+      )
+        await refreshData();
+      previousBalancesRef.current = balances;
+    }, 1000 * 5);
+
+    return () => {
+      // if (unsubscribeRef.current !== undefined) {
+      //   unsubscribeRef.current();
+      //   unsubscribeRef.current = undefined;
+      // }
+      if (interval !== undefined) clearInterval(interval);
+    };
+  }, [address, suiClient, refreshData]);
 
   // Context
   const contextValue: AppContext = useMemo(
@@ -125,16 +181,14 @@ export function AppContextProvider({ children }: PropsWithChildren) {
       suiClient,
       suilendClient,
       data: data ?? null,
-      refreshData: async () => {
-        await mutateData();
-      },
+      refreshData,
       rpc,
       setRpcId: async (value: string) => {
         const newRpc = RPCS.find((r) => r.id === value);
         if (!newRpc) return;
 
         setRpcId(value);
-        await mutateData();
+        await refreshData();
         toast.info(`Switched RPC to ${newRpc.name}`);
       },
       explorer,
@@ -159,7 +213,7 @@ export function AppContextProvider({ children }: PropsWithChildren) {
       suiClient,
       suilendClient,
       data,
-      mutateData,
+      refreshData,
       rpc,
       setRpcId,
       explorer,
