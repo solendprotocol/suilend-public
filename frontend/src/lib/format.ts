@@ -167,4 +167,14 @@ export const formatToken = (
   });
 };
 
-export const formatLtv = (value: BigNumber) => formatPercent(value, { dp: 0 });
+export const formatLtvPercent = (value: BigNumber) =>
+  formatPercent(value, { dp: 0 });
+
+export const formatBorrowWeight = (value: BigNumber) => {
+  const [integers, decimals] = value.toFixed(1).split(".");
+  const integersFormatted = formatInteger(parseInt(integers));
+  const decimalsFormatted = ![undefined, "0"].includes(decimals)
+    ? `.${decimals}`
+    : "";
+  return `${integersFormatted}${decimalsFormatted}`;
+};

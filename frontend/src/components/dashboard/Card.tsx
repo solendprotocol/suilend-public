@@ -1,15 +1,10 @@
-import {
-  PropsWithChildren,
-  ReactElement,
-  ReactNode,
-  cloneElement,
-} from "react";
+import { PropsWithChildren, ReactElement, ReactNode } from "react";
 
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useLocalStorage } from "usehooks-ts";
 
 import Button from "@/components/shared/Button";
-import { TTitle } from "@/components/shared/Typography";
+import TitleWithIcon from "@/components/shared/TitleWithIcon";
 import {
   CardHeader,
   Card as CardRoot,
@@ -50,19 +45,14 @@ export default function Card({ id, header, children, ...props }: CardProps) {
       {header && (
         <CardHeader className="flex flex-col gap-2 space-y-0">
           <div className="flex h-5 flex-row items-center">
-            <TTitle
-              className={cn(
-                "flex flex-1 flex-row items-center gap-2 uppercase",
-                isCollapsible && "cursor-pointer",
-              )}
+            <div
+              className={cn("flex-1", isCollapsible && "cursor-pointer")}
               onClick={isCollapsible ? toggleIsCollapsed : undefined}
             >
-              {header.titleIcon &&
-                cloneElement(header.titleIcon, {
-                  className: "w-4 h-4 shrink-0",
-                })}
-              {header.title}
-            </TTitle>
+              <TitleWithIcon className="w-full" icon={header.titleIcon}>
+                {header.title}
+              </TitleWithIcon>
+            </div>
 
             <div className="flex flex-row items-center justify-end gap-1">
               {header.endContent}

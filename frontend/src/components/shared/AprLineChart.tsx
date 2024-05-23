@@ -18,13 +18,10 @@ interface TooltipContentProps {
 
 function TooltipContent({ utilization, apr }: TooltipContentProps) {
   return (
-    <div className="flex flex-col items-end">
-      <div className="flex flex-row items-baseline gap-2">
-        <TLabelSans>Utilization</TLabelSans>
-        <TBody>{formatPercent(new BigNumber(utilization))}</TBody>
-      </div>
+    <div className="flex w-full flex-col gap-1">
+      <TLabelSans>{formatPercent(new BigNumber(utilization))}</TLabelSans>
 
-      <div className="flex flex-row items-baseline gap-2">
+      <div className="flex flex-row items-center justify-between gap-4">
         <TLabelSans>Borrow APR</TLabelSans>
         <TBody>{formatPercent(new BigNumber(apr))}</TBody>
       </div>
@@ -155,7 +152,7 @@ export default function AprLineChart({ data, reference }: AprLineChartProps) {
         rootProps={{ open: showMouseoverDot }}
         portalProps={{ container: containerRef.current }}
         contentProps={{
-          className: "!pointer-events-none",
+          className: "w-max min-w-[160px] !pointer-events-none",
           side: !!xyForMouseChartX
             ? xyForMouseChartX.xPct > 0.5
               ? "left"
@@ -287,7 +284,7 @@ export default function AprLineChart({ data, reference }: AprLineChartProps) {
                   portalProps={{ container: containerRef.current }}
                   contentProps={{
                     className: cn(
-                      "!pointer-events-none min-w-max transition-opacity",
+                      "w-max min-w-[160px] !pointer-events-none transition-opacity",
                       showMouseoverDot && "opacity-50",
                     ),
                     side: "top",

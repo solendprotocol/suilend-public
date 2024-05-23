@@ -2,17 +2,17 @@ import BigNumber from "bignumber.js";
 
 import { ReservesRowData } from "@/components/dashboard/MarketTable";
 import { TBody, TLabel } from "@/components/shared/Typography";
-import { formatLtv } from "@/lib/format";
+import { formatBorrowWeight, formatLtvPercent } from "@/lib/format";
 
 export default function OpenLtvBwCell({
-  openLtvPct,
+  openLtvPercent,
   borrowWeight,
 }: ReservesRowData) {
   return (
-    <div className="flex flex-row items-baseline gap-2">
-      <TBody>{formatLtv(new BigNumber(openLtvPct))}</TBody>
+    <div className="flex flex-row items-center gap-2">
+      <TBody>{formatLtvPercent(new BigNumber(openLtvPercent))}</TBody>
       <TLabel>/</TLabel>
-      <TBody>{borrowWeight}</TBody>
+      <TBody>{formatBorrowWeight(borrowWeight)}</TBody>
     </div>
   );
 }

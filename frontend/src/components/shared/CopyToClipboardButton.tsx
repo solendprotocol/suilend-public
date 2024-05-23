@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 
 import * as Sentry from "@sentry/nextjs";
 import { ClassValue } from "clsx";
@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 
 interface CopyToClipboardButtonProps {
   className?: ClassValue;
-  tooltip?: string;
+  tooltip?: string | ReactNode;
   value: string;
 }
 

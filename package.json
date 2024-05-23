@@ -1,10 +1,4 @@
 {
-  "private": true,
-  "workspaces": [
-    "frontend",
-    "pyth-sdk",
-    "sdk"
-  ],
   "devDependencies": {
     "@typescript-eslint/parser": "^6.21.0",
     "eslint": "8.56.0",
@@ -15,7 +9,10 @@
     "eslint-plugin-unused-imports": "^3.1.0",
     "prettier": "^3.2.5"
   },
-  "dependencies": {
-    "p-limit": "3.1.0"
-  }
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "pyth-sdk",
+    "sdk"
+  ]
 }

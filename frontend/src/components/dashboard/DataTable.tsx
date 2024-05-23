@@ -125,7 +125,7 @@ export function tableHeader<T>(
   }: {
     isNumerical?: boolean;
     isDate?: boolean;
-    tooltip?: string;
+    tooltip?: string | ReactNode;
     borderBottom?: boolean;
   } = {},
 ) {
@@ -244,7 +244,7 @@ export default function DataTable<T>({
         {table.getHeaderGroups().map((headerGroup) => (
           <TableRow
             key={headerGroup.id}
-            className={cn("hover:bg-muted/10", tableHeaderRowClassName)}
+            className={cn("hover:bg-transparent", tableHeaderRowClassName)}
           >
             {headerGroup.headers.map((header) => {
               return (

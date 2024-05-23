@@ -2,14 +2,13 @@ import NextLink from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
-import { ExternalLink } from "lucide-react";
-
 import PointsCount from "@/components/points/PointsCount";
 import PointsIcon from "@/components/points/PointsIcon";
 import PointsRank from "@/components/points/PointsRank";
 import Button from "@/components/shared/Button";
 import Popover from "@/components/shared/Popover";
-import { TLabel, TTitle } from "@/components/shared/Typography";
+import TitleWithIcon from "@/components/shared/TitleWithIcon";
+import { TLabelSans } from "@/components/shared/Typography";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAppContext } from "@/contexts/AppContext";
 import { usePointsContext } from "@/contexts/PointsContext";
@@ -52,21 +51,21 @@ export default function PointsCountPopover() {
       }}
     >
       <div className="flex flex-col gap-4">
-        <TTitle className="uppercase">Points hub</TTitle>
+        <TitleWithIcon icon={<PointsIcon />}>Suilend points</TitleWithIcon>
 
         <div className="flex w-full flex-col gap-2">
           <div className="flex flex-row items-center justify-between gap-4">
-            <TLabel className="uppercase">Total points</TLabel>
+            <TLabelSans>Total points</TLabelSans>
             <PointsCount points={pointsStats?.totalPoints.total} />
           </div>
 
           <div className="flex flex-row items-center justify-between gap-4">
-            <TLabel className="uppercase">Points per day</TLabel>
+            <TLabelSans>Points per day</TLabelSans>
             <PointsCount points={pointsStats?.pointsPerDay.total} />
           </div>
 
           <div className="flex flex-row items-center justify-between gap-4">
-            <TLabel className="uppercase">Rank</TLabel>
+            <TLabelSans>Rank</TLabelSans>
             <PointsRank rank={rank} isRightAligned />
           </div>
         </div>
@@ -77,10 +76,9 @@ export default function PointsCountPopover() {
               className="w-full border-secondary text-primary-foreground"
               labelClassName="uppercase"
               variant="secondaryOutline"
-              endIcon={<ExternalLink />}
               onClick={() => setIsOpen(false)}
             >
-              Leaderboard
+              View leaderboard
             </Button>
           </NextLink>
         )}

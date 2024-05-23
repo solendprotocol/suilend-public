@@ -3,13 +3,12 @@ import {
   PropsWithChildren,
   ReactElement,
   ReactNode,
-  cloneElement,
 } from "react";
 
 import { DialogProps as DialogRootProps } from "@radix-ui/react-dialog";
 import { ClassValue } from "clsx";
 
-import { TTitle } from "@/components/shared/Typography";
+import TitleWithIcon from "@/components/shared/TitleWithIcon";
 import {
   DialogContent,
   DialogContentProps,
@@ -64,13 +63,7 @@ export default function Dialog({
             headerClassName,
           )}
         >
-          <TTitle className="flex flex-row items-center gap-2 uppercase">
-            {titleIcon &&
-              cloneElement(titleIcon, {
-                className: "w-4 h-4 shrink-0",
-              })}
-            {title}
-          </TTitle>
+          <TitleWithIcon icon={titleIcon}>{title}</TitleWithIcon>
 
           {headerEndContent && (
             <div className="absolute right-[calc(8px+20px+16px)] top-1/2 flex -translate-y-2/4 flex-row gap-1">

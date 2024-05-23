@@ -15,9 +15,18 @@ import LabelWithTooltip from "@/components/shared/LabelWithTooltip";
 import { TBody } from "@/components/shared/Typography";
 import { Separator } from "@/components/ui/separator";
 import { useAppContext } from "@/contexts/AppContext";
-import { formatLtv, formatPrice, formatToken, formatUsd } from "@/lib/format";
+import {
+  formatBorrowWeight,
+  formatLtvPercent,
+  formatPrice,
+  formatToken,
+  formatUsd,
+} from "@/lib/format";
 import {
   BORROW_LIMIT_PRICE_TOOLTIP,
+  BORROW_WEIGHT_TOOLTIP,
+  CLOSE_LTV_TOOLTIP,
+  OPEN_LTV_TOOLTIP,
   WEIGHTED_BORROWS_PRICE_TOOLTIP,
 } from "@/lib/tooltips";
 import { cn, reserveSort } from "@/lib/utils";
@@ -25,47 +34,62 @@ import { cn, reserveSort } from "@/lib/utils";
 interface BreakdownColumn {
   title: string;
   titleTooltip?: string | ReactNode;
-  data?: string[];
+  data: string[];
 }
 
 interface BreakdownColumnProps {
   column: BreakdownColumn;
   rowCount: number;
-  isRightAligned?: boolean;
+  isFirst: boolean;
+  isLast: boolean;
 }
 
 function BreakdownColumn({
   column,
   rowCount,
-  isRightAligned,
+  isFirst,
+  isLast,
 }: BreakdownColumnProps) {
-  if (!column.data)
-    return (
-      <LabelWithTooltip
-        className={cn(
-          "h-fit w-auto flex-1 text-center",
-          rowCount > 0 && "border-b pb-2",
-        )}
-        tooltip={column.titleTooltip}
-      >
-        {column.title}
-      </LabelWithTooltip>
-    );
-  return (
+  return column.data.length === 0 ? (
+    <LabelWithTooltip
+      className={cn(
+        "h-fit w-auto flex-1 py-2 text-center",
+        rowCount > 0 && "border-b",
+      )}
+      tooltip={column.titleTooltip}
+    >
+      {column.title}
+    </LabelWithTooltip>
+  ) : (
     <div
       className={cn(
-        "flex w-max flex-col gap-1",
-        isRightAligned && "justify-end text-right",
+        "flex w-max flex-col",
+        !isFirst && "justify-end text-right",
       )}
     >
       <LabelWithTooltip
-        className={cn("w-auto", rowCount > 0 && "mb-1 border-b pb-2")}
+        className={cn(
+          "w-auto py-2 uppercase",
+          rowCount > 0 && "border-b",
+          isFirst && "pl-4",
+          isLast && "pr-4",
+        )}
         tooltip={column.titleTooltip}
+        isMono
       >
         {column.title}
       </LabelWithTooltip>
       {column.data.map((row, index) => (
-        <TBody key={index} className="text-xs">
+        <TBody
+          key={index}
+          className={cn(
+            "py-1 text-xs",
+            index === 0 && "pt-2",
+            index === column.data.length - 1 && "pb-2",
+            isFirst && "pl-4",
+            isLast && "pr-4",
+          )}
+        >
           {row}
         </TBody>
       ))}
@@ -89,22 +113,24 @@ function BreakdownTable({
   totalValueStyle,
 }: BreakdownTableProps) {
   return (
-    <div className="flex w-full flex-col gap-2">
-      <Separator className="w-full" />
+    <div className="-mx-4 flex flex-col">
       <div className="flex w-full flex-row">
         {columns.map((column, index) => (
           <BreakdownColumn
             key={index}
             column={column}
             rowCount={rowCount}
-            isRightAligned={index !== 0}
+            isFirst={index === 0}
+            isLast={index === columns.length - 1}
           />
         ))}
       </div>
+
       <Separator className="w-full" />
+
       <div className="flex w-full flex-row justify-end">
         <TBody
-          className={cn("text-xs", totalValueClassName)}
+          className={cn("pr-4 pt-2 text-xs", totalValueClassName)}
           style={totalValueStyle}
         >
           {totalValue}
@@ -152,21 +178,23 @@ export default function AccountBreakdown() {
                     `${formatToken(b.borrowedAmount, { exact: false })} ${b.reserve.symbol}`,
                 ),
               },
-              { title: "×" },
+              { title: "×", data: [] },
               {
                 title: "Price",
                 titleTooltip: WEIGHTED_BORROWS_PRICE_TOOLTIP,
                 data: sortedBorrows.map((b) => formatPrice(b.reserve.maxPrice)),
               },
-              { title: "×" },
+              { title: "×", data: [] },
               {
                 title: "BW",
-                titleTooltip: "Borrow weight",
+                titleTooltip: BORROW_WEIGHT_TOOLTIP,
                 data: sortedBorrows.map((b) =>
-                  (b.reserve.config.borrowWeightBps / 10000).toString(),
+                  formatBorrowWeight(
+                    new BigNumber(b.reserve.config.borrowWeightBps / 10000),
+                  ),
                 ),
               },
-              { title: "=" },
+              { title: "=", data: [] },
               {
                 title: "Total",
                 data: sortedBorrows.map((b) =>
@@ -207,7 +235,7 @@ export default function AccountBreakdown() {
                     `${formatToken(d.depositedAmount, { exact: false })} ${d.reserve.symbol}`,
                 ),
               },
-              { title: "×" },
+              { title: "×", data: [] },
               {
                 title: "Price",
                 titleTooltip: BORROW_LIMIT_PRICE_TOOLTIP,
@@ -215,14 +243,15 @@ export default function AccountBreakdown() {
                   formatPrice(d.reserve.minPrice),
                 ),
               },
-              { title: "×" },
+              { title: "×", data: [] },
               {
                 title: "Open LTV",
+                titleTooltip: OPEN_LTV_TOOLTIP,
                 data: sortedDeposits.map((d) =>
-                  formatLtv(new BigNumber(d.reserve.config.openLtvPct)),
+                  formatLtvPercent(new BigNumber(d.reserve.config.openLtvPct)),
                 ),
               },
-              { title: "=" },
+              { title: "=", data: [] },
               {
                 title: "Total",
                 data: sortedDeposits.map((d) =>
@@ -261,19 +290,20 @@ export default function AccountBreakdown() {
                     `${formatToken(d.depositedAmount, { exact: false })} ${d.reserve.symbol}`,
                 ),
               },
-              { title: "×" },
+              { title: "×", data: [] },
               {
                 title: "Price",
                 data: sortedDeposits.map((d) => formatPrice(d.reserve.price)),
               },
-              { title: "×" },
+              { title: "×", data: [] },
               {
                 title: "Close LTV",
+                titleTooltip: CLOSE_LTV_TOOLTIP,
                 data: sortedDeposits.map((d) =>
-                  formatLtv(new BigNumber(d.reserve.config.closeLtvPct)),
+                  formatLtvPercent(new BigNumber(d.reserve.config.closeLtvPct)),
                 ),
               },
-              { title: "=" },
+              { title: "=", data: [] },
               {
                 title: "Total",
                 data: sortedDeposits.map((d) =>

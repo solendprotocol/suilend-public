@@ -25,7 +25,7 @@ import { TBody, TLabel, TLabelSans } from "@/components/shared/Typography";
 import { SelectTrigger } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { formatPrice } from "@/lib/format";
-import { OPEN_LTV_BW_TOOLTIP } from "@/lib/tooltips";
+import { OPEN_LTV_BORROW_WEIGHT_TOOLTIP } from "@/lib/tooltips";
 import { cn } from "@/lib/utils";
 
 interface MarketCardProps {
@@ -55,22 +55,18 @@ function MarketCard({ rowData, onClick }: MarketCardProps) {
 
         <div className="flex w-full flex-row justify-center gap-6">
           <div className="flex w-fit flex-col items-center gap-1">
-            <TLabel className="uppercase">Deposit APR</TLabel>
+            <TLabelSans>Deposit APR</TLabelSans>
             <DepositAprCell {...rowData} />
           </div>
 
           <div className="flex w-fit flex-col items-center gap-1">
-            <TLabel className="uppercase">Borrow APR</TLabel>
+            <TLabelSans>Borrow APR</TLabelSans>
             <BorrowAprCell {...rowData} />
           </div>
         </div>
 
         <div className="flex w-full flex-row items-center justify-between">
-          <LabelWithTooltip
-            className="uppercase"
-            tooltip={OPEN_LTV_BW_TOOLTIP}
-            isMono
-          >
+          <LabelWithTooltip tooltip={OPEN_LTV_BORROW_WEIGHT_TOOLTIP}>
             LTV / BW
           </LabelWithTooltip>
 
@@ -78,12 +74,12 @@ function MarketCard({ rowData, onClick }: MarketCardProps) {
         </div>
 
         <div className="flex w-full flex-row items-center justify-between">
-          <TLabel className="uppercase">Deposits</TLabel>
+          <TLabelSans>Deposits</TLabelSans>
           <TotalDepositsCell {...rowData} horizontal />
         </div>
 
         <div className="flex w-full flex-row items-center justify-between">
-          <TLabel className="uppercase">Borrows</TLabel>
+          <TLabelSans>Borrows</TLabelSans>
           <TotalBorrowsCell {...rowData} horizontal />
         </div>
       </div>

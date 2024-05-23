@@ -4,6 +4,9 @@ import { User } from "lucide-react";
 import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
 
 import AccountBreakdown from "@/components/dashboard/account/AccountBreakdown";
+import BorrowLimitTitle from "@/components/dashboard/account/BorrowLimitTitle";
+import LiquidationThresholdTitle from "@/components/dashboard/account/LiquidationThresholdTitle";
+import WeightedBorrowsTitle from "@/components/dashboard/account/WeightedBorrowsTitle";
 import AccountDetailsDialog from "@/components/dashboard/account-details/AccountDetailsDialog";
 import Card from "@/components/dashboard/Card";
 import ObligationSwitcherPopover from "@/components/dashboard/ObligationSwitcherPopover";
@@ -21,12 +24,8 @@ import { formatPercent, formatUsd } from "@/lib/format";
 import { getFilteredRewards, getTotalAprPercent } from "@/lib/liquidityMining";
 import {
   BORROWS_TOOLTIP,
-  BORROW_LIMIT_TOOLTIP,
   DEPOSITS_TOOLTIP,
-  EQUITY_TOOLTIP,
-  LIQUIDATION_THRESHOLD_TOOLTIP,
   NET_APR_TOOLTIP,
-  WEIGHTED_BORROWS_TOOLTIP,
 } from "@/lib/tooltips";
 
 function AccountPositionCardContent() {
@@ -94,9 +93,7 @@ function AccountPositionCardContent() {
         <TLabel>=</TLabel>
 
         <div className="flex flex-col items-end gap-1">
-          <LabelWithTooltip className="text-right" tooltip={EQUITY_TOOLTIP}>
-            Equity
-          </LabelWithTooltip>
+          <LabelWithTooltip className="text-right">Equity</LabelWithTooltip>
           <Tooltip title={formatUsd(obligation.netValueUsd, { exact: true })}>
             <TBody className="w-max text-right">
               {formatUsd(obligation.netValueUsd)}
@@ -116,9 +113,7 @@ function AccountPositionCardContent() {
 
       <div className="flex flex-row justify-between gap-2">
         <div className="flex flex-col gap-1">
-          <LabelWithTooltip tooltip={WEIGHTED_BORROWS_TOOLTIP}>
-            Weighted borrows
-          </LabelWithTooltip>
+          <WeightedBorrowsTitle />
           <Tooltip
             title={formatUsd(getWeightedBorrowsUsd(obligation), {
               exact: true,
@@ -131,12 +126,7 @@ function AccountPositionCardContent() {
         </div>
 
         <div className="flex flex-col items-end gap-1">
-          <LabelWithTooltip
-            className="text-right"
-            tooltip={BORROW_LIMIT_TOOLTIP}
-          >
-            Borrow limit
-          </LabelWithTooltip>
+          <BorrowLimitTitle />
           <Tooltip
             title={formatUsd(obligation.minPriceBorrowLimitUsd, {
               exact: true,
@@ -152,9 +142,7 @@ function AccountPositionCardContent() {
       <UtilizationBar />
 
       <div className="flex flex-row items-center justify-between gap-2">
-        <LabelWithTooltip tooltip={LIQUIDATION_THRESHOLD_TOOLTIP}>
-          Liquidation threshold
-        </LabelWithTooltip>
+        <LiquidationThresholdTitle />
         <Tooltip
           title={formatUsd(obligation.unhealthyBorrowValueUsd, {
             exact: true,

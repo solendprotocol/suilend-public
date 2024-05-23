@@ -13,12 +13,7 @@ import { Side } from "@suilend/sdk/types";
 import { useActionsModalContext } from "@/components/dashboard/actions-modal/ActionsModalContext";
 import Button from "@/components/shared/Button";
 import TokenLogo from "@/components/shared/TokenLogo";
-import {
-  TBody,
-  TLabel,
-  TLabelSans,
-  TTitle,
-} from "@/components/shared/Typography";
+import { TBody, TLabelSans } from "@/components/shared/Typography";
 import { Separator } from "@/components/ui/separator";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import useBreakpoint from "@/hooks/useBreakpoint";
@@ -113,7 +108,7 @@ function TooltipContent({
         {side === Side.DEPOSIT && data.depositAprPercent !== undefined ? (
           <>
             <div className="mt-1 flex w-full flex-row items-center justify-between gap-4">
-              <TLabel className="uppercase">Base APR</TLabel>
+              <TLabelSans>Base APR</TLabelSans>
               <TBody className="text-success">
                 {formatPercent(new BigNumber(data.depositAprPercent))}
               </TBody>
@@ -122,7 +117,7 @@ function TooltipContent({
             {data.depositSuiRewardsAprPercent !== undefined && (
               <>
                 <div className="flex w-full flex-row items-center justify-between gap-4">
-                  <TLabel className="uppercase">SUI Rewards</TLabel>
+                  <TLabelSans>SUI Rewards</TLabelSans>
 
                   <div className="flex flex-row items-center gap-1.5">
                     <TokenLogo
@@ -141,8 +136,7 @@ function TooltipContent({
 
                 <Separator />
 
-                <div className="flex w-full flex-row items-center justify-between gap-4">
-                  <TTitle className="text-xs uppercase">Total APR</TTitle>
+                <div className="flex w-full flex-row justify-end">
                   <TBody>
                     {formatPercent(
                       new BigNumber(
@@ -158,7 +152,7 @@ function TooltipContent({
         ) : side === Side.BORROW && data.borrowAprPercent !== undefined ? (
           <>
             <div className="flex w-full flex-row items-center justify-between gap-4">
-              <TLabel className="uppercase">Base APR</TLabel>
+              <TLabelSans>Base APR</TLabelSans>
               <TBody className="text-success">
                 {formatPercent(new BigNumber(data.borrowAprPercent))}
               </TBody>
