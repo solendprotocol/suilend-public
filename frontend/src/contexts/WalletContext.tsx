@@ -27,6 +27,8 @@ import { useWallet } from "@suiet/wallet-kit";
 import { useLDClient } from "launchdarkly-react-client-sdk";
 import { toast } from "sonner";
 
+import { formatAddress } from "@/lib/format";
+
 interface WalletContext {
   isConnectWalletDropdownOpen: boolean;
   setIsConnectWalletDropdownOpen: Dispatch<SetStateAction<boolean>>;
@@ -222,11 +224,12 @@ export function WalletContextProvider({ children }: PropsWithChildren) {
 
         setAccountAddress(_address);
         toast.info(
-          `Switched to ${_account?.label ? _account.label : addressNameServiceName ?? _address}`,
+          `Switched to ${_account?.label ?? addressNameServiceName ?? formatAddress(_address, 0)}`,
           {
             description: _account?.label
-              ? addressNameServiceName ?? _address
+              ? addressNameServiceName ?? formatAddress(_address, 0)
               : undefined,
+            descriptionClassName: "uppercase !font-mono",
           },
         );
       },

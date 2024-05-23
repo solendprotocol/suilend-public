@@ -44,7 +44,7 @@ export default function PointsLeaderboardTable() {
           return (
             <Tooltip title={address}>
               <TBody className="w-max uppercase">
-                {formatAddress(address)}
+                {formatAddress(address, 12)}
               </TBody>
             </Tooltip>
           );

@@ -55,9 +55,7 @@ export default function CopyToClipboardButton({
     <Button
       className={cn("!bg-transparent text-muted-foreground", className)}
       tooltip={tooltip ?? "Copy to clipboard"}
-      icon={
-        justCopied ? <Check className="text-primary-foreground" /> : <Copy />
-      }
+      icon={justCopied ? <Check className="text-success" /> : <Copy />}
       variant="ghost"
       size="icon"
       onClick={copyToClipboard}
