@@ -22,6 +22,13 @@ import { AppData, useAppContext } from "@/contexts/AppContext";
 import { formatToken, formatUsd } from "@/lib/format";
 import { cn, reserveSort } from "@/lib/utils";
 
+import { parseReserveAssetDataEvent } from "../../../../../sdk/src/core/parsers/apiReserveAssetDataEvent";
+
+type ChartData = {
+  timestampS: number;
+  earningsUsd: number;
+};
+
 interface RowData {
   coinType: string;
   interest: BigNumber;
@@ -40,6 +47,53 @@ export default function EarningsTabContent({
   const obligation = appContext.obligation as ParsedObligation;
 
   // Data
+  const chartData = useMemo(() => {
+    if (eventsData === undefined) return undefined;
+
+    const firstDepositTimestampS = Math.min(
+      ...eventsData.deposit.map((e) => e.timestamp),
+    );
+
+    const intervalS = 24 * 60 * 60;
+    const firstTimestampS =
+      firstDepositTimestampS + intervalS - (firstDepositTimestampS % intervalS);
+    const lastTimestampS =
+      Date.now() / 1000 - ((Date.now() / 1000) % intervalS);
+
+    const n = (lastTimestampS - firstTimestampS) / intervalS + 1;
+    const timestampsS = Array.from({ length: n }).map(
+      (_, index) => firstTimestampS + index * intervalS,
+    );
+
+    const result: ChartData[] = [];
+    timestampsS.forEach((timestampS, index) => {
+      const earningsUsd = new BigNumber(0);
+
+      const reservePriceMap: Record<string, BigNumber> = {};
+      data.lendingMarket.reserves.forEach((reserve) => {
+        const reserveAssetDataEvent = eventsData.reserveAssetData.findLast(
+          (e) => e.reserveId === reserve.id && e.timestamp <= timestampS,
+        );
+        if (!reserveAssetDataEvent) return;
+
+        const parsedEvent = parseReserveAssetDataEvent(
+          reserveAssetDataEvent,
+          reserve,
+        );
+
+        reservePriceMap[reserve.id] = parsedEvent.price;
+      });
+
+      console.log(
+        "XXX",
+        timestampS,
+        Object.entries(reservePriceMap).map(([x, y]) => [x, y.toString()]),
+      );
+    });
+
+    return result;
+  }, [eventsData, data.lendingMarket.reserves]);
+
   const interestEarned = useMemo(() => {
     if (eventsData === undefined) return undefined;
 
