@@ -199,7 +199,10 @@ function Chart({ side, isLoading, data }: ChartProps) {
         if (days === 30) return d.timestampS % ((sm ? 5 : 10) * DAY_S) === 0;
         return false;
       })
-      .map((d) => d.timestampS);
+      .map((d) => {
+        if (days === 1) return d.timestampS;
+        return d.timestampS + new Date().getTimezoneOffset() * 60;
+      });
   }, [data, days, sm]);
   const ticksY = Array.from({ length: sm ? 4 : 3 }).map(
     (_, index, array) => Math.ceil(maxY / (array.length - 1)) * index,
