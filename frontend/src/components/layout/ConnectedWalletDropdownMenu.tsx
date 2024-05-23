@@ -6,7 +6,6 @@ import Button from "@/components/shared/Button";
 import CopyToClipboardButton from "@/components/shared/CopyToClipboardButton";
 import DropdownMenu, {
   DropdownMenuItem,
-  DropdownMenuSeparator,
 } from "@/components/shared/DropdownMenu";
 import Tooltip from "@/components/shared/Tooltip";
 import { TLabel, TLabelSans } from "@/components/shared/Typography";
@@ -14,12 +13,10 @@ import { useWalletContext } from "@/contexts/WalletContext";
 import { formatAddress } from "@/lib/format";
 
 interface ConnectedWalletDropdownMenuProps {
-  formattedAddress: string;
   addressNameServiceNameMap: Record<string, string | undefined>;
 }
 
 export default function ConnectedWalletDropdownMenu({
-  formattedAddress,
   addressNameServiceNameMap,
 }: ConnectedWalletDropdownMenuProps) {
   const {
@@ -46,20 +43,20 @@ export default function ConnectedWalletDropdownMenu({
           endIcon={<Icon />}
           disabled={isImpersonatingAddress}
         >
-          {addressNameServiceNameMap[address] ?? formattedAddress}
+          {addressNameServiceNameMap[address] ?? formatAddress(address)}
         </Button>
       }
       title={account?.label ?? "Connected"}
       description={
         <div className="flex h-4 flex-row items-center gap-1">
           <Tooltip title={address}>
-            <TLabelSans>
+            <TLabel className="uppercase">
               {addressNameServiceNameMap[address] ?? formatAddress(address, 12)}
-            </TLabelSans>
+            </TLabel>
           </Tooltip>
           <CopyToClipboardButton
             tooltip="Copy address to clipboard"
-            value={address}
+            value={addressNameServiceNameMap[address] ?? address}
           />
         </div>
       }
@@ -71,9 +68,7 @@ export default function ConnectedWalletDropdownMenu({
 
           {!isImpersonatingAddress && accounts.length > 1 && (
             <>
-              <DropdownMenuSeparator />
-
-              <TLabelSans className="mt-2">Other accounts</TLabelSans>
+              <TLabelSans className="mt-4">Switch to</TLabelSans>
               {accounts
                 .filter((a) => a.address !== address)
                 .map((a) => (
@@ -92,10 +87,10 @@ export default function ConnectedWalletDropdownMenu({
                         {a.label}
                       </TLabel>
                     )}
-                    <TLabelSans className="text-inherit">
+                    <TLabel className="uppercase text-inherit">
                       {addressNameServiceNameMap[a.address] ??
                         formatAddress(a.address, 12)}
-                    </TLabelSans>
+                    </TLabel>
                   </DropdownMenuItem>
                 ))}
             </>

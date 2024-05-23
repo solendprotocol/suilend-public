@@ -1,30 +1,39 @@
 import BigNumber from "bignumber.js";
 
-const PREFIX_SUFFIX_LENGTH = 6;
-const shorten = (value: string, prefixSuffixLength: number) => {
-  return value.length > prefixSuffixLength
-    ? `${value.slice(0, prefixSuffixLength)}...${value.slice(
-        -prefixSuffixLength,
-      )}`
+const shorten = (value: string, start: number, end: number) => {
+  return value.length > start + end
+    ? `${value.slice(0, start)}...${value.slice(-end)}`
     : value;
 };
 
-export const formatAddress = (
-  value: string,
-  length: number = PREFIX_SUFFIX_LENGTH,
-) => shorten(value, length);
+export const replace0x = (value: string) => value.replace("0x", "0×");
 
-export const formatId = (
-  value: string,
-  length: number = PREFIX_SUFFIX_LENGTH,
-) => shorten(value, length);
+export const formatAddress = (value: string, length = 4) => {
+  if (length === 0) return replace0x(value);
 
-export const formatType = (
-  value: string,
-  length: number = PREFIX_SUFFIX_LENGTH,
-) => {
+  return shorten(
+    replace0x(value),
+    length + (value.startsWith("0x") ? 2 : 0),
+    length,
+  );
+};
+
+export const formatId = (value: string, length = 4) => {
+  return shorten(
+    replace0x(value),
+    length + (value.startsWith("0x") ? 2 : 0),
+    length,
+  );
+};
+
+export const formatType = (value: string, length = 4) => {
   const [id, module, type] = value.split("::");
-  return `${shorten(id, length)}::${module}::${type}`;
+
+  return [
+    shorten(replace0x(id), length + (id.startsWith("0x") ? 2 : 0), length),
+    module,
+    type,
+  ].join("::");
 };
 
 export const formatInteger = (value: number) =>

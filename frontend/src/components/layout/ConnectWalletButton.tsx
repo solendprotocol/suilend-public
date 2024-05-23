@@ -7,25 +7,11 @@ import ConnectedWalletDropdownMenu from "@/components/layout/ConnectedWalletDrop
 import ConnectWalletDropdownMenu from "@/components/layout/ConnectWalletDropdownMenu";
 import { useAppContext } from "@/contexts/AppContext";
 import { useWalletContext } from "@/contexts/WalletContext";
-import useBreakpoint from "@/hooks/useBreakpoint";
-import { formatAddress } from "@/lib/format";
 
 export default function ConnectWalletButton() {
   const { accounts, address } = useWalletContext();
   const appContext = useAppContext();
   const suiClient = appContext.suiClient as SuiClient;
-
-  // Formatted address
-  const [formattedAddress, setFormattedAddress] = useState<string | undefined>(
-    undefined,
-  );
-
-  const { sm } = useBreakpoint();
-  useEffect(() => {
-    setFormattedAddress(
-      address ? formatAddress(address, sm ? 6 : 4) : undefined,
-    );
-  }, [address, sm]);
 
   // Connect modal
   const [isConnectModalOpen, setIsConnectModalOpen] = useState<boolean>(false);
@@ -86,9 +72,7 @@ export default function ConnectWalletButton() {
   }, [addressesToLookUp, suiClient]);
 
   const isConnected =
-    address &&
-    formattedAddress &&
-    Object.keys(addressNameServiceNameMap).includes(address);
+    address && Object.keys(addressNameServiceNameMap).includes(address);
 
   return (
     <>
@@ -100,7 +84,6 @@ export default function ConnectWalletButton() {
 
       {isConnected ? (
         <ConnectedWalletDropdownMenu
-          formattedAddress={formattedAddress}
           addressNameServiceNameMap={addressNameServiceNameMap}
         />
       ) : (

@@ -2,6 +2,7 @@ import { useRouter } from "next/router";
 
 import { VenetianMask } from "lucide-react";
 
+import Tooltip from "@/components/shared/Tooltip";
 import {
   bodyClassNames,
   labelSansClassNames,
@@ -33,7 +34,10 @@ export default function ImpersonationModeBanner() {
             <AlertTitle
               className={cn(bodyClassNames, "uppercase tracking-normal")}
             >
-              Impersonating {formatAddress(address)}
+              {"Impersonating "}
+              <Tooltip title={address}>
+                <span>{formatAddress(address, 12)}</span>
+              </Tooltip>
             </AlertTitle>
             <AlertDescription className={labelSansClassNames}>
               Click this banner to exit impersonation mode.
