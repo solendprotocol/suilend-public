@@ -271,28 +271,19 @@ export default function UtilizationBar({
         noTooltip ? undefined : (
           <>
             <div className="flex flex-col gap-2">
-              <WeightedBorrowsTitle
-                labelClassName="uppercase font-mono"
-                noTooltip
-              />
+              <WeightedBorrowsTitle noTooltip />
               <TBodySans className="text-xs">
                 {weightedBorrowsTooltip}
               </TBodySans>
             </div>
 
             <div className="flex flex-col gap-2">
-              <BorrowLimitTitle
-                labelClassName="uppercase font-mono"
-                noTooltip
-              />
+              <BorrowLimitTitle noTooltip />
               <TBodySans className="text-xs">{borrowLimitTooltip}</TBodySans>
             </div>
 
             <div className="flex flex-col gap-2">
-              <LiquidationThresholdTitle
-                labelClassName="uppercase font-mono"
-                noTooltip
-              />
+              <LiquidationThresholdTitle noTooltip />
               <TBodySans className="text-xs">
                 {liquidationThresholdTooltip}
               </TBodySans>

@@ -655,7 +655,7 @@ export default function HistoryTabContent({
         }}
         tableCellClassName={(cell) =>
           cn(
-            "z-[1]",
+            "relative z-[1]",
             cell &&
               [EventType.BORROW, EventType.LIQUIDATE].includes(
                 cell.row.original.eventType,
