@@ -90,7 +90,7 @@ export default function Dialog({
       </DrawerTrigger>
 
       <DrawerContent
-        className="!bottom-0 !top-auto mt-0 !h-[calc(100dvh-48px)] max-h-[calc(100dvh-48px)] rounded-t-lg bg-popover p-0"
+        className="!bottom-0 !top-auto mt-0 !h-dvh max-h-dvh rounded-t-lg bg-popover p-0"
         thumbClassName="hidden"
         overlay={{ className: "bg-background/80" }}
       >
