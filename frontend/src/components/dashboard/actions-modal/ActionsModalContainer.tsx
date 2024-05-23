@@ -62,11 +62,11 @@ export default function ActionsModalContainer({ children }: PropsWithChildren) {
     };
   }, []);
 
-  if (md) {
+  if (md)
     return (
       <Dialog open={isOpen}>
         <DialogContent
-          className="grid h-dvh max-w-none place-items-center border-none bg-transparent p-0 px-10 py-8 md:overflow-auto"
+          className="grid h-dvh max-w-none place-items-center overflow-auto border-none bg-transparent p-0 px-10 py-8"
           onOpenAutoFocus={(e) => e.preventDefault()}
           onEscapeKeyDown={() => close()}
           overlay={{
@@ -103,12 +103,11 @@ export default function ActionsModalContainer({ children }: PropsWithChildren) {
         </DialogContent>
       </Dialog>
     );
-  }
   return (
     <DrawerRoot open={isOpen} onRelease={(e, open) => !open && close()}>
       <DrawerContent
         className={cn(
-          "mt-[0] max-h-[calc(100dvh-0px)] rounded-t-lg bg-popover p-4",
+          "mt-0 max-h-[calc(100dvh-0px)] rounded-t-lg bg-popover p-4",
           isMoreParametersOpen ? "!h-[calc(100dvh-0px)]" : "!h-auto",
           visualViewportHeight < 400
             ? "!bottom-auto !top-0"
