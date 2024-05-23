@@ -2,7 +2,6 @@ import NextLink from "next/link";
 import React, { useState } from "react";
 
 import BigNumber from "bignumber.js";
-import { ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 
 import Card from "@/components/dashboard/Card";
@@ -13,12 +12,7 @@ import Spinner from "@/components/shared/Spinner";
 import TextLink from "@/components/shared/TextLink";
 import TokenLogo from "@/components/shared/TokenLogo";
 import Tooltip from "@/components/shared/Tooltip";
-import {
-  TBody,
-  TLabel,
-  TLabelSans,
-  TTitle,
-} from "@/components/shared/Typography";
+import { TBody, TLabelSans, TTitle } from "@/components/shared/Typography";
 import { Separator } from "@/components/ui/separator";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { useDashboardContext } from "@/contexts/DashboardContext";
@@ -41,7 +35,9 @@ interface PendingRewardsProps {
 function PendingRewards({ totalSuiRewards, isCentered }: PendingRewardsProps) {
   return (
     <div className={cn("flex flex-col gap-1", isCentered && "items-center")}>
-      <TLabel className="uppercase">Pending rewards</TLabel>
+      <TLabelSans className={cn(isCentered && "text-center")}>
+        Pending rewards
+      </TLabelSans>
       <div className="flex flex-row items-center gap-1.5">
         <TokenLogo
           className="h-4 w-4"
@@ -65,9 +61,9 @@ interface TotalPointsStatProps {
 function TotalPointsStat({ totalPoints, isCentered }: TotalPointsStatProps) {
   return (
     <div className={cn("flex flex-col gap-1", isCentered && "items-center")}>
-      <TLabel className={cn("uppercase", isCentered && "text-center")}>
+      <TLabelSans className={cn(isCentered && "text-center")}>
         Total points
-      </TLabel>
+      </TLabelSans>
       <PointsCount points={totalPoints} />
     </div>
   );
@@ -81,9 +77,9 @@ interface PointsPerDayStatProps {
 function PointsPerDayStat({ pointsPerDay, isCentered }: PointsPerDayStatProps) {
   return (
     <div className={cn("flex flex-col gap-1", isCentered && "items-center")}>
-      <TLabel className={cn("uppercase", isCentered && "text-center")}>
+      <TLabelSans className={cn(isCentered && "text-center")}>
         Points per day
-      </TLabel>
+      </TLabelSans>
       <PointsCount points={pointsPerDay} />
     </div>
   );
@@ -97,15 +93,13 @@ interface RankStatProps {
 function RankStat({ rank, isCentered }: RankStatProps) {
   return (
     <div className={cn("flex flex-col gap-1", isCentered && "items-center")}>
-      <TLabel className={cn("uppercase", isCentered && "text-center")}>
-        Rank
-      </TLabel>
+      <TLabelSans className={cn(isCentered && "text-center")}>Rank</TLabelSans>
       <PointsRank rank={rank} isCentered={isCentered} />
     </div>
   );
 }
 
-export default function ProtocolRewardsCard() {
+export default function RewardsCard() {
   const { setIsConnectWalletDropdownOpen, address, isImpersonatingAddress } =
     useWalletContext();
   const { refreshData, explorer, obligation, ...restAppContext } =
@@ -168,8 +162,7 @@ export default function ProtocolRewardsCard() {
       <div
         className="flex h-[100px] flex-col items-center justify-center gap-4 sm:h-[110px]"
         style={{
-          backgroundImage:
-            "url('/assets/dashboard/protocol-rewards-not-connected.png')",
+          backgroundImage: "url('/assets/dashboard/rewards-not-connected.png')",
           backgroundPosition: "center",
           backgroundSize: "cover",
           backgroundRepeat: "no-repeat",
@@ -193,8 +186,7 @@ export default function ProtocolRewardsCard() {
       <div
         className="rounded-[3px] bg-background p-4"
         style={{
-          backgroundImage:
-            "url('/assets/dashboard/protocol-rewards-connected.png')",
+          backgroundImage: "url('/assets/dashboard/rewards-connected.png')",
           backgroundPosition: "center",
           backgroundSize: "cover",
           backgroundRepeat: "no-repeat",
@@ -204,7 +196,7 @@ export default function ProtocolRewardsCard() {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex flex-col gap-1">
               <TTitle className="uppercase text-primary-foreground">
-                Protocol rewards
+                Rewards
               </TTitle>
               <TLabelSans>
                 Boost your earnings with bonus Suilend rewards.
@@ -217,7 +209,6 @@ export default function ProtocolRewardsCard() {
                   <Button
                     className="w-full border-secondary text-primary-foreground"
                     labelClassName="uppercase"
-                    endIcon={<ExternalLink />}
                     variant="secondaryOutline"
                   >
                     Leaderboard

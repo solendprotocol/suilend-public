@@ -20,9 +20,9 @@ export default function SectionTitle({
   children,
 }: SectionTitle) {
   return (
-    <div className="flex flex-row items-center gap-2">
+    <div className="flex flex-row items-center gap-1.5">
       <div
-        className={cn("h-2.5 w-2.5", barSegmentClassName)}
+        className={cn("h-2.5 w-1", barSegmentClassName)}
         style={barSegmentStyle}
       />
       <LabelWithTooltip className={labelClassName} tooltip={tooltip}>

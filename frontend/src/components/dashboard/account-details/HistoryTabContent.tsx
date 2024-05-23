@@ -564,49 +564,53 @@ export default function HistoryTabContent({
 
   return (
     <>
-      <div className="flex flex-row flex-wrap gap-2 p-4">
-        {eventTypes.map((eventType) => (
-          <Button
-            key={eventType}
-            labelClassName="text-xs font-sans"
-            className={cn(
-              "rounded-full",
-              isNotFilteredOutEventType(eventType) &&
-                "border-secondary bg-secondary/5 text-primary-foreground",
-            )}
-            variant="secondaryOutline"
-            size="sm"
-            onClick={() => toggleEventTypeFilter(eventType)}
-          >
-            {EventTypeNameMap[eventType]}
-          </Button>
-        ))}
-        {coinTypes.map((coinType) => {
-          const coinMetadata = data.coinMetadataMap[coinType];
+      <div className="flex flex-row gap-4 p-4">
+        <TLabelSans className="my-1">Filters</TLabelSans>
 
-          return (
+        <div className="flex flex-row flex-wrap gap-2">
+          {eventTypes.map((eventType) => (
             <Button
-              key={coinType}
+              key={eventType}
+              labelClassName="text-xs font-sans"
               className={cn(
-                "h-6 rounded-full",
-                isNotFilteredOutCoinType(coinType) &&
+                "rounded-full",
+                isNotFilteredOutEventType(eventType) &&
                   "border-secondary bg-secondary/5 text-primary-foreground",
               )}
-              icon={
-                <TokenLogo
-                  coinType={coinType}
-                  symbol={coinMetadata.symbol}
-                  src={coinMetadata.iconUrl}
-                />
-              }
               variant="secondaryOutline"
-              size="icon"
-              onClick={() => toggleCoinTypeFilter(coinType)}
+              size="sm"
+              onClick={() => toggleEventTypeFilter(eventType)}
             >
-              {coinMetadata.symbol}
+              {EventTypeNameMap[eventType]}
             </Button>
-          );
-        })}
+          ))}
+          {coinTypes.map((coinType) => {
+            const coinMetadata = data.coinMetadataMap[coinType];
+
+            return (
+              <Button
+                key={coinType}
+                className={cn(
+                  "h-6 rounded-full",
+                  isNotFilteredOutCoinType(coinType) &&
+                    "border-secondary bg-secondary/5 text-primary-foreground",
+                )}
+                icon={
+                  <TokenLogo
+                    coinType={coinType}
+                    symbol={coinMetadata.symbol}
+                    src={coinMetadata.iconUrl}
+                  />
+                }
+                variant="secondaryOutline"
+                size="icon"
+                onClick={() => toggleCoinTypeFilter(coinType)}
+              >
+                {coinMetadata.symbol}
+              </Button>
+            );
+          })}
+        </div>
       </div>
 
       <DataTable<RowData>

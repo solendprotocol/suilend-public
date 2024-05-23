@@ -25,7 +25,7 @@ import {
   getFilteredRewards,
   getTotalAprPercent,
 } from "@/lib/liquidityMining";
-import { OPEN_LTV_BW_TOOLTIP } from "@/lib/tooltips";
+import { OPEN_LTV_BORROW_WEIGHT_TOOLTIP } from "@/lib/tooltips";
 import { reserveSort } from "@/lib/utils";
 
 export interface ReservesRowData {
@@ -33,8 +33,8 @@ export interface ReservesRowData {
   price: BigNumber;
   symbol: string;
   iconUrl?: string | null;
-  openLtvPct: number;
-  borrowWeight: number;
+  openLtvPercent: BigNumber;
+  borrowWeight: BigNumber;
   depositedAmount: BigNumber;
   depositedAmountUsd: BigNumber;
   depositedAmountTooltip?: string;
@@ -71,7 +71,7 @@ export default function MarketTable() {
         enableSorting: false,
         header: ({ column }) =>
           tableHeader(column, "LTV / BW", {
-            tooltip: OPEN_LTV_BW_TOOLTIP,
+            tooltip: OPEN_LTV_BORROW_WEIGHT_TOOLTIP,
           }),
         cell: ({ row }) => <OpenLtvBwCell {...row.original} />,
       },
@@ -126,12 +126,10 @@ export default function MarketTable() {
           const price = reserve.price;
           const symbol = reserve.symbol;
           const iconUrl = reserve.iconUrl;
-          const openLtvPct = reserve.config.openLtvPct;
+          const openLtvPercent = new BigNumber(reserve.config.openLtvPct);
           const borrowWeight = new BigNumber(
-            reserve.config.borrowWeightBps.toString(),
-          )
-            .div(100 * 100)
-            .toNumber();
+            reserve.config.borrowWeightBps,
+          ).div(10000);
           const depositedAmount = reserve.depositedAmount;
           const depositedAmountUsd = reserve.depositedAmountUsd;
           const borrowedAmount = reserve.borrowedAmount;
@@ -243,7 +241,7 @@ export default function MarketTable() {
             price,
             symbol,
             iconUrl,
-            openLtvPct,
+            openLtvPercent,
             borrowWeight,
             depositedAmount,
             depositedAmountUsd,
@@ -269,6 +267,7 @@ export default function MarketTable() {
           columns={columns}
           data={rows}
           noDataMessage="No assets"
+          tableClassName="border-t-0"
           onRowClick={(row) => () =>
             openActionsModal(Number(row.original.reserve.arrayIndex))
           }

@@ -2,6 +2,7 @@ import { useCallback, useMemo } from "react";
 
 import { ColumnDef } from "@tanstack/react-table";
 import BigNumber from "bignumber.js";
+import { HandCoins, PiggyBank } from "lucide-react";
 
 import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
 import { Side } from "@suilend/sdk/types";
@@ -12,9 +13,10 @@ import {
   getCtokenExchangeRate,
 } from "@/components/dashboard/account-details/AccountDetailsDialog";
 import DataTable, { tableHeader } from "@/components/dashboard/DataTable";
+import TitleWithIcon from "@/components/shared/TitleWithIcon";
 import TokenLogo from "@/components/shared/TokenLogo";
 import Tooltip from "@/components/shared/Tooltip";
-import { TBody, TLabelSans, TTitle } from "@/components/shared/Typography";
+import { TBody, TLabelSans } from "@/components/shared/Typography";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { formatToken, formatUsd } from "@/lib/format";
@@ -514,12 +516,14 @@ export default function EarningsTabContent({
 
       {[
         {
+          titleIcon: <PiggyBank />,
           title: "Assets deposited",
           columns: depositColumns,
           data: rows?.deposit,
           noDataMessage: "No deposits",
         },
         {
+          titleIcon: <HandCoins />,
           title: "Assets borrowed",
           columns: borrowColumns,
           data: rows?.borrow,
@@ -527,7 +531,10 @@ export default function EarningsTabContent({
         },
       ].map((table) => (
         <div key={table.title} className="flex flex-col gap-4">
-          <TTitle className="px-4 uppercase">{table.title}</TTitle>
+          <TitleWithIcon className="px-4" icon={table.titleIcon}>
+            {table.title}
+          </TitleWithIcon>
+
           <DataTable<RowData>
             columns={table.columns}
             data={table.data}

@@ -202,11 +202,20 @@ export default function AccountDetailsDialog() {
   const isOpen = router.query.accountDetails !== undefined;
 
   const onOpenChange = (_isOpen: boolean) => {
-    const { accountDetails, accountDetailsTab, ...restQuery } = router.query;
+    const { accountDetails, ...restQuery } = router.query;
 
     router.push({
       query: _isOpen ? { ...restQuery, accountDetails: true } : restQuery,
     });
+    if (_isOpen) return;
+
+    setTimeout(() => {
+      const { accountDetailsTab, ...restQuery2 } = restQuery;
+
+      router.replace({
+        query: restQuery2,
+      });
+    }, 250);
   };
 
   const isFetchingRef = useRef<boolean>(false);

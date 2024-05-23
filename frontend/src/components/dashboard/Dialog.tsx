@@ -3,13 +3,12 @@ import {
   PropsWithChildren,
   ReactElement,
   ReactNode,
-  cloneElement,
 } from "react";
 
 import { DialogProps as DialogRootProps } from "@radix-ui/react-dialog";
 import { ClassValue } from "clsx";
 
-import { TTitle } from "@/components/shared/Typography";
+import TitleWithIcon from "@/components/shared/TitleWithIcon";
 import {
   DialogContent,
   DialogContentProps,
@@ -17,6 +16,13 @@ import {
   Dialog as DialogRoot,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  DrawerContent,
+  DrawerHeader,
+  Drawer as DrawerRoot,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
+import useBreakpoint from "@/hooks/useBreakpoint";
 import { cn } from "@/lib/utils";
 
 interface DialogProps extends PropsWithChildren {
@@ -42,45 +48,64 @@ export default function Dialog({
   const { className: contentClassName, ...restContentProps } =
     contentProps || {};
 
-  return (
-    <DialogRoot {...rootProps}>
-      <DialogTrigger asChild className="appearance-none">
-        {trigger}
-      </DialogTrigger>
+  const { md } = useBreakpoint();
 
-      <DialogContent
-        className={cn(
-          "flex h-dvh max-h-none max-w-none flex-col gap-0 overflow-hidden bg-popover p-0 sm:h-[calc(100dvh-var(--sm-my)*2)] sm:w-[calc(100dvw-var(--sm-mx)*2)] sm:max-w-4xl",
-          contentClassName,
-        )}
-        style={{ "--sm-mx": "2rem", "--sm-my": "2rem" } as CSSProperties}
-        onOpenAutoFocus={(e) => e.preventDefault()}
-        overlay={{ className: "bg-background/80" }}
-        {...restContentProps}
-      >
-        <DialogHeader
+  if (md)
+    return (
+      <DialogRoot {...rootProps}>
+        <DialogTrigger asChild className="appearance-none">
+          {trigger}
+        </DialogTrigger>
+
+        <DialogContent
           className={cn(
-            "relative h-max space-y-0 border-b p-4",
-            headerClassName,
+            "flex h-[calc(100dvh-var(--sm-my)*2)] max-h-none w-[calc(100dvw-var(--sm-mx)*2)] max-w-4xl flex-col gap-0 overflow-hidden bg-popover p-0",
+            contentClassName,
           )}
+          style={{ "--sm-mx": "2rem", "--sm-my": "2rem" } as CSSProperties}
+          onOpenAutoFocus={(e) => e.preventDefault()}
+          overlay={{ className: "bg-background/80" }}
+          {...restContentProps}
         >
-          <TTitle className="flex flex-row items-center gap-2 uppercase">
-            {titleIcon &&
-              cloneElement(titleIcon, {
-                className: "w-4 h-4 shrink-0",
-              })}
-            {title}
-          </TTitle>
+          <DialogHeader
+            className={cn("relative space-y-0 p-4", headerClassName)}
+          >
+            <TitleWithIcon icon={titleIcon}>{title}</TitleWithIcon>
+
+            {headerEndContent && (
+              <div className="absolute right-[calc(8px+20px+16px)] top-1/2 flex -translate-y-2/4 flex-row gap-1">
+                {headerEndContent}
+              </div>
+            )}
+          </DialogHeader>
+
+          {children}
+        </DialogContent>
+      </DialogRoot>
+    );
+  return (
+    <DrawerRoot {...rootProps}>
+      <DrawerTrigger asChild className="appearance-none">
+        {trigger}
+      </DrawerTrigger>
+
+      <DrawerContent
+        className="!bottom-0 !top-auto mt-0 !h-[calc(100dvh-48px)] max-h-[calc(100dvh-48px)] rounded-t-lg bg-popover p-0"
+        thumbClassName="hidden"
+        overlay={{ className: "bg-background/80" }}
+      >
+        <DrawerHeader className={cn("relative p-4", headerClassName)}>
+          <TitleWithIcon icon={titleIcon}>{title}</TitleWithIcon>
 
           {headerEndContent && (
-            <div className="absolute right-[calc(8px+20px+16px)] top-1/2 flex -translate-y-2/4 flex-row gap-1">
+            <div className="absolute right-4 top-1/2 flex -translate-y-2/4 flex-row gap-1">
               {headerEndContent}
             </div>
           )}
-        </DialogHeader>
+        </DrawerHeader>
 
         {children}
-      </DialogContent>
-    </DialogRoot>
+      </DrawerContent>
+    </DrawerRoot>
   );
 }

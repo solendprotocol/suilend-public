@@ -12,8 +12,19 @@ import Button from "@/components/shared/Button";
 import LabelWithValue from "@/components/shared/LabelWithValue";
 import { Separator } from "@/components/ui/separator";
 import { useAppContext } from "@/contexts/AppContext";
-import { formatLtv, formatPercent, formatToken, formatUsd } from "@/lib/format";
+import {
+  formatBorrowWeight,
+  formatLtvPercent,
+  formatPercent,
+  formatToken,
+  formatUsd,
+} from "@/lib/format";
 import { PYTH_PRICE_ID_SYMBOL_MAP, getPythOracleUrl } from "@/lib/pyth";
+import {
+  BORROW_WEIGHT_TOOLTIP,
+  CLOSE_LTV_TOOLTIP,
+  OPEN_LTV_TOOLTIP,
+} from "@/lib/tooltips";
 import { cn } from "@/lib/utils";
 
 export enum Panel {
@@ -57,22 +68,27 @@ function LimitsPanel({ reserve }: PanelProps) {
       />
       <LabelWithValue
         label="Open LTV"
-        value={formatLtv(new BigNumber(reserve.config.openLtvPct))}
+        labelTooltip={OPEN_LTV_TOOLTIP}
+        value={formatLtvPercent(new BigNumber(reserve.config.openLtvPct))}
         horizontal
       />
       <LabelWithValue
         label="Close LTV"
-        value={formatLtv(new BigNumber(reserve.config.closeLtvPct))}
+        labelTooltip={CLOSE_LTV_TOOLTIP}
+        value={formatLtvPercent(new BigNumber(reserve.config.closeLtvPct))}
         horizontal
       />
       <LabelWithValue
         label="Max close LTV"
-        value={formatLtv(new BigNumber(reserve.config.maxCloseLtvPct))}
+        value={formatLtvPercent(new BigNumber(reserve.config.maxCloseLtvPct))}
         horizontal
       />
       <LabelWithValue
         label="Borrow weight"
-        value={reserve.config.borrowWeightBps / 10000}
+        labelTooltip={BORROW_WEIGHT_TOOLTIP}
+        value={formatBorrowWeight(
+          new BigNumber(reserve.config.borrowWeightBps / 10000),
+        )}
         horizontal
       />
       <LabelWithValue

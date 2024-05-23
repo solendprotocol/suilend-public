@@ -4,7 +4,7 @@ import { Info } from "lucide-react";
 
 import Button from "@/components/shared/Button";
 import Popover from "@/components/shared/Popover";
-import { TBody, TLabel } from "@/components/shared/Typography";
+import { TBody, TLabelSans } from "@/components/shared/Typography";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { getFormattedMaxOutflow } from "@/lib/rateLimiter";
 import { cn } from "@/lib/utils";
@@ -41,14 +41,14 @@ export default function MarketOverviewPopover() {
     >
       <div className="flex w-full flex-col gap-2">
         <div className="flex flex-row items-center justify-between gap-4">
-          <TLabel className="uppercase">Max outflow</TLabel>
+          <TLabelSans>Max outflow</TLabelSans>
           <TBody className="text-right uppercase">
             {formattedOutflow.formattedMaxOutflow}
           </TBody>
         </div>
 
         <div className="flex flex-row items-center justify-between gap-4">
-          <TLabel className="uppercase">Owner</TLabel>
+          <TLabelSans>Owner</TLabelSans>
           <TBody className="text-right uppercase">Suilend</TBody>
         </div>
       </div>
