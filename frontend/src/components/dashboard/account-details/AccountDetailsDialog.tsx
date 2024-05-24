@@ -11,6 +11,7 @@ import {
   ApiClaimRewardEvent,
   ApiDepositEvent,
   ApiLiquidateEvent,
+  ApiObligationDataEvent,
   ApiRepayEvent,
   ApiReserveAssetDataEvent,
   ApiWithdrawEvent,
@@ -28,7 +29,7 @@ import { TBody } from "@/components/shared/Typography";
 import { Separator } from "@/components/ui/separator";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { isSuilendPoints } from "@/lib/coinType";
-import { EventType, apiEventSortDesc, eventSortAsc } from "@/lib/events";
+import { EventType, eventSortAsc } from "@/lib/events";
 import { formatPoints, formatToken } from "@/lib/format";
 import { API_URL } from "@/lib/navigation";
 
@@ -39,13 +40,13 @@ export const getCtokenExchangeRate = (event: ApiReserveAssetDataEvent) =>
 
 export type EventsData = {
   reserveAssetData: ApiReserveAssetDataEvent[];
-
   deposit: ApiDepositEvent[];
   borrow: ApiBorrowEvent[];
   withdraw: ApiWithdrawEvent[];
   repay: ApiRepayEvent[];
   liquidate: ApiLiquidateEvent[];
   claimReward: ApiClaimRewardEvent[];
+  obligationData: ApiObligationDataEvent[];
 };
 
 interface TokenAmountProps {
@@ -141,21 +142,22 @@ export default function AccountDetailsDialog() {
         const url1 = `${API_URL}/events?${new URLSearchParams({
           eventTypes: [
             EventType.DEPOSIT,
+            EventType.BORROW,
             EventType.WITHDRAW,
+            EventType.REPAY,
             EventType.LIQUIDATE,
           ].join(","),
           obligationId,
-          joinEventTypes: EventType.RESERVE_ASSET_DATA,
+          joinEventTypes: [
+            EventType.RESERVE_ASSET_DATA,
+            EventType.OBLIGATION_DATA,
+          ].join(","),
         })}`;
         const res1 = await fetch(url1);
         const json1 = await res1.json();
 
         const url2 = `${API_URL}/events?${new URLSearchParams({
-          eventTypes: [
-            EventType.BORROW,
-            EventType.REPAY,
-            EventType.CLAIM_REWARD,
-          ].join(","),
+          eventTypes: EventType.CLAIM_REWARD,
           obligationId,
         })}`;
         const res2 = await fetch(url2);
@@ -177,13 +179,15 @@ export default function AccountDetailsDialog() {
           reserveAssetData: (data.reserveAssetData ?? [])
             .slice()
             .sort(eventSortAsc),
-
-          deposit: (data.deposit ?? []).slice().sort(apiEventSortDesc),
-          borrow: (data.borrow ?? []).slice().sort(apiEventSortDesc),
-          withdraw: (data.withdraw ?? []).slice().sort(apiEventSortDesc),
-          repay: (data.repay ?? []).slice().sort(apiEventSortDesc),
-          liquidate: (data.liquidate ?? []).slice().sort(apiEventSortDesc),
-          claimReward: (data.claimReward ?? []).slice().sort(apiEventSortDesc),
+          deposit: (data.deposit ?? []).slice().sort(eventSortAsc),
+          borrow: (data.borrow ?? []).slice().sort(eventSortAsc),
+          withdraw: (data.withdraw ?? []).slice().sort(eventSortAsc),
+          repay: (data.repay ?? []).slice().sort(eventSortAsc),
+          liquidate: (data.liquidate ?? []).slice().sort(eventSortAsc),
+          claimReward: (data.claimReward ?? []).slice().sort(eventSortAsc),
+          obligationData: (data.obligationData ?? [])
+            .slice()
+            .sort(eventSortAsc),
         });
       } catch (err) {
         console.error(err);

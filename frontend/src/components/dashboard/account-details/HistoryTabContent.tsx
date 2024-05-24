@@ -480,7 +480,12 @@ export default function HistoryTabContent({
 
     const sortedRows = Object.entries(eventsData)
       .reduce((acc: RowData[], [key, value]) => {
-        if ((key as EventType) === EventType.RESERVE_ASSET_DATA) return acc;
+        if (
+          [EventType.RESERVE_ASSET_DATA, EventType.OBLIGATION_DATA].includes(
+            key as EventType,
+          )
+        )
+          return acc;
 
         return [
           ...acc,

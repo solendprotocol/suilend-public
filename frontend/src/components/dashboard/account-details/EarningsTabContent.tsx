@@ -22,17 +22,10 @@ import { AppData, useAppContext } from "@/contexts/AppContext";
 import { formatToken, formatUsd } from "@/lib/format";
 import { cn, reserveSort } from "@/lib/utils";
 
-import { parseReserveAssetDataEvent } from "../../../../../sdk/src/core/parsers/apiReserveAssetDataEvent";
-
-type ChartData = {
-  timestampS: number;
-  earningsUsd: number;
-};
-
 interface RowData {
   coinType: string;
   interest: BigNumber;
-  rewards: Record<string, BigNumber>;
+  rewards: Record<string, Record<string, BigNumber>>;
 }
 
 interface EarningsTabContentProps {
@@ -47,57 +40,12 @@ export default function EarningsTabContent({
   const obligation = appContext.obligation as ParsedObligation;
 
   // Data
-  const chartData = useMemo(() => {
+  const NET = "net";
+
+  const depositsMap = useMemo(() => {
     if (eventsData === undefined) return undefined;
 
-    const firstDepositTimestampS = Math.min(
-      ...eventsData.deposit.map((e) => e.timestamp),
-    );
-
-    const intervalS = 24 * 60 * 60;
-    const firstTimestampS =
-      firstDepositTimestampS + intervalS - (firstDepositTimestampS % intervalS);
-    const lastTimestampS =
-      Date.now() / 1000 - ((Date.now() / 1000) % intervalS);
-
-    const n = (lastTimestampS - firstTimestampS) / intervalS + 1;
-    const timestampsS = Array.from({ length: n }).map(
-      (_, index) => firstTimestampS + index * intervalS,
-    );
-
-    const result: ChartData[] = [];
-    timestampsS.forEach((timestampS, index) => {
-      const earningsUsd = new BigNumber(0);
-
-      const reservePriceMap: Record<string, BigNumber> = {};
-      data.lendingMarket.reserves.forEach((reserve) => {
-        const reserveAssetDataEvent = eventsData.reserveAssetData.findLast(
-          (e) => e.reserveId === reserve.id && e.timestamp <= timestampS,
-        );
-        if (!reserveAssetDataEvent) return;
-
-        const parsedEvent = parseReserveAssetDataEvent(
-          reserveAssetDataEvent,
-          reserve,
-        );
-
-        reservePriceMap[reserve.id] = parsedEvent.price;
-      });
-
-      console.log(
-        "XXX",
-        timestampS,
-        Object.entries(reservePriceMap).map(([x, y]) => [x, y.toString()]),
-      );
-    });
-
-    return result;
-  }, [eventsData, data.lendingMarket.reserves]);
-
-  const interestEarned = useMemo(() => {
-    if (eventsData === undefined) return undefined;
-
-    const netDeposits: Record<string, BigNumber> = {};
+    const map: Record<string, Record<string, BigNumber>> = {};
 
     eventsData.deposit.forEach((depositEvent) => {
       const reserveAssetDataEvent = eventsData.reserveAssetData.find(
@@ -105,16 +53,19 @@ export default function EarningsTabContent({
       );
       if (!reserveAssetDataEvent) return;
 
-      netDeposits[depositEvent.coinType] =
-        netDeposits[depositEvent.coinType] ?? new BigNumber(0);
+      map[depositEvent.coinType] = map[depositEvent.coinType] ?? {};
+      map[depositEvent.coinType][NET] =
+        map[depositEvent.coinType][NET] ?? new BigNumber(0);
 
       const coinMetadata = data.coinMetadataMap[depositEvent.coinType];
       const amount = new BigNumber(depositEvent.ctokenAmount)
         .times(getCtokenExchangeRate(reserveAssetDataEvent))
         .div(10 ** coinMetadata.decimals);
 
-      netDeposits[depositEvent.coinType] =
-        netDeposits[depositEvent.coinType].plus(amount);
+      map[depositEvent.coinType][NET] =
+        map[depositEvent.coinType][NET].plus(amount);
+      map[depositEvent.coinType][depositEvent.timestamp] =
+        map[depositEvent.coinType][NET];
     });
 
     eventsData.withdraw.forEach((withdrawEvent) => {
@@ -123,16 +74,19 @@ export default function EarningsTabContent({
       );
       if (!reserveAssetDataEvent) return;
 
-      netDeposits[withdrawEvent.coinType] =
-        netDeposits[withdrawEvent.coinType] ?? new BigNumber(0);
+      map[withdrawEvent.coinType] = map[withdrawEvent.coinType] ?? {};
+      map[withdrawEvent.coinType][NET] =
+        map[withdrawEvent.coinType][NET] ?? new BigNumber(0);
 
       const coinMetadata = data.coinMetadataMap[withdrawEvent.coinType];
       const amount = new BigNumber(withdrawEvent.ctokenAmount)
         .times(getCtokenExchangeRate(reserveAssetDataEvent))
         .div(10 ** coinMetadata.decimals);
 
-      netDeposits[withdrawEvent.coinType] =
-        netDeposits[withdrawEvent.coinType].minus(amount);
+      map[withdrawEvent.coinType][NET] =
+        map[withdrawEvent.coinType][NET].minus(amount);
+      map[withdrawEvent.coinType][withdrawEvent.timestamp] =
+        map[withdrawEvent.coinType][NET];
     });
 
     eventsData.liquidate.forEach((liquidateEvent) => {
@@ -146,29 +100,31 @@ export default function EarningsTabContent({
       );
       if (!withdrawReserve) return;
 
-      netDeposits[withdrawReserve.coinType] =
-        netDeposits[withdrawReserve.coinType] ?? new BigNumber(0);
+      map[withdrawReserve.coinType] = map[withdrawReserve.coinType] ?? {};
+      map[withdrawReserve.coinType][NET] =
+        map[withdrawReserve.coinType][NET] ?? new BigNumber(0);
 
       const withdrawAmount = new BigNumber(liquidateEvent.withdrawAmount)
         .times(getCtokenExchangeRate(reserveAssetDataEvent))
         .div(10 ** withdrawReserve.mintDecimals);
 
-      netDeposits[withdrawReserve.coinType] =
-        netDeposits[withdrawReserve.coinType].minus(withdrawAmount);
+      map[withdrawReserve.coinType][NET] =
+        map[withdrawReserve.coinType][NET].minus(withdrawAmount);
+      map[withdrawReserve.coinType][liquidateEvent.timestamp] =
+        map[withdrawReserve.coinType][NET];
     });
 
-    const result: Record<string, BigNumber> = {};
-    Object.entries(netDeposits).forEach(([coinType, netDeposit]) => {
+    Object.keys(map).forEach((coinType) => {
       const currentDeposit = obligation.deposits.find(
         (deposit) => deposit.coinType === coinType,
       );
 
-      result[coinType] = new BigNumber(0)
-        .plus(currentDeposit?.depositedAmount ?? 0)
-        .minus(netDeposit);
+      map[coinType][NET] = map[coinType][NET].minus(
+        currentDeposit?.depositedAmount ?? 0,
+      );
     });
 
-    return result;
+    return map;
   }, [
     eventsData,
     data.coinMetadataMap,
@@ -176,12 +132,12 @@ export default function EarningsTabContent({
     obligation.deposits,
   ]);
 
-  const rewardsEarned = useMemo(() => {
+  const rewardsMap = useMemo(() => {
     if (eventsData === undefined) return undefined;
 
-    const result: {
-      deposit: Record<string, Record<string, BigNumber>>;
-      borrow: Record<string, Record<string, BigNumber>>;
+    const map: {
+      deposit: Record<string, Record<string, Record<string, BigNumber>>>;
+      borrow: Record<string, Record<string, Record<string, BigNumber>>>;
     } = { deposit: {}, borrow: {} };
 
     eventsData.claimReward.forEach((claimRewardEvent) => {
@@ -200,15 +156,20 @@ export default function EarningsTabContent({
         ? Side.DEPOSIT
         : Side.BORROW;
 
-      result[side][reserve.coinType] = result[side][reserve.coinType] ?? {};
-      result[side][reserve.coinType][claimRewardEvent.coinType] =
-        result[side][reserve.coinType][claimRewardEvent.coinType] ??
+      map[side][reserve.coinType] = map[side][reserve.coinType] ?? {};
+      map[side][reserve.coinType][claimRewardEvent.coinType] =
+        map[side][reserve.coinType][claimRewardEvent.coinType] ?? {};
+      map[side][reserve.coinType][claimRewardEvent.coinType][NET] =
+        map[side][reserve.coinType][claimRewardEvent.coinType][NET] ??
         new BigNumber(0);
 
-      result[side][reserve.coinType][claimRewardEvent.coinType] =
-        result[side][reserve.coinType][claimRewardEvent.coinType].plus(
+      map[side][reserve.coinType][claimRewardEvent.coinType][NET] =
+        map[side][reserve.coinType][claimRewardEvent.coinType][NET].plus(
           claimedAmount,
         );
+      map[side][reserve.coinType][claimRewardEvent.coinType][
+        claimRewardEvent.timestamp
+      ] = map[side][reserve.coinType][claimRewardEvent.coinType][NET];
     });
 
     Object.entries(data.rewardMap).forEach(([coinType, rewards]) => {
@@ -220,19 +181,21 @@ export default function EarningsTabContent({
 
         const side = reward.stats.side;
 
-        result[side][coinType] = result[side][coinType] ?? {};
-        result[side][coinType][reward.stats.rewardCoinType] =
-          result[side][coinType][reward.stats.rewardCoinType] ??
+        map[side][coinType] = map[side][coinType] ?? {};
+        map[side][coinType][reward.stats.rewardCoinType] =
+          map[side][coinType][reward.stats.rewardCoinType] ?? {};
+        map[side][coinType][reward.stats.rewardCoinType][NET] =
+          map[side][coinType][reward.stats.rewardCoinType][NET] ??
           new BigNumber(0);
 
-        result[side][coinType][reward.stats.rewardCoinType] =
-          result[side][coinType][reward.stats.rewardCoinType].plus(
+        map[side][coinType][reward.stats.rewardCoinType][NET] =
+          map[side][coinType][reward.stats.rewardCoinType][NET].plus(
             claimableAmount,
           );
       });
     });
 
-    return result;
+    return map;
   }, [
     eventsData,
     data.lendingMarket.reserves,
@@ -241,35 +204,41 @@ export default function EarningsTabContent({
     obligation.id,
   ]);
 
-  const interestPaid = useMemo(() => {
+  const borrowsMap = useMemo(() => {
     if (eventsData === undefined) return undefined;
 
-    const netBorrows: Record<string, BigNumber> = {};
+    const map: Record<string, Record<string, BigNumber>> = {};
 
     eventsData.borrow.forEach((borrowEvent) => {
-      netBorrows[borrowEvent.coinType] =
-        netBorrows[borrowEvent.coinType] ?? new BigNumber(0);
+      map[borrowEvent.coinType] = map[borrowEvent.coinType] ?? {};
+      map[borrowEvent.coinType][NET] =
+        map[borrowEvent.coinType][NET] ?? new BigNumber(0);
 
       const coinMetadata = data.coinMetadataMap[borrowEvent.coinType];
       const incFeesAmount = new BigNumber(borrowEvent.liquidityAmount).div(
         10 ** coinMetadata.decimals,
       );
 
-      netBorrows[borrowEvent.coinType] =
-        netBorrows[borrowEvent.coinType].plus(incFeesAmount);
+      map[borrowEvent.coinType][NET] =
+        map[borrowEvent.coinType][NET].plus(incFeesAmount);
+      map[borrowEvent.coinType][borrowEvent.timestamp] =
+        map[borrowEvent.coinType][NET];
     });
 
     eventsData.repay.forEach((repayEvent) => {
-      netBorrows[repayEvent.coinType] =
-        netBorrows[repayEvent.coinType] ?? new BigNumber(0);
+      map[repayEvent.coinType] = map[repayEvent.coinType] ?? {};
+      map[repayEvent.coinType][NET] =
+        map[repayEvent.coinType][NET] ?? new BigNumber(0);
 
       const coinMetadata = data.coinMetadataMap[repayEvent.coinType];
       const amount = new BigNumber(repayEvent.liquidityAmount).div(
         10 ** coinMetadata.decimals,
       );
 
-      netBorrows[repayEvent.coinType] =
-        netBorrows[repayEvent.coinType].minus(amount);
+      map[repayEvent.coinType][NET] =
+        map[repayEvent.coinType][NET].minus(amount);
+      map[repayEvent.coinType][repayEvent.timestamp] =
+        map[repayEvent.coinType][NET];
     });
 
     eventsData.liquidate.forEach((liquidateEvent) => {
@@ -283,29 +252,31 @@ export default function EarningsTabContent({
       );
       if (!repayReserve) return;
 
-      netBorrows[repayReserve.coinType] =
-        netBorrows[repayReserve.coinType] ?? new BigNumber(0);
+      map[repayReserve.coinType] = map[repayReserve.coinType] ?? {};
+      map[repayReserve.coinType][NET] =
+        map[repayReserve.coinType][NET] ?? new BigNumber(0);
 
       const repayAmount = new BigNumber(liquidateEvent.repayAmount)
         .times(getCtokenExchangeRate(reserveAssetDataEvent))
         .div(10 ** repayReserve.mintDecimals);
 
-      netBorrows[repayReserve.coinType] =
-        netBorrows[repayReserve.coinType].minus(repayAmount);
+      map[repayReserve.coinType][NET] =
+        map[repayReserve.coinType][NET].minus(repayAmount);
+      map[repayReserve.coinType][liquidateEvent.timestamp] =
+        map[repayReserve.coinType][NET];
     });
 
-    const result: Record<string, BigNumber> = {};
-    Object.entries(netBorrows).forEach(([coinType, netBorrow]) => {
+    Object.keys(map).forEach((coinType) => {
       const currentBorrow = obligation.borrows.find(
         (borrow) => borrow.coinType === coinType,
       );
 
-      result[coinType] = new BigNumber(0)
-        .plus(currentBorrow?.borrowedAmount ?? 0)
-        .minus(netBorrow);
+      map[coinType][NET] = map[coinType][NET].minus(
+        currentBorrow?.borrowedAmount ?? 0,
+      );
     });
 
-    return result;
+    return map;
   }, [
     eventsData,
     data.coinMetadataMap,
@@ -315,44 +286,48 @@ export default function EarningsTabContent({
 
   // Totals
   const totalInterestEarnedUsd = useMemo(() => {
-    if (interestEarned === undefined) return undefined;
+    if (depositsMap === undefined) return undefined;
 
-    return Object.entries(interestEarned).reduce((acc, [coinType, earned]) => {
+    return Object.keys(depositsMap).reduce((acc, coinType) => {
       const reserve = data.reserveMap[coinType];
       if (!reserve) return acc;
 
-      return acc.plus(earned.times(reserve.price));
+      return acc.plus(
+        depositsMap[coinType][NET].times(-1).times(reserve.price),
+      );
     }, new BigNumber(0));
-  }, [interestEarned, data.reserveMap]);
+  }, [depositsMap, data.reserveMap]);
 
   const totalRewardsEarnedUsd = useMemo(() => {
-    if (rewardsEarned === undefined) return undefined;
+    if (rewardsMap === undefined) return undefined;
 
     let result = new BigNumber(0);
-    Object.values(rewardsEarned).forEach((sideRewards) => {
+    Object.values(rewardsMap).forEach((sideRewards) => {
       Object.values(sideRewards).forEach((reserveRewards) => {
-        Object.entries(reserveRewards).forEach(([rewardCoinType, earned]) => {
+        Object.keys(reserveRewards).forEach((rewardCoinType) => {
           const reserve = data.reserveMap[rewardCoinType];
           if (!reserve) return;
 
-          result = result.plus(earned.times(reserve.price));
+          result = result.plus(
+            reserveRewards[rewardCoinType][NET].times(reserve.price),
+          );
         });
       });
     });
 
     return result;
-  }, [rewardsEarned, data.reserveMap]);
+  }, [rewardsMap, data.reserveMap]);
 
   const totalInterestPaidUsd = useMemo(() => {
-    if (interestPaid === undefined) return undefined;
+    if (borrowsMap === undefined) return undefined;
 
-    return Object.entries(interestPaid).reduce((acc, [coinType, paid]) => {
+    return Object.keys(borrowsMap).reduce((acc, coinType) => {
       const reserve = data.reserveMap[coinType];
       if (!reserve) return acc;
 
-      return acc.plus(paid.times(reserve.price));
+      return acc.plus(borrowsMap[coinType][NET].times(-1).times(reserve.price));
     }, new BigNumber(0));
-  }, [interestPaid, data.reserveMap]);
+  }, [borrowsMap, data.reserveMap]);
 
   const totalEarningsUsd = useMemo(() => {
     if (
@@ -421,15 +396,15 @@ export default function EarningsTabContent({
             return <TLabelSans className="w-max">N/A</TLabelSans>;
           return (
             <div className="flex w-max flex-col gap-1">
-              {Object.entries(rewards)
+              {Object.keys(rewards)
                 .sort((a, b) => (a[0] > b[0] ? -1 : 1))
-                .map(([coinType, earned]) => {
+                .map((coinType) => {
                   const coinMetadata = data.coinMetadataMap[coinType];
 
                   return (
                     <TokenAmount
                       key={coinType}
-                      amount={earned}
+                      amount={rewards[coinType][NET]}
                       coinType={coinType}
                       symbol={coinMetadata.symbol}
                       src={coinMetadata.iconUrl}
@@ -451,23 +426,20 @@ export default function EarningsTabContent({
   // Rows
   const rows = useMemo(() => {
     if (
-      interestEarned === undefined ||
-      rewardsEarned === undefined ||
-      interestPaid === undefined
+      depositsMap === undefined ||
+      rewardsMap === undefined ||
+      borrowsMap === undefined
     )
       return undefined;
 
     const depositKeys = Array.from(
       new Set([
-        ...Object.keys(interestEarned),
-        ...Object.keys(rewardsEarned.deposit),
+        ...Object.keys(depositsMap),
+        ...Object.keys(rewardsMap.deposit),
       ]),
     );
     const borrowKeys = Array.from(
-      new Set([
-        ...Object.keys(interestPaid),
-        ...Object.keys(rewardsEarned.borrow),
-      ]),
+      new Set([...Object.keys(borrowsMap), ...Object.keys(rewardsMap.borrow)]),
     );
 
     const depositRows = depositKeys
@@ -476,8 +448,9 @@ export default function EarningsTabContent({
           ...acc,
           {
             coinType,
-            interest: interestEarned[coinType] ?? new BigNumber(0),
-            rewards: rewardsEarned.deposit[coinType] ?? {},
+            interest:
+              depositsMap[coinType]?.[NET].times(-1) ?? new BigNumber(0),
+            rewards: rewardsMap.deposit[coinType] ?? {},
           } as RowData,
         ],
         [],
@@ -492,8 +465,8 @@ export default function EarningsTabContent({
           ...acc,
           {
             coinType,
-            interest: interestPaid[coinType] ?? new BigNumber(0),
-            rewards: rewardsEarned.borrow[coinType] ?? {},
+            interest: borrowsMap[coinType]?.[NET].times(-1) ?? new BigNumber(0),
+            rewards: rewardsMap.borrow[coinType] ?? {},
           } as RowData,
         ],
         [],
@@ -503,7 +476,7 @@ export default function EarningsTabContent({
       );
 
     return { deposit: depositRows, borrow: borrowRows };
-  }, [interestEarned, rewardsEarned, interestPaid, data.reserveMap]);
+  }, [depositsMap, rewardsMap, borrowsMap, data.reserveMap]);
 
   return (
     <div className="flex flex-1 flex-col gap-8 overflow-y-auto overflow-x-hidden">
