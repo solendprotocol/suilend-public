@@ -154,16 +154,20 @@ export function AppContextProvider({ children }: PropsWithChildren) {
     //   });
 
     const interval = setInterval(async () => {
-      const balances = await suiClient.getAllBalances({
-        owner: address,
-      });
+      try {
+        const balances = await suiClient.getAllBalances({
+          owner: address,
+        });
 
-      if (
-        previousBalancesRef.current !== undefined &&
-        !isEqual(balances, previousBalancesRef.current)
-      )
-        await refreshData();
-      previousBalancesRef.current = balances;
+        if (
+          previousBalancesRef.current !== undefined &&
+          !isEqual(balances, previousBalancesRef.current)
+        )
+          await refreshData();
+        previousBalancesRef.current = balances;
+      } catch (err) {
+        console.error(err);
+      }
     }, 1000 * 5);
 
     return () => {
