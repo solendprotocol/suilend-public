@@ -1,6 +1,9 @@
 import { useWallet } from "@suiet/wallet-kit";
 import { merge } from "lodash";
 
+import elli from "@/public/assets/elli.png";
+import suiet from "@/public/assets/suiet.png";
+
 const PRIORITY_WALLET_IDS = ["Sui Wallet", "Nightly", "Suiet"];
 
 export type Wallet = {
@@ -20,8 +23,12 @@ export const useListWallets = () => {
   const { configuredWallets, detectedWallets } = useWallet();
 
   const walletKitOverrides = {
-    Suiet: {},
+    Suiet: {
+      logoUrl: suiet, // From https://suiet.app/press-kit, Chrome Web Store logo doesn't have a transparent background
+    },
     "Sui Wallet": {
+      logoUrl:
+        "https://lh3.googleusercontent.com/u__yuxJ8TH_r7RVLCDFeDXFLunFnEFMwYOFIXLDag1R_1JgCNBH0rvJBxh-7nojjRlvlYCtYMk7FfrkHt-DOrp1pVw=s120",
       downloadUrls: {
         iOS: "https://apps.apple.com/us/app/sui-wallet-mobile/id6476572140",
         android:
@@ -29,6 +36,7 @@ export const useListWallets = () => {
       },
     },
     Elli: {
+      logoUrl: elli, // From https://elliwallet.com/, Chrome Web Store link is not available
       downloadUrls: {
         iOS: "https://apps.apple.com/tw/app/elli-sui-wallet/id6447304928",
         android:
@@ -39,35 +47,65 @@ export const useListWallets = () => {
       logoUrl:
         "https://lh3.googleusercontent.com/0_mgW4wlHfVNEin17NONBPIi5ZeZB-P5fMSR2HOorMat7ITi8-mNqrDI6yZ0-2GRZN8laJY3L8Qjr5rNzvIZGD9I=s120",
       downloadUrls: {
+        browserExtension:
+          "https://chromewebstore.google.com/detail/ethos-sui-wallet/mcbigmjiafegjnnogedioegffbooigli",
         iOS: "https://apps.apple.com/us/app/ethos-sui-wallet/id6450018653",
         android:
           "https://play.google.com/store/apps/details?id=com.ethoswallet.ethosmobile",
       },
     },
     "Frontier Wallet": {
+      logoUrl:
+        "https://lh3.googleusercontent.com/buEza_jrGHEeH2sn-wUM6jpdQdnvSOr4DbmUVQ3rtTn7oRV7uXjLj8KqiWxISji9jf681OZLM0PL0y7jDGz-i4Bqyw=s120",
       downloadUrls: {
+        browserExtension:
+          "https://chromewebstore.google.com/detail/frontier-wallet/kppfdiipphfccemcignhifpjkapfbihd",
         iOS: "https://apps.apple.com/us/app/frontier-crypto-defi-wallet/id1482380988",
         android:
           "https://play.google.com/store/apps/details?id=com.frontierwallet",
       },
     },
     GlassWallet: {
+      logoUrl:
+        "https://lh3.googleusercontent.com/Ls41pzLke2rSVbBeGX_24_Enbos40lsOoWEmjsCJow4-hxpzLTdLfVF2u3y5M_H106vyyuYyV4XasX54LHJ71BUHpg=s120",
       downloadUrls: {
+        browserExtension:
+          "https://chromewebstore.google.com/detail/glass-wallet-sui-wallet/loinekcabhlmhjjbocijdoimmejangoa",
         iOS: "https://apps.apple.com/app/glass-wallet/id6443949035",
         android:
           "https://play.google.com/store/apps/details?id=app.glasswallet",
       },
     },
-    "Martian Sui Wallet": {},
-    "Morphis Wallet": {},
-    Nightly: {
+    "Martian Sui Wallet": {
+      logoUrl:
+        "https://lh3.googleusercontent.com/5Nza0dQHga1_Z1RAKh-9cPV3N0KxsB3hy2Z31E73qMzxHA7u-7mF8AENMngX7fl5fEdKRcZ67d-f0S-3sZr6n0SsgQ=s120",
       downloadUrls: {
+        browserExtension:
+          "https://chromewebstore.google.com/detail/martian-aptos-sui-wallet/efbglgofoippbgcjepnhiblaibcnclgk",
+      },
+    },
+    "Morphis Wallet": {
+      logoUrl:
+        "https://lh3.googleusercontent.com/m5RWqvhbVo9VWyfLLa6HSnR4t1b6aWzbgFdVwIIFA_RWQDk6CaZurfw8emoXu3XoeFl3TWTkEAE1gFroGpgFiMNrAA=s120",
+      downloadUrls: {
+        browserExtension:
+          "https://chromewebstore.google.com/detail/morphis-wallet/heefohaffomkkkphnlpohglngmbcclhi",
+      },
+    },
+    Nightly: {
+      logoUrl:
+        "https://lh3.googleusercontent.com/_feXM9qulMM5w9BYMLzMpZrxW2WlBmdyg3SbETIoRsHdAD9PANnLCEPabC7lzEK0N8fOyyvFkY3746jk8l73zUErxhU=s120",
+      downloadUrls: {
+        browserExtension:
+          "https://chromewebstore.google.com/detail/nightly/fiikommddbeccaoicoejoniammnalkfa",
         iOS: "https://apps.apple.com/pl/app/nightly-multichain-wallet/id6444768157",
         android:
           "https://play.google.com/store/apps/details?id=com.nightlymobile",
       },
     },
     "OneKey Wallet": {
+      logoUrl:
+        "https://lh3.googleusercontent.com/ShuZB3y27bt9B-Gqz-hZTcJfw7Q-AX32pz2BD7KUpdy4d7zl7i39iGftpur_Sz9a5-r1NeznELzmewvzKZEaWQFLBg=s120",
       downloadUrls: {
         iOS: "https://apps.apple.com/us/app/onekey-blockchain-defi-wallet/id1609559473",
         android:
@@ -82,9 +120,17 @@ export const useListWallets = () => {
     "Spacecy Sui Wallet": {
       logoUrl:
         "https://lh3.googleusercontent.com/moj1XrxBNJuZKyhL_Gql68Ah0I5WFXFc7WawYg0njOtOt7abPqNr9PFzR_BTu9-71NN3zz8CZ-mE7hLFqIFvsYxUlA=s120",
+      downloadUrls: {
+        browserExtension:
+          "https://chromewebstore.google.com/detail/spacecy-wallet/mkchoaaiifodcflmbaphdgeidocajadp",
+      },
     },
     "Surf Wallet": {
+      logoUrl:
+        "https://lh3.googleusercontent.com/sWQuDAnkwGqxzocmB8x8vDQWR7D1L6Of7GXFz7UNJ8TDb4UP9oE2iCjXZyT7tAjHCtZxjNhJjABzyHf5l3JgWIEn=s120",
       downloadUrls: {
+        browserExtension:
+          "https://chromewebstore.google.com/detail/surf-wallet/emeeapjkbcbpbpgaagfchmcgglmebnen",
         iOS: "https://apps.apple.com/us/app/surf-wallet/id6467386034",
         android:
           "https://play.google.com/store/apps/details?id=com.surf.suiwallet",
@@ -137,7 +183,7 @@ export const useListWallets = () => {
       name: "Bitget Wallet",
       isInstalled: false,
       logoUrl:
-        "https://lh3.googleusercontent.com/18dLgXjR4f0AEZjACI-J_kgaJ5-ob8YWPzb5yp7tW7yOlnz4ciT0cZb8YZoY1ei96KNPLM3OY5B08ZsFIImJBZy1Vg=s120",
+        "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/67/b9/68/67b9681d-9e68-5da3-7c17-badd8db67444/NewAppIcon-0-0-1x_U007emarketing-0-7-0-85-220.png/460x0w.webp", // Chrome Web Store logo doesn't have a transparent background
       downloadUrls: {
         browserExtension:
           "https://chromewebstore.google.com/detail/bitget-wallet-formerly-bi/jiidiaalihmmhddjgbnbgdfflelocpak",
