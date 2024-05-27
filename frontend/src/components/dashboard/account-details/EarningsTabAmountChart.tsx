@@ -185,7 +185,7 @@ export default function EarningsTabAmountChart({
       }),
     ),
   );
-  const ticksY = Array.from({ length: md ? 4 : 3 }).map(
+  const ticksY = Array.from({ length: 4 }).map(
     (_, index, array) => minY + ((maxY - minY) / (array.length - 1)) * index,
   );
 
