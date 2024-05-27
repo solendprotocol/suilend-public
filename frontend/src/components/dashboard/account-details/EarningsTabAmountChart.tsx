@@ -20,9 +20,9 @@ import { formatToken } from "@/lib/format";
 
 type ChartData = {
   timestampS: number;
-  amountSui?: number;
-  amountUsdc?: number;
-  amountUsdt?: number;
+  cumInterestEarnedSui?: number;
+  cumInterestEarnedUsdc?: number;
+  cumInterestEarnedUsdt?: number;
 };
 
 interface TooltipContentProps {
@@ -78,26 +78,33 @@ function TooltipContent({
     coinType: string;
     symbol: string;
     src?: string | null;
-    amount: number;
+    decimals: number;
+    cumInterestEarned: number;
     color: string;
   }[] = [];
-  const amountKeyCoinTypeMap = {
-    amountSui: NORMALIZED_SUI_COINTYPE,
-    amountUsdc: NORMALIZED_USDC_ET_COINTYPE,
-    amountUsdt: NORMALIZED_USDT_ET_COINTYPE,
+  const cumInterestEarnedKeyCoinTypeMap = {
+    cumInterestEarnedSui: NORMALIZED_SUI_COINTYPE,
+    cumInterestEarnedUsdc: NORMALIZED_USDC_ET_COINTYPE,
+    cumInterestEarnedUsdt: NORMALIZED_USDT_ET_COINTYPE,
   };
-  Object.entries(amountKeyCoinTypeMap).forEach(([amountKey, coinType]) => {
-    if (chartData[amountKey as keyof ChartData] === undefined) return;
+  Object.entries(cumInterestEarnedKeyCoinTypeMap).forEach(
+    ([cumInterestEarnedKey, coinType]) => {
+      if (chartData[cumInterestEarnedKey as keyof ChartData] === undefined)
+        return;
 
-    const coinMetadata = data.coinMetadataMap[coinType];
-    assets.push({
-      coinType,
-      symbol: coinMetadata.symbol,
-      src: coinMetadata.iconUrl,
-      amount: chartData[amountKey as keyof ChartData] as number,
-      color: COIN_TYPE_COLOR_MAP[coinType],
-    });
-  });
+      const coinMetadata = data.coinMetadataMap[coinType];
+      assets.push({
+        coinType,
+        symbol: coinMetadata.symbol,
+        src: coinMetadata.iconUrl,
+        decimals: coinMetadata.decimals,
+        cumInterestEarned: chartData[
+          cumInterestEarnedKey as keyof ChartData
+        ] as number,
+        color: COIN_TYPE_COLOR_MAP[coinType],
+      });
+    },
+  );
 
   return (
     // Subset of TooltipContent className
@@ -126,7 +133,9 @@ function TooltipContent({
             </div>
 
             <TBody style={{ color: asset.color }}>
-              {formatToken(new BigNumber(asset.amount), { exact: false })}
+              {formatToken(new BigNumber(asset.cumInterestEarned), {
+                dp: asset.decimals,
+              })}
             </TBody>
           </div>
         ))}
@@ -149,9 +158,9 @@ export default function EarningsTabAmountChart({
   const { md } = useBreakpoint();
   const isTouchscreen = useIsTouchscreen();
 
-  const hasSui = data.some((d) => d.amountSui !== 0);
-  const hasUsdc = data.some((d) => d.amountUsdc !== 0);
-  const hasUsdt = data.some((d) => d.amountUsdt !== 0);
+  const hasSui = data.some((d) => d.cumInterestEarnedSui !== 0);
+  const hasUsdc = data.some((d) => d.cumInterestEarnedUsdc !== 0);
+  const hasUsdt = data.some((d) => d.cumInterestEarnedUsdt !== 0);
   if (!hasSui && !hasUsdc && !hasUsdt) return null;
 
   const dayS = 86400;
@@ -166,7 +175,11 @@ export default function EarningsTabAmountChart({
     ...data
       .map(
         (d) =>
-          [d.amountSui, d.amountUsdc, d.amountUsdt].filter(Boolean) as number[],
+          [
+            d.cumInterestEarnedSui,
+            d.cumInterestEarnedUsdc,
+            d.cumInterestEarnedUsdt,
+          ].filter(Boolean) as number[],
       )
       .flat(),
   );
@@ -270,7 +283,7 @@ export default function EarningsTabAmountChart({
           </Recharts.YAxis>
           {hasUsdt && (
             <Recharts.Line
-              dataKey="amountUsdt"
+              dataKey="cumInterestEarnedUsdt"
               isAnimationActive={false}
               stroke={COIN_TYPE_COLOR_MAP[NORMALIZED_USDT_ET_COINTYPE]}
               dot={{
@@ -283,7 +296,7 @@ export default function EarningsTabAmountChart({
           )}
           {hasUsdc && (
             <Recharts.Line
-              dataKey="amountUsdc"
+              dataKey="cumInterestEarnedUsdc"
               isAnimationActive={false}
               stroke={COIN_TYPE_COLOR_MAP[NORMALIZED_USDC_ET_COINTYPE]}
               dot={{
@@ -296,7 +309,7 @@ export default function EarningsTabAmountChart({
           )}
           {hasSui && (
             <Recharts.Line
-              dataKey="amountSui"
+              dataKey="cumInterestEarnedSui"
               isAnimationActive={false}
               stroke={COIN_TYPE_COLOR_MAP[NORMALIZED_SUI_COINTYPE]}
               dot={{
@@ -322,9 +335,9 @@ export default function EarningsTabAmountChart({
               content={({ active, payload, viewBox, coordinate }) => {
                 const parsedPayload = payload?.[0]?.payload;
                 if (parsedPayload) {
-                  if (!hasSui) parsedPayload.amountSui = undefined;
-                  if (!hasUsdc) parsedPayload.amountUsdc = undefined;
-                  if (!hasUsdt) parsedPayload.amountUsdt = undefined;
+                  if (!hasSui) parsedPayload.cumInterestEarnedSui = undefined;
+                  if (!hasUsdc) parsedPayload.cumInterestEarnedUsdc = undefined;
+                  if (!hasUsdt) parsedPayload.cumInterestEarnedUsdt = undefined;
                 }
 
                 return (

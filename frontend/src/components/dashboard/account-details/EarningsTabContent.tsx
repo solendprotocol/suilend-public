@@ -3,15 +3,17 @@ import { useCallback, useMemo } from "react";
 import { normalizeStructTag } from "@mysten/sui.js/utils";
 import { ColumnDef } from "@tanstack/react-table";
 import BigNumber from "bignumber.js";
+import { format } from "date-fns";
 import { HandCoins, PiggyBank } from "lucide-react";
 
-import { WAD } from "@suilend/sdk/constants";
 import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
 import {
   ApiBorrowEvent,
   ApiDepositEvent,
   ApiLiquidateEvent,
+  ApiObligationDataEvent,
   ApiRepayEvent,
+  ApiReserveAssetDataEvent,
   ApiWithdrawEvent,
   Side,
 } from "@suilend/sdk/types";
@@ -34,6 +36,7 @@ import {
   NORMALIZED_USDC_ET_COINTYPE,
   NORMALIZED_USDT_ET_COINTYPE,
 } from "@/lib/coinType";
+import { msPerYear } from "@/lib/constants";
 import { EventType, eventSortAsc } from "@/lib/events";
 import { formatToken, formatUsd } from "@/lib/format";
 import { cn, reserveSort } from "@/lib/utils";
@@ -337,170 +340,337 @@ export default function EarningsTabContent({
   ]);
 
   // Chart
-  const getDepositChartData = useCallback(
-    (side: Side) => {
-      if (eventsData === undefined) return undefined;
+  const getDepositChartData = useCallback(() => {
+    if (eventsData === undefined) return undefined;
 
-      const events = (
-        side === Side.DEPOSIT
-          ? [
-              ...eventsData.deposit.map((event) => ({
-                ...event,
-                eventType: EventType.DEPOSIT,
-              })),
-              ...eventsData.withdraw.map((event) => ({
-                ...event,
-                eventType: EventType.WITHDRAW,
-              })),
-              ...eventsData.liquidate.map((event) => ({
-                ...event,
-                eventType: EventType.LIQUIDATE,
-              })),
-            ]
-          : [
-              ...eventsData.borrow.map((event) => ({
-                ...event,
-                eventType: EventType.BORROW,
-              })),
-              ...eventsData.repay.map((event) => ({
-                ...event,
-                eventType: EventType.REPAY,
-              })),
-              ...eventsData.liquidate.map((event) => ({
-                ...event,
-                eventType: EventType.LIQUIDATE,
-              })),
-            ]
-      ).sort(eventSortAsc);
+    const events = [
+      ...eventsData.deposit.map((event) => ({
+        ...event,
+        eventType: EventType.DEPOSIT,
+      })),
+      ...eventsData.withdraw.map((event) => ({
+        ...event,
+        eventType: EventType.WITHDRAW,
+      })),
+      ...eventsData.liquidate.map((event) => ({
+        ...event,
+        eventType: EventType.LIQUIDATE,
+      })),
+    ].sort(eventSortAsc);
 
-      const resultMap: Record<
-        string,
-        { timestampS: number; amount: number }[]
-      > = {};
-      const timestampsS: number[] = [];
+    const getDepositedAmount = (
+      position: any,
+      ctokenExchangeRate: BigNumber,
+      decimals: number,
+    ) =>
+      !position
+        ? new BigNumber(0)
+        : new BigNumber(position.deposited_ctoken_amount)
+            .times(ctokenExchangeRate)
+            .div(10 ** decimals);
 
-      events.forEach((event) => {
-        const reserveAssetDataEvent = eventsData.reserveAssetData.find(
-          (e) => e.digest === event.digest,
+    const resultMap: Record<
+      string,
+      { timestampS: number; cumInterestEarned: number }[]
+    > = {};
+    const timestampsS: number[] = [];
+
+    const prevEventsMap: Record<
+      string,
+      {
+        obligationData: ApiObligationDataEvent;
+        reserveAssetData: ApiReserveAssetDataEvent;
+      }
+    > = {};
+    events.forEach((event) => {
+      const obligationDataEvent = eventsData.obligationData.find(
+        (e) => e.digest === event.digest,
+      );
+      if (!obligationDataEvent) return;
+
+      let coinType;
+      if ([EventType.DEPOSIT, EventType.WITHDRAW].includes(event.eventType)) {
+        coinType = (event as ApiDepositEvent | ApiWithdrawEvent).coinType;
+      } else if (event.eventType === EventType.LIQUIDATE) {
+        const withdrawReserve = data.lendingMarket.reserves.find(
+          (reserve) =>
+            reserve.id === (event as ApiLiquidateEvent).withdrawReserveId,
         );
-        if (!reserveAssetDataEvent) return;
+        if (!withdrawReserve) return;
 
-        const obligationDataEvent = eventsData.obligationData.find(
-          (e) => e.digest === event.digest,
+        coinType = withdrawReserve.coinType;
+      }
+      if (!coinType) return;
+      const coinMetadata = data.coinMetadataMap[coinType];
+
+      const reserveAssetDataEvent = eventsData.reserveAssetData.find(
+        (e) => e.digest === event.digest && e.coinType === coinType,
+      );
+      if (!reserveAssetDataEvent) return;
+
+      if (prevEventsMap[coinType]) {
+        const prevObligationDataEvent = prevEventsMap[coinType].obligationData;
+        const prevReserveAssetDataEvent =
+          prevEventsMap[coinType].reserveAssetData;
+
+        const prevCtokenExchangeRate = getCtokenExchangeRate(
+          prevReserveAssetDataEvent,
         );
-        if (!obligationDataEvent) return;
+        const ctokenExchangeRate = getCtokenExchangeRate(reserveAssetDataEvent);
 
-        let coinType;
-        if (
-          [
-            EventType.DEPOSIT,
-            EventType.BORROW,
-            EventType.WITHDRAW,
-            EventType.REPAY,
-          ].includes(event.eventType)
-        ) {
-          coinType = (
-            event as
-              | ApiDepositEvent
-              | ApiBorrowEvent
-              | ApiWithdrawEvent
-              | ApiRepayEvent
-          ).coinType;
-        } else if (event.eventType === EventType.LIQUIDATE) {
-          if (side === Side.DEPOSIT) {
-            const withdrawReserve = data.lendingMarket.reserves.find(
-              (reserve) =>
-                reserve.id === (event as ApiLiquidateEvent).withdrawReserveId,
-            );
-            if (!withdrawReserve) return;
+        const proportionOfYear = new BigNumber(
+          reserveAssetDataEvent.timestamp - prevReserveAssetDataEvent.timestamp,
+        ).div(msPerYear / 1000);
+        const annualizedInterestRate = new BigNumber(ctokenExchangeRate)
+          .div(prevCtokenExchangeRate)
+          .minus(1)
+          .div(proportionOfYear);
 
-            coinType = withdrawReserve.coinType;
-          } else {
-            const repayReserve = data.lendingMarket.reserves.find(
-              (reserve) =>
-                reserve.id === (event as ApiLiquidateEvent).repayReserveId,
-            );
-            if (!repayReserve) return;
-
-            coinType = repayReserve.coinType;
-          }
-        }
-        if (!coinType) return;
-        const coinMetadata = data.coinMetadataMap[coinType];
-
-        let amount;
-        const position = JSON.parse(
-          side === Side.DEPOSIT
-            ? obligationDataEvent.depositsJson
-            : obligationDataEvent.borrowsJson,
+        const prevPosition = JSON.parse(
+          prevObligationDataEvent.depositsJson,
         ).find((p: any) => normalizeStructTag(p.coin_type.name) === coinType);
-        if (!position) {
-          amount = 0;
-        } else {
-          if (side === Side.DEPOSIT) {
-            const depositedAmount = new BigNumber(
-              position.deposited_ctoken_amount,
-            )
-              .times(getCtokenExchangeRate(reserveAssetDataEvent))
-              .div(10 ** coinMetadata.decimals);
-            amount = depositedAmount;
-          } else {
-            const incFeesAmount = new BigNumber(position.borrowed_amount.value)
-              .div(WAD)
-              .div(10 ** coinMetadata.decimals);
-            amount = incFeesAmount;
-          }
-        }
+        const prevDepositedAmount = getDepositedAmount(
+          prevPosition,
+          prevCtokenExchangeRate,
+          coinMetadata.decimals,
+        );
+
+        // const position = JSON.parse(obligationDataEvent.depositsJson).find(
+        //   (p: any) => normalizeStructTag(p.coin_type.name) === coinType,
+        // );
+        // const depositedAmount = getDepositedAmount(position);
+
+        const interestEarned = prevDepositedAmount
+          .times(annualizedInterestRate)
+          .times(proportionOfYear);
+
+        console.log(
+          "XXX",
+          "had dept",
+          +prevDepositedAmount,
+          coinType,
+          "at APR",
+          +annualizedInterestRate,
+          "between",
+          format(
+            new Date(prevReserveAssetDataEvent.timestamp * 1000),
+            "yyyy-MM-dd HH:mm:ss",
+          ),
+          "\n",
+          format(
+            new Date(reserveAssetDataEvent.timestamp * 1000),
+            "yyyy-MM-dd HH:mm:ss",
+          ),
+          "____ earned:",
+          +interestEarned,
+        );
 
         resultMap[coinType] = resultMap[coinType] ?? [];
         resultMap[coinType].push({
           timestampS: obligationDataEvent.timestamp,
-          amount: +amount,
+          cumInterestEarned: +new BigNumber(
+            resultMap[coinType][
+              resultMap[coinType].length - 1
+            ].cumInterestEarned,
+          ).plus(interestEarned),
         });
-        timestampsS.push(obligationDataEvent.timestamp);
-      });
-
-      const nowS = Math.floor(new Date().getTime() / 1000);
-      Object.keys(resultMap).forEach((coinType) => {
+      } else {
+        resultMap[coinType] = resultMap[coinType] ?? [];
         resultMap[coinType].push({
-          timestampS: nowS,
-          amount: resultMap[coinType][resultMap[coinType].length - 1].amount,
-        });
-        timestampsS.push(nowS);
-      });
-
-      const result = [];
-      for (const timestampS of Array.from(new Set(timestampsS))) {
-        result.push({
-          timestampS,
-          amountSui:
-            resultMap[NORMALIZED_SUI_COINTYPE]?.findLast(
-              (e) => e.timestampS <= timestampS,
-            )?.amount ?? 0,
-          amountUsdc:
-            resultMap[NORMALIZED_USDC_ET_COINTYPE]?.findLast(
-              (e) => e.timestampS <= timestampS,
-            )?.amount ?? 0,
-          amountUsdt:
-            resultMap[NORMALIZED_USDT_ET_COINTYPE]?.findLast(
-              (e) => e.timestampS <= timestampS,
-            )?.amount ?? 0,
+          timestampS: obligationDataEvent.timestamp,
+          cumInterestEarned: 0,
         });
       }
+      prevEventsMap[coinType] = {
+        obligationData: obligationDataEvent,
+        reserveAssetData: reserveAssetDataEvent,
+      };
 
-      return result;
-    },
-    [eventsData, data.lendingMarket.reserves, data.coinMetadataMap],
-  );
+      timestampsS.push(obligationDataEvent.timestamp);
+    });
+
+    const nowS = Math.floor(new Date().getTime() / 1000);
+    Object.keys(resultMap).forEach((coinType) => {
+      const reserve = data.reserveMap[coinType];
+      if (!reserve) return;
+
+      const prevObligationDataEvent = prevEventsMap[coinType].obligationData;
+      const prevReserveAssetDataEvent =
+        prevEventsMap[coinType].reserveAssetData;
+
+      const prevCtokenExchangeRate = getCtokenExchangeRate(
+        prevReserveAssetDataEvent,
+      );
+      const ctokenExchangeRate = reserve.cTokenExchangeRate;
+
+      const proportionOfYear = new BigNumber(
+        nowS - prevReserveAssetDataEvent.timestamp,
+      ).div(msPerYear / 1000);
+      const annualizedInterestRate = new BigNumber(ctokenExchangeRate)
+        .div(prevCtokenExchangeRate)
+        .minus(1)
+        .div(proportionOfYear);
+
+      const prevPosition = JSON.parse(
+        prevObligationDataEvent.depositsJson,
+      ).find((p: any) => normalizeStructTag(p.coin_type.name) === coinType);
+      const prevDepositedAmount = getDepositedAmount(
+        prevPosition,
+        prevCtokenExchangeRate,
+        reserve.mintDecimals,
+      );
+
+      const interestEarned = prevDepositedAmount
+        .times(annualizedInterestRate)
+        .times(proportionOfYear);
+
+      resultMap[coinType].push({
+        timestampS: nowS,
+        cumInterestEarned: +new BigNumber(
+          resultMap[coinType][resultMap[coinType].length - 1].cumInterestEarned,
+        ).plus(interestEarned),
+      });
+
+      timestampsS.push(nowS);
+    });
+
+    const result = [];
+    for (const timestampS of Array.from(new Set(timestampsS))) {
+      result.push({
+        timestampS,
+        cumInterestEarnedSui:
+          resultMap[NORMALIZED_SUI_COINTYPE]?.findLast(
+            (e) => e.timestampS <= timestampS,
+          )?.cumInterestEarned ?? 0,
+        cumInterestEarnedUsdc:
+          resultMap[NORMALIZED_USDC_ET_COINTYPE]?.findLast(
+            (e) => e.timestampS <= timestampS,
+          )?.cumInterestEarned ?? 0,
+        cumInterestEarnedUsdt:
+          resultMap[NORMALIZED_USDT_ET_COINTYPE]?.findLast(
+            (e) => e.timestampS <= timestampS,
+          )?.cumInterestEarned ?? 0,
+      });
+    }
+
+    return result;
+  }, [eventsData, data.lendingMarket.reserves, data.coinMetadataMap]);
+
+  // const getBorrowChartData = useCallback(() => {
+  //   if (eventsData === undefined) return undefined;
+
+  //   const events = [
+  //     ...eventsData.borrow.map((event) => ({
+  //       ...event,
+  //       eventType: EventType.BORROW,
+  //     })),
+  //     ...eventsData.repay.map((event) => ({
+  //       ...event,
+  //       eventType: EventType.REPAY,
+  //     })),
+  //     ...eventsData.liquidate.map((event) => ({
+  //       ...event,
+  //       eventType: EventType.LIQUIDATE,
+  //     })),
+  //   ].sort(eventSortAsc);
+
+  //   const resultMap: Record<string, { timestampS: number; amount: number }[]> =
+  //     {};
+  //   const timestampsS: number[] = [];
+
+  //   const previousReserveAssetDataEventMap: Record<
+  //     string,
+  //     ApiReserveAssetDataEvent
+  //   > = {};
+  //   events.forEach((event) => {
+  //     const obligationDataEvent = eventsData.obligationData.find(
+  //       (e) => e.digest === event.digest,
+  //     );
+  //     if (!obligationDataEvent) return;
+
+  //     let coinType;
+  //     if ([EventType.BORROW, EventType.REPAY].includes(event.eventType)) {
+  //       coinType = (event as ApiBorrowEvent | ApiRepayEvent).coinType;
+  //     } else if (event.eventType === EventType.LIQUIDATE) {
+  //       const repayReserve = data.lendingMarket.reserves.find(
+  //         (reserve) =>
+  //           reserve.id === (event as ApiLiquidateEvent).repayReserveId,
+  //       );
+  //       if (!repayReserve) return;
+
+  //       coinType = repayReserve.coinType;
+  //     }
+  //     if (!coinType) return;
+  //     const coinMetadata = data.coinMetadataMap[coinType];
+
+  //     const reserveAssetDataEvent = eventsData.reserveAssetData.find(
+  //       (e) => e.digest === event.digest && e.coinType === coinType,
+  //     );
+  //     if (!reserveAssetDataEvent) return;
+
+  //     if (previousReserveAssetDataEventMap[coinType]) {
+  //       //
+  //     }
+
+  //     let amount;
+  //     const position = JSON.parse(obligationDataEvent.borrowsJson).find(
+  //       (p: any) => normalizeStructTag(p.coin_type.name) === coinType,
+  //     );
+  //     if (!position) {
+  //       amount = 0;
+  //     } else {
+  //       const incFeesAmount = new BigNumber(position.borrowed_amount.value)
+  //         .div(WAD)
+  //         .div(10 ** coinMetadata.decimals);
+  //       amount = incFeesAmount;
+  //     }
+
+  //     resultMap[coinType] = resultMap[coinType] ?? [];
+  //     resultMap[coinType].push({
+  //       timestampS: obligationDataEvent.timestamp,
+  //       amount: +amount,
+  //     });
+  //     timestampsS.push(obligationDataEvent.timestamp);
+
+  //     previousReserveAssetDataEventMap[coinType] = reserveAssetDataEvent;
+  //   });
+
+  //   const nowS = Math.floor(new Date().getTime() / 1000);
+  //   Object.keys(resultMap).forEach((coinType) => {
+  //     resultMap[coinType].push({
+  //       timestampS: nowS,
+  //       amount: resultMap[coinType][resultMap[coinType].length - 1].amount,
+  //     });
+  //     timestampsS.push(nowS);
+  //   });
+
+  //   const result = [];
+  //   for (const timestampS of Array.from(new Set(timestampsS))) {
+  //     result.push({
+  //       timestampS,
+  //       amountSui:
+  //         resultMap[NORMALIZED_SUI_COINTYPE]?.findLast(
+  //           (e) => e.timestampS <= timestampS,
+  //         )?.amount ?? 0,
+  //       amountUsdc:
+  //         resultMap[NORMALIZED_USDC_ET_COINTYPE]?.findLast(
+  //           (e) => e.timestampS <= timestampS,
+  //         )?.amount ?? 0,
+  //       amountUsdt:
+  //         resultMap[NORMALIZED_USDT_ET_COINTYPE]?.findLast(
+  //           (e) => e.timestampS <= timestampS,
+  //         )?.amount ?? 0,
+  //     });
+  //   }
+
+  //   return result;
+  // }, [eventsData, data.lendingMarket.reserves, data.coinMetadataMap]);
 
   const depositsChartData = useMemo(
-    () => getDepositChartData(Side.DEPOSIT),
+    () => getDepositChartData(),
     [getDepositChartData],
   );
-  const borrowsChartData = useMemo(
-    () => getDepositChartData(Side.BORROW),
-    [getDepositChartData],
-  );
+  const borrowsChartData = useMemo(() => [], []);
 
   // Totals
   const totalInterestEarnedUsd = useMemo(() => {

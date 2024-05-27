@@ -257,7 +257,7 @@ export default function AccountDetailsDialog() {
       }
       headerClassName="border-b-0"
       titleIcon={<TableProperties />}
-      title="Account overview"
+      title="Account details"
       headerEndContent={
         <>
           {data.obligations && data.obligations.length > 1 && (
