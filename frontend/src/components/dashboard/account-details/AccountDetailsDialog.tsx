@@ -105,13 +105,13 @@ export default function AccountDetailsDialog() {
 
   // Tabs
   enum Tab {
+    OVERVIEW = "overview",
     HISTORY = "history",
-    EARNINGS = "earnings",
   }
 
   const tabs = [
+    { id: Tab.OVERVIEW, icon: <TrendingUp />, title: "Overview" },
     { id: Tab.HISTORY, icon: <FileClock />, title: "History" },
-    { id: Tab.EARNINGS, icon: <TrendingUp />, title: "Earnings" },
   ];
 
   const selectedTab =
@@ -148,10 +148,7 @@ export default function AccountDetailsDialog() {
             EventType.LIQUIDATE,
           ].join(","),
           obligationId,
-          joinEventTypes: [
-            EventType.RESERVE_ASSET_DATA,
-            EventType.OBLIGATION_DATA,
-          ].join(","),
+          joinEventTypes: EventType.RESERVE_ASSET_DATA,
         })}`;
         const res1 = await fetch(url1);
         const json1 = await res1.json();
@@ -163,9 +160,17 @@ export default function AccountDetailsDialog() {
         const res2 = await fetch(url2);
         const json2 = await res2.json();
 
+        const url3 = `${API_URL}/events?${new URLSearchParams({
+          eventTypes: EventType.OBLIGATION_DATA,
+          obligationId,
+        })}`;
+        const res3 = await fetch(url3);
+        const json3 = await res3.json();
+
         // Parse
-        const data = { ...json1, ...json2 } as EventsData;
+        const data = { ...json1, ...json2, ...json3 } as EventsData;
         for (const event of [
+          ...data.reserveAssetData,
           ...data.deposit,
           ...data.borrow,
           ...data.withdraw,
@@ -198,7 +203,7 @@ export default function AccountDetailsDialog() {
 
   // Refresh
   const refresh = () => {
-    if (selectedTab === Tab.EARNINGS) refreshData();
+    if (selectedTab === Tab.OVERVIEW) refreshData();
     fetchEventsData();
   };
 
@@ -242,12 +247,12 @@ export default function AccountDetailsDialog() {
       trigger={
         <Button
           className="text-muted-foreground"
-          tooltip="View account details (history, earnings)"
+          tooltip="View account overview & history"
           icon={<TableProperties />}
           size="icon"
           variant="ghost"
         >
-          View account details (history, earnings)
+          View account overview & history
         </Button>
       }
       headerClassName="border-b-0"
@@ -279,13 +284,13 @@ export default function AccountDetailsDialog() {
           onTabChange={(tab) => onSelectedTabChange(tab as Tab)}
         />
       </div>
-      {![Tab.EARNINGS].includes(selectedTab) && <Separator />}
+      {![Tab.OVERVIEW].includes(selectedTab) && <Separator />}
 
+      {selectedTab === Tab.OVERVIEW && (
+        <EarningsTabContent eventsData={eventsData} />
+      )}
       {selectedTab === Tab.HISTORY && (
         <HistoryTabContent eventsData={eventsData} />
-      )}
-      {selectedTab === Tab.EARNINGS && (
-        <EarningsTabContent eventsData={eventsData} />
       )}
     </Dialog>
   );
