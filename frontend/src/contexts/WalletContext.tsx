@@ -96,7 +96,7 @@ export function WalletContextProvider({ children }: PropsWithChildren) {
     setAccountAddress(
       window.localStorage.getItem("accountAddress") ?? undefined,
     );
-  }, []);
+  }, [connected]);
 
   useEffect(() => {
     if (connected) {
@@ -223,6 +223,8 @@ export function WalletContextProvider({ children }: PropsWithChildren) {
         if (!_account) return;
 
         setAccountAddress(_address);
+        window.localStorage.setItem("accountAddress", _address);
+
         toast.info(
           `Switched to ${_account?.label ?? addressNameServiceName ?? formatAddress(_address, 0)}`,
           {
