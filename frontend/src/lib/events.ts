@@ -12,23 +12,31 @@ import {
 import { msPerYear } from "@/lib/constants";
 
 export enum EventType {
+  INTEREST_UPDATE = "interestUpdate",
   RESERVE_ASSET_DATA = "reserveAssetData",
+  MINT = "mint",
+  REDEEM = "redeem",
   DEPOSIT = "deposit",
   BORROW = "borrow",
   WITHDRAW = "withdraw",
   REPAY = "repay",
   LIQUIDATE = "liquidate",
   CLAIM_REWARD = "claimReward",
+  OBLIGATION_DATA = "obligationData",
 }
 
 export const EventTypeNameMap: Record<EventType, string> = {
+  [EventType.INTEREST_UPDATE]: "Interest update",
   [EventType.RESERVE_ASSET_DATA]: "Reserve asset data",
+  [EventType.MINT]: "Mint",
+  [EventType.REDEEM]: "Redeem",
   [EventType.DEPOSIT]: "Deposit",
   [EventType.BORROW]: "Borrow",
   [EventType.WITHDRAW]: "Withdraw",
   [EventType.REPAY]: "Repay",
   [EventType.LIQUIDATE]: "Liquidation",
   [EventType.CLAIM_REWARD]: "Claim rewards",
+  [EventType.OBLIGATION_DATA]: "Obligation data",
 };
 
 type EventRow = {

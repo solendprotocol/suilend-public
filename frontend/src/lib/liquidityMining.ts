@@ -36,7 +36,7 @@ export type RewardSummary = {
     side: Side;
   };
   obligationClaims: {
-    [obligationAddress: string]: ObligationClaim;
+    [obligationId: string]: ObligationClaim;
   };
 };
 
@@ -59,7 +59,6 @@ export function formatRewards(
   obligations?: ParsedObligation[],
 ) {
   const currentTime = new Date().getTime();
-
   const rewardMap: RewardMap = {};
 
   const getRewardSummary = (

@@ -109,52 +109,56 @@ function AccountPositionCardContent() {
         </TBody>
       </div>
 
-      <Separator />
+      {obligation.positionCount > 0 && (
+        <>
+          <Separator />
 
-      <div className="flex flex-row justify-between gap-2">
-        <div className="flex flex-col gap-1">
-          <WeightedBorrowsTitle />
-          <Tooltip
-            title={formatUsd(getWeightedBorrowsUsd(obligation), {
-              exact: true,
-            })}
-          >
-            <TBody className="w-max">
-              {formatUsd(getWeightedBorrowsUsd(obligation))}
-            </TBody>
-          </Tooltip>
-        </div>
+          <div className="flex flex-row justify-between gap-2">
+            <div className="flex flex-col gap-1">
+              <WeightedBorrowsTitle />
+              <Tooltip
+                title={formatUsd(getWeightedBorrowsUsd(obligation), {
+                  exact: true,
+                })}
+              >
+                <TBody className="w-max">
+                  {formatUsd(getWeightedBorrowsUsd(obligation))}
+                </TBody>
+              </Tooltip>
+            </div>
 
-        <div className="flex flex-col items-end gap-1">
-          <BorrowLimitTitle />
-          <Tooltip
-            title={formatUsd(obligation.minPriceBorrowLimitUsd, {
-              exact: true,
-            })}
-          >
-            <TBody className="w-max text-right">
-              {formatUsd(obligation.minPriceBorrowLimitUsd)}
-            </TBody>
-          </Tooltip>
-        </div>
-      </div>
+            <div className="flex flex-col items-end gap-1">
+              <BorrowLimitTitle />
+              <Tooltip
+                title={formatUsd(obligation.minPriceBorrowLimitUsd, {
+                  exact: true,
+                })}
+              >
+                <TBody className="w-max text-right">
+                  {formatUsd(obligation.minPriceBorrowLimitUsd)}
+                </TBody>
+              </Tooltip>
+            </div>
+          </div>
 
-      <UtilizationBar />
+          <UtilizationBar />
 
-      <div className="flex flex-row items-center justify-between gap-2">
-        <LiquidationThresholdTitle />
-        <Tooltip
-          title={formatUsd(obligation.unhealthyBorrowValueUsd, {
-            exact: true,
-          })}
-        >
-          <TBody className="w-max text-right">
-            {formatUsd(obligation.unhealthyBorrowValueUsd)}
-          </TBody>
-        </Tooltip>
-      </div>
+          <div className="flex flex-row items-center justify-between gap-2">
+            <LiquidationThresholdTitle />
+            <Tooltip
+              title={formatUsd(obligation.unhealthyBorrowValueUsd, {
+                exact: true,
+              })}
+            >
+              <TBody className="w-max text-right">
+                {formatUsd(obligation.unhealthyBorrowValueUsd)}
+              </TBody>
+            </Tooltip>
+          </div>
 
-      {obligation.positionCount > 0 && <AccountBreakdown />}
+          <AccountBreakdown />
+        </>
+      )}
     </div>
   );
 }

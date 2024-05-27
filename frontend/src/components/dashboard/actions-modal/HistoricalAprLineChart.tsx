@@ -41,7 +41,6 @@ const aprFields: AprFields[] = [
 ];
 
 type ChartData = {
-  index: number;
   timestampS: number;
 } & {
   [key in AprFields]?: number;
@@ -430,10 +429,9 @@ export default function HistoricalAprLineChart({
       .reverse();
 
     const result: ChartData[] = [];
-    timestampsS.forEach((timestampS, index) => {
+    timestampsS.forEach((timestampS) => {
       const event = events.findLast((e) => e.sampleTimestampS <= timestampS);
       result.push({
-        index,
         timestampS,
         depositAprPercent: event ? +event.depositAprPercent : undefined,
         depositSuiRewardsAprPercent: event

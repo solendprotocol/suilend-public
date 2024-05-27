@@ -11,6 +11,7 @@ import {
   ApiClaimRewardEvent,
   ApiDepositEvent,
   ApiLiquidateEvent,
+  ApiObligationDataEvent,
   ApiRepayEvent,
   ApiReserveAssetDataEvent,
   ApiWithdrawEvent,
@@ -28,7 +29,7 @@ import { TBody } from "@/components/shared/Typography";
 import { Separator } from "@/components/ui/separator";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { isSuilendPoints } from "@/lib/coinType";
-import { EventType, apiEventSortDesc, eventSortAsc } from "@/lib/events";
+import { EventType, eventSortAsc } from "@/lib/events";
 import { formatPoints, formatToken } from "@/lib/format";
 import { API_URL } from "@/lib/navigation";
 
@@ -39,13 +40,13 @@ export const getCtokenExchangeRate = (event: ApiReserveAssetDataEvent) =>
 
 export type EventsData = {
   reserveAssetData: ApiReserveAssetDataEvent[];
-
   deposit: ApiDepositEvent[];
   borrow: ApiBorrowEvent[];
   withdraw: ApiWithdrawEvent[];
   repay: ApiRepayEvent[];
   liquidate: ApiLiquidateEvent[];
   claimReward: ApiClaimRewardEvent[];
+  obligationData: ApiObligationDataEvent[];
 };
 
 interface TokenAmountProps {
@@ -104,13 +105,13 @@ export default function AccountDetailsDialog() {
 
   // Tabs
   enum Tab {
+    OVERVIEW = "overview",
     HISTORY = "history",
-    EARNINGS = "earnings",
   }
 
   const tabs = [
+    { id: Tab.OVERVIEW, icon: <TrendingUp />, title: "Overview" },
     { id: Tab.HISTORY, icon: <FileClock />, title: "History" },
-    { id: Tab.EARNINGS, icon: <TrendingUp />, title: "Earnings" },
   ];
 
   const selectedTab =
@@ -141,7 +142,9 @@ export default function AccountDetailsDialog() {
         const url1 = `${API_URL}/events?${new URLSearchParams({
           eventTypes: [
             EventType.DEPOSIT,
+            EventType.BORROW,
             EventType.WITHDRAW,
+            EventType.REPAY,
             EventType.LIQUIDATE,
           ].join(","),
           obligationId,
@@ -151,19 +154,23 @@ export default function AccountDetailsDialog() {
         const json1 = await res1.json();
 
         const url2 = `${API_URL}/events?${new URLSearchParams({
-          eventTypes: [
-            EventType.BORROW,
-            EventType.REPAY,
-            EventType.CLAIM_REWARD,
-          ].join(","),
+          eventTypes: EventType.CLAIM_REWARD,
           obligationId,
         })}`;
         const res2 = await fetch(url2);
         const json2 = await res2.json();
 
+        const url3 = `${API_URL}/events?${new URLSearchParams({
+          eventTypes: EventType.OBLIGATION_DATA,
+          obligationId,
+        })}`;
+        const res3 = await fetch(url3);
+        const json3 = await res3.json();
+
         // Parse
-        const data = { ...json1, ...json2 } as EventsData;
+        const data = { ...json1, ...json2, ...json3 } as EventsData;
         for (const event of [
+          ...data.reserveAssetData,
           ...data.deposit,
           ...data.borrow,
           ...data.withdraw,
@@ -177,13 +184,15 @@ export default function AccountDetailsDialog() {
           reserveAssetData: (data.reserveAssetData ?? [])
             .slice()
             .sort(eventSortAsc),
-
-          deposit: (data.deposit ?? []).slice().sort(apiEventSortDesc),
-          borrow: (data.borrow ?? []).slice().sort(apiEventSortDesc),
-          withdraw: (data.withdraw ?? []).slice().sort(apiEventSortDesc),
-          repay: (data.repay ?? []).slice().sort(apiEventSortDesc),
-          liquidate: (data.liquidate ?? []).slice().sort(apiEventSortDesc),
-          claimReward: (data.claimReward ?? []).slice().sort(apiEventSortDesc),
+          deposit: (data.deposit ?? []).slice().sort(eventSortAsc),
+          borrow: (data.borrow ?? []).slice().sort(eventSortAsc),
+          withdraw: (data.withdraw ?? []).slice().sort(eventSortAsc),
+          repay: (data.repay ?? []).slice().sort(eventSortAsc),
+          liquidate: (data.liquidate ?? []).slice().sort(eventSortAsc),
+          claimReward: (data.claimReward ?? []).slice().sort(eventSortAsc),
+          obligationData: (data.obligationData ?? [])
+            .slice()
+            .sort(eventSortAsc),
         });
       } catch (err) {
         console.error(err);
@@ -194,7 +203,7 @@ export default function AccountDetailsDialog() {
 
   // Refresh
   const refresh = () => {
-    if (selectedTab === Tab.EARNINGS) refreshData();
+    if (selectedTab === Tab.OVERVIEW) refreshData();
     fetchEventsData();
   };
 
@@ -238,17 +247,17 @@ export default function AccountDetailsDialog() {
       trigger={
         <Button
           className="text-muted-foreground"
-          tooltip="View account details (history, earnings)"
+          tooltip="View account overview & history"
           icon={<TableProperties />}
           size="icon"
           variant="ghost"
         >
-          View account details (history, earnings)
+          View account overview & history
         </Button>
       }
       headerClassName="border-b-0"
       titleIcon={<TableProperties />}
-      title="Account details"
+      title="Account overview"
       headerEndContent={
         <>
           {data.obligations && data.obligations.length > 1 && (
@@ -275,13 +284,13 @@ export default function AccountDetailsDialog() {
           onTabChange={(tab) => onSelectedTabChange(tab as Tab)}
         />
       </div>
-      {![Tab.EARNINGS].includes(selectedTab) && <Separator />}
+      {![Tab.OVERVIEW].includes(selectedTab) && <Separator />}
 
+      {selectedTab === Tab.OVERVIEW && (
+        <EarningsTabContent eventsData={eventsData} />
+      )}
       {selectedTab === Tab.HISTORY && (
         <HistoryTabContent eventsData={eventsData} />
-      )}
-      {selectedTab === Tab.EARNINGS && (
-        <EarningsTabContent eventsData={eventsData} />
       )}
     </Dialog>
   );
