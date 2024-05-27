@@ -615,7 +615,7 @@ export default function EarningsTabContent({
           return (
             <div className="flex w-max flex-col gap-1">
               {Object.keys(rewards)
-                .sort((a, b) => (a[0] > b[0] ? -1 : 1))
+                .sort((a, b) => (a[0] > b[0] ? 1 : -1))
                 .map((coinType) => {
                   const coinMetadata = data.coinMetadataMap[coinType];
 
