@@ -48,7 +48,7 @@ type ChartData = {
 
 interface TooltipContentProps {
   side: Side;
-  data?: ChartData;
+  d?: ChartData;
   viewBox: {
     width: number;
     height: number;
@@ -60,12 +60,7 @@ interface TooltipContentProps {
   coordinate?: Partial<Coordinate>;
 }
 
-function TooltipContent({
-  side,
-  data,
-  viewBox,
-  coordinate,
-}: TooltipContentProps) {
+function TooltipContent({ side, d, viewBox, coordinate }: TooltipContentProps) {
   const getStyle = () => {
     if (coordinate?.x === undefined) return undefined;
 
@@ -91,7 +86,7 @@ function TooltipContent({
     return { width, top, left, right };
   };
 
-  if (!data) return null;
+  if (!d) return null;
   if (!coordinate?.x || !viewBox) return null;
   return (
     // Subset of TooltipContent className
@@ -101,19 +96,19 @@ function TooltipContent({
     >
       <div className="flex w-full flex-col gap-1">
         <TLabelSans>
-          {format(new Date(data.timestampS * 1000), "MM/dd HH:mm")}
+          {format(new Date(d.timestampS * 1000), "MM/dd HH:mm")}
         </TLabelSans>
 
-        {side === Side.DEPOSIT && data.depositAprPercent !== undefined ? (
+        {side === Side.DEPOSIT && d.depositAprPercent !== undefined ? (
           <>
             <div className="mt-1 flex w-full flex-row items-center justify-between gap-4">
               <TLabelSans>Base APR</TLabelSans>
               <TBody className="text-success">
-                {formatPercent(new BigNumber(data.depositAprPercent))}
+                {formatPercent(new BigNumber(d.depositAprPercent))}
               </TBody>
             </div>
 
-            {data.depositSuiRewardsAprPercent !== undefined && (
+            {d.depositSuiRewardsAprPercent !== undefined && (
               <>
                 <div className="flex w-full flex-row items-center justify-between gap-4">
                   <TLabelSans>SUI Rewards</TLabelSans>
@@ -127,7 +122,7 @@ function TooltipContent({
                     />
                     <TBody className="text-primary-foreground">
                       {formatPercent(
-                        new BigNumber(data.depositSuiRewardsAprPercent),
+                        new BigNumber(d.depositSuiRewardsAprPercent),
                       )}
                     </TBody>
                   </div>
@@ -139,8 +134,7 @@ function TooltipContent({
                   <TBody>
                     {formatPercent(
                       new BigNumber(
-                        data.depositAprPercent +
-                          data.depositSuiRewardsAprPercent,
+                        d.depositAprPercent + d.depositSuiRewardsAprPercent,
                       ),
                     )}
                   </TBody>
@@ -148,12 +142,12 @@ function TooltipContent({
               </>
             )}
           </>
-        ) : side === Side.BORROW && data.borrowAprPercent !== undefined ? (
+        ) : side === Side.BORROW && d.borrowAprPercent !== undefined ? (
           <>
             <div className="flex w-full flex-row items-center justify-between gap-4">
               <TLabelSans>Base APR</TLabelSans>
               <TBody className="text-success">
-                {formatPercent(new BigNumber(data.borrowAprPercent))}
+                {formatPercent(new BigNumber(d.borrowAprPercent))}
               </TBody>
             </div>
           </>
@@ -207,11 +201,11 @@ function Chart({ side, isLoading, data }: ChartProps) {
     (_, index, array) => Math.ceil(maxY / (array.length - 1)) * index,
   );
 
-  const tickXFormatter = (timestampS: number) => {
+  const tickFormatterX = (timestampS: number) => {
     if (days === 1) return format(new Date(timestampS * 1000), "HH:mm");
     return format(new Date(timestampS * 1000), "MM/dd");
   };
-  const tickYFormatter = (value: number) => value.toString();
+  const tickFormatterY = (value: number) => value.toString();
 
   const tickMargin = 2;
   const tick = {
@@ -256,7 +250,7 @@ function Chart({ side, isLoading, data }: ChartProps) {
             stroke: "hsl(209 36% 28%)", // 25% var(--secondary) on var(--popover)
           }}
           tickLine={tickLine}
-          tickFormatter={tickXFormatter}
+          tickFormatter={tickFormatterX}
           domain={domainX}
         />
         <Recharts.YAxis
@@ -268,7 +262,7 @@ function Chart({ side, isLoading, data }: ChartProps) {
             stroke: "hsl(209 36% 28%)", // 25% var(--secondary) on var(--popover)
           }}
           tickLine={tickLine}
-          tickFormatter={tickYFormatter}
+          tickFormatter={tickFormatterY}
           domain={domainY}
           unit="%"
         >
@@ -325,7 +319,10 @@ function Chart({ side, isLoading, data }: ChartProps) {
           <Recharts.Tooltip
             isAnimationActive={false}
             filterNull={false}
-            cursor={{ stroke: "hsl(var(--foreground))", strokeWidth: 1 }}
+            cursor={{
+              stroke: "hsl(var(--foreground))",
+              strokeWidth: 2,
+            }}
             trigger={isTouchscreen ? "hover" : "hover"}
             wrapperStyle={{
               transform: undefined,
@@ -333,14 +330,17 @@ function Chart({ side, isLoading, data }: ChartProps) {
               top: undefined,
               left: undefined,
             }}
-            content={({ active, payload, viewBox, coordinate }) => (
-              <TooltipContent
-                side={side}
-                data={!!active ? payload?.[0]?.payload : undefined}
-                viewBox={viewBox as any}
-                coordinate={coordinate}
-              />
-            )}
+            content={({ active, payload, viewBox, coordinate }) => {
+              if (!active) return null;
+              return (
+                <TooltipContent
+                  side={side}
+                  d={payload?.[0].payload as ChartData | undefined}
+                  viewBox={viewBox as any}
+                  coordinate={coordinate}
+                />
+              );
+            }}
           />
         )}
       </Recharts.AreaChart>
