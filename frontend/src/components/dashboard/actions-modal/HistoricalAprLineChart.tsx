@@ -10,12 +10,12 @@ import { useLocalStorage } from "usehooks-ts";
 import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 import { Side } from "@suilend/sdk/types";
 
-import { useActionsModalContext } from "@/components/dashboard/actions-modal/ActionsModalContext";
 import Button from "@/components/shared/Button";
 import TokenLogo from "@/components/shared/TokenLogo";
 import { TBody, TLabelSans } from "@/components/shared/Typography";
 import { Separator } from "@/components/ui/separator";
 import { AppData, useAppContext } from "@/contexts/AppContext";
+import { useDashboardContext } from "@/contexts/DashboardContext";
 import useBreakpoint from "@/hooks/useBreakpoint";
 import useIsTouchscreen from "@/hooks/useIsTouchscreen";
 import { LOGO_MAP, NORMALIZED_SUI_COINTYPE } from "@/lib/coinType";
@@ -360,7 +360,7 @@ export default function HistoricalAprLineChart({
   const appContext = useAppContext();
   const data = appContext.data as AppData;
   const { reserveAssetDataEventsMap, fetchReserveAssetDataEvents } =
-    useActionsModalContext();
+    useDashboardContext();
 
   // Events
   const [days, setDays] = useLocalStorage<Days>(

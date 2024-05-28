@@ -15,7 +15,10 @@ import { maxU64 } from "@suilend/sdk/constants";
 import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 import { Side } from "@suilend/sdk/types";
 
-import { useActionsModalContext } from "@/components/dashboard/actions-modal/ActionsModalContext";
+import {
+  ActionSignature,
+  useActionsModalContext,
+} from "@/components/dashboard/actions-modal/ActionsModalContext";
 import ActionsModalInput from "@/components/dashboard/actions-modal/ActionsModalInput";
 import HistoricalAprLineChart from "@/components/dashboard/actions-modal/HistoricalAprLineChart";
 import ParametersPanel from "@/components/dashboard/actions-modal/ParametersPanel";
@@ -27,7 +30,6 @@ import TextLink from "@/components/shared/TextLink";
 import { TBody } from "@/components/shared/Typography";
 import { Separator } from "@/components/ui/separator";
 import { AppData, useAppContext } from "@/contexts/AppContext";
-import { ActionSignature } from "@/contexts/DashboardContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 import useBreakpoint from "@/hooks/useBreakpoint";
 import { isSui } from "@/lib/coinType";
