@@ -26,7 +26,6 @@ import Tabs from "@/components/shared/Tabs";
 import TokenLogo from "@/components/shared/TokenLogo";
 import Tooltip from "@/components/shared/Tooltip";
 import { TBody } from "@/components/shared/Typography";
-import { Separator } from "@/components/ui/separator";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { isSuilendPoints } from "@/lib/coinType";
 import { EventType, eventSortAsc } from "@/lib/events";
@@ -105,12 +104,12 @@ export default function AccountDetailsDialog() {
 
   // Tabs
   enum Tab {
-    OVERVIEW = "overview",
+    EARNINGS = "earnings",
     HISTORY = "history",
   }
 
   const tabs = [
-    { id: Tab.OVERVIEW, icon: <TrendingUp />, title: "Overview" },
+    { id: Tab.EARNINGS, icon: <TrendingUp />, title: "Earnings" },
     { id: Tab.HISTORY, icon: <FileClock />, title: "History" },
   ];
 
@@ -203,7 +202,7 @@ export default function AccountDetailsDialog() {
 
   // Refresh
   const refresh = () => {
-    if (selectedTab === Tab.OVERVIEW) refreshData();
+    if (selectedTab === Tab.EARNINGS) refreshData();
     fetchEventsData();
   };
 
@@ -247,12 +246,12 @@ export default function AccountDetailsDialog() {
       trigger={
         <Button
           className="text-muted-foreground"
-          tooltip="View account overview & history"
+          tooltip="View account earnings & history"
           icon={<TableProperties />}
           size="icon"
           variant="ghost"
         >
-          View account overview & history
+          View account earnings & history
         </Button>
       }
       headerClassName="border-b-0"
@@ -282,11 +281,11 @@ export default function AccountDetailsDialog() {
           tabs={tabs}
           selectedTab={selectedTab}
           onTabChange={(tab) => onSelectedTabChange(tab as Tab)}
+          listClassName="mb-0"
         />
       </div>
-      {![Tab.OVERVIEW].includes(selectedTab) && <Separator />}
 
-      {selectedTab === Tab.OVERVIEW && (
+      {selectedTab === Tab.EARNINGS && (
         <EarningsTabContent eventsData={eventsData} />
       )}
       {selectedTab === Tab.HISTORY && (

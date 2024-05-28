@@ -5,14 +5,13 @@ import { ColumnDef } from "@tanstack/react-table";
 import BigNumber from "bignumber.js";
 import { HandCoins, PiggyBank } from "lucide-react";
 
+import { WAD } from "@suilend/sdk/constants";
 import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
 import {
   ApiBorrowEvent,
   ApiDepositEvent,
   ApiLiquidateEvent,
-  ApiObligationDataEvent,
   ApiRepayEvent,
-  ApiReserveAssetDataEvent,
   ApiWithdrawEvent,
   Side,
 } from "@suilend/sdk/types";
@@ -32,12 +31,11 @@ import Tooltip from "@/components/shared/Tooltip";
 import { TBody, TLabelSans } from "@/components/shared/Typography";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AppData, useAppContext } from "@/contexts/AppContext";
+import { useDashboardContext } from "@/contexts/DashboardContext";
 import { msPerYear } from "@/lib/constants";
-import { EventType, eventSortAsc } from "@/lib/events";
+import { Days, EventType, eventSortAsc } from "@/lib/events";
 import { formatToken, formatUsd } from "@/lib/format";
 import { cn, reserveSort } from "@/lib/utils";
-
-import { WAD } from "../../../../../sdk/src/core/constants";
 
 interface RowData {
   coinType: string;
@@ -55,52 +53,35 @@ export default function EarningsTabContent({
   const appContext = useAppContext();
   const data = appContext.data as AppData;
   const obligation = appContext.obligation as ParsedObligation;
+  const { reserveAssetDataEventsMap } = useDashboardContext();
+
+  const nowSRef = useRef<number>(Math.floor(new Date().getTime() / 1000));
 
   type CumInterestMap = Record<
     string,
     { timestampS: number; cumInterest: number }[]
   >;
 
-  type PrevEventsMap = Record<
-    string,
-    {
-      obligationDataEvent: ApiObligationDataEvent;
-      reserveAssetDataEvent: ApiReserveAssetDataEvent;
-    }
-  >;
-
-  const nowSRef = useRef<number>(Math.floor(new Date().getTime() / 1000));
-
   // Interest earned
   const getInterestEarned = useCallback(
     (
-      coinType: string,
-      decimals: number,
       timestampS: number,
       ctokenExchangeRate: BigNumber,
-      prevObligationDataEvent: ApiObligationDataEvent,
-      prevReserveAssetDataEvent: ApiReserveAssetDataEvent,
+      prevTimestampS: number,
+      prevCtokenExchangeRate: BigNumber,
+      prevDepositedCtokenAmount: BigNumber,
     ) => {
-      const prevCtokenExchangeRate = getCtokenExchangeRate(
-        prevReserveAssetDataEvent,
+      const proportionOfYear = new BigNumber(timestampS - prevTimestampS).div(
+        msPerYear / 1000,
       );
-
-      const proportionOfYear = new BigNumber(
-        timestampS - prevReserveAssetDataEvent.timestamp,
-      ).div(msPerYear / 1000);
       const annualizedInterestRate = new BigNumber(ctokenExchangeRate)
         .div(prevCtokenExchangeRate)
         .minus(1)
         .div(proportionOfYear);
 
-      const prevPosition = JSON.parse(
-        prevObligationDataEvent.depositsJson,
-      ).find((p: any) => normalizeStructTag(p.coin_type.name) === coinType);
-      const prevDepositedAmount = !prevPosition
-        ? new BigNumber(0)
-        : new BigNumber(prevPosition.deposited_ctoken_amount)
-            .times(prevCtokenExchangeRate)
-            .div(10 ** decimals);
+      const prevDepositedAmount = new BigNumber(
+        prevDepositedCtokenAmount,
+      ).times(prevCtokenExchangeRate);
 
       const interestEarned = prevDepositedAmount
         .times(annualizedInterestRate)
@@ -114,8 +95,16 @@ export default function EarningsTabContent({
   const cumInterestEarnedMap = useMemo(() => {
     if (eventsData === undefined) return undefined;
 
-    const resultMap: CumInterestMap = {};
-    const prevEventsMap: PrevEventsMap = {};
+    type CumInterestEarnedMap = Record<
+      string,
+      {
+        timestampS: number;
+        ctokenExchangeRate: BigNumber;
+        depositedCtokenAmount: BigNumber;
+        cumInterest: number;
+      }[]
+    >;
+    const resultMap: CumInterestEarnedMap = {};
 
     const events = [
       ...eventsData.deposit.map((event) => ({
@@ -160,54 +149,109 @@ export default function EarningsTabContent({
       );
       if (!reserveAssetDataEvent) return;
 
-      if (!prevEventsMap[coinType]) {
-        resultMap[coinType] = resultMap[coinType] ?? [];
-        resultMap[coinType].push({
-          timestampS: obligationDataEvent.timestamp,
-          cumInterest: 0,
-        });
-      } else {
-        const interestEarned = getInterestEarned(
-          coinType,
-          coinMetadata.decimals,
-          reserveAssetDataEvent.timestamp,
-          getCtokenExchangeRate(reserveAssetDataEvent),
-          prevEventsMap[coinType].obligationDataEvent,
-          prevEventsMap[coinType].reserveAssetDataEvent,
-        );
+      const timestampS = reserveAssetDataEvent.timestamp;
+      const ctokenExchangeRate = getCtokenExchangeRate(reserveAssetDataEvent);
 
-        resultMap[coinType] = resultMap[coinType] ?? [];
-        resultMap[coinType].push({
-          timestampS: obligationDataEvent.timestamp,
-          cumInterest: +interestEarned.plus(
-            resultMap[coinType][resultMap[coinType].length - 1].cumInterest,
-          ),
-        });
-      }
-
-      prevEventsMap[coinType] = { obligationDataEvent, reserveAssetDataEvent };
-    });
-
-    Object.keys(resultMap).forEach((coinType) => {
-      const reserve = data.reserveMap[coinType];
-      if (!reserve) return;
-
-      const interestEarned = getInterestEarned(
-        coinType,
-        reserve.mintDecimals,
-        nowSRef.current,
-        reserve.cTokenExchangeRate,
-        prevEventsMap[coinType].obligationDataEvent,
-        prevEventsMap[coinType].reserveAssetDataEvent,
+      const position = JSON.parse(obligationDataEvent.depositsJson).find(
+        (p: any) => normalizeStructTag(p.coin_type.name) === coinType,
       );
+      const depositedCtokenAmount = new BigNumber(
+        position?.deposited_ctoken_amount ?? 0,
+      ).div(10 ** coinMetadata.decimals);
 
+      const prev =
+        resultMap[coinType] && resultMap[coinType].length > 0
+          ? resultMap[coinType][resultMap[coinType].length - 1]
+          : undefined;
+
+      resultMap[coinType] = resultMap[coinType] ?? [];
       resultMap[coinType].push({
-        timestampS: nowSRef.current,
-        cumInterest: +interestEarned.plus(
-          resultMap[coinType][resultMap[coinType].length - 1].cumInterest,
-        ),
+        timestampS,
+        ctokenExchangeRate,
+        depositedCtokenAmount,
+        cumInterest: prev
+          ? +new BigNumber(prev.cumInterest).plus(
+              getInterestEarned(
+                timestampS,
+                ctokenExchangeRate,
+                prev.timestampS,
+                prev.ctokenExchangeRate,
+                prev.depositedCtokenAmount,
+              ),
+            )
+          : 0,
       });
     });
+
+    for (const coinType of Object.keys(resultMap)) {
+      const reserve = data.reserveMap[coinType];
+      if (!reserve) continue;
+
+      const timestampS = nowSRef.current;
+      const ctokenExchangeRate = reserve.cTokenExchangeRate;
+
+      const prev = resultMap[coinType][resultMap[coinType].length - 1];
+
+      resultMap[coinType].push({
+        timestampS,
+        ctokenExchangeRate,
+        depositedCtokenAmount: new BigNumber(-1),
+        cumInterest: +new BigNumber(prev.cumInterest).plus(
+          getInterestEarned(
+            timestampS,
+            ctokenExchangeRate,
+            prev.timestampS,
+            prev.ctokenExchangeRate,
+            prev.depositedCtokenAmount,
+          ),
+        ),
+      });
+
+      // Increase resolution
+      const days: Days = 30;
+      const reserveAssetDataEvents =
+        reserveAssetDataEventsMap?.[reserve.id]?.[days];
+      if (reserveAssetDataEvents === undefined) return undefined;
+
+      for (let i = 0; i < reserveAssetDataEvents.length; i++) {
+        const r = reserveAssetDataEvents[i];
+
+        const timestampS = r.sampleTimestampS;
+        const ctokenExchangeRate = new BigNumber(r.ctokenSupply).eq(0)
+          ? new BigNumber(1)
+          : new BigNumber(r.depositedAmount).div(r.ctokenSupply);
+
+        if (
+          timestampS <= resultMap[coinType][0].timestampS ||
+          timestampS >=
+            resultMap[coinType][resultMap[coinType].length - 1].timestampS
+        )
+          continue;
+
+        const prev = resultMap[coinType].findLast(
+          (d) => d.timestampS < timestampS,
+        );
+        if (!prev) continue;
+
+        const interestEarned = getInterestEarned(
+          timestampS,
+          ctokenExchangeRate,
+          prev.timestampS,
+          prev.ctokenExchangeRate,
+          prev.depositedCtokenAmount,
+        );
+
+        resultMap[coinType].push({
+          timestampS,
+          ctokenExchangeRate,
+          depositedCtokenAmount: prev.depositedCtokenAmount.plus(
+            interestEarned.div(prev.ctokenExchangeRate),
+          ),
+          cumInterest: +new BigNumber(prev.cumInterest).plus(interestEarned),
+        });
+        resultMap[coinType].sort((a, b) => a.timestampS - b.timestampS);
+      }
+    }
 
     return resultMap;
   }, [
@@ -216,38 +260,25 @@ export default function EarningsTabContent({
     data.coinMetadataMap,
     getInterestEarned,
     data.reserveMap,
+    reserveAssetDataEventsMap,
   ]);
 
   // Interest paid
   const getInterestPaid = useCallback(
     (
-      coinType: string,
-      decimals: number,
       timestampS: number,
       cumulativeBorrowRate: BigNumber,
-      prevObligationDataEvent: ApiObligationDataEvent,
-      prevReserveAssetDataEvent: ApiReserveAssetDataEvent,
+      prevTimestampS: number,
+      prevCumulativeBorrowRate: BigNumber,
+      prevBorrowedAmount: BigNumber,
     ) => {
-      const prevCumulativeBorrowRate = new BigNumber(
-        prevReserveAssetDataEvent.cumulativeBorrowRate,
-      ).div(WAD);
-
-      const proportionOfYear = new BigNumber(
-        timestampS - prevReserveAssetDataEvent.timestamp,
-      ).div(msPerYear / 1000);
+      const proportionOfYear = new BigNumber(timestampS - prevTimestampS).div(
+        msPerYear / 1000,
+      );
       const annualizedInterestRate = new BigNumber(cumulativeBorrowRate)
         .div(prevCumulativeBorrowRate)
         .minus(1)
         .div(proportionOfYear);
-
-      const prevPosition = JSON.parse(prevObligationDataEvent.borrowsJson).find(
-        (p: any) => normalizeStructTag(p.coin_type.name) === coinType,
-      );
-      const prevBorrowedAmount = !prevPosition
-        ? new BigNumber(0)
-        : new BigNumber(prevPosition.borrowed_amount.value)
-            .div(WAD)
-            .div(10 ** decimals);
 
       const interestPaid = prevBorrowedAmount
         .times(annualizedInterestRate)
@@ -261,8 +292,16 @@ export default function EarningsTabContent({
   const cumInterestPaidMap = useMemo(() => {
     if (eventsData === undefined) return undefined;
 
-    const resultMap: CumInterestMap = {};
-    const prevEventsMap: PrevEventsMap = {};
+    type CumInterestPaidMap = Record<
+      string,
+      {
+        timestampS: number;
+        cumulativeBorrowRate: BigNumber;
+        borrowedAmount: BigNumber;
+        cumInterest: number;
+      }[]
+    >;
+    const resultMap: CumInterestPaidMap = {};
 
     const events = [
       ...eventsData.borrow.map((event) => ({
@@ -307,54 +346,109 @@ export default function EarningsTabContent({
       );
       if (!reserveAssetDataEvent) return;
 
-      if (!prevEventsMap[coinType]) {
-        resultMap[coinType] = resultMap[coinType] ?? [];
-        resultMap[coinType].push({
-          timestampS: obligationDataEvent.timestamp,
-          cumInterest: 0,
-        });
-      } else {
-        const interestPaid = getInterestPaid(
-          coinType,
-          coinMetadata.decimals,
-          reserveAssetDataEvent.timestamp,
-          new BigNumber(reserveAssetDataEvent.cumulativeBorrowRate).div(WAD),
-          prevEventsMap[coinType].obligationDataEvent,
-          prevEventsMap[coinType].reserveAssetDataEvent,
-        );
+      const timestampS = reserveAssetDataEvent.timestamp;
+      const cumulativeBorrowRate = new BigNumber(
+        reserveAssetDataEvent.cumulativeBorrowRate,
+      ).div(WAD);
 
-        resultMap[coinType] = resultMap[coinType] ?? [];
-        resultMap[coinType].push({
-          timestampS: obligationDataEvent.timestamp,
-          cumInterest: +interestPaid.plus(
-            resultMap[coinType][resultMap[coinType].length - 1].cumInterest,
-          ),
-        });
-      }
-
-      prevEventsMap[coinType] = { obligationDataEvent, reserveAssetDataEvent };
-    });
-
-    Object.keys(resultMap).forEach((coinType) => {
-      const reserve = data.reserveMap[coinType];
-      if (!reserve) return;
-
-      const interestPaid = getInterestPaid(
-        reserve.coinType,
-        reserve.mintDecimals,
-        nowSRef.current,
-        new BigNumber(reserve.cumulativeBorrowRate),
-        prevEventsMap[coinType].obligationDataEvent,
-        prevEventsMap[coinType].reserveAssetDataEvent,
+      const position = JSON.parse(obligationDataEvent.borrowsJson).find(
+        (p: any) => normalizeStructTag(p.coin_type.name) === coinType,
       );
+      const borrowedAmount = new BigNumber(position?.borrowed_amount.value ?? 0)
+        .div(WAD)
+        .div(10 ** coinMetadata.decimals);
 
+      const prev =
+        resultMap[coinType] && resultMap[coinType].length > 0
+          ? resultMap[coinType][resultMap[coinType].length - 1]
+          : undefined;
+
+      resultMap[coinType] = resultMap[coinType] ?? [];
       resultMap[coinType].push({
-        timestampS: nowSRef.current,
-        cumInterest: +interestPaid.plus(
-          resultMap[coinType][resultMap[coinType].length - 1].cumInterest,
-        ),
+        timestampS,
+        cumulativeBorrowRate,
+        borrowedAmount,
+        cumInterest: prev
+          ? +new BigNumber(prev.cumInterest).plus(
+              getInterestPaid(
+                timestampS,
+                cumulativeBorrowRate,
+                prev.timestampS,
+                prev.cumulativeBorrowRate,
+                prev.borrowedAmount,
+              ),
+            )
+          : 0,
       });
     });
+
+    for (const coinType of Object.keys(resultMap)) {
+      const reserve = data.reserveMap[coinType];
+      if (!reserve) continue;
+
+      const timestampS = nowSRef.current;
+      const cumulativeBorrowRate = reserve.cumulativeBorrowRate;
+
+      const prev = resultMap[coinType][resultMap[coinType].length - 1];
+
+      resultMap[coinType].push({
+        timestampS,
+        cumulativeBorrowRate,
+        borrowedAmount: new BigNumber(-1),
+        cumInterest: +new BigNumber(prev.cumInterest).plus(
+          getInterestPaid(
+            timestampS,
+            cumulativeBorrowRate,
+            prev.timestampS,
+            prev.cumulativeBorrowRate,
+            prev.borrowedAmount,
+          ),
+        ),
+      });
+
+      // Increase resolution
+      const days: Days = 30;
+      const reserveAssetDataEvents =
+        reserveAssetDataEventsMap?.[reserve.id]?.[days];
+      if (reserveAssetDataEvents === undefined) return undefined;
+
+      for (let i = 0; i < reserveAssetDataEvents.length; i++) {
+        const r = reserveAssetDataEvents[i];
+
+        const timestampS = r.sampleTimestampS;
+        const cumulativeBorrowRate = r.cumulativeBorrowRate;
+
+        if (
+          timestampS <= resultMap[coinType][0].timestampS ||
+          timestampS >=
+            resultMap[coinType][resultMap[coinType].length - 1].timestampS
+        )
+          continue;
+
+        const prev = resultMap[coinType].findLast(
+          (d) => d.timestampS < timestampS,
+        );
+        if (!prev) continue;
+
+        const interestPaid = getInterestPaid(
+          timestampS,
+          cumulativeBorrowRate,
+          prev.timestampS,
+          prev.cumulativeBorrowRate,
+          prev.borrowedAmount,
+        );
+
+        resultMap[coinType].push({
+          timestampS,
+          cumulativeBorrowRate,
+          borrowedAmount: prev.borrowedAmount.times(
+            interestPaid.div(prev.borrowedAmount).plus(1),
+          ),
+          cumInterest: +new BigNumber(prev.cumInterest).plus(interestPaid),
+        });
+        resultMap[coinType].sort((a, b) => a.timestampS - b.timestampS);
+      }
+    }
 
     return resultMap;
   }, [
@@ -363,6 +457,7 @@ export default function EarningsTabContent({
     data.coinMetadataMap,
     getInterestPaid,
     data.reserveMap,
+    reserveAssetDataEventsMap,
   ]);
 
   // Rewards
@@ -463,7 +558,7 @@ export default function EarningsTabContent({
             ...acc,
             [coinType]:
               cumInterestMap[coinType].findLast(
-                (e) => e.timestampS <= timestampS,
+                (d) => d.timestampS <= timestampS,
               )?.cumInterest ?? 0,
           }),
           { timestampS },
@@ -699,7 +794,7 @@ export default function EarningsTabContent({
   }, [cumInterestEarnedMap, rewardsMap, cumInterestPaidMap, data.reserveMap]);
 
   return (
-    <div className="flex flex-1 flex-col gap-8 overflow-y-auto overflow-x-hidden">
+    <div className="flex flex-1 flex-col gap-8 overflow-y-auto overflow-x-hidden pt-4">
       <div className="flex flex-col gap-2">
         {totalEarningsUsd !== undefined &&
         cumInterestEarnedUsd !== undefined &&
