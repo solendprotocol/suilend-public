@@ -84,11 +84,13 @@ function Threshold({ className, leftPercent }: ThresholdProps) {
 }
 
 interface UtilizationBarProps {
+  className?: ClassValue;
   obligation?: ParsedObligation | null;
   noTooltip?: boolean;
 }
 
 export default function UtilizationBar({
+  className,
   obligation,
   noTooltip,
 }: UtilizationBarProps) {
@@ -292,7 +294,7 @@ export default function UtilizationBar({
         )
       }
     >
-      <div className="relative flex h-2.5 w-full cursor-pointer flex-row">
+      <div className={cn("relative flex h-2.5 w-full flex-row", className)}>
         {segments.map((segment, index) => (
           <Segment key={index} {...segment} />
         ))}

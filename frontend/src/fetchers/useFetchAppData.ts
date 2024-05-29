@@ -121,7 +121,8 @@ export default function useFetchAppData(
           )
           .map((refreshedObligation) =>
             parseObligation(refreshedObligation, reserveMap),
-          );
+          )
+          .sort((a, b) => a.id - b.id);
       }
 
       // Wallet assets
