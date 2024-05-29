@@ -28,7 +28,7 @@ export const useListWallets = () => {
     },
     "Sui Wallet": {
       logoUrl:
-        "https://lh3.googleusercontent.com/u__yuxJ8TH_r7RVLCDFeDXFLunFnEFMwYOFIXLDag1R_1JgCNBH0rvJBxh-7nojjRlvlYCtYMk7FfrkHt-DOrp1pVw=s120",
+        "https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/05/7c/f1/057cf17e-109e-72cd-eed7-2d539cf3d1f9/AppIcon-0-0-1x_U007ephone-0-85-220.png/460x0w.webp", // Chrome Web Store logo isn't full size
       downloadUrls: {
         iOS: "https://apps.apple.com/us/app/sui-wallet-mobile/id6476572140",
         android:
