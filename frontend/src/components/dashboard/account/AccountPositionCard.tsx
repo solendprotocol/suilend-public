@@ -8,10 +8,10 @@ import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
 import AccountBreakdown from "@/components/dashboard/account/AccountBreakdown";
 import BorrowLimitTitle from "@/components/dashboard/account/BorrowLimitTitle";
 import LiquidationThresholdTitle from "@/components/dashboard/account/LiquidationThresholdTitle";
+import SubaccountDropdownMenu from "@/components/dashboard/account/SubaccountDropdownMenu";
 import WeightedBorrowsTitle from "@/components/dashboard/account/WeightedBorrowsTitle";
 import { Tab as AccountDetailsTab } from "@/components/dashboard/account-details/AccountDetailsDialog";
 import Card from "@/components/dashboard/Card";
-import ObligationSwitcherPopover from "@/components/dashboard/ObligationSwitcherPopover";
 import UtilizationBar, {
   getWeightedBorrowsUsd,
 } from "@/components/dashboard/UtilizationBar";
@@ -221,7 +221,7 @@ export default function AccountPositionCard() {
             )}
 
             {data.obligations && data.obligations.length > 1 && (
-              <ObligationSwitcherPopover />
+              <SubaccountDropdownMenu />
             )}
           </>
         ),

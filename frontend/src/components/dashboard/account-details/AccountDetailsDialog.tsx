@@ -17,10 +17,10 @@ import {
   ApiWithdrawEvent,
 } from "@suilend/sdk/types";
 
+import SubaccountDropdownMenu from "@/components/dashboard/account/SubaccountDropdownMenu";
 import EarningsTabContent from "@/components/dashboard/account-details/EarningsTabContent";
 import HistoryTabContent from "@/components/dashboard/account-details/HistoryTabContent";
 import Dialog from "@/components/dashboard/Dialog";
-import ObligationSwitcherPopover from "@/components/dashboard/ObligationSwitcherPopover";
 import Button from "@/components/shared/Button";
 import Tabs from "@/components/shared/Tabs";
 import TokenLogo from "@/components/shared/TokenLogo";
@@ -131,10 +131,7 @@ export default function AccountDetailsDialog() {
   }, []);
 
   const fetchEventsData = useCallback(
-    async (_obligationId?: string) => {
-      const obligationId = _obligationId ?? obligation?.id;
-      if (!obligationId) return;
-
+    async (obligationId: string) => {
       clearEventsData();
 
       try {
@@ -197,7 +194,7 @@ export default function AccountDetailsDialog() {
         console.error(err);
       }
     },
-    [obligation?.id, clearEventsData],
+    [clearEventsData],
   );
 
   // Refresh
@@ -205,14 +202,27 @@ export default function AccountDetailsDialog() {
   const [nowS, setNowS] = useState<number>(getNowS);
 
   const refresh = () => {
-    if (selectedTab === Tab.EARNINGS) refreshData();
-    fetchEventsData();
+    if (!obligation?.id) return;
 
+    if (selectedTab === Tab.EARNINGS) refreshData();
+    fetchEventsData(obligation.id);
     setNowS(getNowS());
   };
 
   // State
   const isOpen = router.query.accountDetails !== undefined;
+  const fetchedDataObligationIdRef = useRef<string | undefined>(undefined);
+
+  useEffect(() => {
+    if (!obligation?.id) return;
+
+    if (isOpen) {
+      if (fetchedDataObligationIdRef.current === obligation.id) return;
+
+      fetchEventsData(obligation.id);
+      fetchedDataObligationIdRef.current = obligation.id;
+    }
+  }, [obligation?.id, isOpen, fetchEventsData]);
 
   const onOpenChange = (_isOpen: boolean) => {
     if (_isOpen) return;
@@ -223,21 +233,11 @@ export default function AccountDetailsDialog() {
     setTimeout(() => {
       const { accountDetailsTab, ...restQuery2 } = restQuery;
       router.replace({ query: restQuery2 });
+
+      clearEventsData();
+      fetchedDataObligationIdRef.current = undefined;
     }, 250);
   };
-
-  const isFetchingRef = useRef<boolean>(false);
-  useEffect(() => {
-    if (isOpen) {
-      if (isFetchingRef.current) return;
-
-      fetchEventsData();
-      isFetchingRef.current = true;
-    } else {
-      clearEventsData();
-      isFetchingRef.current = false;
-    }
-  }, [isOpen, fetchEventsData, clearEventsData]);
 
   if (!obligation) return null;
   return (
@@ -249,7 +249,7 @@ export default function AccountDetailsDialog() {
       headerEndContent={
         <>
           {data.obligations && data.obligations.length > 1 && (
-            <ObligationSwitcherPopover onSelect={refresh} />
+            <SubaccountDropdownMenu />
           )}
 
           <Button
