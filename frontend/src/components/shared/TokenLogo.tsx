@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { CSSProperties } from "react";
 
 import { ClassValue } from "clsx";
 
@@ -13,6 +14,7 @@ import wormholeLogo from "@/public/assets/wormhole.png";
 
 interface TokenLogoProps {
   className?: ClassValue;
+  style?: CSSProperties;
   showTooltip?: boolean;
   coinType: string;
   symbol: string;
@@ -21,6 +23,7 @@ interface TokenLogoProps {
 
 export default function TokenLogo({
   className,
+  style,
   showTooltip,
   coinType,
   symbol,
@@ -50,7 +53,7 @@ export default function TokenLogo({
         ) : undefined
       }
     >
-      <div className={cn("relative h-7 w-7", className)}>
+      <div className={cn("relative h-7 w-7", className)} style={style}>
         <AspectRatio ratio={1} className="relative z-[1]">
           {src ? (
             <Image

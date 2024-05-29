@@ -30,7 +30,7 @@ export default function TotalCell({
     <div
       className={cn(
         "flex flex-col items-end gap-1",
-        horizontal && "flex-row items-baseline justify-end gap-2",
+        horizontal && "flex-row-reverse items-baseline justify-end gap-2",
       )}
     >
       <Tooltip

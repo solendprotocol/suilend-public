@@ -390,13 +390,18 @@ export default function AprWithRewardsBreakdown({
           </>
         }
       >
-        <div className="flex flex-row items-center gap-1.5">
+        <div className="relative flex flex-row items-center">
           {[...pointsDailyRewards, ...aprRewards, ...nonPointsDailyRewards].map(
             (reward, index) => {
               return (
                 <TokenLogo
                   key={index}
-                  className="h-4 w-4"
+                  className={cn(
+                    "relative h-4 w-4",
+                    index !== 0 &&
+                      "-ml-0.5 rounded-full outline outline-2 outline-card",
+                  )}
+                  style={{ zIndex: index }}
                   coinType={reward.stats.rewardCoinType}
                   symbol={reward.stats.rewardSymbol}
                   src={reward.stats.iconUrl}
@@ -407,7 +412,7 @@ export default function AprWithRewardsBreakdown({
 
           <TBody
             className={cn(
-              "text-primary-foreground decoration-primary-foreground/50",
+              "ml-1.5 text-primary-foreground decoration-primary-foreground/50",
               hoverUnderlineClassName,
             )}
           >
