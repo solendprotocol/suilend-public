@@ -220,6 +220,7 @@ export default function EarningsChart({
             .map((coinType) => (
               <Recharts.Line
                 key={coinType}
+                type="monotone"
                 dataKey={coinType}
                 isAnimationActive={false}
                 stroke={COIN_TYPE_COLOR_MAP[coinType]}
