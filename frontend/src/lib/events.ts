@@ -86,6 +86,18 @@ export const calculateSuiRewardsDepositAprPercent = (
         startTimeMs: 1713225600000,
         endTimeMs: 1713830400000,
       },
+      {
+        coinType: NORMALIZED_SUI_COINTYPE,
+        totalRewards: new BigNumber(177579),
+        startTimeMs: 1713830400000, // 2024-04-23 08:00:00
+        endTimeMs: 1715040000000, // 2024-05-07 08:00:00
+      },
+      {
+        coinType: NORMALIZED_SUI_COINTYPE,
+        totalRewards: new BigNumber(162386.57),
+        startTimeMs: 1715040000000, // 2024-05-07 08:00:00
+        endTimeMs: 1716249600000, //2024-05-21 08:00:00
+      },
     ],
     [NORMALIZED_USDC_ET_COINTYPE]: [
       {
@@ -93,6 +105,18 @@ export const calculateSuiRewardsDepositAprPercent = (
         totalRewards: new BigNumber(75915.32),
         startTimeMs: 1713225600000,
         endTimeMs: 1713830400000,
+      },
+      {
+        coinType: NORMALIZED_SUI_COINTYPE,
+        totalRewards: new BigNumber(168534),
+        startTimeMs: 1713830400000, // 2024-04-23 08:00:00
+        endTimeMs: 1715040000000, // 2024-05-07 08:00:00
+      },
+      {
+        coinType: NORMALIZED_SUI_COINTYPE,
+        totalRewards: new BigNumber(176679.79),
+        startTimeMs: 1715040000000, // 2024-05-07 08:00:00
+        endTimeMs: 1716249600000, //2024-05-21 08:00:00
       },
     ],
     [NORMALIZED_USDT_ET_COINTYPE]: [
@@ -102,13 +126,44 @@ export const calculateSuiRewardsDepositAprPercent = (
         startTimeMs: 1713225600000,
         endTimeMs: 1713830400000,
       },
+      {
+        coinType: NORMALIZED_SUI_COINTYPE,
+        totalRewards: new BigNumber(128939),
+        startTimeMs: 1713830400000, // 2024-04-23 08:00:00
+        endTimeMs: 1715040000000, // 2024-05-07 08:00:00
+      },
+      {
+        coinType: NORMALIZED_SUI_COINTYPE,
+        totalRewards: new BigNumber(116534.73),
+        startTimeMs: 1715040000000, // 2024-05-07 08:00:00
+        endTimeMs: 1716249600000, //2024-05-21 08:00:00
+      },
     ],
   };
 
-  const poolRewards = [
-    ...(historicalSuiRewardMap[event.coinType] ?? []),
+  const allPoolRewards: ReducedPoolReward[] = [
     ...reserve.depositsPoolRewardManager.poolRewards,
-  ].filter(
+  ];
+  (historicalSuiRewardMap[event.coinType] ?? []).forEach((pr) => {
+    if (
+      allPoolRewards.find(
+        (p) =>
+          p.coinType === pr.coinType &&
+          p.startTimeMs === pr.startTimeMs &&
+          p.endTimeMs === pr.endTimeMs,
+      )
+    )
+      return;
+
+    allPoolRewards.push({
+      coinType: pr.coinType,
+      totalRewards: pr.totalRewards,
+      startTimeMs: pr.startTimeMs,
+      endTimeMs: pr.endTimeMs,
+    });
+  });
+
+  const poolRewards = allPoolRewards.filter(
     (pr) =>
       isSui(pr.coinType) &&
       event.timestampS >= pr.startTimeMs / 1000 &&
