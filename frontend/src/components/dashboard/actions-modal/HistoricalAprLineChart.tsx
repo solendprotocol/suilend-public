@@ -10,25 +10,25 @@ import { useLocalStorage } from "usehooks-ts";
 import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 import { Side } from "@suilend/sdk/types";
 
-import { useActionsModalContext } from "@/components/dashboard/actions-modal/ActionsModalContext";
 import Button from "@/components/shared/Button";
 import TokenLogo from "@/components/shared/TokenLogo";
 import { TBody, TLabelSans } from "@/components/shared/Typography";
+import { ViewBox, getTooltipStyle } from "@/components/ui/chart";
 import { Separator } from "@/components/ui/separator";
 import { AppData, useAppContext } from "@/contexts/AppContext";
+import { useDashboardContext } from "@/contexts/DashboardContext";
 import useBreakpoint from "@/hooks/useBreakpoint";
 import useIsTouchscreen from "@/hooks/useIsTouchscreen";
 import { LOGO_MAP, NORMALIZED_SUI_COINTYPE } from "@/lib/coinType";
 import {
   DAYS,
+  DAY_S,
   Days,
   RESERVE_EVENT_SAMPLE_INTERVAL_S_MAP,
   calculateSuiRewardsDepositAprPercent,
 } from "@/lib/events";
 import { formatPercent } from "@/lib/format";
 import { cn } from "@/lib/utils";
-
-const DAY_S = 24 * 60 * 60;
 
 type AprFields =
   | "depositAprPercent"
@@ -48,75 +48,41 @@ type ChartData = {
 
 interface TooltipContentProps {
   side: Side;
-  data?: ChartData;
-  viewBox: {
-    width: number;
-    height: number;
-    top: number;
-    right: number;
-    bottom: number;
-    left: number;
-  };
+  d: ChartData;
+  viewBox: ViewBox;
   coordinate?: Partial<Coordinate>;
 }
 
-function TooltipContent({
-  side,
-  data,
-  viewBox,
-  coordinate,
-}: TooltipContentProps) {
-  const getStyle = () => {
-    if (coordinate?.x === undefined) return undefined;
-
-    const width = side === Side.DEPOSIT ? 200 : 160;
-    const top = viewBox.top;
-    let left: string | number = "auto";
-    let right: string | number = "auto";
-    const offset = 10;
-
-    const isOverHalfway = coordinate.x - viewBox.left > viewBox.width / 2;
-    if (isOverHalfway) {
-      right = Math.min(
-        viewBox.left + viewBox.width + viewBox.right - width,
-        viewBox.left + viewBox.width + viewBox.right - (coordinate.x - offset),
-      );
-    } else {
-      left = Math.min(
-        viewBox.left + viewBox.width + viewBox.right - width,
-        coordinate.x + offset,
-      );
-    }
-
-    return { width, top, left, right };
-  };
-
-  if (!data) return null;
+function TooltipContent({ side, d, viewBox, coordinate }: TooltipContentProps) {
   if (!coordinate?.x || !viewBox) return null;
   return (
     // Subset of TooltipContent className
     <div
       className="absolute rounded-md border bg-popover px-3 py-1.5 shadow-md"
-      style={getStyle()}
+      style={getTooltipStyle(
+        side === Side.DEPOSIT ? 180 : 160,
+        viewBox,
+        coordinate,
+      )}
     >
       <div className="flex w-full flex-col gap-1">
         <TLabelSans>
-          {format(new Date(data.timestampS * 1000), "MM/dd HH:mm")}
+          {format(new Date(d.timestampS * 1000), "MM/dd HH:mm")}
         </TLabelSans>
 
-        {side === Side.DEPOSIT && data.depositAprPercent !== undefined ? (
+        {side === Side.DEPOSIT && d.depositAprPercent !== undefined ? (
           <>
             <div className="mt-1 flex w-full flex-row items-center justify-between gap-4">
               <TLabelSans>Base APR</TLabelSans>
               <TBody className="text-success">
-                {formatPercent(new BigNumber(data.depositAprPercent))}
+                {formatPercent(new BigNumber(d.depositAprPercent))}
               </TBody>
             </div>
 
-            {data.depositSuiRewardsAprPercent !== undefined && (
+            {d.depositSuiRewardsAprPercent !== undefined && (
               <>
                 <div className="flex w-full flex-row items-center justify-between gap-4">
-                  <TLabelSans>SUI Rewards</TLabelSans>
+                  <TLabelSans>Rewards</TLabelSans>
 
                   <div className="flex flex-row items-center gap-1.5">
                     <TokenLogo
@@ -127,7 +93,7 @@ function TooltipContent({
                     />
                     <TBody className="text-primary-foreground">
                       {formatPercent(
-                        new BigNumber(data.depositSuiRewardsAprPercent),
+                        new BigNumber(d.depositSuiRewardsAprPercent),
                       )}
                     </TBody>
                   </div>
@@ -139,8 +105,7 @@ function TooltipContent({
                   <TBody>
                     {formatPercent(
                       new BigNumber(
-                        data.depositAprPercent +
-                          data.depositSuiRewardsAprPercent,
+                        d.depositAprPercent + d.depositSuiRewardsAprPercent,
                       ),
                     )}
                   </TBody>
@@ -148,12 +113,12 @@ function TooltipContent({
               </>
             )}
           </>
-        ) : side === Side.BORROW && data.borrowAprPercent !== undefined ? (
+        ) : side === Side.BORROW && d.borrowAprPercent !== undefined ? (
           <>
             <div className="flex w-full flex-row items-center justify-between gap-4">
               <TLabelSans>Base APR</TLabelSans>
               <TBody className="text-success">
-                {formatPercent(new BigNumber(data.borrowAprPercent))}
+                {formatPercent(new BigNumber(d.borrowAprPercent))}
               </TBody>
             </div>
           </>
@@ -207,11 +172,11 @@ function Chart({ side, isLoading, data }: ChartProps) {
     (_, index, array) => Math.ceil(maxY / (array.length - 1)) * index,
   );
 
-  const tickXFormatter = (timestampS: number) => {
+  const tickFormatterX = (timestampS: number) => {
     if (days === 1) return format(new Date(timestampS * 1000), "HH:mm");
     return format(new Date(timestampS * 1000), "MM/dd");
   };
-  const tickYFormatter = (value: number) => value.toString();
+  const tickFormatterY = (value: number) => value.toString();
 
   const tickMargin = 2;
   const tick = {
@@ -232,7 +197,6 @@ function Chart({ side, isLoading, data }: ChartProps) {
 
   return (
     <Recharts.ResponsiveContainer
-      className="relative z-[1]"
       width="100%"
       height="100%"
       data-loading={data.length > 0}
@@ -256,7 +220,7 @@ function Chart({ side, isLoading, data }: ChartProps) {
             stroke: "hsl(209 36% 28%)", // 25% var(--secondary) on var(--popover)
           }}
           tickLine={tickLine}
-          tickFormatter={tickXFormatter}
+          tickFormatter={tickFormatterX}
           domain={domainX}
         />
         <Recharts.YAxis
@@ -268,7 +232,7 @@ function Chart({ side, isLoading, data }: ChartProps) {
             stroke: "hsl(209 36% 28%)", // 25% var(--secondary) on var(--popover)
           }}
           tickLine={tickLine}
-          tickFormatter={tickYFormatter}
+          tickFormatter={tickFormatterY}
           domain={domainY}
           unit="%"
         >
@@ -302,7 +266,7 @@ function Chart({ side, isLoading, data }: ChartProps) {
             strokeWidth: 0,
             fill: "transparent",
           }}
-          strokeWidth={1.5}
+          strokeWidth={2}
         />
         {side === Side.DEPOSIT && (
           <Recharts.Area
@@ -321,11 +285,14 @@ function Chart({ side, isLoading, data }: ChartProps) {
             strokeWidth={1.5}
           />
         )}
-        {!isLoading && (
+        {data.length > 0 && (
           <Recharts.Tooltip
             isAnimationActive={false}
             filterNull={false}
-            cursor={{ stroke: "hsl(var(--foreground))", strokeWidth: 1 }}
+            cursor={{
+              stroke: "hsl(var(--foreground))",
+              strokeWidth: 2,
+            }}
             trigger={isTouchscreen ? "hover" : "hover"}
             wrapperStyle={{
               transform: undefined,
@@ -333,14 +300,17 @@ function Chart({ side, isLoading, data }: ChartProps) {
               top: undefined,
               left: undefined,
             }}
-            content={({ active, payload, viewBox, coordinate }) => (
-              <TooltipContent
-                side={side}
-                data={!!active ? payload?.[0]?.payload : undefined}
-                viewBox={viewBox as any}
-                coordinate={coordinate}
-              />
-            )}
+            content={({ active, payload, viewBox, coordinate }) => {
+              if (!active || !payload?.[0]?.payload) return null;
+              return (
+                <TooltipContent
+                  side={side}
+                  d={payload[0].payload as ChartData}
+                  viewBox={viewBox as any}
+                  coordinate={coordinate}
+                />
+              );
+            }}
           />
         )}
       </Recharts.AreaChart>
@@ -360,7 +330,7 @@ export default function HistoricalAprLineChart({
   const appContext = useAppContext();
   const data = appContext.data as AppData;
   const { reserveAssetDataEventsMap, fetchReserveAssetDataEvents } =
-    useActionsModalContext();
+    useDashboardContext();
 
   // Events
   const [days, setDays] = useLocalStorage<Days>(
@@ -462,7 +432,7 @@ export default function HistoricalAprLineChart({
         {DAYS.map((_days) => (
           <Button
             key={_days}
-            className="px-2 text-muted-foreground hover:bg-transparent"
+            className="px-2 text-muted-foreground"
             labelClassName={cn(
               "text-xs font-sans uppercase",
               days === _days && "text-primary-foreground",
@@ -477,8 +447,7 @@ export default function HistoricalAprLineChart({
       </div>
 
       <div
-        id="historical-apr-line-chart"
-        className="relative z-[1] h-[100px] w-full flex-shrink-0 transform-gpu sm:h-[160px]"
+        className="historical-apr-line-chart h-[100px] w-full flex-shrink-0 transform-gpu sm:h-[160px]"
         is-loading={isLoading ? "true" : "false"}
       >
         <Chart side={side} isLoading={isLoading} data={chartData ?? []} />

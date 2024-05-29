@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { normalizeStructTag } from "@mysten/sui.js/utils";
 import BigNumber from "bignumber.js";
-import { FileClock, RotateCw, TableProperties, TrendingUp } from "lucide-react";
+import { FileClock, RotateCw, TrendingUp, User } from "lucide-react";
 
 import { WAD } from "@suilend/sdk/constants";
 import {
@@ -26,12 +26,16 @@ import Tabs from "@/components/shared/Tabs";
 import TokenLogo from "@/components/shared/TokenLogo";
 import Tooltip from "@/components/shared/Tooltip";
 import { TBody } from "@/components/shared/Typography";
-import { Separator } from "@/components/ui/separator";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { isSuilendPoints } from "@/lib/coinType";
 import { EventType, eventSortAsc } from "@/lib/events";
 import { formatPoints, formatToken } from "@/lib/format";
 import { API_URL } from "@/lib/navigation";
+
+export enum Tab {
+  EARNINGS = "earnings",
+  HISTORY = "history",
+}
 
 export const getCtokenExchangeRate = (event: ApiReserveAssetDataEvent) =>
   new BigNumber(event.ctokenSupply).eq(0)
@@ -104,13 +108,8 @@ export default function AccountDetailsDialog() {
   const data = restAppContext.data as AppData;
 
   // Tabs
-  enum Tab {
-    OVERVIEW = "overview",
-    HISTORY = "history",
-  }
-
   const tabs = [
-    { id: Tab.OVERVIEW, icon: <TrendingUp />, title: "Overview" },
+    { id: Tab.EARNINGS, icon: <TrendingUp />, title: "Earnings" },
     { id: Tab.HISTORY, icon: <FileClock />, title: "History" },
   ];
 
@@ -202,28 +201,28 @@ export default function AccountDetailsDialog() {
   );
 
   // Refresh
+  const getNowS = () => Math.floor(new Date().getTime() / 1000);
+  const [nowS, setNowS] = useState<number>(getNowS);
+
   const refresh = () => {
-    if (selectedTab === Tab.OVERVIEW) refreshData();
+    if (selectedTab === Tab.EARNINGS) refreshData();
     fetchEventsData();
+
+    setNowS(getNowS());
   };
 
   // State
   const isOpen = router.query.accountDetails !== undefined;
 
   const onOpenChange = (_isOpen: boolean) => {
-    const { accountDetails, ...restQuery } = router.query;
-
-    router.push({
-      query: _isOpen ? { ...restQuery, accountDetails: true } : restQuery,
-    });
     if (_isOpen) return;
+
+    const { accountDetails, ...restQuery } = router.query;
+    router.push({ query: restQuery });
 
     setTimeout(() => {
       const { accountDetailsTab, ...restQuery2 } = restQuery;
-
-      router.replace({
-        query: restQuery2,
-      });
+      router.replace({ query: restQuery2 });
     }, 250);
   };
 
@@ -244,20 +243,9 @@ export default function AccountDetailsDialog() {
   return (
     <Dialog
       rootProps={{ open: isOpen, onOpenChange }}
-      trigger={
-        <Button
-          className="text-muted-foreground"
-          tooltip="View account overview & history"
-          icon={<TableProperties />}
-          size="icon"
-          variant="ghost"
-        >
-          View account overview & history
-        </Button>
-      }
       headerClassName="border-b-0"
-      titleIcon={<TableProperties />}
-      title="Account overview"
+      titleIcon={<User />}
+      title="Account"
       headerEndContent={
         <>
           {data.obligations && data.obligations.length > 1 && (
@@ -282,12 +270,12 @@ export default function AccountDetailsDialog() {
           tabs={tabs}
           selectedTab={selectedTab}
           onTabChange={(tab) => onSelectedTabChange(tab as Tab)}
+          listClassName="mb-0"
         />
       </div>
-      {![Tab.OVERVIEW].includes(selectedTab) && <Separator />}
 
-      {selectedTab === Tab.OVERVIEW && (
-        <EarningsTabContent eventsData={eventsData} />
+      {selectedTab === Tab.EARNINGS && (
+        <EarningsTabContent eventsData={eventsData} nowS={nowS} />
       )}
       {selectedTab === Tab.HISTORY && (
         <HistoryTabContent eventsData={eventsData} />

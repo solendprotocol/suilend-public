@@ -46,12 +46,14 @@ export const formatNumber = (
   options?: {
     prefix?: string;
     dp?: number;
+    minDp?: number;
     roundingMode?: BigNumber.RoundingMode;
     exact?: boolean;
   },
 ) => {
   const prefix = options?.prefix ?? "";
   const dp = options?.dp ?? 2;
+  const minDp = options?.minDp ?? 0;
   const roundingMode = options?.roundingMode ?? BigNumber.ROUND_HALF_UP;
   const exact = options?.exact ?? false;
 
@@ -89,7 +91,7 @@ export const formatNumber = (
     const digitsCount = _value
       .integerValue(BigNumber.ROUND_DOWN)
       .toString().length; // 1 <= _value < 1000, so digitsCount is in {1,2,3}
-    const newDp = Math.max(0, Math.min(dp, maxDigits - digitsCount));
+    const newDp = Math.max(minDp, Math.min(dp, maxDigits - digitsCount));
 
     let [integers, decimals] = _value.toFixed(newDp, roundingMode).split(".");
     if (integers.length > digitsCount) {
@@ -115,11 +117,13 @@ export const formatUsd = (
   options?: { dp?: number; exact?: boolean },
 ) => {
   const dp = options?.dp ?? 2;
+  const minDp = dp;
   const exact = options?.exact ?? false;
 
   return formatNumber(value, {
     prefix: "$",
     dp,
+    minDp,
     roundingMode: BigNumber.ROUND_HALF_UP,
     exact,
   });

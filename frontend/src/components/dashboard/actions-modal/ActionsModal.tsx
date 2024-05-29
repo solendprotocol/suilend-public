@@ -11,7 +11,6 @@ import ActionsModalTabContent from "@/components/dashboard/actions-modal/Actions
 import ParametersPanel from "@/components/dashboard/actions-modal/ParametersPanel";
 import Tabs from "@/components/shared/Tabs";
 import { AppData, useAppContext } from "@/contexts/AppContext";
-import { useDashboardContext } from "@/contexts/DashboardContext";
 import useBreakpoint from "@/hooks/useBreakpoint";
 import { isSui } from "@/lib/coinType";
 import {
@@ -24,9 +23,16 @@ import { Action } from "@/lib/types";
 export default function ActionsModal() {
   const { obligation, ...restAppContext } = useAppContext();
   const data = restAppContext.data as AppData;
-  const { deposit, borrow, withdraw, repay } = useDashboardContext();
-  const { reserveIndex, selectedTab, setSelectedTab, isMoreParametersOpen } =
-    useActionsModalContext();
+  const {
+    reserveIndex,
+    selectedTab,
+    setSelectedTab,
+    isMoreParametersOpen,
+    deposit,
+    borrow,
+    withdraw,
+    repay,
+  } = useActionsModalContext();
 
   const { md } = useBreakpoint();
 

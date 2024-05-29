@@ -1,5 +1,7 @@
+import { useRouter } from "next/router";
+
 import BigNumber from "bignumber.js";
-import { User } from "lucide-react";
+import { FileClock, TrendingUp, User } from "lucide-react";
 
 import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
 
@@ -7,12 +9,13 @@ import AccountBreakdown from "@/components/dashboard/account/AccountBreakdown";
 import BorrowLimitTitle from "@/components/dashboard/account/BorrowLimitTitle";
 import LiquidationThresholdTitle from "@/components/dashboard/account/LiquidationThresholdTitle";
 import WeightedBorrowsTitle from "@/components/dashboard/account/WeightedBorrowsTitle";
-import AccountDetailsDialog from "@/components/dashboard/account-details/AccountDetailsDialog";
+import { Tab as AccountDetailsTab } from "@/components/dashboard/account-details/AccountDetailsDialog";
 import Card from "@/components/dashboard/Card";
 import ObligationSwitcherPopover from "@/components/dashboard/ObligationSwitcherPopover";
 import UtilizationBar, {
   getWeightedBorrowsUsd,
 } from "@/components/dashboard/UtilizationBar";
+import Button from "@/components/shared/Button";
 import LabelWithTooltip from "@/components/shared/LabelWithTooltip";
 import Tooltip from "@/components/shared/Tooltip";
 import { TBody, TLabel, TLabelSans } from "@/components/shared/Typography";
@@ -164,22 +167,62 @@ function AccountPositionCardContent() {
 }
 
 export default function AccountPositionCard() {
+  const router = useRouter();
   const { address } = useWalletContext();
   const { obligation, ...restAppContext } = useAppContext();
   const data = restAppContext.data as AppData;
 
+  const openAccountDetailsTab = (tab: AccountDetailsTab) => {
+    const { accountDetails, accountDetailsTab, ...restQuery } = router.query;
+    router.push({
+      query: {
+        ...restQuery,
+        accountDetails: true,
+        accountDetailsTab: tab,
+      },
+    });
+  };
+
   return (
     <Card
-      id="position"
+      id={address && obligation ? "position" : undefined}
       header={{
         titleIcon: <User />,
         title: "Account",
         endContent: (
           <>
+            {address && obligation && (
+              <>
+                <Button
+                  className="text-muted-foreground"
+                  tooltip="Earnings"
+                  icon={<TrendingUp />}
+                  variant="ghost"
+                  size="icon"
+                  onClick={() =>
+                    openAccountDetailsTab(AccountDetailsTab.EARNINGS)
+                  }
+                >
+                  Earnings
+                </Button>
+                <Button
+                  className="text-muted-foreground"
+                  tooltip="History"
+                  icon={<FileClock />}
+                  variant="ghost"
+                  size="icon"
+                  onClick={() =>
+                    openAccountDetailsTab(AccountDetailsTab.HISTORY)
+                  }
+                >
+                  History
+                </Button>
+              </>
+            )}
+
             {data.obligations && data.obligations.length > 1 && (
               <ObligationSwitcherPopover />
             )}
-            <AccountDetailsDialog />
           </>
         ),
         noSeparator: true,

@@ -56,6 +56,8 @@ export const eventSortAsc = (a: EventRow, b: EventRow) =>
   -1 * apiEventSortDesc(a, b);
 
 // DownsampledApiReserveAssetDataEvent
+export const DAY_S = 24 * 60 * 60;
+
 export type Days = 1 | 7 | 30;
 export const DAYS: Days[] = [1, 7, 30];
 export const RESERVE_EVENT_SAMPLE_INTERVAL_S_MAP: Record<Days, number> = {

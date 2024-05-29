@@ -17,7 +17,7 @@ export default function OpenURLButton({ url, children }: OpenURLButtonProps) {
 
   return (
     <Button
-      className="!bg-transparent text-muted-foreground"
+      className="text-muted-foreground"
       tooltip={tooltip}
       icon={<ExternalLink />}
       variant="ghost"
