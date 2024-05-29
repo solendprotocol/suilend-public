@@ -67,8 +67,8 @@ export default function RefreshDataButton() {
     >
       <Button
         className="h-auto w-auto flex-shrink-0 hover:bg-transparent"
-        size="icon"
         variant="ghost"
+        size="icon"
         onClick={manuallyRefreshData}
       >
         <CircularProgress />

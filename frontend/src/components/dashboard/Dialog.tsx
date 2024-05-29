@@ -27,11 +27,11 @@ import { cn } from "@/lib/utils";
 
 interface DialogProps extends PropsWithChildren {
   rootProps?: DialogRootProps;
-  trigger: ReactNode;
+  trigger?: ReactNode;
   contentProps?: DialogContentProps;
   headerClassName?: ClassValue;
   titleIcon?: ReactElement;
-  title?: string;
+  title: string;
   headerEndContent?: ReactNode;
 }
 
@@ -53,9 +53,11 @@ export default function Dialog({
   if (md)
     return (
       <DialogRoot {...rootProps}>
-        <DialogTrigger asChild className="appearance-none">
-          {trigger}
-        </DialogTrigger>
+        {trigger && (
+          <DialogTrigger asChild className="appearance-none">
+            {trigger}
+          </DialogTrigger>
+        )}
 
         <DialogContent
           className={cn(
@@ -85,9 +87,11 @@ export default function Dialog({
     );
   return (
     <DrawerRoot {...rootProps}>
-      <DrawerTrigger asChild className="appearance-none">
-        {trigger}
-      </DrawerTrigger>
+      {trigger && (
+        <DrawerTrigger asChild className="appearance-none">
+          {trigger}
+        </DrawerTrigger>
+      )}
 
       <DrawerContent
         className="!bottom-0 !top-auto mt-0 !h-dvh max-h-dvh rounded-t-lg bg-popover p-0"

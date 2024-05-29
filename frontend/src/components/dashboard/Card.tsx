@@ -18,6 +18,7 @@ interface CardProps extends PropsWithChildren, CardRootProps {
   header?: {
     titleIcon?: ReactElement;
     title?: string;
+    startContent?: ReactNode;
     endContent?: ReactNode;
     noSeparator?: boolean;
   };
@@ -44,31 +45,39 @@ export default function Card({ id, header, children, ...props }: CardProps) {
     >
       {header && (
         <CardHeader className="flex flex-col gap-2 space-y-0">
-          <div className="flex h-5 flex-row items-center">
-            <div
-              className={cn("flex-1", isCollapsible && "cursor-pointer")}
-              onClick={isCollapsible ? toggleIsCollapsed : undefined}
-            >
-              <TitleWithIcon className="w-full" icon={header.titleIcon}>
-                {header.title}
-              </TitleWithIcon>
-            </div>
-
-            <div className="flex flex-row items-center justify-end gap-1">
-              {header.endContent}
-
-              {isCollapsible && (
-                <Button
-                  className="text-muted-foreground"
-                  icon={isCollapsed ? <ChevronDown /> : <ChevronUp />}
-                  variant="ghost"
-                  size="icon"
-                  onClick={toggleIsCollapsed}
+          <div className="flex h-5 flex-row items-center justify-between">
+            {(header.titleIcon || header.title || header.startContent) && (
+              <div className="flex flex-row items-center gap-1">
+                <div
+                  className={cn("flex-1", isCollapsible && "cursor-pointer")}
+                  onClick={isCollapsible ? toggleIsCollapsed : undefined}
                 >
-                  Toggle
-                </Button>
-              )}
-            </div>
+                  <TitleWithIcon className="w-full" icon={header.titleIcon}>
+                    {header.title}
+                  </TitleWithIcon>
+                </div>
+
+                {header.startContent}
+              </div>
+            )}
+
+            {(header.endContent || isCollapsible) && (
+              <div className="flex flex-row items-center justify-end gap-1">
+                {header.endContent}
+
+                {isCollapsible && (
+                  <Button
+                    className="text-muted-foreground"
+                    icon={isCollapsed ? <ChevronDown /> : <ChevronUp />}
+                    variant="ghost"
+                    size="icon"
+                    onClick={toggleIsCollapsed}
+                  >
+                    Toggle
+                  </Button>
+                )}
+              </div>
+            )}
           </div>
 
           {!isCollapsed && !header.noSeparator && <Separator />}

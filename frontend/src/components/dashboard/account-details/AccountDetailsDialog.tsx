@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { normalizeStructTag } from "@mysten/sui.js/utils";
 import BigNumber from "bignumber.js";
-import { FileClock, RotateCw, TableProperties, TrendingUp } from "lucide-react";
+import { FileClock, RotateCw, TrendingUp, User } from "lucide-react";
 
 import { WAD } from "@suilend/sdk/constants";
 import {
@@ -31,6 +31,11 @@ import { isSuilendPoints } from "@/lib/coinType";
 import { EventType, eventSortAsc } from "@/lib/events";
 import { formatPoints, formatToken } from "@/lib/format";
 import { API_URL } from "@/lib/navigation";
+
+export enum Tab {
+  EARNINGS = "earnings",
+  HISTORY = "history",
+}
 
 export const getCtokenExchangeRate = (event: ApiReserveAssetDataEvent) =>
   new BigNumber(event.ctokenSupply).eq(0)
@@ -103,11 +108,6 @@ export default function AccountDetailsDialog() {
   const data = restAppContext.data as AppData;
 
   // Tabs
-  enum Tab {
-    EARNINGS = "earnings",
-    HISTORY = "history",
-  }
-
   const tabs = [
     { id: Tab.EARNINGS, icon: <TrendingUp />, title: "Earnings" },
     { id: Tab.HISTORY, icon: <FileClock />, title: "History" },
@@ -215,19 +215,14 @@ export default function AccountDetailsDialog() {
   const isOpen = router.query.accountDetails !== undefined;
 
   const onOpenChange = (_isOpen: boolean) => {
-    const { accountDetails, ...restQuery } = router.query;
-
-    router.push({
-      query: _isOpen ? { ...restQuery, accountDetails: true } : restQuery,
-    });
     if (_isOpen) return;
+
+    const { accountDetails, ...restQuery } = router.query;
+    router.push({ query: restQuery });
 
     setTimeout(() => {
       const { accountDetailsTab, ...restQuery2 } = restQuery;
-
-      router.replace({
-        query: restQuery2,
-      });
+      router.replace({ query: restQuery2 });
     }, 250);
   };
 
@@ -248,20 +243,9 @@ export default function AccountDetailsDialog() {
   return (
     <Dialog
       rootProps={{ open: isOpen, onOpenChange }}
-      trigger={
-        <Button
-          className="text-muted-foreground"
-          tooltip="View account earnings & history"
-          icon={<TableProperties />}
-          size="icon"
-          variant="ghost"
-        >
-          View account earnings & history
-        </Button>
-      }
       headerClassName="border-b-0"
-      titleIcon={<TableProperties />}
-      title="Account details"
+      titleIcon={<User />}
+      title="Account"
       headerEndContent={
         <>
           {data.obligations && data.obligations.length > 1 && (
