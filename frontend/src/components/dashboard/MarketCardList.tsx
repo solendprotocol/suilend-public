@@ -39,8 +39,8 @@ function MarketCard({ rowData, onClick }: MarketCardProps) {
       className="cursor-pointer transition-colors hover:bg-muted/10"
       onClick={onClick}
     >
-      <div className="flex w-full flex-col items-center gap-4 p-4">
-        <div className="flex w-full flex-col items-center gap-2">
+      <div className="flex w-full flex-col items-center gap-2 p-4">
+        <div className="mb-2 flex w-full flex-col items-center gap-2">
           <div className="flex flex-row items-center gap-2">
             <TokenLogo
               showTooltip
@@ -53,7 +53,7 @@ function MarketCard({ rowData, onClick }: MarketCardProps) {
           <TLabel>{formatPrice(rowData.price)}</TLabel>
         </div>
 
-        <div className="flex w-full flex-row justify-center gap-6">
+        <div className="mb-2 flex w-full flex-row justify-center gap-6">
           <div className="flex w-fit flex-col items-center gap-1">
             <TLabelSans>Deposit APR</TLabelSans>
             <DepositAprCell {...rowData} />
