@@ -75,8 +75,8 @@ body {
 }
 
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 4px;
+  height: 4px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
@@ -342,11 +342,11 @@ body {
   margin: 12px 0 !important;
 }
 
-#historical-apr-line-chart .recharts-active-dot .recharts-dot {
+.historical-apr-line-chart .recharts-active-dot .recharts-dot {
   stroke: transparent;
   fill: transparent;
 }
-#historical-apr-line-chart[is-loading="true"]
+.historical-apr-line-chart[is-loading="true"]
   .recharts-cartesian-grid
   .recharts-cartesian-grid-bg {
   fill: hsla(var(--muted) / 10%);
@@ -356,4 +356,10 @@ body {
 .earnings-chart .recharts-active-dot .recharts-dot {
   stroke: transparent;
   fill: transparent;
+}
+.earnings-chart[is-loading="true"]
+  .recharts-cartesian-grid
+  .recharts-cartesian-grid-bg {
+  fill: hsla(var(--muted) / 10%);
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; /* animate-pulse */
 }

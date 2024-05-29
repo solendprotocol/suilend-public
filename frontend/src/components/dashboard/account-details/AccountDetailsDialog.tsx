@@ -201,9 +201,14 @@ export default function AccountDetailsDialog() {
   );
 
   // Refresh
+  const getNowS = () => Math.floor(new Date().getTime() / 1000);
+  const [nowS, setNowS] = useState<number>(getNowS);
+
   const refresh = () => {
     if (selectedTab === Tab.EARNINGS) refreshData();
     fetchEventsData();
+
+    setNowS(getNowS());
   };
 
   // State
@@ -286,7 +291,7 @@ export default function AccountDetailsDialog() {
       </div>
 
       {selectedTab === Tab.EARNINGS && (
-        <EarningsTabContent eventsData={eventsData} />
+        <EarningsTabContent eventsData={eventsData} nowS={nowS} />
       )}
       {selectedTab === Tab.HISTORY && (
         <HistoryTabContent eventsData={eventsData} />

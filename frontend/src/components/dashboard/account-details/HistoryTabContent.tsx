@@ -58,7 +58,7 @@ enum ColumnId {
 }
 
 interface HistoryTabContentProps {
-  eventsData: EventsData | undefined;
+  eventsData?: EventsData;
 }
 
 export default function HistoryTabContent({

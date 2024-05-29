@@ -1,9 +1,8 @@
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useMemo } from "react";
 
 import { normalizeStructTag } from "@mysten/sui.js/utils";
 import { ColumnDef } from "@tanstack/react-table";
 import BigNumber from "bignumber.js";
-import { HandCoins, PiggyBank } from "lucide-react";
 
 import { WAD } from "@suilend/sdk/constants";
 import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
@@ -24,6 +23,7 @@ import {
 import EarningsChart, {
   ChartData,
 } from "@/components/dashboard/account-details/EarningsChart";
+import Card from "@/components/dashboard/Card";
 import DataTable, { tableHeader } from "@/components/dashboard/DataTable";
 import TitleWithIcon from "@/components/shared/TitleWithIcon";
 import TokenLogo from "@/components/shared/TokenLogo";
@@ -33,7 +33,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { useDashboardContext } from "@/contexts/DashboardContext";
 import { msPerYear } from "@/lib/constants";
-import { Days, EventType, eventSortAsc } from "@/lib/events";
+import { DAY_S, Days, EventType, eventSortAsc } from "@/lib/events";
 import { formatToken, formatUsd } from "@/lib/format";
 import { cn, linearlyInterpolate, reserveSort } from "@/lib/utils";
 
@@ -44,18 +44,18 @@ interface RowData {
 }
 
 interface EarningsTabContentProps {
-  eventsData: EventsData | undefined;
+  eventsData?: EventsData;
+  nowS: number;
 }
 
 export default function EarningsTabContent({
   eventsData,
+  nowS,
 }: EarningsTabContentProps) {
   const appContext = useAppContext();
   const data = appContext.data as AppData;
   const obligation = appContext.obligation as ParsedObligation;
   const { reserveAssetDataEventsMap } = useDashboardContext();
-
-  const nowSRef = useRef<number>(Math.floor(new Date().getTime() / 1000));
 
   type CumInterestMap = Record<
     string,
@@ -188,7 +188,7 @@ export default function EarningsTabContent({
       const reserve = data.reserveMap[coinType];
       if (!reserve) continue;
 
-      const timestampS = nowSRef.current;
+      const timestampS = nowS;
       const ctokenExchangeRate = reserve.cTokenExchangeRate;
 
       const prev = resultMap[coinType][resultMap[coinType].length - 1];
@@ -261,6 +261,7 @@ export default function EarningsTabContent({
     data.coinMetadataMap,
     getInterestEarned,
     data.reserveMap,
+    nowS,
     reserveAssetDataEventsMap,
   ]);
 
@@ -388,7 +389,7 @@ export default function EarningsTabContent({
       const reserve = data.reserveMap[coinType];
       if (!reserve) continue;
 
-      const timestampS = nowSRef.current;
+      const timestampS = nowS;
       const cumulativeBorrowRate = reserve.cumulativeBorrowRate;
 
       const prev = resultMap[coinType][resultMap[coinType].length - 1];
@@ -457,6 +458,7 @@ export default function EarningsTabContent({
     data.coinMetadataMap,
     getInterestPaid,
     data.reserveMap,
+    nowS,
     reserveAssetDataEventsMap,
   ]);
 
@@ -551,8 +553,61 @@ export default function EarningsTabContent({
         ),
       ).sort((a, b) => a - b);
 
+      const minTimestampS = Math.min(...sortedTimestampsS);
+      const maxTimestampS = Math.max(...sortedTimestampsS);
+      const diffS = maxTimestampS - minTimestampS;
+
+      let sampledTimestampsS: number[] = [];
+
+      const minSampleIntervalS = 1 * 60;
+      if (diffS < minSampleIntervalS) sampledTimestampsS = sortedTimestampsS;
+      else {
+        const days = diffS / DAY_S;
+
+        let sampleIntervalS;
+        if (days <= 1 / 4)
+          sampleIntervalS = minSampleIntervalS; // 360
+        else if (days <= 1 / 2)
+          sampleIntervalS = 2 * 60; // 360
+        else if (days <= 1)
+          sampleIntervalS = 5 * 60; // 288
+        else if (days <= 2)
+          sampleIntervalS = 10 * 60; // 288
+        else if (days <= 3)
+          sampleIntervalS = 15 * 60; // 288
+        else if (days <= 7)
+          sampleIntervalS = 30 * 60; // 336
+        else if (days <= 14)
+          sampleIntervalS = 60 * 60; // 336
+        else if (days <= 30)
+          sampleIntervalS = 2 * 60 * 60; // 360
+        else if (days <= 60)
+          sampleIntervalS = 4 * 60 * 60; // 360
+        else if (days <= 90)
+          sampleIntervalS = 6 * 60 * 60; // 360
+        else if (days <= 180)
+          sampleIntervalS = 12 * 60 * 60; // 360
+        else if (days <= 360)
+          sampleIntervalS = DAY_S; // 360
+        else sampleIntervalS = DAY_S;
+
+        const startTimestampS =
+          minTimestampS - (minTimestampS % sampleIntervalS);
+        const endTimestampS = maxTimestampS;
+
+        const n =
+          Math.floor((endTimestampS - startTimestampS) / sampleIntervalS) + 1;
+        for (let i = 0; i < n; i++) {
+          const tS = startTimestampS + sampleIntervalS * i;
+
+          if (tS >= maxTimestampS) break;
+          sampledTimestampsS.push(tS);
+        }
+        sampledTimestampsS.push(maxTimestampS);
+      }
+
       const result: ChartData[] = [];
-      for (const timestampS of sortedTimestampsS) {
+      for (const timestampS of sampledTimestampsS) {
         const d: ChartData = sortedCoinTypes.reduce(
           (acc, coinType) => {
             return {
@@ -594,9 +649,7 @@ export default function EarningsTabContent({
         const reserve = data.reserveMap[coinType];
         if (!reserve) return acc;
 
-        const d = cumInterestMap[coinType].find(
-          (d) => d.timestampS === nowSRef.current,
-        );
+        const d = cumInterestMap[coinType].find((d) => d.timestampS === nowS);
         if (!d) return acc;
 
         const cumInterestUsd = new BigNumber(d.cumInterest).times(
@@ -605,7 +658,7 @@ export default function EarningsTabContent({
         return acc.plus(cumInterestUsd);
       }, new BigNumber(0));
     },
-    [data.reserveMap],
+    [data.reserveMap, nowS],
   );
 
   const cumInterestEarnedUsd = useMemo(
@@ -647,7 +700,7 @@ export default function EarningsTabContent({
       return undefined;
 
     return cumInterestEarnedUsd
-      .minus(cumInterestEarnedUsd)
+      .minus(cumInterestPaidUsd)
       .plus(totalRewardsEarnedUsd);
   }, [cumInterestEarnedUsd, cumInterestPaidUsd, totalRewardsEarnedUsd]);
 
@@ -736,8 +789,8 @@ export default function EarningsTabContent({
   const rows = useMemo(() => {
     if (
       cumInterestEarnedMap === undefined ||
-      rewardsMap === undefined ||
-      cumInterestPaidMap === undefined
+      cumInterestPaidMap === undefined ||
+      rewardsMap === undefined
     )
       return undefined;
 
@@ -761,9 +814,8 @@ export default function EarningsTabContent({
           {
             coinType,
             interest: new BigNumber(
-              cumInterestEarnedMap[coinType]?.find(
-                (d) => d.timestampS === nowSRef.current,
-              )?.cumInterest ?? 0,
+              cumInterestEarnedMap[coinType]?.find((d) => d.timestampS === nowS)
+                ?.cumInterest ?? 0,
             ),
             rewards: rewardsMap.deposit[coinType] ?? {},
           } as RowData,
@@ -781,9 +833,8 @@ export default function EarningsTabContent({
           {
             coinType,
             interest: new BigNumber(
-              cumInterestPaidMap[coinType]?.find(
-                (d) => d.timestampS === nowSRef.current,
-              )?.cumInterest ?? 0,
+              cumInterestPaidMap[coinType]?.find((d) => d.timestampS === nowS)
+                ?.cumInterest ?? 0,
             ),
             rewards: rewardsMap.borrow[coinType] ?? {},
           } as RowData,
@@ -795,91 +846,106 @@ export default function EarningsTabContent({
       );
 
     return { deposit: depositRows, borrow: borrowRows };
-  }, [cumInterestEarnedMap, rewardsMap, cumInterestPaidMap, data.reserveMap]);
+  }, [
+    cumInterestEarnedMap,
+    cumInterestPaidMap,
+    rewardsMap,
+    nowS,
+    data.reserveMap,
+  ]);
 
   return (
     <div className="flex flex-1 flex-col gap-8 overflow-y-auto overflow-x-hidden pt-4">
-      <div className="flex flex-col gap-2">
-        {totalEarningsUsd !== undefined &&
-        cumInterestEarnedUsd !== undefined &&
-        cumInterestPaidUsd !== undefined &&
-        totalRewardsEarnedUsd !== undefined ? (
-          <div className="grid grid-cols-2 gap-4 bg-border p-4 md:grid-cols-4">
+      <div className="flex flex-col gap-2 px-4">
+        <Card>
+          <div className="grid grid-cols-2 gap-4 p-4 md:grid-cols-4">
             <div className="flex flex-1 flex-col items-center gap-1">
               <TLabelSans className="text-center">Net earnings</TLabelSans>
-              <Tooltip title={formatUsd(totalEarningsUsd, { exact: true })}>
-                <TBody
-                  className={cn(
-                    totalEarningsUsd.gt(0) && "text-success",
-                    totalEarningsUsd.lt(0) && "text-destructive",
-                  )}
-                >
-                  {totalEarningsUsd.lt(0) && "-"}
-                  {formatUsd(totalEarningsUsd.abs())}
-                </TBody>
-              </Tooltip>
+              {totalEarningsUsd !== undefined ? (
+                <Tooltip title={formatUsd(totalEarningsUsd, { exact: true })}>
+                  <TBody
+                    className={cn(
+                      totalEarningsUsd.gt(0) && "text-success",
+                      totalEarningsUsd.lt(0) && "text-destructive",
+                    )}
+                  >
+                    {totalEarningsUsd.lt(0) && "-"}
+                    {formatUsd(totalEarningsUsd.abs())}
+                  </TBody>
+                </Tooltip>
+              ) : (
+                <Skeleton className="h-5 w-10" />
+              )}
             </div>
 
             <div className="flex flex-1 flex-col items-center gap-1">
               <TLabelSans className="text-center">Interest earned</TLabelSans>
-              <Tooltip title={formatUsd(cumInterestEarnedUsd, { exact: true })}>
-                <TBody className="text-center">
-                  {formatUsd(cumInterestEarnedUsd)}
-                </TBody>
-              </Tooltip>
+              {cumInterestEarnedUsd !== undefined ? (
+                <Tooltip
+                  title={formatUsd(cumInterestEarnedUsd, { exact: true })}
+                >
+                  <TBody className="text-center">
+                    {formatUsd(cumInterestEarnedUsd)}
+                  </TBody>
+                </Tooltip>
+              ) : (
+                <Skeleton className="h-5 w-10" />
+              )}
             </div>
 
             <div className="flex flex-1 flex-col items-center gap-1">
               <TLabelSans className="text-center">Interest paid</TLabelSans>
-              <Tooltip title={formatUsd(cumInterestPaidUsd, { exact: true })}>
-                <TBody className="text-right">
-                  {formatUsd(cumInterestPaidUsd)}
-                </TBody>
-              </Tooltip>
+              {cumInterestPaidUsd ? (
+                <Tooltip title={formatUsd(cumInterestPaidUsd, { exact: true })}>
+                  <TBody className="text-right">
+                    {formatUsd(cumInterestPaidUsd)}
+                  </TBody>
+                </Tooltip>
+              ) : (
+                <Skeleton className="h-5 w-10" />
+              )}
             </div>
 
             <div className="flex flex-1 flex-col items-center gap-1">
               <TLabelSans className="text-center">Rewards earned</TLabelSans>
-              <Tooltip
-                title={formatUsd(totalRewardsEarnedUsd, { exact: true })}
-              >
-                <TBody className="text-center">
-                  {formatUsd(totalRewardsEarnedUsd)}
-                </TBody>
-              </Tooltip>
+              {totalRewardsEarnedUsd !== undefined ? (
+                <Tooltip
+                  title={formatUsd(totalRewardsEarnedUsd, { exact: true })}
+                >
+                  <TBody className="text-center">
+                    {formatUsd(totalRewardsEarnedUsd)}
+                  </TBody>
+                </Tooltip>
+              ) : (
+                <Skeleton className="h-5 w-10" />
+              )}
             </div>
           </div>
-        ) : (
-          <Skeleton className="h-[calc((4px+10px+4px+10px+4px)*4)] w-full bg-muted/10 md:h-[calc((4px+10px+4px)*4)]" />
-        )}
+        </Card>
 
-        <TLabelSans className="px-4">
-          Note: USD values of earnings are calculated using current prices.
+        <TLabelSans>
+          Note: The above are estimates calculated using current prices.
         </TLabelSans>
       </div>
 
       {[
         {
           side: Side.DEPOSIT,
-          titleIcon: <PiggyBank />,
-          title: "Assets deposited",
+          title: "Deposits",
           columns: depositColumns,
           data: rows?.deposit,
           noDataMessage: "No deposits",
         },
         {
           side: Side.BORROW,
-          titleIcon: <HandCoins />,
-          title: "Assets borrowed",
+          title: "Borrows",
           columns: borrowColumns,
           data: rows?.borrow,
           noDataMessage: "No borrows",
         },
       ].map((table) => (
         <div key={table.title} className="flex flex-col gap-4">
-          <TitleWithIcon className="px-4" icon={table.titleIcon}>
-            {table.title}
-          </TitleWithIcon>
+          <TitleWithIcon className="px-4">{table.title}</TitleWithIcon>
 
           <EarningsChart
             side={table.side}

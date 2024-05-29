@@ -7,10 +7,12 @@ import { Side } from "@suilend/sdk/types";
 
 import TokenLogo from "@/components/shared/TokenLogo";
 import { TBody, TLabelSans } from "@/components/shared/Typography";
+import { ViewBox, getTooltipStyle } from "@/components/ui/chart";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import useBreakpoint from "@/hooks/useBreakpoint";
 import useIsTouchscreen from "@/hooks/useIsTouchscreen";
 import { COIN_TYPE_COLOR_MAP } from "@/lib/coinType";
+import { DAY_S } from "@/lib/events";
 import { formatToken } from "@/lib/format";
 
 export type ChartData = {
@@ -20,15 +22,8 @@ export type ChartData = {
 
 interface TooltipContentProps {
   coinTypes: string[];
-  d?: ChartData;
-  viewBox: {
-    width: number;
-    height: number;
-    top: number;
-    right: number;
-    bottom: number;
-    left: number;
-  };
+  d: ChartData;
+  viewBox: ViewBox;
   coordinate?: Partial<Coordinate>;
 }
 
@@ -41,39 +36,12 @@ function TooltipContent({
   const appContext = useAppContext();
   const data = appContext.data as AppData;
 
-  const getStyle = () => {
-    if (coordinate?.x === undefined) return undefined;
-
-    const width = 160;
-    const top = viewBox.top;
-    let left: string | number = "auto";
-    let right: string | number = "auto";
-    const offset = 10;
-
-    const isOverHalfway = coordinate.x - viewBox.left > viewBox.width / 2;
-    if (isOverHalfway) {
-      right = Math.min(
-        viewBox.left + viewBox.width + viewBox.right - width,
-        viewBox.left + viewBox.width + viewBox.right - (coordinate.x - offset),
-      );
-    } else {
-      left = Math.min(
-        viewBox.left + viewBox.width + viewBox.right - width,
-        coordinate.x + offset,
-      );
-    }
-
-    return { width, top, left, right };
-  };
-
-  if (!d) return null;
   if (!coordinate?.x || !viewBox) return null;
-
   return (
     // Subset of TooltipContent className
     <div
       className="absolute rounded-md border bg-popover px-3 py-1.5 shadow-md"
-      style={getStyle()}
+      style={getTooltipStyle(160, viewBox, coordinate)}
     >
       <div className="flex w-full flex-col gap-1">
         <TLabelSans className="mb-1">
@@ -132,7 +100,6 @@ export default function EarningsChart({
     data.length > 0
       ? Object.keys(data[0]).filter((key) => key !== "timestampS")
       : [];
-  if (coinTypes.length === 0) return null;
 
   const timestampsS = data.map((d) => d.timestampS).flat();
   const cumInterest = data
@@ -147,16 +114,22 @@ export default function EarningsChart({
   const maxY = Math.max(...cumInterest);
 
   // Ticks
-  const ticksX = Array.from(
-    new Set(
-      Array.from({ length: md ? 7 : 5 }).map((_, index, array) => {
-        const timestampS = minX + ((maxX - minX) / (array.length - 1)) * index;
-        return (
-          timestampS - (timestampS % dayS) + new Date().getTimezoneOffset() * 60
+  const ticksX =
+    (maxX - minX) / DAY_S < 1
+      ? [minX - (minX % 60)]
+      : Array.from(
+          new Set(
+            Array.from({ length: md ? 7 : 5 }).map((_, index, array) => {
+              const timestampS =
+                minX + ((maxX - minX) / (array.length - 1)) * index;
+              return (
+                timestampS -
+                (timestampS % dayS) +
+                new Date().getTimezoneOffset() * 60
+              );
+            }),
+          ),
         );
-      }),
-    ),
-  );
   const ticksY = Array.from({ length: 4 }).map(
     (_, index, array) => minY + ((maxY - minY) / (array.length - 1)) * index,
   );
@@ -184,12 +157,11 @@ export default function EarningsChart({
   const labelY = side === Side.DEPOSIT ? "Interest earned" : "Interest paid";
 
   return (
-    <div className="earnings-chart mb-2 h-[160px] w-full flex-shrink-0 transform-gpu md:h-[200px]">
-      <Recharts.ResponsiveContainer
-        className="relative z-[1]"
-        width="100%"
-        height="100%"
-      >
+    <div
+      className="earnings-chart h-[160px] w-full flex-shrink-0 transform-gpu md:h-[200px]"
+      is-loading={isLoading ? "true" : "false"}
+    >
+      <Recharts.ResponsiveContainer width="100%" height="100%">
         <Recharts.LineChart
           data={data}
           margin={{ top: 8, right: 16, bottom: -12, left: 10 + 16 }}
@@ -256,10 +228,10 @@ export default function EarningsChart({
                   strokeWidth: 0,
                   fill: "transparent",
                 }}
-                strokeWidth={1.5}
+                strokeWidth={2}
               />
             ))}
-          {!isLoading && (
+          {data.length > 0 && (
             <Recharts.Tooltip
               isAnimationActive={false}
               filterNull={false}
@@ -275,11 +247,11 @@ export default function EarningsChart({
                 left: undefined,
               }}
               content={({ active, payload, viewBox, coordinate }) => {
-                if (!active) return null;
+                if (!active || !payload?.[0]?.payload) return null;
                 return (
                   <TooltipContent
                     coinTypes={coinTypes}
-                    d={payload?.[0].payload as ChartData | undefined}
+                    d={payload[0].payload as ChartData}
                     viewBox={viewBox as any}
                     coordinate={coordinate}
                   />
