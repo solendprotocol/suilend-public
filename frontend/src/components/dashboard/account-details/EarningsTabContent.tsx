@@ -35,7 +35,7 @@ import { useDashboardContext } from "@/contexts/DashboardContext";
 import { msPerYear } from "@/lib/constants";
 import { Days, EventType, eventSortAsc } from "@/lib/events";
 import { formatToken, formatUsd } from "@/lib/format";
-import { cn, reserveSort } from "@/lib/utils";
+import { cn, linearlyInterpolate, reserveSort } from "@/lib/utils";
 
 interface RowData {
   coinType: string;
@@ -184,6 +184,7 @@ export default function EarningsTabContent({
     });
 
     for (const coinType of Object.keys(resultMap)) {
+      // Add current timestamp
       const reserve = data.reserveMap[coinType];
       if (!reserve) continue;
 
@@ -216,7 +217,7 @@ export default function EarningsTabContent({
       for (let i = 0; i < reserveAssetDataEvents.length; i++) {
         const r = reserveAssetDataEvents[i];
 
-        const timestampS = r.sampleTimestampS;
+        const timestampS = r.timestampS;
         const ctokenExchangeRate = new BigNumber(r.ctokenSupply).eq(0)
           ? new BigNumber(1)
           : new BigNumber(r.depositedAmount).div(r.ctokenSupply);
@@ -383,6 +384,7 @@ export default function EarningsTabContent({
     });
 
     for (const coinType of Object.keys(resultMap)) {
+      // Add current timestamp
       const reserve = data.reserveMap[coinType];
       if (!reserve) continue;
 
@@ -415,7 +417,7 @@ export default function EarningsTabContent({
       for (let i = 0; i < reserveAssetDataEvents.length; i++) {
         const r = reserveAssetDataEvents[i];
 
-        const timestampS = r.sampleTimestampS;
+        const timestampS = r.timestampS;
         const cumulativeBorrowRate = r.cumulativeBorrowRate;
 
         if (
@@ -441,9 +443,7 @@ export default function EarningsTabContent({
         resultMap[coinType].push({
           timestampS,
           cumulativeBorrowRate,
-          borrowedAmount: prev.borrowedAmount.times(
-            interestPaid.div(prev.borrowedAmount).plus(1),
-          ),
+          borrowedAmount: prev.borrowedAmount.plus(interestPaid),
           cumInterest: +new BigNumber(prev.cumInterest).plus(interestPaid),
         });
         resultMap[coinType].sort((a, b) => a.timestampS - b.timestampS);
@@ -540,10 +540,10 @@ export default function EarningsTabContent({
     (cumInterestMap?: CumInterestMap) => {
       if (cumInterestMap === undefined) return undefined;
 
-      const coinTypes = Object.keys(cumInterestMap).sort((a, b) =>
+      const sortedCoinTypes = Object.keys(cumInterestMap).sort((a, b) =>
         reserveSort(data.reserveMap[a], data.reserveMap[b]),
       );
-      const timestampsS = Array.from(
+      const sortedTimestampsS = Array.from(
         new Set(
           Object.values(cumInterestMap)
             .map((chartData) => chartData.map((d) => d.timestampS).flat())
@@ -552,15 +552,19 @@ export default function EarningsTabContent({
       ).sort((a, b) => a - b);
 
       const result: ChartData[] = [];
-      for (const timestampS of timestampsS) {
-        const d: ChartData = coinTypes.reduce(
-          (acc, coinType) => ({
-            ...acc,
-            [coinType]:
-              cumInterestMap[coinType].findLast(
-                (d) => d.timestampS <= timestampS,
-              )?.cumInterest ?? 0,
-          }),
+      for (const timestampS of sortedTimestampsS) {
+        const d: ChartData = sortedCoinTypes.reduce(
+          (acc, coinType) => {
+            return {
+              ...acc,
+              [coinType]: linearlyInterpolate(
+                cumInterestMap[coinType],
+                "timestampS",
+                "cumInterest",
+                timestampS,
+              ),
+            };
+          },
           { timestampS },
         );
         result.push(d);
