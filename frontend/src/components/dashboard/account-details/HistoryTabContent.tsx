@@ -495,7 +495,7 @@ export default function HistoryTabContent({
                 timestamp: event.timestamp,
                 eventIndex: event.eventIndex,
                 eventType: key as EventType,
-                event,
+                event: cloneDeep(event),
               }) as RowData,
           ),
         ];
