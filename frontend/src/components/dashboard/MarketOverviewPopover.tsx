@@ -35,8 +35,8 @@ export default function MarketOverviewPopover() {
         </Button>
       }
       contentProps={{
-        align: "end",
-        className: "w-[280px]",
+        align: "start",
+        className: "w-[240px]",
       }}
     >
       <div className="flex w-full flex-col gap-2">
