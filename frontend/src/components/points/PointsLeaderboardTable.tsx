@@ -106,6 +106,7 @@ export default function PointsLeaderboardTable() {
         }}
         tableClassName="border-b-0"
         tableRowClassName={(row) =>
+          address &&
           row?.original.address === address &&
           "shadow-[inset_0_0_0_2px_hsl(var(--secondary))] !bg-secondary/5"
         }
