@@ -10,9 +10,9 @@ import DataTable, {
   decimalSortingFn,
   tableHeader,
 } from "@/components/dashboard/DataTable";
-import TokenLogo from "@/components/shared/TokenLogo";
+import AssetCell from "@/components/dashboard/market-table/AssetCell";
 import { TBody, TLabel } from "@/components/shared/Typography";
-import { formatPrice, formatToken, formatUsd } from "@/lib/format";
+import { formatToken, formatUsd } from "@/lib/format";
 import { reserveSort } from "@/lib/utils";
 
 interface RowData {
@@ -50,19 +50,12 @@ export default function AccountAssetTable({
           const { coinType, price, symbol, iconUrl } = row.original;
 
           return (
-            <div className="flex flex-row items-center gap-3">
-              <TokenLogo
-                showTooltip
-                coinType={coinType}
-                symbol={symbol}
-                src={iconUrl}
-              />
-
-              <div className="flex flex-col gap-1">
-                <TBody>{symbol}</TBody>
-                <TLabel>{formatPrice(price)}</TLabel>
-              </div>
-            </div>
+            <AssetCell
+              coinType={coinType}
+              price={price}
+              symbol={symbol}
+              iconUrl={iconUrl}
+            />
           );
         },
       },

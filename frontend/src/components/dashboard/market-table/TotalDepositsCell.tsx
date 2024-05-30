@@ -1,17 +1,16 @@
 import TotalCell from "@/components/dashboard/market-table/TotalCell";
 import { ReservesRowData } from "@/components/dashboard/MarketTable";
 
-interface TotalDepositsCellProps
-  extends Pick<
-    ReservesRowData,
-    | "symbol"
-    | "depositedAmount"
-    | "depositedAmountUsd"
-    | "depositedAmountTooltip"
-    | "reserve"
-  > {
+type TotalDepositsCellProps = Pick<
+  ReservesRowData,
+  | "symbol"
+  | "depositedAmount"
+  | "depositedAmountUsd"
+  | "depositedAmountTooltip"
+  | "reserve"
+> & {
   horizontal?: boolean;
-}
+};
 
 export default function TotalDepositsCell({
   symbol,

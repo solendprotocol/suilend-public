@@ -11,6 +11,7 @@ import {
 
 import { useActionsModalContext } from "@/components/dashboard/actions-modal/ActionsModalContext";
 import Card from "@/components/dashboard/Card";
+import AssetCell from "@/components/dashboard/market-table/AssetCell";
 import BorrowAprCell from "@/components/dashboard/market-table/BorrowAprCell";
 import DepositAprCell from "@/components/dashboard/market-table/DepositAprCell";
 import OpenLtvBwCell from "@/components/dashboard/market-table/OpenLtvBwCell";
@@ -20,11 +21,9 @@ import { ReservesRowData } from "@/components/dashboard/MarketTable";
 import Button from "@/components/shared/Button";
 import LabelWithTooltip from "@/components/shared/LabelWithTooltip";
 import Select from "@/components/shared/Select";
-import TokenLogo from "@/components/shared/TokenLogo";
-import { TBody, TLabel, TLabelSans } from "@/components/shared/Typography";
+import { TBody, TLabelSans } from "@/components/shared/Typography";
 import { SelectTrigger } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { formatPrice } from "@/lib/format";
 import { OPEN_LTV_BORROW_WEIGHT_TOOLTIP } from "@/lib/tooltips";
 import { cn } from "@/lib/utils";
 
@@ -40,20 +39,11 @@ function MarketCard({ rowData, onClick }: MarketCardProps) {
       onClick={onClick}
     >
       <div className="flex w-full flex-col items-center gap-2 p-4">
-        <div className="mb-2 flex w-full flex-col items-center gap-2">
-          <div className="flex flex-row items-center gap-2">
-            <TokenLogo
-              showTooltip
-              coinType={rowData.coinType}
-              symbol={rowData.symbol}
-              src={rowData.iconUrl}
-            />
-            <TBody>{rowData.symbol}</TBody>
-          </div>
-          <TLabel>{formatPrice(rowData.price)}</TLabel>
+        <div className="mb-2 flex w-full flex-row justify-center">
+          <AssetCell {...rowData} />
         </div>
 
-        <div className="mb-2 flex w-full flex-row justify-center gap-6">
+        <div className="mb-2 flex w-full flex-row justify-around">
           <div className="flex w-fit flex-col items-center gap-1">
             <TLabelSans>Deposit APR</TLabelSans>
             <DepositAprCell {...rowData} />
@@ -249,7 +239,7 @@ export default function MarketCardList({
       <Separator />
 
       {sortedData.length > 0 ? (
-        <div className="flex w-full flex-col gap-4">
+        <div className="flex w-full flex-col gap-2">
           {sortedData.map((rowData) => (
             <MarketCard
               key={rowData.coinType}

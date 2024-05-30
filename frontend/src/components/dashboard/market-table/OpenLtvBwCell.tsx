@@ -4,10 +4,15 @@ import { ReservesRowData } from "@/components/dashboard/MarketTable";
 import { TBody, TLabel } from "@/components/shared/Typography";
 import { formatBorrowWeight, formatLtvPercent } from "@/lib/format";
 
+type OpenLtvBwCellProps = Pick<
+  ReservesRowData,
+  "openLtvPercent" | "borrowWeight"
+>;
+
 export default function OpenLtvBwCell({
   openLtvPercent,
   borrowWeight,
-}: ReservesRowData) {
+}: OpenLtvBwCellProps) {
   return (
     <div className="flex flex-row items-center gap-2">
       <TBody>{formatLtvPercent(new BigNumber(openLtvPercent))}</TBody>
