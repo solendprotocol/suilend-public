@@ -164,7 +164,7 @@ export default function EarningsChart({
       <Recharts.ResponsiveContainer width="100%" height="100%">
         <Recharts.LineChart
           data={data}
-          margin={{ top: 8, right: 16, bottom: -12, left: 10 + 16 }}
+          margin={{ top: 8, right: 16 + 8, bottom: -12, left: 10 + 16 }}
         >
           <Recharts.CartesianGrid
             strokeDasharray="1 4"

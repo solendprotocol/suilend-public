@@ -40,7 +40,11 @@ import { cn, linearlyInterpolate, reserveSort } from "@/lib/utils";
 interface RowData {
   coinType: string;
   interest: BigNumber;
-  rewards: Record<string, Record<string, BigNumber>>;
+  rewards: {
+    [rewardCoinType: string]: {
+      [timestampS: number]: BigNumber;
+    };
+  };
 }
 
 interface EarningsTabContentProps {
@@ -57,10 +61,12 @@ export default function EarningsTabContent({
   const obligation = appContext.obligation as ParsedObligation;
   const { reserveAssetDataEventsMap } = useDashboardContext();
 
-  type CumInterestMap = Record<
-    string,
-    { timestampS: number; cumInterest: number }[]
-  >;
+  type CumInterestMap = {
+    [coinType: string]: {
+      timestampS: number;
+      cumInterest: number;
+    }[];
+  };
 
   // Interest earned
   const getInterestEarned = useCallback(
@@ -95,15 +101,14 @@ export default function EarningsTabContent({
   const cumInterestEarnedMap = useMemo(() => {
     if (eventsData === undefined) return undefined;
 
-    type CumInterestEarnedMap = Record<
-      string,
-      {
+    type CumInterestEarnedMap = {
+      [coinType: string]: {
         timestampS: number;
         ctokenExchangeRate: BigNumber;
         depositedCtokenAmount: BigNumber;
         cumInterest: number;
-      }[]
-    >;
+      }[];
+    };
     const resultMap: CumInterestEarnedMap = {};
 
     const events = [
@@ -294,15 +299,14 @@ export default function EarningsTabContent({
   const cumInterestPaidMap = useMemo(() => {
     if (eventsData === undefined) return undefined;
 
-    type CumInterestPaidMap = Record<
-      string,
-      {
+    type CumInterestPaidMap = {
+      [coinType: string]: {
         timestampS: number;
         cumulativeBorrowRate: BigNumber;
         borrowedAmount: BigNumber;
         cumInterest: number;
-      }[]
-    >;
+      }[];
+    };
     const resultMap: CumInterestPaidMap = {};
 
     const events = [
@@ -463,15 +467,18 @@ export default function EarningsTabContent({
   ]);
 
   // Rewards
-  const NET = "net";
-
   const rewardsMap = useMemo(() => {
     if (eventsData === undefined) return undefined;
 
-    const map: {
-      deposit: Record<string, Record<string, Record<string, BigNumber>>>;
-      borrow: Record<string, Record<string, Record<string, BigNumber>>>;
-    } = { deposit: {}, borrow: {} };
+    const resultMap: {
+      [side: string]: {
+        [coinType: string]: {
+          [rewardCoinType: string]: {
+            [timestampS: number]: BigNumber;
+          };
+        };
+      };
+    } = {};
 
     eventsData.claimReward.forEach((claimRewardEvent) => {
       const reserve = data.lendingMarket.reserves.find(
@@ -489,20 +496,22 @@ export default function EarningsTabContent({
         ? Side.DEPOSIT
         : Side.BORROW;
 
-      map[side][reserve.coinType] = map[side][reserve.coinType] ?? {};
-      map[side][reserve.coinType][claimRewardEvent.coinType] =
-        map[side][reserve.coinType][claimRewardEvent.coinType] ?? {};
-      map[side][reserve.coinType][claimRewardEvent.coinType][NET] =
-        map[side][reserve.coinType][claimRewardEvent.coinType][NET] ??
+      resultMap[side] = resultMap[side] ?? {};
+      resultMap[side][reserve.coinType] =
+        resultMap[side][reserve.coinType] ?? {};
+      resultMap[side][reserve.coinType][claimRewardEvent.coinType] =
+        resultMap[side][reserve.coinType][claimRewardEvent.coinType] ?? {};
+      resultMap[side][reserve.coinType][claimRewardEvent.coinType][nowS] =
+        resultMap[side][reserve.coinType][claimRewardEvent.coinType][nowS] ??
         new BigNumber(0);
 
-      map[side][reserve.coinType][claimRewardEvent.coinType][NET] =
-        map[side][reserve.coinType][claimRewardEvent.coinType][NET].plus(
+      resultMap[side][reserve.coinType][claimRewardEvent.coinType][nowS] =
+        resultMap[side][reserve.coinType][claimRewardEvent.coinType][nowS].plus(
           claimedAmount,
         );
-      map[side][reserve.coinType][claimRewardEvent.coinType][
+      resultMap[side][reserve.coinType][claimRewardEvent.coinType][
         claimRewardEvent.timestamp
-      ] = map[side][reserve.coinType][claimRewardEvent.coinType][NET];
+      ] = resultMap[side][reserve.coinType][claimRewardEvent.coinType][nowS];
     });
 
     Object.entries(data.rewardMap).forEach(([coinType, rewards]) => {
@@ -514,25 +523,27 @@ export default function EarningsTabContent({
 
         const side = reward.stats.side;
 
-        map[side][coinType] = map[side][coinType] ?? {};
-        map[side][coinType][reward.stats.rewardCoinType] =
-          map[side][coinType][reward.stats.rewardCoinType] ?? {};
-        map[side][coinType][reward.stats.rewardCoinType][NET] =
-          map[side][coinType][reward.stats.rewardCoinType][NET] ??
+        resultMap[side] = resultMap[side] ?? {};
+        resultMap[side][coinType] = resultMap[side][coinType] ?? {};
+        resultMap[side][coinType][reward.stats.rewardCoinType] =
+          resultMap[side][coinType][reward.stats.rewardCoinType] ?? {};
+        resultMap[side][coinType][reward.stats.rewardCoinType][nowS] =
+          resultMap[side][coinType][reward.stats.rewardCoinType][nowS] ??
           new BigNumber(0);
 
-        map[side][coinType][reward.stats.rewardCoinType][NET] =
-          map[side][coinType][reward.stats.rewardCoinType][NET].plus(
+        resultMap[side][coinType][reward.stats.rewardCoinType][nowS] =
+          resultMap[side][coinType][reward.stats.rewardCoinType][nowS].plus(
             claimableAmount,
           );
       });
     });
 
-    return map;
+    return resultMap;
   }, [
     eventsData,
     data.lendingMarket.reserves,
     data.coinMetadataMap,
+    nowS,
     data.rewardMap,
     obligation.id,
   ]);
@@ -682,14 +693,14 @@ export default function EarningsTabContent({
           if (!reserve) return;
 
           result = result.plus(
-            reserveRewards[rewardCoinType][NET].times(reserve.price),
+            reserveRewards[rewardCoinType][nowS].times(reserve.price),
           );
         });
       });
     });
 
     return result;
-  }, [rewardsMap, data.reserveMap]);
+  }, [rewardsMap, data.reserveMap, nowS]);
 
   const totalEarningsUsd = useMemo(() => {
     if (
@@ -766,7 +777,7 @@ export default function EarningsTabContent({
                   return (
                     <TokenAmount
                       key={coinType}
-                      amount={rewards[coinType][NET]}
+                      amount={rewards[coinType][nowS]}
                       coinType={coinType}
                       symbol={coinMetadata.symbol}
                       src={coinMetadata.iconUrl}
@@ -779,7 +790,7 @@ export default function EarningsTabContent({
         },
       },
     ],
-    [data.coinMetadataMap],
+    [data.coinMetadataMap, nowS],
   );
 
   const depositColumns = getColumns("Interest earned");
@@ -797,13 +808,13 @@ export default function EarningsTabContent({
     const depositKeys = Array.from(
       new Set([
         ...Object.keys(cumInterestEarnedMap),
-        ...Object.keys(rewardsMap.deposit),
+        ...Object.keys(rewardsMap?.deposit ?? {}),
       ]),
     );
     const borrowKeys = Array.from(
       new Set([
         ...Object.keys(cumInterestPaidMap),
-        ...Object.keys(rewardsMap.borrow),
+        ...Object.keys(rewardsMap?.borrow ?? {}),
       ]),
     );
 
@@ -817,7 +828,7 @@ export default function EarningsTabContent({
               cumInterestEarnedMap[coinType]?.find((d) => d.timestampS === nowS)
                 ?.cumInterest ?? 0,
             ),
-            rewards: rewardsMap.deposit[coinType] ?? {},
+            rewards: rewardsMap?.deposit?.[coinType] ?? {},
           } as RowData,
         ],
         [],
@@ -836,7 +847,7 @@ export default function EarningsTabContent({
               cumInterestPaidMap[coinType]?.find((d) => d.timestampS === nowS)
                 ?.cumInterest ?? 0,
             ),
-            rewards: rewardsMap.borrow[coinType] ?? {},
+            rewards: rewardsMap?.borrow?.[coinType] ?? {},
           } as RowData,
         ],
         [],
