@@ -14,7 +14,16 @@ export default function ObligationBorrowsCard() {
       id="assets-borrowed"
       header={{
         titleIcon: <HandCoins />,
-        title: "Assets borrowed",
+        title: (
+          <>
+            Borrowed assets
+            {obligation.borrowPositionCount > 0 && (
+              <span className="ml-1 text-xs text-muted-foreground">
+                {obligation.borrowPositionCount}
+              </span>
+            )}
+          </>
+        ),
         noSeparator: true,
       }}
     >
@@ -27,7 +36,7 @@ export default function ObligationBorrowsCard() {
             symbol: b.reserve.symbol,
             iconUrl: b.reserve.iconUrl,
             amount: b.borrowedAmount,
-            amountUsd: b.borrowedAmount.times(b.reserve.price),
+            amountUsd: b.borrowedAmountUsd,
             reserve: b.reserve,
           }))}
           noAssetsMessage="No borrows"

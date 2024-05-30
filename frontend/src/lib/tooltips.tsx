@@ -23,9 +23,9 @@ export const OPEN_LTV_BORROW_WEIGHT_TOOLTIP = (
 );
 
 export const DEPOSITS_TOOLTIP =
-  "The value of all assets deposited. Depositing more assets increases your borrow limit and liquidation threshold.";
+  "The value of all your deposited assets. Depositing more assets increases your borrow limit and liquidation threshold.";
 
-export const BORROWS_TOOLTIP = "The value of all assets borrowed.";
+export const BORROWS_TOOLTIP = "The value of all your borrowed assets.";
 
 export const NET_APR_TOOLTIP = (
   <>
@@ -52,8 +52,7 @@ export const NET_APR_TOOLTIP = (
 
 export const WEIGHTED_BORROWS_TOOLTIP = (
   <>
-    Your weighted borrows is the value of all assets borrowed, adjusted by their
-    borrow weight (BW).
+    The value of all your borrowed assets, adjusted by their borrow weight (BW).
     <Separator className="my-2" />
     <span className="text-muted-foreground">
       Weighted Borrows = Position × Price × BW

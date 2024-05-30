@@ -17,7 +17,7 @@ interface CardProps extends PropsWithChildren, CardRootProps {
   id?: string;
   header?: {
     titleIcon?: ReactElement;
-    title?: string;
+    title?: string | ReactNode;
     startContent?: ReactNode;
     endContent?: ReactNode;
     noSeparator?: boolean;
@@ -49,7 +49,7 @@ export default function Card({ id, header, children, ...props }: CardProps) {
             {(header.titleIcon || header.title || header.startContent) && (
               <div className="flex flex-row items-center gap-1">
                 <div
-                  className={cn("flex-1", isCollapsible && "cursor-pointer")}
+                  className={cn(isCollapsible && "cursor-pointer")}
                   onClick={isCollapsible ? toggleIsCollapsed : undefined}
                 >
                   <TitleWithIcon className="w-full" icon={header.titleIcon}>
