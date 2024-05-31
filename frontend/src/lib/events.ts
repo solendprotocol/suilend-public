@@ -176,15 +176,17 @@ export const calculateSuiRewardsDepositAprPercent = (
   );
   if (!suiEvent) return undefined;
 
-  const rewardsAprPercent = poolRewards.reduce((acc, pr) => {
-    const aprPercent = pr.totalRewards
-      .times(suiEvent.price)
-      .times(new BigNumber(msPerYear).div(pr.endTimeMs - pr.startTimeMs))
-      .div(event.depositedAmountUsd)
-      .times(100);
-
-    return acc.plus(aprPercent);
-  }, new BigNumber(0));
+  const rewardsAprPercent = poolRewards.reduce(
+    (acc, pr) =>
+      acc.plus(
+        pr.totalRewards
+          .times(suiEvent.price)
+          .times(new BigNumber(msPerYear).div(pr.endTimeMs - pr.startTimeMs))
+          .div(event.depositedAmountUsd)
+          .times(100),
+      ),
+    new BigNumber(0),
+  );
 
   return +rewardsAprPercent;
 };

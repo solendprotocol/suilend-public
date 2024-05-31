@@ -3,6 +3,7 @@ import { capitalize } from "lodash";
 
 import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 import { Side } from "@suilend/sdk/types";
+import { linearlyInterpolate } from "@suilend/sdk/utils";
 
 import AprRewardsBreakdownRow from "@/components/dashboard/AprRewardsBreakdownRow";
 import TokenLogo from "@/components/shared/TokenLogo";
@@ -34,35 +35,24 @@ const calculateBorrowAprPercent = (reserve: ParsedReserve) => {
   const config = reserve.config;
   const utilizationPercent = calculateUtilizationPercent(reserve);
 
-  let i = 1;
-  while (i < config.interestRate.length) {
-    const left = config.interestRate[i - 1];
-    const right = config.interestRate[i];
-
-    if (
-      utilizationPercent.gte(left.utilPercent) &&
-      utilizationPercent.lte(right.utilPercent)
-    ) {
-      const weight = new BigNumber(
-        utilizationPercent.minus(left.utilPercent),
-      ).div(right.utilPercent.minus(left.utilPercent));
-
-      return left.aprPercent.plus(
-        weight.times(right.aprPercent.minus(left.aprPercent)),
-      );
-    }
-    i = i + 1;
-  }
-
-  // Should never reach here
-  return new BigNumber(0);
+  return linearlyInterpolate(
+    config.interestRate,
+    "utilPercent",
+    "aprPercent",
+    utilizationPercent,
+  );
 };
 
-const calculateDepositAprPercent = (reserve: ParsedReserve) =>
-  new BigNumber(calculateUtilizationPercent(reserve).div(100))
-    .times(calculateBorrowAprPercent(reserve).div(100))
-    .times(1 - reserve.config.spreadFeeBps / 10000)
+const calculateDepositAprPercent = (reserve: ParsedReserve) => {
+  const config = reserve.config;
+  const utilizationPercent = calculateUtilizationPercent(reserve);
+  const borrowAprPercent = calculateBorrowAprPercent(reserve);
+
+  return new BigNumber(utilizationPercent.div(100))
+    .times(borrowAprPercent.div(100))
+    .times(1 - config.spreadFeeBps / 10000)
     .times(100);
+};
 
 const formatPerDay = (
   coinType: string,

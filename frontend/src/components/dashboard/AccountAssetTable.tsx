@@ -4,6 +4,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import BigNumber from "bignumber.js";
 
 import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
+import { reserveSort } from "@suilend/sdk/utils";
 
 import { useActionsModalContext } from "@/components/dashboard/actions-modal/ActionsModalContext";
 import DataTable, {
@@ -13,7 +14,6 @@ import DataTable, {
 import AssetCell from "@/components/dashboard/market-table/AssetCell";
 import { TBody, TLabel } from "@/components/shared/Typography";
 import { formatToken, formatUsd } from "@/lib/format";
-import { reserveSort } from "@/lib/utils";
 
 interface RowData {
   coinType: string;

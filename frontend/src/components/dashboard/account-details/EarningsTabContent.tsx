@@ -14,6 +14,7 @@ import {
   ApiWithdrawEvent,
   Side,
 } from "@suilend/sdk/types";
+import { linearlyInterpolate, reserveSort } from "@suilend/sdk/utils";
 
 import {
   EventsData,
@@ -35,7 +36,7 @@ import { useDashboardContext } from "@/contexts/DashboardContext";
 import { msPerYear } from "@/lib/constants";
 import { DAY_S, Days, EventType, eventSortAsc } from "@/lib/events";
 import { formatToken, formatUsd } from "@/lib/format";
-import { cn, linearlyInterpolate, reserveSort } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 interface RowData {
   coinType: string;
@@ -623,7 +624,7 @@ export default function EarningsTabContent({
           (acc, coinType) => {
             return {
               ...acc,
-              [coinType]: linearlyInterpolate(
+              [coinType]: +linearlyInterpolate(
                 cumInterestMap[coinType],
                 "timestampS",
                 "cumInterest",

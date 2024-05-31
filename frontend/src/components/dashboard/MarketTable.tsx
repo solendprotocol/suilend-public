@@ -5,6 +5,7 @@ import BigNumber from "bignumber.js";
 
 import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 import { Side } from "@suilend/sdk/types";
+import { reserveSort } from "@suilend/sdk/utils";
 
 import { useActionsModalContext } from "@/components/dashboard/actions-modal/ActionsModalContext";
 import DataTable, {
@@ -26,7 +27,6 @@ import {
   getTotalAprPercent,
 } from "@/lib/liquidityMining";
 import { OPEN_LTV_BORROW_WEIGHT_TOOLTIP } from "@/lib/tooltips";
-import { reserveSort } from "@/lib/utils";
 
 export interface ReservesRowData {
   coinType: string;

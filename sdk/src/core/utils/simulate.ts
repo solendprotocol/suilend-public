@@ -1,9 +1,11 @@
 import { bcs } from "@mysten/sui.js/bcs";
 import { toHEX } from "@mysten/sui.js/utils";
 import BigNumber from "bignumber.js";
+import { v4 as uuidv4 } from "uuid";
 
 import { SuiPriceServiceConnection } from "../../../../pyth-sdk/src";
 import { WAD } from "../constants";
+import { linearlyInterpolate } from "../utils";
 
 interface Deps {
   Decimal: any;
@@ -60,7 +62,7 @@ export class Simulate {
   calculateUtilizationRate(reserve: typeof this.Reserve) {
     const { mintDecimals } = reserve;
 
-    // Parsing logic from core/parsers/reserve.ts
+    // From core/parsers/reserve.ts > parseReserve
     const availableAmount = new BigNumber(
       reserve.availableAmount.toString(),
     ).div(10 ** mintDecimals);
@@ -94,36 +96,23 @@ export class Simulate {
     const config = reserve.config.element as typeof this.ReserveConfig;
     const utilizationPercent = this.calculateUtilizationPercent(reserve);
 
-    let i = 1;
-    while (i < config.interestRateUtils.length) {
-      // Parsing logic from core/parsers/reserve.ts
-      const leftUtilPercent = new BigNumber(config.interestRateUtils[i - 1]);
-      const rightUtilPercent = new BigNumber(config.interestRateUtils[i]);
+    // From core/parsers/reserve.ts > parseReserveConfig
+    const interestRate = (config.interestRateUtils as any[]).map(
+      (util, index) => ({
+        id: uuidv4(),
+        utilPercent: new BigNumber(util.toString()),
+        aprPercent: new BigNumber(
+          config.interestRateAprs[index].toString(),
+        ).div(100),
+      }),
+    );
 
-      if (
-        utilizationPercent.gte(leftUtilPercent) &&
-        utilizationPercent.lte(rightUtilPercent)
-      ) {
-        const leftAprPercent = new BigNumber(
-          config.interestRateAprs[i - 1].toString(),
-        ).div(100);
-        const rightAprPercent = new BigNumber(
-          config.interestRateAprs[i].toString(),
-        ).div(100);
-
-        const weight = new BigNumber(
-          utilizationPercent.minus(leftUtilPercent),
-        ).div(rightUtilPercent.minus(leftUtilPercent));
-
-        return leftAprPercent.plus(
-          weight.times(rightAprPercent.minus(leftAprPercent)),
-        );
-      }
-      i = i + 1;
-    }
-
-    // Should never reach here
-    return new BigNumber(0);
+    return linearlyInterpolate(
+      interestRate,
+      "utilPercent",
+      "aprPercent",
+      utilizationPercent,
+    );
   }
   calculateBorrowAprPercent(reserve: typeof this.Reserve) {
     return this.calculateBorrowApr(reserve);
@@ -134,13 +123,15 @@ export class Simulate {
    */
   calculateSupplyApr(reserve: typeof this.Reserve) {
     const config = reserve.config.element as typeof this.ReserveConfig;
-
     const utilizationPercent = this.calculateUtilizationPercent(reserve);
     const borrowAprPercent = this.calculateBorrowAprPercent(reserve);
 
+    // From core/parsers/reserve.ts > parseReserveConfig
+    const spreadFeeBps = Number(config.spreadFeeBps.toString());
+
     return new BigNumber(utilizationPercent.div(100))
       .times(borrowAprPercent.div(100))
-      .times(1 - +config.spreadFeeBps.toString() / 10000)
+      .times(1 - spreadFeeBps / 10000)
       .times(100);
   }
   calculateDepositAprPercent(reserve: typeof this.Reserve) {
