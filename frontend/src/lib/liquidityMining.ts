@@ -29,7 +29,7 @@ export type RewardSummary = {
     reserveCoinType: string;
     rewardCoinType: string;
     aprPercent?: BigNumber;
-    dailyReward?: BigNumber;
+    perDay?: BigNumber;
     price?: BigNumber;
     iconUrl?: string | null;
     rewardSymbol: string;
@@ -40,16 +40,16 @@ export type RewardSummary = {
   };
 };
 
-export type AprRewardSummary = Omit<RewardSummary, "stats"> & {
+type AprRewardSummary = Omit<RewardSummary, "stats"> & {
   stats: RewardSummary["stats"] & {
     price: BigNumber;
     aprPercent: BigNumber;
   };
 };
 
-export type DailyRewardSummary = Omit<RewardSummary, "stats"> & {
+type PerDayRewardSummary = Omit<RewardSummary, "stats"> & {
   stats: RewardSummary["stats"] & {
-    dailyReward: BigNumber;
+    perDay: BigNumber;
   };
 };
 
@@ -80,7 +80,7 @@ export function formatRewards(
           .div(reserve.depositedAmountUsd)
           .times(100)
       : undefined;
-    const dailyReward = rewardReserve
+    const perDay = rewardReserve
       ? undefined
       : poolReward.totalRewards
           .times(
@@ -101,7 +101,7 @@ export function formatRewards(
         reserveCoinType: reserve.coinType,
         rewardCoinType: poolReward.coinType,
         aprPercent,
-        dailyReward,
+        perDay,
         price: rewardReserve?.price,
         iconUrl: rewardCoinMetadata.iconUrl,
         rewardSymbol: rewardCoinMetadata.symbol,
@@ -182,57 +182,50 @@ export const getDedupedAprRewards = (
     (r) => r.stats.aprPercent !== undefined,
   ) as AprRewardSummary[];
 
-  const dedupedAprRewards: AprRewardSummary[] = [];
+  const result: AprRewardSummary[] = [];
   for (const reward of aprRewards) {
-    const index = dedupedAprRewards.findIndex(
+    const index = result.findIndex(
       (r) => r.stats.rewardCoinType === reward.stats.rewardCoinType,
     );
 
     if (index > -1) {
-      dedupedAprRewards[index].stats.aprPercent = dedupedAprRewards[
-        index
-      ].stats.aprPercent.plus(reward.stats.aprPercent);
-    } else dedupedAprRewards.push(cloneDeep(reward));
+      result[index].stats.aprPercent = result[index].stats.aprPercent.plus(
+        reward.stats.aprPercent,
+      );
+    } else result.push(cloneDeep(reward));
   }
 
-  return dedupedAprRewards;
+  return result;
 };
 
-export const getDedupedDailyRewards = (
+export const getDedupedPerDayRewards = (
   filteredRewards: RewardSummary[],
-): DailyRewardSummary[] => {
-  const dailyRewards = filteredRewards.filter(
-    (r) => r.stats.dailyReward !== undefined,
-  ) as DailyRewardSummary[];
+): PerDayRewardSummary[] => {
+  const perDayRewards = filteredRewards.filter(
+    (r) => r.stats.perDay !== undefined,
+  ) as PerDayRewardSummary[];
 
-  const dedupedDailyRewards: DailyRewardSummary[] = [];
-  for (const reward of dailyRewards) {
-    const index = dedupedDailyRewards.findIndex(
+  const result: PerDayRewardSummary[] = [];
+  for (const reward of perDayRewards) {
+    const index = result.findIndex(
       (r) => r.stats.rewardCoinType === reward.stats.rewardCoinType,
     );
 
     if (index > -1) {
-      dedupedDailyRewards[index].stats.dailyReward = dedupedDailyRewards[
-        index
-      ].stats.dailyReward.plus(reward.stats.dailyReward);
-    } else dedupedDailyRewards.push(cloneDeep(reward));
+      result[index].stats.perDay = result[index].stats.perDay.plus(
+        reward.stats.perDay,
+      );
+    } else result.push(cloneDeep(reward));
   }
 
-  return dedupedDailyRewards;
+  return result;
 };
 
 export const getTotalAprPercent = (
   aprPercent: BigNumber,
   filteredRewards: RewardSummary[],
-) => {
-  const dedupedAprRewards = getDedupedAprRewards(filteredRewards);
-
-  const totalAprPercent = aprPercent.plus(
-    dedupedAprRewards.reduce(
-      (acc, reward) => acc.plus(reward.stats.aprPercent),
-      new BigNumber(0),
-    ),
+) =>
+  getDedupedAprRewards(filteredRewards).reduce(
+    (acc, reward) => acc.plus(reward.stats.aprPercent),
+    aprPercent,
   );
-
-  return totalAprPercent;
-};

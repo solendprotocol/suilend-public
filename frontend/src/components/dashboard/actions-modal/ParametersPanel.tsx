@@ -154,7 +154,7 @@ function RatesPanel({ reserve }: PanelProps) {
         horizontal
       />
       <LabelWithValue
-        label="Current borrow APR"
+        label="Current borrowing APR"
         value={formatPercent(reserve.borrowAprPercent)}
         horizontal
       />
@@ -166,7 +166,7 @@ function RatesPanel({ reserve }: PanelProps) {
             horizontal
           />
           <LabelWithValue
-            label={`Borrow APR at threshold ${index + 1}`}
+            label={`Borrowing APR at threshold ${index + 1}`}
             value={formatPercent(new BigNumber(rate.aprPercent))}
             horizontal
           />
