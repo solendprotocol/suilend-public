@@ -18,14 +18,13 @@ export const linearlyInterpolate = (
 ) => {
   let i = 1;
   while (i < array.length) {
+    const leftXValue = new BigNumber(array[i - 1][xKey]);
+    const leftYValue = new BigNumber(array[i - 1][yKey]);
+
     const xValue = new BigNumber(_xValue);
 
-    const left = array[i - 1];
-    const leftXValue = new BigNumber(left[xKey]);
-    const leftYValue = new BigNumber(left[yKey]);
-    const right = array[i];
-    const rightXValue = new BigNumber(right[xKey]);
-    const rightYValue = new BigNumber(right[yKey]);
+    const rightXValue = new BigNumber(array[i][xKey]);
+    const rightYValue = new BigNumber(array[i][yKey]);
 
     if (xValue.gte(leftXValue) && xValue.lte(rightXValue)) {
       const weight = new BigNumber(xValue.minus(leftXValue)).div(
