@@ -186,7 +186,7 @@ export default function AprWithRewardsBreakdown({
           <>
             <TLabelSans>
               {capitalize(side)} {reserve.symbol}
-              {" to earn "}
+              {" and earn "}
               {perDayRewards.length > 0 && "points & "}
               rewards
             </TLabelSans>
