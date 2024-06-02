@@ -200,7 +200,7 @@ export default function MarketCardList({
             trigger={
               <SelectTrigger
                 className={cn(
-                  "h-8 w-fit gap-1 border-none p-0 uppercase text-muted-foreground ring-offset-transparent transition-colors hover:text-foreground focus:ring-transparent",
+                  "h-8 w-fit gap-1 border-none bg-transparent p-0 font-sans text-muted-foreground ring-offset-transparent transition-colors hover:text-foreground focus:ring-transparent",
                   isSortByOpen && "text-foreground",
                   sortBy && "!text-primary-foreground",
                 )}

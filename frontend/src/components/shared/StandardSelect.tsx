@@ -24,7 +24,7 @@ export default function StandardSelect({
       trigger={
         <SelectTrigger
           className={cn(
-            "h-8 min-w-[120px] gap-1 rounded-sm border-border bg-transparent px-3 py-0 uppercase text-muted-foreground ring-offset-transparent transition-colors hover:border-secondary hover:bg-secondary/5 hover:text-primary-foreground focus:ring-transparent",
+            "h-8 min-w-[120px] gap-1 rounded-sm border-border bg-transparent px-3 py-0 font-sans text-muted-foreground ring-offset-transparent transition-colors hover:border-secondary hover:bg-secondary/5 hover:text-primary-foreground focus:ring-transparent",
             className,
             isOpen && "border-secondary bg-secondary/5 text-primary-foreground",
           )}
