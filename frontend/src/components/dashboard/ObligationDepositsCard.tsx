@@ -14,7 +14,16 @@ export default function ObligationDepositsCard() {
       id="assets-deposited"
       header={{
         titleIcon: <PiggyBank />,
-        title: "Assets deposited",
+        title: (
+          <>
+            Deposited assets
+            {obligation.depositPositionCount > 0 && (
+              <span className="ml-1 text-xs text-muted-foreground">
+                {obligation.depositPositionCount}
+              </span>
+            )}
+          </>
+        ),
         noSeparator: true,
       }}
     >
@@ -27,7 +36,7 @@ export default function ObligationDepositsCard() {
             symbol: d.reserve.symbol,
             iconUrl: d.reserve.iconUrl,
             amount: d.depositedAmount,
-            amountUsd: d.depositedAmount.times(d.reserve.price),
+            amountUsd: d.depositedAmountUsd,
             reserve: d.reserve,
           }))}
           noAssetsMessage="No deposits"

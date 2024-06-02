@@ -48,9 +48,8 @@ export const getPointsStats = (
       pointsPerDay.deposit = pointsPerDay.deposit.plus(
         obligation.deposits
           .find((d) => d.coinType === reward.stats.reserveCoinType)
-          ?.depositedAmount.times(
-            reward.stats.dailyReward ?? new BigNumber(0),
-          ) ?? new BigNumber(0),
+          ?.depositedAmount.times(reward.stats.perDay ?? new BigNumber(0)) ??
+          new BigNumber(0),
       );
     });
 
@@ -63,9 +62,8 @@ export const getPointsStats = (
       pointsPerDay.borrow = pointsPerDay.borrow.plus(
         obligation.borrows
           .find((d) => d.coinType === reward.stats.reserveCoinType)
-          ?.borrowedAmount.times(
-            reward.stats.dailyReward ?? new BigNumber(0),
-          ) ?? new BigNumber(0),
+          ?.borrowedAmount.times(reward.stats.perDay ?? new BigNumber(0)) ??
+          new BigNumber(0),
       );
     });
   });

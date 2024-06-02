@@ -94,7 +94,7 @@ export default function ActionsModalContainer({ children }: PropsWithChildren) {
                 variant="secondary"
                 onClick={() => setIsMoreParametersOpen((o) => !o)}
               >
-                {isMoreParametersOpen ? "Hide" : "Show"} more parameters
+                {isMoreParametersOpen ? "Less" : "More"} parameters
               </Button>
             </div>
 
@@ -107,7 +107,7 @@ export default function ActionsModalContainer({ children }: PropsWithChildren) {
     <DrawerRoot open={isOpen} onRelease={(e, open) => !open && close()}>
       <DrawerContent
         className={cn(
-          "mt-0 max-h-[calc(100dvh-0px)] rounded-t-lg bg-popover p-4",
+          "actions-modal-drawer-content mt-0 max-h-[calc(100dvh-0px)] rounded-t-lg bg-popover p-0",
           isMoreParametersOpen ? "!h-[calc(100dvh-0px)]" : "!h-auto",
           visualViewportHeight < 400
             ? "!bottom-auto !top-0"

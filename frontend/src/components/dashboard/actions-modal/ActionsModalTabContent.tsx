@@ -2,13 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import BigNumber from "bignumber.js";
 import { capitalize } from "lodash";
-import {
-  ChevronsDownUp,
-  ChevronsUpDown,
-  HandCoins,
-  PiggyBank,
-  Wallet,
-} from "lucide-react";
+import { HandCoins, PiggyBank, Wallet } from "lucide-react";
 import { toast } from "sonner";
 
 import { maxU64 } from "@suilend/sdk/constants";
@@ -24,6 +18,7 @@ import HistoricalAprLineChart from "@/components/dashboard/actions-modal/Histori
 import ParametersPanel from "@/components/dashboard/actions-modal/ParametersPanel";
 import AprWithRewardsBreakdown from "@/components/dashboard/AprWithRewardsBreakdown";
 import Button from "@/components/shared/Button";
+import Collapsible from "@/components/shared/Collapsible";
 import LabelWithValue from "@/components/shared/LabelWithValue";
 import Spinner from "@/components/shared/Spinner";
 import TextLink from "@/components/shared/TextLink";
@@ -80,9 +75,6 @@ export default function ActionsModalTabContent({
   const data = restAppContext.data as AppData;
   const { isMoreParametersOpen, setIsMoreParametersOpen } =
     useActionsModalContext();
-  const MoreParametersIcon = isMoreParametersOpen
-    ? ChevronsDownUp
-    : ChevronsUpDown;
 
   const { md } = useBreakpoint();
 
@@ -104,7 +96,7 @@ export default function ActionsModalTabContent({
   const positionAmount =
     (side === Side.DEPOSIT
       ? depositPosition?.depositedAmount
-      : borrowPosition?.borrowedAmount) ?? new BigNumber("0");
+      : borrowPosition?.borrowedAmount) ?? new BigNumber(0);
 
   // Value
   const [useMaxAmount, setUseMaxAmount] = useState<boolean>(false);
@@ -325,7 +317,7 @@ export default function ActionsModalTabContent({
         </div>
       </div>
 
-      <div className="-m-4 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overflow-x-hidden p-4 pb-6">
+      <div className="-m-4 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overflow-x-hidden p-4 md:pb-6">
         <div className="flex flex-col gap-2.5">
           <LabelWithValue
             label="Price"
@@ -353,23 +345,24 @@ export default function ActionsModalTabContent({
           <LabelWithValue
             label="Your borrow limit"
             value={
-              newBorrowLimitUsd
-                ? `${formatUsd(obligation?.minPriceBorrowLimitUsd ?? new BigNumber("0"))} → ${formatUsd(newBorrowLimitUsd)}`
-                : formatUsd(
-                    obligation?.minPriceBorrowLimitUsd ?? new BigNumber("0"),
-                  )
+              !obligation
+                ? "N/A"
+                : newBorrowLimitUsd
+                  ? `${formatUsd(obligation.minPriceBorrowLimitUsd)} → ${formatUsd(newBorrowLimitUsd)}`
+                  : formatUsd(obligation.minPriceBorrowLimitUsd)
             }
             horizontal
           />
           <LabelWithValue
             label="Your utilization"
             value={
-              newBorrowUtilization
-                ? `${formatPercent(obligation?.weightedConservativeBorrowUtilizationPercent ?? new BigNumber(0))} → ${formatPercent(newBorrowUtilization.times(100))}`
-                : formatPercent(
-                    obligation?.weightedConservativeBorrowUtilizationPercent ??
-                      new BigNumber(0),
-                  )
+              !obligation
+                ? "N/A"
+                : newBorrowUtilization
+                  ? `${formatPercent(obligation.weightedConservativeBorrowUtilizationPercent)} → ${formatPercent(newBorrowUtilization.times(100))}`
+                  : formatPercent(
+                      obligation.weightedConservativeBorrowUtilizationPercent,
+                    )
             }
             horizontal
           />
@@ -385,17 +378,17 @@ export default function ActionsModalTabContent({
         )}
       </div>
 
-      <div className="flex w-full flex-row items-stretch gap-[2px]">
+      <div className="flex w-full flex-col gap-2">
         {!md && (
-          <Button
-            className="h-auto w-14 flex-col px-0 py-0"
-            labelClassName="uppercase text-xs"
-            startIcon={<MoreParametersIcon className="h-4 w-4" />}
-            variant="secondary"
-            onClick={() => setIsMoreParametersOpen((o) => !o)}
-          >
-            Params
-          </Button>
+          <Collapsible
+            open={isMoreParametersOpen}
+            onOpenChange={setIsMoreParametersOpen}
+            title={`${isMoreParametersOpen ? "Less" : "More"} parameters`}
+            openTitle="Less parameters"
+            buttonClassName="!bg-popover py-1"
+            buttonLabelClassName="text-xs"
+            hasSeparator
+          />
         )}
 
         <Button

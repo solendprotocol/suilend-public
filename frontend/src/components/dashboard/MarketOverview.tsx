@@ -16,7 +16,7 @@ export default function MarketOverview() {
       header={{
         titleIcon: <LineChart />,
         title: "Pool overview",
-        endContent: <MarketOverviewPopover />,
+        startContent: <MarketOverviewPopover />,
         noSeparator: true,
       }}
     >

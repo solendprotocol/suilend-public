@@ -10,16 +10,20 @@ import { useLocalStorage } from "usehooks-ts";
 import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 import { Side } from "@suilend/sdk/types";
 
+import AprRewardsBreakdownRow from "@/components/dashboard/AprRewardsBreakdownRow";
 import Button from "@/components/shared/Button";
 import TokenLogo from "@/components/shared/TokenLogo";
-import { TBody, TLabelSans } from "@/components/shared/Typography";
+import { TBody, TBodySans, TLabelSans } from "@/components/shared/Typography";
 import { ViewBox, getTooltipStyle } from "@/components/ui/chart";
-import { Separator } from "@/components/ui/separator";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { useDashboardContext } from "@/contexts/DashboardContext";
 import useBreakpoint from "@/hooks/useBreakpoint";
 import useIsTouchscreen from "@/hooks/useIsTouchscreen";
-import { LOGO_MAP, NORMALIZED_SUI_COINTYPE } from "@/lib/coinType";
+import {
+  COIN_TYPE_COLOR_MAP,
+  LOGO_MAP,
+  NORMALIZED_SUI_COINTYPE,
+} from "@/lib/coinType";
 import {
   DAYS,
   DAY_S,
@@ -55,74 +59,86 @@ interface TooltipContentProps {
 
 function TooltipContent({ side, d, viewBox, coordinate }: TooltipContentProps) {
   if (!coordinate?.x || !viewBox) return null;
+  if (
+    (side === Side.DEPOSIT && d.depositAprPercent === undefined) ||
+    (side === Side.BORROW && d.borrowAprPercent === undefined)
+  )
+    return null;
   return (
     // Subset of TooltipContent className
     <div
       className="absolute rounded-md border bg-popover px-3 py-1.5 shadow-md"
       style={getTooltipStyle(
-        side === Side.DEPOSIT ? 180 : 160,
+        side === Side.DEPOSIT ? 240 : 200,
         viewBox,
         coordinate,
       )}
     >
-      <div className="flex w-full flex-col gap-1">
+      <div className="flex w-full flex-col gap-2">
         <TLabelSans>
           {format(new Date(d.timestampS * 1000), "MM/dd HH:mm")}
         </TLabelSans>
 
-        {side === Side.DEPOSIT && d.depositAprPercent !== undefined ? (
-          <>
-            <div className="mt-1 flex w-full flex-row items-center justify-between gap-4">
-              <TLabelSans>Base APR</TLabelSans>
-              <TBody className="text-success">
-                {formatPercent(new BigNumber(d.depositAprPercent))}
-              </TBody>
-            </div>
-
-            {d.depositSuiRewardsAprPercent !== undefined && (
-              <>
-                <div className="flex w-full flex-row items-center justify-between gap-4">
-                  <TLabelSans>Rewards</TLabelSans>
-
-                  <div className="flex flex-row items-center gap-1.5">
-                    <TokenLogo
-                      className="h-4 w-4"
-                      coinType={NORMALIZED_SUI_COINTYPE}
-                      symbol="SUI"
-                      src={LOGO_MAP[NORMALIZED_SUI_COINTYPE]}
-                    />
-                    <TBody className="text-primary-foreground">
-                      {formatPercent(
-                        new BigNumber(d.depositSuiRewardsAprPercent),
-                      )}
-                    </TBody>
-                  </div>
-                </div>
-
-                <Separator />
-
-                <div className="flex w-full flex-row justify-end">
-                  <TBody>
-                    {formatPercent(
-                      new BigNumber(
-                        d.depositAprPercent + d.depositSuiRewardsAprPercent,
-                      ),
-                    )}
-                  </TBody>
-                </div>
-              </>
+        <div className="flex w-full flex-row items-center justify-between gap-4">
+          <TBodySans>{capitalize(side)} APR</TBodySans>
+          <TBody>
+            {formatPercent(
+              new BigNumber(
+                side === Side.DEPOSIT
+                  ? (d.depositAprPercent as number) +
+                    (d.depositSuiRewardsAprPercent ?? 0)
+                  : (d.borrowAprPercent as number),
+              ),
             )}
-          </>
-        ) : side === Side.BORROW && d.borrowAprPercent !== undefined ? (
-          <>
-            <div className="flex w-full flex-row items-center justify-between gap-4">
-              <TLabelSans>Base APR</TLabelSans>
-              <TBody className="text-success">
-                {formatPercent(new BigNumber(d.borrowAprPercent))}
-              </TBody>
-            </div>
-          </>
-        ) : null}
+          </TBody>
+        </div>
+
+        <AprRewardsBreakdownRow
+          isLast={
+            !(
+              side === Side.DEPOSIT &&
+              d.depositSuiRewardsAprPercent !== undefined
+            )
+          }
+          value={
+            <span className="text-success">
+              {formatPercent(
+                new BigNumber(
+                  (side === Side.DEPOSIT
+                    ? d.depositAprPercent
+                    : d.borrowAprPercent) as number,
+                ),
+              )}
+            </span>
+          }
+        >
+          <TLabelSans>Interest</TLabelSans>
+        </AprRewardsBreakdownRow>
+
+        {side === Side.DEPOSIT &&
+          d.depositSuiRewardsAprPercent !== undefined && (
+            <AprRewardsBreakdownRow
+              isLast
+              value={
+                <span
+                  style={{
+                    color: COIN_TYPE_COLOR_MAP[NORMALIZED_SUI_COINTYPE],
+                  }}
+                >
+                  {formatPercent(new BigNumber(d.depositSuiRewardsAprPercent))}
+                </span>
+              }
+            >
+              <TLabelSans>Rewards in</TLabelSans>
+              <TokenLogo
+                className="h-4 w-4"
+                coinType={NORMALIZED_SUI_COINTYPE}
+                symbol="SUI"
+                src={LOGO_MAP[NORMALIZED_SUI_COINTYPE]}
+              />
+              <TLabelSans>SUI</TLabelSans>
+            </AprRewardsBreakdownRow>
+          )}
       </div>
     </div>
   );
@@ -130,11 +146,10 @@ function TooltipContent({ side, d, viewBox, coordinate }: TooltipContentProps) {
 
 interface ChartProps {
   side: Side;
-  isLoading: boolean;
   data: ChartData[];
 }
 
-function Chart({ side, isLoading, data }: ChartProps) {
+function Chart({ side, data }: ChartProps) {
   const { sm } = useBreakpoint();
   const isTouchscreen = useIsTouchscreen();
 
@@ -168,7 +183,7 @@ function Chart({ side, isLoading, data }: ChartProps) {
         return d.timestampS + new Date().getTimezoneOffset() * 60;
       });
   }, [data, days, sm]);
-  const ticksY = Array.from({ length: sm ? 4 : 3 }).map(
+  const ticksY = Array.from({ length: 4 }).map(
     (_, index, array) => Math.ceil(maxY / (array.length - 1)) * index,
   );
 
@@ -274,9 +289,9 @@ function Chart({ side, isLoading, data }: ChartProps) {
             stackId="1"
             dataKey="depositSuiRewardsAprPercent"
             isAnimationActive={false}
-            stroke="hsl(var(--secondary))"
-            fill="hsla(var(--secondary) / 10%)"
-            fillOpacity={1}
+            stroke={COIN_TYPE_COLOR_MAP[NORMALIZED_SUI_COINTYPE]}
+            fill={COIN_TYPE_COLOR_MAP[NORMALIZED_SUI_COINTYPE]}
+            fillOpacity={0.1}
             dot={{
               stroke: "transparent",
               strokeWidth: 0,
@@ -447,10 +462,10 @@ export default function HistoricalAprLineChart({
       </div>
 
       <div
-        className="historical-apr-line-chart h-[100px] w-full flex-shrink-0 transform-gpu sm:h-[160px]"
+        className="historical-apr-line-chart h-[140px] w-full flex-shrink-0 transform-gpu md:h-[160px]"
         is-loading={isLoading ? "true" : "false"}
       >
-        <Chart side={side} isLoading={isLoading} data={chartData ?? []} />
+        <Chart side={side} data={chartData ?? []} />
       </div>
     </div>
   );

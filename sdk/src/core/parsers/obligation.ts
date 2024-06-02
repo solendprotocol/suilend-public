@@ -25,7 +25,8 @@ export const parseObligation = (
   let minPriceBorrowLimitUsd = new BigNumber(0);
   let unhealthyBorrowValueUsd = new BigNumber(0);
 
-  let positionCount = 0;
+  let depositPositionCount = 0;
+  let borrowPositionCount = 0;
 
   const deposits = (obligation.deposits as any[]).map((deposit) => {
     const coinType = normalizeStructTag(deposit.coinType.name);
@@ -35,7 +36,7 @@ export const parseObligation = (
         `Reserve with coinType ${deposit.coinType.name} not found`,
       );
 
-    positionCount++;
+    depositPositionCount++;
 
     const depositedCtokenAmount = new BigNumber(
       deposit.depositedCtokenAmount.toString(),
@@ -86,7 +87,7 @@ export const parseObligation = (
         `Reserve with coinType ${borrow.coinType.name} not found`,
       );
 
-    positionCount++;
+    borrowPositionCount++;
 
     const cumulativeBorrowRate = new BigNumber(
       borrow.cumulativeBorrowRate.value.toString(),
@@ -149,7 +150,9 @@ export const parseObligation = (
     minPriceBorrowLimitUsd,
     unhealthyBorrowValueUsd,
 
-    positionCount,
+    depositPositionCount,
+    borrowPositionCount,
+    positionCount: depositPositionCount + borrowPositionCount,
     deposits,
     borrows,
     weightedConservativeBorrowUtilizationPercent,

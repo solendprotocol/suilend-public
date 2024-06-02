@@ -14,6 +14,7 @@ import {
   ApiWithdrawEvent,
   Side,
 } from "@suilend/sdk/types";
+import { linearlyInterpolate, reserveSort } from "@suilend/sdk/utils";
 
 import {
   EventsData,
@@ -35,7 +36,7 @@ import { useDashboardContext } from "@/contexts/DashboardContext";
 import { msPerYear } from "@/lib/constants";
 import { DAY_S, Days, EventType, eventSortAsc } from "@/lib/events";
 import { formatToken, formatUsd } from "@/lib/format";
-import { cn, linearlyInterpolate, reserveSort } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 interface RowData {
   coinType: string;
@@ -623,7 +624,7 @@ export default function EarningsTabContent({
           (acc, coinType) => {
             return {
               ...acc,
-              [coinType]: linearlyInterpolate(
+              [coinType]: +linearlyInterpolate(
                 cumInterestMap[coinType],
                 "timestampS",
                 "cumInterest",
@@ -769,22 +770,20 @@ export default function EarningsTabContent({
             return <TLabelSans className="w-max">N/A</TLabelSans>;
           return (
             <div className="flex w-max flex-col gap-1">
-              {Object.keys(rewards)
-                .sort((a, b) => (a[0] > b[0] ? -1 : 1))
-                .map((coinType) => {
-                  const coinMetadata = data.coinMetadataMap[coinType];
+              {Object.keys(rewards).map((coinType) => {
+                const coinMetadata = data.coinMetadataMap[coinType];
 
-                  return (
-                    <TokenAmount
-                      key={coinType}
-                      amount={rewards[coinType][nowS]}
-                      coinType={coinType}
-                      symbol={coinMetadata.symbol}
-                      src={coinMetadata.iconUrl}
-                      decimals={coinMetadata.decimals}
-                    />
-                  );
-                })}
+                return (
+                  <TokenAmount
+                    key={coinType}
+                    amount={rewards[coinType][nowS]}
+                    coinType={coinType}
+                    symbol={coinMetadata.symbol}
+                    src={coinMetadata.iconUrl}
+                    decimals={coinMetadata.decimals}
+                  />
+                );
+              })}
             </div>
           );
         },

@@ -21,7 +21,7 @@ export const getTooltipStyle = (
   const top = viewBox.top + MARGIN;
   let left: string | number = "auto";
   let right: string | number = "auto";
-  const offset = 10;
+  const offset = 2 / 2 + 2;
 
   const isAtRightBoundary =
     coordinate.x - viewBox.left > viewBox.width - (offset + width + MARGIN);

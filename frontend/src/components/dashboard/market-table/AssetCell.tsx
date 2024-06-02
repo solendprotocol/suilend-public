@@ -3,12 +3,17 @@ import TokenLogo from "@/components/shared/TokenLogo";
 import { TBody, TLabel } from "@/components/shared/Typography";
 import { formatPrice } from "@/lib/format";
 
+type AssetCellProps = Pick<
+  ReservesRowData,
+  "coinType" | "price" | "symbol" | "iconUrl"
+>;
+
 export default function AssetCell({
   coinType,
   price,
   symbol,
   iconUrl,
-}: ReservesRowData) {
+}: AssetCellProps) {
   return (
     <div className="flex flex-row items-center gap-3">
       <TokenLogo

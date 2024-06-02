@@ -5,6 +5,7 @@ import { ClassValue } from "clsx";
 import { useLocalStorage } from "usehooks-ts";
 
 import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
+import { reserveSort } from "@suilend/sdk/utils";
 
 import BorrowLimitTitle from "@/components/dashboard/account/BorrowLimitTitle";
 import LiquidationThresholdTitle from "@/components/dashboard/account/LiquidationThresholdTitle";
@@ -29,7 +30,7 @@ import {
   OPEN_LTV_TOOLTIP,
   WEIGHTED_BORROWS_PRICE_TOOLTIP,
 } from "@/lib/tooltips";
-import { cn, reserveSort } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 interface BreakdownColumn {
   title: string;

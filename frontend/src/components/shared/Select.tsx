@@ -57,7 +57,7 @@ export default function Select({
                 key={item.id}
                 value={item.id}
                 className={cn(
-                  "cursor-pointer border py-2 pl-3 pr-10 font-sans text-xs text-muted focus:border-secondary focus:bg-secondary/5 focus:text-primary-foreground",
+                  "cursor-pointer border py-2 pl-3 pr-10 font-sans text-xs text-muted transition-colors focus:border-secondary focus:bg-secondary/5 focus:text-primary-foreground",
                   item.id === selectedItemId &&
                     "border-secondary bg-secondary/5 text-primary-foreground",
                 )}

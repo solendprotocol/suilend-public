@@ -8,6 +8,7 @@ import Card from "@/components/dashboard/Card";
 import { CardContent } from "@/components/ui/card";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { useWalletContext } from "@/contexts/WalletContext";
+import { formatUsd } from "@/lib/format";
 
 export default function WalletBalancesCard() {
   const { address } = useWalletContext();
@@ -20,7 +21,20 @@ export default function WalletBalancesCard() {
       id="wallet-balances"
       header={{
         titleIcon: <Wallet />,
-        title: "Wallet balances",
+        title: (
+          <>
+            Wallet balances
+            <span className="ml-1 text-xs text-muted-foreground">
+              {formatUsd(
+                Object.values(data.coinBalancesMap).reduce(
+                  (acc, cb) =>
+                    acc.plus(cb.balance.times(cb.price as BigNumber)),
+                  new BigNumber(0),
+                ),
+              )}
+            </span>
+          </>
+        ),
         noSeparator: true,
       }}
     >

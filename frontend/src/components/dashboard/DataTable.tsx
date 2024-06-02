@@ -30,7 +30,7 @@ import {
 
 import Button from "@/components/shared/Button";
 import LabelWithTooltip from "@/components/shared/LabelWithTooltip";
-import { TLabel, TLabelSans } from "@/components/shared/Typography";
+import { TLabelSans } from "@/components/shared/Typography";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -134,25 +134,14 @@ export function tableHeader<T>(
     : undefined;
 
   if (!sortState)
-    return !tooltip ? (
-      <TLabel
-        className={cn(
-          "flex h-full min-w-max flex-col justify-center px-4 uppercase",
-          isNumerical ? "items-end" : "items-start",
-          borderBottom && "border-b",
-        )}
-      >
-        {title}
-      </TLabel>
-    ) : (
+    return (
       <LabelWithTooltip
         className={cn(
-          "flex h-full min-w-max flex-col justify-center px-4 uppercase",
+          "flex h-full w-full min-w-max flex-col justify-center px-4",
           isNumerical ? "items-end" : "items-start",
           borderBottom && "border-b",
         )}
         tooltip={tooltip}
-        isMono
       >
         {title}
       </LabelWithTooltip>
@@ -165,7 +154,7 @@ export function tableHeader<T>(
         borderBottom && "border-b",
         column.getIsSorted() && "!text-primary-foreground",
       )}
-      labelClassName="text-xs uppercase min-w-max"
+      labelClassName="font-sans text-xs min-w-max"
       tooltip={sortState.tooltip}
       tooltipAlign={isNumerical ? "end" : "start"}
       endIcon={sortState.icon}

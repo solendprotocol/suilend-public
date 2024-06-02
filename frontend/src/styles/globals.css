@@ -342,6 +342,14 @@ body {
   margin: 12px 0 !important;
 }
 
+/* Actions Modal */
+.actions-modal-drawer-content > .vaul-scrollable {
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: calc(4 * 4px);
+}
+
+/* Charts */
 .historical-apr-line-chart .recharts-active-dot .recharts-dot {
   stroke: transparent;
   fill: transparent;

@@ -292,7 +292,7 @@ export default function ParametersPanel({ reserve }: ParametersPanelProps) {
 
       <Separator className="hidden md:block" />
 
-      <div className="h-[160px] w-full flex-shrink-0 md:h-[160px]">
+      <div className="h-[140px] w-full flex-shrink-0 md:h-[160px]">
         <AprLineChart
           data={reserve.config.interestRate
             .slice()
