@@ -19,6 +19,7 @@ interface CollapsibleProps extends PropsWithChildren {
   closedTitle?: string;
   openTitle?: string;
   buttonClassName?: ClassValue;
+  buttonLabelClassName?: ClassValue;
   hasSeparator?: boolean;
 }
 
@@ -29,6 +30,7 @@ export default function Collapsible({
   closedTitle,
   openTitle,
   buttonClassName,
+  buttonLabelClassName,
   hasSeparator,
   children,
 }: CollapsibleProps) {
@@ -42,6 +44,7 @@ export default function Collapsible({
             "relative z-[2] h-fit !bg-card uppercase text-muted-foreground",
             buttonClassName,
           )}
+          labelClassName={buttonLabelClassName}
           endIcon={<Icon className="h-4 w-4" />}
           variant="ghost"
           size="sm"

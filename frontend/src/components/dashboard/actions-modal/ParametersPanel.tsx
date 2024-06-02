@@ -154,7 +154,7 @@ function RatesPanel({ reserve }: PanelProps) {
         horizontal
       />
       <LabelWithValue
-        label="Current borrowing APR"
+        label="Current borrow APR"
         value={formatPercent(reserve.borrowAprPercent)}
         horizontal
       />
@@ -166,7 +166,7 @@ function RatesPanel({ reserve }: PanelProps) {
             horizontal
           />
           <LabelWithValue
-            label={`Borrowing APR at threshold ${index + 1}`}
+            label={`Borrow APR at threshold ${index + 1}`}
             value={formatPercent(new BigNumber(rate.aprPercent))}
             horizontal
           />
@@ -292,7 +292,7 @@ export default function ParametersPanel({ reserve }: ParametersPanelProps) {
 
       <Separator className="hidden md:block" />
 
-      <div className="h-[160px] w-full flex-shrink-0 md:h-[160px]">
+      <div className="h-[140px] w-full flex-shrink-0 md:h-[160px]">
         <AprLineChart
           data={reserve.config.interestRate
             .slice()

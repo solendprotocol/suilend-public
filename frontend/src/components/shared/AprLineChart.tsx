@@ -22,7 +22,7 @@ function TooltipContent({ utilization, apr }: TooltipContentProps) {
       <TLabelSans>{formatPercent(new BigNumber(utilization))}</TLabelSans>
 
       <div className="flex flex-row items-center justify-between gap-4">
-        <TLabelSans>Borrowing APR</TLabelSans>
+        <TLabelSans>Borrow APR</TLabelSans>
         <TBody>{formatPercent(new BigNumber(apr))}</TBody>
       </div>
     </div>
@@ -245,7 +245,7 @@ export default function AprLineChart({ data, reference }: AprLineChartProps) {
             unit="%"
           >
             <Recharts.Label
-              value="Borrowing APR"
+              value="Borrow APR"
               style={{
                 fontSize: 12,
                 fontFamily: "var(--font-geist-sans)",

@@ -58,8 +58,6 @@ interface TooltipContentProps {
 }
 
 function TooltipContent({ side, d, viewBox, coordinate }: TooltipContentProps) {
-  const { sm } = useBreakpoint();
-
   if (!coordinate?.x || !viewBox) return null;
   if (
     (side === Side.DEPOSIT && d.depositAprPercent === undefined) ||
@@ -148,11 +146,10 @@ function TooltipContent({ side, d, viewBox, coordinate }: TooltipContentProps) {
 
 interface ChartProps {
   side: Side;
-  isLoading: boolean;
   data: ChartData[];
 }
 
-function Chart({ side, isLoading, data }: ChartProps) {
+function Chart({ side, data }: ChartProps) {
   const { sm } = useBreakpoint();
   const isTouchscreen = useIsTouchscreen();
 
@@ -186,7 +183,7 @@ function Chart({ side, isLoading, data }: ChartProps) {
         return d.timestampS + new Date().getTimezoneOffset() * 60;
       });
   }, [data, days, sm]);
-  const ticksY = Array.from({ length: sm ? 4 : 3 }).map(
+  const ticksY = Array.from({ length: 4 }).map(
     (_, index, array) => Math.ceil(maxY / (array.length - 1)) * index,
   );
 
@@ -465,10 +462,10 @@ export default function HistoricalAprLineChart({
       </div>
 
       <div
-        className="historical-apr-line-chart h-[120px] w-full flex-shrink-0 transform-gpu sm:h-[160px]"
+        className="historical-apr-line-chart h-[140px] w-full flex-shrink-0 transform-gpu md:h-[160px]"
         is-loading={isLoading ? "true" : "false"}
       >
-        <Chart side={side} isLoading={isLoading} data={chartData ?? []} />
+        <Chart side={side} data={chartData ?? []} />
       </div>
     </div>
   );
