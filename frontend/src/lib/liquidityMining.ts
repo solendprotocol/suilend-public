@@ -42,8 +42,8 @@ export type RewardSummary = {
 
 type AprRewardSummary = Omit<RewardSummary, "stats"> & {
   stats: RewardSummary["stats"] & {
-    price: BigNumber;
     aprPercent: BigNumber;
+    price: BigNumber;
   };
 };
 

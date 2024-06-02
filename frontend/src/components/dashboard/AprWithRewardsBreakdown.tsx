@@ -66,7 +66,7 @@ const formatPerDay = (
       ? formatPoints(_value, { dp: 4 })
       : formatToken(_value, { exact: false });
 
-  return showChange
+  return showChange && !newValue.eq(value)
     ? `${formatter(value)} → ${isAprModifierInvalid ? "N/A" : formatter(newValue)}`
     : formatter(value);
 };
@@ -77,7 +77,7 @@ const formatAprPercent = (
   isAprModifierInvalid: boolean,
   showChange: boolean,
 ) =>
-  showChange
+  showChange && !newValue.eq(value)
     ? `${formatPercent(value)} → ${isAprModifierInvalid ? "N/A" : formatPercent(newValue)}`
     : formatPercent(value);
 

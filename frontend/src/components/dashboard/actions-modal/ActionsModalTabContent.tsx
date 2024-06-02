@@ -96,7 +96,7 @@ export default function ActionsModalTabContent({
   const positionAmount =
     (side === Side.DEPOSIT
       ? depositPosition?.depositedAmount
-      : borrowPosition?.borrowedAmount) ?? new BigNumber("0");
+      : borrowPosition?.borrowedAmount) ?? new BigNumber(0);
 
   // Value
   const [useMaxAmount, setUseMaxAmount] = useState<boolean>(false);
@@ -345,23 +345,24 @@ export default function ActionsModalTabContent({
           <LabelWithValue
             label="Your borrow limit"
             value={
-              newBorrowLimitUsd
-                ? `${formatUsd(obligation?.minPriceBorrowLimitUsd ?? new BigNumber("0"))} → ${formatUsd(newBorrowLimitUsd)}`
-                : formatUsd(
-                    obligation?.minPriceBorrowLimitUsd ?? new BigNumber("0"),
-                  )
+              !obligation
+                ? "N/A"
+                : newBorrowLimitUsd
+                  ? `${formatUsd(obligation.minPriceBorrowLimitUsd)} → ${formatUsd(newBorrowLimitUsd)}`
+                  : formatUsd(obligation.minPriceBorrowLimitUsd)
             }
             horizontal
           />
           <LabelWithValue
             label="Your utilization"
             value={
-              newBorrowUtilization
-                ? `${formatPercent(obligation?.weightedConservativeBorrowUtilizationPercent ?? new BigNumber(0))} → ${formatPercent(newBorrowUtilization.times(100))}`
-                : formatPercent(
-                    obligation?.weightedConservativeBorrowUtilizationPercent ??
-                      new BigNumber(0),
-                  )
+              !obligation
+                ? "N/A"
+                : newBorrowUtilization
+                  ? `${formatPercent(obligation.weightedConservativeBorrowUtilizationPercent)} → ${formatPercent(newBorrowUtilization.times(100))}`
+                  : formatPercent(
+                      obligation.weightedConservativeBorrowUtilizationPercent,
+                    )
             }
             horizontal
           />

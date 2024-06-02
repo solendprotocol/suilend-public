@@ -57,7 +57,7 @@ export default function ActionsModal() {
     if (selectedTab === Tab.DEPOSIT) {
       const maxCalculations = (() => {
         const coinBalanceForReserve =
-          data.coinBalancesMap[reserve.coinType]?.balance ?? new BigNumber("0");
+          data.coinBalancesMap[reserve.coinType]?.balance ?? new BigNumber(0);
 
         // Calculate safe deposit limit (subtract 10 mins of deposit APR from cap)
         const tenMinsDepositAprPercent = reserve.depositAprPercent
@@ -153,7 +153,7 @@ export default function ActionsModal() {
           (d) => d.coinType === reserve.coinType,
         );
         const borrowedAmount =
-          borrowPosition?.borrowedAmount ?? new BigNumber("0");
+          borrowPosition?.borrowedAmount ?? new BigNumber(0);
 
         if (reserve.depositedAmount.gte(reserve.config.depositLimit))
           return {
@@ -291,7 +291,7 @@ export default function ActionsModal() {
           (d) => d.coinType === reserve.coinType,
         );
         const depositedAmount =
-          depositPosition?.depositedAmount ?? new BigNumber("0");
+          depositPosition?.depositedAmount ?? new BigNumber(0);
 
         if (reserve.borrowedAmount.gte(reserve.config.borrowLimit))
           return {
@@ -336,7 +336,7 @@ export default function ActionsModal() {
         const position = obligation?.deposits.find(
           (deposit) => deposit.coinType === reserve.coinType,
         );
-        const depositedAmount = position?.depositedAmount ?? new BigNumber("0");
+        const depositedAmount = position?.depositedAmount ?? new BigNumber(0);
 
         return [
           {
@@ -439,11 +439,11 @@ export default function ActionsModal() {
     } else if (selectedTab === Tab.REPAY) {
       const maxCalculations = (() => {
         const coinBalanceForReserve =
-          data.coinBalancesMap[reserve.coinType]?.balance ?? new BigNumber("0");
+          data.coinBalancesMap[reserve.coinType]?.balance ?? new BigNumber(0);
         const position = obligation?.borrows.find(
           (borrow) => borrow.coinType === reserve.coinType,
         );
-        const borrowedAmount = position?.borrowedAmount ?? new BigNumber("0");
+        const borrowedAmount = position?.borrowedAmount ?? new BigNumber(0);
 
         const result = [
           {

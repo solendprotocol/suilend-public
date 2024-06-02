@@ -770,22 +770,20 @@ export default function EarningsTabContent({
             return <TLabelSans className="w-max">N/A</TLabelSans>;
           return (
             <div className="flex w-max flex-col gap-1">
-              {Object.keys(rewards)
-                .sort((a, b) => (a[0] > b[0] ? -1 : 1))
-                .map((coinType) => {
-                  const coinMetadata = data.coinMetadataMap[coinType];
+              {Object.keys(rewards).map((coinType) => {
+                const coinMetadata = data.coinMetadataMap[coinType];
 
-                  return (
-                    <TokenAmount
-                      key={coinType}
-                      amount={rewards[coinType][nowS]}
-                      coinType={coinType}
-                      symbol={coinMetadata.symbol}
-                      src={coinMetadata.iconUrl}
-                      decimals={coinMetadata.decimals}
-                    />
-                  );
-                })}
+                return (
+                  <TokenAmount
+                    key={coinType}
+                    amount={rewards[coinType][nowS]}
+                    coinType={coinType}
+                    symbol={coinMetadata.symbol}
+                    src={coinMetadata.iconUrl}
+                    decimals={coinMetadata.decimals}
+                  />
+                );
+              })}
             </div>
           );
         },
