@@ -71,7 +71,7 @@ function TooltipContent({ side, d, viewBox, coordinate }: TooltipContentProps) {
     <div
       className="absolute rounded-md border bg-popover px-3 py-1.5 shadow-md"
       style={getTooltipStyle(
-        side === Side.DEPOSIT ? (sm ? 250 : 200) : 200,
+        side === Side.DEPOSIT ? 240 : 200,
         viewBox,
         coordinate,
       )}
@@ -82,7 +82,7 @@ function TooltipContent({ side, d, viewBox, coordinate }: TooltipContentProps) {
         </TLabelSans>
 
         <div className="flex w-full flex-row items-center justify-between gap-4">
-          <TBodySans>Total APR</TBodySans>
+          <TBodySans>{capitalize(side)} APR</TBodySans>
           <TBody>
             {formatPercent(
               new BigNumber(
@@ -114,9 +114,7 @@ function TooltipContent({ side, d, viewBox, coordinate }: TooltipContentProps) {
             </span>
           }
         >
-          <TLabelSans>
-            {side === Side.DEPOSIT ? "Lending" : "Borrowing"} APR
-          </TLabelSans>
+          <TLabelSans>Interest</TLabelSans>
         </AprRewardsBreakdownRow>
 
         {side === Side.DEPOSIT &&
@@ -133,7 +131,7 @@ function TooltipContent({ side, d, viewBox, coordinate }: TooltipContentProps) {
                 </span>
               }
             >
-              <TLabelSans>Rewards APR in</TLabelSans>
+              <TLabelSans>Rewards in</TLabelSans>
               <TokenLogo
                 className="h-4 w-4"
                 coinType={NORMALIZED_SUI_COINTYPE}

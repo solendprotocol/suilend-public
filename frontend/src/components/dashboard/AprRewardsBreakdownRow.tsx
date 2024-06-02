@@ -20,9 +20,7 @@ export default function AprRewardsBreakdownRow({
       )}
 
       <div className="flex flex-1 flex-row items-start justify-between gap-4">
-        <div className="flex flex-row flex-wrap items-center gap-x-1.5 gap-y-0">
-          {children}
-        </div>
+        <div className="flex flex-row items-center gap-1.5">{children}</div>
         {value && <TBody className="text-right text-xs">{value}</TBody>}
       </div>
     </div>

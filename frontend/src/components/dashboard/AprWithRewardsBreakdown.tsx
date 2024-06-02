@@ -179,7 +179,7 @@ export default function AprWithRewardsBreakdown({
     <div>
       <Tooltip
         contentProps={{
-          className: "px-4 py-4 flex-col flex gap-4 min-w-[300px]",
+          className: "px-4 py-4 flex-col flex gap-4 min-w-[280px]",
           style: { maxWidth: "max-content" },
         }}
         content={
@@ -229,7 +229,7 @@ export default function AprWithRewardsBreakdown({
 
             <div className="flex flex-col gap-2">
               <div className="flex flex-row items-center justify-between gap-4">
-                <TBodySans>Total APR</TBodySans>
+                <TBodySans>{capitalize(side)} APR</TBodySans>
                 <TBody>
                   {formatAprPercent(
                     totalAprPercent,
@@ -249,9 +249,7 @@ export default function AprWithRewardsBreakdown({
                   showChange,
                 )}
               >
-                <TLabelSans>
-                  {side === Side.DEPOSIT ? "Lending" : "Borrowing"} APR
-                </TLabelSans>
+                <TLabelSans>Interest</TLabelSans>
               </AprRewardsBreakdownRow>
 
               {aprRewards.map((reward, index) => (
@@ -265,7 +263,7 @@ export default function AprWithRewardsBreakdown({
                     showChange,
                   )}
                 >
-                  <TLabelSans>Rewards APR in</TLabelSans>
+                  <TLabelSans>Rewards in</TLabelSans>
                   <TokenLogo
                     className="h-4 w-4"
                     coinType={reward.stats.rewardCoinType}
