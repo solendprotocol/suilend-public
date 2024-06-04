@@ -12,13 +12,21 @@ import { Side } from "@suilend/sdk/types";
 
 import AprRewardsBreakdownRow from "@/components/dashboard/AprRewardsBreakdownRow";
 import Button from "@/components/shared/Button";
+import CartesianGridVerticalLine from "@/components/shared/CartesianGridVerticalLine";
 import TokenLogo from "@/components/shared/TokenLogo";
 import { TBody, TBodySans, TLabelSans } from "@/components/shared/Typography";
-import { ViewBox, getTooltipStyle } from "@/components/ui/chart";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { useDashboardContext } from "@/contexts/DashboardContext";
 import useBreakpoint from "@/hooks/useBreakpoint";
 import useIsTouchscreen from "@/hooks/useIsTouchscreen";
+import {
+  ViewBox,
+  axis,
+  axisLabel,
+  getTooltipStyle,
+  line,
+  tooltip,
+} from "@/lib/chart";
 import {
   COIN_TYPE_COLOR_MAP,
   LOGO_MAP,
@@ -158,7 +166,11 @@ function Chart({ side, data }: ChartProps) {
   const samplesPerDay = DAY_S / sampleIntervalS;
   const days = data.length / samplesPerDay;
 
-  // Max
+  // Min/max
+  const minX = Math.min(...data.map((d) => d.timestampS));
+  const maxX = Math.max(...data.map((d) => d.timestampS));
+
+  const minY = 0;
   const maxY = Math.max(
     ...(data
       .map((d) =>
@@ -191,31 +203,15 @@ function Chart({ side, data }: ChartProps) {
     if (days === 1) return format(new Date(timestampS * 1000), "HH:mm");
     return format(new Date(timestampS * 1000), "MM/dd");
   };
-  const tickFormatterY = (value: number) => value.toString();
-
-  const tickMargin = 2;
-  const tick = {
-    fontSize: 11,
-    fontFamily: "var(--font-geist-sans)",
-    fill: "hsl(var(--muted-foreground))",
-  };
-  const tickLine = {
-    stroke: "transparent",
-  };
+  const tickFormatterY = (value: number) =>
+    formatPercent(new BigNumber(value), { dp: 0 });
 
   // Domain
-  const domainX = [
-    Math.min(...data.map((d) => d.timestampS)),
-    Math.max(...data.map((d) => d.timestampS)),
-  ];
-  const domainY = [0, maxY];
+  const domainX = [minX, maxX];
+  const domainY = [minY, maxY];
 
   return (
-    <Recharts.ResponsiveContainer
-      width="100%"
-      height="100%"
-      data-loading={data.length > 0}
-    >
+    <Recharts.ResponsiveContainer width="100%" height="100%">
       <Recharts.AreaChart
         data={data}
         margin={{ top: 8, right: 16, bottom: -12, left: -5 }}
@@ -224,46 +220,36 @@ function Chart({ side, data }: ChartProps) {
           strokeDasharray="1 4"
           stroke="hsla(var(--secondary) / 20%)"
           fill="transparent"
+          horizontal={false}
+          vertical={(props) => <CartesianGridVerticalLine {...props} />}
         />
         <Recharts.XAxis
           type="number"
           dataKey="timestampS"
           ticks={ticksX}
-          tickMargin={tickMargin}
-          tick={tick}
-          axisLine={{
-            stroke: "hsl(209 36% 28%)", // 25% var(--secondary) on var(--popover)
-          }}
-          tickLine={tickLine}
+          tickMargin={axis.tickMargin}
+          tick={axis.tick}
+          axisLine={axis.axisLine}
+          tickLine={axis.tickLine}
           tickFormatter={tickFormatterX}
           domain={domainX}
         />
         <Recharts.YAxis
           type="number"
           ticks={ticksY}
-          tickMargin={tickMargin}
-          tick={tick}
-          axisLine={{
-            stroke: "hsl(209 36% 28%)", // 25% var(--secondary) on var(--popover)
-          }}
-          tickLine={tickLine}
+          tickMargin={axis.tickMargin}
+          tick={axis.tick}
+          axisLine={axis.axisLine}
+          tickLine={axis.tickLine}
           tickFormatter={tickFormatterY}
           domain={domainY}
-          unit="%"
         >
           <Recharts.Label
             value={`${capitalize(side)} APR`}
-            style={{
-              fontSize: 12,
-              fontFamily: "var(--font-geist-sans)",
-              fontWeight: 400,
-              lineHeight: "12px",
-              textAnchor: "middle",
-              fill: "hsl(var(--muted-foreground))",
-            }}
+            offset={5 + 5}
             position="insideLeft"
             angle={-90}
-            offset={5 + 5}
+            style={axisLabel.style}
           />
         </Recharts.YAxis>
         <Recharts.Area
@@ -276,12 +262,8 @@ function Chart({ side, data }: ChartProps) {
           stroke="hsl(var(--success))"
           fill="hsla(var(--success) / 10%)"
           fillOpacity={1}
-          dot={{
-            stroke: "transparent",
-            strokeWidth: 0,
-            fill: "transparent",
-          }}
-          strokeWidth={2}
+          dot={line.dot}
+          strokeWidth={line.strokeWidth}
         />
         {side === Side.DEPOSIT && (
           <Recharts.Area
@@ -292,29 +274,17 @@ function Chart({ side, data }: ChartProps) {
             stroke={COIN_TYPE_COLOR_MAP[NORMALIZED_SUI_COINTYPE]}
             fill={COIN_TYPE_COLOR_MAP[NORMALIZED_SUI_COINTYPE]}
             fillOpacity={0.1}
-            dot={{
-              stroke: "transparent",
-              strokeWidth: 0,
-              fill: "transparent",
-            }}
-            strokeWidth={1.5}
+            dot={line.dot}
+            strokeWidth={line.strokeWidth}
           />
         )}
         {data.length > 0 && (
           <Recharts.Tooltip
             isAnimationActive={false}
             filterNull={false}
-            cursor={{
-              stroke: "hsl(var(--foreground))",
-              strokeWidth: 2,
-            }}
+            cursor={tooltip.cursor}
             trigger={isTouchscreen ? "hover" : "hover"}
-            wrapperStyle={{
-              transform: undefined,
-              position: undefined,
-              top: undefined,
-              left: undefined,
-            }}
+            wrapperStyle={tooltip.wrapperStyle}
             content={({ active, payload, viewBox, coordinate }) => {
               if (!active || !payload?.[0]?.payload) return null;
               return (

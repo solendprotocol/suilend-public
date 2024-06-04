@@ -5,11 +5,18 @@ import * as Recharts from "recharts";
 import { CategoricalChartState } from "recharts/types/chart/types";
 
 import styles from "@/components/shared/AprLineChart.module.scss";
+import CartesianGridVerticalLine from "@/components/shared/CartesianGridVerticalLine";
 import Tooltip from "@/components/shared/Tooltip";
 import { TBody, TLabelSans } from "@/components/shared/Typography";
 import useLineChartDimensions from "@/hooks/useLineChartDimensions";
+import { axis, axisLabel, line } from "@/lib/chart";
 import { formatPercent } from "@/lib/format";
 import { cn } from "@/lib/utils";
+
+type ChartData = {
+  x: number;
+  y: number;
+};
 
 interface TooltipContentProps {
   utilization: number;
@@ -29,34 +36,43 @@ function TooltipContent({ utilization, apr }: TooltipContentProps) {
   );
 }
 
-type ChartData = {
-  x: number;
-  y: number;
-};
-
 interface AprLineChartProps {
   data: ChartData[];
   reference?: ChartData;
 }
 
 export default function AprLineChart({ data, reference }: AprLineChartProps) {
-  // Data
   const transform = (value: number) => Math.pow(value, 1 / 2);
   const inverseTransform = (value: number) => Math.pow(value, 2);
 
   const transformedData = data.map((d) => ({ x: d.x, y: transform(d.y) }));
+
+  // Min/max
+  const minX = Math.min(...data.map((d) => d.x));
+  const maxX = Math.max(...data.map((d) => d.x));
+
+  const transformedMinY = 0;
   const transformedMaxY = Math.max(...transformedData.map((d) => d.y));
 
   // Ticks
-  const ticksCount = 4;
-  const ticks = Array(ticksCount)
-    .fill(0)
-    .map((_, i) => 0 + transformedMaxY * (i / (ticksCount - 1)));
+  const ticksX = Array.from({ length: 5 }).map(
+    (_, index, array) => minX + maxX * (index / (array.length - 1)),
+  );
+  const ticksY = Array.from({ length: 4 }).map(
+    (_, index, array) =>
+      transformedMinY + transformedMaxY * (index / (array.length - 1)),
+  );
 
-  const xAxisDomain = useMemo(() => [0, 100], []);
-  const yAxisDomain = useMemo(
-    () => [ticks[0], ticks[ticks.length - 1]],
-    [ticks],
+  const tickFormatterX = (utilPercent: number) =>
+    formatPercent(new BigNumber(utilPercent), { dp: 0 });
+  const tickFormatterY = (value: number) =>
+    formatPercent(new BigNumber(inverseTransform(value)), { dp: 0 });
+
+  // Domain
+  const domainX = useMemo(() => [minX, maxX], [minX, maxX]);
+  const domainY = useMemo(
+    () => [transformedMinY, transformedMaxY],
+    [transformedMinY, transformedMaxY],
   );
 
   // Chart
@@ -65,14 +81,14 @@ export default function AprLineChart({ data, reference }: AprLineChartProps) {
   const chartDimensions = useLineChartDimensions(containerRef);
   const chartConfig = useMemo(() => {
     return {
-      u0: xAxisDomain[0],
-      u1: xAxisDomain[1],
-      ul: xAxisDomain[1] - xAxisDomain[0],
-      v0: yAxisDomain[0],
-      v1: yAxisDomain[1],
-      vl: yAxisDomain[1] - yAxisDomain[0],
+      u0: domainX[0],
+      u1: domainX[1],
+      ul: domainX[1] - domainX[0],
+      v0: domainY[0],
+      v1: domainY[1],
+      vl: domainY[1] - domainY[0],
     };
-  }, [xAxisDomain, yAxisDomain]);
+  }, [domainX, domainY]);
 
   // Mouseover
   const [isMouseOver, setIsMouseOver] = useState<boolean>(false);
@@ -143,7 +159,11 @@ export default function AprLineChart({ data, reference }: AprLineChartProps) {
   return (
     <div
       ref={containerRef}
-      className={cn(styles.container, "relative h-full w-full transform-gpu")}
+      className={cn(
+        styles.container,
+        "apr-line-chart relative h-full w-full transform-gpu",
+      )}
+      is-loading="false"
       onMouseEnter={() => setIsMouseOver(true)}
       onMouseLeave={() => setIsMouseOver(false)}
     >
@@ -190,85 +210,53 @@ export default function AprLineChart({ data, reference }: AprLineChartProps) {
           <Recharts.CartesianGrid
             strokeDasharray="1 4"
             stroke="hsla(var(--secondary) / 20%)"
+            fill="transparent"
+            horizontal={false}
+            vertical={(props) => <CartesianGridVerticalLine {...props} />}
           />
           <Recharts.XAxis
             type="number"
             dataKey="x"
-            tickMargin={2}
-            tick={{
-              fontSize: 11,
-              fontFamily: "var(--font-geist-sans)",
-              fill: "hsl(var(--muted-foreground))",
-            }}
-            axisLine={{
-              stroke: "hsl(209 36% 28%)", // 25% var(--secondary) on var(--popover)
-            }}
-            tickLine={{
-              stroke: "transparent",
-            }}
-            domain={xAxisDomain}
-            unit="%"
+            ticks={ticksX}
+            tickMargin={axis.tickMargin}
+            tick={axis.tick}
+            axisLine={axis.axisLine}
+            tickLine={axis.tickLine}
+            tickFormatter={tickFormatterX}
+            domain={domainX}
           >
             <Recharts.Label
               value="Utilization"
               offset={-4}
-              style={{
-                fontSize: 12,
-                fontFamily: "var(--font-geist-sans)",
-                fontWeight: 400,
-                lineHeight: "12px",
-                fill: "hsl(var(--muted-foreground))",
-              }}
               position="insideBottom"
+              style={axisLabel.style}
             />
           </Recharts.XAxis>
           <Recharts.YAxis
             type="number"
             dataKey="y"
-            ticks={ticks}
-            tickMargin={2}
-            tick={{
-              fontSize: 11,
-              fontFamily: "var(--font-geist-sans)",
-              fill: "hsl(var(--muted-foreground))",
-            }}
-            axisLine={{
-              stroke: "hsl(209 36% 28%)", // 25% var(--secondary) on var(--popover)
-            }}
-            tickLine={{
-              stroke: "transparent",
-            }}
-            tickFormatter={(value: number) =>
-              Math.round(inverseTransform(value)).toString()
-            }
-            domain={yAxisDomain}
-            unit="%"
+            ticks={ticksY}
+            tickMargin={axis.tickMargin}
+            tick={axis.tick}
+            axisLine={axis.axisLine}
+            tickLine={axis.tickLine}
+            tickFormatter={tickFormatterY}
+            domain={domainY}
           >
             <Recharts.Label
               value="Borrow APR"
-              style={{
-                fontSize: 12,
-                fontFamily: "var(--font-geist-sans)",
-                fontWeight: 400,
-                lineHeight: "12px",
-                textAnchor: "middle",
-                fill: "hsl(var(--muted-foreground))",
-              }}
+              offset={5 + 5}
               position="insideLeft"
               angle={-90}
-              offset={5 + 5}
+              style={axisLabel.style}
             />
           </Recharts.YAxis>
           <Recharts.Line
             dataKey="y"
             isAnimationActive={false}
             stroke="hsl(var(--foreground))"
-            dot={{
-              stroke: "transparent",
-              strokeWidth: 0,
-              fill: "transparent",
-            }}
-            strokeWidth={2}
+            dot={line.dot}
+            strokeWidth={line.strokeWidth}
           />
           {reference && (
             <Recharts.ReferenceDot

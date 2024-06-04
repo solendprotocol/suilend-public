@@ -350,24 +350,24 @@ body {
 }
 
 /* Charts */
-.historical-apr-line-chart .recharts-active-dot .recharts-dot {
-  stroke: transparent;
-  fill: transparent;
-}
-.historical-apr-line-chart[is-loading="true"]
-  .recharts-cartesian-grid
-  .recharts-cartesian-grid-bg {
-  fill: hsla(var(--muted) / 10%);
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; /* animate-pulse */
-}
+.apr-line-chart,
+.historical-apr-line-chart,
+.earnings-chart {
+  &[is-loading="true"] {
+    .recharts-cartesian-grid .recharts-cartesian-grid-bg {
+      fill: hsla(var(--muted) / 10%);
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; /* animate-pulse */
+    }
+  }
+  &:not([is-loading="true"]) {
+    .recharts-cartesian-grid .recharts-cartesian-grid-bg {
+      stroke: hsla(var(--secondary) / 25%);
+      stroke-width: 1px;
+    }
+  }
 
-.earnings-chart .recharts-active-dot .recharts-dot {
-  stroke: transparent;
-  fill: transparent;
-}
-.earnings-chart[is-loading="true"]
-  .recharts-cartesian-grid
-  .recharts-cartesian-grid-bg {
-  fill: hsla(var(--muted) / 10%);
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; /* animate-pulse */
+  .recharts-active-dot .recharts-dot {
+    stroke: transparent;
+    fill: transparent;
+  }
 }

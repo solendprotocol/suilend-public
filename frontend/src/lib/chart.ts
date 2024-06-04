@@ -1,4 +1,54 @@
+import { CSSProperties } from "react";
+
 import { Coordinate } from "recharts/types/util/types";
+
+export const axis = {
+  tickMargin: 2,
+  tick: {
+    fontSize: 11,
+    fontFamily: "var(--font-geist-sans)",
+    fill: "hsl(var(--muted-foreground))",
+  },
+  axisLine: {
+    stroke: "transparent",
+  },
+  tickLine: {
+    stroke: "transparent",
+  },
+};
+
+export const axisLabel = {
+  style: {
+    fontSize: 12,
+    fontFamily: "var(--font-geist-sans)",
+    fontWeight: 400,
+    lineHeight: "12px",
+    textAnchor: "middle",
+    fill: "hsl(var(--muted-foreground))",
+  } as CSSProperties,
+};
+
+export const line = {
+  dot: {
+    stroke: "transparent",
+    strokeWidth: 0,
+    fill: "transparent",
+  },
+  strokeWidth: 2,
+};
+
+export const tooltip = {
+  cursor: {
+    stroke: "hsl(var(--foreground))",
+    strokeWidth: 2,
+  },
+  wrapperStyle: {
+    transform: undefined,
+    position: undefined,
+    top: undefined,
+    left: undefined,
+  },
+};
 
 export type ViewBox = {
   width: number;

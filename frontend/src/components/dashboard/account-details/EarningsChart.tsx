@@ -5,12 +5,20 @@ import { Coordinate } from "recharts/types/util/types";
 
 import { Side } from "@suilend/sdk/types";
 
+import CartesianGridVerticalLine from "@/components/shared/CartesianGridVerticalLine";
 import TokenLogo from "@/components/shared/TokenLogo";
 import { TBody, TLabelSans } from "@/components/shared/Typography";
-import { ViewBox, getTooltipStyle } from "@/components/ui/chart";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import useBreakpoint from "@/hooks/useBreakpoint";
 import useIsTouchscreen from "@/hooks/useIsTouchscreen";
+import {
+  ViewBox,
+  axis,
+  axisLabel,
+  getTooltipStyle,
+  line,
+  tooltip,
+} from "@/lib/chart";
 import { COIN_TYPE_COLOR_MAP } from "@/lib/coinType";
 import { DAY_S } from "@/lib/events";
 import { formatToken } from "@/lib/format";
@@ -139,16 +147,6 @@ export default function EarningsChart({
   const tickFormatterY = (value: number) =>
     formatToken(new BigNumber(value), { exact: false });
 
-  const tickMargin = 2;
-  const tick = {
-    fontSize: 11,
-    fontFamily: "var(--font-geist-sans)",
-    fill: "hsl(var(--muted-foreground))",
-  };
-  const tickLine = {
-    stroke: "transparent",
-  };
-
   // Domain
   const domainX = [minX, maxX];
   const domainY = [minY, maxY];
@@ -170,45 +168,36 @@ export default function EarningsChart({
             strokeDasharray="1 4"
             stroke="hsla(var(--secondary) / 20%)"
             fill="transparent"
+            horizontal={false}
+            vertical={(props) => <CartesianGridVerticalLine {...props} />}
           />
           <Recharts.XAxis
             type="number"
             dataKey="timestampS"
             ticks={ticksX}
-            tickMargin={tickMargin}
-            tick={tick}
-            axisLine={{
-              stroke: "hsl(209 36% 28%)", // 25% var(--secondary) on var(--popover)
-            }}
-            tickLine={tickLine}
+            tickMargin={axis.tickMargin}
+            tick={axis.tick}
+            axisLine={axis.axisLine}
+            tickLine={axis.tickLine}
             tickFormatter={tickFormatterX}
             domain={domainX}
           />
           <Recharts.YAxis
             type="number"
             ticks={ticksY}
-            tickMargin={tickMargin}
-            tick={tick}
-            axisLine={{
-              stroke: "hsl(209 36% 28%)", // 25% var(--secondary) on var(--popover)
-            }}
-            tickLine={tickLine}
+            tickMargin={axis.tickMargin}
+            tick={axis.tick}
+            axisLine={axis.axisLine}
+            tickLine={axis.tickLine}
             tickFormatter={tickFormatterY}
             domain={domainY}
           >
             <Recharts.Label
               value={labelY}
-              style={{
-                fontSize: 12,
-                fontFamily: "var(--font-geist-sans)",
-                fontWeight: 400,
-                lineHeight: "12px",
-                textAnchor: "middle",
-                fill: "hsl(var(--muted-foreground))",
-              }}
+              offset={5 - 10}
               position="insideLeft"
               angle={-90}
-              offset={5 - 10}
+              style={axisLabel.style}
             />
           </Recharts.YAxis>
           {/* <Recharts.Legend
@@ -224,29 +213,17 @@ export default function EarningsChart({
                 dataKey={coinType}
                 isAnimationActive={false}
                 stroke={COIN_TYPE_COLOR_MAP[coinType]}
-                dot={{
-                  stroke: "transparent",
-                  strokeWidth: 0,
-                  fill: "transparent",
-                }}
-                strokeWidth={2}
+                dot={line.dot}
+                strokeWidth={line.strokeWidth}
               />
             ))}
           {data.length > 0 && (
             <Recharts.Tooltip
               isAnimationActive={false}
               filterNull={false}
-              cursor={{
-                stroke: "hsl(var(--foreground))",
-                strokeWidth: 2,
-              }}
+              cursor={tooltip.cursor}
               trigger={isTouchscreen ? "hover" : "hover"}
-              wrapperStyle={{
-                transform: undefined,
-                position: undefined,
-                top: undefined,
-                left: undefined,
-              }}
+              wrapperStyle={tooltip.wrapperStyle}
               content={({ active, payload, viewBox, coordinate }) => {
                 if (!active || !payload?.[0]?.payload) return null;
                 return (
