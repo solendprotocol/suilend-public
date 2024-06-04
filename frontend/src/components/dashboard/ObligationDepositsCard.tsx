@@ -14,16 +14,7 @@ export default function ObligationDepositsCard() {
       id="assets-deposited"
       header={{
         titleIcon: <PiggyBank />,
-        title: (
-          <>
-            Deposited assets
-            {obligation.depositPositionCount > 0 && (
-              <span className="ml-1 text-xs text-muted-foreground">
-                {obligation.depositPositionCount}
-              </span>
-            )}
-          </>
-        ),
+        title: "Deposited assets",
         noSeparator: true,
       }}
     >

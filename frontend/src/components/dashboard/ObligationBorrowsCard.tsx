@@ -14,16 +14,7 @@ export default function ObligationBorrowsCard() {
       id="assets-borrowed"
       header={{
         titleIcon: <HandCoins />,
-        title: (
-          <>
-            Borrowed assets
-            {obligation.borrowPositionCount > 0 && (
-              <span className="ml-1 text-xs text-muted-foreground">
-                {obligation.borrowPositionCount}
-              </span>
-            )}
-          </>
-        ),
+        title: "Borrowed assets",
         noSeparator: true,
       }}
     >
