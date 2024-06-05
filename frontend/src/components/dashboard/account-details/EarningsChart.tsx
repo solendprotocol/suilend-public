@@ -7,7 +7,7 @@ import { Side } from "@suilend/sdk/types";
 
 import CartesianGridVerticalLine from "@/components/shared/CartesianGridVerticalLine";
 import TokenLogo from "@/components/shared/TokenLogo";
-import { TBody, TLabelSans } from "@/components/shared/Typography";
+import { TBody, TBodySans, TLabelSans } from "@/components/shared/Typography";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import useBreakpoint from "@/hooks/useBreakpoint";
 import useIsTouchscreen from "@/hooks/useIsTouchscreen";
@@ -19,7 +19,7 @@ import {
   line,
   tooltip,
 } from "@/lib/chart";
-import { COIN_TYPE_COLOR_MAP } from "@/lib/coinType";
+import { COINTYPE_COLOR_MAP } from "@/lib/coinType";
 import { DAY_S } from "@/lib/events";
 import { formatToken } from "@/lib/format";
 
@@ -29,6 +29,7 @@ export type ChartData = {
 };
 
 interface TooltipContentProps {
+  side: Side;
   coinTypes: string[];
   d: ChartData;
   viewBox: ViewBox;
@@ -36,6 +37,7 @@ interface TooltipContentProps {
 }
 
 function TooltipContent({
+  side,
   coinTypes,
   d,
   viewBox,
@@ -49,39 +51,45 @@ function TooltipContent({
     // Subset of TooltipContent className
     <div
       className="absolute rounded-md border bg-popover px-3 py-1.5 shadow-md"
-      style={getTooltipStyle(160, viewBox, coordinate)}
+      style={getTooltipStyle(200, viewBox, coordinate)}
     >
-      <div className="flex w-full flex-col gap-1">
-        <TLabelSans className="mb-1">
+      <div className="flex w-full flex-col gap-2">
+        <TLabelSans>
           {format(new Date(d.timestampS * 1000), "MM/dd HH:mm")}
         </TLabelSans>
 
-        {coinTypes.map((coinType) => {
-          const coinMetadata = data.coinMetadataMap[coinType];
+        <div className="flex w-full flex-col gap-1.5">
+          <TBodySans>
+            {side === Side.DEPOSIT ? "Interest earned" : "Interest paid"}
+          </TBodySans>
 
-          return (
-            <div
-              key={coinType}
-              className="flex w-full flex-row items-center justify-between gap-4"
-            >
-              <div className="flex flex-row items-center gap-1.5">
-                <TokenLogo
-                  className="h-4 w-4"
-                  coinType={coinType}
-                  symbol={coinMetadata.symbol}
-                  src={coinMetadata.iconUrl}
-                />
-                <TLabelSans>{coinMetadata.symbol}</TLabelSans>
+          {coinTypes.map((coinType) => {
+            const coinMetadata = data.coinMetadataMap[coinType];
+
+            return (
+              <div
+                key={coinType}
+                className="flex w-full flex-row items-center justify-between gap-4"
+              >
+                <div className="flex flex-row items-center gap-1.5">
+                  <TokenLogo
+                    className="h-4 w-4"
+                    coinType={coinType}
+                    symbol={coinMetadata.symbol}
+                    src={coinMetadata.iconUrl}
+                  />
+                  <TLabelSans>{coinMetadata.symbol}</TLabelSans>
+                </div>
+
+                <TBody style={{ color: COINTYPE_COLOR_MAP[coinType] }}>
+                  {formatToken(new BigNumber(d[coinType] as number), {
+                    exact: false,
+                  })}
+                </TBody>
               </div>
-
-              <TBody style={{ color: COIN_TYPE_COLOR_MAP[coinType] }}>
-                {formatToken(new BigNumber(d[coinType] as number), {
-                  exact: false,
-                })}
-              </TBody>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
     </div>
   );
@@ -212,7 +220,7 @@ export default function EarningsChart({
                 type="monotone"
                 dataKey={coinType}
                 isAnimationActive={false}
-                stroke={COIN_TYPE_COLOR_MAP[coinType]}
+                stroke={COINTYPE_COLOR_MAP[coinType]}
                 dot={line.dot}
                 strokeWidth={line.strokeWidth}
               />
@@ -228,6 +236,7 @@ export default function EarningsChart({
                 if (!active || !payload?.[0]?.payload) return null;
                 return (
                   <TooltipContent
+                    side={side}
                     coinTypes={coinTypes}
                     d={payload[0].payload as ChartData}
                     viewBox={viewBox as any}
