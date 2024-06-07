@@ -1,7 +1,6 @@
 import BigNumber from "bignumber.js";
 import { format } from "date-fns";
 import * as Recharts from "recharts";
-import { Coordinate } from "recharts/types/util/types";
 
 import { Side } from "@suilend/sdk/types";
 
@@ -32,8 +31,8 @@ interface TooltipContentProps {
   side: Side;
   coinTypes: string[];
   d: ChartData;
-  viewBox: ViewBox;
-  coordinate?: Partial<Coordinate>;
+  viewBox?: ViewBox;
+  x?: number;
 }
 
 function TooltipContent({
@@ -41,17 +40,17 @@ function TooltipContent({
   coinTypes,
   d,
   viewBox,
-  coordinate,
+  x,
 }: TooltipContentProps) {
   const appContext = useAppContext();
   const data = appContext.data as AppData;
 
-  if (!coordinate?.x || !viewBox) return null;
+  if (viewBox === undefined || x === undefined) return null;
   return (
     // Subset of TooltipContent className
     <div
       className="absolute rounded-md border bg-popover px-3 py-1.5 shadow-md"
-      style={getTooltipStyle(200, viewBox, coordinate)}
+      style={getTooltipStyle(200, viewBox, x)}
     >
       <div className="flex w-full flex-col gap-2">
         <TLabelSans>
@@ -240,7 +239,7 @@ export default function EarningsChart({
                     coinTypes={coinTypes}
                     d={payload[0].payload as ChartData}
                     viewBox={viewBox as any}
-                    coordinate={coordinate}
+                    x={coordinate?.x}
                   />
                 );
               }}

@@ -353,6 +353,11 @@ body {
 .apr-line-chart,
 .historical-apr-line-chart,
 .earnings-chart {
+  [data-radix-popper-content-wrapper] {
+    z-index: 1 !important;
+    pointer-events: none !important;
+  }
+
   &[is-loading="true"] {
     .recharts-cartesian-grid .recharts-cartesian-grid-bg {
       fill: hsla(var(--muted) / 10%);

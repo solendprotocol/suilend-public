@@ -298,12 +298,12 @@ export default function ParametersPanel({ reserve }: ParametersPanelProps) {
             .slice()
             .sort((a, b) => +a.utilPercent - +b.utilPercent)
             .map((row) => ({
-              x: +row.utilPercent,
-              y: +row.aprPercent,
+              utilPercent: +row.utilPercent,
+              aprPercent: +row.aprPercent,
             }))}
           reference={{
-            x: +reserve.utilizationPercent,
-            y: +reserve.borrowAprPercent,
+            utilPercent: +reserve.utilizationPercent,
+            aprPercent: +reserve.borrowAprPercent,
           }}
         />
       </div>

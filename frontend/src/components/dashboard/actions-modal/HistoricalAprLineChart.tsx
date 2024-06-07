@@ -4,7 +4,6 @@ import BigNumber from "bignumber.js";
 import { format } from "date-fns";
 import { capitalize } from "lodash";
 import * as Recharts from "recharts";
-import { Coordinate } from "recharts/types/util/types";
 import { useLocalStorage } from "usehooks-ts";
 
 import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
@@ -54,30 +53,20 @@ interface TooltipContentProps {
   side: Side;
   fields: string[];
   d: ChartData;
-  viewBox: ViewBox;
-  coordinate?: Partial<Coordinate>;
+  viewBox?: ViewBox;
+  x?: number;
 }
 
-function TooltipContent({
-  side,
-  fields,
-  d,
-  viewBox,
-  coordinate,
-}: TooltipContentProps) {
+function TooltipContent({ side, fields, d, viewBox, x }: TooltipContentProps) {
   const appContext = useAppContext();
   const data = appContext.data as AppData;
 
-  if (!coordinate?.x || !viewBox) return null;
+  if (viewBox === undefined || x === undefined) return null;
   return (
     // Subset of TooltipContent className
     <div
       className="absolute rounded-md border bg-popover px-3 py-1.5 shadow-md"
-      style={getTooltipStyle(
-        fields.length > 1 ? 240 : 200,
-        viewBox,
-        coordinate,
-      )}
+      style={getTooltipStyle(fields.length > 1 ? 240 : 200, viewBox, x)}
     >
       <div className="flex w-full flex-col gap-2">
         <TLabelSans>
@@ -175,19 +164,17 @@ function Chart({ side, data }: ChartProps) {
   );
 
   // Ticks
-  const ticksX = useMemo(() => {
-    return data
-      .filter((d) => {
-        if (days === 1) return d.timestampS % ((sm ? 4 : 8) * 60 * 60) === 0;
-        if (days === 7) return d.timestampS % ((sm ? 1 : 2) * DAY_S) === 0;
-        if (days === 30) return d.timestampS % ((sm ? 5 : 10) * DAY_S) === 0;
-        return false;
-      })
-      .map((d) => {
-        if (days === 1) return d.timestampS;
-        return d.timestampS + new Date().getTimezoneOffset() * 60;
-      });
-  }, [data, days, sm]);
+  const ticksX = data
+    .filter((d) => {
+      if (days === 1) return d.timestampS % ((sm ? 4 : 8) * 60 * 60) === 0;
+      if (days === 7) return d.timestampS % ((sm ? 1 : 2) * DAY_S) === 0;
+      if (days === 30) return d.timestampS % ((sm ? 5 : 10) * DAY_S) === 0;
+      return false;
+    })
+    .map((d) => {
+      if (days === 1) return d.timestampS;
+      return d.timestampS + new Date().getTimezoneOffset() * 60;
+    });
   const ticksY = Array.from({ length: 4 }).map(
     (_, index, array) => Math.ceil(maxY / (array.length - 1)) * index,
   );
@@ -278,7 +265,7 @@ function Chart({ side, data }: ChartProps) {
                   fields={fields}
                   d={payload[0].payload as ChartData}
                   viewBox={viewBox as any}
-                  coordinate={coordinate}
+                  x={coordinate?.x}
                 />
               );
             }}

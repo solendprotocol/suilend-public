@@ -1,7 +1,5 @@
 import { CSSProperties } from "react";
 
-import { Coordinate } from "recharts/types/util/types";
-
 export const axis = {
   tickMargin: 2,
   tick: {
@@ -59,13 +57,7 @@ export type ViewBox = {
   left: number;
 };
 
-export const getTooltipStyle = (
-  width: number,
-  viewBox: ViewBox,
-  coordinate: Partial<Coordinate>,
-) => {
-  if (coordinate?.x === undefined) return undefined;
-
+export const getTooltipStyle = (width: number, viewBox: ViewBox, x: number) => {
   const MARGIN = 2;
 
   const top = viewBox.top + MARGIN;
@@ -74,16 +66,16 @@ export const getTooltipStyle = (
   const offset = 2 / 2 + 2;
 
   const isAtRightBoundary =
-    coordinate.x - viewBox.left > viewBox.width - (offset + width + MARGIN);
+    x - viewBox.left > viewBox.width - (offset + width + MARGIN);
   if (isAtRightBoundary) {
     right = Math.min(
       viewBox.left + viewBox.width + viewBox.right - width,
-      viewBox.left + viewBox.width + viewBox.right - (coordinate.x - offset),
+      viewBox.left + viewBox.width + viewBox.right - (x - offset),
     );
   } else {
     left = Math.min(
       viewBox.left + viewBox.width + viewBox.right - width,
-      coordinate.x + offset,
+      x + offset,
     );
   }
 
