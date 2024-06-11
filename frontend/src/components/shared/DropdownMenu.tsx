@@ -65,13 +65,13 @@ export default function DropdownMenu({
         style={{
           maxHeight: "var(--radix-dropdown-menu-content-available-height)",
           overflowY: "auto",
-          minWidth: "200px",
+          minWidth: "280px",
           maxWidth: "300px",
         }}
       >
         {title && (
           <div className="mb-4 flex flex-col gap-1">
-            <DropdownMenuLabel className="overflow-hidden text-ellipsis px-0 py-0 font-normal uppercase text-primary-foreground">
+            <DropdownMenuLabel className="overflow-hidden text-ellipsis px-0 py-0 font-sans font-normal text-primary-foreground">
               {title}
             </DropdownMenuLabel>
             {description}

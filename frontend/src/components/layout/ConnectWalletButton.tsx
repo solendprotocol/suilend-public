@@ -1,20 +1,26 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { SuiClient } from "@mysten/sui.js/client";
-import { ConnectModal } from "@suiet/wallet-kit";
+import { ConnectModal, useWallet } from "@suiet/wallet-kit";
 
 import ConnectedWalletDropdownMenu from "@/components/layout/ConnectedWalletDropdownMenu";
 import ConnectWalletDropdownMenu from "@/components/layout/ConnectWalletDropdownMenu";
 import { useAppContext } from "@/contexts/AppContext";
 import { useWalletContext } from "@/contexts/WalletContext";
+import { useListWallets } from "@/lib/wallets";
 
 export default function ConnectWalletButton() {
+  const { adapter } = useWallet();
   const { accounts, address } = useWalletContext();
   const appContext = useAppContext();
   const suiClient = appContext.suiClient as SuiClient;
 
   // Connect modal
   const [isConnectModalOpen, setIsConnectModalOpen] = useState<boolean>(false);
+
+  // Conencted wallet details
+  const { wallets } = useListWallets();
+  const connectedWallet = wallets.find((w) => w.id === adapter?.name);
 
   // Sui Name Service lookup
   const [addressNameServiceNameMap, setAddressNameServiceNameMap] = useState<
@@ -72,7 +78,9 @@ export default function ConnectWalletButton() {
   }, [addressesToLookUp, suiClient]);
 
   const isConnected =
-    address && Object.keys(addressNameServiceNameMap).includes(address);
+    address &&
+    connectedWallet &&
+    Object.keys(addressNameServiceNameMap).includes(address);
 
   return (
     <>
@@ -84,6 +92,7 @@ export default function ConnectWalletButton() {
 
       {isConnected ? (
         <ConnectedWalletDropdownMenu
+          connectedWallet={connectedWallet}
           addressNameServiceNameMap={addressNameServiceNameMap}
         />
       ) : (

@@ -81,9 +81,9 @@ export default function SubaccountDropdownMenu() {
                 onClick={() => setObligationId(o.id)}
               >
                 <div className="flex w-full justify-between">
-                  <TLabel className="uppercase text-inherit">
+                  <TLabelSans className="text-inherit">
                     {getTitle(o.id)}
-                  </TLabel>
+                  </TLabelSans>
                   <TLabelSans className="text-inherit">
                     {o.positionCount} position{o.positionCount > 1 ? "s" : ""}
                   </TLabelSans>

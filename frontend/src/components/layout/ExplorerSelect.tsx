@@ -19,7 +19,7 @@ export default function ExplorerSelect({ className }: ExplorerSelectProps) {
       items={EXPLORERS}
       selectedItemId={explorer.id}
       setValue={setExplorerId}
-      title="Select Explorer"
+      title="Select explorer"
     />
   );
 }
