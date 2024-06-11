@@ -227,7 +227,7 @@ export default function AprLineChart({ data, reference }: AprLineChartProps) {
                   contentProps={{
                     className: cn(
                       "w-[200px] min-w-[200px] transition-opacity !pointer-events-none",
-                      isMouseOver && "opacity-50",
+                      isMouseOver && "opacity-0",
                     ),
                     sideOffset: 8,
                     avoidCollisions: false,
