@@ -226,10 +226,10 @@ export function WalletContextProvider({ children }: PropsWithChildren) {
         window.localStorage.setItem("accountAddress", _address);
 
         toast.info(
-          `Switched to ${_account?.label ?? addressNameServiceName ?? formatAddress(_address, 0)}`,
+          `Switched to ${_account?.label ?? addressNameServiceName ?? formatAddress(_address)}`,
           {
             description: _account?.label
-              ? addressNameServiceName ?? formatAddress(_address, 0)
+              ? addressNameServiceName ?? formatAddress(_address)
               : undefined,
             descriptionClassName: "uppercase !font-mono",
           },

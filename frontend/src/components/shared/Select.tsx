@@ -47,7 +47,7 @@ export default function Select({
       >
         <SelectGroup>
           {title && (
-            <SelectLabel className="mb-4 px-0 py-0 font-normal uppercase text-primary-foreground">
+            <SelectLabel className="mb-4 px-0 py-0 font-sans font-normal text-primary-foreground">
               {title}
             </SelectLabel>
           )}
