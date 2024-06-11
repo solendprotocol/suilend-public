@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { useState } from "react";
 
 import { ChevronDown, ChevronUp } from "lucide-react";
@@ -11,12 +12,16 @@ import Tooltip from "@/components/shared/Tooltip";
 import { TLabel, TLabelSans } from "@/components/shared/Typography";
 import { useWalletContext } from "@/contexts/WalletContext";
 import { formatAddress } from "@/lib/format";
+import { cn } from "@/lib/utils";
+import { Wallet } from "@/lib/wallets";
 
 interface ConnectedWalletDropdownMenuProps {
+  connectedWallet: Wallet;
   addressNameServiceNameMap: Record<string, string | undefined>;
 }
 
 export default function ConnectedWalletDropdownMenu({
+  connectedWallet,
   addressNameServiceNameMap,
 }: ConnectedWalletDropdownMenuProps) {
   const {
@@ -40,10 +45,23 @@ export default function ConnectedWalletDropdownMenu({
         <Button
           className="min-w-0"
           labelClassName="uppercase text-ellipsis overflow-hidden"
+          startIcon={
+            connectedWallet.logoUrl ? (
+              <Image
+                className="h-4 w-4"
+                src={connectedWallet.logoUrl}
+                alt={`${connectedWallet.name} logo`}
+                width={16}
+                height={16}
+              />
+            ) : undefined
+          }
           endIcon={<Icon />}
           disabled={isImpersonatingAddress}
         >
-          {addressNameServiceNameMap[address] ?? formatAddress(address)}
+          {account?.label ??
+            addressNameServiceNameMap[address] ??
+            formatAddress(address)}
         </Button>
       }
       title={account?.label ?? "Connected"}
@@ -82,15 +100,25 @@ export default function ConnectedWalletDropdownMenu({
                       )
                     }
                   >
-                    {a.label && (
-                      <TLabel className="max-w-full overflow-hidden text-ellipsis text-nowrap uppercase text-inherit">
-                        {a.label}
+                    <div className="flex max-w-full flex-row items-center gap-2">
+                      {a.label && (
+                        <TLabelSans className="overflow-hidden text-ellipsis text-nowrap text-inherit">
+                          {a.label}
+                        </TLabelSans>
+                      )}
+
+                      <TLabel
+                        className={cn(
+                          "uppercase text-inherit",
+                          addressNameServiceNameMap[a.address]
+                            ? "overflow-hidden text-ellipsis text-nowrap"
+                            : "flex-shrink-0",
+                        )}
+                      >
+                        {addressNameServiceNameMap[a.address] ??
+                          formatAddress(a.address)}
                       </TLabel>
-                    )}
-                    <TLabel className="uppercase text-inherit">
-                      {addressNameServiceNameMap[a.address] ??
-                        formatAddress(a.address, 12)}
-                    </TLabel>
+                    </div>
                   </DropdownMenuItem>
                 ))}
             </>
