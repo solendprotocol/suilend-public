@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { Fragment, useCallback, useMemo } from "react";
 
 import { normalizeStructTag } from "@mysten/sui.js/utils";
 import { ColumnDef } from "@tanstack/react-table";
@@ -30,6 +30,7 @@ import TitleWithIcon from "@/components/shared/TitleWithIcon";
 import TokenLogo from "@/components/shared/TokenLogo";
 import Tooltip from "@/components/shared/Tooltip";
 import { TBody, TLabelSans } from "@/components/shared/Typography";
+import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { useDashboardContext } from "@/contexts/DashboardContext";
@@ -865,7 +866,7 @@ export default function EarningsTabContent({
   ]);
 
   return (
-    <div className="flex flex-1 flex-col gap-8 overflow-y-auto overflow-x-hidden pt-4">
+    <div className="flex flex-1 flex-col gap-6 overflow-y-auto overflow-x-hidden py-4">
       <div className="flex flex-col gap-2 px-4">
         <Card>
           <div className="grid grid-cols-2 gap-4 p-4 md:grid-cols-4">
@@ -953,42 +954,60 @@ export default function EarningsTabContent({
           data: rows?.borrow,
           noDataMessage: "No borrows",
         },
-      ].map((table) => (
-        <div key={table.title} className="flex flex-col gap-4">
-          <TitleWithIcon className="px-4">{table.title}</TitleWithIcon>
+      ].map((table, index, array) => (
+        <Fragment key={table.title}>
+          <div className="flex flex-col gap-4">
+            <TitleWithIcon className="px-4">{table.title}</TitleWithIcon>
 
-          <EarningsChart
-            side={table.side}
-            isLoading={
-              (table.side === Side.DEPOSIT
-                ? interpolatedCumInterestEarnedData
-                : interpolatedCumInterestPaidData) === undefined
-            }
-            data={
-              (table.side === Side.DEPOSIT
-                ? interpolatedCumInterestEarnedData
-                : interpolatedCumInterestPaidData) ?? []
-            }
-          />
+            <div
+              key={table.title}
+              className="flex flex-col max-lg:gap-4 lg:flex-row"
+            >
+              <div className="max-lg:w-full lg:min-w-0 lg:flex-1">
+                <DataTable<RowData>
+                  columns={table.columns}
+                  data={table.data}
+                  noDataMessage={table.noDataMessage}
+                  skeletonRows={data.lendingMarket.reserves.length}
+                  container={{
+                    className: "overflow-y-visible overflow-x-auto",
+                  }}
+                  tableClassName="border-y-0"
+                  tableCellClassName={(cell) =>
+                    cn(
+                      cell &&
+                        Object.entries(cell.row.original.rewards).length > 1
+                        ? "py-2 h-auto"
+                        : "py-0 h-12",
+                    )
+                  }
+                />
+              </div>
 
-          <DataTable<RowData>
-            columns={table.columns}
-            data={table.data}
-            noDataMessage={table.noDataMessage}
-            skeletonRows={data.lendingMarket.reserves.length}
-            container={{
-              className: "overflow-y-visible overflow-x-auto",
-            }}
-            tableClassName="border-t-0"
-            tableCellClassName={(cell) =>
-              cn(
-                cell && Object.entries(cell.row.original.rewards).length > 1
-                  ? "py-2 h-auto"
-                  : "py-0 h-12",
-              )
-            }
-          />
-        </div>
+              <Separator
+                orientation="vertical"
+                className="max-lg:hidden lg:mr-2"
+              />
+
+              <div className="max-lg:w-full lg:min-w-0 lg:flex-1">
+                <EarningsChart
+                  side={table.side}
+                  isLoading={
+                    (table.side === Side.DEPOSIT
+                      ? interpolatedCumInterestEarnedData
+                      : interpolatedCumInterestPaidData) === undefined
+                  }
+                  data={
+                    (table.side === Side.DEPOSIT
+                      ? interpolatedCumInterestEarnedData
+                      : interpolatedCumInterestPaidData) ?? []
+                  }
+                />
+              </div>
+            </div>
+          </div>
+          {index !== array.length - 1 && <Separator />}
+        </Fragment>
       ))}
     </div>
   );

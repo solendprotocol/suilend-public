@@ -85,7 +85,7 @@ export default function PointsLeaderboardTable() {
   );
 
   return (
-    <div className="flex w-full max-w-[960px] flex-col gap-4">
+    <div className="flex w-full max-w-[960px] flex-col gap-6">
       {leaderboardRows ? (
         <TLabelSans>
           <LeaderboardDataUsers />
@@ -100,11 +100,10 @@ export default function PointsLeaderboardTable() {
         columns={columns}
         data={leaderboardRows}
         noDataMessage="No users"
-        maxRows={250}
+        pageSize={100}
         container={{
           className: cn(!leaderboardRows && "-mb-6"),
         }}
-        tableClassName="border-b-0"
         tableRowClassName={(row) =>
           address &&
           row?.original.address === address &&

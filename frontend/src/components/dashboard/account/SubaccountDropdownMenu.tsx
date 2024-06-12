@@ -10,6 +10,7 @@ import CopyToClipboardButton from "@/components/shared/CopyToClipboardButton";
 import DropdownMenu, {
   DropdownMenuItem,
 } from "@/components/shared/DropdownMenu";
+import OpenOnExplorerButton from "@/components/shared/OpenOnExplorerButton";
 import Tooltip from "@/components/shared/Tooltip";
 import { TLabel, TLabelSans } from "@/components/shared/Typography";
 import { AppData, useAppContext } from "@/contexts/AppContext";
@@ -17,7 +18,7 @@ import { formatId, formatUsd } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 export default function SubaccountDropdownMenu() {
-  const { setObligationId, ...restAppContext } = useAppContext();
+  const { setObligationId, explorer, ...restAppContext } = useAppContext();
   const obligation = restAppContext.obligation as ParsedObligation;
   const data = restAppContext.data as AppData;
   const obligations = data.obligations as ParsedObligation[];
@@ -50,16 +51,19 @@ export default function SubaccountDropdownMenu() {
       title={getTitle(obligation.id)}
       description={
         <div className="flex flex-col gap-1">
-          <div className="flex h-4 flex-row items-center gap-1">
+          <div className="flex flex-row items-center gap-1">
             <Tooltip title={obligation.id}>
               <TLabel className="uppercase">
-                {formatId(obligation.id, 12)}
+                {formatId(obligation.id, 8)}
               </TLabel>
             </Tooltip>
-            <CopyToClipboardButton
-              tooltip="Copy id to clipboard"
-              value={obligation.id}
-            />
+
+            <div className="flex h-4 flex-row items-center">
+              <CopyToClipboardButton value={obligation.id} />
+              <OpenOnExplorerButton
+                url={explorer.buildObjectUrl(obligation.id)}
+              />
+            </div>
           </div>
 
           <UtilizationBar
@@ -81,19 +85,19 @@ export default function SubaccountDropdownMenu() {
                 onClick={() => setObligationId(o.id)}
               >
                 <div className="flex w-full justify-between">
-                  <TLabelSans className="text-inherit">
+                  <TLabelSans className="text-foreground">
                     {getTitle(o.id)}
                   </TLabelSans>
-                  <TLabelSans className="text-inherit">
+                  <TLabelSans>
                     {o.positionCount} position{o.positionCount > 1 ? "s" : ""}
                   </TLabelSans>
                 </div>
 
                 <div className="flex w-full justify-between">
-                  <TLabelSans className="text-right text-inherit">
+                  <TLabelSans>
                     {formatUsd(o.depositedAmountUsd)} deposited
                   </TLabelSans>
-                  <TLabelSans className="text-right text-inherit">
+                  <TLabelSans>
                     {formatUsd(o.borrowedAmountUsd)} borrowed
                   </TLabelSans>
                 </div>

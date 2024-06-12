@@ -26,7 +26,7 @@ export function DropdownMenuItem({
   return (
     <DropdownMenuItemComponent
       className={cn(
-        "cursor-pointer border px-3 py-2 font-sans text-xs text-muted focus:border-secondary focus:bg-secondary/5 focus:text-primary-foreground",
+        "cursor-pointer border px-3 py-2 font-sans text-xs text-muted-foreground focus:border-secondary focus:bg-secondary/5 focus:text-primary-foreground",
         className,
       )}
       onClick={onClick}

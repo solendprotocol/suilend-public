@@ -243,6 +243,7 @@ export default function AccountDetailsDialog() {
   return (
     <Dialog
       rootProps={{ open: isOpen, onOpenChange }}
+      contentProps={{ className: "max-w-6xl" }}
       headerClassName="border-b-0"
       titleIcon={<User />}
       title="Account"
