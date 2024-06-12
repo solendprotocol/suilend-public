@@ -4,7 +4,6 @@ import BigNumber from "bignumber.js";
 import { format } from "date-fns";
 import { capitalize } from "lodash";
 import * as Recharts from "recharts";
-import { Coordinate } from "recharts/types/util/types";
 import { useLocalStorage } from "usehooks-ts";
 
 import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
@@ -12,67 +11,62 @@ import { Side } from "@suilend/sdk/types";
 
 import AprRewardsBreakdownRow from "@/components/dashboard/AprRewardsBreakdownRow";
 import Button from "@/components/shared/Button";
+import CartesianGridVerticalLine from "@/components/shared/CartesianGridVerticalLine";
 import TokenLogo from "@/components/shared/TokenLogo";
 import { TBody, TBodySans, TLabelSans } from "@/components/shared/Typography";
-import { ViewBox, getTooltipStyle } from "@/components/ui/chart";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { useDashboardContext } from "@/contexts/DashboardContext";
 import useBreakpoint from "@/hooks/useBreakpoint";
 import useIsTouchscreen from "@/hooks/useIsTouchscreen";
 import {
-  COIN_TYPE_COLOR_MAP,
-  LOGO_MAP,
-  NORMALIZED_SUI_COINTYPE,
-} from "@/lib/coinType";
+  ViewBox,
+  axis,
+  axisLabel,
+  getTooltipStyle,
+  line,
+  tooltip,
+} from "@/lib/chart";
+import { COINTYPE_COLOR_MAP, NORMALIZED_SUI_COINTYPE } from "@/lib/coinType";
 import {
   DAYS,
   DAY_S,
   Days,
   RESERVE_EVENT_SAMPLE_INTERVAL_S_MAP,
-  calculateSuiRewardsDepositAprPercent,
+  calculateRewardsDepositAprPercent,
 } from "@/lib/events";
 import { formatPercent } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-type AprFields =
-  | "depositAprPercent"
-  | "depositSuiRewardsAprPercent"
-  | "borrowAprPercent";
-const aprFields: AprFields[] = [
-  "depositAprPercent",
-  "depositSuiRewardsAprPercent",
-  "borrowAprPercent",
-];
+const getFieldCoinType = (field: string) =>
+  field.includes("_") ? field.split("_")[1] : undefined;
+const getFieldColor = (field: string) => {
+  const coinType = getFieldCoinType(field);
+  return coinType ? COINTYPE_COLOR_MAP[coinType] : "hsl(var(--success))";
+};
 
 type ChartData = {
   timestampS: number;
-} & {
-  [key in AprFields]?: number;
+  [interestAprPercent: string]: number;
 };
 
 interface TooltipContentProps {
   side: Side;
+  fields: string[];
   d: ChartData;
-  viewBox: ViewBox;
-  coordinate?: Partial<Coordinate>;
+  viewBox?: ViewBox;
+  x?: number;
 }
 
-function TooltipContent({ side, d, viewBox, coordinate }: TooltipContentProps) {
-  if (!coordinate?.x || !viewBox) return null;
-  if (
-    (side === Side.DEPOSIT && d.depositAprPercent === undefined) ||
-    (side === Side.BORROW && d.borrowAprPercent === undefined)
-  )
-    return null;
+function TooltipContent({ side, fields, d, viewBox, x }: TooltipContentProps) {
+  const appContext = useAppContext();
+  const data = appContext.data as AppData;
+
+  if (viewBox === undefined || x === undefined) return null;
   return (
     // Subset of TooltipContent className
     <div
       className="absolute rounded-md border bg-popover px-3 py-1.5 shadow-md"
-      style={getTooltipStyle(
-        side === Side.DEPOSIT ? 240 : 200,
-        viewBox,
-        coordinate,
-      )}
+      style={getTooltipStyle(fields.length > 1 ? 240 : 200, viewBox, x)}
     >
       <div className="flex w-full flex-col gap-2">
         <TLabelSans>
@@ -84,61 +78,45 @@ function TooltipContent({ side, d, viewBox, coordinate }: TooltipContentProps) {
           <TBody>
             {formatPercent(
               new BigNumber(
-                side === Side.DEPOSIT
-                  ? (d.depositAprPercent as number) +
-                    (d.depositSuiRewardsAprPercent ?? 0)
-                  : (d.borrowAprPercent as number),
+                fields.reduce((acc: number, field) => acc + d[field], 0),
               ),
             )}
           </TBody>
         </div>
 
-        <AprRewardsBreakdownRow
-          isLast={
-            !(
-              side === Side.DEPOSIT &&
-              d.depositSuiRewardsAprPercent !== undefined
-            )
-          }
-          value={
-            <span className="text-success">
-              {formatPercent(
-                new BigNumber(
-                  (side === Side.DEPOSIT
-                    ? d.depositAprPercent
-                    : d.borrowAprPercent) as number,
-                ),
-              )}
-            </span>
-          }
-        >
-          <TLabelSans>Interest</TLabelSans>
-        </AprRewardsBreakdownRow>
+        {fields.map((field, index) => {
+          const coinType = getFieldCoinType(field);
+          const color = getFieldColor(field);
 
-        {side === Side.DEPOSIT &&
-          d.depositSuiRewardsAprPercent !== undefined && (
+          return (
             <AprRewardsBreakdownRow
-              isLast
+              key={field}
+              isLast={index === fields.length - 1}
               value={
-                <span
-                  style={{
-                    color: COIN_TYPE_COLOR_MAP[NORMALIZED_SUI_COINTYPE],
-                  }}
-                >
-                  {formatPercent(new BigNumber(d.depositSuiRewardsAprPercent))}
+                <span style={{ color }}>
+                  {formatPercent(new BigNumber(d[field]))}
                 </span>
               }
             >
-              <TLabelSans>Rewards in</TLabelSans>
-              <TokenLogo
-                className="h-4 w-4"
-                coinType={NORMALIZED_SUI_COINTYPE}
-                symbol="SUI"
-                src={LOGO_MAP[NORMALIZED_SUI_COINTYPE]}
-              />
-              <TLabelSans>SUI</TLabelSans>
+              {!coinType ? (
+                <TLabelSans>Interest</TLabelSans>
+              ) : (
+                <>
+                  <TLabelSans>Rewards in</TLabelSans>
+                  <TokenLogo
+                    className="h-4 w-4"
+                    coinType={coinType}
+                    symbol={data.coinMetadataMap[coinType].symbol}
+                    src={data.coinMetadataMap[coinType].iconUrl}
+                  />
+                  <TLabelSans>
+                    {data.coinMetadataMap[coinType].symbol}
+                  </TLabelSans>
+                </>
+              )}
             </AprRewardsBreakdownRow>
-          )}
+          );
+        })}
       </div>
     </div>
   );
@@ -154,35 +132,49 @@ function Chart({ side, data }: ChartProps) {
   const isTouchscreen = useIsTouchscreen();
 
   const sampleIntervalS =
-    data.length > 0 ? data[1].timestampS - data[0].timestampS : 1;
+    data.length > 1 ? data[1].timestampS - data[0].timestampS : 1;
   const samplesPerDay = DAY_S / sampleIntervalS;
   const days = data.length / samplesPerDay;
 
-  // Max
+  // Data
+  const allFields =
+    data.length > 0
+      ? Object.keys(data[0]).filter((key) => key !== "timestampS")
+      : [];
+
+  const fieldsMap = {
+    [Side.DEPOSIT]: allFields.filter((field) =>
+      field.startsWith("depositInterestAprPercent"),
+    ),
+    [Side.BORROW]: allFields.filter((field) =>
+      field.startsWith("borrowInterestAprPercent"),
+    ),
+  };
+  const fields = fieldsMap[side];
+
+  // Min/max
+  const minX = Math.min(...data.map((d) => d.timestampS));
+  const maxX = Math.max(...data.map((d) => d.timestampS));
+
+  const minY = 0;
   const maxY = Math.max(
-    ...(data
-      .map((d) =>
-        side === Side.DEPOSIT
-          ? (d.depositAprPercent ?? 0) + (d.depositSuiRewardsAprPercent ?? 0)
-          : d.borrowAprPercent,
-      )
-      .filter(Boolean) as number[]),
+    ...data.map((d) =>
+      fields.reduce((acc: number, field) => acc + d[field], 0),
+    ),
   );
 
   // Ticks
-  const ticksX = useMemo(() => {
-    return data
-      .filter((d) => {
-        if (days === 1) return d.timestampS % ((sm ? 4 : 8) * 60 * 60) === 0;
-        if (days === 7) return d.timestampS % ((sm ? 1 : 2) * DAY_S) === 0;
-        if (days === 30) return d.timestampS % ((sm ? 5 : 10) * DAY_S) === 0;
-        return false;
-      })
-      .map((d) => {
-        if (days === 1) return d.timestampS;
-        return d.timestampS + new Date().getTimezoneOffset() * 60;
-      });
-  }, [data, days, sm]);
+  const ticksX = data
+    .filter((d) => {
+      if (days === 1) return d.timestampS % ((sm ? 4 : 8) * 60 * 60) === 0;
+      if (days === 7) return d.timestampS % ((sm ? 1 : 2) * DAY_S) === 0;
+      if (days === 30) return d.timestampS % ((sm ? 5 : 10) * DAY_S) === 0;
+      return false;
+    })
+    .map((d) => {
+      if (days === 1) return d.timestampS;
+      return d.timestampS + new Date().getTimezoneOffset() * 60;
+    });
   const ticksY = Array.from({ length: 4 }).map(
     (_, index, array) => Math.ceil(maxY / (array.length - 1)) * index,
   );
@@ -191,31 +183,15 @@ function Chart({ side, data }: ChartProps) {
     if (days === 1) return format(new Date(timestampS * 1000), "HH:mm");
     return format(new Date(timestampS * 1000), "MM/dd");
   };
-  const tickFormatterY = (value: number) => value.toString();
-
-  const tickMargin = 2;
-  const tick = {
-    fontSize: 11,
-    fontFamily: "var(--font-geist-sans)",
-    fill: "hsl(var(--muted-foreground))",
-  };
-  const tickLine = {
-    stroke: "transparent",
-  };
+  const tickFormatterY = (value: number) =>
+    formatPercent(new BigNumber(value), { dp: 0 });
 
   // Domain
-  const domainX = [
-    Math.min(...data.map((d) => d.timestampS)),
-    Math.max(...data.map((d) => d.timestampS)),
-  ];
-  const domainY = [0, maxY];
+  const domainX = [minX, maxX];
+  const domainY = [minY, maxY];
 
   return (
-    <Recharts.ResponsiveContainer
-      width="100%"
-      height="100%"
-      data-loading={data.length > 0}
-    >
+    <Recharts.ResponsiveContainer width="100%" height="100%">
       <Recharts.AreaChart
         data={data}
         margin={{ top: 8, right: 16, bottom: -12, left: -5 }}
@@ -224,105 +200,72 @@ function Chart({ side, data }: ChartProps) {
           strokeDasharray="1 4"
           stroke="hsla(var(--secondary) / 20%)"
           fill="transparent"
+          horizontal={false}
+          vertical={(props) => <CartesianGridVerticalLine {...props} />}
         />
         <Recharts.XAxis
           type="number"
           dataKey="timestampS"
           ticks={ticksX}
-          tickMargin={tickMargin}
-          tick={tick}
-          axisLine={{
-            stroke: "hsl(209 36% 28%)", // 25% var(--secondary) on var(--popover)
-          }}
-          tickLine={tickLine}
+          tickMargin={axis.tickMargin}
+          tick={axis.tick}
+          axisLine={axis.axisLine}
+          tickLine={axis.tickLine}
           tickFormatter={tickFormatterX}
           domain={domainX}
         />
         <Recharts.YAxis
           type="number"
           ticks={ticksY}
-          tickMargin={tickMargin}
-          tick={tick}
-          axisLine={{
-            stroke: "hsl(209 36% 28%)", // 25% var(--secondary) on var(--popover)
-          }}
-          tickLine={tickLine}
+          tickMargin={axis.tickMargin}
+          tick={axis.tick}
+          axisLine={axis.axisLine}
+          tickLine={axis.tickLine}
           tickFormatter={tickFormatterY}
           domain={domainY}
-          unit="%"
         >
           <Recharts.Label
             value={`${capitalize(side)} APR`}
-            style={{
-              fontSize: 12,
-              fontFamily: "var(--font-geist-sans)",
-              fontWeight: 400,
-              lineHeight: "12px",
-              textAnchor: "middle",
-              fill: "hsl(var(--muted-foreground))",
-            }}
+            offset={5 + 5}
             position="insideLeft"
             angle={-90}
-            offset={5 + 5}
+            style={axisLabel.style}
           />
         </Recharts.YAxis>
-        <Recharts.Area
-          type="monotone"
-          stackId="1"
-          dataKey={
-            side === Side.DEPOSIT ? "depositAprPercent" : "borrowAprPercent"
-          }
-          isAnimationActive={false}
-          stroke="hsl(var(--success))"
-          fill="hsla(var(--success) / 10%)"
-          fillOpacity={1}
-          dot={{
-            stroke: "transparent",
-            strokeWidth: 0,
-            fill: "transparent",
-          }}
-          strokeWidth={2}
-        />
-        {side === Side.DEPOSIT && (
-          <Recharts.Area
-            type="monotone"
-            stackId="1"
-            dataKey="depositSuiRewardsAprPercent"
-            isAnimationActive={false}
-            stroke={COIN_TYPE_COLOR_MAP[NORMALIZED_SUI_COINTYPE]}
-            fill={COIN_TYPE_COLOR_MAP[NORMALIZED_SUI_COINTYPE]}
-            fillOpacity={0.1}
-            dot={{
-              stroke: "transparent",
-              strokeWidth: 0,
-              fill: "transparent",
-            }}
-            strokeWidth={1.5}
-          />
-        )}
+        {fields.map((field) => {
+          const color = getFieldColor(field);
+
+          return (
+            <Recharts.Area
+              key={field}
+              type="monotone"
+              stackId="1"
+              dataKey={field}
+              isAnimationActive={false}
+              stroke={color}
+              fill={color}
+              fillOpacity={0.1}
+              dot={line.dot}
+              strokeWidth={line.strokeWidth}
+            />
+          );
+        })}
         {data.length > 0 && (
           <Recharts.Tooltip
             isAnimationActive={false}
             filterNull={false}
-            cursor={{
-              stroke: "hsl(var(--foreground))",
-              strokeWidth: 2,
-            }}
+            cursor={tooltip.cursor}
             trigger={isTouchscreen ? "hover" : "hover"}
-            wrapperStyle={{
-              transform: undefined,
-              position: undefined,
-              top: undefined,
-              left: undefined,
-            }}
+            wrapperStyle={tooltip.wrapperStyle}
             content={({ active, payload, viewBox, coordinate }) => {
               if (!active || !payload?.[0]?.payload) return null;
               return (
                 <TooltipContent
                   side={side}
+                  fields={fields}
                   d={payload[0].payload as ChartData}
                   viewBox={viewBox as any}
-                  coordinate={coordinate}
+                  x={coordinate?.x}
                 />
               );
             }}
@@ -413,22 +356,27 @@ export default function HistoricalAprLineChart({
       .map((_, index) => lastTimestampS - index * sampleIntervalS)
       .reverse();
 
-    const result: ChartData[] = [];
+    const result: (Pick<ChartData, "timestampS"> & Partial<ChartData>)[] = [];
     timestampsS.forEach((timestampS) => {
       const event = events.findLast((e) => e.sampleTimestampS <= timestampS);
       result.push({
         timestampS,
-        depositAprPercent: event ? +event.depositAprPercent : undefined,
-        depositSuiRewardsAprPercent: event
-          ? calculateSuiRewardsDepositAprPercent(event, suiEvents, reserve)
+        depositInterestAprPercent: event ? +event.depositAprPercent : undefined,
+        borrowInterestAprPercent: event ? +event.borrowAprPercent : undefined,
+        [`depositInterestAprPercent_${NORMALIZED_SUI_COINTYPE}`]: event
+          ? calculateRewardsDepositAprPercent(event, suiEvents, reserve)
           : undefined,
-        borrowAprPercent: event ? +event.borrowAprPercent : undefined,
       });
     });
 
+    const fields =
+      result.length > 0
+        ? Object.keys(result[0]).filter((key) => key !== "timestampS")
+        : [];
+
     for (const d of result) {
       let hasUndefined = false;
-      for (const field of aprFields) {
+      for (const field of fields) {
         if (d[field] === undefined) {
           d[field] = result.find((_d) => _d[field] !== undefined)?.[field];
           hasUndefined = true;
@@ -437,7 +385,7 @@ export default function HistoricalAprLineChart({
       if (!hasUndefined) break;
     }
 
-    return result;
+    return result as ChartData[];
   }, [reserveAssetDataEventsMap, reserve, days, suiReserve.id]);
   const isLoading = chartData === undefined;
 

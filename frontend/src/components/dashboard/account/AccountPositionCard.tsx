@@ -195,7 +195,6 @@ export default function AccountPositionCard() {
               <>
                 <Button
                   className="text-muted-foreground"
-                  tooltip="Earnings"
                   icon={<TrendingUp />}
                   variant="ghost"
                   size="icon"
@@ -207,7 +206,6 @@ export default function AccountPositionCard() {
                 </Button>
                 <Button
                   className="text-muted-foreground"
-                  tooltip="History"
                   icon={<FileClock />}
                   variant="ghost"
                   size="icon"

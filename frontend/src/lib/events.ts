@@ -7,7 +7,6 @@ import {
   NORMALIZED_SUI_COINTYPE,
   NORMALIZED_USDC_ET_COINTYPE,
   NORMALIZED_USDT_ET_COINTYPE,
-  isSui,
 } from "@/lib/coinType";
 import { msPerYear } from "@/lib/constants";
 
@@ -73,12 +72,21 @@ type ReducedPoolReward = {
   endTimeMs: number;
 };
 
-export const calculateSuiRewardsDepositAprPercent = (
+export const calculateRewardsDepositAprPercent = (
   event: ParsedDownsampledApiReserveAssetDataEvent,
-  suiEvents: ParsedDownsampledApiReserveAssetDataEvent[],
+  rewardsEvents: ParsedDownsampledApiReserveAssetDataEvent[],
   reserve: ParsedReserve,
 ) => {
-  const historicalSuiRewardMap: Record<string, ReducedPoolReward[]> = {
+  if (rewardsEvents.length === 0) return 0;
+
+  const rewardsEvent = rewardsEvents.findLast(
+    (e) => e.sampleTimestampS <= event.sampleTimestampS,
+  );
+  if (!rewardsEvent) return 0;
+
+  const rewardCoinType = rewardsEvent.coinType;
+
+  const historicalRewardsMap: Record<string, ReducedPoolReward[]> = {
     [NORMALIZED_SUI_COINTYPE]: [
       {
         coinType: NORMALIZED_SUI_COINTYPE,
@@ -144,43 +152,38 @@ export const calculateSuiRewardsDepositAprPercent = (
   const allPoolRewards: ReducedPoolReward[] = [
     ...reserve.depositsPoolRewardManager.poolRewards,
   ];
-  (historicalSuiRewardMap[event.coinType] ?? []).forEach((pr) => {
+  (historicalRewardsMap[event.coinType] ?? []).forEach((hr) => {
     if (
       allPoolRewards.find(
-        (p) =>
-          p.coinType === pr.coinType &&
-          p.startTimeMs === pr.startTimeMs &&
-          p.endTimeMs === pr.endTimeMs,
+        (pr) =>
+          pr.coinType === hr.coinType &&
+          pr.startTimeMs === hr.startTimeMs &&
+          pr.endTimeMs === hr.endTimeMs,
       )
     )
       return;
 
     allPoolRewards.push({
-      coinType: pr.coinType,
-      totalRewards: pr.totalRewards,
-      startTimeMs: pr.startTimeMs,
-      endTimeMs: pr.endTimeMs,
+      coinType: hr.coinType,
+      totalRewards: hr.totalRewards,
+      startTimeMs: hr.startTimeMs,
+      endTimeMs: hr.endTimeMs,
     });
   });
 
   const poolRewards = allPoolRewards.filter(
     (pr) =>
-      isSui(pr.coinType) &&
+      pr.coinType === rewardCoinType &&
       event.timestampS >= pr.startTimeMs / 1000 &&
       event.timestampS < pr.endTimeMs / 1000,
   );
   if (poolRewards.length === 0) return 0;
 
-  const suiEvent = suiEvents.findLast(
-    (e) => e.sampleTimestampS <= event.sampleTimestampS,
-  );
-  if (!suiEvent) return undefined;
-
   const rewardsAprPercent = poolRewards.reduce(
     (acc, pr) =>
       acc.plus(
         pr.totalRewards
-          .times(suiEvent.price)
+          .times(rewardsEvent.price)
           .times(new BigNumber(msPerYear).div(pr.endTimeMs - pr.startTimeMs))
           .div(event.depositedAmountUsd)
           .times(100),

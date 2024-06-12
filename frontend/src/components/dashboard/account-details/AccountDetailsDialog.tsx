@@ -255,7 +255,6 @@ export default function AccountDetailsDialog() {
 
           <Button
             className="text-muted-foreground"
-            tooltip="Refresh"
             icon={<RotateCw />}
             variant="ghost"
             size="icon"
