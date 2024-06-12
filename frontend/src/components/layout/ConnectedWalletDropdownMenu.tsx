@@ -8,8 +8,10 @@ import CopyToClipboardButton from "@/components/shared/CopyToClipboardButton";
 import DropdownMenu, {
   DropdownMenuItem,
 } from "@/components/shared/DropdownMenu";
+import OpenOnExplorerButton from "@/components/shared/OpenOnExplorerButton";
 import Tooltip from "@/components/shared/Tooltip";
 import { TLabel, TLabelSans } from "@/components/shared/Typography";
+import { useAppContext } from "@/contexts/AppContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 import { formatAddress } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -33,6 +35,7 @@ export default function ConnectedWalletDropdownMenu({
     ...restWalletContext
   } = useWalletContext();
   const address = restWalletContext.address as string;
+  const { explorer } = useAppContext();
 
   // State
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -66,16 +69,19 @@ export default function ConnectedWalletDropdownMenu({
       }
       title={account?.label ?? "Connected"}
       description={
-        <div className="flex h-4 flex-row items-center gap-1">
+        <div className="flex flex-row items-center gap-1">
           <Tooltip title={address}>
             <TLabel className="uppercase">
-              {addressNameServiceNameMap[address] ?? formatAddress(address, 12)}
+              {addressNameServiceNameMap[address] ?? formatAddress(address, 8)}
             </TLabel>
           </Tooltip>
-          <CopyToClipboardButton
-            tooltip="Copy address to clipboard"
-            value={addressNameServiceNameMap[address] ?? address}
-          />
+
+          <div className="flex h-4 flex-row items-center">
+            <CopyToClipboardButton
+              value={addressNameServiceNameMap[address] ?? address}
+            />
+            <OpenOnExplorerButton url={explorer.buildAddressUrl(address)} />
+          </div>
         </div>
       }
       items={
@@ -100,23 +106,24 @@ export default function ConnectedWalletDropdownMenu({
                       )
                     }
                   >
-                    <div className="flex max-w-full flex-row items-center gap-2">
+                    <div className="flex w-full flex-row items-center justify-between gap-2">
                       {a.label && (
-                        <TLabelSans className="overflow-hidden text-ellipsis text-nowrap text-inherit">
+                        <TLabelSans className="overflow-hidden text-ellipsis text-nowrap text-foreground">
                           {a.label}
                         </TLabelSans>
                       )}
 
                       <TLabel
                         className={cn(
-                          "uppercase text-inherit",
+                          "uppercase",
+                          !a.label && "text-foreground",
                           addressNameServiceNameMap[a.address]
                             ? "overflow-hidden text-ellipsis text-nowrap"
                             : "flex-shrink-0",
                         )}
                       >
                         {addressNameServiceNameMap[a.address] ??
-                          formatAddress(a.address)}
+                          formatAddress(a.address, a.label ? undefined : 8)}
                       </TLabel>
                     </div>
                   </DropdownMenuItem>
