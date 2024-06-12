@@ -1,4 +1,10 @@
-import { Fragment, FunctionComponent, ReactNode, useState } from "react";
+import {
+  Fragment,
+  FunctionComponent,
+  ReactNode,
+  useMemo,
+  useState,
+} from "react";
 
 import {
   Cell,
@@ -7,12 +13,14 @@ import {
   ColumnFiltersState,
   ExpandedState,
   Header,
+  PaginationState,
   Row,
   SortingState,
   flexRender,
   getCoreRowModel,
   getExpandedRowModel,
   getFilteredRowModel,
+  getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
@@ -173,6 +181,7 @@ interface DataTableProps<T> {
   columnFilters?: ColumnFiltersState;
   skeletonRows?: number;
   maxRows?: number;
+  pageSize?: number;
   container?: TableContainerProps;
   tableClassName?: ClassValue;
   tableHeaderRowClassName?: ClassValue;
@@ -193,6 +202,7 @@ export default function DataTable<T>({
   columnFilters,
   skeletonRows,
   maxRows,
+  pageSize,
   container,
   tableClassName,
   tableHeaderRowClassName,
@@ -204,9 +214,14 @@ export default function DataTable<T>({
 }: DataTableProps<T>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [expanded, setExpanded] = useState<ExpandedState>({});
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: pageSize ?? 0,
+  });
 
   type TWithSubRows = T & { subRows?: T[] };
 
+  const isPaginated = pageSize !== undefined;
   const table = useReactTable({
     data: data ?? [],
     columns,
@@ -220,137 +235,194 @@ export default function DataTable<T>({
         ? (row as TWithSubRows).subRows
         : undefined,
     getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: isPaginated ? getPaginationRowModel() : undefined,
+    onPaginationChange: isPaginated ? setPagination : undefined,
+    paginateExpandedRows: false,
     state: {
+      columnFilters,
       sorting,
       expanded,
-      columnFilters,
+      pagination: isPaginated ? pagination : undefined,
     },
   });
 
-  return (
-    <Table container={container} className={cn("border-y", tableClassName)}>
-      <TableHeader className="relative z-[2]">
-        {table.getHeaderGroups().map((headerGroup) => (
-          <TableRow
-            key={headerGroup.id}
-            className={cn("hover:bg-transparent", tableHeaderRowClassName)}
-          >
-            {headerGroup.headers.map((header) => {
-              return (
-                <TableHead
-                  key={header.id}
-                  className={cn(
-                    "h-9 px-0 py-0",
-                    tableHeadClassName && tableHeadClassName(header),
-                  )}
-                >
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext(),
-                      )}
-                </TableHead>
-              );
-            })}
-          </TableRow>
-        ))}
-      </TableHeader>
-      <TableBody className="relative z-[1]">
-        {data === undefined ? (
-          <>
-            {Array.from({ length: skeletonRows ?? 5 }).map((_, index) => (
-              <TableRow
-                key={index}
-                className={cn(
-                  "hover:bg-transparent",
-                  tableRowClassName && tableRowClassName(),
-                )}
-              >
-                <TableCell
-                  colSpan={columns.length}
-                  className={cn(
-                    "h-16 px-0 py-0",
-                    tableCellClassName && tableCellClassName(),
-                  )}
-                >
-                  <Skeleton className="h-full w-full bg-muted/10" />
-                </TableCell>
-              </TableRow>
-            ))}
-          </>
-        ) : (
-          <>
-            {table.getRowModel().rows.length ? (
-              table
-                .getRowModel()
-                .rows.slice(0, maxRows)
-                .map((row, index) => {
-                  const children = (
-                    <TableRow
-                      className={cn(
-                        "hover:bg-transparent",
-                        (RowModal ||
-                          (onRowClick &&
-                            onRowClick(row, index) !== undefined)) &&
-                          "cursor-pointer hover:bg-muted/10",
-                        tableRowClassName && tableRowClassName(row),
-                      )}
-                      style={{ appearance: "inherit" }}
-                      onClick={
-                        !RowModal && onRowClick
-                          ? onRowClick(row, index)
-                          : undefined
-                      }
-                    >
-                      {row.getVisibleCells().map((cell) => (
-                        <TableCell
-                          key={cell.id}
-                          className={cn(
-                            "h-16",
-                            tableCellClassName && tableCellClassName(cell),
-                          )}
-                        >
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext(),
-                          )}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                  );
+  const pageIndexes: number[] | undefined = useMemo(() => {
+    if (!isPaginated) return undefined;
 
-                  return (
-                    <Fragment key={row.id}>
-                      {RowModal ? (
-                        <RowModal row={row.original}>{children}</RowModal>
-                      ) : (
-                        children
-                      )}
-                    </Fragment>
-                  );
-                })
-            ) : (
-              <TableRow
-                className={cn(
-                  "hover:bg-transparent",
-                  tableRowClassName && tableRowClassName(),
-                )}
-              >
-                <TableCell
-                  colSpan={columns.length}
+    const pageCount = table.getPageCount();
+    const lastPageIndex = pageCount - 1;
+
+    if (pageCount < 7)
+      return Array.from({ length: pageCount }).map((_, index) => index);
+
+    // First three pages
+    if (pagination.pageIndex <= 2) return [0, 1, 2, 3, 4, 5, lastPageIndex];
+
+    // Last three pages
+    if (pagination.pageIndex >= lastPageIndex - 2)
+      return [
+        0,
+        lastPageIndex - 5,
+        lastPageIndex - 4,
+        lastPageIndex - 3,
+        lastPageIndex - 2,
+        lastPageIndex - 1,
+        lastPageIndex,
+      ];
+
+    return [
+      0,
+      pagination.pageIndex - 2,
+      pagination.pageIndex - 1,
+      pagination.pageIndex,
+      pagination.pageIndex + 1,
+      pagination.pageIndex + 2,
+      lastPageIndex,
+    ];
+  }, [table, isPaginated, pagination.pageIndex]);
+
+  return (
+    <>
+      <Table container={container} className={cn("border-y", tableClassName)}>
+        <TableHeader className="relative z-[2]">
+          {table.getHeaderGroups().map((headerGroup) => (
+            <TableRow
+              key={headerGroup.id}
+              className={cn("hover:bg-transparent", tableHeaderRowClassName)}
+            >
+              {headerGroup.headers.map((header) => {
+                return (
+                  <TableHead
+                    key={header.id}
+                    className={cn(
+                      "h-9 px-0 py-0",
+                      tableHeadClassName && tableHeadClassName(header),
+                    )}
+                  >
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                  </TableHead>
+                );
+              })}
+            </TableRow>
+          ))}
+        </TableHeader>
+        <TableBody className="relative z-[1]">
+          {data === undefined ? (
+            <>
+              {Array.from({ length: skeletonRows ?? 5 }).map((_, index) => (
+                <TableRow
+                  key={index}
                   className={cn(
-                    "h-16 py-0 text-center",
-                    tableCellClassName && tableCellClassName(),
+                    "hover:bg-transparent",
+                    tableRowClassName && tableRowClassName(),
                   )}
                 >
-                  <TLabelSans>{noDataMessage}</TLabelSans>
-                </TableCell>
-              </TableRow>
-            )}
-          </>
-        )}
-      </TableBody>
-    </Table>
+                  <TableCell
+                    colSpan={columns.length}
+                    className={cn(
+                      "h-16 px-0 py-0",
+                      tableCellClassName && tableCellClassName(),
+                    )}
+                  >
+                    <Skeleton className="h-full w-full bg-muted/10" />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </>
+          ) : (
+            <>
+              {table.getRowModel().rows.length ? (
+                table
+                  .getRowModel()
+                  .rows.slice(0, maxRows)
+                  .map((row, index) => {
+                    const children = (
+                      <TableRow
+                        className={cn(
+                          "hover:bg-transparent",
+                          (RowModal ||
+                            (onRowClick &&
+                              onRowClick(row, index) !== undefined)) &&
+                            "cursor-pointer hover:bg-muted/10",
+                          tableRowClassName && tableRowClassName(row),
+                        )}
+                        style={{ appearance: "inherit" }}
+                        onClick={
+                          !RowModal && onRowClick
+                            ? onRowClick(row, index)
+                            : undefined
+                        }
+                      >
+                        {row.getVisibleCells().map((cell) => (
+                          <TableCell
+                            key={cell.id}
+                            className={cn(
+                              "h-16",
+                              tableCellClassName && tableCellClassName(cell),
+                            )}
+                          >
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext(),
+                            )}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    );
+
+                    return (
+                      <Fragment key={row.id}>
+                        {RowModal ? (
+                          <RowModal row={row.original}>{children}</RowModal>
+                        ) : (
+                          children
+                        )}
+                      </Fragment>
+                    );
+                  })
+              ) : (
+                <TableRow
+                  className={cn(
+                    "hover:bg-transparent",
+                    tableRowClassName && tableRowClassName(),
+                  )}
+                >
+                  <TableCell
+                    colSpan={columns.length}
+                    className={cn(
+                      "h-16 py-0 text-center",
+                      tableCellClassName && tableCellClassName(),
+                    )}
+                  >
+                    <TLabelSans>{noDataMessage}</TLabelSans>
+                  </TableCell>
+                </TableRow>
+              )}
+            </>
+          )}
+        </TableBody>
+      </Table>
+
+      {pageIndexes && (
+        <div className="flex w-full flex-row items-center justify-center gap-2">
+          {pageIndexes.map((pageIndex) => (
+            <Button
+              key={pageIndex}
+              className="min-w-9 border bg-card transition-none hover:bg-border disabled:border-secondary disabled:bg-secondary disabled:text-secondary-foreground disabled:opacity-100"
+              variant="ghost"
+              onClick={() => table.setPageIndex(pageIndex)}
+              disabled={pageIndex === pagination.pageIndex}
+            >
+              {pageIndex + 1}
+            </Button>
+          ))}
+        </div>
+      )}
+    </>
   );
 }
