@@ -7,12 +7,11 @@ import ConnectedWalletDropdownMenu from "@/components/layout/ConnectedWalletDrop
 import ConnectWalletDropdownMenu from "@/components/layout/ConnectWalletDropdownMenu";
 import { useAppContext } from "@/contexts/AppContext";
 import { useWalletContext } from "@/contexts/WalletContext";
-import { API_URL } from "@/lib/navigation";
 import { useListWallets } from "@/lib/wallets";
 
 export default function ConnectWalletButton() {
   const { adapter } = useWallet();
-  const { accounts, address } = useWalletContext();
+  const { accounts, address, isImpersonatingAddress } = useWalletContext();
   const appContext = useAppContext();
   const suiClient = appContext.suiClient as SuiClient;
 
@@ -78,42 +77,9 @@ export default function ConnectWalletButton() {
     })();
   }, [addressesToLookUp, suiClient]);
 
-  // Wallet connect event
-  const loggingWalletConnectEventRef = useRef<
-    { address: string; walletName: string } | undefined
-  >(undefined);
-  useEffect(() => {
-    if (!(address && connectedWallet)) return;
-
-    const walletName = connectedWallet.name;
-    if (
-      loggingWalletConnectEventRef.current?.address === address &&
-      loggingWalletConnectEventRef.current?.walletName === walletName
-    )
-      return;
-
-    const loggingWalletConnectEvent = { address, walletName };
-    loggingWalletConnectEventRef.current = loggingWalletConnectEvent;
-
-    (async () => {
-      try {
-        const url = `${API_URL}/events/logs/wallet-connect`;
-        await fetch(url, {
-          method: "POST",
-          body: JSON.stringify(loggingWalletConnectEvent),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-      } catch (err) {
-        console.error(err);
-      }
-    })();
-  }, [address, connectedWallet]);
-
   const isConnected =
     address &&
-    connectedWallet &&
+    (!isImpersonatingAddress ? connectedWallet : true) &&
     Object.keys(addressNameServiceNameMap).includes(address);
 
   return (

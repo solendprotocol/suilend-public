@@ -28,6 +28,8 @@ import { useLDClient } from "launchdarkly-react-client-sdk";
 import { toast } from "sonner";
 
 import { formatAddress } from "@/lib/format";
+import { API_URL } from "@/lib/navigation";
+import { useListWallets } from "@/lib/wallets";
 
 interface WalletContext {
   isConnectWalletDropdownOpen: boolean;
@@ -87,6 +89,9 @@ export function WalletContextProvider({ children }: PropsWithChildren) {
   const [isConnectWalletDropdownOpen, setIsConnectWalletDropdownOpen] =
     useState<boolean>(false);
 
+  const { wallets } = useListWallets();
+  const connectedWallet = wallets.find((w) => w.id === adapter?.name);
+
   // Account
   const [accounts, setAccounts] = useState<readonly WalletAccount[]>([]);
   const [accountAddress, setAccountAddress] = useState<string | undefined>(
@@ -132,8 +137,43 @@ export function WalletContextProvider({ children }: PropsWithChildren) {
 
   // Sentry
   useEffect(() => {
+    if (impersonatedAddress) return;
     Sentry.setUser({ id: account?.address });
-  }, [account?.address]);
+  }, [impersonatedAddress, account?.address]);
+
+  // Wallet connect event
+  const loggingWalletConnectEventRef = useRef<
+    { address: string; walletName: string } | undefined
+  >(undefined);
+  useEffect(() => {
+    if (impersonatedAddress) return;
+    if (!account?.address || !connectedWallet) return;
+
+    const walletName = connectedWallet.name;
+    if (
+      loggingWalletConnectEventRef.current?.address === account.address &&
+      loggingWalletConnectEventRef.current?.walletName === walletName
+    )
+      return;
+
+    const loggingWalletConnectEvent = { address: account?.address, walletName };
+    loggingWalletConnectEventRef.current = loggingWalletConnectEvent;
+
+    (async () => {
+      try {
+        const url = `${API_URL}/events/logs/wallet-connect`;
+        await fetch(url, {
+          method: "POST",
+          body: JSON.stringify(loggingWalletConnectEvent),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+      } catch (err) {
+        console.error(err);
+      }
+    })();
+  }, [impersonatedAddress, account?.address, connectedWallet]);
 
   // LaunchDarkly
   const ldClient = useLDClient();

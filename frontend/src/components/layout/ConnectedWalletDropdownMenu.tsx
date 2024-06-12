@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { useState } from "react";
 
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, VenetianMask } from "lucide-react";
 
 import Button from "@/components/shared/Button";
 import CopyToClipboardButton from "@/components/shared/CopyToClipboardButton";
@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
 import { Wallet } from "@/lib/wallets";
 
 interface ConnectedWalletDropdownMenuProps {
-  connectedWallet: Wallet;
+  connectedWallet?: Wallet;
   addressNameServiceNameMap: Record<string, string | undefined>;
 }
 
@@ -49,7 +49,9 @@ export default function ConnectedWalletDropdownMenu({
           className="min-w-0"
           labelClassName="uppercase text-ellipsis overflow-hidden"
           startIcon={
-            connectedWallet.logoUrl ? (
+            isImpersonatingAddress ? (
+              <VenetianMask />
+            ) : connectedWallet?.logoUrl ? (
               <Image
                 className="h-4 w-4"
                 src={connectedWallet.logoUrl}
@@ -62,7 +64,7 @@ export default function ConnectedWalletDropdownMenu({
           endIcon={<Icon />}
           disabled={isImpersonatingAddress}
         >
-          {account?.label ??
+          {(!isImpersonatingAddress ? account?.label : undefined) ??
             addressNameServiceNameMap[address] ??
             formatAddress(address)}
         </Button>
@@ -90,7 +92,7 @@ export default function ConnectedWalletDropdownMenu({
             Disconnect
           </DropdownMenuItem>
 
-          {!isImpersonatingAddress && accounts.length > 1 && (
+          {accounts.length > 1 && (
             <>
               <TLabelSans className="mt-4">Switch to</TLabelSans>
               {accounts
