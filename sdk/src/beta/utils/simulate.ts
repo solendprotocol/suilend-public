@@ -1,6 +1,6 @@
+import { HermesClient } from "@pythnetwork/hermes-client";
 import BigNumber from "bignumber.js";
 
-import { SuiPriceServiceConnection } from "../../../../pyth-sdk/src";
 import { Simulate } from "../../core/utils/simulate";
 import { Decimal } from "../_generated/suilend/decimal/structs";
 import {
@@ -67,7 +67,7 @@ export const updatePoolRewardsManager = (
 
 export const refreshReservePrice = async (
   reserves: Reserve<string>[],
-  pythConnection: SuiPriceServiceConnection,
+  pythConnection: HermesClient,
 ): Promise<Reserve<string>[]> =>
   simulate.refreshReservePrice(reserves, pythConnection);
 

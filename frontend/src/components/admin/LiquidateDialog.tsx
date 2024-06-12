@@ -5,6 +5,7 @@ import {
   TransactionBlock,
   TransactionResult,
 } from "@mysten/sui.js/transactions";
+import { HermesClient } from "@pythnetwork/hermes-client";
 import * as Sentry from "@sentry/nextjs";
 import { ColumnDef } from "@tanstack/react-table";
 import BigNumber from "bignumber.js";
@@ -32,8 +33,6 @@ import {
   getObligationHistoryPage,
 } from "@suilend/sdk/utils/obligation";
 import * as simulate from "@suilend/sdk/utils/simulate";
-
-import { SuiPriceServiceConnection } from "@pyth-sdk";
 
 import Input from "@/components/admin/Input";
 import DataTable, {
@@ -118,15 +117,11 @@ export default function LiquidateDialog({
       [LENDING_MARKET_TYPE],
       suiClient,
     );
-    let refreshedReserves = rawLendingMarket.reserves as Reserve<string>[];
-    const connection = new SuiPriceServiceConnection(
-      "https://hermes.pyth.network",
-    );
-    refreshedReserves = await simulate.refreshReservePrice(
+    const refreshedReserves = await simulate.refreshReservePrice(
       rawLendingMarket.reserves.map((r) =>
         simulate.compoundReserveInterest(r, Math.round(Date.now() / 1000)),
       ),
-      connection,
+      new HermesClient("https://hermes.pyth.network", {}),
     );
     const refreshedObligation = simulate.refreshObligation(
       rawObligation,

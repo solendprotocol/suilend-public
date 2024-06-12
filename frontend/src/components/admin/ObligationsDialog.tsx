@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import { SuiClient } from "@mysten/sui.js/client";
+import { HermesClient } from "@pythnetwork/hermes-client";
 import { ColumnDef } from "@tanstack/react-table";
 
 import { phantom } from "@suilend/sdk/_generated/_framework/reified";
@@ -14,8 +15,6 @@ import {
 import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 import { fetchAllObligationsForMarketWithHandler } from "@suilend/sdk/utils/obligation";
 import * as simulate from "@suilend/sdk/utils/simulate";
-
-import { SuiPriceServiceConnection } from "@pyth-sdk";
 
 import Dialog from "@/components/admin/Dialog";
 import Input from "@/components/admin/Input";
@@ -60,7 +59,7 @@ export default function ObligationsDialog() {
       rawLendingMarket.reserves.map((r) =>
         simulate.compoundReserveInterest(r, Math.round(Date.now() / 1000)),
       ),
-      new SuiPriceServiceConnection("https://hermes.pyth.network"),
+      new HermesClient("https://hermes.pyth.network", {}),
     );
     async function chunkHandler(obligationsChunk: Obligation<string>[]) {
       setObligations((obligations) => [

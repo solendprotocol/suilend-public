@@ -2,6 +2,7 @@ import { useRef } from "react";
 
 import { CoinBalance, SuiClient } from "@mysten/sui.js/client";
 import { normalizeStructTag } from "@mysten/sui.js/utils";
+import { HermesClient } from "@pythnetwork/hermes-client";
 import * as Sentry from "@sentry/nextjs";
 import { toast } from "sonner";
 import useSWR from "swr";
@@ -17,8 +18,6 @@ import { parseLendingMarket } from "@suilend/sdk/parsers/lendingMarket";
 import { parseObligation } from "@suilend/sdk/parsers/obligation";
 import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 import * as simulate from "@suilend/sdk/utils/simulate";
-
-import { SuiPriceServiceConnection } from "@pyth-sdk";
 
 import { AppContext, AppData } from "@/contexts/AppContext";
 import { ParsedCoinBalance, parseCoinBalances } from "@/lib/coinBalance";
@@ -45,7 +44,7 @@ export default function useFetchAppData(
       rawLendingMarket.reserves.map((r) =>
         simulate.compoundReserveInterest(r, now),
       ),
-      new SuiPriceServiceConnection("https://hermes.pyth.network"),
+      new HermesClient("https://hermes.pyth.network", {}),
     );
 
     if (!suilendClientRef.current) {

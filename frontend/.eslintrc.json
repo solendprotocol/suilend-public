@@ -35,12 +35,6 @@
             "position": "before"
           },
           {
-            "pattern": "@pyth-sdk/*/**",
-            "patternOptions": { "partial": true },
-            "group": "internal",
-            "position": "before"
-          },
-          {
             "pattern": "@/*/**",
             "group": "internal",
             "position": "before"

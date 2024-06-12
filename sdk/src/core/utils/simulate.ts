@@ -1,9 +1,9 @@
 import { bcs } from "@mysten/sui.js/bcs";
 import { toHEX } from "@mysten/sui.js/utils";
+import { HermesClient } from "@pythnetwork/hermes-client";
 import BigNumber from "bignumber.js";
 import { v4 as uuidv4 } from "uuid";
 
-import { SuiPriceServiceConnection } from "../../../../pyth-sdk/src";
 import { WAD } from "../constants";
 import { linearlyInterpolate } from "../utils";
 
@@ -256,29 +256,30 @@ export class Simulate {
 
   async refreshReservePrice(
     reserves: (typeof this.Reserve)[],
-    pythConnection: SuiPriceServiceConnection,
+    pythConnection: HermesClient,
   ): Promise<(typeof this.Reserve)[]> {
     const priceIdentifiers = reserves.map((r) =>
       toHEX(new Uint8Array(r.priceIdentifier.bytes)),
     );
     const priceData =
-      await pythConnection.getLatestPriceFeeds(priceIdentifiers);
-    if (!priceData) return reserves;
+      await pythConnection.getLatestPriceUpdates(priceIdentifiers);
+    if (!priceData || !priceData.parsed) return reserves;
 
     const updatedReserves: (typeof this.Reserve)[] = [];
     for (let i = 0; i < reserves.length; i++) {
       const newReserve = { ...reserves[i] };
       newReserve.price = this.stringToDecimal(
-        priceData[i].getPriceUnchecked().getPriceAsNumberUnchecked().toString(),
+        new BigNumber(priceData.parsed[i].price.price)
+          .times(10 ** priceData.parsed[i].price.expo)
+          .toString(),
       );
       newReserve.smoothedPrice = this.stringToDecimal(
-        priceData[i]
-          .getEmaPriceUnchecked()
-          .getPriceAsNumberUnchecked()
+        new BigNumber(priceData.parsed[i].ema_price.price)
+          .times(10 ** priceData.parsed[i].ema_price.expo)
           .toString(),
       );
       newReserve.priceLastUpdateTimestampS = BigInt(
-        priceData[i].getPriceUnchecked().publishTime,
+        priceData.parsed[i].price.publish_time,
       );
       updatedReserves.push(newReserve as typeof this.Reserve);
     }
