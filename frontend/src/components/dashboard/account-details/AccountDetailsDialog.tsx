@@ -157,8 +157,8 @@ export default function AccountDetailsDialog() {
             EventType.REPAY,
             EventType.LIQUIDATE,
           ].join(","),
-          obligationId,
           joinEventTypes: EventType.RESERVE_ASSET_DATA,
+          obligationId,
         })}`;
         const res1 = await fetch(url1);
         const json1 = await res1.json();
@@ -180,12 +180,12 @@ export default function AccountDetailsDialog() {
         // Parse
         const data = { ...json1, ...json2, ...json3 } as EventsData;
         for (const event of [
-          ...data.reserveAssetData,
-          ...data.deposit,
-          ...data.borrow,
-          ...data.withdraw,
-          ...data.repay,
-          ...data.claimReward,
+          ...(data.reserveAssetData ?? []),
+          ...(data.deposit ?? []),
+          ...(data.borrow ?? []),
+          ...(data.withdraw ?? []),
+          ...(data.repay ?? []),
+          ...(data.claimReward ?? []),
         ]) {
           event.coinType = normalizeStructTag(event.coinType);
         }

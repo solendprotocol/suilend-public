@@ -14,6 +14,7 @@
     "lint": "bun eslint && bun prettier"
   },
   "dependencies": {
+    "@hop.ag/sdk": "^3.0.4",
     "@launchdarkly/node-server-sdk": "^9.2.0",
     "@mysten/sui.js": "0.51.2",
     "@mysten/wallet-standard": "0.11.2",

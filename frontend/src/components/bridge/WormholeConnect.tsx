@@ -4,7 +4,7 @@ import * as Sentry from "@sentry/nextjs";
 
 import styles from "@/components/bridge/WormholeConnect.module.scss";
 import Container from "@/components/shared/Container";
-import { RPCS, Rpc } from "@/lib/constants";
+import { useAppContext } from "@/contexts/AppContext";
 import { DASHBOARD_URL } from "@/lib/navigation";
 import track from "@/lib/track";
 import { cn } from "@/lib/utils";
@@ -14,9 +14,11 @@ interface WormholeConnectProps {
 }
 
 export default function WormholeConnect({ isHidden }: WormholeConnectProps) {
+  const { rpc } = useAppContext();
+
   // RPCs
-  const solanaRpc = `https://solendf-solendf-67c7.rpcpool.com/${process.env.NEXT_PUBLIC_SOL_TRITON_ONE_DEV_API_KEY ?? ""}`;
-  const suiRpc = RPCS.find((rpc) => rpc.id === Rpc.TRITON_ONE)?.url;
+  const solanaRpcUrl = `https://solendf-solendf-67c7.rpcpool.com/${process.env.NEXT_PUBLIC_SOL_TRITON_ONE_DEV_API_KEY ?? ""}`;
+  const suiRpcUrl = rpc.url;
 
   // Analytics
   const [didSubmit, setDidSubmit] = useState<boolean>(false);
@@ -142,8 +144,8 @@ export default function WormholeConnect({ isHidden }: WormholeConnectProps) {
           rpcs: {
             ethereum:
               "https://rpc.ankr.com/eth/d57d49c5cc988185579623ea8fc23e7a0fc7005e843939bc29ed460952b381cb",
-            solana: solanaRpc,
-            sui: suiRpc,
+            solana: solanaRpcUrl,
+            sui: suiRpcUrl,
           },
           tokens: [
             "USDCeth",
