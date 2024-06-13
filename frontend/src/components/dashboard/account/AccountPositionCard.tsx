@@ -10,7 +10,10 @@ import BorrowLimitTitle from "@/components/dashboard/account/BorrowLimitTitle";
 import LiquidationThresholdTitle from "@/components/dashboard/account/LiquidationThresholdTitle";
 import SubaccountDropdownMenu from "@/components/dashboard/account/SubaccountDropdownMenu";
 import WeightedBorrowsTitle from "@/components/dashboard/account/WeightedBorrowsTitle";
-import { Tab as AccountDetailsTab } from "@/components/dashboard/account-details/AccountDetailsDialog";
+import {
+  QueryParams as AccountDetailsQueryParams,
+  Tab as AccountDetailsTab,
+} from "@/components/dashboard/account-details/AccountDetailsDialog";
 import Card from "@/components/dashboard/Card";
 import UtilizationBar, {
   getWeightedBorrowsUsd,
@@ -173,12 +176,11 @@ export default function AccountPositionCard() {
   const data = restAppContext.data as AppData;
 
   const openAccountDetailsTab = (tab: AccountDetailsTab) => {
-    const { accountDetails, accountDetailsTab, ...restQuery } = router.query;
     router.push({
       query: {
-        ...restQuery,
-        accountDetails: true,
-        accountDetailsTab: tab,
+        ...router.query,
+        [AccountDetailsQueryParams.ACCOUNT_DETAILS]: true,
+        [AccountDetailsQueryParams.TAB]: tab,
       },
     });
   };

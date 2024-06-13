@@ -1,4 +1,4 @@
-import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/router";
 import {
   Dispatch,
   PropsWithChildren,
@@ -30,6 +30,10 @@ import { toast } from "sonner";
 import { formatAddress } from "@/lib/format";
 import { API_URL } from "@/lib/navigation";
 import { useListWallets } from "@/lib/wallets";
+
+export enum QueryParams {
+  WALLET = "wallet",
+}
 
 interface WalletContext {
   isConnectWalletDropdownOpen: boolean;
@@ -73,6 +77,13 @@ const WalletContext = createContext<WalletContext>({
 export const useWalletContext = () => useContext(WalletContext);
 
 export function WalletContextProvider({ children }: PropsWithChildren) {
+  const router = useRouter();
+  const queryParams = {
+    [QueryParams.WALLET]: router.query[QueryParams.WALLET] as
+      | string
+      | undefined,
+  };
+
   const {
     chain,
     adapter,
@@ -82,8 +93,8 @@ export function WalletContextProvider({ children }: PropsWithChildren) {
     getAccounts,
   } = useWallet();
 
-  const searchParams = useSearchParams();
-  const impersonatedAddress = searchParams?.get("wallet") ?? undefined;
+  // Impersonated address
+  const impersonatedAddress = queryParams[QueryParams.WALLET];
 
   // Wallet connect dropdown
   const [isConnectWalletDropdownOpen, setIsConnectWalletDropdownOpen] =

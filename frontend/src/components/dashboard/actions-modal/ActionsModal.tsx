@@ -26,7 +26,7 @@ export default function ActionsModal() {
   const {
     reserveIndex,
     selectedTab,
-    setSelectedTab,
+    onSelectedTabChange,
     isMoreParametersOpen,
     deposit,
     borrow,
@@ -542,7 +542,7 @@ export default function ActionsModal() {
       <Tabs
         tabs={tabs}
         selectedTab={selectedTab}
-        onTabChange={(tab) => setSelectedTab(tab as Tab)}
+        onTabChange={(tab) => onSelectedTabChange(tab as Tab)}
       >
         <div
           className="flex flex-col gap-4 md:!h-auto md:flex-row md:items-stretch"

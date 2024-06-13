@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRouter } from "next/router";
 
 import { TransactionBlock } from "@mysten/sui.js/transactions";
 import * as Sentry from "@sentry/nextjs";
@@ -21,6 +21,10 @@ import Value from "@/components/shared/Value";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 
+enum QueryParams {
+  TAB = "rewardsTab",
+}
+
 interface ReserveRewardsDialogProps {
   reserve: ParsedReserve;
 }
@@ -28,6 +32,11 @@ interface ReserveRewardsDialogProps {
 export default function ReserveRewardsDialog({
   reserve,
 }: ReserveRewardsDialogProps) {
+  const router = useRouter();
+  const queryParams = {
+    [QueryParams.TAB]: router.query[QueryParams.TAB] as Tab | undefined,
+  };
+
   const { address } = useWalletContext();
   const {
     refreshData,
@@ -49,7 +58,18 @@ export default function ReserveRewardsDialog({
     { id: Tab.BORROWS, title: "Borrows" },
   ];
 
-  const [selectedTab, setSelectedTab] = useState<Tab>(Tab.DEPOSITS);
+  const selectedTab =
+    queryParams[QueryParams.TAB] &&
+    Object.values(Tab).includes(queryParams[QueryParams.TAB])
+      ? queryParams[QueryParams.TAB]
+      : Tab.DEPOSITS;
+  const onSelectedTabChange = (tab: Tab) => {
+    router.push({
+      query: { ...router.query, [QueryParams.TAB]: tab },
+    });
+  };
+
+  // Actions
   const poolRewardManager =
     selectedTab === Tab.DEPOSITS
       ? reserve.depositsPoolRewardManager
@@ -167,7 +187,7 @@ export default function ReserveRewardsDialog({
       <Tabs
         tabs={tabs}
         selectedTab={selectedTab}
-        onTabChange={(tab) => setSelectedTab(tab as Tab)}
+        onTabChange={(tab) => onSelectedTabChange(tab as Tab)}
       >
         <Grid>
           <LabelWithValue

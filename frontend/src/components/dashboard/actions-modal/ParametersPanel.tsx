@@ -277,7 +277,7 @@ interface ParametersTabContentProps {
 export default function ParametersPanel({
   reserve,
 }: ParametersTabContentProps) {
-  const { selectedParametersPanelTab, setSelectedParametersPanelTab } =
+  const { selectedParametersPanelTab, onSelectedParametersPanelTabChange } =
     useActionsModalContext();
 
   const TabContent = {
@@ -293,7 +293,7 @@ export default function ParametersPanel({
           <TabButton
             key={tab}
             isActive={selectedParametersPanelTab === tab}
-            onClick={() => setSelectedParametersPanelTab(tab)}
+            onClick={() => onSelectedParametersPanelTabChange(tab)}
           >
             {capitalize(tab)}
           </TabButton>
