@@ -1,5 +1,6 @@
 import { useRouter } from "next/router";
 
+import { cloneDeep } from "lodash";
 import { VenetianMask } from "lucide-react";
 
 import Tooltip from "@/components/shared/Tooltip";
@@ -8,7 +9,10 @@ import {
   labelSansClassNames,
 } from "@/components/shared/Typography";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { useWalletContext } from "@/contexts/WalletContext";
+import {
+  QueryParams as WalletContextQueryParams,
+  useWalletContext,
+} from "@/contexts/WalletContext";
 import { formatAddress } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -17,7 +21,8 @@ export default function ImpersonationModeBanner() {
   const { address, isImpersonatingAddress } = useWalletContext();
 
   const onClick = () => {
-    const { wallet, ...restQuery } = router.query;
+    const restQuery = cloneDeep(router.query);
+    delete restQuery[WalletContextQueryParams.WALLET];
     router.push({ query: restQuery });
   };
 

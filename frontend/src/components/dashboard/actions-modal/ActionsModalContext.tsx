@@ -1,3 +1,4 @@
+import { useRouter } from "next/router";
 import {
   Dispatch,
   PropsWithChildren,
@@ -6,17 +7,25 @@ import {
   useCallback,
   useContext,
   useMemo,
-  useState,
 } from "react";
 
 import { SuiTransactionBlockResponse } from "@mysten/sui.js/client";
 import { TransactionBlock } from "@mysten/sui.js/transactions";
 import * as Sentry from "@sentry/nextjs";
+import { cloneDeep } from "lodash";
 import { useLocalStorage } from "usehooks-ts";
 
-import { Panel } from "@/components/dashboard/actions-modal/ParametersPanel";
+import { ParametersPanelTab } from "@/components/dashboard/actions-modal/ParametersPanel";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { useWalletContext } from "@/contexts/WalletContext";
+
+const QUERY_PARAMS_PREFIX = "assetActions";
+enum QueryParams {
+  ASSET_ACTIONS = QUERY_PARAMS_PREFIX,
+  RESERVE_INDEX = `${QUERY_PARAMS_PREFIX}-assetIndex`,
+  TAB = `${QUERY_PARAMS_PREFIX}-action`,
+  PARAMETERS_PANEL_TAB = `${QUERY_PARAMS_PREFIX}-parametersPanelTab`,
+}
 
 export enum Tab {
   DEPOSIT = "deposit",
@@ -31,17 +40,17 @@ export type ActionSignature = (
 ) => Promise<SuiTransactionBlockResponse>;
 
 interface ActionsModalContext {
-  reserveIndex?: number;
   isOpen: boolean;
   open: (reserveIndex: number) => void;
   close: () => void;
+  reserveIndex?: number;
 
   selectedTab: Tab;
-  setSelectedTab: Dispatch<SetStateAction<Tab>>;
+  onSelectedTabChange: (tab: Tab) => void;
   isMoreParametersOpen: boolean;
   setIsMoreParametersOpen: Dispatch<SetStateAction<boolean>>;
-  activePanel: Panel;
-  setActivePanel: Dispatch<SetStateAction<Panel>>;
+  selectedParametersPanelTab: ParametersPanelTab;
+  onSelectedParametersPanelTabChange: (tab: ParametersPanelTab) => void;
 
   deposit: ActionSignature;
   borrow: ActionSignature;
@@ -50,7 +59,6 @@ interface ActionsModalContext {
 }
 
 const defaultContextValue: ActionsModalContext = {
-  reserveIndex: undefined,
   isOpen: false,
   open: () => {
     throw Error("ActionsModalContextProvider not initialized");
@@ -58,17 +66,18 @@ const defaultContextValue: ActionsModalContext = {
   close: () => {
     throw Error("ActionsModalContextProvider not initialized");
   },
+  reserveIndex: undefined,
 
   selectedTab: Tab.DEPOSIT,
-  setSelectedTab: () => {
+  onSelectedTabChange: () => {
     throw Error("ActionsModalContextProvider not initialized");
   },
   isMoreParametersOpen: false,
   setIsMoreParametersOpen: () => {
     throw Error("ActionsModalContextProvider not initialized");
   },
-  activePanel: Panel.LIMITS,
-  setActivePanel: () => {
+  selectedParametersPanelTab: ParametersPanelTab.LIMITS,
+  onSelectedParametersPanelTabChange: () => {
     throw Error("ActionsModalContextProvider not initialized");
   },
 
@@ -92,6 +101,20 @@ const ActionsModalContext =
 export const useActionsModalContext = () => useContext(ActionsModalContext);
 
 export function ActionsModalContextProvider({ children }: PropsWithChildren) {
+  const router = useRouter();
+  const queryParams = {
+    [QueryParams.ASSET_ACTIONS]: router.query[QueryParams.ASSET_ACTIONS] as
+      | string
+      | undefined,
+    [QueryParams.RESERVE_INDEX]: router.query[QueryParams.RESERVE_INDEX] as
+      | string
+      | undefined,
+    [QueryParams.TAB]: router.query[QueryParams.TAB] as Tab | undefined,
+    [QueryParams.PARAMETERS_PANEL_TAB]: router.query[
+      QueryParams.PARAMETERS_PANEL_TAB
+    ] as ParametersPanelTab | undefined,
+  };
+
   const { address } = useWalletContext();
   const {
     suilendClient,
@@ -101,27 +124,76 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
   } = useAppContext();
   const data = restAppContext.data as AppData;
 
-  // Index
-  const [reserveIndex, setReserveIndex] = useState<
-    ActionsModalContext["reserveIndex"]
-  >(defaultContextValue.reserveIndex);
-  const [isOpen, setIsOpen] = useState<ActionsModalContext["isOpen"]>(
-    defaultContextValue.isOpen,
+  // Open
+  const isOpen = queryParams[QueryParams.ASSET_ACTIONS] !== undefined;
+  const open = useCallback(
+    (_reserveIndex: number) => {
+      router.push({
+        query: {
+          ...router.query,
+          [QueryParams.ASSET_ACTIONS]: true,
+          [QueryParams.RESERVE_INDEX]: _reserveIndex,
+        },
+      });
+    },
+    [router],
+  );
+  const close = useCallback(() => {
+    const restQuery = cloneDeep(router.query);
+    delete restQuery[QueryParams.ASSET_ACTIONS];
+    router.push({ query: restQuery });
+
+    setTimeout(() => {
+      const restQuery2 = cloneDeep(restQuery);
+      delete restQuery2[QueryParams.RESERVE_INDEX];
+      router.push({ query: restQuery2 });
+    }, 250);
+  }, [router]);
+
+  // Reserve index
+  const reserveIndex =
+    queryParams[QueryParams.RESERVE_INDEX] !== undefined
+      ? +queryParams[QueryParams.RESERVE_INDEX]
+      : defaultContextValue.reserveIndex;
+
+  // Tab
+  const selectedTab =
+    queryParams[QueryParams.TAB] &&
+    Object.values(Tab).includes(queryParams[QueryParams.TAB])
+      ? queryParams[QueryParams.TAB]
+      : defaultContextValue.selectedTab;
+  const onSelectedTabChange = useCallback(
+    (tab: Tab) => {
+      router.push({
+        query: { ...router.query, [QueryParams.TAB]: tab },
+      });
+    },
+    [router],
   );
 
-  // Tabs
-  const [selectedTab, setSelectedTab] = useState<
-    ActionsModalContext["selectedTab"]
-  >(defaultContextValue.selectedTab);
+  // More parameters
   const [isMoreParametersOpen, setIsMoreParametersOpen] = useLocalStorage<
     ActionsModalContext["isMoreParametersOpen"]
   >(
     "isActionsModalMoreParametersOpen",
     defaultContextValue.isMoreParametersOpen,
   );
-  const [activePanel, setActivePanel] = useState<
-    ActionsModalContext["activePanel"]
-  >(defaultContextValue.activePanel);
+
+  const selectedParametersPanelTab =
+    queryParams[QueryParams.PARAMETERS_PANEL_TAB] &&
+    Object.values(ParametersPanelTab).includes(
+      queryParams[QueryParams.PARAMETERS_PANEL_TAB],
+    )
+      ? queryParams[QueryParams.PARAMETERS_PANEL_TAB]
+      : defaultContextValue.selectedParametersPanelTab;
+  const onSelectedParametersPanelTabChange = useCallback(
+    (tab: ParametersPanelTab) => {
+      router.push({
+        query: { ...router.query, [QueryParams.PARAMETERS_PANEL_TAB]: tab },
+      });
+    },
+    [router],
+  );
 
   // Actions
   const obligationOwnerCap = data.obligationOwnerCaps?.find(
@@ -259,22 +331,17 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
   // Context
   const contextValue = useMemo(
     () => ({
-      reserveIndex,
       isOpen: isOpen && reserveIndex !== undefined,
-      open: (_reserveIndex: number) => {
-        setIsOpen(true);
-        setReserveIndex(_reserveIndex);
-      },
-      close: () => {
-        setIsOpen(false);
-      },
+      open,
+      close,
+      reserveIndex,
 
       selectedTab,
-      setSelectedTab,
+      onSelectedTabChange,
       isMoreParametersOpen,
       setIsMoreParametersOpen,
-      activePanel,
-      setActivePanel,
+      selectedParametersPanelTab,
+      onSelectedParametersPanelTabChange,
 
       deposit,
       borrow,
@@ -282,12 +349,16 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
       repay,
     }),
     [
-      reserveIndex,
       isOpen,
+      reserveIndex,
+      open,
+      close,
       selectedTab,
+      onSelectedTabChange,
       isMoreParametersOpen,
       setIsMoreParametersOpen,
-      activePanel,
+      selectedParametersPanelTab,
+      onSelectedParametersPanelTabChange,
       deposit,
       borrow,
       withdraw,

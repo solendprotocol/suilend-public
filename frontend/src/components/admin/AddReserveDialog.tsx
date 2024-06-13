@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { CoinMetadata, SuiClient } from "@mysten/sui.js/client";
 import { TransactionBlock } from "@mysten/sui.js/transactions";
 import * as Sentry from "@sentry/nextjs";
+import { isEqual } from "lodash";
 import { Eraser, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { v4 as uuidv4 } from "uuid";
@@ -44,6 +45,7 @@ export default function AddReserveDialog() {
     return Array.from(new Set(coinTypes));
   }, [data.lendingMarket.reserves, data.coinBalancesRaw]);
 
+  const fetchingCoinTypesRef = useRef<string[] | undefined>(undefined);
   const [coinMetadataMap, setCoinMetadataMap] = useState<
     Record<string, CoinMetadata>
   >({});
@@ -54,6 +56,13 @@ export default function AddReserveDialog() {
       );
       if (filteredCoinTypes.length === 0) return;
 
+      if (
+        fetchingCoinTypesRef.current !== undefined &&
+        !isEqual(filteredCoinTypes, fetchingCoinTypesRef.current)
+      )
+        return;
+
+      fetchingCoinTypesRef.current = filteredCoinTypes;
       const result = await getCoinMetadataMap(suiClient, filteredCoinTypes);
       setCoinMetadataMap(result);
     })();

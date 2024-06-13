@@ -1,10 +1,4 @@
-import {
-  Fragment,
-  FunctionComponent,
-  ReactNode,
-  useMemo,
-  useState,
-} from "react";
+import { Fragment, FunctionComponent, ReactNode, useState } from "react";
 
 import {
   Cell,
@@ -246,7 +240,7 @@ export default function DataTable<T>({
     },
   });
 
-  const pageIndexes: number[] | undefined = useMemo(() => {
+  const pageIndexes: number[] | undefined = (() => {
     if (!isPaginated) return undefined;
 
     const pageCount = table.getPageCount();
@@ -279,7 +273,7 @@ export default function DataTable<T>({
       pagination.pageIndex + 2,
       lastPageIndex,
     ];
-  }, [table, isPaginated, pagination.pageIndex]);
+  })();
 
   return (
     <>
@@ -408,7 +402,7 @@ export default function DataTable<T>({
         </TableBody>
       </Table>
 
-      {pageIndexes && (
+      {pageIndexes && pageIndexes.length > 0 && (
         <div className="flex w-full flex-row items-center justify-center gap-2">
           {pageIndexes.map((pageIndex) => (
             <Button

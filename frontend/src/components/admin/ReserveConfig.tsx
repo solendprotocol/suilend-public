@@ -350,7 +350,7 @@ export default function ReserveConfig({
             Add row
           </Button>
 
-          <div className="mt-4 h-[140px] md:h-[200px]">
+          <div className="mt-4 h-[140px] w-full flex-shrink-0 md:h-[200px]">
             <AprLineChart
               data={sortedInterestRate.map((row) => ({
                 utilPercent: +row.utilPercent,

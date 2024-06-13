@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { normalizeStructTag } from "@mysten/sui.js/utils";
 import BigNumber from "bignumber.js";
+import { cloneDeep } from "lodash";
 import { FileClock, RotateCw, TrendingUp, User } from "lucide-react";
 
 import { WAD } from "@suilend/sdk/constants";
@@ -31,6 +32,12 @@ import { isSuilendPoints } from "@/lib/coinType";
 import { EventType, eventSortAsc } from "@/lib/events";
 import { formatPoints, formatToken } from "@/lib/format";
 import { API_URL } from "@/lib/navigation";
+
+const QUERY_PARAMS_PREFIX = "accountDetails";
+export enum QueryParams {
+  ACCOUNT_DETAILS = QUERY_PARAMS_PREFIX,
+  TAB = `${QUERY_PARAMS_PREFIX}-tab`,
+}
 
 export enum Tab {
   EARNINGS = "earnings",
@@ -101,9 +108,13 @@ export function TokenAmount({
 
 export default function AccountDetailsDialog() {
   const router = useRouter();
-  const accountDetailsTab = router.query.accountDetailsTab as
-    | string
-    | undefined;
+  const queryParams = {
+    [QueryParams.ACCOUNT_DETAILS]: router.query[QueryParams.ACCOUNT_DETAILS] as
+      | string
+      | undefined,
+    [QueryParams.TAB]: router.query[QueryParams.TAB] as Tab | undefined,
+  };
+
   const { refreshData, obligation, ...restAppContext } = useAppContext();
   const data = restAppContext.data as AppData;
 
@@ -114,11 +125,14 @@ export default function AccountDetailsDialog() {
   ];
 
   const selectedTab =
-    accountDetailsTab && Object.values(Tab).includes(accountDetailsTab as Tab)
-      ? (accountDetailsTab as Tab)
+    queryParams[QueryParams.TAB] &&
+    Object.values(Tab).includes(queryParams[QueryParams.TAB])
+      ? queryParams[QueryParams.TAB]
       : Object.values(Tab)[0];
   const onSelectedTabChange = (tab: Tab) => {
-    router.push({ query: { ...router.query, accountDetailsTab: tab } });
+    router.push({
+      query: { ...router.query, [QueryParams.TAB]: tab },
+    });
   };
 
   // Events
@@ -210,7 +224,7 @@ export default function AccountDetailsDialog() {
   };
 
   // State
-  const isOpen = router.query.accountDetails !== undefined;
+  const isOpen = queryParams[QueryParams.ACCOUNT_DETAILS] !== undefined;
   const fetchedDataObligationIdRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
@@ -227,11 +241,13 @@ export default function AccountDetailsDialog() {
   const onOpenChange = (_isOpen: boolean) => {
     if (_isOpen) return;
 
-    const { accountDetails, ...restQuery } = router.query;
+    const restQuery = cloneDeep(router.query);
+    delete restQuery[QueryParams.ACCOUNT_DETAILS];
     router.push({ query: restQuery });
 
     setTimeout(() => {
-      const { accountDetailsTab, ...restQuery2 } = restQuery;
+      const restQuery2 = cloneDeep(restQuery);
+      delete restQuery2[QueryParams.TAB];
       router.replace({ query: restQuery2 });
 
       clearEventsData();

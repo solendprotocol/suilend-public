@@ -1,5 +1,3 @@
-import { useRef, useState } from "react";
-
 import BigNumber from "bignumber.js";
 import * as Recharts from "recharts";
 
@@ -7,7 +5,6 @@ import { linearlyInterpolate } from "@suilend/sdk/utils";
 
 import AprRewardsBreakdownRow from "@/components/dashboard/AprRewardsBreakdownRow";
 import CartesianGridVerticalLine from "@/components/shared/CartesianGridVerticalLine";
-import Tooltip from "@/components/shared/Tooltip";
 import { TBodySans, TLabelSans } from "@/components/shared/Typography";
 import useIsTouchscreen from "@/hooks/useIsTouchscreen";
 import {
@@ -19,7 +16,6 @@ import {
   tooltip,
 } from "@/lib/chart";
 import { formatPercent } from "@/lib/format";
-import { cn } from "@/lib/utils";
 
 const transform = (value: number) => Math.pow(value, 1 / 2);
 const inverseTransform = (value: number) => Math.pow(value, 2);
@@ -35,49 +31,38 @@ type TransformedChartData = ChartData & {
 
 interface TooltipContentProps {
   d: ChartData;
-  dp?: number;
-}
-
-function TooltipContent({ d, dp }: TooltipContentProps) {
-  return (
-    <div className="flex w-full flex-col gap-2">
-      <TBodySans>
-        Borrow APR
-        <span className="text-xs text-muted-foreground">
-          {" at "}
-          {formatPercent(new BigNumber(d.utilPercent), { dp: dp ?? 0 })} util.
-        </span>
-      </TBodySans>
-
-      <AprRewardsBreakdownRow
-        isLast
-        value={
-          <span className="text-success">
-            {formatPercent(new BigNumber(d.aprPercent))}
-          </span>
-        }
-      >
-        <TLabelSans>Interest</TLabelSans>
-      </AprRewardsBreakdownRow>
-    </div>
-  );
-}
-
-interface CustomTooltipProps {
-  d: ChartData;
   viewBox?: ViewBox;
   x?: number;
 }
 
-function CustomTooltip({ d, viewBox, x }: CustomTooltipProps) {
+function TooltipContent({ d, viewBox, x }: TooltipContentProps) {
   if (viewBox === undefined || x === undefined) return null;
   return (
     // Subset of TooltipContent className
     <div
-      className="absolute z-[2] rounded-md border bg-popover px-3 py-1.5 shadow-md"
+      className="absolute rounded-md border bg-popover px-3 py-1.5 shadow-md"
       style={getTooltipStyle(200, viewBox, x)}
     >
-      <TooltipContent d={d} />
+      <div className="flex w-full flex-col gap-2">
+        <TBodySans>
+          Borrow APR
+          <span className="text-xs text-muted-foreground">
+            {" at "}
+            {formatPercent(new BigNumber(d.utilPercent), { dp: 0 })} util.
+          </span>
+        </TBodySans>
+
+        <AprRewardsBreakdownRow
+          isLast
+          value={
+            <span className="text-success">
+              {formatPercent(new BigNumber(d.aprPercent))}
+            </span>
+          }
+        >
+          <TLabelSans>Interest</TLabelSans>
+        </AprRewardsBreakdownRow>
+      </div>
     </div>
   );
 }
@@ -89,9 +74,6 @@ interface AprLineChartProps {
 
 export default function AprLineChart({ data, reference }: AprLineChartProps) {
   const isTouchscreen = useIsTouchscreen();
-
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [isMouseOver, setIsMouseOver] = useState<boolean>(false);
 
   // Data
   const interpolatedData: TransformedChartData[] = Array.from({
@@ -142,17 +124,10 @@ export default function AprLineChart({ data, reference }: AprLineChartProps) {
 
   return (
     <div
-      ref={containerRef}
-      className="apr-line-chart relative h-full w-full transform-gpu"
+      className="apr-line-chart h-full w-full transform-gpu"
       is-loading="false"
-      onMouseEnter={() => setIsMouseOver(true)}
-      onMouseLeave={() => setIsMouseOver(false)}
     >
-      <Recharts.ResponsiveContainer
-        className="relative"
-        width="100%"
-        height="100%"
-      >
+      <Recharts.ResponsiveContainer width="100%" height="100%">
         <Recharts.LineChart
           data={interpolatedData}
           margin={{ top: 8, right: 16, bottom: 5, left: -5 }}
@@ -220,23 +195,6 @@ export default function AprLineChart({ data, reference }: AprLineChartProps) {
               fill="hsl(var(--foreground))"
               strokeWidth={0}
               r={4}
-              shape={(props: any) => (
-                <Tooltip
-                  rootProps={{ open: true }}
-                  portalProps={{ container: containerRef.current }}
-                  contentProps={{
-                    className: cn(
-                      "w-[200px] min-w-[200px] transition-opacity !pointer-events-none",
-                      isMouseOver && "opacity-0",
-                    ),
-                    sideOffset: 8,
-                    avoidCollisions: false,
-                  }}
-                  content={<TooltipContent d={reference} dp={2} />}
-                >
-                  <circle {...props} />
-                </Tooltip>
-              )}
             />
           )}
           {data.length > 0 && (
@@ -249,7 +207,7 @@ export default function AprLineChart({ data, reference }: AprLineChartProps) {
               content={({ active, payload, viewBox, coordinate }) => {
                 if (!active || !payload?.[0]?.payload) return null;
                 return (
-                  <CustomTooltip
+                  <TooltipContent
                     d={payload[0].payload as TransformedChartData}
                     viewBox={viewBox as any}
                     x={coordinate?.x}

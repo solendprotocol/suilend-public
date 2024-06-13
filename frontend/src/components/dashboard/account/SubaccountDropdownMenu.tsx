@@ -53,9 +53,7 @@ export default function SubaccountDropdownMenu() {
         <div className="flex flex-col gap-1">
           <div className="flex flex-row items-center gap-1">
             <Tooltip title={obligation.id}>
-              <TLabel className="uppercase">
-                {formatId(obligation.id, 8)}
-              </TLabel>
+              <TLabel className="uppercase">{formatId(obligation.id)}</TLabel>
             </Tooltip>
 
             <div className="flex h-4 flex-row items-center">

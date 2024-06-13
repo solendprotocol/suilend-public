@@ -16,7 +16,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { LeaderboardRowData, usePointsContext } from "@/contexts/PointsContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 import { formatAddress } from "@/lib/format";
-import { cn } from "@/lib/utils";
 
 export default function PointsLeaderboardTable() {
   const { address } = useWalletContext();
@@ -101,9 +100,6 @@ export default function PointsLeaderboardTable() {
         data={leaderboardRows}
         noDataMessage="No users"
         pageSize={100}
-        container={{
-          className: cn(!leaderboardRows && "-mb-6"),
-        }}
         tableRowClassName={(row) =>
           address &&
           row?.original.address === address &&

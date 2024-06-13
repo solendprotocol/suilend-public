@@ -317,8 +317,8 @@ export default function ActionsModalTabContent({
         </div>
       </div>
 
-      <div className="-m-4 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overflow-x-hidden p-4 md:pb-6">
-        <div className="flex flex-col gap-2.5">
+      <div className="-m-4 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overflow-x-hidden p-4 md:pb-8">
+        <div className="flex flex-col gap-3">
           <LabelWithValue
             label="Price"
             value={formatPrice(reserve.price)}

@@ -26,7 +26,7 @@ export default function ActionsModal() {
   const {
     reserveIndex,
     selectedTab,
-    setSelectedTab,
+    onSelectedTabChange,
     isMoreParametersOpen,
     deposit,
     borrow,
@@ -542,7 +542,7 @@ export default function ActionsModal() {
       <Tabs
         tabs={tabs}
         selectedTab={selectedTab}
-        onTabChange={(tab) => setSelectedTab(tab as Tab)}
+        onTabChange={(tab) => onSelectedTabChange(tab as Tab)}
       >
         <div
           className="flex flex-col gap-4 md:!h-auto md:flex-row md:items-stretch"
@@ -559,7 +559,8 @@ export default function ActionsModal() {
               </div>
 
               {md && isMoreParametersOpen && (
-                <div className="flex w-[500px] flex-col gap-4 rounded-md border p-4">
+                // 514px is the height of the left-hand panel
+                <div className="flex h-[514px] w-[460px] flex-col gap-4 rounded-md border p-4">
                   <ParametersPanel reserve={reserve} />
                 </div>
               )}

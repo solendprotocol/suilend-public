@@ -28,9 +28,15 @@ import {
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { cn } from "@/lib/utils";
 
+enum QueryParams {
+  TAB = "tab",
+}
+
 export default function Admin() {
   const router = useRouter();
-  const tab = router.query.tab as string | undefined;
+  const queryParams = {
+    [QueryParams.TAB]: router.query[QueryParams.TAB] as Tab | undefined,
+  };
 
   const {
     refreshData,
@@ -65,11 +71,14 @@ export default function Admin() {
   ];
 
   const selectedTab =
-    tab && Object.values(Tab).includes(tab as Tab)
-      ? (tab as Tab)
+    queryParams[QueryParams.TAB] &&
+    Object.values(Tab).includes(queryParams[QueryParams.TAB])
+      ? queryParams[QueryParams.TAB]
       : Object.values(Tab)[0];
   const onSelectedTabChange = (tab: Tab) => {
-    router.push({ query: { tab } });
+    router.push({
+      query: { ...router.query, [QueryParams.TAB]: tab },
+    });
   };
 
   // Lending market
