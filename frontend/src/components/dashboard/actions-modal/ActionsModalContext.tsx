@@ -14,7 +14,7 @@ import { TransactionBlock } from "@mysten/sui.js/transactions";
 import * as Sentry from "@sentry/nextjs";
 import { useLocalStorage } from "usehooks-ts";
 
-import { Panel } from "@/components/dashboard/actions-modal/ParametersPanel";
+import { ParametersPanelTab } from "@/components/dashboard/actions-modal/ParametersPanel";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 
@@ -40,8 +40,8 @@ interface ActionsModalContext {
   setSelectedTab: Dispatch<SetStateAction<Tab>>;
   isMoreParametersOpen: boolean;
   setIsMoreParametersOpen: Dispatch<SetStateAction<boolean>>;
-  activePanel: Panel;
-  setActivePanel: Dispatch<SetStateAction<Panel>>;
+  selectedParametersPanelTab: ParametersPanelTab;
+  setSelectedParametersPanelTab: Dispatch<SetStateAction<ParametersPanelTab>>;
 
   deposit: ActionSignature;
   borrow: ActionSignature;
@@ -67,8 +67,8 @@ const defaultContextValue: ActionsModalContext = {
   setIsMoreParametersOpen: () => {
     throw Error("ActionsModalContextProvider not initialized");
   },
-  activePanel: Panel.LIMITS,
-  setActivePanel: () => {
+  selectedParametersPanelTab: ParametersPanelTab.LIMITS,
+  setSelectedParametersPanelTab: () => {
     throw Error("ActionsModalContextProvider not initialized");
   },
 
@@ -119,9 +119,9 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
     "isActionsModalMoreParametersOpen",
     defaultContextValue.isMoreParametersOpen,
   );
-  const [activePanel, setActivePanel] = useState<
-    ActionsModalContext["activePanel"]
-  >(defaultContextValue.activePanel);
+  const [selectedParametersPanelTab, setSelectedParametersPanelTab] = useState<
+    ActionsModalContext["selectedParametersPanelTab"]
+  >(defaultContextValue.selectedParametersPanelTab);
 
   // Actions
   const obligationOwnerCap = data.obligationOwnerCaps?.find(
@@ -273,8 +273,8 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
       setSelectedTab,
       isMoreParametersOpen,
       setIsMoreParametersOpen,
-      activePanel,
-      setActivePanel,
+      selectedParametersPanelTab,
+      setSelectedParametersPanelTab,
 
       deposit,
       borrow,
@@ -287,7 +287,7 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
       selectedTab,
       isMoreParametersOpen,
       setIsMoreParametersOpen,
-      activePanel,
+      selectedParametersPanelTab,
       deposit,
       borrow,
       withdraw,

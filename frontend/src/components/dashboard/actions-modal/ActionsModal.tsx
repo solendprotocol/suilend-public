@@ -559,7 +559,8 @@ export default function ActionsModal() {
               </div>
 
               {md && isMoreParametersOpen && (
-                <div className="flex w-[500px] flex-col gap-4 rounded-md border p-4">
+                // 514px is the height of the left-hand panel
+                <div className="flex h-[514px] w-[460px] flex-col gap-4 rounded-md border p-4">
                   <ParametersPanel reserve={reserve} />
                 </div>
               )}
