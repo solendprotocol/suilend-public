@@ -954,61 +954,64 @@ export default function EarningsTabContent({
           data: rows?.borrow,
           noDataMessage: "No borrows",
         },
-      ].map((table, index, array) => (
-        <Fragment key={table.title}>
-          <div className="flex flex-col gap-4">
-            <TitleWithIcon className="px-4">{table.title}</TitleWithIcon>
+      ].map((table, index, array) => {
+        const chartData =
+          table.side === Side.DEPOSIT
+            ? interpolatedCumInterestEarnedData
+            : interpolatedCumInterestPaidData;
 
-            <div
-              key={table.title}
-              className="flex flex-col max-lg:gap-4 lg:flex-row"
-            >
-              <div className="max-lg:w-full lg:min-w-0 lg:flex-1">
-                <DataTable<RowData>
-                  columns={table.columns}
-                  data={table.data}
-                  noDataMessage={table.noDataMessage}
-                  skeletonRows={data.lendingMarket.reserves.length}
-                  container={{
-                    className: "overflow-y-visible overflow-x-auto",
-                  }}
-                  tableClassName="border-y-0"
-                  tableCellClassName={(cell) =>
-                    cn(
-                      cell &&
-                        Object.entries(cell.row.original.rewards).length > 1
-                        ? "py-2 h-auto"
-                        : "py-0 h-12",
-                    )
-                  }
-                />
-              </div>
+        return (
+          <Fragment key={table.title}>
+            <div className="flex flex-col gap-4">
+              <TitleWithIcon className="px-4">{table.title}</TitleWithIcon>
 
-              <Separator
-                orientation="vertical"
-                className="max-lg:hidden lg:mr-2"
-              />
+              <div
+                key={table.title}
+                className="flex flex-col max-lg:gap-4 lg:flex-row"
+              >
+                <div className="max-lg:w-full lg:min-w-0 lg:flex-1">
+                  <DataTable<RowData>
+                    columns={table.columns}
+                    data={table.data}
+                    noDataMessage={table.noDataMessage}
+                    skeletonRows={data.lendingMarket.reserves.length}
+                    container={{
+                      className: "overflow-y-visible overflow-x-auto",
+                    }}
+                    tableClassName="border-y-0"
+                    tableCellClassName={(cell) =>
+                      cn(
+                        cell &&
+                          Object.entries(cell.row.original.rewards).length > 1
+                          ? "py-2 h-auto"
+                          : "py-0 h-12",
+                      )
+                    }
+                  />
+                </div>
 
-              <div className="max-lg:w-full lg:min-w-0 lg:flex-1">
-                <EarningsChart
-                  side={table.side}
-                  isLoading={
-                    (table.side === Side.DEPOSIT
-                      ? interpolatedCumInterestEarnedData
-                      : interpolatedCumInterestPaidData) === undefined
-                  }
-                  data={
-                    (table.side === Side.DEPOSIT
-                      ? interpolatedCumInterestEarnedData
-                      : interpolatedCumInterestPaidData) ?? []
-                  }
-                />
+                {(chartData === undefined || chartData.length > 0) && (
+                  <>
+                    <Separator
+                      orientation="vertical"
+                      className="max-lg:hidden lg:mr-2"
+                    />
+
+                    <div className="max-lg:w-full lg:min-w-0 lg:flex-1">
+                      <EarningsChart
+                        side={table.side}
+                        isLoading={chartData === undefined}
+                        data={chartData ?? []}
+                      />
+                    </div>
+                  </>
+                )}
               </div>
             </div>
-          </div>
-          {index !== array.length - 1 && <Separator />}
-        </Fragment>
-      ))}
+            {index !== array.length - 1 && <Separator />}
+          </Fragment>
+        );
+      })}
     </div>
   );
 }
