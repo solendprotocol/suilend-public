@@ -74,7 +74,7 @@ export default function ConnectedWalletDropdownMenu({
         <div className="flex flex-row items-center gap-1">
           <Tooltip title={address}>
             <TLabel className="uppercase">
-              {addressNameServiceNameMap[address] ?? formatAddress(address, 8)}
+              {addressNameServiceNameMap[address] ?? formatAddress(address)}
             </TLabel>
           </Tooltip>
 
@@ -109,24 +109,23 @@ export default function ConnectedWalletDropdownMenu({
                     }
                   >
                     <div className="flex w-full flex-row items-center justify-between gap-2">
-                      {a.label && (
-                        <TLabelSans className="overflow-hidden text-ellipsis text-nowrap text-foreground">
-                          {a.label}
-                        </TLabelSans>
-                      )}
-
                       <TLabel
                         className={cn(
-                          "uppercase",
-                          !a.label && "text-foreground",
+                          "uppercase text-foreground",
                           addressNameServiceNameMap[a.address]
                             ? "overflow-hidden text-ellipsis text-nowrap"
                             : "flex-shrink-0",
                         )}
                       >
                         {addressNameServiceNameMap[a.address] ??
-                          formatAddress(a.address, a.label ? undefined : 8)}
+                          formatAddress(a.address)}
                       </TLabel>
+
+                      {a.label && (
+                        <TLabelSans className="overflow-hidden text-ellipsis text-nowrap text-inherit">
+                          {a.label}
+                        </TLabelSans>
+                      )}
                     </div>
                   </DropdownMenuItem>
                 ))}
