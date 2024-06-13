@@ -1,6 +1,6 @@
 import NextLink, { LinkProps as NextLinkProps } from "next/link";
 import { useRouter } from "next/router";
-import { PropsWithChildren, ReactNode, useEffect, useState } from "react";
+import { PropsWithChildren, ReactNode } from "react";
 
 import { ClassValue } from "clsx";
 
@@ -23,11 +23,7 @@ export default function Link({
   ...props
 }: LinkProps) {
   const router = useRouter();
-  const [isActive, setIsActive] = useState<boolean>(false);
-
-  useEffect(() => {
-    setIsActive(router.asPath.startsWith(href));
-  }, [router.asPath, href]);
+  const isActive = router.asPath.startsWith(href);
 
   const Component = isExternal ? "a" : NextLink;
 
@@ -37,7 +33,7 @@ export default function Link({
       target={isExternal ? "_blank" : undefined}
       className={cn(
         labelSansClassNames,
-        "flex flex-row items-center gap-2 text-sm transition-colors hover:text-foreground",
+        "flex flex-shrink-0 flex-row items-center gap-1.5 text-sm transition-colors hover:text-foreground",
         isActive && "text-foreground",
         className,
       )}
