@@ -2,6 +2,8 @@ import { useMemo } from "react";
 
 import BigNumber from "bignumber.js";
 
+import { Side } from "@suilend/sdk/types";
+
 import ActionsModalContainer from "@/components/dashboard/actions-modal/ActionsModalContainer";
 import {
   Tab,
@@ -49,6 +51,10 @@ export default function ActionsModal() {
     { id: Tab.WITHDRAW, title: "Withdraw" },
     { id: Tab.REPAY, title: "Repay" },
   ];
+
+  const side = [Tab.DEPOSIT, Tab.WITHDRAW].includes(selectedTab)
+    ? Side.DEPOSIT
+    : Side.BORROW;
 
   // Tab config
   const tabConfig = useMemo(() => {
@@ -100,7 +106,7 @@ export default function ActionsModal() {
         ];
         if (isSui(reserve.coinType))
           result.push({
-            reason: `Min ${SUI_DEPOSIT_GAS_MIN} SUI should be saved for gas`,
+            reason: `${SUI_DEPOSIT_GAS_MIN} SUI should be saved for gas`,
             isDisabled: true,
             value: coinBalanceForReserve.minus(SUI_DEPOSIT_GAS_MIN),
           });
@@ -459,7 +465,7 @@ export default function ActionsModal() {
         ];
         if (isSui(reserve.coinType))
           result.push({
-            reason: `Min ${SUI_REPAY_GAS_MIN} SUI should be saved for gas`,
+            reason: `${SUI_REPAY_GAS_MIN} SUI should be saved for gas`,
             isDisabled: true,
             value: coinBalanceForReserve.minus(SUI_REPAY_GAS_MIN),
           });
@@ -555,13 +561,16 @@ export default function ActionsModal() {
           {reserve && tabConfig && (
             <>
               <div className="flex h-full w-full flex-col gap-4 md:h-auto md:w-[460px]">
-                <ActionsModalTabContent reserve={reserve} {...tabConfig} />
+                <ActionsModalTabContent
+                  side={side}
+                  reserve={reserve}
+                  {...tabConfig}
+                />
               </div>
 
               {md && isMoreParametersOpen && (
-                // 514px is the height of the left-hand panel
-                <div className="flex h-[514px] w-[460px] flex-col gap-4 rounded-md border p-4">
-                  <ParametersPanel reserve={reserve} />
+                <div className="flex h-[500px] w-[460px] flex-col gap-4 rounded-md border p-4">
+                  <ParametersPanel side={side} reserve={reserve} />
                 </div>
               )}
             </>

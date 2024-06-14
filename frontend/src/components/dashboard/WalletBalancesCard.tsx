@@ -1,5 +1,4 @@
 import BigNumber from "bignumber.js";
-import { Wallet } from "lucide-react";
 
 import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 
@@ -20,7 +19,6 @@ export default function WalletBalancesCard() {
     <Card
       id="wallet-balances"
       header={{
-        titleIcon: <Wallet />,
         title: (
           <>
             Wallet balances

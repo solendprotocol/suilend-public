@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { normalizeStructTag } from "@mysten/sui.js/utils";
 import BigNumber from "bignumber.js";
 import { cloneDeep } from "lodash";
-import { FileClock, RotateCw, TrendingUp, User } from "lucide-react";
+import { FileClock, RotateCw, TrendingUp } from "lucide-react";
 
 import { WAD } from "@suilend/sdk/constants";
 import {
@@ -261,7 +261,6 @@ export default function AccountDetailsDialog() {
       rootProps={{ open: isOpen, onOpenChange }}
       contentProps={{ className: "max-w-6xl" }}
       headerClassName="border-b-0"
-      titleIcon={<User />}
       title="Account"
       headerEndContent={
         <>
