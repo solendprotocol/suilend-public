@@ -14,6 +14,7 @@ import TokenLogo from "@/components/shared/TokenLogo";
 import { TBody, TDisplay, TTitle } from "@/components/shared/Typography";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAppContext } from "@/contexts/AppContext";
+import { isEth } from "@/lib/coinType";
 import { formatPercent } from "@/lib/format";
 import { getFilteredRewards, getTotalAprPercent } from "@/lib/liquidityMining";
 import { DASHBOARD_URL, DISCORD_URL, X_URL } from "@/lib/navigation";
@@ -154,7 +155,7 @@ export default function Home() {
             <Ticker
               className="h-16"
               items={data.lendingMarket.reserves
-                .filter((reserve) => reserve.config.depositLimit.gt(0))
+                .filter((reserve) => !isEth(reserve.coinType))
                 .map((reserve) => {
                   const totalDepositAprPercent = getTotalAprPercent(
                     reserve.depositAprPercent,

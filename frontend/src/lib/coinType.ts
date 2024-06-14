@@ -44,5 +44,7 @@ export const extractSymbolFromCoinType = (coinType: string) =>
 
 export const isSui = (coinType: string) =>
   normalizeStructTag(coinType) === NORMALIZED_SUI_COINTYPE;
+export const isEth = (coinType: string) =>
+  normalizeStructTag(coinType) === NORMALIZED_WETH_COINTYPE;
 export const isSuilendPoints = (coinType: string) =>
   normalizeStructTag(coinType) === NORMALIZED_SUILEND_POINTS_COINTYPE;
