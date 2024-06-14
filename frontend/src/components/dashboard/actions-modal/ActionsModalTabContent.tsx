@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import BigNumber from "bignumber.js";
 import { capitalize } from "lodash";
-import { HandCoins, PiggyBank, Wallet } from "lucide-react";
 import { toast } from "sonner";
 
 import { maxU64 } from "@suilend/sdk/constants";
@@ -14,7 +13,6 @@ import {
   useActionsModalContext,
 } from "@/components/dashboard/actions-modal/ActionsModalContext";
 import ActionsModalInput from "@/components/dashboard/actions-modal/ActionsModalInput";
-import HistoricalAprLineChart from "@/components/dashboard/actions-modal/HistoricalAprLineChart";
 import ParametersPanel from "@/components/dashboard/actions-modal/ParametersPanel";
 import AprWithRewardsBreakdown from "@/components/dashboard/AprWithRewardsBreakdown";
 import Button from "@/components/shared/Button";
@@ -22,7 +20,7 @@ import Collapsible from "@/components/shared/Collapsible";
 import LabelWithValue from "@/components/shared/LabelWithValue";
 import Spinner from "@/components/shared/Spinner";
 import TextLink from "@/components/shared/TextLink";
-import { TBody } from "@/components/shared/Typography";
+import { TBody, TLabelSans } from "@/components/shared/Typography";
 import { Separator } from "@/components/ui/separator";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { useWalletContext } from "@/contexts/WalletContext";
@@ -46,6 +44,7 @@ export type SubmitButtonState = {
 };
 
 interface ActionsModalTabContentProps {
+  side: Side;
   reserve: ParsedReserve;
   action: Action;
   actionPastTense: string;
@@ -60,6 +59,7 @@ interface ActionsModalTabContentProps {
 }
 
 export default function ActionsModalTabContent({
+  side,
   reserve,
   action,
   actionPastTense,
@@ -78,10 +78,6 @@ export default function ActionsModalTabContent({
 
   const { md } = useBreakpoint();
 
-  const side = [Action.DEPOSIT, Action.WITHDRAW].includes(action)
-    ? Side.DEPOSIT
-    : Side.BORROW;
-
   // Balance
   const balance =
     data.coinBalancesMap[reserve.coinType]?.balance ?? new BigNumber(0);
@@ -99,13 +95,13 @@ export default function ActionsModalTabContent({
       : borrowPosition?.borrowedAmount) ?? new BigNumber(0);
 
   // Value
-  const [useMaxAmount, setUseMaxAmount] = useState<boolean>(false);
-  const maxAmount = getMaxValue();
-
   const inputRef = useRef<HTMLInputElement>(null);
   const [value, setValue] = useState<string>("");
 
-  const onValueChangeCore = useCallback(
+  const [useMaxAmount, setUseMaxAmount] = useState<boolean>(false);
+  const maxAmount = getMaxValue();
+
+  const formatAndSetValue = useCallback(
     (_value: string) => {
       if (_value.includes(".")) {
         const [whole, decimals] = _value.split(".");
@@ -119,19 +115,19 @@ export default function ActionsModalTabContent({
 
   const onValueChange = (_value: string) => {
     if (useMaxAmount) setUseMaxAmount(false);
-    onValueChangeCore(_value);
+    formatAndSetValue(_value);
   };
 
-  const setMaxValue = () => {
+  const useMaxValueWrapper = () => {
     setUseMaxAmount(true);
-    onValueChangeCore(maxAmount);
+    formatAndSetValue(maxAmount);
   };
 
   useEffect(() => {
     // If user has specified intent to use max amount, we continue this intent
     // even if the max value updates
-    if (useMaxAmount) onValueChangeCore(maxAmount);
-  }, [useMaxAmount, maxAmount, onValueChangeCore]);
+    if (useMaxAmount) formatAndSetValue(maxAmount);
+  }, [useMaxAmount, maxAmount, formatAndSetValue]);
 
   const { newBorrowLimitUsd, newBorrowUtilization } = getNewCalculations(value);
 
@@ -145,7 +141,7 @@ export default function ActionsModalTabContent({
   // Submit
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  const getSubmitButtonStateWrapper = (): SubmitButtonState => {
+  const submitButtonState: SubmitButtonState = (() => {
     if (!address) return { isDisabled: true, title: "Connect wallet" };
     if (isSubmitting) return { isDisabled: true, isLoading: true };
 
@@ -171,8 +167,7 @@ export default function ActionsModalTabContent({
           ? `+${formatToken(borrowFee, { dp: reserve.mintDecimals })} ${reserve.symbol} in fees`
           : undefined,
     };
-  };
-  const submitButtonState = getSubmitButtonStateWrapper();
+  })();
 
   const onSubmitClick = async () => {
     if (submitButtonState.isDisabled) return;
@@ -250,7 +245,7 @@ export default function ActionsModalTabContent({
 
   return (
     <>
-      <div className="flex w-full flex-col">
+      <div className="relative flex w-full flex-col">
         <div className="relative z-[2] w-full">
           <ActionsModalInput
             ref={inputRef}
@@ -259,21 +254,21 @@ export default function ActionsModalTabContent({
             reserve={reserve}
             action={action}
             useMaxAmount={useMaxAmount}
-            onMaxClick={setMaxValue}
+            onMaxClick={useMaxValueWrapper}
           />
         </div>
 
-        <div className="relative z-[1] -mt-2 flex w-full flex-row flex-wrap justify-between gap-x-2 gap-y-1 rounded-b-md bg-card px-2 pb-2 pt-4">
+        <div className="relative z-[1] -mt-2 flex w-full flex-row flex-wrap justify-between gap-x-2 gap-y-1 rounded-b-md bg-primary/25 px-2 pb-2 pt-4">
           <div
             className={cn(
-              "flex flex-row items-center gap-1",
+              "flex flex-row items-center gap-2",
               [Action.DEPOSIT].includes(action) && "cursor-pointer",
             )}
             onClick={
-              [Action.DEPOSIT].includes(action) ? setMaxValue : undefined
+              [Action.DEPOSIT].includes(action) ? useMaxValueWrapper : undefined
             }
           >
-            <Wallet className="h-3 w-3 text-foreground" />
+            <TLabelSans>Balance</TLabelSans>
             <TBody
               className={cn(
                 "text-xs",
@@ -281,28 +276,25 @@ export default function ActionsModalTabContent({
                   cn("decoration-foreground/50", hoverUnderlineClassName),
               )}
             >
-              {formatToken(balance, { dp: reserve.mintDecimals })}{" "}
-              {reserve.symbol}
+              {formatToken(balance, { exact: false })} {reserve.symbol}
             </TBody>
           </div>
 
           <div
             className={cn(
-              "flex flex-row items-center gap-1",
+              "flex flex-row items-center gap-2",
               [Action.WITHDRAW, Action.REPAY].includes(action) &&
                 "cursor-pointer",
             )}
             onClick={
               [Action.WITHDRAW, Action.REPAY].includes(action)
-                ? setMaxValue
+                ? useMaxValueWrapper
                 : undefined
             }
           >
-            {side === Side.DEPOSIT ? (
-              <PiggyBank className="h-3 w-3 text-foreground" />
-            ) : (
-              <HandCoins className="h-3 w-3 text-foreground" />
-            )}
+            <TLabelSans>
+              {side === Side.DEPOSIT ? "Deposited" : "Borrowed"}
+            </TLabelSans>
             <TBody
               className={cn(
                 "text-xs",
@@ -310,14 +302,13 @@ export default function ActionsModalTabContent({
                   cn("decoration-foreground/50", hoverUnderlineClassName),
               )}
             >
-              {formatToken(positionAmount, { dp: reserve.mintDecimals })}{" "}
-              {reserve.symbol}
+              {formatToken(positionAmount, { exact: false })} {reserve.symbol}
             </TBody>
           </div>
         </div>
       </div>
 
-      <div className="-m-4 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overflow-x-hidden p-4 md:pb-8">
+      <div className="-m-4 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overflow-x-hidden p-4 md:pb-6">
         <div className="flex flex-col gap-3">
           <LabelWithValue
             label="Price"
@@ -368,12 +359,10 @@ export default function ActionsModalTabContent({
           />
         </div>
 
-        <HistoricalAprLineChart reserve={reserve} side={side} />
-
         {!md && isMoreParametersOpen && (
           <>
             <Separator />
-            <ParametersPanel reserve={reserve} />
+            <ParametersPanel side={side} reserve={reserve} />
           </>
         )}
       </div>

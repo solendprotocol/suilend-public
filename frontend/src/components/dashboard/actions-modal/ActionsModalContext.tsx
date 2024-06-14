@@ -76,7 +76,7 @@ const defaultContextValue: ActionsModalContext = {
   setIsMoreParametersOpen: () => {
     throw Error("ActionsModalContextProvider not initialized");
   },
-  selectedParametersPanelTab: ParametersPanelTab.LIMITS,
+  selectedParametersPanelTab: ParametersPanelTab.ADVANCED,
   onSelectedParametersPanelTabChange: () => {
     throw Error("ActionsModalContextProvider not initialized");
   },
