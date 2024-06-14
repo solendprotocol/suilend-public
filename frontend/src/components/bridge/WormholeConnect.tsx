@@ -146,6 +146,8 @@ export default function WormholeConnect({ isHidden }: WormholeConnectProps) {
             sui: suiRpc,
           },
           tokens: [
+            "ETH",
+            "WETH",
             "USDCeth",
             // "USDCpolygon",
             // "USDCavax",
