@@ -1,5 +1,3 @@
-import { LineChart } from "lucide-react";
-
 import Card from "@/components/dashboard/Card";
 import MarketOverviewPopover from "@/components/dashboard/MarketOverviewPopover";
 import { TBody, TLabelSans } from "@/components/shared/Typography";
@@ -14,7 +12,6 @@ export default function MarketOverview() {
   return (
     <Card
       header={{
-        titleIcon: <LineChart />,
         title: "Pool overview",
         startContent: <MarketOverviewPopover />,
         noSeparator: true,

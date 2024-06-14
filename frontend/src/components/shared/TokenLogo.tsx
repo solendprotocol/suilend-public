@@ -39,7 +39,11 @@ export default function TokenLogo({
   };
   const nativeAsset = nativeAssetMap[coinType];
 
-  const isSmall = className ? className.toString().includes("h-4") : false;
+  const isSmall = className
+    ? className.toString().includes("h-4") ||
+      className.toString().includes("h-5") ||
+      className.toString().includes("h-6")
+    : false;
   const wormholeLogoSize = isSmall ? 8 : 12;
 
   return (

@@ -5,12 +5,15 @@ import { capitalize } from "lodash";
 
 import { SuilendClient } from "@suilend/sdk/client";
 import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
+import { Side } from "@suilend/sdk/types";
 
 import { useActionsModalContext } from "@/components/dashboard/actions-modal/ActionsModalContext";
+import HistoricalAprLineChart from "@/components/dashboard/actions-modal/HistoricalAprLineChart";
 import PythLogo from "@/components/dashboard/actions-modal/PythLogo";
 import AprLineChart from "@/components/shared/AprLineChart";
 import Button from "@/components/shared/Button";
 import LabelWithValue from "@/components/shared/LabelWithValue";
+import { Separator } from "@/components/ui/separator";
 import { useAppContext } from "@/contexts/AppContext";
 import {
   formatBorrowWeight,
@@ -28,18 +31,24 @@ import {
 import { cn } from "@/lib/utils";
 
 export enum ParametersPanelTab {
-  LIMITS = "limits",
+  ADVANCED = "advanced",
   RATES = "rates",
   OBJECTS = "objects",
 }
 
 interface TabContentProps {
+  side: Side;
   reserve: ParsedReserve;
 }
 
-function LimitsTabContent({ reserve }: TabContentProps) {
+function AdvancedTabContent({ side, reserve }: TabContentProps) {
   return (
     <>
+      <div className="mb-1 flex w-full flex-col gap-4">
+        <HistoricalAprLineChart reserve={reserve} side={side} />
+        <Separator />
+      </div>
+
       <LabelWithValue
         label="Deposit limit"
         value={`${formatToken(reserve.config.depositLimit, { dp: 0 })} ${reserve.symbol}`}
@@ -145,10 +154,10 @@ function LimitsTabContent({ reserve }: TabContentProps) {
   );
 }
 
-function RatesTabContent({ reserve }: TabContentProps) {
+function RatesTabContent({ side, reserve }: TabContentProps) {
   return (
     <>
-      <div className="mb-1 h-[140px] w-full flex-shrink-0 md:h-[160px]">
+      <div className="mb-1 w-full">
         <AprLineChart
           data={reserve.config.interestRate
             .slice()
@@ -192,7 +201,7 @@ function RatesTabContent({ reserve }: TabContentProps) {
   );
 }
 
-function ObjectsTabContent({ reserve }: TabContentProps) {
+function ObjectsTabContent({ side, reserve }: TabContentProps) {
   const { explorer, obligation, ...restAppContext } = useAppContext();
   const suilendClient = restAppContext.suilendClient as SuilendClient<string>;
 
@@ -271,17 +280,19 @@ function TabButton({ isActive, onClick, children }: TabButtonProps) {
 }
 
 interface ParametersTabContentProps {
+  side: Side;
   reserve: ParsedReserve;
 }
 
 export default function ParametersPanel({
+  side,
   reserve,
 }: ParametersTabContentProps) {
   const { selectedParametersPanelTab, onSelectedParametersPanelTabChange } =
     useActionsModalContext();
 
   const TabContent = {
-    [ParametersPanelTab.LIMITS]: LimitsTabContent,
+    [ParametersPanelTab.ADVANCED]: AdvancedTabContent,
     [ParametersPanelTab.RATES]: RatesTabContent,
     [ParametersPanelTab.OBJECTS]: ObjectsTabContent,
   }[selectedParametersPanelTab];
@@ -301,7 +312,7 @@ export default function ParametersPanel({
       </div>
 
       <div className="flex flex-col gap-3 md:-m-4 md:overflow-y-auto md:p-4">
-        <TabContent reserve={reserve} />
+        <TabContent side={side} reserve={reserve} />
       </div>
     </>
   );

@@ -1,7 +1,7 @@
 import { useRouter } from "next/router";
 
 import BigNumber from "bignumber.js";
-import { FileClock, TrendingUp, User } from "lucide-react";
+import { FileClock, TrendingUp } from "lucide-react";
 
 import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
 
@@ -189,7 +189,6 @@ export default function AccountPositionCard() {
     <Card
       id={address && obligation ? "position" : undefined}
       header={{
-        titleIcon: <User />,
         title: "Account",
         endContent: (
           <>

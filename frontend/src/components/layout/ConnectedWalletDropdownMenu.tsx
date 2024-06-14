@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { useState } from "react";
 
-import { ChevronDown, ChevronUp, VenetianMask } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 import Button from "@/components/shared/Button";
 import CopyToClipboardButton from "@/components/shared/CopyToClipboardButton";
@@ -49,9 +49,7 @@ export default function ConnectedWalletDropdownMenu({
           className="min-w-0"
           labelClassName="uppercase text-ellipsis overflow-hidden"
           startIcon={
-            isImpersonatingAddress ? (
-              <VenetianMask />
-            ) : connectedWallet?.logoUrl ? (
+            !isImpersonatingAddress && connectedWallet?.logoUrl ? (
               <Image
                 className="h-4 w-4"
                 src={connectedWallet.logoUrl}
