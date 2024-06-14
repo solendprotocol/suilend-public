@@ -153,29 +153,33 @@ export default function Home() {
           ) : (
             <Ticker
               className="h-16"
-              items={data.lendingMarket.reserves.map((reserve) => {
-                const totalDepositAprPercent = getTotalAprPercent(
-                  reserve.depositAprPercent,
-                  getFilteredRewards(data.rewardMap[reserve.coinType].deposit),
-                );
+              items={data.lendingMarket.reserves
+                .filter((reserve) => reserve.config.depositLimit.gt(0))
+                .map((reserve) => {
+                  const totalDepositAprPercent = getTotalAprPercent(
+                    reserve.depositAprPercent,
+                    getFilteredRewards(
+                      data.rewardMap[reserve.coinType].deposit,
+                    ),
+                  );
 
-                return (
-                  <div
-                    key={reserve.coinType}
-                    className="flex flex-row items-center gap-3 py-2"
-                  >
-                    <TokenLogo
-                      coinType={reserve.coinType}
-                      symbol={reserve.symbol}
-                      src={reserve.iconUrl}
-                    />
-                    <TBody>{reserve.symbol}</TBody>
-                    <TBody className="text-muted-foreground">
-                      {formatPercent(totalDepositAprPercent)} APR
-                    </TBody>
-                  </div>
-                );
-              })}
+                  return (
+                    <div
+                      key={reserve.coinType}
+                      className="flex flex-row items-center gap-3 py-2"
+                    >
+                      <TokenLogo
+                        coinType={reserve.coinType}
+                        symbol={reserve.symbol}
+                        src={reserve.iconUrl}
+                      />
+                      <TBody>{reserve.symbol}</TBody>
+                      <TBody className="text-muted-foreground">
+                        {formatPercent(totalDepositAprPercent)} APR
+                      </TBody>
+                    </div>
+                  );
+                })}
             />
           )}
         </div>

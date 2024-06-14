@@ -968,7 +968,7 @@ export default function EarningsTabContent({
                   columns={table.columns}
                   data={table.data}
                   noDataMessage={table.noDataMessage}
-                  skeletonRows={data.lendingMarket.reserves.length}
+                  skeletonRows={3}
                   container={{
                     className: "overflow-y-visible overflow-x-auto",
                   }}

@@ -119,6 +119,7 @@ export default function MarketTable() {
   const rows: ReservesRowData[] = useMemo(
     () =>
       data.lendingMarket.reserves
+        .filter((reserve) => reserve.config.depositLimit.gt(0))
         .slice()
         .sort(reserveSort)
         .map((reserve) => {
