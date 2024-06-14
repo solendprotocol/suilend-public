@@ -335,10 +335,9 @@ function Page({
 
         max_slippage_bps: 100, // optional default is 1%
       });
-      console.log("XXX", tx.transaction.getData());
 
       const txb = new TransactionBlock(
-        tx.transaction.serialize() as unknown as TransactionBlock,
+        tx.transaction as unknown as TransactionBlock,
       );
       const res = await signExecuteAndWaitTransactionBlock(txb);
       const txUrl = explorer.buildTxUrl(res.digest);
@@ -411,7 +410,7 @@ function Page({
                         cn("decoration-foreground/50", hoverUnderlineClassName),
                       )}
                     >
-                      {formatToken(tokenInBalance, { dp: tokenIn.decimals })}{" "}
+                      {formatToken(tokenInBalance, { exact: false })}{" "}
                       {tokenIn.ticker}
                     </TBody>
                   </div>
@@ -453,7 +452,7 @@ function Page({
                   <div className="flex flex-row items-center gap-2">
                     <TLabelSans>Balance</TLabelSans>
                     <TBody className="text-xs">
-                      {formatToken(tokenOutBalance, { dp: tokenOut.decimals })}{" "}
+                      {formatToken(tokenOutBalance, { exact: false })}{" "}
                       {tokenOut.ticker}
                     </TBody>
                   </div>
@@ -512,7 +511,8 @@ function Page({
 }
 
 export default function Swap() {
-  const { rpc } = useAppContext();
+  const { rpc, ...restAppContext } = useAppContext();
+  const data = restAppContext.data as AppData;
 
   // SDK
   const sdk = useMemo(() => {
@@ -538,16 +538,23 @@ export default function Swap() {
       try {
         const result = await sdk.fetchTokens();
         setVerifiedTokens(
-          result.tokens.map((token) => ({
-            ...token,
-            coin_type: normalizeStructTag(token.coin_type),
-          })),
+          result.tokens.map((token) => {
+            const coinType = normalizeStructTag(token.coin_type);
+            const coinMetadata = data.coinMetadataMap[coinType];
+
+            return {
+              ...token,
+              coin_type: coinType,
+              ticker: coinMetadata?.symbol ?? token.ticker,
+              icon_url: coinMetadata?.iconUrl ?? token.icon_url,
+            };
+          }),
         );
       } catch (err) {
         console.error(err);
       }
     })();
-  }, [sdk]);
+  }, [sdk, data.coinMetadataMap]);
 
   // State
   const [tokenInCoinType, setTokenInCoinType] = useState<string>(
