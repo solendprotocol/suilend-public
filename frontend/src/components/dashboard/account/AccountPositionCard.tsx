@@ -28,6 +28,7 @@ import { AppData, useAppContext } from "@/contexts/AppContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 import { formatPercent, formatUsd } from "@/lib/format";
 import { getFilteredRewards, getTotalAprPercent } from "@/lib/liquidityMining";
+import { shallowPushQuery } from "@/lib/router";
 import {
   BORROWS_TOOLTIP,
   DEPOSITS_TOOLTIP,
@@ -176,12 +177,10 @@ export default function AccountPositionCard() {
   const data = restAppContext.data as AppData;
 
   const openAccountDetailsTab = (tab: AccountDetailsTab) => {
-    router.push({
-      query: {
-        ...router.query,
-        [AccountDetailsQueryParams.ACCOUNT_DETAILS]: true,
-        [AccountDetailsQueryParams.TAB]: tab,
-      },
+    shallowPushQuery(router, {
+      ...router.query,
+      [AccountDetailsQueryParams.ACCOUNT_DETAILS]: true,
+      [AccountDetailsQueryParams.TAB]: tab,
     });
   };
 

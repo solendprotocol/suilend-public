@@ -26,6 +26,7 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { AppData, useAppContext } from "@/contexts/AppContext";
+import { shallowPushQuery } from "@/lib/router";
 import { cn } from "@/lib/utils";
 
 enum QueryParams {
@@ -76,9 +77,7 @@ export default function Admin() {
       ? queryParams[QueryParams.TAB]
       : Object.values(Tab)[0];
   const onSelectedTabChange = (tab: Tab) => {
-    router.push({
-      query: { ...router.query, [QueryParams.TAB]: tab },
-    });
+    shallowPushQuery(router, { ...router.query, [QueryParams.TAB]: tab });
   };
 
   // Lending market

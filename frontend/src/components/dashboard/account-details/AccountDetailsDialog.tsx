@@ -32,6 +32,7 @@ import { isSuilendPoints } from "@/lib/coinType";
 import { EventType, eventSortAsc } from "@/lib/events";
 import { formatPoints, formatToken } from "@/lib/format";
 import { API_URL } from "@/lib/navigation";
+import { shallowPushQuery, shallowReplaceQuery } from "@/lib/router";
 
 const QUERY_PARAMS_PREFIX = "accountDetails";
 export enum QueryParams {
@@ -130,9 +131,7 @@ export default function AccountDetailsDialog() {
       ? queryParams[QueryParams.TAB]
       : Object.values(Tab)[0];
   const onSelectedTabChange = (tab: Tab) => {
-    router.push({
-      query: { ...router.query, [QueryParams.TAB]: tab },
-    });
+    shallowPushQuery(router, { ...router.query, [QueryParams.TAB]: tab });
   };
 
   // Events
@@ -243,12 +242,12 @@ export default function AccountDetailsDialog() {
 
     const restQuery = cloneDeep(router.query);
     delete restQuery[QueryParams.ACCOUNT_DETAILS];
-    router.push({ query: restQuery });
+    shallowPushQuery(router, restQuery);
 
     setTimeout(() => {
       const restQuery2 = cloneDeep(restQuery);
       delete restQuery2[QueryParams.TAB];
-      router.replace({ query: restQuery2 });
+      shallowReplaceQuery(router, restQuery2);
 
       clearEventsData();
       fetchedDataObligationIdRef.current = undefined;
