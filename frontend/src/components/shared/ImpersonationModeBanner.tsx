@@ -14,6 +14,7 @@ import {
   useWalletContext,
 } from "@/contexts/WalletContext";
 import { formatAddress } from "@/lib/format";
+import { shallowPushQuery } from "@/lib/router";
 import { cn } from "@/lib/utils";
 
 export default function ImpersonationModeBanner() {
@@ -23,7 +24,7 @@ export default function ImpersonationModeBanner() {
   const onClick = () => {
     const restQuery = cloneDeep(router.query);
     delete restQuery[WalletContextQueryParams.WALLET];
-    router.push({ query: restQuery });
+    shallowPushQuery(router, restQuery);
   };
 
   return (
