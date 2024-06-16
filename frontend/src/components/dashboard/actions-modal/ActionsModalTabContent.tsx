@@ -258,7 +258,7 @@ export default function ActionsModalTabContent({
           />
         </div>
 
-        <div className="relative z-[1] -mt-2 flex w-full flex-row flex-wrap justify-between gap-x-2 gap-y-1 rounded-b-md bg-primary/25 px-2 pb-2 pt-4">
+        <div className="relative z-[1] -mt-2 flex w-full flex-row flex-wrap justify-between gap-x-2 gap-y-1 rounded-b-md bg-primary/25 px-3 pb-2 pt-4">
           <div
             className={cn(
               "flex flex-row items-center gap-2",
