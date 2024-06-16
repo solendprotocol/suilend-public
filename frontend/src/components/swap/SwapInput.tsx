@@ -49,13 +49,13 @@ const SwapInput = forwardRef<HTMLInputElement, SwapInputProps>(
           onChange={!isReadOnly ? (e) => onChange(e.target.value) : undefined}
           style={{
             height: `${INPUT_HEIGHT}px`,
-            paddingLeft: `${4 * 4 + Math.max(5 * 4 + 2 * 4 + token.ticker.length * 14.4) + 3 * 4}px`,
-            paddingRight: `${4 * 4}px`,
+            paddingLeft: `${3 * 4 + Math.max(5 * 4 + 2 * 4 + token.ticker.length * 14.4) + 3 * 4}px`,
+            paddingRight: `${3 * 4}px`,
           }}
           step="any"
         />
         <div
-          className="absolute left-0 top-0 z-[2] flex flex-row items-center gap-2 pl-4 pr-3"
+          className="absolute left-3 top-0 z-[2] flex flex-row items-center gap-2"
           style={{ height: `${INPUT_HEIGHT}px` }}
         >
           <TokenLogo

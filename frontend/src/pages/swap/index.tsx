@@ -398,7 +398,7 @@ function Page({
                   />
                 </div>
 
-                <div className="relative z-[1] -mt-2 flex w-full justify-end rounded-b-md bg-primary/25 px-2 pb-2 pt-4">
+                <div className="relative z-[1] -mt-2 flex w-full justify-end rounded-b-md bg-primary/25 px-3 pb-2 pt-4">
                   <div
                     className="flex cursor-pointer flex-row items-center gap-2"
                     onClick={useMaxValueWrapper}
@@ -448,7 +448,7 @@ function Page({
                   />
                 </div>
 
-                <div className="relative z-[1] -mt-2 flex w-full justify-end rounded-b-md bg-border px-2 pb-2 pt-4">
+                <div className="relative z-[1] -mt-2 flex w-full justify-end rounded-b-md bg-border px-3 pb-2 pt-4">
                   <div className="flex flex-row items-center gap-2">
                     <TLabelSans>Balance</TLabelSans>
                     <TBody className="text-xs">
