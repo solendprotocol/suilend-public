@@ -21,7 +21,7 @@ export default function Bridge() {
           <AlertTitle
             className={cn(bodySansClassNames, "mb-0 tracking-normal")}
           >
-            Note: Only Wormhole Wrapped Ethereum-native USDC and USDT are
+            Note: Only Wormhole Wrapped Ethereum-native USDC, USDT, and ETH are
             supported on Suilend.{" "}
             <TextLink href={DOCS_BRIDGE_LEARN_MORE_URL}>Learn more</TextLink>
           </AlertTitle>
