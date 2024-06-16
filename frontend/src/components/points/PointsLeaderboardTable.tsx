@@ -6,13 +6,10 @@ import DataTable, {
   decimalSortingFn,
   tableHeader,
 } from "@/components/dashboard/DataTable";
-import LeaderboardDataLastUpdated from "@/components/points/LeaderboardDataLastUpdated";
-import LeaderboardDataUsers from "@/components/points/LeaderboardDataUsers";
 import PointsCount from "@/components/points/PointsCount";
 import PointsRank from "@/components/points/PointsRank";
 import Tooltip from "@/components/shared/Tooltip";
-import { TBody, TLabelSans } from "@/components/shared/Typography";
-import { Skeleton } from "@/components/ui/skeleton";
+import { TBody } from "@/components/shared/Typography";
 import { LeaderboardRowData, usePointsContext } from "@/contexts/PointsContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 import { formatAddress } from "@/lib/format";
@@ -85,16 +82,6 @@ export default function PointsLeaderboardTable() {
 
   return (
     <div className="flex w-full max-w-[960px] flex-col gap-6">
-      {leaderboardRows ? (
-        <TLabelSans>
-          <LeaderboardDataUsers />
-          {" • "}
-          <LeaderboardDataLastUpdated />
-        </TLabelSans>
-      ) : (
-        <Skeleton className="h-4 w-40" />
-      )}
-
       <DataTable<LeaderboardRowData>
         columns={columns}
         data={leaderboardRows}
