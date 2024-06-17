@@ -2,8 +2,8 @@ import { CoinMetadata, SuiClient } from "@mysten/sui.js/client";
 
 import {
   LOGO_MAP,
+  NORMALIZED_ETH_COINTYPE,
   NORMALIZED_SUILEND_POINTS_COINTYPE,
-  NORMALIZED_WETH_COINTYPE,
   extractSymbolFromCoinType,
 } from "@/lib/coinType";
 
@@ -21,7 +21,7 @@ export const getCoinMetadataMap = async (
     if (!metadata) continue;
 
     const symbolMap: Record<string, string> = {
-      [NORMALIZED_WETH_COINTYPE]: "ETH",
+      [NORMALIZED_ETH_COINTYPE]: "ETH",
       [NORMALIZED_SUILEND_POINTS_COINTYPE]: "Suilend Points",
     };
     const coinType = uniqueCoinTypes[i];

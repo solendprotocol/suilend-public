@@ -121,7 +121,6 @@ export default function MarketTable() {
     () =>
       data.lendingMarket.reserves
         .filter((reserve) => !isEth(reserve.coinType))
-        .slice()
         .sort(reserveSort)
         .map((reserve) => {
           const coinType = reserve.coinType;
