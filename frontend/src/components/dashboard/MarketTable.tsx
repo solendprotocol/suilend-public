@@ -20,7 +20,6 @@ import TotalBorrowsCell from "@/components/dashboard/market-table/TotalBorrowsCe
 import TotalDepositsCell from "@/components/dashboard/market-table/TotalDepositsCell";
 import MarketCardList from "@/components/dashboard/MarketCardList";
 import { AppData, useAppContext } from "@/contexts/AppContext";
-import { isEth } from "@/lib/coinType";
 import { formatToken, formatUsd } from "@/lib/format";
 import {
   RewardSummary,
@@ -119,145 +118,142 @@ export default function MarketTable() {
   // Rows
   const rows: ReservesRowData[] = useMemo(
     () =>
-      data.lendingMarket.reserves
-        .filter((reserve) => !isEth(reserve.coinType))
-        .sort(reserveSort)
-        .map((reserve) => {
-          const coinType = reserve.coinType;
-          const price = reserve.price;
-          const symbol = reserve.symbol;
-          const iconUrl = reserve.iconUrl;
-          const openLtvPercent = new BigNumber(reserve.config.openLtvPct);
-          const borrowWeight = new BigNumber(
-            reserve.config.borrowWeightBps,
-          ).div(10000);
-          const depositedAmount = reserve.depositedAmount;
-          const depositedAmountUsd = reserve.depositedAmountUsd;
-          const borrowedAmount = reserve.borrowedAmount;
-          const borrowedAmountUsd = reserve.borrowedAmountUsd;
-          const depositAprPercent = reserve.depositAprPercent;
-          const totalDepositAprPercent = getTotalAprPercent(
-            reserve.depositAprPercent,
-            getFilteredRewards(data.rewardMap[coinType].deposit),
-          );
-          const borrowAprPercent = reserve.borrowAprPercent;
-          const totalBorrowAprPercent = getTotalAprPercent(
-            reserve.borrowAprPercent,
-            getFilteredRewards(data.rewardMap[coinType].borrow),
-          );
-          const rewards = data.rewardMap[coinType];
+      data.lendingMarket.reserves.sort(reserveSort).map((reserve) => {
+        const coinType = reserve.coinType;
+        const price = reserve.price;
+        const symbol = reserve.symbol;
+        const iconUrl = reserve.iconUrl;
+        const openLtvPercent = new BigNumber(reserve.config.openLtvPct);
+        const borrowWeight = new BigNumber(reserve.config.borrowWeightBps).div(
+          10000,
+        );
+        const depositedAmount = reserve.depositedAmount;
+        const depositedAmountUsd = reserve.depositedAmountUsd;
+        const borrowedAmount = reserve.borrowedAmount;
+        const borrowedAmountUsd = reserve.borrowedAmountUsd;
+        const depositAprPercent = reserve.depositAprPercent;
+        const totalDepositAprPercent = getTotalAprPercent(
+          reserve.depositAprPercent,
+          getFilteredRewards(data.rewardMap[coinType].deposit),
+        );
+        const borrowAprPercent = reserve.borrowAprPercent;
+        const totalBorrowAprPercent = getTotalAprPercent(
+          reserve.borrowAprPercent,
+          getFilteredRewards(data.rewardMap[coinType].borrow),
+        );
+        const rewards = data.rewardMap[coinType];
 
-          const getAlmostExceedsLimit = (limit: BigNumber, total: BigNumber) =>
-            !limit.eq(0) &&
-            total.gte(limit.times(Math.min(0.9999, 1 - 1 / limit.toNumber())));
-          const getExceedsLimit = (limit: BigNumber, total: BigNumber) =>
-            limit.eq(0) || total.gte(limit);
+        const getAlmostExceedsLimit = (limit: BigNumber, total: BigNumber) =>
+          !limit.eq(0) &&
+          total.gte(limit.times(Math.min(0.9999, 1 - 1 / limit.toNumber())));
+        const getExceedsLimit = (limit: BigNumber, total: BigNumber) =>
+          limit.eq(0) || total.gte(limit);
 
-          const almostExceedsDepositLimit = getAlmostExceedsLimit(
-            reserve.config.depositLimit,
-            depositedAmount,
-          );
-          const almostExceedsDepositLimitUsd = getAlmostExceedsLimit(
-            reserve.config.depositLimitUsd,
-            depositedAmountUsd,
-          );
+        const almostExceedsDepositLimit = getAlmostExceedsLimit(
+          reserve.config.depositLimit,
+          depositedAmount,
+        );
+        const almostExceedsDepositLimitUsd = getAlmostExceedsLimit(
+          reserve.config.depositLimitUsd,
+          depositedAmountUsd,
+        );
 
-          const exceedsDepositLimit = getExceedsLimit(
-            reserve.config.depositLimit,
-            depositedAmount,
-          );
-          const exceedsDepositLimitUsd = getExceedsLimit(
-            reserve.config.depositLimitUsd,
-            depositedAmountUsd,
-          );
+        const exceedsDepositLimit = getExceedsLimit(
+          reserve.config.depositLimit,
+          depositedAmount,
+        );
+        const exceedsDepositLimitUsd = getExceedsLimit(
+          reserve.config.depositLimitUsd,
+          depositedAmountUsd,
+        );
 
-          const almostExceedsBorrowLimit = getAlmostExceedsLimit(
-            reserve.config.borrowLimit,
-            borrowedAmount,
-          );
-          const almostExceedsBorrowLimitUsd = getAlmostExceedsLimit(
-            reserve.config.borrowLimitUsd,
-            borrowedAmountUsd,
-          );
+        const almostExceedsBorrowLimit = getAlmostExceedsLimit(
+          reserve.config.borrowLimit,
+          borrowedAmount,
+        );
+        const almostExceedsBorrowLimitUsd = getAlmostExceedsLimit(
+          reserve.config.borrowLimitUsd,
+          borrowedAmountUsd,
+        );
 
-          const exceedsBorrowLimit = getExceedsLimit(
-            reserve.config.borrowLimit,
-            borrowedAmount,
-          );
-          const exceedsBorrowLimitUsd = getExceedsLimit(
-            reserve.config.borrowLimitUsd,
-            borrowedAmountUsd,
-          );
+        const exceedsBorrowLimit = getExceedsLimit(
+          reserve.config.borrowLimit,
+          borrowedAmount,
+        );
+        const exceedsBorrowLimitUsd = getExceedsLimit(
+          reserve.config.borrowLimitUsd,
+          borrowedAmountUsd,
+        );
 
-          const getAlmostExceedsLimitTooltip = (
-            side: Side,
-            remaining: BigNumber,
-            symbol: string,
-          ) =>
-            `Asset ${side} limit almost reached. Capacity remaining: ${formatToken(remaining, { dp: reserve.mintDecimals })} ${symbol}`;
-          const getAlmostExceedsLimitUsd = (side: Side, remaining: BigNumber) =>
-            `Asset USD ${side} limit almost reached. Capacity remaining: ${formatUsd(remaining)}`;
+        const getAlmostExceedsLimitTooltip = (
+          side: Side,
+          remaining: BigNumber,
+          symbol: string,
+        ) =>
+          `Asset ${side} limit almost reached. Capacity remaining: ${formatToken(remaining, { dp: reserve.mintDecimals })} ${symbol}`;
+        const getAlmostExceedsLimitUsd = (side: Side, remaining: BigNumber) =>
+          `Asset USD ${side} limit almost reached. Capacity remaining: ${formatUsd(remaining)}`;
 
-          const getExceedsLimitTooltip = (side: Side) =>
-            `Asset ${side} limit reached.`;
-          const getExceedsLimitUsdTooltip = (side: Side) =>
-            `Asset USD ${side} limit reached.`;
+        const getExceedsLimitTooltip = (side: Side) =>
+          `Asset ${side} limit reached.`;
+        const getExceedsLimitUsdTooltip = (side: Side) =>
+          `Asset USD ${side} limit reached.`;
 
-          const depositedAmountTooltip = exceedsDepositLimit
-            ? getExceedsLimitTooltip(Side.DEPOSIT)
-            : exceedsDepositLimitUsd
-              ? getExceedsLimitUsdTooltip(Side.DEPOSIT)
-              : almostExceedsDepositLimit
-                ? getAlmostExceedsLimitTooltip(
+        const depositedAmountTooltip = exceedsDepositLimit
+          ? getExceedsLimitTooltip(Side.DEPOSIT)
+          : exceedsDepositLimitUsd
+            ? getExceedsLimitUsdTooltip(Side.DEPOSIT)
+            : almostExceedsDepositLimit
+              ? getAlmostExceedsLimitTooltip(
+                  Side.DEPOSIT,
+                  reserve.config.depositLimit.minus(depositedAmount),
+                  symbol,
+                )
+              : almostExceedsDepositLimitUsd
+                ? getAlmostExceedsLimitUsd(
                     Side.DEPOSIT,
-                    reserve.config.depositLimit.minus(depositedAmount),
-                    symbol,
+                    reserve.config.depositLimitUsd.minus(depositedAmountUsd),
                   )
-                : almostExceedsDepositLimitUsd
-                  ? getAlmostExceedsLimitUsd(
-                      Side.DEPOSIT,
-                      reserve.config.depositLimitUsd.minus(depositedAmountUsd),
-                    )
-                  : undefined;
+                : undefined;
 
-          const borrowedAmountTooltip = exceedsBorrowLimit
-            ? getExceedsLimitTooltip(Side.DEPOSIT)
-            : exceedsBorrowLimitUsd
-              ? getExceedsLimitUsdTooltip(Side.DEPOSIT)
-              : almostExceedsBorrowLimit
-                ? getAlmostExceedsLimitTooltip(
+        const borrowedAmountTooltip = exceedsBorrowLimit
+          ? getExceedsLimitTooltip(Side.DEPOSIT)
+          : exceedsBorrowLimitUsd
+            ? getExceedsLimitUsdTooltip(Side.DEPOSIT)
+            : almostExceedsBorrowLimit
+              ? getAlmostExceedsLimitTooltip(
+                  Side.DEPOSIT,
+                  reserve.config.borrowLimit.minus(borrowedAmount),
+                  symbol,
+                )
+              : almostExceedsBorrowLimitUsd
+                ? getAlmostExceedsLimitUsd(
                     Side.DEPOSIT,
-                    reserve.config.borrowLimit.minus(borrowedAmount),
-                    symbol,
+                    reserve.config.borrowLimitUsd.minus(borrowedAmountUsd),
                   )
-                : almostExceedsBorrowLimitUsd
-                  ? getAlmostExceedsLimitUsd(
-                      Side.DEPOSIT,
-                      reserve.config.borrowLimitUsd.minus(borrowedAmountUsd),
-                    )
-                  : undefined;
+                : undefined;
 
-          return {
-            coinType,
-            price,
-            symbol,
-            iconUrl,
-            openLtvPercent,
-            borrowWeight,
-            depositedAmount,
-            depositedAmountUsd,
-            depositedAmountTooltip,
-            borrowedAmount,
-            borrowedAmountUsd,
-            borrowedAmountTooltip,
-            depositAprPercent,
-            totalDepositAprPercent,
-            borrowAprPercent,
-            totalBorrowAprPercent,
-            rewards,
-            reserve,
-          };
-        }),
+        return {
+          coinType,
+          price,
+          symbol,
+          iconUrl,
+          openLtvPercent,
+          borrowWeight,
+          depositedAmount,
+          depositedAmountUsd,
+          depositedAmountTooltip,
+          borrowedAmount,
+          borrowedAmountUsd,
+          borrowedAmountTooltip,
+          depositAprPercent,
+          totalDepositAprPercent,
+          borrowAprPercent,
+          totalBorrowAprPercent,
+          rewards,
+          reserve,
+        };
+      }),
     [data.lendingMarket.reserves, data.rewardMap],
   );
 
