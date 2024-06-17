@@ -5,8 +5,8 @@ import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 
 import {
   NORMALIZED_SUI_COINTYPE,
-  NORMALIZED_USDC_ET_COINTYPE,
-  NORMALIZED_USDT_ET_COINTYPE,
+  NORMALIZED_USDC_COINTYPE,
+  NORMALIZED_USDT_COINTYPE,
 } from "@/lib/coinType";
 import { msPerYear } from "@/lib/constants";
 
@@ -107,7 +107,7 @@ export const calculateRewardsDepositAprPercent = (
         endTimeMs: 1716249600000, //2024-05-21 08:00:00
       },
     ],
-    [NORMALIZED_USDC_ET_COINTYPE]: [
+    [NORMALIZED_USDC_COINTYPE]: [
       {
         coinType: NORMALIZED_SUI_COINTYPE,
         totalRewards: new BigNumber(75915.32),
@@ -127,7 +127,7 @@ export const calculateRewardsDepositAprPercent = (
         endTimeMs: 1716249600000, //2024-05-21 08:00:00
       },
     ],
-    [NORMALIZED_USDT_ET_COINTYPE]: [
+    [NORMALIZED_USDT_COINTYPE]: [
       {
         coinType: NORMALIZED_SUI_COINTYPE,
         totalRewards: new BigNumber(64602.32),

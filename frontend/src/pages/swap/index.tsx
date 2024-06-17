@@ -33,7 +33,7 @@ import { AppData, useAppContext } from "@/contexts/AppContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 import {
   NORMALIZED_SUI_COINTYPE,
-  NORMALIZED_USDC_ET_COINTYPE,
+  NORMALIZED_USDC_COINTYPE,
   isSui,
 } from "@/lib/coinType";
 import { TX_TOAST_DURATION } from "@/lib/constants";
@@ -565,7 +565,7 @@ export default function Swap() {
   );
 
   const [tokenOutCoinType, setTokenOutCoinType] = useState<string>(
-    NORMALIZED_USDC_ET_COINTYPE,
+    NORMALIZED_USDC_COINTYPE,
   );
   const tokenOut = verifiedTokens?.find(
     (vt) => vt.coin_type === tokenOutCoinType,

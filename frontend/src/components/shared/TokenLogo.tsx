@@ -6,8 +6,8 @@ import { ClassValue } from "clsx";
 import TextLink from "@/components/shared/TextLink";
 import Tooltip from "@/components/shared/Tooltip";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { NORMALIZED_USDT_ET_COINTYPE } from "@/lib/coinType";
-import { NORMALIZED_USDC_ET_COINTYPE } from "@/lib/coinType";
+import { NORMALIZED_USDT_COINTYPE } from "@/lib/coinType";
+import { NORMALIZED_USDC_COINTYPE } from "@/lib/coinType";
 import { DOCS_BRIDGE_LEARN_MORE_URL } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 import wormholeLogo from "@/public/assets/wormhole.png";
@@ -30,10 +30,10 @@ export default function TokenLogo({
   src,
 }: TokenLogoProps) {
   const nativeAssetMap = {
-    [NORMALIZED_USDC_ET_COINTYPE]: {
+    [NORMALIZED_USDC_COINTYPE]: {
       fullName: "Wormhole Wrapped Ethereum-native USDC",
     },
-    [NORMALIZED_USDT_ET_COINTYPE]: {
+    [NORMALIZED_USDT_COINTYPE]: {
       fullName: "Wormhole Wrapped Ethereum-native USDT",
     },
   };
@@ -72,7 +72,7 @@ export default function TokenLogo({
         </AspectRatio>
 
         {nativeAsset && (
-          <div className="absolute -bottom-0.5 -right-0.5 z-[2] rounded-full border border-background bg-background">
+          <div className="absolute -bottom-0.5 -right-0.5 z-[2] rounded-full border border-[black] bg-[black]">
             <Image
               src={wormholeLogo}
               alt="Wormhole logo"
