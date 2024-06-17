@@ -11,6 +11,7 @@ import {
 import BigNumber from "bignumber.js";
 
 import { Obligation } from "@suilend/sdk/_generated/suilend/obligation/structs";
+import { SDK_ENV, SdkEnv } from "@suilend/sdk/constants";
 import {
   ParsedObligation,
   parseObligation,
@@ -93,6 +94,21 @@ export function PointsContextProvider({ children }: PropsWithChildren) {
     if (refreshedObligations === undefined) return;
     if (data === null) return;
     if (isProcessingLeaderboardRowsRef.current) return;
+    if (SDK_ENV === SdkEnv.BETA) {
+      const pointsStats = getPointsStats(data.rewardMap, data.obligations);
+      const sortedRows = [];
+
+      if (address)
+        sortedRows.push({
+          address,
+          totalPoints: pointsStats.totalPoints.total,
+          pointsPerDay: pointsStats.pointsPerDay.total,
+          rank: 1,
+        });
+
+      setLeaderboardRows(sortedRows);
+      return;
+    }
 
     isProcessingLeaderboardRowsRef.current = true;
 
