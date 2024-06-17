@@ -72,7 +72,7 @@ export default function TokenLogo({
         </AspectRatio>
 
         {nativeAsset && (
-          <div className="absolute -bottom-0.5 -right-0.5 z-[2] rounded-full border border-background bg-background">
+          <div className="absolute -bottom-0.5 -right-0.5 z-[2] rounded-full border border-[black] bg-[black]">
             <Image
               src={wormholeLogo}
               alt="Wormhole logo"
