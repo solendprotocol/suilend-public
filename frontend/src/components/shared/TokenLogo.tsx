@@ -8,9 +8,9 @@ import Tooltip from "@/components/shared/Tooltip";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import {
   NORMALIZED_ETH_COINTYPE,
+  NORMALIZED_USDC_COINTYPE,
   NORMALIZED_USDT_COINTYPE,
 } from "@/lib/coinType";
-import { NORMALIZED_USDC_COINTYPE } from "@/lib/coinType";
 import { DOCS_BRIDGE_LEARN_MORE_URL } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 import wormholeLogo from "@/public/assets/wormhole.png";
