@@ -20,6 +20,7 @@ import TotalBorrowsCell from "@/components/dashboard/market-table/TotalBorrowsCe
 import TotalDepositsCell from "@/components/dashboard/market-table/TotalDepositsCell";
 import MarketCardList from "@/components/dashboard/MarketCardList";
 import { AppData, useAppContext } from "@/contexts/AppContext";
+import { isEth } from "@/lib/coinType";
 import { formatToken, formatUsd } from "@/lib/format";
 import {
   RewardSummary,
@@ -119,7 +120,7 @@ export default function MarketTable() {
   const rows: ReservesRowData[] = useMemo(
     () =>
       data.lendingMarket.reserves
-        .slice()
+        .filter((reserve) => !isEth(reserve.coinType))
         .sort(reserveSort)
         .map((reserve) => {
           const coinType = reserve.coinType;
