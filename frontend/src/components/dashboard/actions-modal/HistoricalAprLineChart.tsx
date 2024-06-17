@@ -6,6 +6,7 @@ import { capitalize } from "lodash";
 import * as Recharts from "recharts";
 import { useLocalStorage } from "usehooks-ts";
 
+import { ParsedDownsampledApiReserveAssetDataEvent } from "@suilend/sdk/parsers/apiReserveAssetDataEvent";
 import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 import { Side } from "@suilend/sdk/types";
 
@@ -26,15 +27,19 @@ import {
   line,
   tooltip,
 } from "@/lib/chart";
-import { COINTYPE_COLOR_MAP, NORMALIZED_SUI_COINTYPE } from "@/lib/coinType";
+import { COINTYPE_COLOR_MAP } from "@/lib/coinType";
 import {
   DAYS,
   DAY_S,
   Days,
   RESERVE_EVENT_SAMPLE_INTERVAL_S_MAP,
-  calculateRewardsDepositAprPercent,
+  calculateRewardDepositAprPercent,
 } from "@/lib/events";
 import { formatPercent } from "@/lib/format";
+import {
+  getDedupedAprRewards,
+  getFilteredRewards,
+} from "@/lib/liquidityMining";
 import { cn } from "@/lib/utils";
 
 const getFieldCoinType = (field: string) =>
@@ -296,10 +301,21 @@ export default function HistoricalAprLineChart({
     7,
   );
 
-  const suiReserve = data.reserveMap[NORMALIZED_SUI_COINTYPE];
+  const aprRewardReserves = useMemo(() => {
+    const rewards = data.rewardMap[reserve.coinType]?.[side] ?? [];
+    const filteredRewards = getFilteredRewards(rewards);
+    const aprRewards = getDedupedAprRewards(filteredRewards);
+
+    return aprRewards.map(
+      (aprReward) => data.reserveMap[aprReward.stats.rewardCoinType],
+    );
+  }, [data.rewardMap, reserve.coinType, side, data.reserveMap]);
+  console.log("XXX", aprRewardReserves);
 
   const didFetchInitialReserveAssetDataEventsRef = useRef<boolean>(false);
-  const didFetchInitialSuiReserveAssetDataEventsRef = useRef<boolean>(false);
+  const didFetchInitialRewardReservesAssetDataEventsRef = useRef<
+    Record<string, boolean>
+  >({});
   useEffect(() => {
     const events = reserveAssetDataEventsMap?.[reserve.id]?.[days];
     if (events === undefined) {
@@ -309,20 +325,29 @@ export default function HistoricalAprLineChart({
       didFetchInitialReserveAssetDataEventsRef.current = true;
     }
 
-    if (reserve.id === suiReserve.id) return;
-    const suiEvents = reserveAssetDataEventsMap?.[suiReserve.id]?.[days];
-    if (suiEvents === undefined) {
-      if (didFetchInitialSuiReserveAssetDataEventsRef.current) return;
+    // Rewards
+    aprRewardReserves.forEach((rewardReserve) => {
+      if (reserve.id === rewardReserve.id) return;
+      if (reserveAssetDataEventsMap?.[rewardReserve.id]?.[days] === undefined) {
+        if (
+          didFetchInitialRewardReservesAssetDataEventsRef.current[
+            rewardReserve.coinType
+          ]
+        )
+          return;
 
-      fetchReserveAssetDataEvents(suiReserve, days);
-      didFetchInitialSuiReserveAssetDataEventsRef.current = true;
-    }
+        fetchReserveAssetDataEvents(rewardReserve, days);
+        didFetchInitialRewardReservesAssetDataEventsRef.current[
+          rewardReserve.coinType
+        ] = true;
+      }
+    });
   }, [
     reserveAssetDataEventsMap,
     reserve,
     days,
     fetchReserveAssetDataEvents,
-    suiReserve,
+    aprRewardReserves,
   ]);
 
   const onDaysClick = (value: Days) => {
@@ -331,18 +356,26 @@ export default function HistoricalAprLineChart({
     const events = reserveAssetDataEventsMap?.[reserve.id]?.[value];
     if (events === undefined) fetchReserveAssetDataEvents(reserve, value);
 
-    if (reserve.id === suiReserve.id) return;
-    const suiEvents = reserveAssetDataEventsMap?.[suiReserve.id]?.[value];
-    if (suiEvents === undefined) fetchReserveAssetDataEvents(suiReserve, value);
+    // Rewards
+    aprRewardReserves.forEach((rewardReserve) => {
+      if (reserve.id === rewardReserve.id) return;
+      if (reserveAssetDataEventsMap?.[rewardReserve.id]?.[value] === undefined)
+        fetchReserveAssetDataEvents(rewardReserve, value);
+    });
   };
 
   // Data
   const chartData = useMemo(() => {
     const events = reserveAssetDataEventsMap?.[reserve.id]?.[days];
     if (events === undefined) return;
-
-    const suiEvents = reserveAssetDataEventsMap?.[suiReserve.id]?.[days];
-    if (suiEvents === undefined) return;
+    if (events.length === 0) return [];
+    if (
+      aprRewardReserves.some(
+        (rewardReserve) =>
+          reserveAssetDataEventsMap?.[rewardReserve.id]?.[days] === undefined,
+      )
+    )
+      return;
 
     // Data
     const sampleIntervalS = RESERVE_EVENT_SAMPLE_INTERVAL_S_MAP[days];
@@ -359,14 +392,29 @@ export default function HistoricalAprLineChart({
     const result: (Pick<ChartData, "timestampS"> & Partial<ChartData>)[] = [];
     timestampsS.forEach((timestampS) => {
       const event = events.findLast((e) => e.sampleTimestampS <= timestampS);
-      result.push({
-        timestampS,
-        depositInterestAprPercent: event ? +event.depositAprPercent : undefined,
-        borrowInterestAprPercent: event ? +event.borrowAprPercent : undefined,
-        [`depositInterestAprPercent_${NORMALIZED_SUI_COINTYPE}`]: event
-          ? calculateRewardsDepositAprPercent(event, suiEvents, reserve)
-          : undefined,
-      });
+
+      const d = aprRewardReserves.reduce(
+        (acc, rewardReserve) => ({
+          ...acc,
+          [`depositInterestAprPercent_${rewardReserve.coinType}`]: event
+            ? calculateRewardDepositAprPercent(
+                event,
+                reserveAssetDataEventsMap?.[rewardReserve.id]?.[
+                  days
+                ] as ParsedDownsampledApiReserveAssetDataEvent[],
+                reserve,
+              )
+            : undefined,
+        }),
+        {
+          timestampS,
+          depositInterestAprPercent: event
+            ? +event.depositAprPercent
+            : undefined,
+          borrowInterestAprPercent: event ? +event.borrowAprPercent : undefined,
+        },
+      );
+      result.push(d);
     });
 
     const fields =
@@ -386,7 +434,7 @@ export default function HistoricalAprLineChart({
     }
 
     return result as ChartData[];
-  }, [reserveAssetDataEventsMap, reserve, days, suiReserve.id]);
+  }, [reserveAssetDataEventsMap, reserve, days, aprRewardReserves]);
   const isLoading = chartData === undefined;
 
   return (
