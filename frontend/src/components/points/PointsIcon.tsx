@@ -1,7 +1,10 @@
 import { ClassValue } from "clsx";
 
 import TokenLogo from "@/components/shared/TokenLogo";
-import { LOGO_MAP, NORMALIZED_SUILEND_POINTS_COINTYPE } from "@/lib/coinType";
+import {
+  COINTYPE_LOGO_MAP,
+  NORMALIZED_SUILEND_POINTS_COINTYPE,
+} from "@/lib/coinType";
 import { cn } from "@/lib/utils";
 
 interface PointsIconProps {
@@ -14,7 +17,7 @@ export default function PointsIcon({ className }: PointsIconProps) {
       className={cn("h-4 w-4", className)}
       coinType={NORMALIZED_SUILEND_POINTS_COINTYPE}
       symbol="Suilend Points"
-      src={LOGO_MAP[NORMALIZED_SUILEND_POINTS_COINTYPE]}
+      src={COINTYPE_LOGO_MAP[NORMALIZED_SUILEND_POINTS_COINTYPE]}
     />
   );
 }

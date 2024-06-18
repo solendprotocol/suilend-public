@@ -19,7 +19,11 @@ import { useDashboardContext } from "@/contexts/DashboardContext";
 import { usePointsContext } from "@/contexts/PointsContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 import useBreakpoint from "@/hooks/useBreakpoint";
-import { LOGO_MAP, NORMALIZED_SUI_COINTYPE, isSui } from "@/lib/coinType";
+import {
+  COINTYPE_LOGO_MAP,
+  NORMALIZED_SUI_COINTYPE,
+  isSui,
+} from "@/lib/coinType";
 import { TX_TOAST_DURATION } from "@/lib/constants";
 import { formatToken } from "@/lib/format";
 import { RewardSummary } from "@/lib/liquidityMining";
@@ -43,7 +47,7 @@ function PendingRewards({ totalSuiRewards, isCentered }: PendingRewardsProps) {
           className="h-4 w-4"
           coinType={NORMALIZED_SUI_COINTYPE}
           symbol="SUI"
-          src={LOGO_MAP[NORMALIZED_SUI_COINTYPE]}
+          src={COINTYPE_LOGO_MAP[NORMALIZED_SUI_COINTYPE]}
         />
         <Tooltip title={formatToken(totalSuiRewards, { dp: 9 })}>
           <TBody>{formatToken(totalSuiRewards)}</TBody>

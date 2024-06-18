@@ -134,7 +134,7 @@ export default function ActionsModalTabContent({
   const formattedValue = `${value} ${reserve.symbol}`;
 
   // Borrow fee
-  const borrowFee = new BigNumber(value || "0")
+  const borrowFee = new BigNumber(value || 0)
     .times(reserve.config.borrowFeeBps)
     .div(10000);
 
@@ -151,11 +151,11 @@ export default function ActionsModalTabContent({
     )
       return getSubmitButtonNoValueState() as SubmitButtonState;
 
-    if (value === "") return { isDisabled: true, title: "Enter a value" };
+    if (value === "") return { isDisabled: true, title: "Enter an amount" };
     if (new BigNumber(value).lt(0))
-      return { isDisabled: true, title: "Enter a +ve value" };
+      return { isDisabled: true, title: "Enter a +ve amount" };
     if (new BigNumber(value).eq(0))
-      return { isDisabled: true, title: "Enter a non-zero value" };
+      return { isDisabled: true, title: "Enter a non-zero amount" };
 
     if (getSubmitButtonState(value) !== undefined)
       return getSubmitButtonState(value) as SubmitButtonState;

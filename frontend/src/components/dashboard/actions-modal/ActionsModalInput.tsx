@@ -36,6 +36,9 @@ const ActionsModalInput = forwardRef<HTMLInputElement, ActionsModalInputProps>(
       setTimeout(() => localRef.current?.focus());
     }, [action]);
 
+    // Usd
+    const usdValue = new BigNumber(value || 0).times(reserve.price);
+
     return (
       <div className="relative w-full">
         <div className="absolute left-3 top-1/2 z-[2] -translate-y-2/4">
@@ -77,11 +80,9 @@ const ActionsModalInput = forwardRef<HTMLInputElement, ActionsModalInputProps>(
           style={{ height: `${INPUT_HEIGHT}px` }}
         >
           <TBody className="text-right text-2xl">{reserve.symbol}</TBody>
-          <TLabel
-            className="text-right"
-            style={{ height: `${USD_LABEL_HEIGHT}px` }}
-          >
-            ≈{formatUsd(new BigNumber(value || "0").times(reserve.price))}
+          <TLabel className="text-right">
+            {!usdValue.eq(0) && "≈"}
+            {formatUsd(usdValue)}
           </TLabel>
         </div>
       </div>
