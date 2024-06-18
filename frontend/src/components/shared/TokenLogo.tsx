@@ -61,6 +61,7 @@ export default function TokenLogo({
         <AspectRatio ratio={1} className="relative z-[1]">
           {src ? (
             <Image
+              key={src}
               className="object-cover"
               src={src}
               alt={`${symbol} logo`}

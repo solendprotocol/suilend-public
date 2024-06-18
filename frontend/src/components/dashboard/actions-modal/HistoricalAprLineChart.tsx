@@ -310,7 +310,6 @@ export default function HistoricalAprLineChart({
       (aprReward) => data.reserveMap[aprReward.stats.rewardCoinType],
     );
   }, [data.rewardMap, reserve.coinType, side, data.reserveMap]);
-  console.log("XXX", aprRewardReserves);
 
   const didFetchInitialReserveAssetDataEventsRef = useRef<boolean>(false);
   const didFetchInitialRewardReservesAssetDataEventsRef = useRef<

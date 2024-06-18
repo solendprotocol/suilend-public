@@ -37,6 +37,11 @@ import { formatToken } from "@/lib/format";
 import { SWAP_URL } from "@/lib/navigation";
 import { cn, hoverUnderlineClassName } from "@/lib/utils";
 
+enum TokenDirection {
+  IN = "in",
+  OUT = "out",
+}
+
 type SubmitButtonState = {
   isLoading?: boolean;
   isDisabled?: boolean;
@@ -49,8 +54,7 @@ interface PageProps {
   tokens: VerifiedToken[];
   tokenIn: VerifiedToken;
   tokenOut: VerifiedToken;
-  setTokenInSymbol: (symbol: string) => void;
-  setTokenOutSymbol: (symbol: string) => void;
+  setTokenSymbol: (coinType: string, direction: TokenDirection) => void;
   reverseTokenSymbols: () => void;
 }
 
@@ -59,8 +63,7 @@ function Page({
   tokens,
   tokenIn,
   tokenOut,
-  setTokenInSymbol,
-  setTokenOutSymbol,
+  setTokenSymbol,
   reverseTokenSymbols,
 }: PageProps) {
   const { address } = useWalletContext();
@@ -249,7 +252,7 @@ function Page({
     inputRef.current?.focus();
   };
 
-  // Usd prices
+  // USD prices
   const [usdPriceMap, setUsdPriceMap] = useState<Record<string, number>>({});
   const tokenInUsdPrice = usdPriceMap[tokenIn.coin_type];
   const tokenOutUsdPrice = usdPriceMap[tokenOut.coin_type];
@@ -324,6 +327,31 @@ function Page({
     if (new BigNumber(_value || 0).gt(0)) fetchQuote(tokenOut, tokenIn, _value);
 
     inputRef.current?.focus();
+  };
+
+  // Select token
+  const onTokenCoinTypeChange = (
+    coinType: string,
+    direction: TokenDirection,
+  ) => {
+    const _token = tokens.find((t) => t.coin_type === coinType);
+    if (!_token) return;
+
+    if (
+      _token.coin_type ===
+      (direction === TokenDirection.IN ? tokenOut : tokenIn).coin_type
+    )
+      reverseTokens();
+    else {
+      setTokenSymbol(_token.ticker, direction);
+      fetchQuote(
+        direction === TokenDirection.IN ? _token : tokenIn,
+        direction === TokenDirection.IN ? tokenOut : _token,
+        value,
+      );
+    }
+
+    setTimeout(() => inputRef.current?.focus());
   };
 
   // Exchange rate
@@ -467,7 +495,11 @@ function Page({
                 autoFocus
                 value={value}
                 onChange={onValueChange}
+                tokens={tokens}
                 token={tokenIn}
+                onTokenChange={(coinType: string) =>
+                  onTokenCoinTypeChange(coinType, TokenDirection.IN)
+                }
                 usdValue={tokenInUsdValue}
               />
             </div>
@@ -516,7 +548,11 @@ function Page({
                     : ""
                 }
                 isValueLoading={isFetchingQuote}
+                tokens={tokens}
                 token={tokenOut}
+                onTokenChange={(coinType: string) =>
+                  onTokenCoinTypeChange(coinType, TokenDirection.OUT)
+                }
                 usdValue={tokenOutUsdValue}
                 usdValueChangePercent={tokenOutUsdValueChangePercent}
               />
@@ -601,22 +637,22 @@ export default function Swap() {
   const tokenInSymbol = slug?.[0];
   const tokenOutSymbol = slug?.[1];
 
-  const setTokenSymbol = useCallback(
-    (newTokenSymbol: string, direction: "in" | "out") => {
-      router.push(
-        {
-          pathname: [
-            SWAP_URL,
-            direction === "in" ? newTokenSymbol : tokenInSymbol,
-            direction === "in" ? tokenOutSymbol : newTokenSymbol,
-          ].join("/"),
-        },
-        undefined,
-        { shallow: true },
-      );
-    },
-    [router, tokenInSymbol, tokenOutSymbol],
-  );
+  const setTokenSymbol = (
+    newTokenSymbol: string,
+    direction: TokenDirection,
+  ) => {
+    router.push(
+      {
+        pathname: [
+          SWAP_URL,
+          direction === TokenDirection.IN ? newTokenSymbol : tokenInSymbol,
+          direction === TokenDirection.IN ? tokenOutSymbol : newTokenSymbol,
+        ].join("/"),
+      },
+      undefined,
+      { shallow: true },
+    );
+  };
 
   const reverseTokenSymbols = useCallback(() => {
     router.push(
@@ -687,8 +723,7 @@ export default function Swap() {
       tokens={verifiedTokens}
       tokenIn={tokenIn}
       tokenOut={tokenOut}
-      setTokenInSymbol={(symbol: string) => setTokenSymbol(symbol, "in")}
-      setTokenOutSymbol={(symbol: string) => setTokenSymbol(symbol, "out")}
+      setTokenSymbol={setTokenSymbol}
       reverseTokenSymbols={reverseTokenSymbols}
     />
   );

@@ -4,9 +4,11 @@ import { VerifiedToken } from "@hop.ag/sdk";
 import BigNumber from "bignumber.js";
 import { mergeRefs } from "react-merge-refs";
 
+import Select from "@/components/shared/Select";
 import TokenLogo from "@/components/shared/TokenLogo";
-import { TBody, TLabel, TLabelSans } from "@/components/shared/Typography";
+import { TLabel, TLabelSans } from "@/components/shared/Typography";
 import { Input as InputComponent } from "@/components/ui/input";
+import { SelectTrigger } from "@/components/ui/select";
 import { formatPercent, formatUsd } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -20,7 +22,9 @@ interface SwapInputProps {
   value: string;
   isValueLoading?: boolean;
   onChange?: (value: string) => void;
+  tokens: VerifiedToken[];
   token: VerifiedToken;
+  onTokenChange: (coinType: string) => void;
   usdValue?: BigNumber;
   usdValueChangePercent?: BigNumber;
 }
@@ -33,7 +37,9 @@ const SwapInput = forwardRef<HTMLInputElement, SwapInputProps>(
       value,
       isValueLoading,
       onChange,
+      tokens,
       token,
+      onTokenChange,
       usdValue,
       usdValueChangePercent,
     },
@@ -80,7 +86,7 @@ const SwapInput = forwardRef<HTMLInputElement, SwapInputProps>(
               style={{
                 height: `${INPUT_HEIGHT}px`,
                 paddingLeft: `${3 * 4}px`,
-                paddingRight: `${3 * 4 + Math.max(5 * 4 + 2 * 4 + token.ticker.length * 14.4) + 3 * 4}px`,
+                paddingRight: `${3 * 4 + (5 * 4 + 2 * 4 + token.ticker.length * 14.4 + 1 * 4 + 4 * 4) + 3 * 4}px`,
                 paddingTop: `${INPUT_PADDING_Y}px`,
                 paddingBottom: `${INPUT_PADDING_Y + USD_LABEL_HEIGHT}px`,
               }}
@@ -113,16 +119,34 @@ const SwapInput = forwardRef<HTMLInputElement, SwapInputProps>(
               )}
 
             <div
-              className="absolute right-3 z-[2] flex flex-row items-center gap-2"
+              className="absolute right-3 z-[2]"
               style={{ top: `${INPUT_PADDING_Y}px` }}
             >
-              <TokenLogo
-                className="h-5 w-5"
-                coinType={token.coin_type}
-                symbol={token.ticker}
-                src={token.icon_url}
+              <Select
+                trigger={
+                  <SelectTrigger
+                    className={cn(
+                      "h-8 w-fit gap-1 border-none bg-transparent p-0 font-mono text-2xl text-foreground ring-offset-transparent transition-colors hover:text-foreground focus:ring-transparent",
+                    )}
+                    startIcon={
+                      <TokenLogo
+                        className="mr-1 h-5 w-5"
+                        coinType={token.coin_type}
+                        symbol={token.ticker}
+                        src={token.icon_url}
+                      />
+                    }
+                  >
+                    {token.ticker}
+                  </SelectTrigger>
+                }
+                items={tokens.map((_token) => ({
+                  id: _token.coin_type,
+                  name: _token.ticker,
+                }))}
+                selectedItemId={token.coin_type}
+                setValue={onTokenChange}
               />
-              <TBody className="text-right text-2xl">{token.ticker}</TBody>
             </div>
           </div>
         </div>

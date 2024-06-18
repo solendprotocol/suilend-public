@@ -26,7 +26,7 @@ export default function SwapSlippagePopover({
       rootProps={{ open: isOpen, onOpenChange: setIsOpen }}
       trigger={
         <Button
-          className="h-7"
+          className="h-7 rounded-full"
           labelClassName="uppercase text-xs"
           startIcon={<Settings2 />}
           variant="secondary"
