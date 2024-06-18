@@ -14,6 +14,7 @@ import TokenLogo from "@/components/shared/TokenLogo";
 import { TBody, TDisplay, TTitle } from "@/components/shared/Typography";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAppContext } from "@/contexts/AppContext";
+import { isEth } from "@/lib/coinType";
 import { formatPercent } from "@/lib/format";
 import { getFilteredRewards, getTotalAprPercent } from "@/lib/liquidityMining";
 import { DASHBOARD_URL, DISCORD_URL, X_URL } from "@/lib/navigation";
@@ -153,29 +154,37 @@ export default function Home() {
           ) : (
             <Ticker
               className="h-16"
-              items={data.lendingMarket.reserves.map((reserve) => {
-                const totalDepositAprPercent = getTotalAprPercent(
-                  reserve.depositAprPercent,
-                  getFilteredRewards(data.rewardMap[reserve.coinType].deposit),
-                );
+              items={data.lendingMarket.reserves
+                .filter(
+                  (reserve) =>
+                    !isEth(reserve.coinType) ||
+                    reserve.config.depositLimit.gt(0),
+                )
+                .map((reserve) => {
+                  const totalDepositAprPercent = getTotalAprPercent(
+                    reserve.depositAprPercent,
+                    getFilteredRewards(
+                      data.rewardMap[reserve.coinType].deposit,
+                    ),
+                  );
 
-                return (
-                  <div
-                    key={reserve.coinType}
-                    className="flex flex-row items-center gap-3 py-2"
-                  >
-                    <TokenLogo
-                      coinType={reserve.coinType}
-                      symbol={reserve.symbol}
-                      src={reserve.iconUrl}
-                    />
-                    <TBody>{reserve.symbol}</TBody>
-                    <TBody className="text-muted-foreground">
-                      {formatPercent(totalDepositAprPercent)} APR
-                    </TBody>
-                  </div>
-                );
-              })}
+                  return (
+                    <div
+                      key={reserve.coinType}
+                      className="flex flex-row items-center gap-3 py-2"
+                    >
+                      <TokenLogo
+                        coinType={reserve.coinType}
+                        symbol={reserve.symbol}
+                        src={reserve.iconUrl}
+                      />
+                      <TBody>{reserve.symbol}</TBody>
+                      <TBody className="text-muted-foreground">
+                        {formatPercent(totalDepositAprPercent)} APR
+                      </TBody>
+                    </div>
+                  );
+                })}
             />
           )}
         </div>
