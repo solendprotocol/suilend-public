@@ -103,11 +103,10 @@ const SwapInput = forwardRef<HTMLInputElement, SwapInputProps>(
                           usdValueChangePercent.lt(0) && "text-destructive",
                         )}
                       >
-                        {" ("}
+                        {" "}
                         {usdValueChangePercent.gt(0) && "+"}
                         {usdValueChangePercent.lt(0) && "-"}
                         {formatPercent(usdValueChangePercent.abs())}
-                        {")"}
                       </span>
                     )}
                 </TLabel>

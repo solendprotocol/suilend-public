@@ -15,6 +15,7 @@ import BigNumber from "bignumber.js";
 import { ArrowRightLeft, ArrowUpDown, RotateCw } from "lucide-react";
 import { toast } from "sonner";
 import useSWR from "swr";
+import { useLocalStorage } from "usehooks-ts";
 
 import Button from "@/components/shared/Button";
 import FullPageSpinner from "@/components/shared/FullPageSpinner";
@@ -22,6 +23,7 @@ import Spinner from "@/components/shared/Spinner";
 import TextLink from "@/components/shared/TextLink";
 import { TBody, TLabelSans } from "@/components/shared/Typography";
 import SwapInput from "@/components/swap/SwapInput";
+import SwapSlippagePopover from "@/components/swap/SwapSlippagePopover";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 import {
@@ -106,6 +108,28 @@ function Page({
   // State
   const inputRef = useRef<HTMLInputElement>(null);
   const [value, setValue] = useState<string>("");
+
+  // Slippage
+  const [slippage, setSlippage] = useLocalStorage<string>(
+    "swapSlippage",
+    "1.0",
+  );
+
+  const formatAndSetSlippage = useCallback(
+    (_value: string) => {
+      if (new BigNumber(_value || 0).lt(0)) setSlippage("0");
+      else if (new BigNumber(_value).gt(100)) setSlippage("100");
+      else {
+        if (_value.includes(".")) {
+          const [whole, decimals] = _value.split(".");
+          setSlippage(
+            `${whole}.${decimals.slice(0, Math.min(decimals.length, 1))}`,
+          );
+        } else setSlippage(_value);
+      }
+    },
+    [setSlippage],
+  );
 
   // Quote
   const [quoteMap, setQuoteMap] = useState<
@@ -328,7 +352,7 @@ function Page({
         : tokenIn.ticker;
 
     if (quoteAmountIn === undefined || quoteAmountOut === undefined)
-      return `1 ${inTicker} ≈-- ${outTicker}`;
+      return `1 ${inTicker} ≈ -- ${outTicker}`;
 
     const exchangeRate =
       exchangeRateDirection === ExchangeRateDirection.FORWARD
@@ -382,7 +406,7 @@ function Page({
         trade: quote.trade,
         sui_address: address,
 
-        max_slippage_bps: 100, // optional default is 1%
+        max_slippage_bps: +slippage * 100,
       });
 
       const txb = new TransactionBlock(
@@ -417,18 +441,21 @@ function Page({
       <div className="flex w-full max-w-[500px] flex-col items-center gap-8">
         <div className="relative flex w-full flex-col">
           {/* Settings */}
-          <div className="mb-4 flex flex-row items-center gap-2">
-            <div className="flex flex-row justify-center">
-              <Button
-                className="h-7 w-7 rounded-full px-0"
-                tooltip="Refresh"
-                icon={<RotateCw className="h-3 w-3" />}
-                variant="secondary"
-                onClick={fetchQuoteWrapper}
-              >
-                Refresh
-              </Button>
-            </div>
+          <div className="mb-4 flex flex-row items-center justify-between gap-2">
+            <Button
+              className="h-7 w-7 rounded-full px-0"
+              tooltip="Refresh"
+              icon={<RotateCw className="h-3 w-3" />}
+              variant="secondary"
+              onClick={fetchQuoteWrapper}
+            >
+              Refresh
+            </Button>
+
+            <SwapSlippagePopover
+              slippage={slippage}
+              onSlippageChange={formatAndSetSlippage}
+            />
           </div>
 
           {/* In */}
@@ -558,8 +585,7 @@ export default function Swap() {
   const params = useParams();
   const slug = params.slug as string[] | undefined;
 
-  const { rpc, ...restAppContext } = useAppContext();
-  const data = restAppContext.data as AppData;
+  const { rpc } = useAppContext();
 
   // SDK
   const sdk = useMemo(() => {

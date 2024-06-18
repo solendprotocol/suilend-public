@@ -33,10 +33,7 @@ export default function CoinPopover({
     <Popover
       label="coin"
       id="coin"
-      rootProps={{
-        open: isOpen,
-        onOpenChange: setIsOpen,
-      }}
+      rootProps={{ open: isOpen, onOpenChange: setIsOpen }}
       trigger={
         <Button
           className="justify-between"
