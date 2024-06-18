@@ -4,7 +4,10 @@ import { PropsWithChildren, ReactNode } from "react";
 
 import { ClassValue } from "clsx";
 
-import { labelSansClassNames } from "@/components/shared/Typography";
+import {
+  TLabelSans,
+  labelSansClassNames,
+} from "@/components/shared/Typography";
 import { cn } from "@/lib/utils";
 
 interface LinkProps extends PropsWithChildren, NextLinkProps {
@@ -12,6 +15,7 @@ interface LinkProps extends PropsWithChildren, NextLinkProps {
   className?: ClassValue;
   isExternal?: boolean;
   icon?: ReactNode;
+  label?: string;
 }
 
 export default function Link({
@@ -19,6 +23,7 @@ export default function Link({
   className,
   isExternal,
   icon,
+  label,
   children,
   ...props
 }: LinkProps) {
@@ -33,7 +38,7 @@ export default function Link({
       target={isExternal ? "_blank" : undefined}
       className={cn(
         labelSansClassNames,
-        "flex flex-shrink-0 flex-row items-center gap-1.5 text-sm transition-colors hover:text-foreground",
+        "group flex flex-shrink-0 flex-row items-center gap-1.5 text-sm transition-colors hover:text-foreground",
         isActive && "text-foreground",
         className,
       )}
@@ -41,6 +46,16 @@ export default function Link({
     >
       {icon}
       {children}
+      {label && (
+        <TLabelSans
+          className={cn(
+            "rounded-sm bg-muted px-1 text-[10px] leading-4 text-background transition-colors group-hover:bg-foreground",
+            isActive && "bg-foreground",
+          )}
+        >
+          {label}
+        </TLabelSans>
+      )}
     </Component>
   );
 }

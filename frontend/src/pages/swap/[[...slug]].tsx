@@ -243,7 +243,7 @@ function Page({
     tokenOutUsdValue !== undefined &&
     quoteAmountIn !== undefined &&
     quoteAmountIn.gt(0)
-      ? new BigNumber(new BigNumber(tokenInUsdValue).minus(tokenOutUsdValue))
+      ? new BigNumber(new BigNumber(tokenOutUsdValue).minus(tokenInUsdValue))
           .div(tokenInUsdValue)
           .times(100)
       : undefined;
@@ -317,9 +317,7 @@ function Page({
         : ExchangeRateDirection.FORWARD,
     );
 
-  const getExchangeRateLabel = () => {
-    if (quoteAmountIn === undefined || quoteAmountOut === undefined) return;
-
+  const exchangeRateLabel = (() => {
     const inTicker =
       exchangeRateDirection === ExchangeRateDirection.FORWARD
         ? tokenIn.ticker
@@ -328,6 +326,10 @@ function Page({
       exchangeRateDirection === ExchangeRateDirection.FORWARD
         ? tokenOut.ticker
         : tokenIn.ticker;
+
+    if (quoteAmountIn === undefined || quoteAmountOut === undefined)
+      return `1 ${inTicker} ≈-- ${outTicker}`;
+
     const exchangeRate =
       exchangeRateDirection === ExchangeRateDirection.FORWARD
         ? quoteAmountOut.div(quoteAmountIn)
@@ -337,13 +339,8 @@ function Page({
         ? tokenOut.decimals
         : tokenIn.decimals;
 
-    return [
-      `1 ${inTicker}`,
-      "≈",
-      `${formatToken(exchangeRate, { dp: decimals })} ${outTicker}`,
-    ].join(" ");
-  };
-  const exchangeRateLabel = getExchangeRateLabel();
+    return `1 ${inTicker} ≈ ${formatToken(exchangeRate, { dp: decimals })} ${outTicker}`;
+  })();
 
   // Submit
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -377,7 +374,7 @@ function Page({
 
   const onSubmitClick = async () => {
     if (submitButtonState.isDisabled) return;
-    if (!address || !quote) return;
+    if (!address || !quote || isFetchingQuote) return;
 
     setIsSubmitting(true);
     try {
@@ -418,7 +415,7 @@ function Page({
       </Head>
 
       <div className="flex w-full max-w-[500px] flex-col items-center gap-8">
-        <div className="relative flex flex-col">
+        <div className="relative flex w-full flex-col">
           {/* Settings */}
           <div className="mb-4 flex flex-row items-center gap-2">
             <div className="flex flex-row justify-center">
@@ -468,7 +465,7 @@ function Page({
           </div>
 
           {/* Reverse */}
-          <div className="relative z-[2] -my-3.5 w-max self-center rounded-full bg-background">
+          <div className="relative z-[2] -my-3 w-max self-center rounded-full bg-background">
             <Button
               className="rounded-full px-0"
               icon={<ArrowUpDown />}
@@ -511,7 +508,7 @@ function Page({
 
           {/* Submit */}
           <Button
-            className="h-auto min-h-12 flex-1 rounded-md py-1 md:py-2"
+            className="h-auto min-h-14 flex-1 rounded-lg py-1 md:py-2"
             labelClassName="text-wrap uppercase"
             style={{ overflowWrap: "anywhere" }}
             disabled={submitButtonState.isDisabled}
@@ -531,19 +528,15 @@ function Page({
           </Button>
 
           {/* Exchange rate */}
-          <div className="h-4">
-            {exchangeRateLabel && (
-              <Button
-                className="mt-3 h-auto w-max px-0 py-0 text-muted-foreground hover:bg-transparent"
-                labelClassName="text-xs font-sans"
-                variant="ghost"
-                endIcon={<ArrowRightLeft />}
-                onClick={reverseExchangeRate}
-              >
-                {exchangeRateLabel}
-              </Button>
-            )}
-          </div>
+          <Button
+            className="mt-3 h-auto w-max px-0 py-0 text-muted-foreground hover:bg-transparent"
+            labelClassName="text-xs font-sans"
+            variant="ghost"
+            endIcon={<ArrowRightLeft />}
+            onClick={reverseExchangeRate}
+          >
+            {exchangeRateLabel}
+          </Button>
         </div>
 
         <TLabelSans>

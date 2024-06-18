@@ -4,7 +4,6 @@ import { isBefore } from "date-fns";
 
 import HeaderPointsPopover from "@/components/points/HeaderPointsPopover";
 import Link from "@/components/shared/Link";
-import { TLabelSans } from "@/components/shared/Typography";
 import { useAppContext } from "@/contexts/AppContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 import {
@@ -14,7 +13,6 @@ import {
   POINTS_URL,
   SWAP_URL,
 } from "@/lib/navigation";
-import { cn } from "@/lib/utils";
 
 export default function NavigationLinks() {
   const router = useRouter();
@@ -40,19 +38,8 @@ export default function NavigationLinks() {
           </div>
         )}
       </div>
-      <Link href={SWAP_URL}>
+      <Link href={SWAP_URL} label={isSwapNew ? "New" : undefined}>
         Swap
-        {isSwapNew && (
-          <TLabelSans
-            className={cn(
-              "rounded-sm border px-1 text-[10px] leading-4 text-inherit",
-              isActive(SWAP_URL) &&
-                "border-secondary bg-secondary text-secondary-foreground",
-            )}
-          >
-            New
-          </TLabelSans>
-        )}
       </Link>
       <Link href={BRIDGE_URL}>Bridge</Link>
       {data?.lendingMarketOwnerCapId && <Link href={ADMIN_URL}>Admin</Link>}

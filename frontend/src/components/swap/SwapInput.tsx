@@ -93,7 +93,7 @@ const SwapInput = forwardRef<HTMLInputElement, SwapInputProps>(
                   className="absolute left-3 z-[2]"
                   style={{ bottom: `${INPUT_PADDING_Y}px` }}
                 >
-                  ≈{formatUsd(usdValue)}
+                  {formatUsd(usdValue)}
                   {usdValueChangePercent !== undefined &&
                     !usdValueChangePercent.eq(0) && (
                       <span
