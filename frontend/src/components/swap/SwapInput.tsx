@@ -68,7 +68,7 @@ const SwapInput = forwardRef<HTMLInputElement, SwapInputProps>(
           <div className="relative w-full">
             <InputComponent
               ref={mergeRefs([localRef, ref])}
-              className="relative z-[1] border-0 bg-transparent px-0 py-0 text-2xl transition-opacity [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+              className="relative z-[1] border-0 bg-transparent px-0 py-0 text-2xl"
               type="number"
               placeholder="0"
               value={value}
@@ -76,6 +76,7 @@ const SwapInput = forwardRef<HTMLInputElement, SwapInputProps>(
               onChange={
                 !isReadOnly ? (e) => onChange(e.target.value) : undefined
               }
+              onWheel={(e) => e.currentTarget.blur()}
               style={{
                 height: `${INPUT_HEIGHT}px`,
                 paddingLeft: `${3 * 4}px`,

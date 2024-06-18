@@ -43,7 +43,7 @@ export default function ConnectedWalletDropdownMenu({
 
   return (
     <DropdownMenu
-      root={{ open: isOpen, onOpenChange: setIsOpen }}
+      rootProps={{ open: isOpen, onOpenChange: setIsOpen }}
       trigger={
         <Button
           className="min-w-0"

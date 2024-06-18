@@ -44,9 +44,11 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 
     const inputId = getInputId(id);
 
+    // Autofocus
     const localRef = useRef<HTMLInputElement>(null);
     useEffect(() => {
-      if (autoFocus) setTimeout(() => localRef.current?.focus());
+      if (!autoFocus) return;
+      setTimeout(() => localRef.current?.focus());
     }, [autoFocus]);
 
     return (
@@ -59,17 +61,19 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             {labelRight && <TLabelSans>{labelRight}</TLabelSans>}
           </div>
         )}
+
         <div className="relative w-full">
           {startDecorator && (
             <TLabel className="pointer-events-none absolute left-3 top-1/2 z-[2] -translate-y-2/4">
               {startDecorator}
             </TLabel>
           )}
+
           <InputComponent
             ref={mergeRefs([localRef, ref])}
             id={inputId}
             className={cn(
-              "border-divider relative z-[1] flex-1 focus:border-input [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none",
+              "border-divider relative z-[1] focus:border-primary",
               startDecorator && "pl-10",
               endDecorator && "pr-10",
               className,
@@ -81,6 +85,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             onWheel={(e) => e.currentTarget.blur()}
             {...restInputProps}
           />
+
           {endDecorator && (
             <TLabel className="pointer-events-none absolute right-3 top-1/2 z-[2] -translate-y-2/4">
               {endDecorator}

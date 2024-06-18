@@ -196,7 +196,7 @@ export default function MarketCardList({
 
         <div className="flex h-5 flex-row items-center gap-1">
           <Select
-            root={{ open: isSortByOpen, onOpenChange: setIsSortByOpen }}
+            rootProps={{ open: isSortByOpen, onOpenChange: setIsSortByOpen }}
             trigger={
               <SelectTrigger
                 className={cn(

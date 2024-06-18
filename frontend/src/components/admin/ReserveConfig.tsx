@@ -6,9 +6,9 @@ import { v4 as uuidv4 } from "uuid";
 
 import { CreateReserveConfigArgs } from "@suilend/sdk/_generated/suilend/reserve-config/functions";
 
-import Input, { getInputId } from "@/components/admin/Input";
 import AprLineChart from "@/components/shared/AprLineChart";
 import Button from "@/components/shared/Button";
+import Input, { getInputId } from "@/components/shared/Input";
 import Switch from "@/components/shared/Switch";
 import { TLabelSans } from "@/components/shared/Typography";
 
