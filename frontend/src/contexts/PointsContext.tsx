@@ -94,7 +94,7 @@ export function PointsContextProvider({ children }: PropsWithChildren) {
     if (refreshedObligations === undefined) return;
     if (data === null) return;
     if (isProcessingLeaderboardRowsRef.current) return;
-    if (SDK_ENV === SdkEnv.BETA) {
+    if ((SDK_ENV as SdkEnv) === SdkEnv.BETA) {
       const pointsStats = getPointsStats(data.rewardMap, data.obligations);
       const sortedRows = [];
 
