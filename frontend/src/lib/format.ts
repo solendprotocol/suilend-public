@@ -36,6 +36,12 @@ export const formatType = (value: string, length = 4) => {
   ].join("::");
 };
 
+export const formatList = (array: string[]) => {
+  if (array.length === 1) return array[0];
+  if (array.length === 2) return array.join(" and ");
+  return `${array.slice(0, -1).join(", ")}, and ${array.slice(-1)}`;
+};
+
 export const formatInteger = (value: number) =>
   Intl.NumberFormat().format(value);
 
