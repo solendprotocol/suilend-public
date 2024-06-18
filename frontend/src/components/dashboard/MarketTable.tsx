@@ -120,7 +120,10 @@ export default function MarketTable() {
   const rows: ReservesRowData[] = useMemo(
     () =>
       data.lendingMarket.reserves
-        .filter((reserve) => !isEth(reserve.coinType))
+        .filter(
+          (reserve) =>
+            !isEth(reserve.coinType) || reserve.config.depositLimit.gt(0),
+        )
         .sort(reserveSort)
         .map((reserve) => {
           const coinType = reserve.coinType;

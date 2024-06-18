@@ -155,7 +155,11 @@ export default function Home() {
             <Ticker
               className="h-16"
               items={data.lendingMarket.reserves
-                .filter((reserve) => !isEth(reserve.coinType))
+                .filter(
+                  (reserve) =>
+                    !isEth(reserve.coinType) ||
+                    reserve.config.depositLimit.gt(0),
+                )
                 .map((reserve) => {
                   const totalDepositAprPercent = getTotalAprPercent(
                     reserve.depositAprPercent,
