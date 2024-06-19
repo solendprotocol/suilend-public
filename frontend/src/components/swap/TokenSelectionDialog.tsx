@@ -14,6 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { useSwapContext } from "@/contexts/SwapContext";
 import { ParsedCoinBalance } from "@/lib/coinBalance";
+import { SUI_COINTYPE, isSui } from "@/lib/coinType";
 import { formatId, formatToken } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -111,7 +112,7 @@ export default function TokenSelectionDialog({
         </Button>
       }
       contentProps={{ className: "max-w-xl" }}
-      title="Select a token"
+      title="Select token"
     >
       <div className="mx-4 mb-4 flex flex-row items-center gap-3 rounded-md bg-muted/5 px-3">
         <Search className="h-4 w-4 text-muted-foreground" />
@@ -176,7 +177,7 @@ export default function TokenSelectionDialog({
               <div
                 key={t.coin_type}
                 className={cn(
-                  "flex w-full cursor-pointer flex-row items-center justify-between p-4 transition-colors hover:bg-muted/10",
+                  "flex w-full cursor-pointer flex-row justify-between p-4 transition-colors hover:bg-muted/10",
                   isSelected &&
                     "bg-muted/5 shadow-[inset_2px_0_0_0_hsl(var(--secondary))]",
                 )}
@@ -208,14 +209,12 @@ export default function TokenSelectionDialog({
                       : "--"}{" "}
                     {t.ticker}
                   </TBody>
-                  <TLabelSans className="w-max">
-                    <TextLink
-                      className="text-muted-foreground no-underline hover:text-foreground"
-                      href={explorer.buildCoinUrl(t.coin_type)}
-                    >
-                      {formatId(t.coin_type)}
-                    </TextLink>
-                  </TLabelSans>
+                  <TextLink
+                    className="w-max text-xs text-muted-foreground no-underline hover:text-foreground"
+                    href={explorer.buildCoinUrl(t.coin_type)}
+                  >
+                    {isSui(t.coin_type) ? SUI_COINTYPE : formatId(t.coin_type)}
+                  </TextLink>
                 </div>
               </div>
             );

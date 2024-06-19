@@ -13,16 +13,20 @@ import { useLocalStorage } from "usehooks-ts";
 import Button from "@/components/shared/Button";
 import Spinner from "@/components/shared/Spinner";
 import TextLink from "@/components/shared/TextLink";
+import TokenLogo from "@/components/shared/TokenLogo";
 import { TBody, TLabelSans } from "@/components/shared/Typography";
+import HopsDialog from "@/components/swap/HopsDialog";
 import SwapInput from "@/components/swap/SwapInput";
 import SwapSlippagePopover from "@/components/swap/SwapSlippagePopover";
+import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useAppContext } from "@/contexts/AppContext";
 import { SwapContextProvider, useSwapContext } from "@/contexts/SwapContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 import { ParsedCoinBalance } from "@/lib/coinBalance";
 import { SUI_COINTYPE, isSui } from "@/lib/coinType";
 import { TX_TOAST_DURATION } from "@/lib/constants";
-import { formatToken } from "@/lib/format";
+import { formatId, formatPercent, formatToken, formatUsd } from "@/lib/format";
 import { cn, hoverUnderlineClassName } from "@/lib/utils";
 
 enum TokenDirection {
@@ -172,6 +176,10 @@ function Page() {
         result.trade.amount_out.token = normalizeStructTag(
           result.trade.amount_out.token,
         );
+        for (const node of Object.values(result.trade.nodes)) {
+          node.amount_in.token = normalizeStructTag(node.amount_in.token);
+          node.amount_out.token = normalizeStructTag(node.amount_out.token);
+        }
 
         setQuoteMap((o) => ({ ...o, [timestamp]: result }));
         return result;
@@ -254,16 +262,13 @@ function Page() {
 
   const fetchTokenUsdPrice = useCallback(async (token: VerifiedToken) => {
     try {
-      const url = "https://public-api.birdeye.so/defi/price";
-      const res = await fetch(
-        `${url}?address=${isSui(token.coin_type) ? SUI_COINTYPE : token.coin_type}`,
-        {
-          headers: {
-            "X-API-KEY": process.env.NEXT_PUBLIC_BIRDEYE_API_KEY as string,
-            "x-chain": "sui",
-          },
+      const url = `https://public-api.birdeye.so/defi/price?address=${isSui(token.coin_type) ? SUI_COINTYPE : token.coin_type}`;
+      const res = await fetch(url, {
+        headers: {
+          "X-API-KEY": process.env.NEXT_PUBLIC_BIRDEYE_API_KEY as string,
+          "x-chain": "sui",
         },
-      );
+      });
       const json = await res.json();
       if (json.data?.value)
         setUsdPriceMap((o) => ({ ...o, [token.coin_type]: json.data.value }));
@@ -289,6 +294,49 @@ function Page() {
         clearInterval(usdPricesIntervalRef.current);
     };
   }, [tokenIn, tokenOut, fetchTokenUsdPrice]);
+
+  // Historical USD prices
+  const [historicalUsdPriceMap, setHistoricalUsdPriceMap] = useState<
+    Record<string, number>
+  >({});
+
+  const getTokenUsdPrice1DChange = (t: VerifiedToken) =>
+    usdPriceMap[t.coin_type] !== undefined &&
+    historicalUsdPriceMap[t.coin_type] !== undefined
+      ? new BigNumber(
+          ((usdPriceMap[t.coin_type] - historicalUsdPriceMap[t.coin_type]) /
+            historicalUsdPriceMap[t.coin_type]) *
+            100,
+        )
+      : undefined;
+
+  const fetchTokenHistoricalUsdPrice = useCallback(
+    async (token: VerifiedToken) => {
+      try {
+        const url = `https://public-api.birdeye.so/defi/history_price?address=${isSui(token.coin_type) ? SUI_COINTYPE : token.coin_type}&address_type=token&type=15m&time_from=${Math.floor(new Date().getTime() / 1000) - 24 * 60 * 60}&time_to=${Math.floor(new Date().getTime() / 1000)}`;
+        const res = await fetch(url, {
+          headers: {
+            "X-API-KEY": process.env.NEXT_PUBLIC_BIRDEYE_API_KEY as string,
+            "x-chain": "sui",
+          },
+        });
+        const json = await res.json();
+        if (json.data?.items)
+          setHistoricalUsdPriceMap((o) => ({
+            ...o,
+            [token.coin_type]: json.data.items[0].value,
+          }));
+      } catch (err) {
+        console.error(err);
+      }
+    },
+    [],
+  );
+
+  useEffect(() => {
+    fetchTokenHistoricalUsdPrice(tokenIn);
+    fetchTokenHistoricalUsdPrice(tokenOut);
+  }, [tokenIn, tokenOut, fetchTokenHistoricalUsdPrice]);
 
   // Reverse tokens
   const reverseTokens = () => {
@@ -514,7 +562,7 @@ function Page() {
           </div>
 
           {/* Out */}
-          <div className="relative z-[1] mb-6 flex flex-col">
+          <div className="relative z-[1] mb-4 flex flex-col">
             <div className="relative z-[2] w-full">
               <SwapInput
                 title="To receive"
@@ -546,6 +594,16 @@ function Page() {
             </div>
           </div>
 
+          {new BigNumber(value || 0).gt(0) && (
+            <div className="mb-4 w-full">
+              {quote ? (
+                <HopsDialog quote={quote} />
+              ) : (
+                <Skeleton className="h-5 w-40" />
+              )}
+            </div>
+          )}
+
           {/* Submit */}
           <Button
             className="h-auto min-h-14 flex-1 rounded-lg py-1 md:py-2"
@@ -569,7 +627,7 @@ function Page() {
 
           {/* Exchange rate */}
           <Button
-            className="mt-3 h-auto w-max px-0 py-0 text-muted-foreground hover:bg-transparent"
+            className="mt-4 h-auto w-max px-0 py-0 text-muted-foreground hover:bg-transparent"
             labelClassName="text-xs font-sans"
             variant="ghost"
             endIcon={<ArrowRightLeft />}
@@ -577,7 +635,75 @@ function Page() {
           >
             {exchangeRateLabel}
           </Button>
+
+          {/* Tokens */}
+          <div className="mt-6 flex w-full flex-col gap-4">
+            {[tokenIn, tokenOut].map((t) => {
+              const usdPrice = usdPriceMap[t.coin_type];
+              const usdPriceDp =
+                Math.max(0, -Math.floor(Math.log10(usdPrice)) - 1) + 2;
+              const usdPrice1DChange = getTokenUsdPrice1DChange(t);
+
+              return (
+                <div
+                  key={t.coin_type}
+                  className="flex w-full flex-row justify-between"
+                >
+                  <div className="flex w-full flex-row items-center gap-3">
+                    <TokenLogo
+                      showTooltip
+                      coinType={t.coin_type}
+                      symbol={t.ticker}
+                      src={t.icon_url}
+                    />
+
+                    <div className="flex flex-col gap-1">
+                      <TBody className="w-max">{t.ticker}</TBody>
+                      <TLabelSans className="w-max">{t.name}</TLabelSans>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col items-end gap-1">
+                    <TBody className="w-max">
+                      {usdPrice !== undefined &&
+                      usdPrice1DChange !== undefined ? (
+                        <>
+                          {formatUsd(new BigNumber(usdPrice), {
+                            dp: usdPriceDp,
+                            exact: true,
+                          })}{" "}
+                          <span
+                            className={cn(
+                              usdPrice1DChange.gt(0) && "text-success",
+                              usdPrice1DChange.eq(0) && "text-muted-foreground",
+                              usdPrice1DChange.lt(0) && "text-destructive",
+                            )}
+                          >
+                            {usdPrice1DChange.gt(0) && "+"}
+                            {usdPrice1DChange.lt(0) && "-"}
+                            {formatPercent(usdPrice1DChange.abs())}
+                          </span>
+                        </>
+                      ) : (
+                        <Skeleton className="h-5 w-20" />
+                      )}
+                    </TBody>
+                    <TextLink
+                      className="w-max text-xs text-muted-foreground no-underline hover:text-foreground"
+                      href={explorer.buildCoinUrl(t.coin_type)}
+                    >
+                      {isSui(t.coin_type)
+                        ? SUI_COINTYPE
+                        : formatId(t.coin_type)}
+                    </TextLink>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
+
+        <Separator />
 
         <TLabelSans>
           Powered by{" "}
