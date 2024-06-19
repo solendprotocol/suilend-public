@@ -6,7 +6,9 @@ import { Settings2 } from "lucide-react";
 import Button from "@/components/shared/Button";
 import Input from "@/components/shared/Input";
 import Popover from "@/components/shared/Popover";
+import styles from "@/components/swap/SwapSlippagePopover.module.scss";
 import { formatPercent } from "@/lib/format";
+import { cn } from "@/lib/utils";
 
 interface SwapSlippagePopoverProps {
   slippage: string;
@@ -26,7 +28,7 @@ export default function SwapSlippagePopover({
       rootProps={{ open: isOpen, onOpenChange: setIsOpen }}
       trigger={
         <Button
-          className="h-7 rounded-full"
+          className={cn("h-7 rounded-full", isOpen && "!bg-secondary")}
           labelClassName="uppercase text-xs"
           startIcon={<Settings2 />}
           variant="secondary"
@@ -38,23 +40,23 @@ export default function SwapSlippagePopover({
       }
       contentProps={{
         align: "end",
-        sideOffset: 2,
-        className: "border-0 w-[var(--radix-popover-trigger-width)] p-0",
+        sideOffset: 0,
+        className:
+          "border-0 bg-transparent w-[var(--radix-popover-trigger-width)] py-0 px-2",
       }}
     >
       <Input
         id="slippage"
-        type="number"
+        type="range"
         value={slippage}
         onChange={onSlippageChange}
         inputProps={{
           autoFocus: false,
-          className: "h-8 focus:border-secondary rounded-sm",
+          className: cn(styles.input, "p-0 h-4 border-0"),
           min: 0,
           max: 5,
           step: 0.1,
         }}
-        endDecorator="%"
       />
     </Popover>
   );

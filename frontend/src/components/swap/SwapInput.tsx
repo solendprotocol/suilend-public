@@ -4,11 +4,9 @@ import { VerifiedToken } from "@hop.ag/sdk";
 import BigNumber from "bignumber.js";
 import { mergeRefs } from "react-merge-refs";
 
-import Select from "@/components/shared/Select";
-import TokenLogo from "@/components/shared/TokenLogo";
 import { TLabel, TLabelSans } from "@/components/shared/Typography";
+import TokenSelectionDialog from "@/components/swap/TokenSelectionDialog";
 import { Input as InputComponent } from "@/components/ui/input";
-import { SelectTrigger } from "@/components/ui/select";
 import { formatPercent, formatUsd } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -22,11 +20,11 @@ interface SwapInputProps {
   value: string;
   isValueLoading?: boolean;
   onChange?: (value: string) => void;
-  tokens: VerifiedToken[];
-  token: VerifiedToken;
-  onTokenChange: (coinType: string) => void;
   usdValue?: BigNumber;
   usdValueChangePercent?: BigNumber;
+  tokens: VerifiedToken[];
+  token: VerifiedToken;
+  onSelectToken: (token: VerifiedToken) => void;
 }
 
 const SwapInput = forwardRef<HTMLInputElement, SwapInputProps>(
@@ -37,11 +35,11 @@ const SwapInput = forwardRef<HTMLInputElement, SwapInputProps>(
       value,
       isValueLoading,
       onChange,
-      tokens,
-      token,
-      onTokenChange,
       usdValue,
       usdValueChangePercent,
+      tokens,
+      token,
+      onSelectToken,
     },
     ref,
   ) => {
@@ -102,7 +100,7 @@ const SwapInput = forwardRef<HTMLInputElement, SwapInputProps>(
                 >
                   {formatUsd(usdValue)}
                   {usdValueChangePercent !== undefined &&
-                    !usdValueChangePercent.eq(0) && (
+                    usdValueChangePercent.abs().gt(0.01) && (
                       <span
                         className={cn(
                           usdValueChangePercent.gt(0) && "text-success",
@@ -122,30 +120,10 @@ const SwapInput = forwardRef<HTMLInputElement, SwapInputProps>(
               className="absolute right-3 z-[2]"
               style={{ top: `${INPUT_PADDING_Y}px` }}
             >
-              <Select
-                trigger={
-                  <SelectTrigger
-                    className={cn(
-                      "h-8 w-fit gap-1 border-none bg-transparent p-0 font-mono text-2xl text-foreground ring-offset-transparent transition-colors hover:text-foreground focus:ring-transparent",
-                    )}
-                    startIcon={
-                      <TokenLogo
-                        className="mr-1 h-5 w-5"
-                        coinType={token.coin_type}
-                        symbol={token.ticker}
-                        src={token.icon_url}
-                      />
-                    }
-                  >
-                    {token.ticker}
-                  </SelectTrigger>
-                }
-                items={tokens.map((_token) => ({
-                  id: _token.coin_type,
-                  name: _token.ticker,
-                }))}
-                selectedItemId={token.coin_type}
-                setValue={onTokenChange}
+              <TokenSelectionDialog
+                tokens={tokens}
+                token={token}
+                onSelectToken={onSelectToken}
               />
             </div>
           </div>

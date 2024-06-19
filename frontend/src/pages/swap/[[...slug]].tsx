@@ -1,14 +1,7 @@
 import Head from "next/head";
-import { useParams } from "next/navigation";
-import { useRouter } from "next/router";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-import {
-  GetQuoteResponse,
-  HopApi,
-  HopApiOptions,
-  VerifiedToken,
-} from "@hop.ag/sdk";
+import { GetQuoteResponse, HopApi, VerifiedToken } from "@hop.ag/sdk";
 import { TransactionBlock } from "@mysten/sui.js/transactions";
 import { normalizeStructTag } from "@mysten/sui.js/utils";
 import BigNumber from "bignumber.js";
@@ -18,23 +11,18 @@ import useSWR from "swr";
 import { useLocalStorage } from "usehooks-ts";
 
 import Button from "@/components/shared/Button";
-import FullPageSpinner from "@/components/shared/FullPageSpinner";
 import Spinner from "@/components/shared/Spinner";
 import TextLink from "@/components/shared/TextLink";
 import { TBody, TLabelSans } from "@/components/shared/Typography";
 import SwapInput from "@/components/swap/SwapInput";
 import SwapSlippagePopover from "@/components/swap/SwapSlippagePopover";
-import { AppData, useAppContext } from "@/contexts/AppContext";
+import { useAppContext } from "@/contexts/AppContext";
+import { SwapContextProvider, useSwapContext } from "@/contexts/SwapContext";
 import { useWalletContext } from "@/contexts/WalletContext";
-import {
-  COINTYPE_LOGO_MAP,
-  COINTYPE_SYMBOL_MAP,
-  SUI_COINTYPE,
-  isSui,
-} from "@/lib/coinType";
+import { ParsedCoinBalance } from "@/lib/coinBalance";
+import { SUI_COINTYPE, isSui } from "@/lib/coinType";
 import { TX_TOAST_DURATION } from "@/lib/constants";
 import { formatToken } from "@/lib/format";
-import { SWAP_URL } from "@/lib/navigation";
 import { cn, hoverUnderlineClassName } from "@/lib/utils";
 
 enum TokenDirection {
@@ -49,38 +37,27 @@ type SubmitButtonState = {
   description?: string;
 };
 
-interface PageProps {
-  sdk: HopApi;
-  tokens: VerifiedToken[];
-  tokenIn: VerifiedToken;
-  tokenOut: VerifiedToken;
-  setTokenSymbol: (coinType: string, direction: TokenDirection) => void;
-  reverseTokenSymbols: () => void;
-}
-
-function Page({
-  sdk,
-  tokens,
-  tokenIn,
-  tokenOut,
-  setTokenSymbol,
-  reverseTokenSymbols,
-}: PageProps) {
+function Page() {
   const { address } = useWalletContext();
-  const {
-    refreshData,
+  const { refreshData, explorer, signExecuteAndWaitTransactionBlock } =
+    useAppContext();
 
-    explorer,
-    signExecuteAndWaitTransactionBlock,
-    ...restAppContext
-  } = useAppContext();
-  const data = restAppContext.data as AppData;
+  const { setTokenSymbol, reverseTokenSymbols, ...restSwapContext } =
+    useSwapContext();
+  const sdk = restSwapContext.sdk as HopApi;
+  const tokens = restSwapContext.tokens as VerifiedToken[];
+  const tokenIn = restSwapContext.tokenIn as VerifiedToken;
+  const tokenOut = restSwapContext.tokenOut as VerifiedToken;
+  const coinBalancesMap = restSwapContext.coinBalancesMap as Record<
+    string,
+    ParsedCoinBalance
+  >;
 
   // Balances
   const tokenInBalance =
-    data.coinBalancesMap[tokenIn.coin_type]?.balance ?? new BigNumber(0);
+    coinBalancesMap[tokenIn.coin_type]?.balance ?? new BigNumber(0);
   const tokenOutBalance =
-    data.coinBalancesMap[tokenOut.coin_type]?.balance ?? new BigNumber(0);
+    coinBalancesMap[tokenOut.coin_type]?.balance ?? new BigNumber(0);
 
   // Max
   const tokenInMaxCalculations = (() => {
@@ -337,6 +314,7 @@ function Page({
     const _token = tokens.find((t) => t.coin_type === coinType);
     if (!_token) return;
 
+    setQuoteMap({});
     if (
       _token.coin_type ===
       (direction === TokenDirection.IN ? tokenOut : tokenIn).coin_type
@@ -351,7 +329,7 @@ function Page({
       );
     }
 
-    setTimeout(() => inputRef.current?.focus());
+    inputRef.current?.focus();
   };
 
   // Exchange rate
@@ -418,17 +396,13 @@ function Page({
     };
   })();
 
-  const actionInWords = [
-    `${value} ${tokenIn.ticker}`,
-    "for",
-    `${quoteAmountOut !== undefined ? quoteAmountOut.toString() : "--"} ${tokenOut.ticker}`,
-  ].join(" ");
-
   const onSubmitClick = async () => {
     if (submitButtonState.isDisabled) return;
     if (!address || !quote || isFetchingQuote) return;
 
     setIsSubmitting(true);
+    await fetchQuoteWrapper();
+
     try {
       const tx = await sdk.fetchTx({
         trade: quote.trade,
@@ -443,13 +417,16 @@ function Page({
       const res = await signExecuteAndWaitTransactionBlock(txb);
       const txUrl = explorer.buildTxUrl(res.digest);
 
-      toast.success(`Swapped ${actionInWords}`, {
-        action: <TextLink href={txUrl}>View tx on {explorer.name}</TextLink>,
-        duration: TX_TOAST_DURATION,
-      });
+      toast.success(
+        `Swapped ${value} ${tokenIn.ticker} for ${tokenOut.ticker}`,
+        {
+          action: <TextLink href={txUrl}>View tx on {explorer.name}</TextLink>,
+          duration: TX_TOAST_DURATION,
+        },
+      );
       formatAndSetValue("", tokenIn);
     } catch (err) {
-      toast.error(`Failed to swap ${actionInWords}`, {
+      toast.error("Failed to swap", {
         description: ((err as Error)?.message || err) as string,
         duration: TX_TOAST_DURATION,
       });
@@ -495,12 +472,12 @@ function Page({
                 autoFocus
                 value={value}
                 onChange={onValueChange}
+                usdValue={tokenInUsdValue}
                 tokens={tokens}
                 token={tokenIn}
-                onTokenChange={(coinType: string) =>
-                  onTokenCoinTypeChange(coinType, TokenDirection.IN)
+                onSelectToken={(t: VerifiedToken) =>
+                  onTokenCoinTypeChange(t.coin_type, TokenDirection.IN)
                 }
-                usdValue={tokenInUsdValue}
               />
             </div>
 
@@ -548,13 +525,13 @@ function Page({
                     : ""
                 }
                 isValueLoading={isFetchingQuote}
-                tokens={tokens}
-                token={tokenOut}
-                onTokenChange={(coinType: string) =>
-                  onTokenCoinTypeChange(coinType, TokenDirection.OUT)
-                }
                 usdValue={tokenOutUsdValue}
                 usdValueChangePercent={tokenOutUsdValueChangePercent}
+                tokens={tokens}
+                token={tokenOut}
+                onSelectToken={(t: VerifiedToken) =>
+                  onTokenCoinTypeChange(t.coin_type, TokenDirection.OUT)
+                }
               />
             </div>
 
@@ -617,114 +594,9 @@ function Page({
 }
 
 export default function Swap() {
-  const router = useRouter();
-  const params = useParams();
-  const slug = params.slug as string[] | undefined;
-
-  const { rpc } = useAppContext();
-
-  // SDK
-  const sdk = useMemo(() => {
-    const hop_api_options: HopApiOptions = {
-      api_key: process.env.NEXT_PUBLIC_HOP_AG_API_KEY as string,
-      fee_bps: 0,
-    };
-
-    return new HopApi(rpc.url, hop_api_options);
-  }, [rpc.url]);
-
-  // State
-  const tokenInSymbol = slug?.[0];
-  const tokenOutSymbol = slug?.[1];
-
-  const setTokenSymbol = (
-    newTokenSymbol: string,
-    direction: TokenDirection,
-  ) => {
-    router.push(
-      {
-        pathname: [
-          SWAP_URL,
-          direction === TokenDirection.IN ? newTokenSymbol : tokenInSymbol,
-          direction === TokenDirection.IN ? tokenOutSymbol : newTokenSymbol,
-        ].join("/"),
-      },
-      undefined,
-      { shallow: true },
-    );
-  };
-
-  const reverseTokenSymbols = useCallback(() => {
-    router.push(
-      { pathname: [SWAP_URL, tokenOutSymbol, tokenInSymbol].join("/") },
-      undefined,
-      { shallow: true },
-    );
-  }, [router, tokenInSymbol, tokenOutSymbol]);
-
-  // Verified tokens
-  const [verifiedTokens, setVerifiedTokens] = useState<
-    VerifiedToken[] | undefined
-  >(undefined);
-
-  const isFetchingVerifiedTokensRef = useRef<boolean>(false);
-  useEffect(() => {
-    (async () => {
-      if (isFetchingVerifiedTokensRef.current) return;
-
-      isFetchingVerifiedTokensRef.current = true;
-      try {
-        const result = await sdk.fetchTokens();
-        setVerifiedTokens(
-          result.tokens.map((token) => {
-            const coinType = normalizeStructTag(token.coin_type);
-
-            return {
-              ...token,
-              coin_type: coinType,
-              ticker: COINTYPE_SYMBOL_MAP[coinType] ?? token.ticker,
-              icon_url: COINTYPE_LOGO_MAP[coinType] ?? token.icon_url,
-            };
-          }),
-        );
-      } catch (err) {
-        console.error(err);
-      }
-    })();
-  }, [sdk]);
-
-  const tokenIn = useMemo(
-    () => verifiedTokens?.find((vt) => vt.ticker === tokenInSymbol),
-    [verifiedTokens, tokenInSymbol],
-  );
-  const tokenOut = useMemo(
-    () => verifiedTokens?.find((vt) => vt.ticker === tokenOutSymbol),
-    [verifiedTokens, tokenOutSymbol],
-  );
-
-  useEffect(() => {
-    if (
-      slug === undefined ||
-      slug.length !== 2 ||
-      slug[0] === slug[1] ||
-      (verifiedTokens && (!tokenIn || !tokenOut))
-    )
-      router.replace(
-        { pathname: [SWAP_URL, "SUI", "USDC"].join("/") },
-        undefined,
-        { shallow: true },
-      );
-  }, [slug, verifiedTokens, tokenIn, tokenOut, router]);
-
-  if (!verifiedTokens || !tokenIn || !tokenOut) return <FullPageSpinner />;
   return (
-    <Page
-      sdk={sdk}
-      tokens={verifiedTokens}
-      tokenIn={tokenIn}
-      tokenOut={tokenOut}
-      setTokenSymbol={setTokenSymbol}
-      reverseTokenSymbols={reverseTokenSymbols}
-    />
+    <SwapContextProvider>
+      <Page />
+    </SwapContextProvider>
   );
 }

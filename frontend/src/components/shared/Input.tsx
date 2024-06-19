@@ -15,7 +15,7 @@ interface InputProps {
   label?: string;
   labelRight?: string;
   id: string;
-  type?: "text" | "number";
+  type?: "text" | "number" | "range";
   placeholder?: string;
   value: string | number;
   onChange: (value: string) => void;
