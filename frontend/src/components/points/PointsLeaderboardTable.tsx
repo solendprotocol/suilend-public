@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 
 import { ColumnDef } from "@tanstack/react-table";
+import { VenetianMask } from "lucide-react";
 
 import DataTable, {
   decimalSortingFn,
@@ -10,11 +11,17 @@ import PointsCount from "@/components/points/PointsCount";
 import PointsRank from "@/components/points/PointsRank";
 import Tooltip from "@/components/shared/Tooltip";
 import { TBody } from "@/components/shared/Typography";
+import { useAppContext } from "@/contexts/AppContext";
 import { LeaderboardRowData, usePointsContext } from "@/contexts/PointsContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 import { formatAddress } from "@/lib/format";
+import { DASHBOARD_URL } from "@/lib/navigation";
+
+import CopyToClipboardButton from "../shared/CopyToClipboardButton";
+import OpenURLButton from "../shared/OpenURLButton";
 
 export default function PointsLeaderboardTable() {
+  const { explorer } = useAppContext();
   const { address } = useWalletContext();
   const { leaderboardRows } = usePointsContext();
 
@@ -38,11 +45,24 @@ export default function PointsLeaderboardTable() {
           const { address } = row.original;
 
           return (
-            <Tooltip title={address}>
-              <TBody className="w-max uppercase">
-                {formatAddress(address, 12)}
-              </TBody>
-            </Tooltip>
+            <div className="flex flex-row items-center gap-2">
+              <Tooltip title={address}>
+                <TBody className="w-max uppercase">
+                  {formatAddress(address, 12)}
+                </TBody>
+              </Tooltip>
+
+              <div className="flex h-5 flex-row items-center">
+                <CopyToClipboardButton value={address} />
+                <OpenURLButton url={explorer.buildAddressUrl(address)} />
+                <OpenURLButton
+                  url={`${DASHBOARD_URL}?wallet=${address}`}
+                  icon={<VenetianMask />}
+                >
+                  View Dashboard as this user
+                </OpenURLButton>
+              </div>
+            </div>
           );
         },
       },
