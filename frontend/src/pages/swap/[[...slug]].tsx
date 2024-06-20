@@ -656,9 +656,11 @@ function Page() {
                   <div className="flex w-full flex-row items-center gap-3">
                     <TokenLogo
                       showTooltip
-                      coinType={t.coin_type}
-                      symbol={t.ticker}
-                      src={t.icon_url}
+                      token={{
+                        coinType: t.coin_type,
+                        symbol: t.ticker,
+                        iconUrl: t.icon_url,
+                      }}
                     />
 
                     <div className="flex flex-col gap-1">

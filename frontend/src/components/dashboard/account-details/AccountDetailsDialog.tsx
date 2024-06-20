@@ -33,6 +33,7 @@ import { EventType, eventSortAsc } from "@/lib/events";
 import { formatPoints, formatToken } from "@/lib/format";
 import { API_URL } from "@/lib/navigation";
 import { shallowPushQuery, shallowReplaceQuery } from "@/lib/router";
+import { Token } from "@/lib/types";
 
 const QUERY_PARAMS_PREFIX = "accountDetails";
 export enum QueryParams {
@@ -63,33 +64,20 @@ export type EventsData = {
 
 interface TokenAmountProps {
   amount?: BigNumber;
-  coinType: string;
-  symbol: string;
-  src?: string | null;
+  token: Token;
   decimals: number;
 }
 
-export function TokenAmount({
-  amount,
-  coinType,
-  symbol,
-  src,
-  decimals,
-}: TokenAmountProps) {
+export function TokenAmount({ amount, token, decimals }: TokenAmountProps) {
   return (
     <div className="flex w-max flex-row items-center gap-2">
-      <TokenLogo
-        className="h-4 w-4"
-        coinType={coinType}
-        symbol={symbol}
-        src={src}
-      />
+      <TokenLogo className="h-4 w-4" token={token} />
 
       <Tooltip
         title={
-          amount !== undefined && isSuilendPoints(coinType) ? (
+          amount !== undefined && isSuilendPoints(token.coinType) ? (
             <>
-              {formatPoints(amount, { dp: decimals })} {symbol}
+              {formatPoints(amount, { dp: decimals })} {token.symbol}
             </>
           ) : undefined
         }
@@ -97,10 +85,10 @@ export function TokenAmount({
         <TBody className="uppercase">
           {amount === undefined
             ? "N/A"
-            : isSuilendPoints(coinType)
+            : isSuilendPoints(token.coinType)
               ? formatPoints(amount)
               : formatToken(amount, { dp: decimals })}{" "}
-          {symbol}
+          {token.symbol}
         </TBody>
       </Tooltip>
     </div>

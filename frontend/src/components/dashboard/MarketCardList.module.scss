@@ -1,11 +1,7 @@
 .card {
-  :global(.bg-shadow-2px) {
-    box-shadow: 0 0 0 2px hsl(var(--card)) !important;
-  }
+  --bg-color: hsl(var(--card));
 
   &:hover {
-    :global(.bg-shadow-2px) {
-      box-shadow: 0 0 0 2px #0f1729 !important; // background + 10% muted
-    }
+    --bg-color: #0f1729;
   }
 }

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { CSSProperties, useCallback, useEffect, useRef, useState } from "react";
 
 import BigNumber from "bignumber.js";
 import { capitalize } from "lodash";
@@ -13,7 +13,6 @@ import {
   useActionsModalContext,
 } from "@/components/dashboard/actions-modal/ActionsModalContext";
 import ActionsModalInput from "@/components/dashboard/actions-modal/ActionsModalInput";
-import styles from "@/components/dashboard/actions-modal/ActionsModalTabContent.module.scss";
 import ParametersPanel from "@/components/dashboard/actions-modal/ParametersPanel";
 import AprWithRewardsBreakdown from "@/components/dashboard/AprWithRewardsBreakdown";
 import Button from "@/components/shared/Button";
@@ -314,7 +313,10 @@ export default function ActionsModalTabContent({
       </div>
 
       <div className="-m-4 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overflow-x-hidden p-4 md:pb-6">
-        <div className={cn("flex flex-col gap-3", styles.parameters)}>
+        <div
+          className="flex flex-col gap-3"
+          style={{ "--bg-color": "hsl(var(--popover))" } as CSSProperties}
+        >
           <LabelWithValue
             label="Price"
             value={formatPrice(reserve.price)}

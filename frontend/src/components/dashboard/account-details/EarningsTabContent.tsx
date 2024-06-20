@@ -733,9 +733,11 @@ export default function EarningsTabContent({
             <div className="flex w-max flex-row items-center gap-2">
               <TokenLogo
                 className="h-4 w-4"
-                coinType={coinType}
-                symbol={coinMetadata.symbol}
-                src={coinMetadata.iconUrl}
+                token={{
+                  coinType,
+                  symbol: coinMetadata.symbol,
+                  iconUrl: coinMetadata.iconUrl,
+                }}
               />
 
               <TBody className="w-max">{coinMetadata.symbol}</TBody>
@@ -778,9 +780,11 @@ export default function EarningsTabContent({
                   <TokenAmount
                     key={coinType}
                     amount={rewards[coinType][nowS]}
-                    coinType={coinType}
-                    symbol={coinMetadata.symbol}
-                    src={coinMetadata.iconUrl}
+                    token={{
+                      coinType,
+                      symbol: coinMetadata.symbol,
+                      iconUrl: coinMetadata.iconUrl,
+                    }}
                     decimals={coinMetadata.decimals}
                   />
                 );

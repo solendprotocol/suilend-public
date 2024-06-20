@@ -114,9 +114,11 @@ function TooltipContent({ side, fields, d, viewBox, x }: TooltipContentProps) {
                   <TLabelSans>Rewards in</TLabelSans>
                   <TokenLogo
                     className="h-4 w-4"
-                    coinType={coinType}
-                    symbol={data.coinMetadataMap[coinType].symbol}
-                    src={data.coinMetadataMap[coinType].iconUrl}
+                    token={{
+                      coinType,
+                      symbol: data.coinMetadataMap[coinType].symbol,
+                      iconUrl: data.coinMetadataMap[coinType].iconUrl,
+                    }}
                   />
                   <TLabelSans>
                     {data.coinMetadataMap[coinType].symbol}

@@ -15,9 +15,11 @@ export default function PointsIcon({ className }: PointsIconProps) {
   return (
     <TokenLogo
       className={cn("h-4 w-4", className)}
-      coinType={NORMALIZED_SUILEND_POINTS_COINTYPE}
-      symbol="Suilend Points"
-      src={COINTYPE_LOGO_MAP[NORMALIZED_SUILEND_POINTS_COINTYPE]}
+      token={{
+        coinType: NORMALIZED_SUILEND_POINTS_COINTYPE,
+        symbol: "Suilend Points",
+        iconUrl: COINTYPE_LOGO_MAP[NORMALIZED_SUILEND_POINTS_COINTYPE],
+      }}
     />
   );
 }

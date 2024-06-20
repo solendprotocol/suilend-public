@@ -218,9 +218,11 @@ export default function AprWithRewardsBreakdown({
                   >
                     <TokenLogo
                       className="h-4 w-4"
-                      coinType={reward.stats.rewardCoinType}
-                      symbol={reward.stats.rewardSymbol}
-                      src={reward.stats.iconUrl}
+                      token={{
+                        coinType: reward.stats.rewardCoinType,
+                        symbol: reward.stats.rewardSymbol,
+                        iconUrl: reward.stats.iconUrl,
+                      }}
                     />
                     <TLabelSans>{reward.stats.rewardSymbol}</TLabelSans>
                   </AprRewardsBreakdownRow>
@@ -267,9 +269,11 @@ export default function AprWithRewardsBreakdown({
                   <TLabelSans>Rewards in</TLabelSans>
                   <TokenLogo
                     className="h-4 w-4"
-                    coinType={reward.stats.rewardCoinType}
-                    symbol={reward.stats.rewardSymbol}
-                    src={reward.stats.iconUrl}
+                    token={{
+                      coinType: reward.stats.rewardCoinType,
+                      symbol: reward.stats.rewardSymbol,
+                      iconUrl: reward.stats.iconUrl,
+                    }}
                   />
                   <TLabelSans>{reward.stats.rewardSymbol}</TLabelSans>
                 </AprRewardsBreakdownRow>
@@ -283,7 +287,7 @@ export default function AprWithRewardsBreakdown({
             tokens={[...perDayRewards, ...aprRewards].map((reward) => ({
               coinType: reward.stats.rewardCoinType,
               symbol: reward.stats.rewardSymbol,
-              src: reward.stats.iconUrl,
+              iconUrl: reward.stats.iconUrl,
             }))}
           />
 

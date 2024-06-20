@@ -46,9 +46,11 @@ function PendingRewards({ totalSuiRewards, isCentered }: PendingRewardsProps) {
       <div className="flex flex-row items-center gap-1.5">
         <TokenLogo
           className="h-4 w-4"
-          coinType={NORMALIZED_SUI_COINTYPE}
-          symbol="SUI"
-          src={COINTYPE_LOGO_MAP[NORMALIZED_SUI_COINTYPE]}
+          token={{
+            coinType: NORMALIZED_SUI_COINTYPE,
+            symbol: "SUI",
+            iconUrl: COINTYPE_LOGO_MAP[NORMALIZED_SUI_COINTYPE],
+          }}
         />
         <Tooltip title={formatToken(totalSuiRewards, { dp: 9 })}>
           <TBody>{formatToken(totalSuiRewards)}</TBody>

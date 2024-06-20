@@ -11,7 +11,7 @@ import {
   useState,
 } from "react";
 
-import { HopApi, HopApiOptions, VerifiedToken } from "@hop.ag/sdk";
+import { HopApi, HopApiOptions, SuiExchange, VerifiedToken } from "@hop.ag/sdk";
 import { CoinMetadata } from "@mysten/sui.js/client";
 import { normalizeStructTag } from "@mysten/sui.js/utils";
 
@@ -20,6 +20,17 @@ import { AppData, useAppContext } from "@/contexts/AppContext";
 import { ParsedCoinBalance, parseCoinBalances } from "@/lib/coinBalance";
 import { COINTYPE_LOGO_MAP, COINTYPE_SYMBOL_MAP } from "@/lib/coinType";
 import { SWAP_URL } from "@/lib/navigation";
+
+export const EXCHANGE_NAME_MAP: Record<SuiExchange, string> = {
+  [SuiExchange.CETUS]: "Cetus",
+  [SuiExchange.FLOWX]: "FlowX Finance",
+  [SuiExchange.TURBOS]: "Turbos Finance",
+  [SuiExchange.AFTERMATH]: "Aftermath Finance",
+  [SuiExchange.KRIYA]: "Kriya",
+  [SuiExchange.BLUEMOVE]: "BlueMove",
+  [SuiExchange.DEEPBOOK]: "DeepBook",
+  [SuiExchange.SUISWAP]: "Suiswap",
+};
 
 enum TokenDirection {
   IN = "in",

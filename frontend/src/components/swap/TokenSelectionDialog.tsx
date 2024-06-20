@@ -100,9 +100,11 @@ export default function TokenSelectionDialog({
           startIcon={
             <TokenLogo
               className="mr-1 h-5 w-5"
-              coinType={token.coin_type}
-              symbol={token.ticker}
-              src={token.icon_url}
+              token={{
+                coinType: token.coin_type,
+                symbol: token.ticker,
+                iconUrl: token.icon_url,
+              }}
             />
           }
           endIcon={<ChevronDown className="h-4 w-4 text-inherit opacity-50" />}
@@ -145,9 +147,11 @@ export default function TokenSelectionDialog({
               startIcon={
                 <TokenLogo
                   className="h-4 w-4"
-                  coinType={t.coin_type}
-                  symbol={t.ticker}
-                  src={t.icon_url}
+                  token={{
+                    coinType: t.coin_type,
+                    symbol: t.ticker,
+                    iconUrl: t.icon_url,
+                  }}
                 />
               }
               endIcon={
@@ -186,9 +190,11 @@ export default function TokenSelectionDialog({
                 <div className="flex w-full flex-row items-center gap-3">
                   <TokenLogo
                     showTooltip
-                    coinType={t.coin_type}
-                    symbol={t.ticker}
-                    src={t.icon_url}
+                    token={{
+                      coinType: t.coin_type,
+                      symbol: t.ticker,
+                      iconUrl: t.icon_url,
+                    }}
                   />
 
                   <div className="flex flex-col gap-1">

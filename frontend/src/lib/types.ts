@@ -4,3 +4,9 @@ export enum Action {
   BORROW = "borrow",
   REPAY = "repay",
 }
+
+export type Token = {
+  coinType: string;
+  symbol: string;
+  iconUrl?: string | null;
+};
