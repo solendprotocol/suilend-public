@@ -157,7 +157,7 @@ export default function RoutingDialog({ quote }: RoutingDialogProps) {
             return (
               <div
                 key={node.pool.object_id}
-                className="flex flex-col items-center gap-2 rounded-md border px-4 py-2"
+                className="flex flex-col items-center gap-1 rounded-md border px-4 py-3"
               >
                 <Tooltip
                   content={
@@ -169,10 +169,10 @@ export default function RoutingDialog({ quote }: RoutingDialogProps) {
                     </TextLink>
                   }
                 >
-                  <TBody className="uppercase">
+                  <TLabelSans>
                     {EXCHANGE_NAME_MAP[node.pool.sui_exchange] ??
                       node.pool.sui_exchange}
-                  </TBody>
+                  </TLabelSans>
                 </Tooltip>
 
                 {nodeTokenIn !== undefined &&
