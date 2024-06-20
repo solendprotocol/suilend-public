@@ -1,17 +1,19 @@
-import { useState } from "react";
+import { CSSProperties, useState } from "react";
 
 import { GetQuoteResponse, VerifiedToken } from "@hop.ag/sdk";
 import BigNumber from "bignumber.js";
-import { MoveRight, Route } from "lucide-react";
+import { Route } from "lucide-react";
 
 import Dialog from "@/components/dashboard/Dialog";
 import Button from "@/components/shared/Button";
-import OpenOnExplorerButton from "@/components/shared/OpenOnExplorerButton";
+import TextLink from "@/components/shared/TextLink";
 import TokenLogo from "@/components/shared/TokenLogo";
+import TokenLogos from "@/components/shared/TokenLogos";
+import Tooltip from "@/components/shared/Tooltip";
 import { TBody, TLabelSans } from "@/components/shared/Typography";
 import { useAppContext } from "@/contexts/AppContext";
-import { useSwapContext } from "@/contexts/SwapContext";
-import { formatList } from "@/lib/format";
+import { EXCHANGE_NAME_MAP, useSwapContext } from "@/contexts/SwapContext";
+import { formatId, formatList } from "@/lib/format";
 
 interface TokenAmountProps {
   token: VerifiedToken;
@@ -20,12 +22,14 @@ interface TokenAmountProps {
 
 function TokenAmount({ token, amount }: TokenAmountProps) {
   return (
-    <div className="flex flex-row items-center gap-2">
+    <div className="flex flex-row items-center gap-1.5">
       <TokenLogo
         className="h-4 w-4"
-        coinType={token.coin_type}
-        symbol={token.ticker}
-        src={token.icon_url}
+        token={{
+          coinType: token.coin_type,
+          symbol: token.ticker,
+          iconUrl: token.icon_url,
+        }}
       />
       <TBody>
         {+amount} {token.ticker}
@@ -34,11 +38,11 @@ function TokenAmount({ token, amount }: TokenAmountProps) {
   );
 }
 
-interface HopsDialogProps {
+interface RoutingDialogProps {
   quote: GetQuoteResponse;
 }
 
-export default function HopsDialog({ quote }: HopsDialogProps) {
+export default function RoutingDialog({ quote }: RoutingDialogProps) {
   const { explorer } = useAppContext();
 
   const swapContext = useSwapContext();
@@ -65,46 +69,28 @@ export default function HopsDialog({ quote }: HopsDialogProps) {
   const hopsCount = Object.keys(quote.trade.nodes).length;
   const nodes = Object.values(quote.trade.nodes);
 
-  const firstNodeObjectId = nodes.find((node) => {
-    const nodeToken = tokens.find((t) => t.coin_type === node.amount_in.token);
-    if (!nodeToken) return false;
-
-    const nodeAmount = BigNumber(node.amount_in.amount.toString()).div(
-      10 ** nodeToken.decimals,
-    );
-
-    return (
-      nodeToken.coin_type === tokenIn.coin_type && nodeAmount.eq(quoteAmountIn)
-    );
-  })?.pool.object_id;
-
-  const lastNodeObjectId = nodes.find((node) => {
-    const nodeToken = tokens.find((t) => t.coin_type === node.amount_out.token);
-    if (!nodeToken) return false;
-
-    const nodeAmount = BigNumber(node.amount_out.amount.toString()).div(
-      10 ** nodeToken.decimals,
-    );
-
-    return (
-      nodeToken.coin_type === tokenOut.coin_type &&
-      nodeAmount.eq(quoteAmountOut)
-    );
-  })?.pool.object_id;
-
-  const sortedNodeObjectIds = [
-    firstNodeObjectId,
-    ...nodes
+  const chainedNodeObjectIds: string[][] = [];
+  Object.entries(quote.trade.edges).forEach(
+    ([endNodeObjectId, nodeObjectIds]) => {
+      chainedNodeObjectIds.push([...nodeObjectIds, endNodeObjectId]);
+    },
+  );
+  chainedNodeObjectIds.push(
+    ...Object.keys(quote.trade.nodes)
       .filter(
-        (node) =>
-          ![firstNodeObjectId, lastNodeObjectId].includes(node.pool.object_id),
+        (nodeObjectId) => !chainedNodeObjectIds.flat().includes(nodeObjectId),
       )
-      .map((node) => node.pool.object_id),
-    lastNodeObjectId,
-  ].filter(Boolean) as string[];
-  const sortedNodes = sortedNodeObjectIds
-    .map((objectId) => nodes.find((node) => node.pool.object_id === objectId))
-    .filter(Boolean) as typeof nodes;
+      .map((nodeObjectId) => [nodeObjectId]),
+  );
+
+  const chainedNodes = chainedNodeObjectIds.map(
+    (nodeObjectIds) =>
+      nodeObjectIds
+        .map((nodeObjectId) =>
+          nodes.find((node) => node.pool.object_id === nodeObjectId),
+        )
+        .filter(Boolean) as typeof nodes,
+  );
 
   return (
     <Dialog
@@ -126,7 +112,9 @@ export default function HopsDialog({ quote }: HopsDialogProps) {
               Array.from(
                 new Set(
                   Object.values(quote.trade.nodes).map(
-                    (node) => node.pool.sui_exchange,
+                    (node) =>
+                      EXCHANGE_NAME_MAP[node.pool.sui_exchange] ??
+                      node.pool.sui_exchange,
                   ),
                 ),
               ),
@@ -147,7 +135,7 @@ export default function HopsDialog({ quote }: HopsDialogProps) {
             <TokenAmount token={tokenIn} amount={quoteAmountIn} />
           </div>
 
-          {sortedNodes.map((node) => {
+          {chainedNodes.flat().map((node) => {
             const nodeTokenIn = tokens.find(
               (t) => t.coin_type === node.amount_in.token,
             );
@@ -171,22 +159,68 @@ export default function HopsDialog({ quote }: HopsDialogProps) {
                 key={node.pool.object_id}
                 className="flex flex-col items-center gap-2 rounded-md border px-4 py-2"
               >
-                <div className="flex h-5 flex-row items-center gap-1">
-                  <TBody>{node.pool.sui_exchange} </TBody>
-                  <OpenOnExplorerButton
-                    url={explorer.buildObjectUrl(node.pool.object_id)}
-                  />
-                </div>
+                <Tooltip
+                  content={
+                    <TextLink
+                      className="block font-mono text-xs"
+                      href={explorer.buildObjectUrl(node.pool.object_id)}
+                    >
+                      {formatId(node.pool.object_id)}
+                    </TextLink>
+                  }
+                >
+                  <TBody className="uppercase">
+                    {EXCHANGE_NAME_MAP[node.pool.sui_exchange] ??
+                      node.pool.sui_exchange}
+                  </TBody>
+                </Tooltip>
 
                 {nodeTokenIn !== undefined &&
                   nodeTokenOut !== undefined &&
                   amountIn !== undefined &&
                   amountOut !== undefined && (
-                    <div className="flex flex-row items-center gap-2">
-                      <TokenAmount token={nodeTokenIn} amount={amountIn} />
-                      <MoveRight className="h-4 w-4 text-foreground" />
-                      <TokenAmount token={nodeTokenOut} amount={amountOut} />
-                    </div>
+                    <Tooltip
+                      content={
+                        <TBody className="text-xs">
+                          {+amountIn}{" "}
+                          <TextLink
+                            href={explorer.buildCoinUrl(nodeTokenIn.coin_type)}
+                          >
+                            {nodeTokenIn.ticker}
+                          </TextLink>
+                          {" → "}
+                          {+amountOut}{" "}
+                          <TextLink
+                            href={explorer.buildCoinUrl(nodeTokenOut.coin_type)}
+                          >
+                            {nodeTokenOut.ticker}
+                          </TextLink>
+                        </TBody>
+                      }
+                    >
+                      <div
+                        className="flex flex-row items-center gap-2"
+                        style={
+                          {
+                            "--bg-color": "hsl(var(--popover))",
+                          } as CSSProperties
+                        }
+                      >
+                        <TokenLogos
+                          tokens={[nodeTokenIn, nodeTokenOut].map((t) => ({
+                            coinType: t.coin_type,
+                            symbol: t.ticker,
+                            iconUrl: t.icon_url,
+                          }))}
+                        />
+
+                        <TBody>
+                          {nodeTokenIn.ticker}
+                          <span className="font-sans">/</span>
+                          {nodeTokenOut.ticker}
+                        </TBody>
+                      </div>
+                    </Tooltip>
                   )}
               </div>
             );
