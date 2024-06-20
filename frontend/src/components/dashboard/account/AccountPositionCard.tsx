@@ -21,7 +21,7 @@ import UtilizationBar, {
 import Button from "@/components/shared/Button";
 import LabelWithTooltip from "@/components/shared/LabelWithTooltip";
 import Tooltip from "@/components/shared/Tooltip";
-import { TBody, TLabel, TLabelSans } from "@/components/shared/Typography";
+import { TBody, TLabelSans } from "@/components/shared/Typography";
 import { CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { AppData, useAppContext } from "@/contexts/AppContext";
@@ -68,21 +68,32 @@ function AccountPositionCardContent() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-row justify-between gap-2">
-        <div className="flex flex-col gap-1">
-          <LabelWithTooltip tooltip={DEPOSITS_TOOLTIP}>
+      <div className="flex flex-row items-center justify-around gap-1 rounded-md border px-4 py-3">
+        <div className="flex flex-col items-center gap-1">
+          <LabelWithTooltip className="text-center">Equity</LabelWithTooltip>
+          <Tooltip title={formatUsd(obligation.netValueUsd, { exact: true })}>
+            <TBody className="w-max text-center">
+              {formatUsd(obligation.netValueUsd)}
+            </TBody>
+          </Tooltip>
+        </div>
+
+        <TLabelSans>=</TLabelSans>
+
+        <div className="flex flex-col items-center gap-1">
+          <LabelWithTooltip className="text-center" tooltip={DEPOSITS_TOOLTIP}>
             Deposits
           </LabelWithTooltip>
           <Tooltip
             title={formatUsd(obligation.depositedAmountUsd, { exact: true })}
           >
-            <TBody className="w-max">
+            <TBody className="w-max text-center">
               {formatUsd(obligation.depositedAmountUsd)}
             </TBody>
           </Tooltip>
         </div>
 
-        <TLabel>-</TLabel>
+        <TLabelSans>-</TLabelSans>
 
         <div className="flex flex-col items-center gap-1">
           <LabelWithTooltip className="text-center" tooltip={BORROWS_TOOLTIP}>
@@ -93,17 +104,6 @@ function AccountPositionCardContent() {
           >
             <TBody className="w-max text-center">
               {formatUsd(obligation.borrowedAmountUsd)}
-            </TBody>
-          </Tooltip>
-        </div>
-
-        <TLabel>=</TLabel>
-
-        <div className="flex flex-col items-end gap-1">
-          <LabelWithTooltip className="text-right">Equity</LabelWithTooltip>
-          <Tooltip title={formatUsd(obligation.netValueUsd, { exact: true })}>
-            <TBody className="w-max text-right">
-              {formatUsd(obligation.netValueUsd)}
             </TBody>
           </Tooltip>
         </div>

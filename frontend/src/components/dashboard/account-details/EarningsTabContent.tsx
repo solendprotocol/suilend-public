@@ -24,7 +24,6 @@ import {
 import EarningsChart, {
   ChartData,
 } from "@/components/dashboard/account-details/EarningsChart";
-import Card from "@/components/dashboard/Card";
 import DataTable, { tableHeader } from "@/components/dashboard/DataTable";
 import TitleWithIcon from "@/components/shared/TitleWithIcon";
 import TokenLogo from "@/components/shared/TokenLogo";
@@ -868,71 +867,74 @@ export default function EarningsTabContent({
   return (
     <div className="flex flex-1 flex-col gap-6 overflow-y-auto overflow-x-hidden py-4">
       <div className="flex flex-col gap-2 px-4">
-        <Card>
-          <div className="grid grid-cols-2 gap-4 p-4 md:grid-cols-4">
-            <div className="flex flex-1 flex-col items-center gap-1">
-              <TLabelSans className="text-center">Net earnings</TLabelSans>
-              {totalEarningsUsd !== undefined ? (
-                <Tooltip title={formatUsd(totalEarningsUsd, { exact: true })}>
-                  <TBody
-                    className={cn(
-                      totalEarningsUsd.gt(0) && "text-success",
-                      totalEarningsUsd.lt(0) && "text-destructive",
-                    )}
-                  >
-                    {totalEarningsUsd.lt(0) && "-"}
-                    {formatUsd(totalEarningsUsd.abs())}
-                  </TBody>
-                </Tooltip>
-              ) : (
-                <Skeleton className="h-5 w-10" />
-              )}
-            </div>
-
-            <div className="flex flex-1 flex-col items-center gap-1">
-              <TLabelSans className="text-center">Interest earned</TLabelSans>
-              {cumInterestEarnedUsd !== undefined ? (
-                <Tooltip
-                  title={formatUsd(cumInterestEarnedUsd, { exact: true })}
+        <div className="flex flex-row items-center justify-around gap-1 rounded-md border px-2 py-3 md:px-4">
+          <div className="flex flex-col items-center gap-1">
+            <TLabelSans className="text-center">Net earnings</TLabelSans>
+            {totalEarningsUsd !== undefined ? (
+              <Tooltip title={formatUsd(totalEarningsUsd, { exact: true })}>
+                <TBody
+                  className={cn(
+                    "text-center",
+                    totalEarningsUsd.gt(0) && "text-success",
+                    totalEarningsUsd.lt(0) && "text-destructive",
+                  )}
                 >
-                  <TBody className="text-center">
-                    {formatUsd(cumInterestEarnedUsd)}
-                  </TBody>
-                </Tooltip>
-              ) : (
-                <Skeleton className="h-5 w-10" />
-              )}
-            </div>
-
-            <div className="flex flex-1 flex-col items-center gap-1">
-              <TLabelSans className="text-center">Interest paid</TLabelSans>
-              {cumInterestPaidUsd ? (
-                <Tooltip title={formatUsd(cumInterestPaidUsd, { exact: true })}>
-                  <TBody className="text-right">
-                    {formatUsd(cumInterestPaidUsd)}
-                  </TBody>
-                </Tooltip>
-              ) : (
-                <Skeleton className="h-5 w-10" />
-              )}
-            </div>
-
-            <div className="flex flex-1 flex-col items-center gap-1">
-              <TLabelSans className="text-center">Rewards earned</TLabelSans>
-              {totalRewardsEarnedUsd !== undefined ? (
-                <Tooltip
-                  title={formatUsd(totalRewardsEarnedUsd, { exact: true })}
-                >
-                  <TBody className="text-center">
-                    {formatUsd(totalRewardsEarnedUsd)}
-                  </TBody>
-                </Tooltip>
-              ) : (
-                <Skeleton className="h-5 w-10" />
-              )}
-            </div>
+                  {totalEarningsUsd.lt(0) && "-"}
+                  {formatUsd(totalEarningsUsd.abs())}
+                </TBody>
+              </Tooltip>
+            ) : (
+              <Skeleton className="h-5 w-10" />
+            )}
           </div>
-        </Card>
+
+          <TLabelSans>=</TLabelSans>
+
+          <div className="flex flex-col items-center gap-1">
+            <TLabelSans className="text-center">Rewards earned</TLabelSans>
+            {totalRewardsEarnedUsd !== undefined ? (
+              <Tooltip
+                title={formatUsd(totalRewardsEarnedUsd, { exact: true })}
+              >
+                <TBody className="text-center">
+                  {formatUsd(totalRewardsEarnedUsd)}
+                </TBody>
+              </Tooltip>
+            ) : (
+              <Skeleton className="h-5 w-10" />
+            )}
+          </div>
+
+          <TLabelSans>+</TLabelSans>
+
+          <div className="flex flex-col items-center gap-1">
+            <TLabelSans className="text-center">Interest earned</TLabelSans>
+            {cumInterestEarnedUsd !== undefined ? (
+              <Tooltip title={formatUsd(cumInterestEarnedUsd, { exact: true })}>
+                <TBody className="text-center">
+                  {formatUsd(cumInterestEarnedUsd)}
+                </TBody>
+              </Tooltip>
+            ) : (
+              <Skeleton className="h-5 w-10" />
+            )}
+          </div>
+
+          <TLabelSans>-</TLabelSans>
+
+          <div className="flex flex-col items-center gap-1">
+            <TLabelSans className="text-center">Interest paid</TLabelSans>
+            {cumInterestPaidUsd ? (
+              <Tooltip title={formatUsd(cumInterestPaidUsd, { exact: true })}>
+                <TBody className="text-center">
+                  {formatUsd(cumInterestPaidUsd)}
+                </TBody>
+              </Tooltip>
+            ) : (
+              <Skeleton className="h-5 w-10" />
+            )}
+          </div>
+        </div>
 
         <TLabelSans>
           Note: The above are estimates calculated using current prices.

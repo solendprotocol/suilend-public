@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { normalizeStructTag } from "@mysten/sui.js/utils";
 import BigNumber from "bignumber.js";
 import { cloneDeep } from "lodash";
-import { FileClock, RotateCw, TrendingUp } from "lucide-react";
+import { RotateCw } from "lucide-react";
 
 import { WAD } from "@suilend/sdk/constants";
 import {
@@ -121,8 +121,8 @@ export default function AccountDetailsDialog() {
 
   // Tabs
   const tabs = [
-    { id: Tab.EARNINGS, icon: <TrendingUp />, title: "Earnings" },
-    { id: Tab.HISTORY, icon: <FileClock />, title: "History" },
+    { id: Tab.EARNINGS, title: "Earnings" },
+    { id: Tab.HISTORY, title: "History" },
   ];
 
   const selectedTab =
