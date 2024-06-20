@@ -284,6 +284,7 @@ export default function AprWithRewardsBreakdown({
       >
         <div className="relative flex flex-row items-center">
           <TokenLogos
+            className="h-4 w-4"
             tokens={[...perDayRewards, ...aprRewards].map((reward) => ({
               coinType: reward.stats.rewardCoinType,
               symbol: reward.stats.rewardSymbol,

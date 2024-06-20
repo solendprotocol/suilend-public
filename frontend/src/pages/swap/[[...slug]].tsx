@@ -5,7 +5,7 @@ import { GetQuoteResponse, HopApi, VerifiedToken } from "@hop.ag/sdk";
 import { TransactionBlock } from "@mysten/sui.js/transactions";
 import { normalizeStructTag } from "@mysten/sui.js/utils";
 import BigNumber from "bignumber.js";
-import { ArrowRightLeft, ArrowUpDown, RotateCw } from "lucide-react";
+import { ArrowUpDown, RotateCw } from "lucide-react";
 import { toast } from "sonner";
 import useSWR from "swr";
 import { useLocalStorage } from "usehooks-ts";
@@ -13,11 +13,12 @@ import { useLocalStorage } from "usehooks-ts";
 import Button from "@/components/shared/Button";
 import Spinner from "@/components/shared/Spinner";
 import TextLink from "@/components/shared/TextLink";
-import TokenLogo from "@/components/shared/TokenLogo";
+import TokenLogos from "@/components/shared/TokenLogos";
 import { TBody, TLabelSans } from "@/components/shared/Typography";
 import RoutingDialog from "@/components/swap/RoutingDialog";
 import SwapInput from "@/components/swap/SwapInput";
 import SwapSlippagePopover from "@/components/swap/SwapSlippagePopover";
+import TokensRatioChart from "@/components/swap/TokensRatioChart";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAppContext } from "@/contexts/AppContext";
@@ -26,7 +27,7 @@ import { useWalletContext } from "@/contexts/WalletContext";
 import { ParsedCoinBalance } from "@/lib/coinBalance";
 import { SUI_COINTYPE, isSui } from "@/lib/coinType";
 import { TX_TOAST_DURATION } from "@/lib/constants";
-import { formatId, formatPercent, formatToken, formatUsd } from "@/lib/format";
+import { formatPercent, formatToken } from "@/lib/format";
 import { cn, hoverUnderlineClassName } from "@/lib/utils";
 
 enum TokenDirection {
@@ -242,6 +243,15 @@ function Page() {
   const tokenInUsdPrice = usdPriceMap[tokenIn.coin_type];
   const tokenOutUsdPrice = usdPriceMap[tokenOut.coin_type];
 
+  const tokensRatio =
+    tokenInUsdPrice !== undefined && tokenOutUsdPrice !== undefined
+      ? new BigNumber(tokenInUsdPrice).div(tokenOutUsdPrice)
+      : undefined;
+  const tokensRatioDp =
+    tokensRatio !== undefined
+      ? Math.max(0, -Math.floor(Math.log10(+tokensRatio)) - 1) + 4
+      : undefined;
+
   const tokenInUsdValue =
     quoteAmountIn !== undefined && tokenInUsdPrice !== undefined
       ? quoteAmountIn.times(tokenInUsdPrice)
@@ -296,24 +306,53 @@ function Page() {
   }, [tokenIn, tokenOut, fetchTokenUsdPrice]);
 
   // Historical USD prices
-  const [historicalUsdPriceMap, setHistoricalUsdPriceMap] = useState<
-    Record<string, number>
-  >({});
+  type HistoricalPriceData = {
+    timestampS: number;
+    value: number;
+  };
 
-  const getTokenUsdPrice1DChange = (t: VerifiedToken) =>
-    usdPriceMap[t.coin_type] !== undefined &&
-    historicalUsdPriceMap[t.coin_type] !== undefined
-      ? new BigNumber(
-          ((usdPriceMap[t.coin_type] - historicalUsdPriceMap[t.coin_type]) /
-            historicalUsdPriceMap[t.coin_type]) *
-            100,
-        )
+  const [historicalUsdPricesMap, setHistoricalUsdPriceMap] = useState<
+    Record<string, HistoricalPriceData[]>
+  >({});
+  const tokenInHistoricalUsdPrices = historicalUsdPricesMap[tokenIn.coin_type];
+  const tokenOutHistoricalUsdPrices =
+    historicalUsdPricesMap[tokenOut.coin_type];
+
+  const tokensHistoricalRatios = (() => {
+    if (
+      tokenInHistoricalUsdPrices === undefined ||
+      tokenOutHistoricalUsdPrices === undefined
+    )
+      return undefined;
+
+    const timestampsS = tokenInHistoricalUsdPrices.map(
+      (item) => item.timestampS,
+    );
+
+    return timestampsS.map((timestampS) => ({
+      timestampS,
+      ratio: +new BigNumber(
+        tokenInHistoricalUsdPrices.find(
+          (item) => item.timestampS === timestampS,
+        )?.value ?? 0,
+      ).div(
+        tokenOutHistoricalUsdPrices.find(
+          (item) => item.timestampS === timestampS,
+        )?.value ?? 1,
+      ),
+    }));
+  })();
+  const tokensRatio1DChange =
+    tokensRatio !== undefined && tokensHistoricalRatios !== undefined
+      ? new BigNumber(tokensRatio.minus(tokensHistoricalRatios[0].ratio))
+          .div(tokensHistoricalRatios[0].ratio)
+          .times(100)
       : undefined;
 
   const fetchTokenHistoricalUsdPrice = useCallback(
     async (token: VerifiedToken) => {
       try {
-        const url = `https://public-api.birdeye.so/defi/history_price?address=${isSui(token.coin_type) ? SUI_COINTYPE : token.coin_type}&address_type=token&type=15m&time_from=${Math.floor(new Date().getTime() / 1000) - 24 * 60 * 60}&time_to=${Math.floor(new Date().getTime() / 1000)}`;
+        const url = `https://public-api.birdeye.so/defi/history_price?address=${isSui(token.coin_type) ? SUI_COINTYPE : token.coin_type}&address_type=token&type=5m&time_from=${Math.floor(new Date().getTime() / 1000) - 24 * 60 * 60}&time_to=${Math.floor(new Date().getTime() / 1000)}`;
         const res = await fetch(url, {
           headers: {
             "X-API-KEY": process.env.NEXT_PUBLIC_BIRDEYE_API_KEY as string,
@@ -324,7 +363,13 @@ function Page() {
         if (json.data?.items)
           setHistoricalUsdPriceMap((o) => ({
             ...o,
-            [token.coin_type]: json.data.items[0].value,
+            [token.coin_type]: json.data.items.map(
+              (item: any) =>
+                ({
+                  timestampS: item.unixTime,
+                  value: item.value,
+                }) as HistoricalPriceData,
+            ),
           }));
       } catch (err) {
         console.error(err);
@@ -379,46 +424,6 @@ function Page() {
 
     inputRef.current?.focus();
   };
-
-  // Exchange rate
-  enum ExchangeRateDirection {
-    FORWARD = "forward",
-    REVERSE = "reverse",
-  }
-
-  const [exchangeRateDirection, setExchangeRateDirection] =
-    useState<ExchangeRateDirection>(ExchangeRateDirection.FORWARD);
-  const reverseExchangeRate = () =>
-    setExchangeRateDirection((q) =>
-      q === ExchangeRateDirection.FORWARD
-        ? ExchangeRateDirection.REVERSE
-        : ExchangeRateDirection.FORWARD,
-    );
-
-  const exchangeRateLabel = (() => {
-    const inTicker =
-      exchangeRateDirection === ExchangeRateDirection.FORWARD
-        ? tokenIn.ticker
-        : tokenOut.ticker;
-    const outTicker =
-      exchangeRateDirection === ExchangeRateDirection.FORWARD
-        ? tokenOut.ticker
-        : tokenIn.ticker;
-
-    if (quoteAmountIn === undefined || quoteAmountOut === undefined)
-      return `1 ${inTicker} ≈ -- ${outTicker}`;
-
-    const exchangeRate =
-      exchangeRateDirection === ExchangeRateDirection.FORWARD
-        ? quoteAmountOut.div(quoteAmountIn)
-        : quoteAmountIn.div(quoteAmountOut);
-    const decimals =
-      exchangeRateDirection === ExchangeRateDirection.FORWARD
-        ? tokenOut.decimals
-        : tokenIn.decimals;
-
-    return `1 ${inTicker} ≈ ${formatToken(exchangeRate, { dp: decimals })} ${outTicker}`;
-  })();
 
   // Submit
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -629,83 +634,56 @@ function Page() {
             )}
           </Button>
 
-          {/* Exchange rate */}
-          <Button
-            className="mt-4 h-auto w-max px-0 py-0 text-muted-foreground hover:bg-transparent"
-            labelClassName="text-xs font-sans"
-            variant="ghost"
-            endIcon={<ArrowRightLeft />}
-            onClick={reverseExchangeRate}
-          >
-            {exchangeRateLabel}
-          </Button>
-
           {/* Tokens */}
-          <div className="mt-6 flex w-full flex-col gap-4">
-            {[tokenIn, tokenOut].map((t) => {
-              const usdPrice = usdPriceMap[t.coin_type];
-              const usdPriceDp =
-                Math.max(0, -Math.floor(Math.log10(usdPrice)) - 1) + 2;
-              const usdPrice1DChange = getTokenUsdPrice1DChange(t);
+          <div className="mt-6 flex w-full flex-row items-stretch gap-4">
+            <div className="flex flex-col gap-1.5">
+              <div className="flex flex-row items-center gap-2">
+                <TokenLogos
+                  className="h-4 w-4"
+                  tokens={[tokenIn, tokenOut].map((t) => ({
+                    coinType: t.coin_type,
+                    symbol: t.ticker,
+                    iconUrl: t.icon_url,
+                  }))}
+                />
 
-              return (
-                <div
-                  key={t.coin_type}
-                  className="flex w-full flex-row justify-between"
-                >
-                  <div className="flex w-full flex-row items-center gap-3">
-                    <TokenLogo
-                      showTooltip
-                      token={{
-                        coinType: t.coin_type,
-                        symbol: t.ticker,
-                        iconUrl: t.icon_url,
-                      }}
-                    />
+                <TBody>
+                  {tokenIn.ticker}
+                  <span className="font-sans">/</span>
+                  {tokenOut.ticker}
+                </TBody>
+              </div>
 
-                    <div className="flex flex-col gap-1">
-                      <TBody className="w-max">{t.ticker}</TBody>
-                      <TLabelSans className="w-max">{t.name}</TLabelSans>
-                    </div>
-                  </div>
+              {tokensRatio !== undefined &&
+              tokensRatioDp !== undefined &&
+              tokensRatio1DChange !== undefined ? (
+                <TBody className="text-xs">
+                  {formatToken(tokensRatio, {
+                    dp: tokensRatioDp,
+                    exact: true,
+                  })}{" "}
+                  <span
+                    className={cn(
+                      tokensRatio1DChange.gt(0) && "text-success",
+                      tokensRatio1DChange.eq(0) && "text-muted-foreground",
+                      tokensRatio1DChange.lt(0) && "text-destructive",
+                    )}
+                  >
+                    {tokensRatio1DChange.gt(0) && "+"}
+                    {tokensRatio1DChange.lt(0) && "-"}
+                    {formatPercent(tokensRatio1DChange.abs())}
+                  </span>
+                </TBody>
+              ) : (
+                <Skeleton className="h-4 w-40" />
+              )}
+            </div>
 
-                  <div className="flex flex-col items-end gap-1">
-                    <TBody className="w-max">
-                      {usdPrice !== undefined &&
-                      usdPrice1DChange !== undefined ? (
-                        <>
-                          {formatUsd(new BigNumber(usdPrice), {
-                            dp: usdPriceDp,
-                            exact: true,
-                          })}{" "}
-                          <span
-                            className={cn(
-                              usdPrice1DChange.gt(0) && "text-success",
-                              usdPrice1DChange.eq(0) && "text-muted-foreground",
-                              usdPrice1DChange.lt(0) && "text-destructive",
-                            )}
-                          >
-                            {usdPrice1DChange.gt(0) && "+"}
-                            {usdPrice1DChange.lt(0) && "-"}
-                            {formatPercent(usdPrice1DChange.abs())}
-                          </span>
-                        </>
-                      ) : (
-                        <Skeleton className="h-5 w-20" />
-                      )}
-                    </TBody>
-                    <TextLink
-                      className="block w-max text-xs text-muted-foreground no-underline hover:text-foreground"
-                      href={explorer.buildCoinUrl(t.coin_type)}
-                    >
-                      {isSui(t.coin_type)
-                        ? SUI_COINTYPE
-                        : formatId(t.coin_type)}
-                    </TextLink>
-                  </div>
-                </div>
-              );
-            })}
+            <div className="flex-1">
+              {tokensHistoricalRatios !== undefined && (
+                <TokensRatioChart data={tokensHistoricalRatios} />
+              )}
+            </div>
           </div>
         </div>
 

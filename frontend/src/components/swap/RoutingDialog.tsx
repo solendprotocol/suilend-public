@@ -207,6 +207,7 @@ export default function RoutingDialog({ quote }: RoutingDialogProps) {
                         }
                       >
                         <TokenLogos
+                          className="h-4 w-4"
                           tokens={[nodeTokenIn, nodeTokenOut].map((t) => ({
                             coinType: t.coin_type,
                             symbol: t.ticker,
