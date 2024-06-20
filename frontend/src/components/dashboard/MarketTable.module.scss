@@ -1,0 +1,11 @@
+.tableRow {
+  :global(.bg-shadow-2px) {
+    box-shadow: 0 0 0 2px hsl(var(--background)) !important;
+  }
+
+  &:hover {
+    :global(.bg-shadow-2px) {
+      box-shadow: 0 0 0 2px #0f1729 !important; // background + 10% muted
+    }
+  }
+}

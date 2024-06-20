@@ -13,6 +13,7 @@ import {
   useActionsModalContext,
 } from "@/components/dashboard/actions-modal/ActionsModalContext";
 import ActionsModalInput from "@/components/dashboard/actions-modal/ActionsModalInput";
+import styles from "@/components/dashboard/actions-modal/ActionsModalTabContent.module.scss";
 import ParametersPanel from "@/components/dashboard/actions-modal/ParametersPanel";
 import AprWithRewardsBreakdown from "@/components/dashboard/AprWithRewardsBreakdown";
 import Button from "@/components/shared/Button";
@@ -219,7 +220,11 @@ export default function ActionsModalTabContent({
       const txUrl = explorer.buildTxUrl(res.digest);
 
       toast.success(`${capitalize(actionPastTense)} ${formattedValue}`, {
-        action: <TextLink href={txUrl}>View tx on {explorer.name}</TextLink>,
+        action: (
+          <TextLink className="block" href={txUrl}>
+            View tx on {explorer.name}
+          </TextLink>
+        ),
         duration: TX_TOAST_DURATION,
       });
       setUseMaxAmount(false);
@@ -309,7 +314,7 @@ export default function ActionsModalTabContent({
       </div>
 
       <div className="-m-4 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overflow-x-hidden p-4 md:pb-6">
-        <div className="flex flex-col gap-3">
+        <div className={cn("flex flex-col gap-3", styles.parameters)}>
           <LabelWithValue
             label="Price"
             value={formatPrice(reserve.price)}

@@ -15,7 +15,7 @@ import Spinner from "@/components/shared/Spinner";
 import TextLink from "@/components/shared/TextLink";
 import TokenLogo from "@/components/shared/TokenLogo";
 import { TBody, TLabelSans } from "@/components/shared/Typography";
-import HopsDialog from "@/components/swap/HopsDialog";
+import RoutingDialog from "@/components/swap/RoutingDialog";
 import SwapInput from "@/components/swap/SwapInput";
 import SwapSlippagePopover from "@/components/swap/SwapSlippagePopover";
 import { Separator } from "@/components/ui/separator";
@@ -468,7 +468,11 @@ function Page() {
       toast.success(
         `Swapped ${value} ${tokenIn.ticker} for ${tokenOut.ticker}`,
         {
-          action: <TextLink href={txUrl}>View tx on {explorer.name}</TextLink>,
+          action: (
+            <TextLink className="block" href={txUrl}>
+              View tx on {explorer.name}
+            </TextLink>
+          ),
           duration: TX_TOAST_DURATION,
         },
       );
@@ -597,7 +601,7 @@ function Page() {
           {new BigNumber(value || 0).gt(0) && (
             <div className="mb-4 w-full">
               {quote ? (
-                <HopsDialog quote={quote} />
+                <RoutingDialog quote={quote} />
               ) : (
                 <Skeleton className="h-5 w-40" />
               )}
@@ -689,7 +693,7 @@ function Page() {
                       )}
                     </TBody>
                     <TextLink
-                      className="w-max text-xs text-muted-foreground no-underline hover:text-foreground"
+                      className="block w-max text-xs text-muted-foreground no-underline hover:text-foreground"
                       href={explorer.buildCoinUrl(t.coin_type)}
                     >
                       {isSui(t.coin_type)

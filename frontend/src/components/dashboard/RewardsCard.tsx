@@ -42,6 +42,7 @@ function PendingRewards({ totalSuiRewards, isCentered }: PendingRewardsProps) {
       <TLabelSans className={cn(isCentered && "text-center")}>
         Pending rewards
       </TLabelSans>
+
       <div className="flex flex-row items-center gap-1.5">
         <TokenLogo
           className="h-4 w-4"
@@ -144,7 +145,11 @@ export default function RewardsCard() {
       const txUrl = explorer.buildTxUrl(res.digest);
 
       toast.success("Claimed rewards", {
-        action: <TextLink href={txUrl}>View tx on {explorer.name}</TextLink>,
+        action: (
+          <TextLink className="block" href={txUrl}>
+            View tx on {explorer.name}
+          </TextLink>
+        ),
         duration: TX_TOAST_DURATION,
       });
     } catch (err) {

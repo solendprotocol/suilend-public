@@ -210,7 +210,7 @@ export default function TokenSelectionDialog({
                     {t.ticker}
                   </TBody>
                   <TextLink
-                    className="w-max text-xs text-muted-foreground no-underline hover:text-foreground"
+                    className="block w-max text-xs text-muted-foreground no-underline hover:text-foreground"
                     href={explorer.buildCoinUrl(t.coin_type)}
                   >
                     {isSui(t.coin_type) ? SUI_COINTYPE : formatId(t.coin_type)}
