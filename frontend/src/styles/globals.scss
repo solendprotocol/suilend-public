@@ -376,3 +376,17 @@ body {
     fill: transparent;
   }
 }
+
+// React Flow
+.react-flow__attribution {
+  background: transparent !important;
+  padding: 12px !important;
+  opacity: 0.5;
+
+  a {
+    font-family: var(--font-geist-sans);
+    color: hsl(var(--muted-foreground)) !important;
+    text-decoration: underline !important;
+    text-decoration-color: hsla(var(--muted-foreground) / 50%) !important;
+  }
+}

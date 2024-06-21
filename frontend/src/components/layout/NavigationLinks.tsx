@@ -1,7 +1,3 @@
-import { useRouter } from "next/router";
-
-import { isBefore } from "date-fns";
-
 import HeaderPointsPopover from "@/components/points/HeaderPointsPopover";
 import Link from "@/components/shared/Link";
 import { useAppContext } from "@/contexts/AppContext";
@@ -15,14 +11,8 @@ import {
 } from "@/lib/navigation";
 
 export default function NavigationLinks() {
-  const router = useRouter();
   const { address } = useWalletContext();
   const { data } = useAppContext();
-
-  const isActive = (href: string) => router.asPath.startsWith(href);
-
-  // Swap
-  const isSwapNew = isBefore(new Date(), new Date(2024, 6, 1)); // Show until 1st of July 2024
 
   return (
     <>
@@ -38,7 +28,7 @@ export default function NavigationLinks() {
           </div>
         )}
       </div>
-      <Link href={SWAP_URL} label={isSwapNew ? "New" : undefined}>
+      <Link href={SWAP_URL} label="Beta">
         Swap
       </Link>
       <Link href={BRIDGE_URL}>Bridge</Link>

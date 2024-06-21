@@ -6,6 +6,7 @@ import { TransactionBlock } from "@mysten/sui.js/transactions";
 import { normalizeStructTag } from "@mysten/sui.js/utils";
 import BigNumber from "bignumber.js";
 import { ArrowUpDown, RotateCw } from "lucide-react";
+import { ReactFlowProvider } from "reactflow";
 import { toast } from "sonner";
 import useSWR from "swr";
 import { useLocalStorage } from "usehooks-ts";
@@ -609,7 +610,9 @@ function Page() {
           {new BigNumber(value || 0).gt(0) && (
             <div className="mb-4 w-full">
               {quote ? (
-                <RoutingDialog quote={quote} />
+                <ReactFlowProvider>
+                  <RoutingDialog quote={quote} />
+                </ReactFlowProvider>
               ) : (
                 <Skeleton className="h-5 w-40" />
               )}

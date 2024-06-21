@@ -1,9 +1,26 @@
-import { CSSProperties, useEffect, useMemo, useRef, useState } from "react";
+import {
+  CSSProperties,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
+import Dagre from "@dagrejs/dagre";
 import { GetQuoteResponse, VerifiedToken } from "@hop.ag/sdk";
 import { CoinMetadata, SuiClient } from "@mysten/sui.js/client";
 import BigNumber from "bignumber.js";
 import { Route } from "lucide-react";
+import ReactFlow, {
+  Edge,
+  Handle,
+  Node,
+  Position,
+  useEdgesState,
+  useNodesState,
+  useReactFlow,
+} from "reactflow";
 
 import Dialog from "@/components/dashboard/Dialog";
 import Button from "@/components/shared/Button";
@@ -17,30 +34,31 @@ import { useAppContext } from "@/contexts/AppContext";
 import { EXCHANGE_NAME_MAP, useSwapContext } from "@/contexts/SwapContext";
 import { getCoinMetadataMap } from "@/lib/coinMetadata";
 import { formatId, formatList } from "@/lib/format";
+import { cn } from "@/lib/utils";
+import "reactflow/dist/style.css";
 
-interface TokenAmountProps {
-  token: VerifiedToken;
-  amount: BigNumber;
-}
+const g = new Dagre.graphlib.Graph().setDefaultEdgeLabel(() => ({}));
+const getLayoutedElements = (nodes: any[], edges: any[], options: any) => {
+  g.setGraph({ rankdir: options.direction });
 
-function TokenAmount({ token, amount }: TokenAmountProps) {
-  return (
-    <div className="flex flex-row items-center gap-1.5">
-      <TokenLogo
-        className="h-4 w-4"
-        imageProps={{ className: "rounded-full" }}
-        token={{
-          coinType: token.coin_type,
-          symbol: token.ticker,
-          iconUrl: token.icon_url,
-        }}
-      />
-      <TBody>
-        {+amount} {token.ticker}
-      </TBody>
-    </div>
-  );
-}
+  edges.forEach((edge) => g.setEdge(edge.source, edge.target));
+  nodes.forEach((node) => g.setNode(node.id, node));
+
+  Dagre.layout(g);
+
+  return {
+    nodes: nodes.map((node) => {
+      const position = g.node(node.id);
+      // We are shifting the dagre node position (anchor=center center) to the top left
+      // so it matches the React Flow node anchor point (top left).
+      const x = position.x - node.width / 2;
+      const y = position.y - node.height / 2;
+
+      return { ...node, position: { x, y } };
+    }),
+    edges,
+  };
+};
 
 const useGetCoinMetadataMap = (coinTypes: string[]) => {
   const appContext = useAppContext();
@@ -72,13 +90,152 @@ const useGetCoinMetadataMap = (coinTypes: string[]) => {
   return coinMetadataMap;
 };
 
+type QuoteNode = GetQuoteResponse["trade"]["nodes"][0];
+type QuoteNodeWithTokens = QuoteNode & {
+  amount_in: QuoteNode["amount_in"] & VerifiedToken;
+  amount_out: QuoteNode["amount_out"] & VerifiedToken;
+};
+
+const START_END_NODE_WIDTH = 200; // px
+const START_END_NODE_HEIGHT = 36; // px
+
+interface StartEndNodeProps {
+  data: {
+    isStart?: boolean;
+    token: VerifiedToken;
+    amount: BigNumber;
+  };
+}
+
+function StartEndNode({ data }: StartEndNodeProps) {
+  const { isStart, token, amount } = data;
+
+  return (
+    <>
+      {!isStart && <Handle type="target" position={Position.Left} />}
+      <div
+        className={cn(
+          "flex flex-row",
+          isStart ? "justify-end" : "justify-start",
+        )}
+        style={{
+          width: `${START_END_NODE_WIDTH}px`,
+          height: `${START_END_NODE_HEIGHT}px`,
+        }}
+      >
+        <div className="flex flex-row items-center gap-1.5 rounded-md bg-muted/10 px-3 py-2">
+          <TokenLogo
+            className="h-4 w-4"
+            imageProps={{ className: "rounded-full" }}
+            token={{
+              coinType: token.coin_type,
+              symbol: token.ticker,
+              iconUrl: token.icon_url,
+            }}
+          />
+          <TBody>
+            {+amount} {token.ticker}
+          </TBody>
+        </div>
+      </div>
+      {isStart && <Handle type="source" position={Position.Right} />}
+    </>
+  );
+}
+
+const EXCHANGE_NODE_WIDTH = 160; // px
+const EXCHANGE_NODE_HEIGHT = 12 + 16 + 4 + 20 + 12; // px
+
+interface ExchangeNodeProps {
+  data: QuoteNodeWithTokens;
+}
+
+function ExchangeNode({ data }: ExchangeNodeProps) {
+  const { explorer } = useAppContext();
+
+  const amountIn = BigNumber(data.amount_in.amount.toString()).div(
+    10 ** data.amount_in.decimals,
+  );
+  const amountOut = BigNumber(data.amount_out.amount.toString()).div(
+    10 ** data.amount_out.decimals,
+  );
+
+  return (
+    <>
+      <Handle type="target" position={Position.Left} />
+      <div
+        className="flex flex-col items-center gap-1 rounded-md bg-card px-4 py-3"
+        style={{
+          width: `${EXCHANGE_NODE_WIDTH}px`,
+          height: `${EXCHANGE_NODE_HEIGHT}px`,
+        }}
+      >
+        <Tooltip
+          content={
+            <TextLink
+              className="block font-mono text-xs"
+              href={explorer.buildObjectUrl(data.pool.object_id)}
+            >
+              {formatId(data.pool.object_id)}
+            </TextLink>
+          }
+        >
+          <TLabelSans>
+            {EXCHANGE_NAME_MAP[data.pool.sui_exchange] ??
+              data.pool.sui_exchange}
+          </TLabelSans>
+        </Tooltip>
+
+        <Tooltip
+          content={
+            <TBody className="text-xs">
+              {+amountIn}{" "}
+              <TextLink href={explorer.buildCoinUrl(data.amount_in.coin_type)}>
+                {data.amount_in.ticker}
+              </TextLink>
+              {" → "}
+              {+amountOut}{" "}
+              <TextLink href={explorer.buildCoinUrl(data.amount_out.coin_type)}>
+                {data.amount_out.ticker}
+              </TextLink>
+            </TBody>
+          }
+        >
+          <div
+            className="flex flex-row items-center gap-2"
+            style={
+              {
+                "--bg-color": "hsl(var(--popover))",
+              } as CSSProperties
+            }
+          >
+            <TokenLogos
+              className="h-4 w-4"
+              tokens={[data.amount_in, data.amount_out].map((t) => ({
+                coinType: t.coin_type,
+                symbol: t.ticker,
+                iconUrl: t.icon_url,
+              }))}
+            />
+
+            <TBody>
+              {data.amount_in.ticker}
+              <span className="font-sans">/</span>
+              {data.amount_out.ticker}
+            </TBody>
+          </div>
+        </Tooltip>
+      </div>
+      <Handle type="source" position={Position.Right} />
+    </>
+  );
+}
+
 interface RoutingDialogProps {
   quote: GetQuoteResponse;
 }
 
 export default function RoutingDialog({ quote }: RoutingDialogProps) {
-  const { explorer } = useAppContext();
-
   const swapContext = useSwapContext();
   const tokens = swapContext.tokens as VerifiedToken[];
   const tokenIn = swapContext.tokenIn as VerifiedToken;
@@ -90,14 +247,6 @@ export default function RoutingDialog({ quote }: RoutingDialogProps) {
   const onOpenChange = (_isOpen: boolean) => {
     setIsOpen(_isOpen);
   };
-
-  // Quote
-  const quoteAmountIn = BigNumber(quote.trade.amount_in.amount.toString()).div(
-    10 ** tokenIn.decimals,
-  );
-  const quoteAmountOut = BigNumber(
-    quote.trade.amount_out.amount.toString(),
-  ).div(10 ** tokenOut.decimals);
 
   // Coin metadata
   const nodeTokenCoinTypes = useMemo(() => {
@@ -113,78 +262,164 @@ export default function RoutingDialog({ quote }: RoutingDialogProps) {
 
   const coinMetadataMap = useGetCoinMetadataMap(nodeTokenCoinTypes);
 
-  // Hops
-  const hopsCount = Object.keys(quote.trade.nodes).length;
-  const nodes = Object.values(quote.trade.nodes);
+  // Nodes
+  const nodesWithTokens = useMemo(
+    () =>
+      Object.values(quote.trade.nodes)
+        .map((node) => {
+          const inToken = tokens.find(
+            (t) => t.coin_type === node.amount_in.token,
+          );
+          const outToken = tokens.find(
+            (t) => t.coin_type === node.amount_out.token,
+          );
 
-  // const chainedNodeObjectIds: string[][] = [];
-  // Object.entries(quote.trade.edges).forEach(
-  //   ([endNodeObjectId, nodeObjectIds]) => {
-  //     chainedNodeObjectIds.push([...nodeObjectIds, endNodeObjectId]);
-  //   },
-  // );
-  // chainedNodeObjectIds.push(
-  //   ...Object.keys(quote.trade.nodes)
-  //     .filter(
-  //       (nodeObjectId) => !chainedNodeObjectIds.flat().includes(nodeObjectId),
-  //     )
-  //     .map((nodeObjectId) => [nodeObjectId]),
-  // );
+          const inCoinMetadata = coinMetadataMap[node.amount_in.token];
+          const outCoinMetadata = coinMetadataMap[node.amount_out.token];
 
-  // const chainedNodes = chainedNodeObjectIds.map(
-  //   (nodeObjectIds) =>
-  //     nodeObjectIds
-  //       .map((nodeObjectId) =>
-  //         nodes.find((node) => node.pool.object_id === nodeObjectId),
-  //       )
-  //       .filter(Boolean) as typeof nodes,
-  // );
+          if (!(inToken || inCoinMetadata) || !(outToken || outCoinMetadata))
+            return undefined;
+          return {
+            ...node,
+            amount_in: {
+              ...node.amount_in,
+              ...({
+                coin_type: node.amount_in.token,
+                name: inToken?.name ?? inCoinMetadata?.name,
+                ticker: inToken?.ticker ?? inCoinMetadata?.symbol,
+                icon_url: inToken?.icon_url ?? inCoinMetadata?.iconUrl,
+                decimals: inToken?.decimals ?? inCoinMetadata?.decimals,
+              } as VerifiedToken),
+            },
+            amount_out: {
+              ...node.amount_out,
+              ...({
+                coin_type: node.amount_out.token,
+                name: outToken?.name ?? outCoinMetadata?.name,
+                ticker: outToken?.ticker ?? outCoinMetadata?.symbol,
+                icon_url: outToken?.icon_url ?? outCoinMetadata?.iconUrl,
+                decimals: outToken?.decimals ?? outCoinMetadata?.decimals,
+              } as VerifiedToken),
+            },
+          };
+        })
+        .filter(Boolean) as QuoteNodeWithTokens[],
+    [quote, tokens, coinMetadataMap],
+  );
 
-  type Node = GetQuoteResponse["trade"]["nodes"][0];
-  type NodeWithTokens = Node & {
-    amount_in: Node["amount_in"] & VerifiedToken;
-    amount_out: Node["amount_out"] & VerifiedToken;
-  };
+  // Layout
+  const { fitView } = useReactFlow();
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
-  const nodesWithTokens = nodes
-    .map((node) => {
-      const inToken = tokens.find((t) => t.coin_type === node.amount_in.token);
-      const outToken = tokens.find(
-        (t) => t.coin_type === node.amount_out.token,
-      );
+  const nodeTypes = useMemo(
+    () => ({ startEnd: StartEndNode, exchange: ExchangeNode }),
+    [],
+  );
 
-      const inCoinMetadata = coinMetadataMap[node.amount_in.token];
-      const outCoinMetadata = coinMetadataMap[node.amount_out.token];
+  const fixLayout = useCallback(() => {
+    // Nodes
+    const quoteAmountIn = BigNumber(
+      quote.trade.amount_in.amount.toString(),
+    ).div(10 ** tokenIn.decimals);
+    const quoteAmountOut = BigNumber(
+      quote.trade.amount_out.amount.toString(),
+    ).div(10 ** tokenOut.decimals);
 
-      if (!(inToken || inCoinMetadata) || !(outToken || outCoinMetadata))
-        return undefined;
-      return {
-        ...node,
-        amount_in: {
-          ...node.amount_in,
-          ...({
-            coin_type: node.amount_in.token,
-            name: inToken?.name ?? inCoinMetadata?.name,
-            ticker: inToken?.ticker ?? inCoinMetadata?.symbol,
-            icon_url: inToken?.icon_url ?? inCoinMetadata?.iconUrl,
-            decimals: inToken?.decimals ?? inCoinMetadata?.decimals,
-          } as VerifiedToken),
-        },
-        amount_out: {
-          ...node.amount_out,
-          ...({
-            coin_type: node.amount_out.token,
-            name: outToken?.name ?? outCoinMetadata?.name,
-            ticker: outToken?.ticker ?? outCoinMetadata?.symbol,
-            icon_url: outToken?.icon_url ?? outCoinMetadata?.iconUrl,
-            decimals: outToken?.decimals ?? outCoinMetadata?.decimals,
-          } as VerifiedToken),
-        },
-      };
-    })
-    .filter(Boolean) as NodeWithTokens[];
+    const initialNodes: Node[] = [];
+    initialNodes.push({
+      id: "start",
+      type: "startEnd",
+      position: { x: 0, y: 0 },
+      width: START_END_NODE_WIDTH,
+      height: START_END_NODE_HEIGHT,
+      data: {
+        isStart: true,
+        token: tokenIn,
+        amount: quoteAmountIn,
+      },
+    });
+    nodesWithTokens.forEach((node) => {
+      initialNodes.push({
+        id: node.pool.object_id,
+        type: "exchange",
+        position: { x: 0, y: 0 },
+        width: EXCHANGE_NODE_WIDTH,
+        height: EXCHANGE_NODE_HEIGHT,
+        data: node,
+      });
+    });
+    initialNodes.push({
+      id: "end",
+      type: "startEnd",
+      position: { x: 0, y: 0 },
+      width: START_END_NODE_WIDTH,
+      height: START_END_NODE_HEIGHT,
+      data: {
+        token: tokenOut,
+        amount: quoteAmountOut,
+      },
+    });
 
-  const isLoading = nodesWithTokens.length !== nodes.length;
+    // Edges
+    const initialEdges: Edge[] = [];
+    nodesWithTokens.forEach((node) => {
+      if (Object.keys(quote.trade.edges).includes(node.pool.object_id)) return;
+
+      initialEdges.push({
+        id: `start-${node.pool.object_id}`,
+        source: "start",
+        target: node.pool.object_id,
+      });
+    });
+    Object.entries(quote.trade.edges).forEach(
+      ([targetNodeObjectId, sourceNodeObjectIds]) => {
+        sourceNodeObjectIds.forEach((sourceNodeObjectId) => {
+          initialEdges.push({
+            id: `${sourceNodeObjectId}-${targetNodeObjectId}`,
+            source: sourceNodeObjectId,
+            target: targetNodeObjectId,
+          });
+        });
+      },
+    );
+    nodesWithTokens.forEach((node) => {
+      if (Object.values(quote.trade.edges).flat().includes(node.pool.object_id))
+        return;
+
+      initialEdges.push({
+        id: `end-${node.pool.object_id}`,
+        source: node.pool.object_id,
+        target: "end",
+      });
+    });
+
+    const layouted = getLayoutedElements(initialNodes, initialEdges, {
+      direction: "LR",
+    });
+
+    setNodes([...layouted.nodes]);
+    setEdges([...layouted.edges]);
+
+    setTimeout(() => fitView());
+  }, [
+    quote.trade.amount_in.amount,
+    quote.trade.amount_out.amount,
+    tokenIn,
+    tokenOut,
+    nodesWithTokens,
+    quote.trade.edges,
+    setNodes,
+    setEdges,
+    fitView,
+  ]);
+  useEffect(() => {
+    fixLayout();
+  }, [quote, fixLayout]);
+
+  const hopsCount = Object.values(quote.trade.nodes).length;
+  const isLoading =
+    nodesWithTokens.length !== Object.values(quote.trade.nodes).length;
 
   return (
     <Dialog
@@ -216,106 +451,26 @@ export default function RoutingDialog({ quote }: RoutingDialogProps) {
           </TLabelSans>
         </div>
       }
-      contentProps={{
-        className:
-          "max-w-xl max-h-[calc(100dvh-var(--sm-my)*2)] h-auto overflow-auto",
-      }}
+      headerClassName="pb-0"
       titleIcon={<Route />}
       title="Routing"
     >
-      <div className="w-full overflow-auto p-4 pt-0">
-        {isLoading ? (
+      {isLoading ? (
+        <div className="flex h-full w-full flex-row items-center justify-center">
           <Spinner size="md" />
-        ) : (
-          <div className="flex w-full min-w-max flex-col items-center gap-4">
-            <div className="rounded-md bg-muted/10 px-3 py-2">
-              <TokenAmount token={tokenIn} amount={quoteAmountIn} />
-            </div>
-
-            {nodesWithTokens.flat().map((node) => {
-              const amountIn = BigNumber(node.amount_in.amount.toString()).div(
-                10 ** node.amount_in.decimals,
-              );
-              const amountOut = BigNumber(
-                node.amount_out.amount.toString(),
-              ).div(10 ** node.amount_out.decimals);
-
-              return (
-                <div
-                  key={node.pool.object_id}
-                  className="flex flex-col items-center gap-1 rounded-md border px-4 py-3"
-                >
-                  <Tooltip
-                    content={
-                      <TextLink
-                        className="block font-mono text-xs"
-                        href={explorer.buildObjectUrl(node.pool.object_id)}
-                      >
-                        {formatId(node.pool.object_id)}
-                      </TextLink>
-                    }
-                  >
-                    <TLabelSans>
-                      {EXCHANGE_NAME_MAP[node.pool.sui_exchange] ??
-                        node.pool.sui_exchange}
-                    </TLabelSans>
-                  </Tooltip>
-
-                  <Tooltip
-                    content={
-                      <TBody className="text-xs">
-                        {+amountIn}{" "}
-                        <TextLink
-                          href={explorer.buildCoinUrl(node.amount_in.coin_type)}
-                        >
-                          {node.amount_in.ticker}
-                        </TextLink>
-                        {" → "}
-                        {+amountOut}{" "}
-                        <TextLink
-                          href={explorer.buildCoinUrl(
-                            node.amount_out.coin_type,
-                          )}
-                        >
-                          {node.amount_out.ticker}
-                        </TextLink>
-                      </TBody>
-                    }
-                  >
-                    <div
-                      className="flex flex-row items-center gap-2"
-                      style={
-                        {
-                          "--bg-color": "hsl(var(--popover))",
-                        } as CSSProperties
-                      }
-                    >
-                      <TokenLogos
-                        className="h-4 w-4"
-                        tokens={[node.amount_in, node.amount_out].map((t) => ({
-                          coinType: t.coin_type,
-                          symbol: t.ticker,
-                          iconUrl: t.icon_url,
-                        }))}
-                      />
-
-                      <TBody>
-                        {node.amount_in.ticker}
-                        <span className="font-sans">/</span>
-                        {node.amount_out.ticker}
-                      </TBody>
-                    </div>
-                  </Tooltip>
-                </div>
-              );
-            })}
-
-            <div className="rounded-md bg-muted/10 px-3 py-2">
-              <TokenAmount token={tokenOut} amount={quoteAmountOut} />
-            </div>
-          </div>
-        )}
-      </div>
+        </div>
+      ) : (
+        <div className="h-full w-full">
+          <ReactFlow
+            nodeTypes={nodeTypes}
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            fitView
+          />
+        </div>
+      )}
     </Dialog>
   );
 }
