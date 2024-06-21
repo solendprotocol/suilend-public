@@ -158,7 +158,7 @@ export function PointsContextProvider({ children }: PropsWithChildren) {
     }
 
     setLeaderboardRows(sortedRows);
-  }, [refreshedObligations, data]);
+  }, [refreshedObligations, data, address]);
 
   // Rank
   const [rank, setRank] = useState<PointsContext["rank"]>(
