@@ -24,15 +24,24 @@ export default function TokensRatioChart({ data }: TokensRatioChartProps) {
   const domainY = [minY, maxY];
 
   return (
-    <div className="h-full w-full flex-shrink-0 transform-gpu">
-      <Recharts.ResponsiveContainer width="100%" height="100%">
+    <div className="relative h-full w-full flex-shrink-0 transform-gpu">
+      <div
+        className="absolute left-0 right-0 z-[1] h-[1px] border-b border-dashed border-foreground/25"
+        style={{ bottom: `${((data[0].ratio - minY) / (maxY - minY)) * 100}%` }}
+      />
+
+      <Recharts.ResponsiveContainer
+        className="relative z-[2]"
+        width="100%"
+        height="100%"
+      >
         <Recharts.LineChart
           data={data}
           margin={{
             top: line.strokeWidth / 2,
-            right: 0,
+            right: line.strokeWidth / 2,
             bottom: line.strokeWidth / 2,
-            left: 0,
+            left: line.strokeWidth / 2,
           }}
         >
           <Recharts.CartesianGrid
@@ -49,7 +58,6 @@ export default function TokensRatioChart({ data }: TokensRatioChartProps) {
           />
           <Recharts.YAxis type="number" domain={domainY} hide />
           <Recharts.Line
-            type="monotone"
             dataKey="ratio"
             isAnimationActive={false}
             stroke="hsl(var(--foreground))"

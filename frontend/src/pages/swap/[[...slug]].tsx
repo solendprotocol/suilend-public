@@ -352,7 +352,7 @@ function Page() {
   const fetchTokenHistoricalUsdPrice = useCallback(
     async (token: VerifiedToken) => {
       try {
-        const url = `https://public-api.birdeye.so/defi/history_price?address=${isSui(token.coin_type) ? SUI_COINTYPE : token.coin_type}&address_type=token&type=5m&time_from=${Math.floor(new Date().getTime() / 1000) - 24 * 60 * 60}&time_to=${Math.floor(new Date().getTime() / 1000)}`;
+        const url = `https://public-api.birdeye.so/defi/history_price?address=${isSui(token.coin_type) ? SUI_COINTYPE : token.coin_type}&address_type=token&type=15m&time_from=${Math.floor(new Date().getTime() / 1000) - 24 * 60 * 60}&time_to=${Math.floor(new Date().getTime() / 1000)}`;
         const res = await fetch(url, {
           headers: {
             "X-API-KEY": process.env.NEXT_PUBLIC_BIRDEYE_API_KEY as string,
@@ -461,12 +461,14 @@ function Page() {
         trade: quote.trade,
         sui_address: address,
 
+        gas_budget: 0.25 * 10 ** 9, // Set to 0.25 SUI
         max_slippage_bps: +slippage * 100,
       });
 
       const txb = new TransactionBlock(
         tx.transaction as unknown as TransactionBlock,
       );
+      txb.setGasBudget("" as any); // Set to dynamic
       const res = await signExecuteAndWaitTransactionBlock(txb);
       const txUrl = explorer.buildTxUrl(res.digest);
 
@@ -500,7 +502,7 @@ function Page() {
         <title>Suilend Swap</title>
       </Head>
 
-      <div className="flex w-full max-w-[500px] flex-col items-center gap-8">
+      <div className="flex w-full max-w-[460px] flex-col items-center gap-8">
         <div className="relative flex w-full flex-col">
           {/* Settings */}
           <div className="mb-4 flex flex-row items-center justify-between gap-2">
@@ -603,6 +605,7 @@ function Page() {
             </div>
           </div>
 
+          {/* Routing */}
           {new BigNumber(value || 0).gt(0) && (
             <div className="mb-4 w-full">
               {quote ? (
@@ -635,7 +638,7 @@ function Page() {
           </Button>
 
           {/* Tokens */}
-          <div className="mt-6 flex w-full flex-row items-stretch gap-4">
+          <div className="mt-6 flex w-full flex-row items-center justify-between gap-6">
             <div className="flex flex-col gap-1.5">
               <div className="flex flex-row items-center gap-2">
                 <TokenLogos
@@ -679,7 +682,7 @@ function Page() {
               )}
             </div>
 
-            <div className="flex-1">
+            <div className="h-6 max-w-48 flex-1">
               {tokensHistoricalRatios !== undefined && (
                 <TokensRatioChart data={tokensHistoricalRatios} />
               )}
@@ -689,11 +692,12 @@ function Page() {
 
         <Separator />
 
-        <TLabelSans>
+        <TLabelSans className="opacity-50">
           Powered by{" "}
           <TextLink
             className="text-muted-foreground decoration-muted-foreground/50"
             href="https://hop.ag/"
+            noIcon
           >
             Hop
           </TextLink>

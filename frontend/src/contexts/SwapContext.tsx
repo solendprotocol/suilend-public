@@ -80,7 +80,7 @@ export function SwapContextProvider({ children }: PropsWithChildren) {
       fee_bps: 0,
     };
 
-    return new HopApi(rpc.url, hop_api_options);
+    return new HopApi(rpc.url, hop_api_options, true);
   }, [rpc.url]);
 
   // Tokens

@@ -100,6 +100,7 @@ export default function TokenSelectionDialog({
           startIcon={
             <TokenLogo
               className="mr-1 h-5 w-5"
+              imageProps={{ className: "rounded-full" }}
               token={{
                 coinType: token.coin_type,
                 symbol: token.ticker,
@@ -113,7 +114,7 @@ export default function TokenSelectionDialog({
           {token.ticker}
         </Button>
       }
-      contentProps={{ className: "max-w-xl" }}
+      contentProps={{ className: "max-w-lg" }}
       title="Select token"
     >
       <div className="mx-4 mb-4 flex flex-row items-center gap-3 rounded-md bg-muted/5 px-3">
@@ -147,6 +148,7 @@ export default function TokenSelectionDialog({
               startIcon={
                 <TokenLogo
                   className="h-4 w-4"
+                  imageProps={{ className: "rounded-full" }}
                   token={{
                     coinType: t.coin_type,
                     symbol: t.ticker,
@@ -190,6 +192,7 @@ export default function TokenSelectionDialog({
                 <div className="flex w-full flex-row items-center gap-3">
                   <TokenLogo
                     showTooltip
+                    imageProps={{ className: "rounded-full" }}
                     token={{
                       coinType: t.coin_type,
                       symbol: t.ticker,
