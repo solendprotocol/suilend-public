@@ -9,6 +9,8 @@ import DataTable, {
 } from "@/components/dashboard/DataTable";
 import PointsCount from "@/components/points/PointsCount";
 import PointsRank from "@/components/points/PointsRank";
+import CopyToClipboardButton from "@/components/shared/CopyToClipboardButton";
+import OpenURLButton from "@/components/shared/OpenURLButton";
 import Tooltip from "@/components/shared/Tooltip";
 import { TBody } from "@/components/shared/Typography";
 import { useAppContext } from "@/contexts/AppContext";
@@ -16,9 +18,6 @@ import { LeaderboardRowData, usePointsContext } from "@/contexts/PointsContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 import { formatAddress } from "@/lib/format";
 import { DASHBOARD_URL } from "@/lib/navigation";
-
-import CopyToClipboardButton from "../shared/CopyToClipboardButton";
-import OpenURLButton from "../shared/OpenURLButton";
 
 export default function PointsLeaderboardTable() {
   const { explorer } = useAppContext();
