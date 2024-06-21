@@ -14,6 +14,7 @@ import {
 import { HopApi, HopApiOptions, SuiExchange, VerifiedToken } from "@hop.ag/sdk";
 import { CoinMetadata } from "@mysten/sui.js/client";
 import { normalizeStructTag } from "@mysten/sui.js/utils";
+import { useLocalStorage } from "usehooks-ts";
 
 import FullPageSpinner from "@/components/shared/FullPageSpinner";
 import { AppData, useAppContext } from "@/contexts/AppContext";
@@ -31,6 +32,9 @@ export const EXCHANGE_NAME_MAP: Record<SuiExchange, string> = {
   [SuiExchange.DEEPBOOK]: "DeepBook",
   [SuiExchange.SUISWAP]: "Suiswap",
 };
+
+const DEFAULT_TOKEN_IN_SYMBOL = "SUI";
+const DEFAULT_TOKEN_OUT_SYMBOL = "USDC";
 
 enum TokenDirection {
   IN = "in",
@@ -125,6 +129,15 @@ export function SwapContextProvider({ children }: PropsWithChildren) {
     [tokens, tokenOutSymbol],
   );
 
+  const [lastTokenInSymbol, setLastTokenInSymbol] = useLocalStorage<string>(
+    "swapLastTokenInSymbol",
+    DEFAULT_TOKEN_IN_SYMBOL,
+  );
+  const [lastTokenOutSymbol, setLastTokenOutSymbol] = useLocalStorage<string>(
+    "swapLastTokenOutSymbol",
+    DEFAULT_TOKEN_OUT_SYMBOL,
+  );
+
   useEffect(() => {
     if (
       slug === undefined ||
@@ -133,11 +146,21 @@ export function SwapContextProvider({ children }: PropsWithChildren) {
       (tokens && (!tokenIn || !tokenOut))
     )
       router.replace(
-        { pathname: [SWAP_URL, "SUI", "USDC"].join("/") },
+        {
+          pathname: [SWAP_URL, lastTokenInSymbol, lastTokenOutSymbol].join("/"),
+        },
         undefined,
         { shallow: true },
       );
-  }, [slug, tokens, tokenIn, tokenOut, router]);
+  }, [
+    slug,
+    tokens,
+    tokenIn,
+    tokenOut,
+    router,
+    lastTokenInSymbol,
+    lastTokenOutSymbol,
+  ]);
 
   const setTokenSymbol = useCallback(
     (newTokenSymbol: string, direction: TokenDirection) => {
@@ -152,8 +175,17 @@ export function SwapContextProvider({ children }: PropsWithChildren) {
         undefined,
         { shallow: true },
       );
+
+      if (direction === TokenDirection.IN) setLastTokenInSymbol(newTokenSymbol);
+      else setLastTokenOutSymbol(newTokenSymbol);
     },
-    [router, tokenInSymbol, tokenOutSymbol],
+    [
+      router,
+      tokenInSymbol,
+      tokenOutSymbol,
+      setLastTokenInSymbol,
+      setLastTokenOutSymbol,
+    ],
   );
 
   const reverseTokenSymbols = useCallback(() => {
@@ -162,7 +194,16 @@ export function SwapContextProvider({ children }: PropsWithChildren) {
       undefined,
       { shallow: true },
     );
-  }, [router, tokenInSymbol, tokenOutSymbol]);
+
+    setLastTokenInSymbol(tokenOutSymbol as string);
+    setLastTokenOutSymbol(tokenInSymbol as string);
+  }, [
+    router,
+    tokenInSymbol,
+    tokenOutSymbol,
+    setLastTokenInSymbol,
+    setLastTokenOutSymbol,
+  ]);
 
   // Balances
   const coinBalancesMap = useMemo(() => {
