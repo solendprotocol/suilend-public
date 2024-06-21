@@ -32,8 +32,9 @@ import Tooltip from "@/components/shared/Tooltip";
 import { TBody, TLabelSans } from "@/components/shared/Typography";
 import { useAppContext } from "@/contexts/AppContext";
 import { EXCHANGE_NAME_MAP, useSwapContext } from "@/contexts/SwapContext";
+import useBreakpoint from "@/hooks/useBreakpoint";
 import { getCoinMetadataMap } from "@/lib/coinMetadata";
-import { formatId, formatList } from "@/lib/format";
+import { formatId, formatList, formatToken } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import "reactflow/dist/style.css";
 
@@ -96,7 +97,7 @@ type QuoteNodeWithTokens = QuoteNode & {
   amount_out: QuoteNode["amount_out"] & VerifiedToken;
 };
 
-const START_END_NODE_WIDTH = 200; // px
+const START_END_NODE_WIDTH = 240; // px
 const START_END_NODE_HEIGHT = 36; // px
 
 interface StartEndNodeProps {
@@ -110,13 +111,17 @@ interface StartEndNodeProps {
 function StartEndNode({ data }: StartEndNodeProps) {
   const { isStart, token, amount } = data;
 
+  const { sm } = useBreakpoint();
+
   return (
     <>
-      {!isStart && <Handle type="target" position={Position.Left} />}
+      {!isStart && (
+        <Handle type="target" position={sm ? Position.Left : Position.Top} />
+      )}
       <div
         className={cn(
-          "flex flex-row",
-          isStart ? "justify-end" : "justify-start",
+          "flex flex-row justify-center",
+          isStart ? "sm:justify-end" : "sm:justify-start",
         )}
         style={{
           width: `${START_END_NODE_WIDTH}px`,
@@ -138,7 +143,12 @@ function StartEndNode({ data }: StartEndNodeProps) {
           </TBody>
         </div>
       </div>
-      {isStart && <Handle type="source" position={Position.Right} />}
+      {isStart && (
+        <Handle
+          type="source"
+          position={sm ? Position.Right : Position.Bottom}
+        />
+      )}
     </>
   );
 }
@@ -153,6 +163,8 @@ interface ExchangeNodeProps {
 function ExchangeNode({ data }: ExchangeNodeProps) {
   const { explorer } = useAppContext();
 
+  const { sm } = useBreakpoint();
+
   const amountIn = BigNumber(data.amount_in.amount.toString()).div(
     10 ** data.amount_in.decimals,
   );
@@ -162,7 +174,7 @@ function ExchangeNode({ data }: ExchangeNodeProps) {
 
   return (
     <>
-      <Handle type="target" position={Position.Left} />
+      <Handle type="target" position={sm ? Position.Left : Position.Top} />
       <div
         className="flex flex-col items-center gap-1 rounded-md bg-card px-4 py-3"
         style={{
@@ -189,12 +201,12 @@ function ExchangeNode({ data }: ExchangeNodeProps) {
         <Tooltip
           content={
             <TBody className="text-xs">
-              {+amountIn}{" "}
+              {formatToken(amountIn, { dp: data.amount_in.decimals })}{" "}
               <TextLink href={explorer.buildCoinUrl(data.amount_in.coin_type)}>
                 {data.amount_in.ticker}
               </TextLink>
               {" → "}
-              {+amountOut}{" "}
+              {formatToken(amountOut, { dp: data.amount_out.decimals })}{" "}
               <TextLink href={explorer.buildCoinUrl(data.amount_out.coin_type)}>
                 {data.amount_out.ticker}
               </TextLink>
@@ -226,7 +238,7 @@ function ExchangeNode({ data }: ExchangeNodeProps) {
           </div>
         </Tooltip>
       </div>
-      <Handle type="source" position={Position.Right} />
+      <Handle type="source" position={sm ? Position.Right : Position.Bottom} />
     </>
   );
 }
@@ -240,6 +252,8 @@ export default function RoutingDialog({ quote }: RoutingDialogProps) {
   const tokens = swapContext.tokens as VerifiedToken[];
   const tokenIn = swapContext.tokenIn as VerifiedToken;
   const tokenOut = swapContext.tokenOut as VerifiedToken;
+
+  const { sm } = useBreakpoint();
 
   // State
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -395,13 +409,12 @@ export default function RoutingDialog({ quote }: RoutingDialogProps) {
     });
 
     const layouted = getLayoutedElements(initialNodes, initialEdges, {
-      direction: "LR",
+      direction: sm ? "LR" : "TB",
     });
 
     setNodes([...layouted.nodes]);
     setEdges([...layouted.edges]);
-
-    setTimeout(() => fitView());
+    setTimeout(() => fitView({ maxZoom: 1 }));
   }, [
     quote.trade.amount_in.amount,
     quote.trade.amount_out.amount,
@@ -409,13 +422,14 @@ export default function RoutingDialog({ quote }: RoutingDialogProps) {
     tokenOut,
     nodesWithTokens,
     quote.trade.edges,
+    sm,
     setNodes,
     setEdges,
     fitView,
   ]);
   useEffect(() => {
     fixLayout();
-  }, [quote, fixLayout]);
+  }, [isOpen, quote, fixLayout]);
 
   const hopsCount = Object.values(quote.trade.nodes).length;
   const isLoading =
