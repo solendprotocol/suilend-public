@@ -127,6 +127,7 @@ export default function TokenSelectionDialog({
             value={filter}
             onChange={setFilter}
             inputProps={{
+              autoFocus: true,
               className: "font-sans bg-transparent border-0 px-0",
             }}
           />
