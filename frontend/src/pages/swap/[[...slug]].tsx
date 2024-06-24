@@ -1,7 +1,7 @@
 import Head from "next/head";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { GetQuoteResponse, HopApi, VerifiedToken } from "@hop.ag/sdk";
+import { HopApi, VerifiedToken } from "@hop.ag/sdk";
 import { TransactionBlock } from "@mysten/sui.js/transactions";
 import { normalizeStructTag } from "@mysten/sui.js/utils";
 import BigNumber from "bignumber.js";
@@ -10,6 +10,7 @@ import { ReactFlowProvider } from "reactflow";
 import { toast } from "sonner";
 import useSWR from "swr";
 import { useLocalStorage } from "usehooks-ts";
+import { v4 as uuidv4 } from "uuid";
 
 import Button from "@/components/shared/Button";
 import Spinner from "@/components/shared/Spinner";
@@ -23,7 +24,11 @@ import TokensRatioChart from "@/components/swap/TokensRatioChart";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAppContext } from "@/contexts/AppContext";
-import { SwapContextProvider, useSwapContext } from "@/contexts/SwapContext";
+import {
+  Quote,
+  SwapContextProvider,
+  useSwapContext,
+} from "@/contexts/SwapContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 import { ParsedCoinBalance } from "@/lib/coinBalance";
 import { SUI_COINTYPE, isSui } from "@/lib/coinType";
@@ -119,9 +124,9 @@ function Page() {
   );
 
   // Quote
-  const [quoteMap, setQuoteMap] = useState<
-    Record<number, GetQuoteResponse | undefined>
-  >({});
+  const [quoteMap, setQuoteMap] = useState<Record<number, Quote | undefined>>(
+    {},
+  );
   const quote = (() => {
     const timestamps = Object.entries(quoteMap)
       .filter(
@@ -184,8 +189,9 @@ function Page() {
           node.amount_out.token = normalizeStructTag(node.amount_out.token);
         }
 
-        setQuoteMap((o) => ({ ...o, [timestamp]: result }));
-        return result;
+        const resultWithId = { ...result, id: uuidv4() };
+        setQuoteMap((o) => ({ ...o, [timestamp]: resultWithId }));
+        return resultWithId;
       } catch (err) {
         console.error(err);
 
@@ -199,7 +205,7 @@ function Page() {
   );
   const fetchQuoteWrapper = useCallback(() => fetchQuote(), [fetchQuote]);
 
-  useSWR<GetQuoteResponse | undefined>("quote", fetchQuoteWrapper, {
+  useSWR<Quote | undefined>("quote", fetchQuoteWrapper, {
     refreshInterval: 30 * 1000,
     onSuccess: (data) => {
       console.log("Fetched quote", data);

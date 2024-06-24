@@ -1,5 +1,6 @@
 import * as Recharts from "recharts";
 
+import { TLabelSans } from "@/components/shared/Typography";
 import { line } from "@/lib/chart";
 
 type ChartData = {
@@ -28,7 +29,11 @@ export default function TokensRatioChart({ data }: TokensRatioChartProps) {
       <div
         className="absolute left-0 right-0 z-[1] h-[1px] border-b border-dashed border-foreground/25"
         style={{ bottom: `${((data[0].ratio - minY) / (maxY - minY)) * 100}%` }}
-      />
+      >
+        <TLabelSans className="absolute left-0 top-1/2 -translate-x-full -translate-y-2/4 pr-1 text-[10px] uppercase text-foreground/25">
+          24h
+        </TLabelSans>
+      </div>
 
       <Recharts.ResponsiveContainer
         className="relative z-[2]"
