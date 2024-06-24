@@ -16,7 +16,7 @@ import { Token } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import wormholeLogo from "@/public/assets/wormhole.png";
 
-export interface TokenLogoProps {
+interface TokenLogoProps {
   showTooltip?: boolean;
   className?: ClassValue;
   style?: CSSProperties;

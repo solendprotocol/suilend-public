@@ -82,7 +82,10 @@ const ActionsModalInput = forwardRef<HTMLInputElement, ActionsModalInputProps>(
           style={{ height: `${INPUT_HEIGHT}px` }}
         >
           <TBody className="text-right text-2xl">{reserve.symbol}</TBody>
-          <TLabel className="text-right">
+          <TLabel
+            className="text-right"
+            style={{ height: `${USD_LABEL_HEIGHT}px` }}
+          >
             {!usdValue.eq(0) && "≈"}
             {formatUsd(usdValue)}
           </TLabel>
