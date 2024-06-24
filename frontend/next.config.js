@@ -15,21 +15,20 @@ const nextConfig = {
       },
     ],
   },
-  rewrites() {
-    return {
-      beforeFiles: [
-        {
-          source: "/:path*",
-          has: [
-            {
-              type: "host",
-              value: "swap.suilend.fi",
-            },
-          ],
-          destination: "/swap/:path*",
-        },
-      ],
-    };
+  async redirects() {
+    return [
+      {
+        source: "/:path*",
+        has: [
+          {
+            type: "host",
+            value: "swap.suilend.fi",
+          },
+        ],
+        destination: "https://suilend.fi/swap/:path*",
+        permanent: true,
+      },
+    ];
   },
 };
 
