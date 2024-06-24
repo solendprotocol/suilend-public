@@ -1,26 +1,11 @@
-import {
-  CSSProperties,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { CSSProperties, useEffect, useMemo, useRef, useState } from "react";
 
 import Dagre from "@dagrejs/dagre";
-import { GetQuoteResponse, VerifiedToken } from "@hop.ag/sdk";
+import { VerifiedToken } from "@hop.ag/sdk";
 import { CoinMetadata, SuiClient } from "@mysten/sui.js/client";
 import BigNumber from "bignumber.js";
 import { Route } from "lucide-react";
-import ReactFlow, {
-  Edge,
-  Handle,
-  Node,
-  Position,
-  useEdgesState,
-  useNodesState,
-  useReactFlow,
-} from "reactflow";
+import ReactFlow, { Edge, Handle, Node, Position } from "reactflow";
 
 import Dialog from "@/components/dashboard/Dialog";
 import Button from "@/components/shared/Button";
@@ -31,7 +16,11 @@ import TokenLogos from "@/components/shared/TokenLogos";
 import Tooltip from "@/components/shared/Tooltip";
 import { TBody, TLabelSans } from "@/components/shared/Typography";
 import { useAppContext } from "@/contexts/AppContext";
-import { EXCHANGE_NAME_MAP, useSwapContext } from "@/contexts/SwapContext";
+import {
+  EXCHANGE_NAME_MAP,
+  Quote,
+  useSwapContext,
+} from "@/contexts/SwapContext";
 import useBreakpoint from "@/hooks/useBreakpoint";
 import { getCoinMetadataMap } from "@/lib/coinMetadata";
 import { formatId, formatList, formatToken } from "@/lib/format";
@@ -91,7 +80,7 @@ const useGetCoinMetadataMap = (coinTypes: string[]) => {
   return coinMetadataMap;
 };
 
-type QuoteNode = GetQuoteResponse["trade"]["nodes"][0];
+type QuoteNode = Quote["trade"]["nodes"][0];
 type QuoteNodeWithTokens = QuoteNode & {
   amount_in: QuoteNode["amount_in"] & VerifiedToken;
   amount_out: QuoteNode["amount_out"] & VerifiedToken;
@@ -121,7 +110,7 @@ function StartEndNode({ data }: StartEndNodeProps) {
       <div
         className={cn(
           "flex flex-row justify-center",
-          isStart ? "sm:justify-end" : "sm:justify-start",
+          isStart ? "md:justify-end" : "md:justify-start",
         )}
         style={{
           width: `${START_END_NODE_WIDTH}px`,
@@ -199,6 +188,7 @@ function ExchangeNode({ data }: ExchangeNodeProps) {
         </Tooltip>
 
         <Tooltip
+          contentProps={{ style: { maxWidth: "none" } }}
           content={
             <TBody className="text-xs">
               {formatToken(amountIn, { dp: data.amount_in.decimals })}{" "}
@@ -243,17 +233,132 @@ function ExchangeNode({ data }: ExchangeNodeProps) {
   );
 }
 
+interface NodeChartProps {
+  quote: Quote;
+  quoteNodesWithTokens: QuoteNodeWithTokens[];
+}
+
+function NodeChart({ quote, quoteNodesWithTokens }: NodeChartProps) {
+  const swapContext = useSwapContext();
+  const tokenIn = swapContext.tokenIn as VerifiedToken;
+  const tokenOut = swapContext.tokenOut as VerifiedToken;
+
+  const { md } = useBreakpoint();
+
+  // Layout
+  const initialNodesEdges = (() => {
+    // Nodes
+    const quoteAmountIn = BigNumber(
+      quote.trade.amount_in.amount.toString(),
+    ).div(10 ** tokenIn.decimals);
+    const quoteAmountOut = BigNumber(
+      quote.trade.amount_out.amount.toString(),
+    ).div(10 ** tokenOut.decimals);
+
+    const initialNodes: Node[] = [];
+    initialNodes.push({
+      id: "start",
+      type: "startEnd",
+      position: { x: 0, y: 0 },
+      width: START_END_NODE_WIDTH,
+      height: START_END_NODE_HEIGHT,
+      data: {
+        isStart: true,
+        token: tokenIn,
+        amount: quoteAmountIn,
+      },
+    });
+    quoteNodesWithTokens.forEach((node) => {
+      initialNodes.push({
+        id: node.pool.object_id,
+        type: "exchange",
+        position: { x: 0, y: 0 },
+        width: EXCHANGE_NODE_WIDTH,
+        height: EXCHANGE_NODE_HEIGHT,
+        data: node,
+      });
+    });
+    initialNodes.push({
+      id: "end",
+      type: "startEnd",
+      position: { x: 0, y: 0 },
+      width: START_END_NODE_WIDTH,
+      height: START_END_NODE_HEIGHT,
+      data: {
+        token: tokenOut,
+        amount: quoteAmountOut,
+      },
+    });
+
+    // Edges
+    const initialEdges: Edge[] = [];
+    quoteNodesWithTokens.forEach((node) => {
+      if (Object.keys(quote.trade.edges).includes(node.pool.object_id)) return;
+
+      initialEdges.push({
+        id: `start-${node.pool.object_id}`,
+        source: "start",
+        target: node.pool.object_id,
+      });
+    });
+    Object.entries(quote.trade.edges).forEach(
+      ([targetNodeObjectId, sourceNodeObjectIds]) => {
+        sourceNodeObjectIds.forEach((sourceNodeObjectId) => {
+          initialEdges.push({
+            id: `${sourceNodeObjectId}-${targetNodeObjectId}`,
+            source: sourceNodeObjectId,
+            target: targetNodeObjectId,
+          });
+        });
+      },
+    );
+    quoteNodesWithTokens.forEach((node) => {
+      if (Object.values(quote.trade.edges).flat().includes(node.pool.object_id))
+        return;
+
+      initialEdges.push({
+        id: `end-${node.pool.object_id}`,
+        source: node.pool.object_id,
+        target: "end",
+      });
+    });
+
+    // Layout
+    const layouted = getLayoutedElements(initialNodes, initialEdges, {
+      direction: md ? "LR" : "TB",
+    });
+
+    return {
+      nodes: layouted.nodes,
+      edges: layouted.edges,
+    };
+  })();
+
+  const nodeTypes = useMemo(
+    () => ({ startEnd: StartEndNode, exchange: ExchangeNode }),
+    [],
+  );
+
+  return (
+    <div className="h-full w-full">
+      <ReactFlow
+        nodeTypes={nodeTypes}
+        defaultNodes={initialNodesEdges.nodes}
+        defaultEdges={initialNodesEdges.edges}
+        fitView
+        fitViewOptions={{ maxZoom: 1 }}
+      />
+    </div>
+  );
+}
+
 interface RoutingDialogProps {
-  quote: GetQuoteResponse;
+  quote: Quote;
 }
 
 export default function RoutingDialog({ quote }: RoutingDialogProps) {
   const swapContext = useSwapContext();
   const tokens = swapContext.tokens as VerifiedToken[];
-  const tokenIn = swapContext.tokenIn as VerifiedToken;
-  const tokenOut = swapContext.tokenOut as VerifiedToken;
-
-  const { sm } = useBreakpoint();
 
   // State
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -276,8 +381,8 @@ export default function RoutingDialog({ quote }: RoutingDialogProps) {
 
   const coinMetadataMap = useGetCoinMetadataMap(nodeTokenCoinTypes);
 
-  // Nodes
-  const nodesWithTokens = useMemo(
+  // Quote
+  const quoteNodesWithTokens = useMemo(
     () =>
       Object.values(quote.trade.nodes)
         .map((node) => {
@@ -321,119 +426,9 @@ export default function RoutingDialog({ quote }: RoutingDialogProps) {
     [quote, tokens, coinMetadataMap],
   );
 
-  // Layout
-  const { fitView } = useReactFlow();
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-
-  const nodeTypes = useMemo(
-    () => ({ startEnd: StartEndNode, exchange: ExchangeNode }),
-    [],
-  );
-
-  const fixLayout = useCallback(() => {
-    // Nodes
-    const quoteAmountIn = BigNumber(
-      quote.trade.amount_in.amount.toString(),
-    ).div(10 ** tokenIn.decimals);
-    const quoteAmountOut = BigNumber(
-      quote.trade.amount_out.amount.toString(),
-    ).div(10 ** tokenOut.decimals);
-
-    const initialNodes: Node[] = [];
-    initialNodes.push({
-      id: "start",
-      type: "startEnd",
-      position: { x: 0, y: 0 },
-      width: START_END_NODE_WIDTH,
-      height: START_END_NODE_HEIGHT,
-      data: {
-        isStart: true,
-        token: tokenIn,
-        amount: quoteAmountIn,
-      },
-    });
-    nodesWithTokens.forEach((node) => {
-      initialNodes.push({
-        id: node.pool.object_id,
-        type: "exchange",
-        position: { x: 0, y: 0 },
-        width: EXCHANGE_NODE_WIDTH,
-        height: EXCHANGE_NODE_HEIGHT,
-        data: node,
-      });
-    });
-    initialNodes.push({
-      id: "end",
-      type: "startEnd",
-      position: { x: 0, y: 0 },
-      width: START_END_NODE_WIDTH,
-      height: START_END_NODE_HEIGHT,
-      data: {
-        token: tokenOut,
-        amount: quoteAmountOut,
-      },
-    });
-
-    // Edges
-    const initialEdges: Edge[] = [];
-    nodesWithTokens.forEach((node) => {
-      if (Object.keys(quote.trade.edges).includes(node.pool.object_id)) return;
-
-      initialEdges.push({
-        id: `start-${node.pool.object_id}`,
-        source: "start",
-        target: node.pool.object_id,
-      });
-    });
-    Object.entries(quote.trade.edges).forEach(
-      ([targetNodeObjectId, sourceNodeObjectIds]) => {
-        sourceNodeObjectIds.forEach((sourceNodeObjectId) => {
-          initialEdges.push({
-            id: `${sourceNodeObjectId}-${targetNodeObjectId}`,
-            source: sourceNodeObjectId,
-            target: targetNodeObjectId,
-          });
-        });
-      },
-    );
-    nodesWithTokens.forEach((node) => {
-      if (Object.values(quote.trade.edges).flat().includes(node.pool.object_id))
-        return;
-
-      initialEdges.push({
-        id: `end-${node.pool.object_id}`,
-        source: node.pool.object_id,
-        target: "end",
-      });
-    });
-
-    const layouted = getLayoutedElements(initialNodes, initialEdges, {
-      direction: sm ? "LR" : "TB",
-    });
-
-    setNodes([...layouted.nodes]);
-    setEdges([...layouted.edges]);
-    setTimeout(() => fitView({ maxZoom: 1 }));
-  }, [
-    quote.trade.amount_in.amount,
-    quote.trade.amount_out.amount,
-    tokenIn,
-    tokenOut,
-    nodesWithTokens,
-    quote.trade.edges,
-    sm,
-    setNodes,
-    setEdges,
-    fitView,
-  ]);
-  useEffect(() => {
-    fixLayout();
-  }, [isOpen, quote, fixLayout]);
-
   const hopsCount = Object.values(quote.trade.nodes).length;
   const isLoading =
-    nodesWithTokens.length !== Object.values(quote.trade.nodes).length;
+    quoteNodesWithTokens.length !== Object.values(quote.trade.nodes).length;
 
   return (
     <Dialog
@@ -474,16 +469,12 @@ export default function RoutingDialog({ quote }: RoutingDialogProps) {
           <Spinner size="md" />
         </div>
       ) : (
-        <div className="h-full w-full">
-          <ReactFlow
-            nodeTypes={nodeTypes}
-            nodes={nodes}
-            edges={edges}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            fitView
+        isOpen && (
+          <NodeChart
+            quote={quote}
+            quoteNodesWithTokens={quoteNodesWithTokens}
           />
-        </div>
+        )
       )}
     </Dialog>
   );

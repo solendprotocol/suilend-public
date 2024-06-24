@@ -11,7 +11,13 @@ import {
   useState,
 } from "react";
 
-import { HopApi, HopApiOptions, SuiExchange, VerifiedToken } from "@hop.ag/sdk";
+import {
+  GetQuoteResponse,
+  HopApi,
+  HopApiOptions,
+  SuiExchange,
+  VerifiedToken,
+} from "@hop.ag/sdk";
 import { CoinMetadata } from "@mysten/sui.js/client";
 import { normalizeStructTag } from "@mysten/sui.js/utils";
 import { useLocalStorage } from "usehooks-ts";
@@ -40,6 +46,10 @@ enum TokenDirection {
   IN = "in",
   OUT = "out",
 }
+
+export type Quote = GetQuoteResponse & {
+  id: string;
+};
 
 interface SwapContext {
   sdk?: HopApi;
