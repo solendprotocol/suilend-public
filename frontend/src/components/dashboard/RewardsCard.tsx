@@ -19,7 +19,11 @@ import { useDashboardContext } from "@/contexts/DashboardContext";
 import { usePointsContext } from "@/contexts/PointsContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 import useBreakpoint from "@/hooks/useBreakpoint";
-import { LOGO_MAP, NORMALIZED_SUI_COINTYPE, isSui } from "@/lib/coinType";
+import {
+  COINTYPE_LOGO_MAP,
+  NORMALIZED_SUI_COINTYPE,
+  isSui,
+} from "@/lib/coinType";
 import { TX_TOAST_DURATION } from "@/lib/constants";
 import { formatToken } from "@/lib/format";
 import { RewardSummary } from "@/lib/liquidityMining";
@@ -38,12 +42,15 @@ function PendingRewards({ totalSuiRewards, isCentered }: PendingRewardsProps) {
       <TLabelSans className={cn(isCentered && "text-center")}>
         Pending rewards
       </TLabelSans>
+
       <div className="flex flex-row items-center gap-1.5">
         <TokenLogo
           className="h-4 w-4"
-          coinType={NORMALIZED_SUI_COINTYPE}
-          symbol="SUI"
-          src={LOGO_MAP[NORMALIZED_SUI_COINTYPE]}
+          token={{
+            coinType: NORMALIZED_SUI_COINTYPE,
+            symbol: "SUI",
+            iconUrl: COINTYPE_LOGO_MAP[NORMALIZED_SUI_COINTYPE],
+          }}
         />
         <Tooltip title={formatToken(totalSuiRewards, { dp: 9 })}>
           <TBody>{formatToken(totalSuiRewards)}</TBody>
@@ -140,7 +147,11 @@ export default function RewardsCard() {
       const txUrl = explorer.buildTxUrl(res.digest);
 
       toast.success("Claimed rewards", {
-        action: <TextLink href={txUrl}>View tx on {explorer.name}</TextLink>,
+        action: (
+          <TextLink className="block" href={txUrl}>
+            View tx on {explorer.name}
+          </TextLink>
+        ),
         duration: TX_TOAST_DURATION,
       });
     } catch (err) {

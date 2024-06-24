@@ -174,9 +174,11 @@ export default function Home() {
                       className="flex flex-row items-center gap-3 py-2"
                     >
                       <TokenLogo
-                        coinType={reserve.coinType}
-                        symbol={reserve.symbol}
-                        src={reserve.iconUrl}
+                        token={{
+                          coinType: reserve.coinType,
+                          symbol: reserve.symbol,
+                          iconUrl: reserve.iconUrl,
+                        }}
                       />
                       <TBody>{reserve.symbol}</TBody>
                       <TBody className="text-muted-foreground">

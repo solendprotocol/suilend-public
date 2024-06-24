@@ -37,6 +37,7 @@ export default function PointsCountPopover() {
         <Button
           className="gap-1.5 bg-[#142142] hover:bg-[#142142]/80"
           startIcon={<PointsIcon className="h-4 w-4" />}
+          role="combobox"
         >
           {pointsStats ? (
             formatPoints(pointsStats.totalPoints.total)

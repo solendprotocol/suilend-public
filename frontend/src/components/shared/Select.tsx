@@ -12,7 +12,7 @@ import {
 import { cn } from "@/lib/utils";
 
 export interface SelectProps {
-  root?: SelectRootProps;
+  rootProps?: SelectRootProps;
   trigger: ReactNode;
   items: {
     id: string;
@@ -24,7 +24,7 @@ export interface SelectProps {
 }
 
 export default function Select({
-  root,
+  rootProps,
   trigger,
   items,
   selectedItemId,
@@ -32,7 +32,7 @@ export default function Select({
   title,
 }: SelectProps) {
   return (
-    <SelectRoot onValueChange={setValue} value={selectedItemId} {...root}>
+    <SelectRoot onValueChange={setValue} value={selectedItemId} {...rootProps}>
       {trigger}
       <SelectContent
         className="rounded-md"

@@ -20,7 +20,7 @@ export default function StandardSelect({
 
   return (
     <Select
-      root={{ open: isOpen, onOpenChange: setIsOpen }}
+      rootProps={{ open: isOpen, onOpenChange: setIsOpen }}
       trigger={
         <SelectTrigger
           className={cn(

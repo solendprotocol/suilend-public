@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { CSSProperties, useCallback, useEffect, useRef, useState } from "react";
 
 import BigNumber from "bignumber.js";
 import { capitalize } from "lodash";
@@ -134,7 +134,7 @@ export default function ActionsModalTabContent({
   const formattedValue = `${value} ${reserve.symbol}`;
 
   // Borrow fee
-  const borrowFee = new BigNumber(value || "0")
+  const borrowFee = new BigNumber(value || 0)
     .times(reserve.config.borrowFeeBps)
     .div(10000);
 
@@ -151,11 +151,11 @@ export default function ActionsModalTabContent({
     )
       return getSubmitButtonNoValueState() as SubmitButtonState;
 
-    if (value === "") return { isDisabled: true, title: "Enter a value" };
+    if (value === "") return { isDisabled: true, title: "Enter an amount" };
     if (new BigNumber(value).lt(0))
-      return { isDisabled: true, title: "Enter a +ve value" };
+      return { isDisabled: true, title: "Enter a +ve amount" };
     if (new BigNumber(value).eq(0))
-      return { isDisabled: true, title: "Enter a non-zero value" };
+      return { isDisabled: true, title: "Enter a non-zero amount" };
 
     if (getSubmitButtonState(value) !== undefined)
       return getSubmitButtonState(value) as SubmitButtonState;
@@ -219,7 +219,11 @@ export default function ActionsModalTabContent({
       const txUrl = explorer.buildTxUrl(res.digest);
 
       toast.success(`${capitalize(actionPastTense)} ${formattedValue}`, {
-        action: <TextLink href={txUrl}>View tx on {explorer.name}</TextLink>,
+        action: (
+          <TextLink className="block" href={txUrl}>
+            View tx on {explorer.name}
+          </TextLink>
+        ),
         duration: TX_TOAST_DURATION,
       });
       setUseMaxAmount(false);
@@ -309,7 +313,10 @@ export default function ActionsModalTabContent({
       </div>
 
       <div className="-m-4 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overflow-x-hidden p-4 md:pb-6">
-        <div className="flex flex-col gap-3">
+        <div
+          className="flex flex-col gap-3"
+          style={{ "--bg-color": "hsl(var(--popover))" } as CSSProperties}
+        >
           <LabelWithValue
             label="Price"
             value={formatPrice(reserve.price)}

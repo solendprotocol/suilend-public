@@ -51,7 +51,7 @@ const getFieldColor = (field: string) => {
 
 type ChartData = {
   timestampS: number;
-  [interestAprPercent: string]: number;
+  [interestAprPercent: string]: number | undefined;
 };
 
 interface TooltipContentProps {
@@ -66,6 +66,7 @@ function TooltipContent({ side, fields, d, viewBox, x }: TooltipContentProps) {
   const appContext = useAppContext();
   const data = appContext.data as AppData;
 
+  if (fields.every((field) => d[field] === undefined)) return null;
   if (viewBox === undefined || x === undefined) return null;
   return (
     // Subset of TooltipContent className
@@ -83,7 +84,10 @@ function TooltipContent({ side, fields, d, viewBox, x }: TooltipContentProps) {
           <TBody>
             {formatPercent(
               new BigNumber(
-                fields.reduce((acc: number, field) => acc + d[field], 0),
+                fields.reduce(
+                  (acc: number, field) => acc + (d[field] as number),
+                  0,
+                ),
               ),
             )}
           </TBody>
@@ -99,7 +103,7 @@ function TooltipContent({ side, fields, d, viewBox, x }: TooltipContentProps) {
               isLast={index === fields.length - 1}
               value={
                 <span style={{ color }}>
-                  {formatPercent(new BigNumber(d[field]))}
+                  {formatPercent(new BigNumber(d[field] as number))}
                 </span>
               }
             >
@@ -110,9 +114,11 @@ function TooltipContent({ side, fields, d, viewBox, x }: TooltipContentProps) {
                   <TLabelSans>Rewards in</TLabelSans>
                   <TokenLogo
                     className="h-4 w-4"
-                    coinType={coinType}
-                    symbol={data.coinMetadataMap[coinType].symbol}
-                    src={data.coinMetadataMap[coinType].iconUrl}
+                    token={{
+                      coinType,
+                      symbol: data.coinMetadataMap[coinType].symbol,
+                      iconUrl: data.coinMetadataMap[coinType].iconUrl,
+                    }}
                   />
                   <TLabelSans>
                     {data.coinMetadataMap[coinType].symbol}
@@ -164,7 +170,7 @@ function Chart({ side, data }: ChartProps) {
   const minY = 0;
   const maxY = Math.max(
     ...data.map((d) =>
-      fields.reduce((acc: number, field) => acc + d[field], 0),
+      fields.reduce((acc: number, field) => acc + (d[field] ?? 0), 0),
     ),
   );
 
@@ -310,7 +316,6 @@ export default function HistoricalAprLineChart({
       (aprReward) => data.reserveMap[aprReward.stats.rewardCoinType],
     );
   }, [data.rewardMap, reserve.coinType, side, data.reserveMap]);
-  console.log("XXX", aprRewardReserves);
 
   const didFetchInitialReserveAssetDataEventsRef = useRef<boolean>(false);
   const didFetchInitialRewardReservesAssetDataEventsRef = useRef<
@@ -416,22 +421,6 @@ export default function HistoricalAprLineChart({
       );
       result.push(d);
     });
-
-    const fields =
-      result.length > 0
-        ? Object.keys(result[0]).filter((key) => key !== "timestampS")
-        : [];
-
-    for (const d of result) {
-      let hasUndefined = false;
-      for (const field of fields) {
-        if (d[field] === undefined) {
-          d[field] = result.find((_d) => _d[field] !== undefined)?.[field];
-          hasUndefined = true;
-        }
-      }
-      if (!hasUndefined) break;
-    }
 
     return result as ChartData[];
   }, [reserveAssetDataEventsMap, reserve, days, aprRewardReserves]);

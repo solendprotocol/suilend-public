@@ -41,7 +41,7 @@ export function DropdownMenuSeparator() {
 }
 
 interface DropdownMenuProps {
-  root?: DropdownMenuRootProps;
+  rootProps?: DropdownMenuRootProps;
   trigger: ReactNode;
   title?: string;
   description?: ReactNode;
@@ -49,14 +49,14 @@ interface DropdownMenuProps {
 }
 
 export default function DropdownMenu({
-  root,
+  rootProps,
   trigger,
   title,
   description,
   items,
 }: DropdownMenuProps) {
   return (
-    <DropdownMenuRoot {...root}>
+    <DropdownMenuRoot {...rootProps}>
       <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
       <DropdownMenuContent
         className="rounded-md p-4"

@@ -99,7 +99,7 @@ export default function ConnectWalletDropdownMenu() {
 
   return (
     <DropdownMenu
-      root={{
+      rootProps={{
         open: isConnectWalletDropdownOpen,
         onOpenChange: setIsConnectWalletDropdownOpen,
       }}
