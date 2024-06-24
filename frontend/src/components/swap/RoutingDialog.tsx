@@ -100,12 +100,12 @@ interface StartEndNodeProps {
 function StartEndNode({ data }: StartEndNodeProps) {
   const { isStart, token, amount } = data;
 
-  const { sm } = useBreakpoint();
+  const { md } = useBreakpoint();
 
   return (
     <>
       {!isStart && (
-        <Handle type="target" position={sm ? Position.Left : Position.Top} />
+        <Handle type="target" position={md ? Position.Left : Position.Top} />
       )}
       <div
         className={cn(
@@ -135,7 +135,7 @@ function StartEndNode({ data }: StartEndNodeProps) {
       {isStart && (
         <Handle
           type="source"
-          position={sm ? Position.Right : Position.Bottom}
+          position={md ? Position.Right : Position.Bottom}
         />
       )}
     </>
@@ -152,7 +152,7 @@ interface ExchangeNodeProps {
 function ExchangeNode({ data }: ExchangeNodeProps) {
   const { explorer } = useAppContext();
 
-  const { sm } = useBreakpoint();
+  const { md } = useBreakpoint();
 
   const amountIn = BigNumber(data.amount_in.amount.toString()).div(
     10 ** data.amount_in.decimals,
@@ -163,7 +163,7 @@ function ExchangeNode({ data }: ExchangeNodeProps) {
 
   return (
     <>
-      <Handle type="target" position={sm ? Position.Left : Position.Top} />
+      <Handle type="target" position={md ? Position.Left : Position.Top} />
       <div
         className="flex flex-col items-center gap-1 rounded-md bg-card px-4 py-3"
         style={{
@@ -228,7 +228,7 @@ function ExchangeNode({ data }: ExchangeNodeProps) {
           </div>
         </Tooltip>
       </div>
-      <Handle type="source" position={sm ? Position.Right : Position.Bottom} />
+      <Handle type="source" position={md ? Position.Right : Position.Bottom} />
     </>
   );
 }

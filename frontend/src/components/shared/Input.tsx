@@ -17,7 +17,8 @@ interface InputProps {
   id: string;
   type?: "text" | "number" | "range";
   placeholder?: string;
-  value: string | number;
+  defaultValue?: string | number;
+  value?: string | number;
   onChange: (value: string) => void;
   inputProps?: InputComponentProps;
   startDecorator?: string;
@@ -32,6 +33,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       id,
       type = "text",
       placeholder,
+      defaultValue,
       value,
       onChange,
       inputProps = {},
@@ -80,6 +82,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             )}
             type={type}
             placeholder={placeholder}
+            defaultValue={defaultValue}
             value={value}
             onChange={(e) => onChange(e.target.value)}
             onWheel={(e) => e.currentTarget.blur()}

@@ -214,10 +214,7 @@ export default function TokenSelectionDialog({
 
                 <div className="flex flex-col items-end gap-1">
                   <TBody className="w-max">
-                    {tokenBalance.gt(0)
-                      ? formatToken(tokenBalance, { exact: false })
-                      : "--"}{" "}
-                    {t.ticker}
+                    {formatToken(tokenBalance, { exact: false })} {t.ticker}
                   </TBody>
                   <TextLink
                     className="block w-max text-xs text-muted-foreground no-underline hover:text-foreground"
