@@ -25,7 +25,7 @@ const nextConfig = {
             value: "swap.suilend.fi",
           },
         ],
-        destination: "https://suilend.fi/swap/:path*",
+        destination: "https://www.suilend.fi/swap/:path*",
         permanent: true,
       },
     ];
