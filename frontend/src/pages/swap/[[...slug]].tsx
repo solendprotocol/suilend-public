@@ -29,6 +29,7 @@ import { ParsedCoinBalance } from "@/lib/coinBalance";
 import { SUI_COINTYPE, isSui } from "@/lib/coinType";
 import { TX_TOAST_DURATION } from "@/lib/constants";
 import { formatPercent, formatToken } from "@/lib/format";
+import track from "@/lib/track";
 import { cn, hoverUnderlineClassName } from "@/lib/utils";
 
 enum TokenDirection {
@@ -416,6 +417,8 @@ function Page() {
       reverseTokens();
     else {
       setTokenSymbol(_token.ticker, direction);
+      track("swap_select_token", { asset: _token.ticker, direction });
+
       fetchQuote(
         direction === TokenDirection.IN ? _token : tokenIn,
         direction === TokenDirection.IN ? tokenOut : _token,
@@ -452,7 +455,8 @@ function Page() {
 
   const onSubmitClick = async () => {
     if (submitButtonState.isDisabled) return;
-    if (!address || !quote || isFetchingQuote) return;
+    if (!address || !quote || quoteAmountOut === undefined || isFetchingQuote)
+      return;
 
     setIsSubmitting(true);
     await fetchQuoteWrapper();
@@ -485,6 +489,13 @@ function Page() {
         },
       );
       formatAndSetValue("", tokenIn);
+
+      track("swap_success", {
+        assetIn: tokenIn.ticker,
+        assetOut: tokenOut.ticker,
+        amountIn: value,
+        amountOut: quoteAmountOut.toString(),
+      });
     } catch (err) {
       toast.error("Failed to swap", {
         description: ((err as Error)?.message || err) as string,
