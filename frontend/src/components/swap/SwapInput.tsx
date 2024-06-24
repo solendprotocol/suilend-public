@@ -7,7 +7,7 @@ import { mergeRefs } from "react-merge-refs";
 import { TLabel, TLabelSans } from "@/components/shared/Typography";
 import TokenSelectionDialog from "@/components/swap/TokenSelectionDialog";
 import { Input as InputComponent } from "@/components/ui/input";
-import { formatPercent, formatUsd } from "@/lib/format";
+import { formatUsd } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 const INPUT_HEIGHT = 70; // px
@@ -21,7 +21,6 @@ interface SwapInputProps {
   isValueLoading?: boolean;
   onChange?: (value: string) => void;
   usdValue?: BigNumber;
-  usdValueChangePercent?: BigNumber;
   tokens: VerifiedToken[];
   token: VerifiedToken;
   onSelectToken: (token: VerifiedToken) => void;
@@ -36,7 +35,6 @@ const SwapInput = forwardRef<HTMLInputElement, SwapInputProps>(
       isValueLoading,
       onChange,
       usdValue,
-      usdValueChangePercent,
       tokens,
       token,
       onSelectToken,
@@ -99,20 +97,6 @@ const SwapInput = forwardRef<HTMLInputElement, SwapInputProps>(
                   style={{ bottom: `${INPUT_PADDING_Y}px` }}
                 >
                   {formatUsd(usdValue)}
-                  {usdValueChangePercent !== undefined &&
-                    usdValueChangePercent.abs().gt(0.01) && (
-                      <span
-                        className={cn(
-                          usdValueChangePercent.gt(0) && "text-success",
-                          usdValueChangePercent.lt(0) && "text-destructive",
-                        )}
-                      >
-                        {" "}
-                        {usdValueChangePercent.gt(0) && "+"}
-                        {usdValueChangePercent.lt(0) && "-"}
-                        {formatPercent(usdValueChangePercent.abs())}
-                      </span>
-                    )}
                 </TLabel>
               )}
 

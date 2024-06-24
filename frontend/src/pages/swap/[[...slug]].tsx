@@ -268,15 +268,6 @@ function Page() {
     quoteAmountOut !== undefined && tokenOutUsdPrice !== undefined
       ? quoteAmountOut.times(tokenOutUsdPrice)
       : undefined;
-  const tokenOutUsdValueChangePercent =
-    tokenInUsdValue !== undefined &&
-    tokenOutUsdValue !== undefined &&
-    quoteAmountIn !== undefined &&
-    quoteAmountIn.gt(0)
-      ? new BigNumber(new BigNumber(tokenOutUsdValue).minus(tokenInUsdValue))
-          .div(tokenInUsdValue)
-          .times(100)
-      : undefined;
 
   const fetchTokenUsdPrice = useCallback(async (token: VerifiedToken) => {
     try {
@@ -525,10 +516,10 @@ function Page() {
           {/* Settings */}
           <div className="mb-4 flex flex-row items-center justify-between gap-2">
             <Button
-              className="h-7 w-7 rounded-full px-0"
+              className="h-7 w-7 rounded-full bg-border px-0"
               tooltip="Refresh"
               icon={<RotateCw className="h-3 w-3" />}
-              variant="secondary"
+              variant="ghost"
               onClick={fetchQuoteWrapper}
             >
               Refresh
@@ -603,7 +594,6 @@ function Page() {
                 }
                 isValueLoading={isFetchingQuote}
                 usdValue={tokenOutUsdValue}
-                usdValueChangePercent={tokenOutUsdValueChangePercent}
                 tokens={tokens}
                 token={tokenOut}
                 onSelectToken={(t: VerifiedToken) =>
