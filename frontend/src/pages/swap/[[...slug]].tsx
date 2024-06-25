@@ -444,7 +444,6 @@ function Page() {
       reverseTokens();
     else {
       setTokenSymbol(_token.ticker, direction);
-      track("swap_select_token", { asset: _token.ticker, direction });
 
       fetchQuote(
         direction === TokenDirection.IN ? _token : tokenIn,
