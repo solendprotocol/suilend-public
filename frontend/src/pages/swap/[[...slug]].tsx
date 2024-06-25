@@ -601,7 +601,9 @@ function Page() {
     const depositSubmitButtonState = getSubmitButtonState(
       Action.DEPOSIT,
       tokenOutReserve,
-      quoteAmountOut,
+      quoteAmountOut.plus(
+        isSui(tokenOutReserve.coinType) ? SUI_DEPOSIT_GAS_MIN : 0,
+      ),
       data,
       obligation,
     )(quoteAmountOut.toString());
