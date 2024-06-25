@@ -14,6 +14,7 @@ import { useLocalStorage } from "usehooks-ts";
 import { v4 as uuidv4 } from "uuid";
 
 import { SuilendClient } from "@suilend/sdk/client";
+import { ObjectArg } from "@suilend/sdk/types";
 
 import Button from "@/components/shared/Button";
 import Spinner from "@/components/shared/Spinner";
@@ -487,7 +488,7 @@ function Page() {
     if (isSwappingAndDepositing) return { isDisabled: true, isLoading: true };
 
     return {
-      title: `Swap and deposit for ${formatPercent(tokenOutReserveDepositAprPercent)} yield`,
+      title: `Swap and deposit for ${formatPercent(tokenOutReserveDepositAprPercent)} APR`,
       isDisabled: swapButtonState.isDisabled || isSwapping,
     };
   })();
@@ -517,18 +518,26 @@ function Page() {
           (o) => o.obligationId === obligation?.id,
         );
 
-        const depositSubmitAmount = quoteAmountOut
-          .times(10 ** tokenOut.decimals)
-          .integerValue(BigNumber.ROUND_DOWN)
-          .toString();
+        let createdObligationOwnerCap;
+        if (!obligationOwnerCap) {
+          createdObligationOwnerCap = suilendClient.createObligation(txb)[0];
+        }
 
-        await suilendClient.depositIntoObligation(
-          address,
+        const mergeCoinsTransaction = txb.blockData.transactions[
+          txb.blockData.transactions.length - 3
+        ] as any;
+        const coin = mergeCoinsTransaction.destination;
+
+        suilendClient.deposit(
+          coin,
           tokenOutReserve.coinType,
-          depositSubmitAmount,
+          (obligationOwnerCap?.id ?? createdObligationOwnerCap) as ObjectArg,
           txb,
-          obligationOwnerCap?.id,
         );
+
+        if (createdObligationOwnerCap) {
+          txb.transferObjects([createdObligationOwnerCap], txb.pure(address));
+        }
       }
     } catch (err) {
       Sentry.captureException(err);
