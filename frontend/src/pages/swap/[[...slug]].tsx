@@ -99,7 +99,9 @@ function Page() {
     : undefined;
 
   const hasTokenOutReserve =
-    !!tokenOutReserve && tokenOutReserveDepositAprPercent !== undefined;
+    !!tokenOutReserve &&
+    tokenOutReserveDepositAprPercent !== undefined &&
+    false; // TEMP
 
   // Max
   const tokenInMaxCalculations = (() => {
