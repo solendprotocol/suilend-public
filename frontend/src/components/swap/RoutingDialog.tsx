@@ -165,7 +165,7 @@ function ExchangeNode({ data }: ExchangeNodeProps) {
     <>
       <Handle type="target" position={md ? Position.Left : Position.Top} />
       <div
-        className="flex flex-col items-center gap-1 rounded-md bg-card px-4 py-3"
+        className="flex flex-col items-center gap-1.5 rounded-md bg-card px-4 py-3"
         style={{
           width: `${EXCHANGE_NODE_WIDTH}px`,
           height: `${EXCHANGE_NODE_HEIGHT}px`,

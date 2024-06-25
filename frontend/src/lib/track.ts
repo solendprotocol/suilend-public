@@ -1,7 +1,7 @@
 import mixpanel from "mixpanel-browser";
 
 const track = (
-  event_name: string,
+  eventName: string,
   properties?: Record<string, string | number>,
 ) => {
   const projectToken = process.env.NEXT_PUBLIC_MIXPANEL_PROJECT_TOKEN;
@@ -9,7 +9,7 @@ const track = (
 
   try {
     setTimeout(() => {
-      mixpanel.track(event_name, properties);
+      mixpanel.track(eventName, properties);
     }, 250);
   } catch (err) {
     console.error(err);

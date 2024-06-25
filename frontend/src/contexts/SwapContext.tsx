@@ -1,4 +1,3 @@
-import { useParams } from "next/navigation";
 import { useRouter } from "next/router";
 import {
   PropsWithChildren,
@@ -42,6 +41,9 @@ export const EXCHANGE_NAME_MAP: Record<SuiExchange, string> = {
 const DEFAULT_TOKEN_IN_SYMBOL = "SUI";
 const DEFAULT_TOKEN_OUT_SYMBOL = "USDC";
 
+const getUrl = (inSymbol: string, outSymbol: string) =>
+  `${SWAP_URL}/${inSymbol}-${outSymbol}`;
+
 enum TokenDirection {
   IN = "in",
   OUT = "out",
@@ -81,8 +83,7 @@ export const useSwapContext = () => useContext(SwapContext);
 
 export function SwapContextProvider({ children }: PropsWithChildren) {
   const router = useRouter();
-  const params = useParams();
-  const slug = params.slug as string[] | undefined;
+  const slug = router.query.slug as string[] | undefined;
 
   const { rpc, ...restAppContext } = useAppContext();
   const data = restAppContext.data as AppData;
@@ -127,8 +128,8 @@ export function SwapContextProvider({ children }: PropsWithChildren) {
   }, [sdk]);
 
   // Selected tokens
-  const tokenInSymbol = slug?.[0];
-  const tokenOutSymbol = slug?.[1];
+  const [tokenInSymbol, tokenOutSymbol] =
+    slug !== undefined ? slug[0].split("-") : [undefined, undefined];
 
   const tokenIn = useMemo(
     () => tokens?.find((t) => t.ticker === tokenInSymbol),
@@ -151,14 +152,12 @@ export function SwapContextProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     if (
       slug === undefined ||
-      slug.length !== 2 ||
-      slug[0] === slug[1] ||
+      slug[0].split("-").length !== 2 ||
+      slug[0].split("-")[0] === slug[0].split("-")[1] ||
       (tokens && (!tokenIn || !tokenOut))
     )
       router.replace(
-        {
-          pathname: [SWAP_URL, lastTokenInSymbol, lastTokenOutSymbol].join("/"),
-        },
+        { pathname: getUrl(lastTokenInSymbol, lastTokenOutSymbol) },
         undefined,
         { shallow: true },
       );
@@ -174,13 +173,14 @@ export function SwapContextProvider({ children }: PropsWithChildren) {
 
   const setTokenSymbol = useCallback(
     (newTokenSymbol: string, direction: TokenDirection) => {
+      if (!tokenInSymbol || !tokenOutSymbol) return;
+
       router.push(
         {
-          pathname: [
-            SWAP_URL,
+          pathname: getUrl(
             direction === TokenDirection.IN ? newTokenSymbol : tokenInSymbol,
             direction === TokenDirection.IN ? tokenOutSymbol : newTokenSymbol,
-          ].join("/"),
+          ),
         },
         undefined,
         { shallow: true },
@@ -190,17 +190,19 @@ export function SwapContextProvider({ children }: PropsWithChildren) {
       else setLastTokenOutSymbol(newTokenSymbol);
     },
     [
-      router,
       tokenInSymbol,
       tokenOutSymbol,
+      router,
       setLastTokenInSymbol,
       setLastTokenOutSymbol,
     ],
   );
 
   const reverseTokenSymbols = useCallback(() => {
+    if (!tokenInSymbol || !tokenOutSymbol) return;
+
     router.push(
-      { pathname: [SWAP_URL, tokenOutSymbol, tokenInSymbol].join("/") },
+      { pathname: getUrl(tokenOutSymbol, tokenInSymbol) },
       undefined,
       { shallow: true },
     );
@@ -208,9 +210,9 @@ export function SwapContextProvider({ children }: PropsWithChildren) {
     setLastTokenInSymbol(tokenOutSymbol as string);
     setLastTokenOutSymbol(tokenInSymbol as string);
   }, [
-    router,
     tokenInSymbol,
     tokenOutSymbol,
+    router,
     setLastTokenInSymbol,
     setLastTokenOutSymbol,
   ]);
