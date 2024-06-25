@@ -15,6 +15,7 @@ import * as Sentry from "@sentry/nextjs";
 import pLimit from "p-limit";
 
 import { fetchDownsampledApiReserveAssetDataEvents } from "@suilend/sdk/api/events";
+import { SuilendClient } from "@suilend/sdk/client";
 import {
   ParsedDownsampledApiReserveAssetDataEvent,
   parseDownsampledApiReserveAssetDataEvent,
@@ -61,12 +62,9 @@ export const useDashboardContext = () => useContext(DashboardContext);
 
 export function DashboardContextProvider({ children }: PropsWithChildren) {
   const { address } = useWalletContext();
-  const {
-    suilendClient,
-    obligation,
-    signExecuteAndWaitTransactionBlock,
-    ...restAppContext
-  } = useAppContext();
+  const { obligation, signExecuteAndWaitTransactionBlock, ...restAppContext } =
+    useAppContext();
+  const suilendClient = restAppContext.suilendClient as SuilendClient<string>;
   const data = restAppContext.data as AppData;
 
   // Actions
@@ -77,7 +75,6 @@ export function DashboardContextProvider({ children }: PropsWithChildren) {
   const claimRewards = useCallback(
     async (rewards: RewardSummary[]) => {
       if (!address) throw Error("Wallet not connected");
-      if (!suilendClient) throw Error("Suilend client not initialized");
       if (!obligationOwnerCap || !obligation)
         throw Error("Obligation not found");
 

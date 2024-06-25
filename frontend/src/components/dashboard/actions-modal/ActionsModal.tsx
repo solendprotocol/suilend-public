@@ -59,6 +59,9 @@ export default function ActionsModal() {
   const tabConfig = useMemo(() => {
     if (reserve === undefined) return undefined;
 
+    const coinBalanceForReserve =
+      data.coinBalancesMap[reserve.coinType]?.balance ?? new BigNumber(0);
+
     if (selectedTab === Tab.DEPOSIT) {
       const getNewCalculations = (value: string) => {
         if (!value.length)
@@ -94,7 +97,13 @@ export default function ActionsModal() {
       return {
         action: Action.DEPOSIT,
         actionPastTense: "deposited",
-        getMaxValue: getMaxValue(Action.DEPOSIT, reserve, data, obligation),
+        getMaxValue: getMaxValue(
+          Action.DEPOSIT,
+          reserve,
+          coinBalanceForReserve,
+          data,
+          obligation,
+        ),
         getNewCalculations,
         getSubmitButtonNoValueState: getSubmitButtonNoValueState(
           Action.DEPOSIT,
@@ -104,6 +113,7 @@ export default function ActionsModal() {
         getSubmitButtonState: getSubmitButtonState(
           Action.DEPOSIT,
           reserve,
+          coinBalanceForReserve,
           data,
           obligation,
         ),
@@ -145,7 +155,13 @@ export default function ActionsModal() {
       return {
         action: Action.BORROW,
         actionPastTense: "borrowed",
-        getMaxValue: getMaxValue(Action.BORROW, reserve, data, obligation),
+        getMaxValue: getMaxValue(
+          Action.BORROW,
+          reserve,
+          coinBalanceForReserve,
+          data,
+          obligation,
+        ),
         getNewCalculations,
         getSubmitButtonNoValueState: getSubmitButtonNoValueState(
           Action.BORROW,
@@ -155,6 +171,7 @@ export default function ActionsModal() {
         getSubmitButtonState: getSubmitButtonState(
           Action.BORROW,
           reserve,
+          coinBalanceForReserve,
           data,
           obligation,
         ),
@@ -198,11 +215,18 @@ export default function ActionsModal() {
       return {
         action: Action.WITHDRAW,
         actionPastTense: "withdrew",
-        getMaxValue: getMaxValue(Action.WITHDRAW, reserve, data, obligation),
+        getMaxValue: getMaxValue(
+          Action.WITHDRAW,
+          reserve,
+          coinBalanceForReserve,
+          data,
+          obligation,
+        ),
         getNewCalculations,
         getSubmitButtonState: getSubmitButtonState(
           Action.WITHDRAW,
           reserve,
+          coinBalanceForReserve,
           data,
           obligation,
         ),
@@ -244,11 +268,18 @@ export default function ActionsModal() {
       return {
         action: Action.REPAY,
         actionPastTense: "repaid",
-        getMaxValue: getMaxValue(Action.REPAY, reserve, data, obligation),
+        getMaxValue: getMaxValue(
+          Action.REPAY,
+          reserve,
+          coinBalanceForReserve,
+          data,
+          obligation,
+        ),
         getNewCalculations,
         getSubmitButtonState: getSubmitButtonState(
           Action.REPAY,
           reserve,
+          coinBalanceForReserve,
           data,
           obligation,
         ),

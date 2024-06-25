@@ -15,13 +15,11 @@ import { Action } from "@/lib/types";
 const getMaxCalculations = (
   action: Action,
   reserve: ParsedReserve,
+  balance: BigNumber,
   data: AppData,
   obligation?: ParsedObligation | null,
 ) => {
   if (action === Action.DEPOSIT) {
-    const coinBalanceForReserve =
-      data.coinBalancesMap[reserve.coinType]?.balance ?? new BigNumber(0);
-
     // Calculate safe deposit limit (subtract 10 mins of deposit APR from cap)
     const tenMinsDepositAprPercent = reserve.depositAprPercent
       .div(msPerYear)
@@ -38,9 +36,9 @@ const getMaxCalculations = (
 
     const result = [
       {
-        reason: "Insufficient balance",
+        reason: `Insufficient ${reserve.symbol} balance`,
         isDisabled: true,
-        value: coinBalanceForReserve,
+        value: balance,
       },
       {
         reason: "Exceeds reserve deposit limit",
@@ -65,7 +63,7 @@ const getMaxCalculations = (
       result.push({
         reason: `${SUI_DEPOSIT_GAS_MIN} SUI should be saved for gas`,
         isDisabled: true,
-        value: coinBalanceForReserve.minus(SUI_DEPOSIT_GAS_MIN),
+        value: balance.minus(SUI_DEPOSIT_GAS_MIN),
       });
 
     return result;
@@ -121,10 +119,11 @@ const getMaxCalculations = (
   } else if (action === Action.WITHDRAW) {
     const MIN_AVAILABLE_AMOUNT = 100;
 
-    const position = obligation?.deposits.find(
+    const depositPosition = obligation?.deposits.find(
       (deposit) => deposit.coinType === reserve.coinType,
     );
-    const depositedAmount = position?.depositedAmount ?? new BigNumber(0);
+    const depositedAmount =
+      depositPosition?.depositedAmount ?? new BigNumber(0);
 
     return [
       {
@@ -162,18 +161,16 @@ const getMaxCalculations = (
       },
     ];
   } else if (action === Action.REPAY) {
-    const coinBalanceForReserve =
-      data.coinBalancesMap[reserve.coinType]?.balance ?? new BigNumber(0);
-    const position = obligation?.borrows.find(
+    const borrowPosition = obligation?.borrows.find(
       (borrow) => borrow.coinType === reserve.coinType,
     );
-    const borrowedAmount = position?.borrowedAmount ?? new BigNumber(0);
+    const borrowedAmount = borrowPosition?.borrowedAmount ?? new BigNumber(0);
 
     const result = [
       {
-        reason: "Insufficient balance",
+        reason: `Insufficient ${reserve.symbol} balance`,
         isDisabled: true,
-        value: coinBalanceForReserve,
+        value: balance,
       },
       {
         reason: "Repay amount exceeds borrowed amount",
@@ -185,7 +182,7 @@ const getMaxCalculations = (
       result.push({
         reason: `${SUI_REPAY_GAS_MIN} SUI should be saved for gas`,
         isDisabled: true,
-        value: coinBalanceForReserve.minus(SUI_REPAY_GAS_MIN),
+        value: balance.minus(SUI_REPAY_GAS_MIN),
       });
 
     return result;
@@ -198,6 +195,7 @@ export const getMaxValue =
   (
     action: Action,
     reserve: ParsedReserve,
+    balance: BigNumber,
     data: AppData,
     obligation?: ParsedObligation | null,
   ) =>
@@ -205,6 +203,7 @@ export const getMaxValue =
     const maxCalculations = getMaxCalculations(
       action,
       reserve,
+      balance,
       data,
       obligation,
     );
@@ -278,6 +277,7 @@ export const getSubmitButtonState =
   (
     action: Action,
     reserve: ParsedReserve,
+    balance: BigNumber,
     data: AppData,
     obligation?: ParsedObligation | null,
   ) =>
@@ -285,6 +285,7 @@ export const getSubmitButtonState =
     const maxCalculations = getMaxCalculations(
       action,
       reserve,
+      balance,
       data,
       obligation,
     );
