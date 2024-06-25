@@ -426,12 +426,12 @@ function Page() {
     inputRef.current?.focus();
   };
 
-  // Submit
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  // Swap
+  const [isSwapping, setIsSwapping] = useState<boolean>(false);
 
-  const submitButtonState: SubmitButtonState = (() => {
+  const swapButtonState: SubmitButtonState = (() => {
     if (!address) return { isDisabled: true, title: "Connect wallet" };
-    if (isSubmitting) return { isDisabled: true, isLoading: true };
+    if (isSwapping) return { isDisabled: true, isLoading: true };
 
     if (value === "") return { isDisabled: true, title: "Enter an amount" };
     if (new BigNumber(value).lt(0))
@@ -450,12 +450,12 @@ function Page() {
     };
   })();
 
-  const onSubmitClick = async () => {
-    if (submitButtonState.isDisabled) return;
+  const onSwapClick = async () => {
+    if (swapButtonState.isDisabled) return;
     if (!address || !quote || quoteAmountOut === undefined || isFetchingQuote)
       return;
 
-    setIsSubmitting(true);
+    setIsSwapping(true);
     await fetchQuoteWrapper();
 
     try {
@@ -499,10 +499,27 @@ function Page() {
         duration: TX_TOAST_DURATION,
       });
     } finally {
-      setIsSubmitting(false);
+      setIsSwapping(false);
       inputRef.current?.focus();
       await refreshData();
     }
+  };
+
+  // Swap and deposit
+  const [isSwapAndDepositing, setIsSwapAndDepositing] =
+    useState<boolean>(false);
+
+  const swapAndDepositButtonState: SubmitButtonState = (() => {
+    return {
+      title: "Swap & deposit",
+      isDisabled: !quote,
+    };
+  })();
+
+  const onSwapAndDepositClick = async () => {
+    if (swapAndDepositButtonState.isDisabled) return;
+    if (!address || !quote || quoteAmountOut === undefined || isFetchingQuote)
+      return;
   };
 
   return (
@@ -626,25 +643,36 @@ function Page() {
             </div>
           )}
 
-          {/* Submit */}
+          {/* Swap */}
           <Button
-            className="h-auto min-h-14 flex-1 rounded-lg py-1 md:py-2"
+            className="mb-[1px] h-auto min-h-14 rounded-b-none rounded-t-lg py-1 md:py-2"
             labelClassName="text-wrap uppercase"
             style={{ overflowWrap: "anywhere" }}
-            disabled={submitButtonState.isDisabled}
-            onClick={onSubmitClick}
+            disabled={swapButtonState.isDisabled}
+            onClick={onSwapClick}
           >
-            {submitButtonState.isLoading ? (
+            {swapButtonState.isLoading ? (
               <Spinner size="md" />
             ) : (
-              submitButtonState.title
+              swapButtonState.title
             )}
 
-            {submitButtonState.description && (
+            {swapButtonState.description && (
               <span className="block font-sans text-xs normal-case opacity-75">
-                {submitButtonState.description}
+                {swapButtonState.description}
               </span>
             )}
+          </Button>
+
+          {/* Swap and deposit */}
+          <Button
+            className="rounded-b-lg rounded-t-none"
+            labelClassName="uppercase text-xs"
+            variant="secondary"
+            disabled={swapAndDepositButtonState.isDisabled}
+            onClick={onSwapAndDepositClick}
+          >
+            Swap & deposit
           </Button>
 
           {/* Tokens */}
