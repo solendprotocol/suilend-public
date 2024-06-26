@@ -68,44 +68,51 @@ function AccountPositionCardContent() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-row items-center justify-around gap-1 rounded-md border px-4 py-3">
-        <div className="flex flex-col items-center gap-1">
-          <LabelWithTooltip className="text-center">Equity</LabelWithTooltip>
-          <Tooltip title={formatUsd(obligation.netValueUsd, { exact: true })}>
-            <TBody className="w-max text-center">
-              {formatUsd(obligation.netValueUsd)}
-            </TBody>
-          </Tooltip>
-        </div>
+      <div className="relative w-full">
+        <div className="absolute bottom-0 left-0 right-2/3 top-0 z-[1] rounded-l-sm bg-gradient-to-r from-primary/15 to-transparent" />
 
-        <TLabelSans>=</TLabelSans>
+        <div className="relative z-[2] flex flex-row items-center justify-around gap-1 rounded-sm border border-primary/10 px-4 py-3">
+          <div className="flex flex-col items-center gap-1">
+            <LabelWithTooltip className="text-center">Equity</LabelWithTooltip>
+            <Tooltip title={formatUsd(obligation.netValueUsd, { exact: true })}>
+              <TBody className="w-max text-center">
+                {formatUsd(obligation.netValueUsd)}
+              </TBody>
+            </Tooltip>
+          </div>
 
-        <div className="flex flex-col items-center gap-1">
-          <LabelWithTooltip className="text-center" tooltip={DEPOSITS_TOOLTIP}>
-            Deposits
-          </LabelWithTooltip>
-          <Tooltip
-            title={formatUsd(obligation.depositedAmountUsd, { exact: true })}
-          >
-            <TBody className="w-max text-center">
-              {formatUsd(obligation.depositedAmountUsd)}
-            </TBody>
-          </Tooltip>
-        </div>
+          <TLabelSans>=</TLabelSans>
 
-        <TLabelSans>-</TLabelSans>
+          <div className="flex flex-col items-center gap-1">
+            <LabelWithTooltip
+              className="text-center"
+              tooltip={DEPOSITS_TOOLTIP}
+            >
+              Deposits
+            </LabelWithTooltip>
+            <Tooltip
+              title={formatUsd(obligation.depositedAmountUsd, { exact: true })}
+            >
+              <TBody className="w-max text-center">
+                {formatUsd(obligation.depositedAmountUsd)}
+              </TBody>
+            </Tooltip>
+          </div>
 
-        <div className="flex flex-col items-center gap-1">
-          <LabelWithTooltip className="text-center" tooltip={BORROWS_TOOLTIP}>
-            Borrows
-          </LabelWithTooltip>
-          <Tooltip
-            title={formatUsd(obligation.borrowedAmountUsd, { exact: true })}
-          >
-            <TBody className="w-max text-center">
-              {formatUsd(obligation.borrowedAmountUsd)}
-            </TBody>
-          </Tooltip>
+          <TLabelSans>-</TLabelSans>
+
+          <div className="flex flex-col items-center gap-1">
+            <LabelWithTooltip className="text-center" tooltip={BORROWS_TOOLTIP}>
+              Borrows
+            </LabelWithTooltip>
+            <Tooltip
+              title={formatUsd(obligation.borrowedAmountUsd, { exact: true })}
+            >
+              <TBody className="w-max text-center">
+                {formatUsd(obligation.borrowedAmountUsd)}
+              </TBody>
+            </Tooltip>
+          </div>
         </div>
       </div>
 

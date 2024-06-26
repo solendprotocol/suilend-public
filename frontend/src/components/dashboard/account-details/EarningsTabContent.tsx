@@ -871,72 +871,78 @@ export default function EarningsTabContent({
   return (
     <div className="flex flex-1 flex-col gap-6 overflow-y-auto overflow-x-hidden py-4">
       <div className="flex flex-col gap-2 px-4">
-        <div className="flex flex-row items-center justify-around gap-1 rounded-md border px-2 py-3 md:px-4">
-          <div className="flex flex-col items-center gap-1">
-            <TLabelSans className="text-center">Net earnings</TLabelSans>
-            {totalEarningsUsd !== undefined ? (
-              <Tooltip title={formatUsd(totalEarningsUsd, { exact: true })}>
-                <TBody
-                  className={cn(
-                    "text-center",
-                    totalEarningsUsd.gt(0) && "text-success",
-                    totalEarningsUsd.lt(0) && "text-destructive",
-                  )}
+        <div className="relative w-full">
+          <div className="absolute bottom-0 left-0 right-3/4 top-0 z-[1] rounded-l-md bg-gradient-to-r from-primary/15 to-transparent" />
+
+          <div className="relative z-[2] flex flex-row items-center justify-around rounded-md border border-primary/10 px-2 py-3 md:px-4">
+            <div className="flex flex-col items-center gap-1">
+              <TLabelSans className="text-center">Net earnings</TLabelSans>
+              {totalEarningsUsd !== undefined ? (
+                <Tooltip title={formatUsd(totalEarningsUsd, { exact: true })}>
+                  <TBody
+                    className={cn(
+                      "text-center",
+                      totalEarningsUsd.gt(0) && "text-success",
+                      totalEarningsUsd.lt(0) && "text-destructive",
+                    )}
+                  >
+                    {totalEarningsUsd.lt(0) && "-"}
+                    {formatUsd(totalEarningsUsd.abs())}
+                  </TBody>
+                </Tooltip>
+              ) : (
+                <Skeleton className="h-5 w-10" />
+              )}
+            </div>
+
+            <TLabelSans>=</TLabelSans>
+
+            <div className="flex flex-col items-center gap-1">
+              <TLabelSans className="text-center">Rewards earned</TLabelSans>
+              {totalRewardsEarnedUsd !== undefined ? (
+                <Tooltip
+                  title={formatUsd(totalRewardsEarnedUsd, { exact: true })}
                 >
-                  {totalEarningsUsd.lt(0) && "-"}
-                  {formatUsd(totalEarningsUsd.abs())}
-                </TBody>
-              </Tooltip>
-            ) : (
-              <Skeleton className="h-5 w-10" />
-            )}
-          </div>
+                  <TBody className="text-center">
+                    {formatUsd(totalRewardsEarnedUsd)}
+                  </TBody>
+                </Tooltip>
+              ) : (
+                <Skeleton className="h-5 w-10" />
+              )}
+            </div>
 
-          <TLabelSans>=</TLabelSans>
+            <TLabelSans>+</TLabelSans>
 
-          <div className="flex flex-col items-center gap-1">
-            <TLabelSans className="text-center">Rewards earned</TLabelSans>
-            {totalRewardsEarnedUsd !== undefined ? (
-              <Tooltip
-                title={formatUsd(totalRewardsEarnedUsd, { exact: true })}
-              >
-                <TBody className="text-center">
-                  {formatUsd(totalRewardsEarnedUsd)}
-                </TBody>
-              </Tooltip>
-            ) : (
-              <Skeleton className="h-5 w-10" />
-            )}
-          </div>
+            <div className="flex flex-col items-center gap-1">
+              <TLabelSans className="text-center">Interest earned</TLabelSans>
+              {cumInterestEarnedUsd !== undefined ? (
+                <Tooltip
+                  title={formatUsd(cumInterestEarnedUsd, { exact: true })}
+                >
+                  <TBody className="text-center">
+                    {formatUsd(cumInterestEarnedUsd)}
+                  </TBody>
+                </Tooltip>
+              ) : (
+                <Skeleton className="h-5 w-10" />
+              )}
+            </div>
 
-          <TLabelSans>+</TLabelSans>
+            <TLabelSans>-</TLabelSans>
 
-          <div className="flex flex-col items-center gap-1">
-            <TLabelSans className="text-center">Interest earned</TLabelSans>
-            {cumInterestEarnedUsd !== undefined ? (
-              <Tooltip title={formatUsd(cumInterestEarnedUsd, { exact: true })}>
-                <TBody className="text-center">
-                  {formatUsd(cumInterestEarnedUsd)}
-                </TBody>
-              </Tooltip>
-            ) : (
-              <Skeleton className="h-5 w-10" />
-            )}
-          </div>
-
-          <TLabelSans>-</TLabelSans>
-
-          <div className="flex flex-col items-center gap-1">
-            <TLabelSans className="text-center">Interest paid</TLabelSans>
-            {cumInterestPaidUsd ? (
-              <Tooltip title={formatUsd(cumInterestPaidUsd, { exact: true })}>
-                <TBody className="text-center">
-                  {formatUsd(cumInterestPaidUsd)}
-                </TBody>
-              </Tooltip>
-            ) : (
-              <Skeleton className="h-5 w-10" />
-            )}
+            <div className="flex flex-col items-center gap-1">
+              <TLabelSans className="text-center">Interest paid</TLabelSans>
+              {cumInterestPaidUsd ? (
+                <Tooltip title={formatUsd(cumInterestPaidUsd, { exact: true })}>
+                  <TBody className="text-center">
+                    {formatUsd(cumInterestPaidUsd)}
+                  </TBody>
+                </Tooltip>
+              ) : (
+                <Skeleton className="h-5 w-10" />
+              )}
+            </div>
           </div>
         </div>
 
