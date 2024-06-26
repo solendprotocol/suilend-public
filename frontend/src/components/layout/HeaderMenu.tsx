@@ -12,7 +12,7 @@ export default function HeaderMenu() {
     >
       <div className="flex w-full flex-1 flex-col gap-8 px-6 py-6 md:pr-10">
         <div className="flex flex-1 flex-col">
-          <div className="flex flex-col gap-6 lg:hidden">
+          <div className="flex flex-col gap-6">
             <NavigationLinks />
           </div>
 

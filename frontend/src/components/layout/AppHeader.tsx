@@ -14,11 +14,14 @@ import SettingsDialog from "@/components/layout/SettingsDialog";
 import HeaderPointsPopover from "@/components/points/HeaderPointsPopover";
 import Button from "@/components/shared/Button";
 import { useWalletContext } from "@/contexts/WalletContext";
+import useBreakpoint from "@/hooks/useBreakpoint";
 import { ROOT_URL } from "@/lib/navigation";
 
 export default function AppHeader() {
   const router = useRouter();
   const { address } = useWalletContext();
+
+  const { lg } = useBreakpoint();
 
   // Menu
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
@@ -73,16 +76,20 @@ export default function AppHeader() {
             <SettingsDialog />
           </div>
 
-          <Button
-            className="flex-shrink-0"
-            icon={!isMenuOpen ? <Menu /> : <X />}
-            variant="ghost"
-            size="icon"
-            onClick={onMenuToggle}
-          >
-            Menu
-          </Button>
-          {isMenuOpen && <HeaderMenu />}
+          {!lg && (
+            <>
+              <Button
+                className="flex-shrink-0"
+                icon={!isMenuOpen ? <Menu /> : <X />}
+                variant="ghost"
+                size="icon"
+                onClick={onMenuToggle}
+              >
+                Menu
+              </Button>
+              {isMenuOpen && <HeaderMenu />}
+            </>
+          )}
         </div>
       </div>
     </HeaderBase>
