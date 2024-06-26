@@ -2,10 +2,7 @@ import Head from "next/head";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { HopApi, VerifiedToken } from "@hop.ag/sdk";
-import {
-  TransactionBlock,
-  TransactionResult,
-} from "@mysten/sui.js/transactions";
+import { TransactionBlock } from "@mysten/sui.js/transactions";
 import { normalizeStructTag } from "@mysten/sui.js/utils";
 import * as Sentry from "@sentry/nextjs";
 import BigNumber from "bignumber.js";
@@ -48,6 +45,8 @@ import { getFilteredRewards, getTotalAprPercent } from "@/lib/liquidityMining";
 import track from "@/lib/track";
 import { Action } from "@/lib/types";
 import { cn, hoverUnderlineClassName } from "@/lib/utils";
+
+import { ObjectArg } from "../../../../sdk/src/core/types";
 
 enum TokenDirection {
   IN = "in",
@@ -502,6 +501,8 @@ function Page() {
     if (deposit && !hasTokenOutReserve)
       throw new Error("Cannot deposit this token");
 
+    const isDepositing = !!(deposit && hasTokenOutReserve);
+
     let txb = new TransactionBlock();
     try {
       const tx = await sdk.fetchTx({
@@ -510,85 +511,39 @@ function Page() {
 
         gas_budget: 0.25 * 10 ** 9, // Set to 0.25 SUI
         max_slippage_bps: +slippage * 100,
+
+        return_output_coin_argument: isDepositing,
       });
 
       txb = new TransactionBlock(tx.transaction as unknown as TransactionBlock);
-      txb.setGasBudget("" as any); // Set to dynamic
+      txb.setGasBudget(SUI_DEPOSIT_GAS_MIN * 10 ** 9);
+      if (isDepositing) {
+        const obligationOwnerCap = data.obligationOwnerCaps?.find(
+          (o) => o.obligationId === obligation?.id,
+        );
+        let createdObligationOwnerCap;
+        if (!obligationOwnerCap) {
+          createdObligationOwnerCap = suilendClient.createObligation(txb)[0];
+        }
 
-      const outputCoin = (
-        txb.blockData.transactions.findLast(
-          (transaction) => transaction.kind === "MergeCoins",
-        ) as any
-      ).destination as TransactionResult;
+        const slippageTransaction = txb.blockData.transactions.findLast(
+          (transaction) =>
+            transaction.kind === "MoveCall" &&
+            (transaction as any).target.includes("slippage::check_slippage"),
+        );
+        const outputCoin = (slippageTransaction as any).arguments[0];
+        console.log("XXX", outputCoin, tx.output_coin);
 
-      // console.log("XXX", outputCoin);
-      // const outValue = txb.moveCall({
-      //   target: "0x2::coin::value",
-      //   typeArguments: [tokenOut.coin_type],
-      //   arguments: [outputCoin],
-      // });
+        suilendClient.deposit(
+          outputCoin as any,
+          tokenOutReserve.coinType,
+          obligationOwnerCap?.id as ObjectArg,
+          txb,
+        );
 
-      console.log("XXXXXX", txb);
-
-      const obligationOwnerCap = data.obligationOwnerCaps?.find(
-        (o) => o.obligationId === obligation?.id,
-      );
-
-      // const coins = (
-      //   await suilendClient.client.getCoins({
-      //     owner: address,
-      //     coinType: tokenOut.coin_type,
-      //   })
-      // ).data;
-      // const [sendCoin] = txb.splitCoins(outputCoin, [outValue]);
-      // console.log("XXXWTF", sendCoin);
-
-      // const [ctokens] = suilendClient.depositLiquidityAndMintCtokensFunction(
-      //   txb,
-      //   [suilendClient.lendingMarket.$typeArgs[0], tokenOut.coin_type],
-      //   {
-      //     lendingMarket: suilendClient.lendingMarket.id,
-      //     clock: SUI_CLOCK_OBJECT_ID,
-      //     deposit: sendCoin,
-      //     reserveArrayIndex: suilendClient.findReserveArrayIndex(
-      //       tokenOut.coin_type,
-      //     ),
-      //   },
-      // );
-      // // suilendClient.depositCtokensIntoObligationFunction(
-      // //   txb,
-      // //   [suilendClient.lendingMarket.$typeArgs[0], tokenOut.coin_type],
-      // //   {
-      // //     lendingMarket: suilendClient.lendingMarket.id,
-      // //     obligationOwnerCap: obligationOwnerCap?.id as string,
-      // //     deposit: ctokens,
-      // //     clock: SUI_CLOCK_OBJECT_ID,
-      // //     reserveArrayIndex: suilendClient.findReserveArrayIndex(
-      // //       tokenOut.coin_type,
-      // //     ),
-      // //   },
-      // // );
-
-      // console.log("XXXXX", obligationOwnerCap, txb);
-
-      console.log("XXXX", outputCoin, tx);
-      if (deposit && hasTokenOutReserve) {
-        // const obligationOwnerCap = data.obligationOwnerCaps?.find(
-        //   (o) => o.obligationId === obligation?.id,
-        // );
-        // let createdObligationOwnerCap;
-        // if (!obligationOwnerCap) {
-        //   createdObligationOwnerCap = suilendClient.createObligation(txb)[0];
-        // }
-        // const coin = mergeCoinsTransaction.destination;
-        // suilendClient.deposit(
-        //   txb.object(outputCoin),
-        //   tokenOutReserve.coinType,
-        //   obligationOwnerCap?.id as ObjectArg,
-        //   txb,
-        // );
-        // if (createdObligationOwnerCap) {
-        //   txb.transferObjects([createdObligationOwnerCap], txb.pure(address));
+        if (createdObligationOwnerCap) {
+          txb.transferObjects([createdObligationOwnerCap], txb.pure(address));
+        }
       }
     } catch (err) {
       Sentry.captureException(err);

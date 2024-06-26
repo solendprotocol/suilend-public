@@ -93,6 +93,8 @@ export function SwapContextProvider({ children }: PropsWithChildren) {
     const hop_api_options: HopApiOptions = {
       api_key: process.env.NEXT_PUBLIC_HOP_AG_API_KEY as string,
       fee_bps: 0,
+      // fee_wallet:
+      //   "0xb737c9c6bf4d42ebeb68c67dff2ea03a8cc82fda24067f3eaf5f3dd627a8d866",
     };
 
     return new HopApi(rpc.url, hop_api_options, true);
