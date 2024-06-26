@@ -70,13 +70,12 @@ function BreakdownColumn({
     >
       <LabelWithTooltip
         className={cn(
-          "w-auto py-2 uppercase",
+          "w-auto py-2",
           rowCount > 0 && "border-b",
           isFirst && "pl-4",
           isLast && "pr-4",
         )}
         tooltip={column.titleTooltip}
-        isMono
       >
         {column.title}
       </LabelWithTooltip>
