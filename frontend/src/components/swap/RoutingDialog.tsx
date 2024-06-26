@@ -362,7 +362,6 @@ export default function RoutingDialog({ quote }: RoutingDialogProps) {
 
   // State
   const [isOpen, setIsOpen] = useState<boolean>(false);
-
   const onOpenChange = (_isOpen: boolean) => {
     setIsOpen(_isOpen);
   };

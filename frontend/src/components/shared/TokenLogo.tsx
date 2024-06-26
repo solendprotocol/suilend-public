@@ -28,10 +28,10 @@ export default function TokenLogo({
   showTooltip,
   className,
   style,
-  imageProps = {},
+  imageProps,
   token,
 }: TokenLogoProps) {
-  const { className: imageClassName, ...restImageProps } = imageProps;
+  const { className: imageClassName, ...restImageProps } = imageProps || {};
 
   const nativeAssetMap: Record<string, string> = {
     [NORMALIZED_USDC_COINTYPE]: "Wormhole Wrapped Ethereum-native USDC",

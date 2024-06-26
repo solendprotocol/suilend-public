@@ -36,13 +36,13 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       defaultValue,
       value,
       onChange,
-      inputProps = {},
+      inputProps,
       startDecorator,
       endDecorator,
     },
     ref,
   ) => {
-    const { className, autoFocus, ...restInputProps } = inputProps;
+    const { className, autoFocus, ...restInputProps } = inputProps || {};
 
     const inputId = getInputId(id);
 

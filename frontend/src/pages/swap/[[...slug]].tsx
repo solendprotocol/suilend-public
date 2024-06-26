@@ -747,7 +747,7 @@ function Page() {
           <div className="flex w-full flex-col gap-[1px]">
             <Button
               className={cn(
-                "h-auto min-h-14 w-full rounded-lg py-1 md:py-2",
+                "h-auto min-h-14 w-full py-2",
                 hasTokenOutReserve && "rounded-b-none",
               )}
               labelClassName="text-wrap uppercase"
