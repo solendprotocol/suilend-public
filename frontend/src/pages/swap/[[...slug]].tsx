@@ -2,7 +2,10 @@ import Head from "next/head";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { HopApi, VerifiedToken } from "@hop.ag/sdk";
-import { TransactionBlock } from "@mysten/sui.js/transactions";
+import {
+  TransactionBlock,
+  TransactionResult,
+} from "@mysten/sui.js/transactions";
 import { normalizeStructTag } from "@mysten/sui.js/utils";
 import * as Sentry from "@sentry/nextjs";
 import BigNumber from "bignumber.js";
@@ -14,7 +17,6 @@ import { useLocalStorage } from "usehooks-ts";
 import { v4 as uuidv4 } from "uuid";
 
 import { SuilendClient } from "@suilend/sdk/client";
-import { ObjectArg } from "@suilend/sdk/types";
 
 import Button from "@/components/shared/Button";
 import Spinner from "@/components/shared/Spinner";
@@ -513,31 +515,80 @@ function Page() {
       txb = new TransactionBlock(tx.transaction as unknown as TransactionBlock);
       txb.setGasBudget("" as any); // Set to dynamic
 
+      const outputCoin = (
+        txb.blockData.transactions.findLast(
+          (transaction) => transaction.kind === "MergeCoins",
+        ) as any
+      ).destination as TransactionResult;
+
+      // console.log("XXX", outputCoin);
+      // const outValue = txb.moveCall({
+      //   target: "0x2::coin::value",
+      //   typeArguments: [tokenOut.coin_type],
+      //   arguments: [outputCoin],
+      // });
+
+      console.log("XXXXXX", txb);
+
+      const obligationOwnerCap = data.obligationOwnerCaps?.find(
+        (o) => o.obligationId === obligation?.id,
+      );
+
+      // const coins = (
+      //   await suilendClient.client.getCoins({
+      //     owner: address,
+      //     coinType: tokenOut.coin_type,
+      //   })
+      // ).data;
+      // const [sendCoin] = txb.splitCoins(outputCoin, [outValue]);
+      // console.log("XXXWTF", sendCoin);
+
+      // const [ctokens] = suilendClient.depositLiquidityAndMintCtokensFunction(
+      //   txb,
+      //   [suilendClient.lendingMarket.$typeArgs[0], tokenOut.coin_type],
+      //   {
+      //     lendingMarket: suilendClient.lendingMarket.id,
+      //     clock: SUI_CLOCK_OBJECT_ID,
+      //     deposit: sendCoin,
+      //     reserveArrayIndex: suilendClient.findReserveArrayIndex(
+      //       tokenOut.coin_type,
+      //     ),
+      //   },
+      // );
+      // // suilendClient.depositCtokensIntoObligationFunction(
+      // //   txb,
+      // //   [suilendClient.lendingMarket.$typeArgs[0], tokenOut.coin_type],
+      // //   {
+      // //     lendingMarket: suilendClient.lendingMarket.id,
+      // //     obligationOwnerCap: obligationOwnerCap?.id as string,
+      // //     deposit: ctokens,
+      // //     clock: SUI_CLOCK_OBJECT_ID,
+      // //     reserveArrayIndex: suilendClient.findReserveArrayIndex(
+      // //       tokenOut.coin_type,
+      // //     ),
+      // //   },
+      // // );
+
+      // console.log("XXXXX", obligationOwnerCap, txb);
+
+      console.log("XXXX", outputCoin, tx);
       if (deposit && hasTokenOutReserve) {
-        const obligationOwnerCap = data.obligationOwnerCaps?.find(
-          (o) => o.obligationId === obligation?.id,
-        );
-
-        let createdObligationOwnerCap;
-        if (!obligationOwnerCap) {
-          createdObligationOwnerCap = suilendClient.createObligation(txb)[0];
-        }
-
-        const mergeCoinsTransaction = txb.blockData.transactions[
-          txb.blockData.transactions.length - 3
-        ] as any;
-        const coin = mergeCoinsTransaction.destination;
-
-        suilendClient.deposit(
-          coin,
-          tokenOutReserve.coinType,
-          (obligationOwnerCap?.id ?? createdObligationOwnerCap) as ObjectArg,
-          txb,
-        );
-
-        if (createdObligationOwnerCap) {
-          txb.transferObjects([createdObligationOwnerCap], txb.pure(address));
-        }
+        // const obligationOwnerCap = data.obligationOwnerCaps?.find(
+        //   (o) => o.obligationId === obligation?.id,
+        // );
+        // let createdObligationOwnerCap;
+        // if (!obligationOwnerCap) {
+        //   createdObligationOwnerCap = suilendClient.createObligation(txb)[0];
+        // }
+        // const coin = mergeCoinsTransaction.destination;
+        // suilendClient.deposit(
+        //   txb.object(outputCoin),
+        //   tokenOutReserve.coinType,
+        //   obligationOwnerCap?.id as ObjectArg,
+        //   txb,
+        // );
+        // if (createdObligationOwnerCap) {
+        //   txb.transferObjects([createdObligationOwnerCap], txb.pure(address));
       }
     } catch (err) {
       Sentry.captureException(err);
