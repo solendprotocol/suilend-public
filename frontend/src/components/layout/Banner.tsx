@@ -51,7 +51,7 @@ const Banner = forwardRef<HTMLDivElement, BannerProps>(({ height }, ref) => {
 
               {flags.banner.link && (
                 <TextLink
-                  className="hover:decoration-none shrink-0 text-sm !text-secondary-foreground decoration-secondary-foreground"
+                  className="hover:decoration-none block shrink-0 text-sm !text-secondary-foreground decoration-secondary-foreground"
                   href={flags.banner.link}
                 >
                   {flags.banner.linkTitle || "Learn more"}

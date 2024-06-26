@@ -73,9 +73,11 @@ function TooltipContent({
                 <div className="flex flex-row items-center gap-1.5">
                   <TokenLogo
                     className="h-4 w-4"
-                    coinType={coinType}
-                    symbol={coinMetadata.symbol}
-                    src={coinMetadata.iconUrl}
+                    token={{
+                      coinType,
+                      symbol: coinMetadata.symbol,
+                      iconUrl: coinMetadata.iconUrl,
+                    }}
                   />
                   <TLabelSans>{coinMetadata.symbol}</TLabelSans>
                 </div>

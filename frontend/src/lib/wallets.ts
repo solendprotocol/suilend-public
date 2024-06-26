@@ -254,9 +254,7 @@ export const useListWallets = () => {
     ...notInstalledPriorityWallets,
   ];
   const otherWallets = wallets.filter(
-    (w) =>
-      !sortedInstalledWallets.find((iw) => iw.id === w.id) &&
-      !notInstalledPriorityWallets.find((iw) => iw.id === w.id),
+    (w) => !mainWallets.find((iw) => iw.id === w.id),
   );
 
   return {

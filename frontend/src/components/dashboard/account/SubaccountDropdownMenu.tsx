@@ -35,7 +35,7 @@ export default function SubaccountDropdownMenu() {
 
   return (
     <DropdownMenu
-      root={{ open: isOpen, onOpenChange: setIsOpen }}
+      rootProps={{ open: isOpen, onOpenChange: setIsOpen }}
       trigger={
         <Button
           className={cn(

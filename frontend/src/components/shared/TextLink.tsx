@@ -26,6 +26,7 @@ export default function TextLink({
         "inline font-medium text-foreground underline decoration-foreground/50 hover:text-primary-foreground hover:decoration-primary-foreground",
         className,
       )}
+      onClick={(e) => e.stopPropagation()}
     >
       {children}
       {!noIcon && <ExternalLink className="mb-0.5 ml-1 inline h-3 w-3" />}

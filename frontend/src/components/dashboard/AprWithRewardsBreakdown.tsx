@@ -7,6 +7,7 @@ import { linearlyInterpolate } from "@suilend/sdk/utils";
 
 import AprRewardsBreakdownRow from "@/components/dashboard/AprRewardsBreakdownRow";
 import TokenLogo from "@/components/shared/TokenLogo";
+import TokenLogos from "@/components/shared/TokenLogos";
 import Tooltip from "@/components/shared/Tooltip";
 import { TBody, TBodySans, TLabelSans } from "@/components/shared/Typography";
 import { isSuilendPoints } from "@/lib/coinType";
@@ -217,9 +218,11 @@ export default function AprWithRewardsBreakdown({
                   >
                     <TokenLogo
                       className="h-4 w-4"
-                      coinType={reward.stats.rewardCoinType}
-                      symbol={reward.stats.rewardSymbol}
-                      src={reward.stats.iconUrl}
+                      token={{
+                        coinType: reward.stats.rewardCoinType,
+                        symbol: reward.stats.rewardSymbol,
+                        iconUrl: reward.stats.iconUrl,
+                      }}
                     />
                     <TLabelSans>{reward.stats.rewardSymbol}</TLabelSans>
                   </AprRewardsBreakdownRow>
@@ -266,9 +269,11 @@ export default function AprWithRewardsBreakdown({
                   <TLabelSans>Rewards in</TLabelSans>
                   <TokenLogo
                     className="h-4 w-4"
-                    coinType={reward.stats.rewardCoinType}
-                    symbol={reward.stats.rewardSymbol}
-                    src={reward.stats.iconUrl}
+                    token={{
+                      coinType: reward.stats.rewardCoinType,
+                      symbol: reward.stats.rewardSymbol,
+                      iconUrl: reward.stats.iconUrl,
+                    }}
                   />
                   <TLabelSans>{reward.stats.rewardSymbol}</TLabelSans>
                 </AprRewardsBreakdownRow>
@@ -278,22 +283,14 @@ export default function AprWithRewardsBreakdown({
         }
       >
         <div className="relative flex flex-row items-center">
-          {[...perDayRewards, ...aprRewards].map((reward, index) => {
-            return (
-              <TokenLogo
-                key={index}
-                className={cn(
-                  "relative h-4 w-4",
-                  index !== 0 &&
-                    "-ml-0.5 rounded-full outline outline-2 outline-card",
-                )}
-                style={{ zIndex: index }}
-                coinType={reward.stats.rewardCoinType}
-                symbol={reward.stats.rewardSymbol}
-                src={reward.stats.iconUrl}
-              />
-            );
-          })}
+          <TokenLogos
+            className="h-4 w-4"
+            tokens={[...perDayRewards, ...aprRewards].map((reward) => ({
+              coinType: reward.stats.rewardCoinType,
+              symbol: reward.stats.rewardSymbol,
+              iconUrl: reward.stats.iconUrl,
+            }))}
+          />
 
           <TBody
             className={cn(

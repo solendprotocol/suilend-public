@@ -7,6 +7,7 @@ import {
   BRIDGE_URL,
   DASHBOARD_URL,
   POINTS_URL,
+  SWAP_URL,
 } from "@/lib/navigation";
 
 export default function NavigationLinks() {
@@ -16,7 +17,7 @@ export default function NavigationLinks() {
   return (
     <>
       <Link href={DASHBOARD_URL}>Dashboard</Link>
-      <div className="flex h-[20px] flex-row items-center gap-4">
+      <div className="flex h-[20px] flex-shrink-0 flex-row items-center gap-4">
         <Link href={POINTS_URL} className="flex-1">
           Points
         </Link>
@@ -27,6 +28,9 @@ export default function NavigationLinks() {
           </div>
         )}
       </div>
+      <Link href={SWAP_URL} label="Beta">
+        Swap
+      </Link>
       <Link href={BRIDGE_URL}>Bridge</Link>
       {data?.lendingMarketOwnerCapId && <Link href={ADMIN_URL}>Admin</Link>}
     </>

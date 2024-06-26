@@ -16,9 +16,6 @@ interface WormholeConnectProps {
 export default function WormholeConnect({ isHidden }: WormholeConnectProps) {
   const { rpc } = useAppContext();
 
-  // RPCs
-  const solanaRpc = `https://solendf-solendf-67c7.rpcpool.com/${process.env.NEXT_PUBLIC_SOL_TRITON_ONE_DEV_API_KEY ?? ""}`;
-
   // Analytics
   const [didSubmit, setDidSubmit] = useState<boolean>(false);
   const [didClaim, setDidClaim] = useState<boolean>(false);
@@ -143,7 +140,7 @@ export default function WormholeConnect({ isHidden }: WormholeConnectProps) {
           rpcs: {
             ethereum:
               "https://rpc.ankr.com/eth/d57d49c5cc988185579623ea8fc23e7a0fc7005e843939bc29ed460952b381cb",
-            solana: solanaRpc,
+            solana: `https://solendf-solendf-67c7.rpcpool.com/${process.env.NEXT_PUBLIC_SOL_TRITON_ONE_DEV_API_KEY ?? ""}`,
             sui: rpc.url,
           },
           tokens: [

@@ -36,6 +36,9 @@ const ActionsModalInput = forwardRef<HTMLInputElement, ActionsModalInputProps>(
       setTimeout(() => localRef.current?.focus());
     }, [action]);
 
+    // Usd
+    const usdValue = new BigNumber(value || 0).times(reserve.price);
+
     return (
       <div className="relative w-full">
         <div className="absolute left-3 top-1/2 z-[2] -translate-y-2/4">
@@ -59,10 +62,11 @@ const ActionsModalInput = forwardRef<HTMLInputElement, ActionsModalInputProps>(
 
         <InputComponent
           ref={mergeRefs([localRef, ref])}
-          className="relative z-[1] border-primary bg-card px-0 py-0 text-right text-2xl [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+          className="relative z-[1] border-primary bg-card px-0 py-0 text-right text-2xl"
           type="number"
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          onWheel={(e) => e.currentTarget.blur()}
           style={{
             height: `${INPUT_HEIGHT}px`,
             paddingLeft: `${3 * 4 + MAX_BUTTON_WIDTH + 3 * 4}px`,
@@ -72,6 +76,7 @@ const ActionsModalInput = forwardRef<HTMLInputElement, ActionsModalInputProps>(
           }}
           step="any"
         />
+
         <div
           className="absolute right-3 top-0 z-[2] flex flex-col items-end justify-center"
           style={{ height: `${INPUT_HEIGHT}px` }}
@@ -81,7 +86,8 @@ const ActionsModalInput = forwardRef<HTMLInputElement, ActionsModalInputProps>(
             className="text-right"
             style={{ height: `${USD_LABEL_HEIGHT}px` }}
           >
-            ≈{formatUsd(new BigNumber(value || "0").times(reserve.price))}
+            {!usdValue.eq(0) && "≈"}
+            {formatUsd(usdValue)}
           </TLabel>
         </div>
       </div>
