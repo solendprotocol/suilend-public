@@ -18,8 +18,8 @@ export interface SelectProps {
     id: string;
     name: string;
   }[];
-  selectedItemId?: string;
-  setValue: (selectedItemId: string) => void;
+  value?: string;
+  onChange: (value: string) => void;
   title?: string;
 }
 
@@ -27,12 +27,12 @@ export default function Select({
   rootProps,
   trigger,
   items,
-  selectedItemId,
-  setValue,
+  value,
+  onChange,
   title,
 }: SelectProps) {
   return (
-    <SelectRoot onValueChange={setValue} value={selectedItemId} {...rootProps}>
+    <SelectRoot value={value} onValueChange={onChange} {...rootProps}>
       {trigger}
       <SelectContent
         className="rounded-md"
@@ -58,7 +58,7 @@ export default function Select({
                 value={item.id}
                 className={cn(
                   "cursor-pointer border py-2 pl-3 pr-10 font-sans text-xs text-muted-foreground transition-colors focus:border-secondary focus:bg-secondary/5 focus:text-primary-foreground",
-                  item.id === selectedItemId &&
+                  item.id === value &&
                     "border-secondary bg-secondary/5 text-primary-foreground",
                 )}
                 itemIndicatorContainer={{

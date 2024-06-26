@@ -1,8 +1,5 @@
-import ExplorerSelect from "@/components/layout/ExplorerSelect";
 import ExternalLinks from "@/components/layout/ExternalLinks";
 import NavigationLinks from "@/components/layout/NavigationLinks";
-import RpcSelect from "@/components/layout/RpcSelect";
-import { TLabelSans } from "@/components/shared/Typography";
 import { Separator } from "@/components/ui/separator";
 
 export default function HeaderMenu() {
@@ -18,27 +15,12 @@ export default function HeaderMenu() {
           <div className="flex flex-col gap-6 lg:hidden">
             <NavigationLinks />
           </div>
-          <Separator className="my-8 lg:hidden" />
 
+          <Separator className="my-8 md:hidden" />
           <div className="flex flex-col gap-6 md:hidden">
             <ExternalLinks />
           </div>
-          <Separator className="my-8 md:hidden" />
-
-          <div className="flex flex-col gap-6">
-            <div className="flex flex-col gap-2 md:hidden">
-              <TLabelSans>RPC</TLabelSans>
-              <RpcSelect />
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <TLabelSans>Explorer</TLabelSans>
-              <ExplorerSelect />
-            </div>
-          </div>
         </div>
-
-        {/* <div className="flex flex-row" /> */}
       </div>
     </div>
   );

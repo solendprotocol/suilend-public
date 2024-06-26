@@ -3,23 +3,25 @@ import React from "react";
 import { ClassValue } from "clsx";
 
 import StandardSelect from "@/components/shared/StandardSelect";
-import { useAppContext } from "@/contexts/AppContext";
 import { EXPLORERS } from "@/lib/constants";
 
 interface ExplorerSelectProps {
   className?: ClassValue;
+  value: string;
+  onChange: (id: string) => void;
 }
 
-export default function ExplorerSelect({ className }: ExplorerSelectProps) {
-  const { explorer, setExplorerId } = useAppContext();
-
+export default function ExplorerSelect({
+  className,
+  value,
+  onChange,
+}: ExplorerSelectProps) {
   return (
     <StandardSelect
       className={className}
       items={EXPLORERS}
-      selectedItemId={explorer.id}
-      setValue={setExplorerId}
-      title="Select explorer"
+      value={value}
+      onChange={onChange}
     />
   );
 }

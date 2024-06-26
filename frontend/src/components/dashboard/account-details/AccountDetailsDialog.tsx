@@ -246,7 +246,7 @@ export default function AccountDetailsDialog() {
   return (
     <Dialog
       rootProps={{ open: isOpen, onOpenChange }}
-      contentProps={{ className: "max-w-6xl" }}
+      dialogContentProps={{ className: "max-w-6xl" }}
       headerClassName="border-b-0"
       title="Account"
       headerEndContent={

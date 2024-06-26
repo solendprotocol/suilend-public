@@ -40,7 +40,6 @@ export default function TokenSelectionDialog({
 
   // State
   const [isOpen, setIsOpen] = useState<boolean>(false);
-
   const onOpenChange = (_isOpen: boolean) => {
     setIsOpen(_isOpen);
   };
@@ -114,7 +113,7 @@ export default function TokenSelectionDialog({
           {token.ticker}
         </Button>
       }
-      contentProps={{ className: "max-w-lg" }}
+      dialogContentProps={{ className: "max-w-lg" }}
       title="Select token"
     >
       <div className="mx-4 mb-4 flex flex-row items-center gap-3 rounded-md bg-muted/5 px-3">
