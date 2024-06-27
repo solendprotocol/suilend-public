@@ -101,9 +101,7 @@ function Page() {
     : undefined;
 
   const hasTokenOutReserve =
-    !!tokenOutReserve &&
-    tokenOutReserveDepositAprPercent !== undefined &&
-    false; // TEMP
+    !!tokenOutReserve && tokenOutReserveDepositAprPercent !== undefined;
 
   // Max
   const tokenInMaxCalculations = (() => {
@@ -519,10 +517,12 @@ function Page() {
 
       txb = new TransactionBlock(tx.transaction as unknown as TransactionBlock);
       txb.setGasBudget(SUI_DEPOSIT_GAS_MIN * 10 ** 9);
+
       if (isDepositing) {
         const obligationOwnerCap = data.obligationOwnerCaps?.find(
           (o) => o.obligationId === obligation?.id,
         );
+
         let createdObligationOwnerCap;
         if (!obligationOwnerCap) {
           createdObligationOwnerCap = suilendClient.createObligation(txb)[0];
