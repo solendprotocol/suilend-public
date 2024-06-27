@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@dagrejs/dagre": "^1.1.2",
-    "@hop.ag/sdk": "^3.1.1",
+    "@hop.ag/sdk": "^3.1.2",
     "@launchdarkly/node-server-sdk": "^9.2.0",
     "@mysten/sui.js": "0.51.2",
     "@mysten/wallet-standard": "0.11.2",

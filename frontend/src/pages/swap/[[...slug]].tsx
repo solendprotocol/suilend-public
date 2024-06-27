@@ -46,8 +46,6 @@ import track from "@/lib/track";
 import { Action } from "@/lib/types";
 import { cn, hoverUnderlineClassName } from "@/lib/utils";
 
-import { ObjectArg } from "../../../../sdk/src/core/types";
-
 enum TokenDirection {
   IN = "in",
   OUT = "out",
@@ -516,17 +514,12 @@ function Page() {
       });
 
       txb = new TransactionBlock(tx.transaction as unknown as TransactionBlock);
-      txb.setGasBudget(SUI_DEPOSIT_GAS_MIN * 10 ** 9);
+      txb.setGasBudget("" as any); // Set to dynamic
 
       if (isDepositing) {
         const obligationOwnerCap = data.obligationOwnerCaps?.find(
           (o) => o.obligationId === obligation?.id,
         );
-
-        let createdObligationOwnerCap;
-        if (!obligationOwnerCap) {
-          createdObligationOwnerCap = suilendClient.createObligation(txb)[0];
-        }
 
         const slippageTransaction = txb.blockData.transactions.findLast(
           (transaction) =>
@@ -536,16 +529,13 @@ function Page() {
         const outputCoin = (slippageTransaction as any).arguments[0];
         console.log("XXX", outputCoin, tx.output_coin);
 
-        suilendClient.deposit(
-          outputCoin as any,
+        await suilendClient.depositCoin(
+          address,
+          outputCoin,
           tokenOutReserve.coinType,
-          obligationOwnerCap?.id as ObjectArg,
           txb,
+          obligationOwnerCap?.id,
         );
-
-        if (createdObligationOwnerCap) {
-          txb.transferObjects([createdObligationOwnerCap], txb.pure(address));
-        }
       }
     } catch (err) {
       Sentry.captureException(err);
