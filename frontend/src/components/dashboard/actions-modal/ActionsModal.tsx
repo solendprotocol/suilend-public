@@ -314,7 +314,7 @@ export default function ActionsModal() {
         >
           {reserve && tabConfig && (
             <>
-              <div className="flex h-full w-full flex-col gap-4 md:h-auto md:w-[460px]">
+              <div className="flex h-full w-full flex-col gap-4 md:h-auto md:w-[28rem]">
                 <ActionsModalTabContent
                   side={side}
                   reserve={reserve}
@@ -323,7 +323,7 @@ export default function ActionsModal() {
               </div>
 
               {md && isMoreParametersOpen && (
-                <div className="flex h-[400px] w-[460px] flex-col gap-4 rounded-md border p-4">
+                <div className="flex h-[400px] w-[28rem] flex-col gap-4 rounded-md border p-4">
                   <ParametersPanel side={side} reserve={reserve} />
                 </div>
               )}

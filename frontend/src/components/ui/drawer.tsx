@@ -34,12 +34,16 @@ const DrawerOverlay = React.forwardRef<
 ));
 DrawerOverlay.displayName = DrawerPrimitive.Overlay.displayName;
 
+export type DrawerContentProps = React.ComponentPropsWithoutRef<
+  typeof DrawerPrimitive.Content
+> & {
+  overlay?: React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Overlay>;
+  thumbClassName?: ClassValue;
+};
+
 const DrawerContent = React.forwardRef<
   React.ElementRef<typeof DrawerPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content> & {
-    overlay?: React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Overlay>;
-    thumbClassName?: ClassValue;
-  }
+  DrawerContentProps
 >(({ className, children, overlay, thumbClassName, ...props }, ref) => (
   <DrawerPortal
     container={

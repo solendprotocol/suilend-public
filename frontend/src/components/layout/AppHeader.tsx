@@ -10,15 +10,18 @@ import HeaderMenu from "@/components/layout/HeaderMenu";
 import Logo from "@/components/layout/Logo";
 import NavigationLinks from "@/components/layout/NavigationLinks";
 import RefreshDataButton from "@/components/layout/RefreshDataButton";
-import RpcSelect from "@/components/layout/RpcSelect";
+import SettingsDialog from "@/components/layout/SettingsDialog";
 import HeaderPointsPopover from "@/components/points/HeaderPointsPopover";
 import Button from "@/components/shared/Button";
 import { useWalletContext } from "@/contexts/WalletContext";
+import useBreakpoint from "@/hooks/useBreakpoint";
 import { ROOT_URL } from "@/lib/navigation";
 
 export default function AppHeader() {
   const router = useRouter();
   const { address } = useWalletContext();
+
+  const { lg } = useBreakpoint();
 
   // Menu
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
@@ -61,10 +64,6 @@ export default function AppHeader() {
         <RefreshDataButton />
 
         <div className="flex min-w-0 flex-row items-center gap-2">
-          <div className="hidden flex-shrink-0 md:flex">
-            <RpcSelect />
-          </div>
-
           {address && (
             <div className="hidden flex-shrink-0 sm:flex">
               <HeaderPointsPopover />
@@ -73,8 +72,12 @@ export default function AppHeader() {
 
           <ConnectWalletButton />
 
+          <div className="-mr-1 flex-shrink-0">
+            <SettingsDialog />
+          </div>
+
           <Button
-            className="flex-shrink-0"
+            className="flex-shrink-0 lg:hidden"
             icon={!isMenuOpen ? <Menu /> : <X />}
             variant="ghost"
             size="icon"

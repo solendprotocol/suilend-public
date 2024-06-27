@@ -9,18 +9,20 @@ import { cn } from "@/lib/utils";
 interface TextLinkProps extends PropsWithChildren {
   className?: ClassValue;
   href: string;
+  isRelative?: boolean;
   noIcon?: boolean;
 }
 
 export default function TextLink({
   className,
   href,
+  isRelative,
   noIcon,
   children,
 }: TextLinkProps) {
   return (
     <NextLink
-      target="_blank"
+      target={isRelative ? undefined : "_blank"}
       href={href}
       className={cn(
         "inline font-medium text-foreground underline decoration-foreground/50 hover:text-primary-foreground hover:decoration-primary-foreground",
@@ -29,7 +31,9 @@ export default function TextLink({
       onClick={(e) => e.stopPropagation()}
     >
       {children}
-      {!noIcon && <ExternalLink className="mb-0.5 ml-1 inline h-3 w-3" />}
+      {!isRelative && !noIcon && (
+        <ExternalLink className="mb-0.5 ml-1 inline h-3 w-3" />
+      )}
     </NextLink>
   );
 }

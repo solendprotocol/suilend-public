@@ -40,7 +40,6 @@ export default function TokenSelectionDialog({
 
   // State
   const [isOpen, setIsOpen] = useState<boolean>(false);
-
   const onOpenChange = (_isOpen: boolean) => {
     setIsOpen(_isOpen);
   };
@@ -114,7 +113,7 @@ export default function TokenSelectionDialog({
           {token.ticker}
         </Button>
       }
-      contentProps={{ className: "max-w-lg" }}
+      dialogContentProps={{ className: "max-w-lg" }}
       title="Select token"
     >
       <div className="mx-4 mb-4 flex flex-row items-center gap-3 rounded-md bg-muted/5 px-3">
@@ -142,10 +141,9 @@ export default function TokenSelectionDialog({
             <Button
               key={t.coin_type}
               className={cn(
-                "gap-1.5 rounded-full border hover:border-transparent hover:bg-muted/15",
-                isSelected && "!border-secondary bg-muted/5",
+                "gap-1.5 rounded-full border hover:border-transparent",
+                isSelected && "border-transparent bg-muted/20",
               )}
-              labelClassName="text-foreground"
               startIcon={
                 <TokenLogo
                   className="h-4 w-4"
@@ -186,7 +184,7 @@ export default function TokenSelectionDialog({
                 className={cn(
                   "flex w-full cursor-pointer flex-row justify-between p-4 transition-colors hover:bg-muted/10",
                   isSelected &&
-                    "bg-muted/5 shadow-[inset_2px_0_0_0_hsl(var(--secondary))]",
+                    "bg-muted/15 shadow-[inset_2px_0_0_0_hsl(var(--secondary))]",
                 )}
                 onClick={() => onTokenClick(t)}
               >

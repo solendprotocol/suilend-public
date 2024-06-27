@@ -222,8 +222,8 @@ export default function MarketCardList({
               id: key,
               name: value.name,
             }))}
-            selectedItemId={sortBy}
-            setValue={onSortChange}
+            value={sortBy}
+            onChange={onSortChange}
             title="Sort by"
           />
 

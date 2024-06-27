@@ -388,7 +388,7 @@ export default function ActionsModalTabContent({
         )}
 
         <Button
-          className="h-auto min-h-12 flex-1 py-1 md:min-h-14 md:py-2"
+          className="h-auto min-h-14 w-full py-2"
           labelClassName="text-wrap uppercase"
           style={{ overflowWrap: "anywhere" }}
           disabled={submitButtonState.isDisabled}

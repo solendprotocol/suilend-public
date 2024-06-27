@@ -53,7 +53,7 @@ const SwapInput = forwardRef<HTMLInputElement, SwapInputProps>(
     return (
       <div
         className={cn(
-          "w-full rounded-lg border bg-background",
+          "w-full rounded-md border bg-background",
           !isReadOnly && "border-primary",
         )}
       >
