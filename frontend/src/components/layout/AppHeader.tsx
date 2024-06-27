@@ -14,14 +14,11 @@ import SettingsDialog from "@/components/layout/SettingsDialog";
 import HeaderPointsPopover from "@/components/points/HeaderPointsPopover";
 import Button from "@/components/shared/Button";
 import { useWalletContext } from "@/contexts/WalletContext";
-import useBreakpoint from "@/hooks/useBreakpoint";
 import { ROOT_URL } from "@/lib/navigation";
 
 export default function AppHeader() {
   const router = useRouter();
   const { address } = useWalletContext();
-
-  const { lg } = useBreakpoint();
 
   // Menu
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);

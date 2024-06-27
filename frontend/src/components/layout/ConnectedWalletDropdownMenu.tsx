@@ -3,6 +3,7 @@ import { useState } from "react";
 
 import { ChevronDown, ChevronUp } from "lucide-react";
 
+import UtilizationBar from "@/components/dashboard/UtilizationBar";
 import Button from "@/components/shared/Button";
 import CopyToClipboardButton from "@/components/shared/CopyToClipboardButton";
 import DropdownMenu, {
@@ -13,7 +14,7 @@ import Tooltip from "@/components/shared/Tooltip";
 import { TLabel, TLabelSans } from "@/components/shared/Typography";
 import { useAppContext } from "@/contexts/AppContext";
 import { useWalletContext } from "@/contexts/WalletContext";
-import { formatAddress } from "@/lib/format";
+import { formatAddress, formatUsd } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { Wallet } from "@/lib/wallets";
 
@@ -35,7 +36,7 @@ export default function ConnectedWalletDropdownMenu({
     ...restWalletContext
   } = useWalletContext();
   const address = restWalletContext.address as string;
-  const { explorer } = useAppContext();
+  const { data, explorer, obligation, setObligationId } = useAppContext();
 
   // State
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -90,43 +91,86 @@ export default function ConnectedWalletDropdownMenu({
             Disconnect
           </DropdownMenuItem>
 
-          {accounts.length > 1 && (
-            <>
-              <TLabelSans className="mt-4">Switch to</TLabelSans>
-              {accounts
-                .filter((a) => a.address !== address)
-                .map((a) => (
+          {/* Subaccounts */}
+          {data &&
+            data.obligations &&
+            data.obligations.length > 1 &&
+            obligation && (
+              <>
+                <TLabelSans className="mt-4">Subaccounts</TLabelSans>
+                {data.obligations.map((o, index, array) => (
                   <DropdownMenuItem
-                    key={a.address}
+                    key={o.id}
                     className="flex flex-col items-start gap-1"
-                    onClick={() =>
-                      selectAccount(
-                        a.address,
-                        addressNameServiceNameMap[a.address],
-                      )
-                    }
+                    isSelected={o.id === obligation.id}
+                    onClick={() => setObligationId(o.id)}
                   >
-                    <div className="flex w-full flex-row items-center justify-between gap-2">
-                      <TLabel
-                        className={cn(
-                          "uppercase text-foreground",
-                          addressNameServiceNameMap[a.address]
-                            ? "overflow-hidden text-ellipsis text-nowrap"
-                            : "flex-shrink-0",
-                        )}
-                      >
-                        {addressNameServiceNameMap[a.address] ??
-                          formatAddress(a.address)}
-                      </TLabel>
-
-                      {a.label && (
-                        <TLabelSans className="overflow-hidden text-ellipsis text-nowrap text-inherit">
-                          {a.label}
-                        </TLabelSans>
-                      )}
+                    <div className="flex w-full justify-between">
+                      <TLabelSans className="text-foreground">
+                        Subaccount {array.findIndex((_o) => _o.id === o.id) + 1}
+                      </TLabelSans>
+                      <TLabelSans className="text-inherit">
+                        {o.positionCount} position
+                        {o.positionCount > 1 ? "s" : ""}
+                      </TLabelSans>
                     </div>
+
+                    <div className="flex w-full justify-between">
+                      <TLabelSans>
+                        {formatUsd(o.depositedAmountUsd)} deposited
+                      </TLabelSans>
+                      <TLabelSans>
+                        {formatUsd(o.borrowedAmountUsd)} borrowed
+                      </TLabelSans>
+                    </div>
+
+                    <UtilizationBar
+                      className="mt-2 h-1"
+                      obligation={o}
+                      noTooltip
+                    />
                   </DropdownMenuItem>
                 ))}
+              </>
+            )}
+
+          {/* Wallets */}
+          {accounts.length > 1 && (
+            <>
+              <TLabelSans className="mt-4">Wallets</TLabelSans>
+              {accounts.map((a) => (
+                <DropdownMenuItem
+                  key={a.address}
+                  className="flex flex-col items-start gap-1"
+                  isSelected={a.address === address}
+                  onClick={() =>
+                    selectAccount(
+                      a.address,
+                      addressNameServiceNameMap[a.address],
+                    )
+                  }
+                >
+                  <div className="flex w-full flex-row items-center justify-between gap-2">
+                    <TLabel
+                      className={cn(
+                        "uppercase text-foreground",
+                        addressNameServiceNameMap[a.address]
+                          ? "overflow-hidden text-ellipsis text-nowrap"
+                          : "flex-shrink-0",
+                      )}
+                    >
+                      {addressNameServiceNameMap[a.address] ??
+                        formatAddress(a.address)}
+                    </TLabel>
+
+                    {a.label && (
+                      <TLabelSans className="overflow-hidden text-ellipsis text-nowrap text-inherit">
+                        {a.label}
+                      </TLabelSans>
+                    )}
+                  </div>
+                </DropdownMenuItem>
+              ))}
             </>
           )}
         </>

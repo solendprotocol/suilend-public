@@ -15,18 +15,21 @@ import { cn } from "@/lib/utils";
 
 interface DropdownMenuItemProps extends PropsWithChildren {
   className?: ClassValue;
+  isSelected?: boolean;
   onClick: () => void;
 }
 
 export function DropdownMenuItem({
   className,
   onClick,
+  isSelected,
   children,
 }: DropdownMenuItemProps) {
   return (
     <DropdownMenuItemComponent
       className={cn(
         "cursor-pointer border px-3 py-2 font-sans text-xs text-muted-foreground focus:border-secondary focus:bg-secondary/5 focus:text-primary-foreground",
+        isSelected && "border-secondary bg-secondary/5 text-primary-foreground",
         className,
       )}
       onClick={onClick}

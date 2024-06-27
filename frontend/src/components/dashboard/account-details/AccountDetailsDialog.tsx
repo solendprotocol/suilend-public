@@ -18,7 +18,6 @@ import {
   ApiWithdrawEvent,
 } from "@suilend/sdk/types";
 
-import SubaccountDropdownMenu from "@/components/dashboard/account/SubaccountDropdownMenu";
 import EarningsTabContent from "@/components/dashboard/account-details/EarningsTabContent";
 import HistoryTabContent from "@/components/dashboard/account-details/HistoryTabContent";
 import Dialog from "@/components/dashboard/Dialog";
@@ -27,7 +26,7 @@ import Tabs from "@/components/shared/Tabs";
 import TokenLogo from "@/components/shared/TokenLogo";
 import Tooltip from "@/components/shared/Tooltip";
 import { TBody } from "@/components/shared/Typography";
-import { AppData, useAppContext } from "@/contexts/AppContext";
+import { useAppContext } from "@/contexts/AppContext";
 import { isSuilendPoints } from "@/lib/coinType";
 import { EventType, eventSortAsc } from "@/lib/events";
 import { formatPoints, formatToken } from "@/lib/format";
@@ -104,8 +103,7 @@ export default function AccountDetailsDialog() {
     [QueryParams.TAB]: router.query[QueryParams.TAB] as Tab | undefined,
   };
 
-  const { refreshData, obligation, ...restAppContext } = useAppContext();
-  const data = restAppContext.data as AppData;
+  const { refreshData, obligation } = useAppContext();
 
   // Tabs
   const tabs = [
@@ -250,21 +248,15 @@ export default function AccountDetailsDialog() {
       headerClassName="border-b-0"
       title="Account"
       headerEndContent={
-        <>
-          {data.obligations && data.obligations.length > 1 && (
-            <SubaccountDropdownMenu />
-          )}
-
-          <Button
-            className="text-muted-foreground"
-            icon={<RotateCw />}
-            variant="ghost"
-            size="icon"
-            onClick={refresh}
-          >
-            Refresh
-          </Button>
-        </>
+        <Button
+          className="text-muted-foreground"
+          icon={<RotateCw />}
+          variant="ghost"
+          size="icon"
+          onClick={refresh}
+        >
+          Refresh
+        </Button>
       }
     >
       <div className="px-4">
