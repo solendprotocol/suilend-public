@@ -28,8 +28,8 @@ export function DropdownMenuItem({
   return (
     <DropdownMenuItemComponent
       className={cn(
-        "cursor-pointer border px-3 py-2 font-sans text-xs text-muted-foreground focus:border-secondary focus:bg-secondary/5 focus:text-primary-foreground",
-        isSelected && "border-secondary bg-secondary/5 text-primary-foreground",
+        "cursor-pointer border px-3 py-2 font-sans text-xs text-muted-foreground focus:border-transparent focus:bg-muted/10 focus:text-foreground",
+        isSelected && "border-transparent bg-muted/15 text-foreground",
         className,
       )}
       onClick={onClick}

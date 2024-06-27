@@ -35,7 +35,7 @@ export default function PointsCountPopover() {
       rootProps={{ open: isOpen, onOpenChange: setIsOpen }}
       trigger={
         <Button
-          className="gap-1.5 bg-border"
+          className="gap-1.5 bg-muted/15"
           startIcon={<PointsIcon className="h-4 w-4" />}
           variant="ghost"
           role="combobox"

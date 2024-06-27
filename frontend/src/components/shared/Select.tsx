@@ -57,9 +57,9 @@ export default function Select({
                 key={item.id}
                 value={item.id}
                 className={cn(
-                  "cursor-pointer border py-2 pl-3 pr-10 font-sans text-xs text-muted-foreground transition-colors focus:border-secondary focus:bg-secondary/5 focus:text-primary-foreground",
+                  "cursor-pointer border py-2 pl-3 pr-10 font-sans text-xs text-muted-foreground transition-colors focus:border-transparent focus:bg-muted/10 focus:text-foreground",
                   item.id === value &&
-                    "border-secondary bg-secondary/5 text-primary-foreground",
+                    "border-transparent bg-muted/15 text-foreground",
                 )}
                 itemIndicatorContainer={{
                   className: "left-auto right-3 w-4 h-4",

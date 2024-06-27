@@ -107,7 +107,7 @@ export default function TokenSelectionDialog({
               }}
             />
           }
-          endIcon={<ChevronDown className="h-4 w-4 text-inherit opacity-50" />}
+          endIcon={<ChevronDown className="h-4 w-4 opacity-50" />}
           variant="ghost"
         >
           {token.ticker}
@@ -142,7 +142,7 @@ export default function TokenSelectionDialog({
               key={t.coin_type}
               className={cn(
                 "gap-1.5 rounded-full border hover:border-transparent",
-                isSelected && "border-transparent bg-muted/20",
+                isSelected && "border-transparent bg-muted/15",
               )}
               startIcon={
                 <TokenLogo

@@ -109,7 +109,7 @@ export default function ConnectedWalletDropdownMenu({
                       <TLabelSans className="text-foreground">
                         Subaccount {array.findIndex((_o) => _o.id === o.id) + 1}
                       </TLabelSans>
-                      <TLabelSans className="text-inherit">
+                      <TLabelSans>
                         {o.positionCount} position
                         {o.positionCount > 1 ? "s" : ""}
                       </TLabelSans>
@@ -164,7 +164,7 @@ export default function ConnectedWalletDropdownMenu({
                     </TLabel>
 
                     {a.label && (
-                      <TLabelSans className="overflow-hidden text-ellipsis text-nowrap text-inherit">
+                      <TLabelSans className="overflow-hidden text-ellipsis text-nowrap">
                         {a.label}
                       </TLabelSans>
                     )}

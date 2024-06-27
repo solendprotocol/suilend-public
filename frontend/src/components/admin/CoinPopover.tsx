@@ -76,7 +76,7 @@ export default function CoinPopover({
               </div>
 
               <div className="flex w-full flex-row items-center justify-between">
-                <TLabel className="text-inherit">{cb.symbol}</TLabel>
+                <TLabel>{cb.symbol}</TLabel>
                 <TLabelSans>
                   {formatToken(cb.balance, { dp: cb.mintDecimals })} {cb.symbol}
                 </TLabelSans>

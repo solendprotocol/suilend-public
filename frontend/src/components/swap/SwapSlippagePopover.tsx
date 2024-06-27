@@ -36,7 +36,10 @@ export default function SwapSlippagePopover({
       rootProps={{ open: isOpen, onOpenChange: setIsOpen }}
       trigger={
         <Button
-          className={cn("h-7 rounded-full bg-border", isOpen && "!bg-border")}
+          className={cn(
+            "h-7 rounded-full bg-muted/15",
+            isOpen && "!bg-muted/15",
+          )}
           labelClassName="uppercase text-xs"
           startIcon={<Settings2 />}
           variant="ghost"
@@ -60,12 +63,11 @@ export default function SwapSlippagePopover({
               <Button
                 key={preset}
                 className={cn(
-                  "w-12 rounded-full px-0",
-                  slippage === preset &&
-                    "border-secondary bg-secondary/5 text-primary-foreground",
+                  "w-12 rounded-full border px-0 hover:border-transparent",
+                  slippage === preset && "border-transparent bg-muted/15",
                 )}
                 labelClassName="text-xs"
-                variant="secondaryOutline"
+                variant="ghost"
                 size="sm"
                 onClick={() => onPresetClick(preset)}
               >

@@ -660,7 +660,7 @@ function Page() {
           {/* Settings */}
           <div className="mb-4 flex flex-row items-center justify-between gap-2">
             <Button
-              className="h-7 w-7 rounded-full bg-border px-0"
+              className="h-7 w-7 rounded-full bg-muted/15 px-0"
               tooltip="Refresh"
               icon={<RotateCw className="h-3 w-3" />}
               variant="ghost"

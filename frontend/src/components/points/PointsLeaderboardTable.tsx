@@ -96,7 +96,7 @@ export default function PointsLeaderboardTable() {
         },
       },
     ],
-    [],
+    [explorer],
   );
 
   return (
