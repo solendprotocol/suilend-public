@@ -590,13 +590,13 @@ export default function HistoryTabContent({
           {eventTypes.map((eventType) => (
             <Button
               key={eventType}
-              labelClassName="text-xs font-sans"
               className={cn(
-                "rounded-full",
+                "rounded-full border hover:border-transparent",
                 isNotFilteredOutEventType(eventType) &&
-                  "border-secondary bg-secondary/5 text-primary-foreground",
+                  "border-transparent bg-muted/20",
               )}
-              variant="secondaryOutline"
+              labelClassName="text-xs font-sans"
+              variant="ghost"
               size="sm"
               onClick={() => toggleEventTypeFilter(eventType)}
             >
@@ -611,8 +611,7 @@ export default function HistoryTabContent({
                 key={coinType}
                 className={cn(
                   "h-6 rounded-full",
-                  isNotFilteredOutCoinType(coinType) &&
-                    "border-secondary bg-secondary/5 text-primary-foreground",
+                  isNotFilteredOutCoinType(coinType) && "bg-muted/20",
                 )}
                 icon={
                   <TokenLogo
@@ -623,7 +622,7 @@ export default function HistoryTabContent({
                     }}
                   />
                 }
-                variant="secondaryOutline"
+                variant="ghost"
                 size="icon"
                 onClick={() => toggleCoinTypeFilter(coinType)}
               >
