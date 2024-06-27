@@ -610,8 +610,9 @@ export default function HistoryTabContent({
               <Button
                 key={coinType}
                 className={cn(
-                  "h-6 rounded-full",
-                  isNotFilteredOutCoinType(coinType) && "bg-muted/20",
+                  "h-6 rounded-full border hover:border-transparent",
+                  isNotFilteredOutCoinType(coinType) &&
+                    "border-transparent bg-muted/20",
                 )}
                 icon={
                   <TokenLogo

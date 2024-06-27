@@ -99,9 +99,7 @@ function Page() {
     : undefined;
 
   const hasTokenOutReserve =
-    !!tokenOutReserve &&
-    tokenOutReserveDepositAprPercent !== undefined &&
-    false; // TEMP
+    !!tokenOutReserve && tokenOutReserveDepositAprPercent !== undefined;
 
   // Max
   const tokenInMaxCalculations = (() => {
@@ -489,7 +487,7 @@ function Page() {
     if (isSwappingAndDepositing) return { isDisabled: true, isLoading: true };
 
     return {
-      title: `Swap and deposit for ${formatPercent(tokenOutReserveDepositAprPercent)} yield`,
+      title: `Swap and deposit for ${formatPercent(tokenOutReserveDepositAprPercent)} APR`,
       isDisabled: swapButtonState.isDisabled || isSwapping,
     };
   })();
@@ -501,6 +499,8 @@ function Page() {
     if (deposit && !hasTokenOutReserve)
       throw new Error("Cannot deposit this token");
 
+    const isDepositing = !!(deposit && hasTokenOutReserve);
+
     let txb = new TransactionBlock();
     try {
       const tx = await sdk.fetchTx({
@@ -509,25 +509,24 @@ function Page() {
 
         gas_budget: 0.25 * 10 ** 9, // Set to 0.25 SUI
         max_slippage_bps: +slippage * 100,
+
+        return_output_coin_argument: isDepositing,
       });
 
       txb = new TransactionBlock(tx.transaction as unknown as TransactionBlock);
       txb.setGasBudget("" as any); // Set to dynamic
 
-      if (deposit && hasTokenOutReserve) {
+      if (isDepositing) {
+        if (!tx.output_coin) throw new Error("Missing coin to deposit");
+
         const obligationOwnerCap = data.obligationOwnerCaps?.find(
           (o) => o.obligationId === obligation?.id,
         );
 
-        const depositSubmitAmount = quoteAmountOut
-          .times(10 ** tokenOut.decimals)
-          .integerValue(BigNumber.ROUND_DOWN)
-          .toString();
-
-        await suilendClient.depositIntoObligation(
+        await suilendClient.depositCoin(
           address,
+          tx.output_coin as any,
           tokenOutReserve.coinType,
-          depositSubmitAmount,
           txb,
           obligationOwnerCap?.id,
         );
@@ -628,7 +627,7 @@ function Page() {
         <title>Suilend Swap</title>
       </Head>
 
-      <div className="flex w-full max-w-[460px] flex-col items-center gap-8">
+      <div className="flex w-full max-w-[28rem] flex-col items-center gap-8">
         <div className="relative flex w-full flex-col">
           {/* Settings */}
           <div className="mb-4 flex flex-row items-center justify-between gap-2">

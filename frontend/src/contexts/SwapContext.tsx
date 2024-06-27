@@ -25,6 +25,7 @@ import FullPageSpinner from "@/components/shared/FullPageSpinner";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { ParsedCoinBalance, parseCoinBalances } from "@/lib/coinBalance";
 import { COINTYPE_LOGO_MAP, COINTYPE_SYMBOL_MAP } from "@/lib/coinType";
+import { BURN_ADDRESS } from "@/lib/constants";
 import { SWAP_URL } from "@/lib/navigation";
 
 export const EXCHANGE_NAME_MAP: Record<SuiExchange, string> = {
@@ -93,6 +94,7 @@ export function SwapContextProvider({ children }: PropsWithChildren) {
     const hop_api_options: HopApiOptions = {
       api_key: process.env.NEXT_PUBLIC_HOP_AG_API_KEY as string,
       fee_bps: 0,
+      fee_wallet: BURN_ADDRESS,
     };
 
     return new HopApi(rpc.url, hop_api_options, true);
