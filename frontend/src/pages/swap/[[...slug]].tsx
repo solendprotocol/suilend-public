@@ -517,21 +517,15 @@ function Page() {
       txb.setGasBudget("" as any); // Set to dynamic
 
       if (isDepositing) {
+        if (!tx.output_coin) throw new Error("Missing coin to deposit");
+
         const obligationOwnerCap = data.obligationOwnerCaps?.find(
           (o) => o.obligationId === obligation?.id,
         );
 
-        const slippageTransaction = txb.blockData.transactions.findLast(
-          (transaction) =>
-            transaction.kind === "MoveCall" &&
-            (transaction as any).target.includes("slippage::check_slippage"),
-        );
-        const outputCoin = (slippageTransaction as any).arguments[0];
-        console.log("XXX", outputCoin, tx.output_coin);
-
         await suilendClient.depositCoin(
           address,
-          outputCoin,
+          tx.output_coin as any,
           tokenOutReserve.coinType,
           txb,
           obligationOwnerCap?.id,
@@ -633,7 +627,7 @@ function Page() {
         <title>Suilend Swap</title>
       </Head>
 
-      <div className="flex w-full max-w-[460px] flex-col items-center gap-8">
+      <div className="flex w-full max-w-[28rem] flex-col items-center gap-8">
         <div className="relative flex w-full flex-col">
           {/* Settings */}
           <div className="mb-4 flex flex-row items-center justify-between gap-2">
