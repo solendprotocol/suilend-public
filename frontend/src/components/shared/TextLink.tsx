@@ -2,7 +2,7 @@ import NextLink from "next/link";
 import { PropsWithChildren } from "react";
 
 import { ClassValue } from "clsx";
-import { ExternalLink, MoveRight } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -20,8 +20,6 @@ export default function TextLink({
   noIcon,
   children,
 }: TextLinkProps) {
-  const LinkIcon = isRelative ? MoveRight : ExternalLink;
-
   return (
     <NextLink
       target={isRelative ? undefined : "_blank"}
@@ -33,7 +31,9 @@ export default function TextLink({
       onClick={(e) => e.stopPropagation()}
     >
       {children}
-      {!noIcon && <LinkIcon className="mb-0.5 ml-1 inline h-3 w-3" />}
+      {!isRelative && !noIcon && (
+        <ExternalLink className="mb-0.5 ml-1 inline h-3 w-3" />
+      )}
     </NextLink>
   );
 }

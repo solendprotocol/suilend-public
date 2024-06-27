@@ -5,7 +5,7 @@ import { ArrowLeftRight, Info, LucideIcon } from "lucide-react";
 
 import Container from "@/components/shared/Container";
 import TextLink from "@/components/shared/TextLink";
-import { TBodySans } from "@/components/shared/Typography";
+import { bodySansClassNames } from "@/components/shared/Typography";
 import { cn } from "@/lib/utils";
 
 interface BannerProps {
@@ -39,20 +39,28 @@ const Banner = forwardRef<HTMLDivElement, BannerProps>(({ height }, ref) => {
       >
         {flags.banner?.message && (
           <Container>
-            <div className="flex w-full flex-row justify-between gap-4 py-2">
+            <div className="flex min-h-10 w-full flex-row items-center justify-between gap-4 py-2">
               <div className="flex flex-row gap-2">
                 {Icon && (
                   <Icon className="my-0.5 h-4 w-4 shrink-0 text-secondary-foreground" />
                 )}
 
-                <TBodySans className="text-secondary-foreground">
+                <TextLink
+                  className={cn(
+                    bodySansClassNames,
+                    "block !text-secondary-foreground !no-underline",
+                  )}
+                  href={flags.banner.link}
+                  isRelative={flags.banner.isLinkRelative}
+                  noIcon
+                >
                   {flags.banner.message}
-                </TBodySans>
+                </TextLink>
               </div>
 
               {flags.banner.link && (
                 <TextLink
-                  className="hover:decoration-none block shrink-0 text-sm !text-secondary-foreground decoration-secondary-foreground"
+                  className="block shrink-0 text-sm uppercase !text-secondary-foreground decoration-secondary-foreground hover:no-underline"
                   href={flags.banner.link}
                   isRelative={flags.banner.isLinkRelative}
                 >

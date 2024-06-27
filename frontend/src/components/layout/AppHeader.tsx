@@ -76,20 +76,16 @@ export default function AppHeader() {
             <SettingsDialog />
           </div>
 
-          {!lg && (
-            <>
-              <Button
-                className="flex-shrink-0"
-                icon={!isMenuOpen ? <Menu /> : <X />}
-                variant="ghost"
-                size="icon"
-                onClick={onMenuToggle}
-              >
-                Menu
-              </Button>
-              {isMenuOpen && <HeaderMenu />}
-            </>
-          )}
+          <Button
+            className="flex-shrink-0 lg:hidden"
+            icon={!isMenuOpen ? <Menu /> : <X />}
+            variant="ghost"
+            size="icon"
+            onClick={onMenuToggle}
+          >
+            Menu
+          </Button>
+          {isMenuOpen && <HeaderMenu />}
         </div>
       </div>
     </HeaderBase>

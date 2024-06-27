@@ -69,9 +69,9 @@ function AccountPositionCardContent() {
   return (
     <div className="flex flex-col gap-4">
       <div className="relative w-full">
-        <div className="absolute bottom-0 left-0 right-2/3 top-0 z-[1] rounded-l-sm bg-gradient-to-r from-primary/15 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-2/3 top-0 z-[1] rounded-l-sm bg-gradient-to-r from-primary/20 to-transparent" />
 
-        <div className="relative z-[2] flex flex-row items-center justify-around gap-1 rounded-sm border border-primary/10 px-4 py-3">
+        <div className="relative z-[2] flex flex-row items-center justify-around gap-1 rounded-sm border border-primary/5 px-4 py-3">
           <div className="flex flex-col items-center gap-1">
             <LabelWithTooltip className="text-center">Equity</LabelWithTooltip>
             <Tooltip title={formatUsd(obligation.netValueUsd, { exact: true })}>

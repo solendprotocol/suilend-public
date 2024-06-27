@@ -51,7 +51,7 @@ export default function ConnectedWalletDropdownMenu({
           startIcon={
             !isImpersonatingAddress && connectedWallet?.logoUrl ? (
               <Image
-                className="h-4 w-4"
+                className="h-4 w-4 min-w-4 flex-shrink-0"
                 src={connectedWallet.logoUrl}
                 alt={`${connectedWallet.name} logo`}
                 width={16}

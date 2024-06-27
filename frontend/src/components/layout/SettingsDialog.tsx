@@ -85,11 +85,9 @@ export default function SettingsDialog() {
         </Button>
       }
       dialogContentProps={{
-        className: "h-auto max-w-md max-h-[calc(100dvh-var(--sm-my)*2)]",
+        className: "max-w-md",
       }}
-      drawerContentProps={{
-        className: "!h-auto min-h-[50dvh]",
-      }}
+      isAutoHeight
       title="Settings"
     >
       <div className="flex w-full flex-col gap-4 overflow-y-auto p-4 pt-0">

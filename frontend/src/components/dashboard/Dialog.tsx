@@ -31,6 +31,7 @@ interface DialogProps extends PropsWithChildren {
   trigger?: ReactNode;
   dialogContentProps?: DialogContentProps;
   drawerContentProps?: DrawerContentProps;
+  isAutoHeight?: boolean;
   headerClassName?: ClassValue;
   titleIcon?: ReactElement;
   title: string;
@@ -42,6 +43,7 @@ export default function Dialog({
   trigger,
   dialogContentProps,
   drawerContentProps,
+  isAutoHeight,
   headerClassName,
   titleIcon,
   title,
@@ -66,7 +68,10 @@ export default function Dialog({
 
         <DialogContent
           className={cn(
-            "flex h-[calc(100dvh-var(--sm-my)*2)] max-h-none w-[calc(100dvw-var(--sm-mx)*2)] max-w-4xl flex-col gap-0 overflow-hidden bg-popover p-0",
+            "flex w-[calc(100dvw-var(--sm-mx)*2)] max-w-4xl flex-col gap-0 overflow-hidden bg-popover p-0",
+            !isAutoHeight
+              ? "h-[calc(100dvh-var(--sm-my)*2)] max-h-none"
+              : "h-auto max-h-[calc(100dvh-var(--sm-my)*2)]",
             dialogContentClassName,
           )}
           style={{ "--sm-mx": "2rem", "--sm-my": "2rem" } as CSSProperties}
@@ -100,7 +105,8 @@ export default function Dialog({
 
       <DrawerContent
         className={cn(
-          "!bottom-0 !top-auto mt-0 !h-dvh max-h-dvh rounded-t-lg bg-popover p-0",
+          "mt-0 max-h-dvh rounded-t-lg bg-popover p-0",
+          !isAutoHeight ? "!bottom-0 !top-auto !h-dvh" : "min-h-[50dvh]",
           drawerContentClassName,
         )}
         thumbClassName="hidden"

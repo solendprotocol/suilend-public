@@ -872,9 +872,9 @@ export default function EarningsTabContent({
     <div className="flex flex-1 flex-col gap-6 overflow-y-auto overflow-x-hidden py-4">
       <div className="flex flex-col gap-2 px-4">
         <div className="relative w-full">
-          <div className="absolute bottom-0 left-0 right-3/4 top-0 z-[1] rounded-l-md bg-gradient-to-r from-primary/15 to-transparent" />
+          <div className="absolute bottom-0 left-0 right-3/4 top-0 z-[1] rounded-l-sm bg-gradient-to-r from-primary/20 to-transparent" />
 
-          <div className="relative z-[2] flex flex-row items-center justify-around rounded-md border border-primary/10 px-2 py-3 md:px-4">
+          <div className="relative z-[2] flex flex-row items-center justify-around rounded-sm border border-primary/5 px-2 py-3 md:px-4">
             <div className="flex flex-col items-center gap-1">
               <TLabelSans className="text-center">Net earnings</TLabelSans>
               {totalEarningsUsd !== undefined ? (
