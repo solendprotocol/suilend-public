@@ -157,7 +157,7 @@ export default function TokenSelectionDialog({
               }
               endIcon={
                 isSelected ? (
-                  <Check className="h-4 w-4 text-primary-foreground" />
+                  <Check className="h-4 w-4 text-foreground" />
                 ) : undefined
               }
               variant="ghost"
@@ -184,7 +184,7 @@ export default function TokenSelectionDialog({
                 className={cn(
                   "flex w-full cursor-pointer flex-row justify-between p-4 transition-colors hover:bg-muted/10",
                   isSelected &&
-                    "bg-muted/15 shadow-[inset_2px_0_0_0_hsl(var(--secondary))]",
+                    "bg-muted/15 shadow-[inset_2px_0_0_0_hsl(var(--foreground))]",
                 )}
                 onClick={() => onTokenClick(t)}
               >
@@ -203,7 +203,7 @@ export default function TokenSelectionDialog({
                     <div className="flex flex-row items-center gap-2">
                       <TBody className="w-max">{t.ticker}</TBody>
                       {isSelected && (
-                        <Check className="h-4 w-4 text-primary-foreground" />
+                        <Check className="h-4 w-4 text-foreground" />
                       )}
                     </div>
                     <TLabelSans className="w-max">{t.name}</TLabelSans>

@@ -432,9 +432,9 @@ export default function HistoricalAprLineChart({
         {DAYS.map((_days) => (
           <Button
             key={_days}
-            className="px-2 text-muted-foreground"
+            className="px-2"
             labelClassName={cn(
-              "text-xs font-sans uppercase",
+              "text-muted-foreground text-xs font-sans uppercase",
               days === _days && "text-primary-foreground",
             )}
             variant="ghost"

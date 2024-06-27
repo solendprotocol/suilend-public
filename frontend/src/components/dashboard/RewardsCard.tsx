@@ -218,8 +218,8 @@ export default function RewardsCard() {
               <div className="flex-1 sm:flex-initial">
                 <NextLink href={POINTS_URL}>
                   <Button
-                    className="w-full border-secondary text-primary-foreground"
-                    labelClassName="uppercase"
+                    className="w-full border-secondary"
+                    labelClassName="uppercase text-primary-foreground"
                     variant="secondaryOutline"
                   >
                     Leaderboard

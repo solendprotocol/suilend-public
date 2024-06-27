@@ -123,7 +123,6 @@ export default function SettingsDialog() {
 
               <div className="flex w-full flex-row justify-end gap-2">
                 <Button
-                  className=""
                   labelClassName="uppercase"
                   disabled={!rpcState.customUrl}
                   onClick={saveCustomRpc}

@@ -124,10 +124,7 @@ export default function ConnectWalletDropdownMenu() {
             open={showOtherWallets}
             onOpenChange={setShowOtherWallets}
             title="Other wallets"
-            buttonClassName={cn(
-              "!bg-popover w-full justify-between px-0",
-              showOtherWallets && "!text-primary-foreground",
-            )}
+            buttonClassName="!bg-popover w-full justify-between px-0"
           >
             <div
               className={cn("flex flex-col gap-2", showOtherWallets && "mt-4")}

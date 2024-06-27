@@ -45,9 +45,12 @@ const ActionsModalInput = forwardRef<HTMLInputElement, ActionsModalInputProps>(
           <Button
             className={cn(
               useMaxAmount &&
-                "border-secondary bg-secondary/5 text-primary-foreground disabled:opacity-100",
+                "border-secondary bg-secondary/5 disabled:opacity-100",
             )}
-            labelClassName="uppercase"
+            labelClassName={cn(
+              "uppercase",
+              useMaxAmount && "text-primary-foreground",
+            )}
             variant="secondaryOutline"
             onClick={onMaxClick}
             disabled={useMaxAmount}
