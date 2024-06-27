@@ -23,9 +23,9 @@ import { useLocalStorage } from "usehooks-ts";
 
 import FullPageSpinner from "@/components/shared/FullPageSpinner";
 import { AppData, useAppContext } from "@/contexts/AppContext";
-import { useWalletContext } from "@/contexts/WalletContext";
 import { ParsedCoinBalance, parseCoinBalances } from "@/lib/coinBalance";
 import { COINTYPE_LOGO_MAP, COINTYPE_SYMBOL_MAP } from "@/lib/coinType";
+import { BURN_ADDRESS } from "@/lib/constants";
 import { SWAP_URL } from "@/lib/navigation";
 
 export const EXCHANGE_NAME_MAP: Record<SuiExchange, string> = {
@@ -86,30 +86,25 @@ export function SwapContextProvider({ children }: PropsWithChildren) {
   const router = useRouter();
   const slug = router.query.slug as string[] | undefined;
 
-  const { address } = useWalletContext();
   const { rpc, ...restAppContext } = useAppContext();
   const data = restAppContext.data as AppData;
 
   // SDK
   const sdk = useMemo(() => {
-    if (!address) return;
-
     const hop_api_options: HopApiOptions = {
       api_key: process.env.NEXT_PUBLIC_HOP_AG_API_KEY as string,
       fee_bps: 0,
-      fee_wallet: address,
+      fee_wallet: BURN_ADDRESS,
     };
 
     return new HopApi(rpc.url, hop_api_options, true);
-  }, [address, rpc.url]);
+  }, [rpc.url]);
 
   // Tokens
   const [tokens, setTokens] = useState<VerifiedToken[] | undefined>(undefined);
 
   const isFetchingVerifiedTokensRef = useRef<boolean>(false);
   useEffect(() => {
-    if (!sdk) return;
-
     (async () => {
       if (isFetchingVerifiedTokensRef.current) return;
 
@@ -274,7 +269,7 @@ export function SwapContextProvider({ children }: PropsWithChildren) {
 
   return (
     <SwapContext.Provider value={contextValue}>
-      {sdk && tokens && tokenIn && tokenOut ? children : <FullPageSpinner />}
+      {tokens && tokenIn && tokenOut ? children : <FullPageSpinner />}
     </SwapContext.Provider>
   );
 }
