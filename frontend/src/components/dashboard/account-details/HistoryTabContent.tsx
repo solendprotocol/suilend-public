@@ -593,7 +593,7 @@ export default function HistoryTabContent({
               className={cn(
                 "rounded-full border hover:border-transparent",
                 isNotFilteredOutEventType(eventType) &&
-                  "border-transparent bg-muted/20",
+                  "border-transparent bg-muted/15",
               )}
               labelClassName="text-xs font-sans"
               variant="ghost"
@@ -612,7 +612,7 @@ export default function HistoryTabContent({
                 className={cn(
                   "h-6 rounded-full border hover:border-transparent",
                   isNotFilteredOutCoinType(coinType) &&
-                    "border-transparent bg-muted/20",
+                    "border-transparent bg-muted/15",
                 )}
                 icon={
                   <TokenLogo

@@ -8,7 +8,6 @@ import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
 import AccountBreakdown from "@/components/dashboard/account/AccountBreakdown";
 import BorrowLimitTitle from "@/components/dashboard/account/BorrowLimitTitle";
 import LiquidationThresholdTitle from "@/components/dashboard/account/LiquidationThresholdTitle";
-import SubaccountDropdownMenu from "@/components/dashboard/account/SubaccountDropdownMenu";
 import WeightedBorrowsTitle from "@/components/dashboard/account/WeightedBorrowsTitle";
 import {
   QueryParams as AccountDetailsQueryParams,
@@ -180,8 +179,7 @@ function AccountPositionCardContent() {
 export default function AccountPositionCard() {
   const router = useRouter();
   const { address } = useWalletContext();
-  const { obligation, ...restAppContext } = useAppContext();
-  const data = restAppContext.data as AppData;
+  const { obligation } = useAppContext();
 
   const openAccountDetailsTab = (tab: AccountDetailsTab) => {
     shallowPushQuery(router, {
@@ -196,38 +194,26 @@ export default function AccountPositionCard() {
       id={address && obligation ? "position" : undefined}
       header={{
         title: "Account",
-        endContent: (
+        endContent: address && obligation && (
           <>
-            {address && obligation && (
-              <>
-                <Button
-                  className="text-muted-foreground"
-                  icon={<TrendingUp />}
-                  variant="ghost"
-                  size="icon"
-                  onClick={() =>
-                    openAccountDetailsTab(AccountDetailsTab.EARNINGS)
-                  }
-                >
-                  Earnings
-                </Button>
-                <Button
-                  className="text-muted-foreground"
-                  icon={<FileClock />}
-                  variant="ghost"
-                  size="icon"
-                  onClick={() =>
-                    openAccountDetailsTab(AccountDetailsTab.HISTORY)
-                  }
-                >
-                  History
-                </Button>
-              </>
-            )}
-
-            {data.obligations && data.obligations.length > 1 && (
-              <SubaccountDropdownMenu />
-            )}
+            <Button
+              className="text-muted-foreground"
+              icon={<TrendingUp />}
+              variant="ghost"
+              size="icon"
+              onClick={() => openAccountDetailsTab(AccountDetailsTab.EARNINGS)}
+            >
+              Earnings
+            </Button>
+            <Button
+              className="text-muted-foreground"
+              icon={<FileClock />}
+              variant="ghost"
+              size="icon"
+              onClick={() => openAccountDetailsTab(AccountDetailsTab.HISTORY)}
+            >
+              History
+            </Button>
           </>
         ),
         noSeparator: true,

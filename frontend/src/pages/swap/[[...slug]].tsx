@@ -87,6 +87,34 @@ function Page() {
   const tokenOutBalance =
     coinBalancesMap[tokenOut.coin_type]?.balance ?? new BigNumber(0);
 
+  // Positions
+  const tokenOutDepositPosition = obligation?.deposits?.find(
+    (d) => d.coinType === tokenOut.coin_type,
+  );
+  const tokenOutBorrowPosition = obligation?.borrows?.find(
+    (b) => b.coinType === tokenOut.coin_type,
+  );
+
+  const tokenOutDepositPositionAmount =
+    tokenOutDepositPosition?.depositedAmount ?? new BigNumber(0);
+  const tokenOutBorrowPositionAmount =
+    tokenOutBorrowPosition?.borrowedAmount ?? new BigNumber(0);
+
+  const [
+    isShowingTokenOutDepositPosition,
+    setIsShowingTokenOutDepositPosition,
+  ] = useState<boolean>(true);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsShowingTokenOutDepositPosition((is) => !is);
+    }, 3000 + 500);
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, []);
+
   // Deposit
   const tokenOutReserve = data.lendingMarket.reserves.find(
     (reserve) => reserve.coinType === tokenOut.coin_type,
@@ -632,7 +660,7 @@ function Page() {
           {/* Settings */}
           <div className="mb-4 flex flex-row items-center justify-between gap-2">
             <Button
-              className="h-7 w-7 rounded-full bg-border px-0"
+              className="h-7 w-7 rounded-full bg-muted/15 px-0"
               tooltip="Refresh"
               icon={<RotateCw className="h-3 w-3" />}
               variant="ghost"
@@ -665,7 +693,7 @@ function Page() {
               />
             </div>
 
-            <div className="relative z-[1] -mt-2 flex w-full rounded-b-md bg-primary/25 px-3 pb-2 pt-4">
+            <div className="relative z-[1] -mt-2 flex w-full flex-row rounded-b-md bg-primary/25 px-3 pb-2 pt-4">
               <div
                 className="flex cursor-pointer flex-row items-center gap-2"
                 onClick={useMaxValueWrapper}
@@ -718,11 +746,50 @@ function Page() {
               />
             </div>
 
-            <div className="relative z-[1] -mt-2 flex w-full rounded-b-md bg-border px-3 pb-2 pt-4">
+            <div className="relative z-[1] -mt-2 flex w-full flex-row flex-wrap justify-between gap-x-2 gap-y-1 rounded-b-md bg-border px-3 pb-2 pt-4">
               <div className="flex flex-row items-center gap-2">
                 <TLabelSans>Balance</TLabelSans>
                 <TBody className="text-xs">
                   {formatToken(tokenOutBalance, { exact: false })}{" "}
+                  {tokenOut.ticker}
+                </TBody>
+              </div>
+
+              <div className="flex w-max flex-row items-center justify-end">
+                <div className="flex h-4 flex-col items-end justify-center">
+                  <div
+                    className={cn(
+                      "flex h-0 w-max flex-row items-center gap-2 opacity-0 transition-opacity duration-500",
+                      isShowingTokenOutDepositPosition && "opacity-100",
+                    )}
+                  >
+                    <TLabelSans>Deposited</TLabelSans>
+                    <TBody className="text-xs">
+                      {formatToken(tokenOutDepositPositionAmount, {
+                        exact: false,
+                      })}
+                    </TBody>
+                  </div>
+
+                  <div
+                    className={cn(
+                      "flex h-0 w-max flex-row items-center gap-2 opacity-0 transition-opacity duration-500",
+                      !isShowingTokenOutDepositPosition && "opacity-100",
+                    )}
+                  >
+                    <TLabelSans>Borrowed</TLabelSans>
+                    <TBody className="text-xs">
+                      {formatToken(tokenOutBorrowPositionAmount, {
+                        exact: false,
+                      })}
+                    </TBody>
+                  </div>
+                </div>
+
+                <TBody
+                  className="text-xs"
+                  style={{ marginLeft: `${7.2 * 1}px` }}
+                >
                   {tokenOut.ticker}
                 </TBody>
               </div>
@@ -775,7 +842,7 @@ function Page() {
                     ? swapAndDepositButtonDisabledTooltip
                     : undefined
                 }
-                className="rounded-b-lg rounded-t-none disabled:pointer-events-auto disabled:bg-secondary"
+                className="rounded-t-none disabled:pointer-events-auto disabled:bg-secondary"
                 labelClassName="uppercase text-xs"
                 variant="secondary"
                 disabled={
