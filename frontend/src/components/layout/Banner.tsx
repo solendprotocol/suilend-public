@@ -1,7 +1,7 @@
 import { forwardRef } from "react";
 
 import { useFlags } from "launchdarkly-react-client-sdk";
-import { Info, LucideIcon } from "lucide-react";
+import { ArrowLeftRight, Info, LucideIcon } from "lucide-react";
 
 import Container from "@/components/shared/Container";
 import TextLink from "@/components/shared/TextLink";
@@ -17,6 +17,7 @@ const Banner = forwardRef<HTMLDivElement, BannerProps>(({ height }, ref) => {
 
   const IconMap: Record<string, LucideIcon> = {
     info: Info,
+    arrowLeftRight: ArrowLeftRight,
   };
 
   const Icon = flags.banner?.icon
