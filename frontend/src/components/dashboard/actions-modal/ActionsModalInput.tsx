@@ -44,12 +44,11 @@ const ActionsModalInput = forwardRef<HTMLInputElement, ActionsModalInputProps>(
         <div className="absolute left-3 top-1/2 z-[2] -translate-y-2/4">
           <Button
             className={cn(
-              "border hover:border-transparent",
               useMaxAmount &&
-                "border-transparent bg-muted/15 disabled:opacity-100",
+                "border-secondary bg-secondary/5 text-primary-foreground disabled:opacity-100",
             )}
             labelClassName="uppercase"
-            variant="ghost"
+            variant="secondaryOutline"
             onClick={onMaxClick}
             disabled={useMaxAmount}
             style={{
