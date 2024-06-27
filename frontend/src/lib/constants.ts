@@ -6,9 +6,6 @@ export const TX_TOAST_DURATION = 10 * 1000;
 export const SUI_DEPOSIT_GAS_MIN = 0.025;
 export const SUI_REPAY_GAS_MIN = 0.01;
 
-export const BURN_ADDRESS =
-  "0x0000000000000000000000000000000000000000000000000000000000000000";
-
 export enum Rpc {
   TRITON_ONE = "tritonOne",
   FULL_NODE = "fullNode",
