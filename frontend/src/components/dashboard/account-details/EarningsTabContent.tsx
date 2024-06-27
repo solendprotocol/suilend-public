@@ -32,7 +32,7 @@ import { TBody, TLabelSans } from "@/components/shared/Typography";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AppData, useAppContext } from "@/contexts/AppContext";
-import { useDashboardContext } from "@/contexts/DashboardContext";
+import { useReserveAssetDataEventsContext } from "@/contexts/ReserveAssetDataEventsContext";
 import { msPerYear } from "@/lib/constants";
 import { DAY_S, Days, EventType, eventSortAsc } from "@/lib/events";
 import { formatToken, formatUsd } from "@/lib/format";
@@ -60,7 +60,7 @@ export default function EarningsTabContent({
   const appContext = useAppContext();
   const data = appContext.data as AppData;
   const obligation = appContext.obligation as ParsedObligation;
-  const { reserveAssetDataEventsMap } = useDashboardContext();
+  const { reserveAssetDataEventsMap } = useReserveAssetDataEventsContext();
 
   type CumInterestMap = {
     [coinType: string]: {

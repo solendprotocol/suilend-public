@@ -1,7 +1,6 @@
 import Head from "next/head";
 
 import AccountPositionCard from "@/components/dashboard/account/AccountPositionCard";
-import AccountDetailsDialog from "@/components/dashboard/account-details/AccountDetailsDialog";
 import ActionsModal from "@/components/dashboard/actions-modal/ActionsModal";
 import MarketOverview from "@/components/dashboard/MarketOverview";
 import MarketTable from "@/components/dashboard/MarketTable";
@@ -60,7 +59,6 @@ export default function Dashboard() {
       )}
 
       <ActionsModal />
-      <AccountDetailsDialog />
     </DashboardContextProvider>
   );
 }

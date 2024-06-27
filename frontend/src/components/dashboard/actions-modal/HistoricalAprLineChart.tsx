@@ -16,7 +16,7 @@ import CartesianGridVerticalLine from "@/components/shared/CartesianGridVertical
 import TokenLogo from "@/components/shared/TokenLogo";
 import { TBody, TBodySans, TLabelSans } from "@/components/shared/Typography";
 import { AppData, useAppContext } from "@/contexts/AppContext";
-import { useDashboardContext } from "@/contexts/DashboardContext";
+import { useReserveAssetDataEventsContext } from "@/contexts/ReserveAssetDataEventsContext";
 import useBreakpoint from "@/hooks/useBreakpoint";
 import useIsTouchscreen from "@/hooks/useIsTouchscreen";
 import {
@@ -299,7 +299,7 @@ export default function HistoricalAprLineChart({
   const appContext = useAppContext();
   const data = appContext.data as AppData;
   const { reserveAssetDataEventsMap, fetchReserveAssetDataEvents } =
-    useDashboardContext();
+    useReserveAssetDataEventsContext();
 
   // Events
   const [days, setDays] = useLocalStorage<Days>(

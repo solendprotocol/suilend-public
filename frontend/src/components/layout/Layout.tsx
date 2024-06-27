@@ -4,12 +4,14 @@ import { CSSProperties, PropsWithChildren, useRef, useState } from "react";
 import { useResizeObserver } from "usehooks-ts";
 
 import WormholeConnect from "@/components/bridge/WormholeConnect";
+import AccountDetailsDialog from "@/components/dashboard/account-details/AccountDetailsDialog";
 import AppHeader from "@/components/layout/AppHeader";
 import Banner from "@/components/layout/Banner";
 import Footer from "@/components/layout/Footer";
 import Container from "@/components/shared/Container";
 import FullPageSpinner from "@/components/shared/FullPageSpinner";
 import { useAppContext } from "@/contexts/AppContext";
+import { ReserveAssetDataEventsContextProvider } from "@/contexts/ReserveAssetDataEventsContext";
 import { useWormholeConnectContext } from "@/contexts/WormholeConnectContext";
 import { BRIDGE_URL, ROOT_URL } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
@@ -63,7 +65,14 @@ export default function Layout({ children }: PropsWithChildren) {
         )}
       >
         {!isOnLandingPage ? (
-          <Container>{!isPageLoading && children}</Container>
+          <Container>
+            {!isPageLoading && (
+              <ReserveAssetDataEventsContextProvider>
+                {children}
+                <AccountDetailsDialog />
+              </ReserveAssetDataEventsContextProvider>
+            )}
+          </Container>
         ) : (
           children
         )}
