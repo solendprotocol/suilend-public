@@ -21,14 +21,15 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
+import { PKG_V23 } from "../index";
 import { BcsType, bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== Wrapper =============================== */
 
 export function isWrapper(type: string): boolean {
   type = compressSuiType(type);
-  return type.startsWith("0x2::dynamic_object_field::Wrapper<");
+  return type.startsWith(`${PKG_V23}::dynamic_object_field::Wrapper` + "<");
 }
 
 export interface WrapperFields<Name extends TypeArgument> {
@@ -41,12 +42,12 @@ export type WrapperReified<Name extends TypeArgument> = Reified<
 >;
 
 export class Wrapper<Name extends TypeArgument> implements StructClass {
-  static readonly $typeName = "0x2::dynamic_object_field::Wrapper";
+  static readonly $typeName = `${PKG_V23}::dynamic_object_field::Wrapper`;
   static readonly $numTypeParams = 1;
 
   readonly $typeName = Wrapper.$typeName;
 
-  readonly $fullTypeName: `0x2::dynamic_object_field::Wrapper<${ToTypeStr<Name>}>`;
+  readonly $fullTypeName: `${typeof PKG_V23}::dynamic_object_field::Wrapper<${ToTypeStr<Name>}>`;
 
   readonly $typeArgs: [ToTypeStr<Name>];
 
@@ -59,7 +60,7 @@ export class Wrapper<Name extends TypeArgument> implements StructClass {
     this.$fullTypeName = composeSuiType(
       Wrapper.$typeName,
       ...typeArgs,
-    ) as `0x2::dynamic_object_field::Wrapper<${ToTypeStr<Name>}>`;
+    ) as `${typeof PKG_V23}::dynamic_object_field::Wrapper<${ToTypeStr<Name>}>`;
     this.$typeArgs = typeArgs;
 
     this.name = fields.name;
@@ -73,7 +74,7 @@ export class Wrapper<Name extends TypeArgument> implements StructClass {
       fullTypeName: composeSuiType(
         Wrapper.$typeName,
         ...[extractType(Name)],
-      ) as `0x2::dynamic_object_field::Wrapper<${ToTypeStr<ToTypeArgument<Name>>}>`,
+      ) as `${typeof PKG_V23}::dynamic_object_field::Wrapper<${ToTypeStr<ToTypeArgument<Name>>}>`,
       typeArgs: [extractType(Name)] as [ToTypeStr<ToTypeArgument<Name>>],
       reifiedTypeArgs: [Name],
       fromFields: (fields: Record<string, any>) =>

@@ -15,17 +15,15 @@ import {
   compressSuiType,
 } from "../../_framework/util";
 import { Decimal } from "../decimal/structs";
+import { PKG_V1 } from "../index";
 import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== RateLimiter =============================== */
 
 export function isRateLimiter(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::rate_limiter::RateLimiter"
-  );
+  return type === `${PKG_V1}::rate_limiter::RateLimiter`;
 }
 
 export interface RateLimiterFields {
@@ -38,13 +36,12 @@ export interface RateLimiterFields {
 export type RateLimiterReified = Reified<RateLimiter, RateLimiterFields>;
 
 export class RateLimiter implements StructClass {
-  static readonly $typeName =
-    "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::rate_limiter::RateLimiter";
+  static readonly $typeName = `${PKG_V1}::rate_limiter::RateLimiter`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = RateLimiter.$typeName;
 
-  readonly $fullTypeName: "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::rate_limiter::RateLimiter";
+  readonly $fullTypeName: `${typeof PKG_V1}::rate_limiter::RateLimiter`;
 
   readonly $typeArgs: [];
 
@@ -57,7 +54,7 @@ export class RateLimiter implements StructClass {
     this.$fullTypeName = composeSuiType(
       RateLimiter.$typeName,
       ...typeArgs,
-    ) as "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::rate_limiter::RateLimiter";
+    ) as `${typeof PKG_V1}::rate_limiter::RateLimiter`;
     this.$typeArgs = typeArgs;
 
     this.config = fields.config;
@@ -72,7 +69,7 @@ export class RateLimiter implements StructClass {
       fullTypeName: composeSuiType(
         RateLimiter.$typeName,
         ...[],
-      ) as "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::rate_limiter::RateLimiter",
+      ) as `${typeof PKG_V1}::rate_limiter::RateLimiter`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
@@ -213,10 +210,7 @@ export class RateLimiter implements StructClass {
 
 export function isRateLimiterConfig(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::rate_limiter::RateLimiterConfig"
-  );
+  return type === `${PKG_V1}::rate_limiter::RateLimiterConfig`;
 }
 
 export interface RateLimiterConfigFields {
@@ -230,13 +224,12 @@ export type RateLimiterConfigReified = Reified<
 >;
 
 export class RateLimiterConfig implements StructClass {
-  static readonly $typeName =
-    "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::rate_limiter::RateLimiterConfig";
+  static readonly $typeName = `${PKG_V1}::rate_limiter::RateLimiterConfig`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = RateLimiterConfig.$typeName;
 
-  readonly $fullTypeName: "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::rate_limiter::RateLimiterConfig";
+  readonly $fullTypeName: `${typeof PKG_V1}::rate_limiter::RateLimiterConfig`;
 
   readonly $typeArgs: [];
 
@@ -247,7 +240,7 @@ export class RateLimiterConfig implements StructClass {
     this.$fullTypeName = composeSuiType(
       RateLimiterConfig.$typeName,
       ...typeArgs,
-    ) as "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::rate_limiter::RateLimiterConfig";
+    ) as `${typeof PKG_V1}::rate_limiter::RateLimiterConfig`;
     this.$typeArgs = typeArgs;
 
     this.windowDuration = fields.windowDuration;
@@ -260,7 +253,7 @@ export class RateLimiterConfig implements StructClass {
       fullTypeName: composeSuiType(
         RateLimiterConfig.$typeName,
         ...[],
-      ) as "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::rate_limiter::RateLimiterConfig",
+      ) as `${typeof PKG_V1}::rate_limiter::RateLimiterConfig`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>

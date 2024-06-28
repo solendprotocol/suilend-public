@@ -15,17 +15,15 @@ import {
   compressSuiType,
 } from "../../../../_framework/util";
 import { UID } from "../../0x2/object/structs";
+import { PKG_V1 } from "../index";
 import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== DeployerCap =============================== */
 
 export function isDeployerCap(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::setup::DeployerCap"
-  );
+  return type === `${PKG_V1}::setup::DeployerCap`;
 }
 
 export interface DeployerCapFields {
@@ -35,13 +33,12 @@ export interface DeployerCapFields {
 export type DeployerCapReified = Reified<DeployerCap, DeployerCapFields>;
 
 export class DeployerCap implements StructClass {
-  static readonly $typeName =
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::setup::DeployerCap";
+  static readonly $typeName = `${PKG_V1}::setup::DeployerCap`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = DeployerCap.$typeName;
 
-  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::setup::DeployerCap";
+  readonly $fullTypeName: `${typeof PKG_V1}::setup::DeployerCap`;
 
   readonly $typeArgs: [];
 
@@ -51,7 +48,7 @@ export class DeployerCap implements StructClass {
     this.$fullTypeName = composeSuiType(
       DeployerCap.$typeName,
       ...typeArgs,
-    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::setup::DeployerCap";
+    ) as `${typeof PKG_V1}::setup::DeployerCap`;
     this.$typeArgs = typeArgs;
 
     this.id = fields.id;
@@ -63,7 +60,7 @@ export class DeployerCap implements StructClass {
       fullTypeName: composeSuiType(
         DeployerCap.$typeName,
         ...[],
-      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::setup::DeployerCap",
+      ) as `${typeof PKG_V1}::setup::DeployerCap`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>

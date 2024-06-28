@@ -15,17 +15,15 @@ import {
   compressSuiType,
 } from "../../../../_framework/util";
 import { Bytes20 } from "../bytes20/structs";
+import { PKG_V1 } from "../index";
 import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== Guardian =============================== */
 
 export function isGuardian(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::guardian::Guardian"
-  );
+  return type === `${PKG_V1}::guardian::Guardian`;
 }
 
 export interface GuardianFields {
@@ -35,13 +33,12 @@ export interface GuardianFields {
 export type GuardianReified = Reified<Guardian, GuardianFields>;
 
 export class Guardian implements StructClass {
-  static readonly $typeName =
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::guardian::Guardian";
+  static readonly $typeName = `${PKG_V1}::guardian::Guardian`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = Guardian.$typeName;
 
-  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::guardian::Guardian";
+  readonly $fullTypeName: `${typeof PKG_V1}::guardian::Guardian`;
 
   readonly $typeArgs: [];
 
@@ -51,7 +48,7 @@ export class Guardian implements StructClass {
     this.$fullTypeName = composeSuiType(
       Guardian.$typeName,
       ...typeArgs,
-    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::guardian::Guardian";
+    ) as `${typeof PKG_V1}::guardian::Guardian`;
     this.$typeArgs = typeArgs;
 
     this.pubkey = fields.pubkey;
@@ -63,7 +60,7 @@ export class Guardian implements StructClass {
       fullTypeName: composeSuiType(
         Guardian.$typeName,
         ...[],
-      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::guardian::Guardian",
+      ) as `${typeof PKG_V1}::guardian::Guardian`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => Guardian.fromFields(fields),

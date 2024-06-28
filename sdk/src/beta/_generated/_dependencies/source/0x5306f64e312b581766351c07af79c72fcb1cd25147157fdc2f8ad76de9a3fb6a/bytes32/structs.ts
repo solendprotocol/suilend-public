@@ -17,17 +17,15 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
+import { PKG_V1 } from "../index";
 import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== Bytes32 =============================== */
 
 export function isBytes32(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::bytes32::Bytes32"
-  );
+  return type === `${PKG_V1}::bytes32::Bytes32`;
 }
 
 export interface Bytes32Fields {
@@ -37,13 +35,12 @@ export interface Bytes32Fields {
 export type Bytes32Reified = Reified<Bytes32, Bytes32Fields>;
 
 export class Bytes32 implements StructClass {
-  static readonly $typeName =
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::bytes32::Bytes32";
+  static readonly $typeName = `${PKG_V1}::bytes32::Bytes32`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = Bytes32.$typeName;
 
-  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::bytes32::Bytes32";
+  readonly $fullTypeName: `${typeof PKG_V1}::bytes32::Bytes32`;
 
   readonly $typeArgs: [];
 
@@ -53,7 +50,7 @@ export class Bytes32 implements StructClass {
     this.$fullTypeName = composeSuiType(
       Bytes32.$typeName,
       ...typeArgs,
-    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::bytes32::Bytes32";
+    ) as `${typeof PKG_V1}::bytes32::Bytes32`;
     this.$typeArgs = typeArgs;
 
     this.data = fields.data;
@@ -65,7 +62,7 @@ export class Bytes32 implements StructClass {
       fullTypeName: composeSuiType(
         Bytes32.$typeName,
         ...[],
-      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::bytes32::Bytes32",
+      ) as `${typeof PKG_V1}::bytes32::Bytes32`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => Bytes32.fromFields(fields),

@@ -15,17 +15,15 @@ import {
   compressSuiType,
 } from "../../../../_framework/util";
 import { Bytes32 } from "../bytes32/structs";
+import { PKG_V1 } from "../index";
 import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== ExternalAddress =============================== */
 
 export function isExternalAddress(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::external_address::ExternalAddress"
-  );
+  return type === `${PKG_V1}::external_address::ExternalAddress`;
 }
 
 export interface ExternalAddressFields {
@@ -38,13 +36,12 @@ export type ExternalAddressReified = Reified<
 >;
 
 export class ExternalAddress implements StructClass {
-  static readonly $typeName =
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::external_address::ExternalAddress";
+  static readonly $typeName = `${PKG_V1}::external_address::ExternalAddress`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = ExternalAddress.$typeName;
 
-  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::external_address::ExternalAddress";
+  readonly $fullTypeName: `${typeof PKG_V1}::external_address::ExternalAddress`;
 
   readonly $typeArgs: [];
 
@@ -54,7 +51,7 @@ export class ExternalAddress implements StructClass {
     this.$fullTypeName = composeSuiType(
       ExternalAddress.$typeName,
       ...typeArgs,
-    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::external_address::ExternalAddress";
+    ) as `${typeof PKG_V1}::external_address::ExternalAddress`;
     this.$typeArgs = typeArgs;
 
     this.value = fields.value;
@@ -66,7 +63,7 @@ export class ExternalAddress implements StructClass {
       fullTypeName: composeSuiType(
         ExternalAddress.$typeName,
         ...[],
-      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::external_address::ExternalAddress",
+      ) as `${typeof PKG_V1}::external_address::ExternalAddress`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>

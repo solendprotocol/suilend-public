@@ -1,10 +1,11 @@
+import { BcsType, splitGenericParameters } from "@mysten/bcs";
+import { bcs } from "@mysten/sui/bcs";
 import {
+  Transaction,
   TransactionArgument,
-  TransactionBlock,
   TransactionObjectArgument,
-} from "@mysten/sui.js/transactions";
-import { bcs, ObjectArg as SuiObjectArg } from "@mysten/sui.js/bcs";
-import { BcsType } from "@mysten/bcs";
+  TransactionObjectInput,
+} from "@mysten/sui/transactions";
 
 export interface FieldsWithTypes {
   /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -13,10 +14,6 @@ export interface FieldsWithTypes {
 }
 
 export type ObjectId = string;
-
-export type ObjectCallArg = { Object: SuiObjectArg };
-
-export type ObjectArg = string | ObjectCallArg | TransactionArgument;
 
 export type PureArg =
   | bigint
@@ -27,9 +24,9 @@ export type PureArg =
   | TransactionArgument
   | Array<PureArg>;
 export type GenericArg =
-  | ObjectArg
+  | TransactionObjectInput
   | PureArg
-  | Array<ObjectArg>
+  | Array<TransactionObjectInput>
   | Array<PureArg>
   | Array<GenericArg>;
 
@@ -37,41 +34,86 @@ export function parseTypeName(name: string): {
   typeName: string;
   typeArgs: string[];
 } {
-  const parsed = bcs.parseTypeName(name);
-  return { typeName: parsed.name, typeArgs: parsed.params as string[] };
+  if (typeof name !== "string") {
+    throw new Error(`Illegal type passed as a name of the type: ${name}`);
+  }
+
+  let [left, right] = ["<", ">"];
+
+  let l_bound = name.indexOf(left);
+  let r_bound = Array.from(name).reverse().indexOf(right);
+
+  // if there are no generics - exit gracefully.
+  if (l_bound === -1 && r_bound === -1) {
+    return { typeName: name, typeArgs: [] };
+  }
+
+  // if one of the bounds is not defined - throw an Error.
+  if (l_bound === -1 || r_bound === -1) {
+    throw new Error(`Unclosed generic in name '${name}'`);
+  }
+
+  let typeName = name.slice(0, l_bound);
+  let typeArgs = splitGenericParameters(
+    name.slice(l_bound + 1, name.length - r_bound - 1),
+    [left, right],
+  );
+
+  return { typeName, typeArgs };
 }
 
 export function isTransactionArgument(
   arg: GenericArg,
 ): arg is TransactionArgument {
+  if (typeof arg === "function") {
+    throw new Error("Transaction plugins are not supported");
+  }
+
   if (!arg || typeof arg !== "object" || Array.isArray(arg)) {
     return false;
   }
 
-  return "kind" in arg;
+  return (
+    "GasCoin" in arg ||
+    "Input" in arg ||
+    "Result" in arg ||
+    "NestedResult" in arg
+  );
 }
 
 export function isTransactionObjectArgument(
   arg: GenericArg,
 ): arg is TransactionObjectArgument {
+  if (typeof arg === "function") {
+    throw new Error("Transaction plugins are not supported");
+  }
+
   if (!isTransactionArgument(arg)) {
     return false;
   }
 
-  if (arg.kind === "Input" && arg.type === "pure") {
+  if ("Input" in arg && arg.type === "pure") {
     return false;
   }
 
   return true;
 }
 
-export function obj(txb: TransactionBlock, arg: ObjectArg) {
-  return isTransactionArgument(arg) ? arg : txb.object(arg);
+export function obj(tx: Transaction, arg: TransactionObjectInput) {
+  if (typeof arg === "function") {
+    throw new Error("Transaction plugins are not supported");
+  }
+
+  return isTransactionArgument(arg) ? arg : tx.object(arg);
 }
 
-export function pure(txb: TransactionBlock, arg: PureArg, type: string) {
+export function pure(tx: Transaction, arg: PureArg, type: string) {
+  if (typeof arg === "function") {
+    throw new Error("Transaction plugins are not supported");
+  }
+
   if (isTransactionArgument(arg)) {
-    return obj(txb, arg);
+    return obj(tx, arg);
   }
 
   function getBcsForType(type: string): BcsType<any> {
@@ -108,6 +150,10 @@ export function pure(txb: TransactionBlock, arg: PureArg, type: string) {
   }
 
   function isOrHasNestedTransactionArgument(arg: PureArg): boolean {
+    if (typeof arg === "function") {
+      throw new Error("Transaction plugins are not supported");
+    }
+
     if (Array.isArray(arg)) {
       return arg.some((item) => isOrHasNestedTransactionArgument(item));
     }
@@ -119,7 +165,7 @@ export function pure(txb: TransactionBlock, arg: PureArg, type: string) {
   switch (typeName) {
     case "0x1::option::Option":
       if (arg === null) {
-        return txb.pure(bcs.option(bcs.Bool).serialize(null)); // bcs.Bool is arbitrary
+        return tx.pure(bcs.option(bcs.Bool).serialize(null)); // bcs.Bool is arbitrary
       }
       if (isOrHasNestedTransactionArgument(arg)) {
         throw new Error("nesting TransactionArgument is not supported");
@@ -130,7 +176,7 @@ export function pure(txb: TransactionBlock, arg: PureArg, type: string) {
         throw new Error("expected an array for vector type");
       }
       if (arg.length === 0) {
-        return txb.pure(bcs.vector(bcs.Bool).serialize([])); // bcs.Bool is arbitrary
+        return tx.pure(bcs.vector(bcs.Bool).serialize([])); // bcs.Bool is arbitrary
       }
       if (
         arg.some(
@@ -148,92 +194,103 @@ export function pure(txb: TransactionBlock, arg: PureArg, type: string) {
         );
       }
       if (isTransactionObjectArgument(arg[0])) {
-        return txb.makeMoveVec({
-          objects: arg as Array<TransactionObjectArgument>,
+        return tx.makeMoveVec({
           type: typeArgs[0],
+          elements: arg as Array<TransactionObjectArgument>,
         });
       }
   }
 
-  return txb.pure(getBcsForType(type).serialize(arg));
+  return tx.pure(getBcsForType(type).serialize(arg));
 }
 
-export function option(
-  txb: TransactionBlock,
-  type: string,
-  arg: GenericArg | null,
-) {
+export function option(tx: Transaction, type: string, arg: GenericArg | null) {
+  if (typeof arg === "function") {
+    throw new Error("Transaction plugins are not supported");
+  }
+
   if (isTransactionArgument(arg)) {
     return arg;
   }
+
   if (typeArgIsPure(type)) {
     return pure(
-      txb,
+      tx,
       arg as PureArg | TransactionArgument,
       `0x1::option::Option<${type}>`,
     );
   }
+
   if (arg === null) {
-    return txb.moveCall({
+    return tx.moveCall({
       target: `0x1::option::none`,
       typeArguments: [type],
       arguments: [],
     });
   }
+
   // wrap it with some
-  const val = generic(txb, type, arg);
-  return txb.moveCall({
+  const val = generic(tx, type, arg);
+  return tx.moveCall({
     target: `0x1::option::some`,
     typeArguments: [type],
     arguments: [val],
   });
 }
 
-export function generic(txb: TransactionBlock, type: string, arg: GenericArg) {
+export function generic(tx: Transaction, type: string, arg: GenericArg) {
+  if (typeof arg === "function") {
+    throw new Error("Transaction plugins are not supported");
+  }
+
   if (typeArgIsPure(type)) {
-    return pure(txb, arg as PureArg | TransactionArgument, type);
+    return pure(tx, arg as PureArg | TransactionArgument, type);
   } else {
     const { typeName, typeArgs } = parseTypeName(type);
     if (typeName === "vector" && Array.isArray(arg)) {
       const itemType = typeArgs[0];
 
-      return txb.makeMoveVec({
-        objects: arg.map((item) =>
-          obj(txb, item as ObjectArg),
-        ) as Array<TransactionObjectArgument>,
+      return tx.makeMoveVec({
         type: itemType,
+        elements: arg.map((item) =>
+          obj(tx, item as TransactionObjectInput),
+        ) as Array<TransactionObjectArgument>,
       });
     } else {
-      return obj(txb, arg as ObjectArg);
+      return obj(tx, arg as TransactionObjectInput);
     }
   }
 }
 
 export function vector(
-  txb: TransactionBlock,
+  tx: Transaction,
   itemType: string,
   items: Array<GenericArg> | TransactionArgument,
 ) {
+  if (typeof items === "function") {
+    throw new Error("Transaction plugins are not supported");
+  }
+
   if (typeArgIsPure(itemType)) {
-    return pure(txb, items as PureArg, `vector<${itemType}>`);
+    return pure(tx, items as PureArg, `vector<${itemType}>`);
   } else if (isTransactionArgument(items)) {
     return items;
   } else {
     const { typeName: itemTypeName, typeArgs: itemTypeArgs } =
       parseTypeName(itemType);
     if (itemTypeName === "0x1::option::Option") {
-      const objects = items.map((item) =>
-        option(txb, itemTypeArgs[0], item),
+      const elements = items.map((item) =>
+        option(tx, itemTypeArgs[0], item),
       ) as Array<TransactionObjectArgument>;
-      return txb.makeMoveVec({
-        objects,
+      return tx.makeMoveVec({
         type: itemType,
+        elements,
       });
     }
 
-    return txb.makeMoveVec({
-      objects: items as Array<TransactionObjectArgument>,
+    return tx.makeMoveVec({
       type: itemType,
+      elements: items as Array<TransactionObjectArgument>,
     });
   }
 }
@@ -297,7 +354,9 @@ export function compressSuiType(type: string): string {
       tok[0] = compressSuiAddress(tok[0]);
       const compressedName = tok.join("::");
       if (typeArgs.length > 0) {
-        return `${compressedName}<${typeArgs.map((typeArg) => compressSuiType(typeArg)).join(",")}>`;
+        return `${compressedName}<${typeArgs
+          .map((typeArg) => compressSuiType(typeArg))
+          .join(",")}>`;
       } else {
         return compressedName;
       }

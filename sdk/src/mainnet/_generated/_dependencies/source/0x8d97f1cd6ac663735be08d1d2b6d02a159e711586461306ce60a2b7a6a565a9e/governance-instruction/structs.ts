@@ -18,17 +18,15 @@ import {
   compressSuiType,
 } from "../../../../_framework/util";
 import { GovernanceAction } from "../governance-action/structs";
+import { PKG_V1 } from "../index";
 import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== GovernanceInstruction =============================== */
 
 export function isGovernanceInstruction(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::governance_instruction::GovernanceInstruction"
-  );
+  return type === `${PKG_V1}::governance_instruction::GovernanceInstruction`;
 }
 
 export interface GovernanceInstructionFields {
@@ -44,13 +42,12 @@ export type GovernanceInstructionReified = Reified<
 >;
 
 export class GovernanceInstruction implements StructClass {
-  static readonly $typeName =
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::governance_instruction::GovernanceInstruction";
+  static readonly $typeName = `${PKG_V1}::governance_instruction::GovernanceInstruction`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = GovernanceInstruction.$typeName;
 
-  readonly $fullTypeName: "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::governance_instruction::GovernanceInstruction";
+  readonly $fullTypeName: `${typeof PKG_V1}::governance_instruction::GovernanceInstruction`;
 
   readonly $typeArgs: [];
 
@@ -63,7 +60,7 @@ export class GovernanceInstruction implements StructClass {
     this.$fullTypeName = composeSuiType(
       GovernanceInstruction.$typeName,
       ...typeArgs,
-    ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::governance_instruction::GovernanceInstruction";
+    ) as `${typeof PKG_V1}::governance_instruction::GovernanceInstruction`;
     this.$typeArgs = typeArgs;
 
     this.module = fields.module;
@@ -78,7 +75,7 @@ export class GovernanceInstruction implements StructClass {
       fullTypeName: composeSuiType(
         GovernanceInstruction.$typeName,
         ...[],
-      ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::governance_instruction::GovernanceInstruction",
+      ) as `${typeof PKG_V1}::governance_instruction::GovernanceInstruction`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>

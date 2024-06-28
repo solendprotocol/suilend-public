@@ -14,17 +14,15 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
+import { PKG_V1 } from "../index";
 import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== I64 =============================== */
 
 export function isI64(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::i64::I64"
-  );
+  return type === `${PKG_V1}::i64::I64`;
 }
 
 export interface I64Fields {
@@ -35,13 +33,12 @@ export interface I64Fields {
 export type I64Reified = Reified<I64, I64Fields>;
 
 export class I64 implements StructClass {
-  static readonly $typeName =
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::i64::I64";
+  static readonly $typeName = `${PKG_V1}::i64::I64`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = I64.$typeName;
 
-  readonly $fullTypeName: "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::i64::I64";
+  readonly $fullTypeName: `${typeof PKG_V1}::i64::I64`;
 
   readonly $typeArgs: [];
 
@@ -52,7 +49,7 @@ export class I64 implements StructClass {
     this.$fullTypeName = composeSuiType(
       I64.$typeName,
       ...typeArgs,
-    ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::i64::I64";
+    ) as `${typeof PKG_V1}::i64::I64`;
     this.$typeArgs = typeArgs;
 
     this.negative = fields.negative;
@@ -65,7 +62,7 @@ export class I64 implements StructClass {
       fullTypeName: composeSuiType(
         I64.$typeName,
         ...[],
-      ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::i64::I64",
+      ) as `${typeof PKG_V1}::i64::I64`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => I64.fromFields(fields),

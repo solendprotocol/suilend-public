@@ -23,14 +23,15 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
+import { PKG_V23 } from "../index";
 import { BcsType, bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== Entry =============================== */
 
 export function isEntry(type: string): boolean {
   type = compressSuiType(type);
-  return type.startsWith("0x2::vec_map::Entry<");
+  return type.startsWith(`${PKG_V23}::vec_map::Entry` + "<");
 }
 
 export interface EntryFields<K extends TypeArgument, V extends TypeArgument> {
@@ -46,12 +47,12 @@ export type EntryReified<
 export class Entry<K extends TypeArgument, V extends TypeArgument>
   implements StructClass
 {
-  static readonly $typeName = "0x2::vec_map::Entry";
+  static readonly $typeName = `${PKG_V23}::vec_map::Entry`;
   static readonly $numTypeParams = 2;
 
   readonly $typeName = Entry.$typeName;
 
-  readonly $fullTypeName: `0x2::vec_map::Entry<${ToTypeStr<K>}, ${ToTypeStr<V>}>`;
+  readonly $fullTypeName: `${typeof PKG_V23}::vec_map::Entry<${ToTypeStr<K>}, ${ToTypeStr<V>}>`;
 
   readonly $typeArgs: [ToTypeStr<K>, ToTypeStr<V>];
 
@@ -65,7 +66,7 @@ export class Entry<K extends TypeArgument, V extends TypeArgument>
     this.$fullTypeName = composeSuiType(
       Entry.$typeName,
       ...typeArgs,
-    ) as `0x2::vec_map::Entry<${ToTypeStr<K>}, ${ToTypeStr<V>}>`;
+    ) as `${typeof PKG_V23}::vec_map::Entry<${ToTypeStr<K>}, ${ToTypeStr<V>}>`;
     this.$typeArgs = typeArgs;
 
     this.key = fields.key;
@@ -81,7 +82,7 @@ export class Entry<K extends TypeArgument, V extends TypeArgument>
       fullTypeName: composeSuiType(
         Entry.$typeName,
         ...[extractType(K), extractType(V)],
-      ) as `0x2::vec_map::Entry<${ToTypeStr<ToTypeArgument<K>>}, ${ToTypeStr<ToTypeArgument<V>>}>`,
+      ) as `${typeof PKG_V23}::vec_map::Entry<${ToTypeStr<ToTypeArgument<K>>}, ${ToTypeStr<ToTypeArgument<V>>}>`,
       typeArgs: [extractType(K), extractType(V)] as [
         ToTypeStr<ToTypeArgument<K>>,
         ToTypeStr<ToTypeArgument<V>>,
@@ -265,7 +266,7 @@ export class Entry<K extends TypeArgument, V extends TypeArgument>
 
 export function isVecMap(type: string): boolean {
   type = compressSuiType(type);
-  return type.startsWith("0x2::vec_map::VecMap<");
+  return type.startsWith(`${PKG_V23}::vec_map::VecMap` + "<");
 }
 
 export interface VecMapFields<K extends TypeArgument, V extends TypeArgument> {
@@ -280,12 +281,12 @@ export type VecMapReified<
 export class VecMap<K extends TypeArgument, V extends TypeArgument>
   implements StructClass
 {
-  static readonly $typeName = "0x2::vec_map::VecMap";
+  static readonly $typeName = `${PKG_V23}::vec_map::VecMap`;
   static readonly $numTypeParams = 2;
 
   readonly $typeName = VecMap.$typeName;
 
-  readonly $fullTypeName: `0x2::vec_map::VecMap<${ToTypeStr<K>}, ${ToTypeStr<V>}>`;
+  readonly $fullTypeName: `${typeof PKG_V23}::vec_map::VecMap<${ToTypeStr<K>}, ${ToTypeStr<V>}>`;
 
   readonly $typeArgs: [ToTypeStr<K>, ToTypeStr<V>];
 
@@ -298,7 +299,7 @@ export class VecMap<K extends TypeArgument, V extends TypeArgument>
     this.$fullTypeName = composeSuiType(
       VecMap.$typeName,
       ...typeArgs,
-    ) as `0x2::vec_map::VecMap<${ToTypeStr<K>}, ${ToTypeStr<V>}>`;
+    ) as `${typeof PKG_V23}::vec_map::VecMap<${ToTypeStr<K>}, ${ToTypeStr<V>}>`;
     this.$typeArgs = typeArgs;
 
     this.contents = fields.contents;
@@ -313,7 +314,7 @@ export class VecMap<K extends TypeArgument, V extends TypeArgument>
       fullTypeName: composeSuiType(
         VecMap.$typeName,
         ...[extractType(K), extractType(V)],
-      ) as `0x2::vec_map::VecMap<${ToTypeStr<ToTypeArgument<K>>}, ${ToTypeStr<ToTypeArgument<V>>}>`,
+      ) as `${typeof PKG_V23}::vec_map::VecMap<${ToTypeStr<ToTypeArgument<K>>}, ${ToTypeStr<ToTypeArgument<V>>}>`,
       typeArgs: [extractType(K), extractType(V)] as [
         ToTypeStr<ToTypeArgument<K>>,
         ToTypeStr<ToTypeArgument<V>>,
@@ -413,7 +414,7 @@ export class VecMap<K extends TypeArgument, V extends TypeArgument>
   toJSONField() {
     return {
       contents: fieldToJSON<Vector<Entry<K, V>>>(
-        `vector<0x2::vec_map::Entry<${this.$typeArgs[0]}, ${this.$typeArgs[1]}>>`,
+        `vector<${Entry.$typeName}<${this.$typeArgs[0]}, ${this.$typeArgs[1]}>>`,
         this.contents,
       ),
     };

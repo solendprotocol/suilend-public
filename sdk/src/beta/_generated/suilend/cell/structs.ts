@@ -22,16 +22,15 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../_framework/util";
+import { PKG_V1 } from "../index";
 import { BcsType, bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== Cell =============================== */
 
 export function isCell(type: string): boolean {
   type = compressSuiType(type);
-  return type.startsWith(
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::cell::Cell<",
-  );
+  return type.startsWith(`${PKG_V1}::cell::Cell` + "<");
 }
 
 export interface CellFields<Element extends TypeArgument> {
@@ -44,13 +43,12 @@ export type CellReified<Element extends TypeArgument> = Reified<
 >;
 
 export class Cell<Element extends TypeArgument> implements StructClass {
-  static readonly $typeName =
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::cell::Cell";
+  static readonly $typeName = `${PKG_V1}::cell::Cell`;
   static readonly $numTypeParams = 1;
 
   readonly $typeName = Cell.$typeName;
 
-  readonly $fullTypeName: `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::cell::Cell<${ToTypeStr<Element>}>`;
+  readonly $fullTypeName: `${typeof PKG_V1}::cell::Cell<${ToTypeStr<Element>}>`;
 
   readonly $typeArgs: [ToTypeStr<Element>];
 
@@ -63,7 +61,7 @@ export class Cell<Element extends TypeArgument> implements StructClass {
     this.$fullTypeName = composeSuiType(
       Cell.$typeName,
       ...typeArgs,
-    ) as `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::cell::Cell<${ToTypeStr<Element>}>`;
+    ) as `${typeof PKG_V1}::cell::Cell<${ToTypeStr<Element>}>`;
     this.$typeArgs = typeArgs;
 
     this.element = fields.element;
@@ -77,7 +75,7 @@ export class Cell<Element extends TypeArgument> implements StructClass {
       fullTypeName: composeSuiType(
         Cell.$typeName,
         ...[extractType(Element)],
-      ) as `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::cell::Cell<${ToTypeStr<ToTypeArgument<Element>>}>`,
+      ) as `${typeof PKG_V1}::cell::Cell<${ToTypeStr<ToTypeArgument<Element>>}>`,
       typeArgs: [extractType(Element)] as [ToTypeStr<ToTypeArgument<Element>>],
       reifiedTypeArgs: [Element],
       fromFields: (fields: Record<string, any>) =>
@@ -157,7 +155,7 @@ export class Cell<Element extends TypeArgument> implements StructClass {
   toJSONField() {
     return {
       element: fieldToJSON<Option<Element>>(
-        `0x1::option::Option<${this.$typeArgs[0]}>`,
+        `${Option.$typeName}<${this.$typeArgs[0]}>`,
         this.element,
       ),
     };

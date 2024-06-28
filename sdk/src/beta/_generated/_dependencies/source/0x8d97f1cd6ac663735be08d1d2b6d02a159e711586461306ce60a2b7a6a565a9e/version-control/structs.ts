@@ -14,17 +14,15 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
+import { PKG_V1, PKG_V2 } from "../index";
 import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== V__DUMMY =============================== */
 
 export function isV__DUMMY(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::version_control::V__DUMMY"
-  );
+  return type === `${PKG_V1}::version_control::V__DUMMY`;
 }
 
 export interface V__DUMMYFields {
@@ -34,13 +32,12 @@ export interface V__DUMMYFields {
 export type V__DUMMYReified = Reified<V__DUMMY, V__DUMMYFields>;
 
 export class V__DUMMY implements StructClass {
-  static readonly $typeName =
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::version_control::V__DUMMY";
+  static readonly $typeName = `${PKG_V1}::version_control::V__DUMMY`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = V__DUMMY.$typeName;
 
-  readonly $fullTypeName: "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::version_control::V__DUMMY";
+  readonly $fullTypeName: `${typeof PKG_V1}::version_control::V__DUMMY`;
 
   readonly $typeArgs: [];
 
@@ -50,7 +47,7 @@ export class V__DUMMY implements StructClass {
     this.$fullTypeName = composeSuiType(
       V__DUMMY.$typeName,
       ...typeArgs,
-    ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::version_control::V__DUMMY";
+    ) as `${typeof PKG_V1}::version_control::V__DUMMY`;
     this.$typeArgs = typeArgs;
 
     this.dummyField = fields.dummyField;
@@ -62,7 +59,7 @@ export class V__DUMMY implements StructClass {
       fullTypeName: composeSuiType(
         V__DUMMY.$typeName,
         ...[],
-      ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::version_control::V__DUMMY",
+      ) as `${typeof PKG_V1}::version_control::V__DUMMY`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => V__DUMMY.fromFields(fields),
@@ -181,10 +178,7 @@ export class V__DUMMY implements StructClass {
 
 export function isV__0_1_1(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::version_control::V__0_1_1"
-  );
+  return type === `${PKG_V1}::version_control::V__0_1_1`;
 }
 
 export interface V__0_1_1Fields {
@@ -194,13 +188,12 @@ export interface V__0_1_1Fields {
 export type V__0_1_1Reified = Reified<V__0_1_1, V__0_1_1Fields>;
 
 export class V__0_1_1 implements StructClass {
-  static readonly $typeName =
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::version_control::V__0_1_1";
+  static readonly $typeName = `${PKG_V1}::version_control::V__0_1_1`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = V__0_1_1.$typeName;
 
-  readonly $fullTypeName: "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::version_control::V__0_1_1";
+  readonly $fullTypeName: `${typeof PKG_V1}::version_control::V__0_1_1`;
 
   readonly $typeArgs: [];
 
@@ -210,7 +203,7 @@ export class V__0_1_1 implements StructClass {
     this.$fullTypeName = composeSuiType(
       V__0_1_1.$typeName,
       ...typeArgs,
-    ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::version_control::V__0_1_1";
+    ) as `${typeof PKG_V1}::version_control::V__0_1_1`;
     this.$typeArgs = typeArgs;
 
     this.dummyField = fields.dummyField;
@@ -222,7 +215,7 @@ export class V__0_1_1 implements StructClass {
       fullTypeName: composeSuiType(
         V__0_1_1.$typeName,
         ...[],
-      ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::version_control::V__0_1_1",
+      ) as `${typeof PKG_V1}::version_control::V__0_1_1`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => V__0_1_1.fromFields(fields),
@@ -341,10 +334,7 @@ export class V__0_1_1 implements StructClass {
 
 export function isV__0_1_2(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x4e20ddf36af412a4096f9014f4a565af9e812db9a05cc40254846cf6ed0ad91::version_control::V__0_1_2"
-  );
+  return type === `${PKG_V2}::version_control::V__0_1_2`;
 }
 
 export interface V__0_1_2Fields {
@@ -354,13 +344,12 @@ export interface V__0_1_2Fields {
 export type V__0_1_2Reified = Reified<V__0_1_2, V__0_1_2Fields>;
 
 export class V__0_1_2 implements StructClass {
-  static readonly $typeName =
-    "0x4e20ddf36af412a4096f9014f4a565af9e812db9a05cc40254846cf6ed0ad91::version_control::V__0_1_2";
+  static readonly $typeName = `${PKG_V2}::version_control::V__0_1_2`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = V__0_1_2.$typeName;
 
-  readonly $fullTypeName: "0x4e20ddf36af412a4096f9014f4a565af9e812db9a05cc40254846cf6ed0ad91::version_control::V__0_1_2";
+  readonly $fullTypeName: `${typeof PKG_V2}::version_control::V__0_1_2`;
 
   readonly $typeArgs: [];
 
@@ -370,7 +359,7 @@ export class V__0_1_2 implements StructClass {
     this.$fullTypeName = composeSuiType(
       V__0_1_2.$typeName,
       ...typeArgs,
-    ) as "0x4e20ddf36af412a4096f9014f4a565af9e812db9a05cc40254846cf6ed0ad91::version_control::V__0_1_2";
+    ) as `${typeof PKG_V2}::version_control::V__0_1_2`;
     this.$typeArgs = typeArgs;
 
     this.dummyField = fields.dummyField;
@@ -382,7 +371,7 @@ export class V__0_1_2 implements StructClass {
       fullTypeName: composeSuiType(
         V__0_1_2.$typeName,
         ...[],
-      ) as "0x4e20ddf36af412a4096f9014f4a565af9e812db9a05cc40254846cf6ed0ad91::version_control::V__0_1_2",
+      ) as `${typeof PKG_V2}::version_control::V__0_1_2`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => V__0_1_2.fromFields(fields),

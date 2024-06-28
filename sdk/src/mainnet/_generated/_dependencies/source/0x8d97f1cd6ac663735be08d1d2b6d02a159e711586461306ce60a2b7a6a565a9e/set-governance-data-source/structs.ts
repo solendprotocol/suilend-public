@@ -15,17 +15,15 @@ import {
   compressSuiType,
 } from "../../../../_framework/util";
 import { ExternalAddress } from "../../0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a/external-address/structs";
+import { PKG_V1 } from "../index";
 import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== GovernanceDataSource =============================== */
 
 export function isGovernanceDataSource(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set_governance_data_source::GovernanceDataSource"
-  );
+  return type === `${PKG_V1}::set_governance_data_source::GovernanceDataSource`;
 }
 
 export interface GovernanceDataSourceFields {
@@ -40,13 +38,12 @@ export type GovernanceDataSourceReified = Reified<
 >;
 
 export class GovernanceDataSource implements StructClass {
-  static readonly $typeName =
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set_governance_data_source::GovernanceDataSource";
+  static readonly $typeName = `${PKG_V1}::set_governance_data_source::GovernanceDataSource`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = GovernanceDataSource.$typeName;
 
-  readonly $fullTypeName: "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set_governance_data_source::GovernanceDataSource";
+  readonly $fullTypeName: `${typeof PKG_V1}::set_governance_data_source::GovernanceDataSource`;
 
   readonly $typeArgs: [];
 
@@ -58,7 +55,7 @@ export class GovernanceDataSource implements StructClass {
     this.$fullTypeName = composeSuiType(
       GovernanceDataSource.$typeName,
       ...typeArgs,
-    ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set_governance_data_source::GovernanceDataSource";
+    ) as `${typeof PKG_V1}::set_governance_data_source::GovernanceDataSource`;
     this.$typeArgs = typeArgs;
 
     this.emitterChainId = fields.emitterChainId;
@@ -72,7 +69,7 @@ export class GovernanceDataSource implements StructClass {
       fullTypeName: composeSuiType(
         GovernanceDataSource.$typeName,
         ...[],
-      ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set_governance_data_source::GovernanceDataSource",
+      ) as `${typeof PKG_V1}::set_governance_data_source::GovernanceDataSource`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>

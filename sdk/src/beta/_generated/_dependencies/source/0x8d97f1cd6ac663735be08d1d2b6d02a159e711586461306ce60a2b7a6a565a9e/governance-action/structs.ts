@@ -14,17 +14,15 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
+import { PKG_V1 } from "../index";
 import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== GovernanceAction =============================== */
 
 export function isGovernanceAction(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::governance_action::GovernanceAction"
-  );
+  return type === `${PKG_V1}::governance_action::GovernanceAction`;
 }
 
 export interface GovernanceActionFields {
@@ -37,13 +35,12 @@ export type GovernanceActionReified = Reified<
 >;
 
 export class GovernanceAction implements StructClass {
-  static readonly $typeName =
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::governance_action::GovernanceAction";
+  static readonly $typeName = `${PKG_V1}::governance_action::GovernanceAction`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = GovernanceAction.$typeName;
 
-  readonly $fullTypeName: "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::governance_action::GovernanceAction";
+  readonly $fullTypeName: `${typeof PKG_V1}::governance_action::GovernanceAction`;
 
   readonly $typeArgs: [];
 
@@ -53,7 +50,7 @@ export class GovernanceAction implements StructClass {
     this.$fullTypeName = composeSuiType(
       GovernanceAction.$typeName,
       ...typeArgs,
-    ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::governance_action::GovernanceAction";
+    ) as `${typeof PKG_V1}::governance_action::GovernanceAction`;
     this.$typeArgs = typeArgs;
 
     this.value = fields.value;
@@ -65,7 +62,7 @@ export class GovernanceAction implements StructClass {
       fullTypeName: composeSuiType(
         GovernanceAction.$typeName,
         ...[],
-      ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::governance_action::GovernanceAction",
+      ) as `${typeof PKG_V1}::governance_action::GovernanceAction`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>

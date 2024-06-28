@@ -15,17 +15,15 @@ import {
   compressSuiType,
 } from "../../../../_framework/util";
 import { Bytes32 } from "../bytes32/structs";
+import { PKG_V1 } from "../index";
 import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== GuardianSignature =============================== */
 
 export function isGuardianSignature(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::guardian_signature::GuardianSignature"
-  );
+  return type === `${PKG_V1}::guardian_signature::GuardianSignature`;
 }
 
 export interface GuardianSignatureFields {
@@ -41,13 +39,12 @@ export type GuardianSignatureReified = Reified<
 >;
 
 export class GuardianSignature implements StructClass {
-  static readonly $typeName =
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::guardian_signature::GuardianSignature";
+  static readonly $typeName = `${PKG_V1}::guardian_signature::GuardianSignature`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = GuardianSignature.$typeName;
 
-  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::guardian_signature::GuardianSignature";
+  readonly $fullTypeName: `${typeof PKG_V1}::guardian_signature::GuardianSignature`;
 
   readonly $typeArgs: [];
 
@@ -60,7 +57,7 @@ export class GuardianSignature implements StructClass {
     this.$fullTypeName = composeSuiType(
       GuardianSignature.$typeName,
       ...typeArgs,
-    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::guardian_signature::GuardianSignature";
+    ) as `${typeof PKG_V1}::guardian_signature::GuardianSignature`;
     this.$typeArgs = typeArgs;
 
     this.r = fields.r;
@@ -75,7 +72,7 @@ export class GuardianSignature implements StructClass {
       fullTypeName: composeSuiType(
         GuardianSignature.$typeName,
         ...[],
-      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::guardian_signature::GuardianSignature",
+      ) as `${typeof PKG_V1}::guardian_signature::GuardianSignature`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>

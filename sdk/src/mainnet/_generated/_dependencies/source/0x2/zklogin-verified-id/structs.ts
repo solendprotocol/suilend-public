@@ -15,15 +15,16 @@ import {
   compressSuiType,
 } from "../../../../_framework/util";
 import { String } from "../../0x1/string/structs";
+import { PKG_V23 } from "../index";
 import { UID } from "../object/structs";
 import { bcs, fromB64, fromHEX, toHEX } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== VerifiedID =============================== */
 
 export function isVerifiedID(type: string): boolean {
   type = compressSuiType(type);
-  return type === "0x2::zklogin_verified_id::VerifiedID";
+  return type === `${PKG_V23}::zklogin_verified_id::VerifiedID`;
 }
 
 export interface VerifiedIDFields {
@@ -38,12 +39,12 @@ export interface VerifiedIDFields {
 export type VerifiedIDReified = Reified<VerifiedID, VerifiedIDFields>;
 
 export class VerifiedID implements StructClass {
-  static readonly $typeName = "0x2::zklogin_verified_id::VerifiedID";
+  static readonly $typeName = `${PKG_V23}::zklogin_verified_id::VerifiedID`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = VerifiedID.$typeName;
 
-  readonly $fullTypeName: "0x2::zklogin_verified_id::VerifiedID";
+  readonly $fullTypeName: `${typeof PKG_V23}::zklogin_verified_id::VerifiedID`;
 
   readonly $typeArgs: [];
 
@@ -58,7 +59,7 @@ export class VerifiedID implements StructClass {
     this.$fullTypeName = composeSuiType(
       VerifiedID.$typeName,
       ...typeArgs,
-    ) as "0x2::zklogin_verified_id::VerifiedID";
+    ) as `${typeof PKG_V23}::zklogin_verified_id::VerifiedID`;
     this.$typeArgs = typeArgs;
 
     this.id = fields.id;
@@ -75,7 +76,7 @@ export class VerifiedID implements StructClass {
       fullTypeName: composeSuiType(
         VerifiedID.$typeName,
         ...[],
-      ) as "0x2::zklogin_verified_id::VerifiedID",
+      ) as `${typeof PKG_V23}::zklogin_verified_id::VerifiedID`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>

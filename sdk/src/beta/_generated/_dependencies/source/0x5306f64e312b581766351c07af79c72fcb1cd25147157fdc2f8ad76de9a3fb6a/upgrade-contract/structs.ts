@@ -16,17 +16,15 @@ import {
 } from "../../../../_framework/util";
 import { ID } from "../../0x2/object/structs";
 import { Bytes32 } from "../bytes32/structs";
+import { PKG_V1 } from "../index";
 import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== ContractUpgraded =============================== */
 
 export function isContractUpgraded(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::upgrade_contract::ContractUpgraded"
-  );
+  return type === `${PKG_V1}::upgrade_contract::ContractUpgraded`;
 }
 
 export interface ContractUpgradedFields {
@@ -40,13 +38,12 @@ export type ContractUpgradedReified = Reified<
 >;
 
 export class ContractUpgraded implements StructClass {
-  static readonly $typeName =
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::upgrade_contract::ContractUpgraded";
+  static readonly $typeName = `${PKG_V1}::upgrade_contract::ContractUpgraded`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = ContractUpgraded.$typeName;
 
-  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::upgrade_contract::ContractUpgraded";
+  readonly $fullTypeName: `${typeof PKG_V1}::upgrade_contract::ContractUpgraded`;
 
   readonly $typeArgs: [];
 
@@ -57,7 +54,7 @@ export class ContractUpgraded implements StructClass {
     this.$fullTypeName = composeSuiType(
       ContractUpgraded.$typeName,
       ...typeArgs,
-    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::upgrade_contract::ContractUpgraded";
+    ) as `${typeof PKG_V1}::upgrade_contract::ContractUpgraded`;
     this.$typeArgs = typeArgs;
 
     this.oldContract = fields.oldContract;
@@ -70,7 +67,7 @@ export class ContractUpgraded implements StructClass {
       fullTypeName: composeSuiType(
         ContractUpgraded.$typeName,
         ...[],
-      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::upgrade_contract::ContractUpgraded",
+      ) as `${typeof PKG_V1}::upgrade_contract::ContractUpgraded`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
@@ -201,10 +198,7 @@ export class ContractUpgraded implements StructClass {
 
 export function isGovernanceWitness(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::upgrade_contract::GovernanceWitness"
-  );
+  return type === `${PKG_V1}::upgrade_contract::GovernanceWitness`;
 }
 
 export interface GovernanceWitnessFields {
@@ -217,13 +211,12 @@ export type GovernanceWitnessReified = Reified<
 >;
 
 export class GovernanceWitness implements StructClass {
-  static readonly $typeName =
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::upgrade_contract::GovernanceWitness";
+  static readonly $typeName = `${PKG_V1}::upgrade_contract::GovernanceWitness`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = GovernanceWitness.$typeName;
 
-  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::upgrade_contract::GovernanceWitness";
+  readonly $fullTypeName: `${typeof PKG_V1}::upgrade_contract::GovernanceWitness`;
 
   readonly $typeArgs: [];
 
@@ -233,7 +226,7 @@ export class GovernanceWitness implements StructClass {
     this.$fullTypeName = composeSuiType(
       GovernanceWitness.$typeName,
       ...typeArgs,
-    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::upgrade_contract::GovernanceWitness";
+    ) as `${typeof PKG_V1}::upgrade_contract::GovernanceWitness`;
     this.$typeArgs = typeArgs;
 
     this.dummyField = fields.dummyField;
@@ -245,7 +238,7 @@ export class GovernanceWitness implements StructClass {
       fullTypeName: composeSuiType(
         GovernanceWitness.$typeName,
         ...[],
-      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::upgrade_contract::GovernanceWitness",
+      ) as `${typeof PKG_V1}::upgrade_contract::GovernanceWitness`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
@@ -368,10 +361,7 @@ export class GovernanceWitness implements StructClass {
 
 export function isUpgradeContract(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::upgrade_contract::UpgradeContract"
-  );
+  return type === `${PKG_V1}::upgrade_contract::UpgradeContract`;
 }
 
 export interface UpgradeContractFields {
@@ -384,13 +374,12 @@ export type UpgradeContractReified = Reified<
 >;
 
 export class UpgradeContract implements StructClass {
-  static readonly $typeName =
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::upgrade_contract::UpgradeContract";
+  static readonly $typeName = `${PKG_V1}::upgrade_contract::UpgradeContract`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = UpgradeContract.$typeName;
 
-  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::upgrade_contract::UpgradeContract";
+  readonly $fullTypeName: `${typeof PKG_V1}::upgrade_contract::UpgradeContract`;
 
   readonly $typeArgs: [];
 
@@ -400,7 +389,7 @@ export class UpgradeContract implements StructClass {
     this.$fullTypeName = composeSuiType(
       UpgradeContract.$typeName,
       ...typeArgs,
-    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::upgrade_contract::UpgradeContract";
+    ) as `${typeof PKG_V1}::upgrade_contract::UpgradeContract`;
     this.$typeArgs = typeArgs;
 
     this.digest = fields.digest;
@@ -412,7 +401,7 @@ export class UpgradeContract implements StructClass {
       fullTypeName: composeSuiType(
         UpgradeContract.$typeName,
         ...[],
-      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::upgrade_contract::UpgradeContract",
+      ) as `${typeof PKG_V1}::upgrade_contract::UpgradeContract`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>

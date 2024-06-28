@@ -16,17 +16,15 @@ import {
 } from "../../../../_framework/util";
 import { ID } from "../../0x2/object/structs";
 import { Bytes32 } from "../bytes32/structs";
+import { PKG_V1 } from "../index";
 import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== CurrentVersion =============================== */
 
 export function isCurrentVersion(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::package_utils::CurrentVersion"
-  );
+  return type === `${PKG_V1}::package_utils::CurrentVersion`;
 }
 
 export interface CurrentVersionFields {
@@ -39,13 +37,12 @@ export type CurrentVersionReified = Reified<
 >;
 
 export class CurrentVersion implements StructClass {
-  static readonly $typeName =
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::package_utils::CurrentVersion";
+  static readonly $typeName = `${PKG_V1}::package_utils::CurrentVersion`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = CurrentVersion.$typeName;
 
-  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::package_utils::CurrentVersion";
+  readonly $fullTypeName: `${typeof PKG_V1}::package_utils::CurrentVersion`;
 
   readonly $typeArgs: [];
 
@@ -55,7 +52,7 @@ export class CurrentVersion implements StructClass {
     this.$fullTypeName = composeSuiType(
       CurrentVersion.$typeName,
       ...typeArgs,
-    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::package_utils::CurrentVersion";
+    ) as `${typeof PKG_V1}::package_utils::CurrentVersion`;
     this.$typeArgs = typeArgs;
 
     this.dummyField = fields.dummyField;
@@ -67,7 +64,7 @@ export class CurrentVersion implements StructClass {
       fullTypeName: composeSuiType(
         CurrentVersion.$typeName,
         ...[],
-      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::package_utils::CurrentVersion",
+      ) as `${typeof PKG_V1}::package_utils::CurrentVersion`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
@@ -187,10 +184,7 @@ export class CurrentVersion implements StructClass {
 
 export function isCurrentPackage(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::package_utils::CurrentPackage"
-  );
+  return type === `${PKG_V1}::package_utils::CurrentPackage`;
 }
 
 export interface CurrentPackageFields {
@@ -203,13 +197,12 @@ export type CurrentPackageReified = Reified<
 >;
 
 export class CurrentPackage implements StructClass {
-  static readonly $typeName =
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::package_utils::CurrentPackage";
+  static readonly $typeName = `${PKG_V1}::package_utils::CurrentPackage`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = CurrentPackage.$typeName;
 
-  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::package_utils::CurrentPackage";
+  readonly $fullTypeName: `${typeof PKG_V1}::package_utils::CurrentPackage`;
 
   readonly $typeArgs: [];
 
@@ -219,7 +212,7 @@ export class CurrentPackage implements StructClass {
     this.$fullTypeName = composeSuiType(
       CurrentPackage.$typeName,
       ...typeArgs,
-    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::package_utils::CurrentPackage";
+    ) as `${typeof PKG_V1}::package_utils::CurrentPackage`;
     this.$typeArgs = typeArgs;
 
     this.dummyField = fields.dummyField;
@@ -231,7 +224,7 @@ export class CurrentPackage implements StructClass {
       fullTypeName: composeSuiType(
         CurrentPackage.$typeName,
         ...[],
-      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::package_utils::CurrentPackage",
+      ) as `${typeof PKG_V1}::package_utils::CurrentPackage`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
@@ -351,10 +344,7 @@ export class CurrentPackage implements StructClass {
 
 export function isPackageInfo(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::package_utils::PackageInfo"
-  );
+  return type === `${PKG_V1}::package_utils::PackageInfo`;
 }
 
 export interface PackageInfoFields {
@@ -365,13 +355,12 @@ export interface PackageInfoFields {
 export type PackageInfoReified = Reified<PackageInfo, PackageInfoFields>;
 
 export class PackageInfo implements StructClass {
-  static readonly $typeName =
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::package_utils::PackageInfo";
+  static readonly $typeName = `${PKG_V1}::package_utils::PackageInfo`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = PackageInfo.$typeName;
 
-  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::package_utils::PackageInfo";
+  readonly $fullTypeName: `${typeof PKG_V1}::package_utils::PackageInfo`;
 
   readonly $typeArgs: [];
 
@@ -382,7 +371,7 @@ export class PackageInfo implements StructClass {
     this.$fullTypeName = composeSuiType(
       PackageInfo.$typeName,
       ...typeArgs,
-    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::package_utils::PackageInfo";
+    ) as `${typeof PKG_V1}::package_utils::PackageInfo`;
     this.$typeArgs = typeArgs;
 
     this.package = fields.package;
@@ -395,7 +384,7 @@ export class PackageInfo implements StructClass {
       fullTypeName: composeSuiType(
         PackageInfo.$typeName,
         ...[],
-      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::package_utils::PackageInfo",
+      ) as `${typeof PKG_V1}::package_utils::PackageInfo`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
@@ -520,10 +509,7 @@ export class PackageInfo implements StructClass {
 
 export function isPendingPackage(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::package_utils::PendingPackage"
-  );
+  return type === `${PKG_V1}::package_utils::PendingPackage`;
 }
 
 export interface PendingPackageFields {
@@ -536,13 +522,12 @@ export type PendingPackageReified = Reified<
 >;
 
 export class PendingPackage implements StructClass {
-  static readonly $typeName =
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::package_utils::PendingPackage";
+  static readonly $typeName = `${PKG_V1}::package_utils::PendingPackage`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = PendingPackage.$typeName;
 
-  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::package_utils::PendingPackage";
+  readonly $fullTypeName: `${typeof PKG_V1}::package_utils::PendingPackage`;
 
   readonly $typeArgs: [];
 
@@ -552,7 +537,7 @@ export class PendingPackage implements StructClass {
     this.$fullTypeName = composeSuiType(
       PendingPackage.$typeName,
       ...typeArgs,
-    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::package_utils::PendingPackage";
+    ) as `${typeof PKG_V1}::package_utils::PendingPackage`;
     this.$typeArgs = typeArgs;
 
     this.dummyField = fields.dummyField;
@@ -564,7 +549,7 @@ export class PendingPackage implements StructClass {
       fullTypeName: composeSuiType(
         PendingPackage.$typeName,
         ...[],
-      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::package_utils::PendingPackage",
+      ) as `${typeof PKG_V1}::package_utils::PendingPackage`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>

@@ -23,14 +23,15 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
+import { PKG_V23 } from "../index";
 import { BcsType, bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== VecSet =============================== */
 
 export function isVecSet(type: string): boolean {
   type = compressSuiType(type);
-  return type.startsWith("0x2::vec_set::VecSet<");
+  return type.startsWith(`${PKG_V23}::vec_set::VecSet` + "<");
 }
 
 export interface VecSetFields<K extends TypeArgument> {
@@ -43,12 +44,12 @@ export type VecSetReified<K extends TypeArgument> = Reified<
 >;
 
 export class VecSet<K extends TypeArgument> implements StructClass {
-  static readonly $typeName = "0x2::vec_set::VecSet";
+  static readonly $typeName = `${PKG_V23}::vec_set::VecSet`;
   static readonly $numTypeParams = 1;
 
   readonly $typeName = VecSet.$typeName;
 
-  readonly $fullTypeName: `0x2::vec_set::VecSet<${ToTypeStr<K>}>`;
+  readonly $fullTypeName: `${typeof PKG_V23}::vec_set::VecSet<${ToTypeStr<K>}>`;
 
   readonly $typeArgs: [ToTypeStr<K>];
 
@@ -58,7 +59,7 @@ export class VecSet<K extends TypeArgument> implements StructClass {
     this.$fullTypeName = composeSuiType(
       VecSet.$typeName,
       ...typeArgs,
-    ) as `0x2::vec_set::VecSet<${ToTypeStr<K>}>`;
+    ) as `${typeof PKG_V23}::vec_set::VecSet<${ToTypeStr<K>}>`;
     this.$typeArgs = typeArgs;
 
     this.contents = fields.contents;
@@ -72,7 +73,7 @@ export class VecSet<K extends TypeArgument> implements StructClass {
       fullTypeName: composeSuiType(
         VecSet.$typeName,
         ...[extractType(K)],
-      ) as `0x2::vec_set::VecSet<${ToTypeStr<ToTypeArgument<K>>}>`,
+      ) as `${typeof PKG_V23}::vec_set::VecSet<${ToTypeStr<ToTypeArgument<K>>}>`,
       typeArgs: [extractType(K)] as [ToTypeStr<ToTypeArgument<K>>],
       reifiedTypeArgs: [K],
       fromFields: (fields: Record<string, any>) => VecSet.fromFields(K, fields),

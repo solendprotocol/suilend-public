@@ -14,17 +14,15 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
+import { PKG_V1 } from "../index";
 import { bcs, fromB64, fromHEX, toHEX } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== GovernanceWitness =============================== */
 
 export function isGovernanceWitness(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::transfer_fee::GovernanceWitness"
-  );
+  return type === `${PKG_V1}::transfer_fee::GovernanceWitness`;
 }
 
 export interface GovernanceWitnessFields {
@@ -37,13 +35,12 @@ export type GovernanceWitnessReified = Reified<
 >;
 
 export class GovernanceWitness implements StructClass {
-  static readonly $typeName =
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::transfer_fee::GovernanceWitness";
+  static readonly $typeName = `${PKG_V1}::transfer_fee::GovernanceWitness`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = GovernanceWitness.$typeName;
 
-  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::transfer_fee::GovernanceWitness";
+  readonly $fullTypeName: `${typeof PKG_V1}::transfer_fee::GovernanceWitness`;
 
   readonly $typeArgs: [];
 
@@ -53,7 +50,7 @@ export class GovernanceWitness implements StructClass {
     this.$fullTypeName = composeSuiType(
       GovernanceWitness.$typeName,
       ...typeArgs,
-    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::transfer_fee::GovernanceWitness";
+    ) as `${typeof PKG_V1}::transfer_fee::GovernanceWitness`;
     this.$typeArgs = typeArgs;
 
     this.dummyField = fields.dummyField;
@@ -65,7 +62,7 @@ export class GovernanceWitness implements StructClass {
       fullTypeName: composeSuiType(
         GovernanceWitness.$typeName,
         ...[],
-      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::transfer_fee::GovernanceWitness",
+      ) as `${typeof PKG_V1}::transfer_fee::GovernanceWitness`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
@@ -188,10 +185,7 @@ export class GovernanceWitness implements StructClass {
 
 export function isTransferFee(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::transfer_fee::TransferFee"
-  );
+  return type === `${PKG_V1}::transfer_fee::TransferFee`;
 }
 
 export interface TransferFeeFields {
@@ -202,13 +196,12 @@ export interface TransferFeeFields {
 export type TransferFeeReified = Reified<TransferFee, TransferFeeFields>;
 
 export class TransferFee implements StructClass {
-  static readonly $typeName =
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::transfer_fee::TransferFee";
+  static readonly $typeName = `${PKG_V1}::transfer_fee::TransferFee`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = TransferFee.$typeName;
 
-  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::transfer_fee::TransferFee";
+  readonly $fullTypeName: `${typeof PKG_V1}::transfer_fee::TransferFee`;
 
   readonly $typeArgs: [];
 
@@ -219,7 +212,7 @@ export class TransferFee implements StructClass {
     this.$fullTypeName = composeSuiType(
       TransferFee.$typeName,
       ...typeArgs,
-    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::transfer_fee::TransferFee";
+    ) as `${typeof PKG_V1}::transfer_fee::TransferFee`;
     this.$typeArgs = typeArgs;
 
     this.amount = fields.amount;
@@ -232,7 +225,7 @@ export class TransferFee implements StructClass {
       fullTypeName: composeSuiType(
         TransferFee.$typeName,
         ...[],
-      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::transfer_fee::TransferFee",
+      ) as `${typeof PKG_V1}::transfer_fee::TransferFee`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>

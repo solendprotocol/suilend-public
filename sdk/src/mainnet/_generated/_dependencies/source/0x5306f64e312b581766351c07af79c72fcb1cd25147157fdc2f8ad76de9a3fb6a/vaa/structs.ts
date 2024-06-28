@@ -19,17 +19,15 @@ import {
 } from "../../../../_framework/util";
 import { Bytes32 } from "../bytes32/structs";
 import { ExternalAddress } from "../external-address/structs";
+import { PKG_V1 } from "../index";
 import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== VAA =============================== */
 
 export function isVAA(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::vaa::VAA"
-  );
+  return type === `${PKG_V1}::vaa::VAA`;
 }
 
 export interface VAAFields {
@@ -47,13 +45,12 @@ export interface VAAFields {
 export type VAAReified = Reified<VAA, VAAFields>;
 
 export class VAA implements StructClass {
-  static readonly $typeName =
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::vaa::VAA";
+  static readonly $typeName = `${PKG_V1}::vaa::VAA`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = VAA.$typeName;
 
-  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::vaa::VAA";
+  readonly $fullTypeName: `${typeof PKG_V1}::vaa::VAA`;
 
   readonly $typeArgs: [];
 
@@ -71,7 +68,7 @@ export class VAA implements StructClass {
     this.$fullTypeName = composeSuiType(
       VAA.$typeName,
       ...typeArgs,
-    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::vaa::VAA";
+    ) as `${typeof PKG_V1}::vaa::VAA`;
     this.$typeArgs = typeArgs;
 
     this.guardianSetIndex = fields.guardianSetIndex;
@@ -91,7 +88,7 @@ export class VAA implements StructClass {
       fullTypeName: composeSuiType(
         VAA.$typeName,
         ...[],
-      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::vaa::VAA",
+      ) as `${typeof PKG_V1}::vaa::VAA`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => VAA.fromFields(fields),

@@ -18,17 +18,15 @@ import {
   compressSuiType,
 } from "../../../../_framework/util";
 import { Guardian } from "../guardian/structs";
+import { PKG_V1 } from "../index";
 import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== GovernanceWitness =============================== */
 
 export function isGovernanceWitness(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::update_guardian_set::GovernanceWitness"
-  );
+  return type === `${PKG_V1}::update_guardian_set::GovernanceWitness`;
 }
 
 export interface GovernanceWitnessFields {
@@ -41,13 +39,12 @@ export type GovernanceWitnessReified = Reified<
 >;
 
 export class GovernanceWitness implements StructClass {
-  static readonly $typeName =
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::update_guardian_set::GovernanceWitness";
+  static readonly $typeName = `${PKG_V1}::update_guardian_set::GovernanceWitness`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = GovernanceWitness.$typeName;
 
-  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::update_guardian_set::GovernanceWitness";
+  readonly $fullTypeName: `${typeof PKG_V1}::update_guardian_set::GovernanceWitness`;
 
   readonly $typeArgs: [];
 
@@ -57,7 +54,7 @@ export class GovernanceWitness implements StructClass {
     this.$fullTypeName = composeSuiType(
       GovernanceWitness.$typeName,
       ...typeArgs,
-    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::update_guardian_set::GovernanceWitness";
+    ) as `${typeof PKG_V1}::update_guardian_set::GovernanceWitness`;
     this.$typeArgs = typeArgs;
 
     this.dummyField = fields.dummyField;
@@ -69,7 +66,7 @@ export class GovernanceWitness implements StructClass {
       fullTypeName: composeSuiType(
         GovernanceWitness.$typeName,
         ...[],
-      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::update_guardian_set::GovernanceWitness",
+      ) as `${typeof PKG_V1}::update_guardian_set::GovernanceWitness`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
@@ -192,10 +189,7 @@ export class GovernanceWitness implements StructClass {
 
 export function isGuardianSetAdded(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::update_guardian_set::GuardianSetAdded"
-  );
+  return type === `${PKG_V1}::update_guardian_set::GuardianSetAdded`;
 }
 
 export interface GuardianSetAddedFields {
@@ -208,13 +202,12 @@ export type GuardianSetAddedReified = Reified<
 >;
 
 export class GuardianSetAdded implements StructClass {
-  static readonly $typeName =
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::update_guardian_set::GuardianSetAdded";
+  static readonly $typeName = `${PKG_V1}::update_guardian_set::GuardianSetAdded`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = GuardianSetAdded.$typeName;
 
-  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::update_guardian_set::GuardianSetAdded";
+  readonly $fullTypeName: `${typeof PKG_V1}::update_guardian_set::GuardianSetAdded`;
 
   readonly $typeArgs: [];
 
@@ -224,7 +217,7 @@ export class GuardianSetAdded implements StructClass {
     this.$fullTypeName = composeSuiType(
       GuardianSetAdded.$typeName,
       ...typeArgs,
-    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::update_guardian_set::GuardianSetAdded";
+    ) as `${typeof PKG_V1}::update_guardian_set::GuardianSetAdded`;
     this.$typeArgs = typeArgs;
 
     this.newIndex = fields.newIndex;
@@ -236,7 +229,7 @@ export class GuardianSetAdded implements StructClass {
       fullTypeName: composeSuiType(
         GuardianSetAdded.$typeName,
         ...[],
-      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::update_guardian_set::GuardianSetAdded",
+      ) as `${typeof PKG_V1}::update_guardian_set::GuardianSetAdded`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
@@ -356,10 +349,7 @@ export class GuardianSetAdded implements StructClass {
 
 export function isUpdateGuardianSet(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::update_guardian_set::UpdateGuardianSet"
-  );
+  return type === `${PKG_V1}::update_guardian_set::UpdateGuardianSet`;
 }
 
 export interface UpdateGuardianSetFields {
@@ -373,13 +363,12 @@ export type UpdateGuardianSetReified = Reified<
 >;
 
 export class UpdateGuardianSet implements StructClass {
-  static readonly $typeName =
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::update_guardian_set::UpdateGuardianSet";
+  static readonly $typeName = `${PKG_V1}::update_guardian_set::UpdateGuardianSet`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = UpdateGuardianSet.$typeName;
 
-  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::update_guardian_set::UpdateGuardianSet";
+  readonly $fullTypeName: `${typeof PKG_V1}::update_guardian_set::UpdateGuardianSet`;
 
   readonly $typeArgs: [];
 
@@ -390,7 +379,7 @@ export class UpdateGuardianSet implements StructClass {
     this.$fullTypeName = composeSuiType(
       UpdateGuardianSet.$typeName,
       ...typeArgs,
-    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::update_guardian_set::UpdateGuardianSet";
+    ) as `${typeof PKG_V1}::update_guardian_set::UpdateGuardianSet`;
     this.$typeArgs = typeArgs;
 
     this.newIndex = fields.newIndex;
@@ -403,7 +392,7 @@ export class UpdateGuardianSet implements StructClass {
       fullTypeName: composeSuiType(
         UpdateGuardianSet.$typeName,
         ...[],
-      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::update_guardian_set::UpdateGuardianSet",
+      ) as `${typeof PKG_V1}::update_guardian_set::UpdateGuardianSet`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
@@ -475,7 +464,7 @@ export class UpdateGuardianSet implements StructClass {
     return {
       newIndex: this.newIndex,
       guardians: fieldToJSON<Vector<Guardian>>(
-        `vector<0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::guardian::Guardian>`,
+        `vector<${Guardian.$typeName}>`,
         this.guardians,
       ),
     };

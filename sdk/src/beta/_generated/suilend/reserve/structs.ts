@@ -31,19 +31,17 @@ import {
 } from "../../_framework/util";
 import { Cell } from "../cell/structs";
 import { Decimal } from "../decimal/structs";
+import { PKG_V1 } from "../index";
 import { PoolRewardManager } from "../liquidity-mining/structs";
 import { ReserveConfig } from "../reserve-config/structs";
 import { bcs, fromB64, fromHEX, toHEX } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== BalanceKey =============================== */
 
 export function isBalanceKey(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::BalanceKey"
-  );
+  return type === `${PKG_V1}::reserve::BalanceKey`;
 }
 
 export interface BalanceKeyFields {
@@ -53,13 +51,12 @@ export interface BalanceKeyFields {
 export type BalanceKeyReified = Reified<BalanceKey, BalanceKeyFields>;
 
 export class BalanceKey implements StructClass {
-  static readonly $typeName =
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::BalanceKey";
+  static readonly $typeName = `${PKG_V1}::reserve::BalanceKey`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = BalanceKey.$typeName;
 
-  readonly $fullTypeName: "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::BalanceKey";
+  readonly $fullTypeName: `${typeof PKG_V1}::reserve::BalanceKey`;
 
   readonly $typeArgs: [];
 
@@ -69,7 +66,7 @@ export class BalanceKey implements StructClass {
     this.$fullTypeName = composeSuiType(
       BalanceKey.$typeName,
       ...typeArgs,
-    ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::BalanceKey";
+    ) as `${typeof PKG_V1}::reserve::BalanceKey`;
     this.$typeArgs = typeArgs;
 
     this.dummyField = fields.dummyField;
@@ -81,7 +78,7 @@ export class BalanceKey implements StructClass {
       fullTypeName: composeSuiType(
         BalanceKey.$typeName,
         ...[],
-      ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::BalanceKey",
+      ) as `${typeof PKG_V1}::reserve::BalanceKey`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
@@ -201,9 +198,7 @@ export class BalanceKey implements StructClass {
 
 export function isBalances(type: string): boolean {
   type = compressSuiType(type);
-  return type.startsWith(
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::Balances<",
-  );
+  return type.startsWith(`${PKG_V1}::reserve::Balances` + "<");
 }
 
 export interface BalancesFields<
@@ -227,13 +222,12 @@ export class Balances<
   T extends PhantomTypeArgument,
 > implements StructClass
 {
-  static readonly $typeName =
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::Balances";
+  static readonly $typeName = `${PKG_V1}::reserve::Balances`;
   static readonly $numTypeParams = 2;
 
   readonly $typeName = Balances.$typeName;
 
-  readonly $fullTypeName: `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::Balances<${PhantomToTypeStr<P>}, ${PhantomToTypeStr<T>}>`;
+  readonly $fullTypeName: `${typeof PKG_V1}::reserve::Balances<${PhantomToTypeStr<P>}, ${PhantomToTypeStr<T>}>`;
 
   readonly $typeArgs: [PhantomToTypeStr<P>, PhantomToTypeStr<T>];
 
@@ -250,7 +244,7 @@ export class Balances<
     this.$fullTypeName = composeSuiType(
       Balances.$typeName,
       ...typeArgs,
-    ) as `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::Balances<${PhantomToTypeStr<P>}, ${PhantomToTypeStr<T>}>`;
+    ) as `${typeof PKG_V1}::reserve::Balances<${PhantomToTypeStr<P>}, ${PhantomToTypeStr<T>}>`;
     this.$typeArgs = typeArgs;
 
     this.availableAmount = fields.availableAmount;
@@ -272,7 +266,7 @@ export class Balances<
       fullTypeName: composeSuiType(
         Balances.$typeName,
         ...[extractType(P), extractType(T)],
-      ) as `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::Balances<${PhantomToTypeStr<ToPhantomTypeArgument<P>>}, ${PhantomToTypeStr<ToPhantomTypeArgument<T>>}>`,
+      ) as `${typeof PKG_V1}::reserve::Balances<${PhantomToTypeStr<ToPhantomTypeArgument<P>>}, ${PhantomToTypeStr<ToPhantomTypeArgument<T>>}>`,
       typeArgs: [extractType(P), extractType(T)] as [
         PhantomToTypeStr<ToPhantomTypeArgument<P>>,
         PhantomToTypeStr<ToPhantomTypeArgument<T>>,
@@ -534,9 +528,7 @@ export class Balances<
 
 export function isCToken(type: string): boolean {
   type = compressSuiType(type);
-  return type.startsWith(
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::CToken<",
-  );
+  return type.startsWith(`${PKG_V1}::reserve::CToken` + "<");
 }
 
 export interface CTokenFields<
@@ -556,13 +548,12 @@ export class CToken<
   T extends PhantomTypeArgument,
 > implements StructClass
 {
-  static readonly $typeName =
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::CToken";
+  static readonly $typeName = `${PKG_V1}::reserve::CToken`;
   static readonly $numTypeParams = 2;
 
   readonly $typeName = CToken.$typeName;
 
-  readonly $fullTypeName: `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::CToken<${PhantomToTypeStr<P>}, ${PhantomToTypeStr<T>}>`;
+  readonly $fullTypeName: `${typeof PKG_V1}::reserve::CToken<${PhantomToTypeStr<P>}, ${PhantomToTypeStr<T>}>`;
 
   readonly $typeArgs: [PhantomToTypeStr<P>, PhantomToTypeStr<T>];
 
@@ -575,7 +566,7 @@ export class CToken<
     this.$fullTypeName = composeSuiType(
       CToken.$typeName,
       ...typeArgs,
-    ) as `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::CToken<${PhantomToTypeStr<P>}, ${PhantomToTypeStr<T>}>`;
+    ) as `${typeof PKG_V1}::reserve::CToken<${PhantomToTypeStr<P>}, ${PhantomToTypeStr<T>}>`;
     this.$typeArgs = typeArgs;
 
     this.dummyField = fields.dummyField;
@@ -593,7 +584,7 @@ export class CToken<
       fullTypeName: composeSuiType(
         CToken.$typeName,
         ...[extractType(P), extractType(T)],
-      ) as `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::CToken<${PhantomToTypeStr<ToPhantomTypeArgument<P>>}, ${PhantomToTypeStr<ToPhantomTypeArgument<T>>}>`,
+      ) as `${typeof PKG_V1}::reserve::CToken<${PhantomToTypeStr<ToPhantomTypeArgument<P>>}, ${PhantomToTypeStr<ToPhantomTypeArgument<T>>}>`,
       typeArgs: [extractType(P), extractType(T)] as [
         PhantomToTypeStr<ToPhantomTypeArgument<P>>,
         PhantomToTypeStr<ToPhantomTypeArgument<T>>,
@@ -778,10 +769,7 @@ export class CToken<
 
 export function isInterestUpdateEvent(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::InterestUpdateEvent"
-  );
+  return type === `${PKG_V1}::reserve::InterestUpdateEvent`;
 }
 
 export interface InterestUpdateEventFields {
@@ -807,13 +795,12 @@ export type InterestUpdateEventReified = Reified<
 >;
 
 export class InterestUpdateEvent implements StructClass {
-  static readonly $typeName =
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::InterestUpdateEvent";
+  static readonly $typeName = `${PKG_V1}::reserve::InterestUpdateEvent`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = InterestUpdateEvent.$typeName;
 
-  readonly $fullTypeName: "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::InterestUpdateEvent";
+  readonly $fullTypeName: `${typeof PKG_V1}::reserve::InterestUpdateEvent`;
 
   readonly $typeArgs: [];
 
@@ -836,7 +823,7 @@ export class InterestUpdateEvent implements StructClass {
     this.$fullTypeName = composeSuiType(
       InterestUpdateEvent.$typeName,
       ...typeArgs,
-    ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::InterestUpdateEvent";
+    ) as `${typeof PKG_V1}::reserve::InterestUpdateEvent`;
     this.$typeArgs = typeArgs;
 
     this.lendingMarketId = fields.lendingMarketId;
@@ -862,7 +849,7 @@ export class InterestUpdateEvent implements StructClass {
       fullTypeName: composeSuiType(
         InterestUpdateEvent.$typeName,
         ...[],
-      ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::InterestUpdateEvent",
+      ) as `${typeof PKG_V1}::reserve::InterestUpdateEvent`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
@@ -1147,9 +1134,7 @@ export class InterestUpdateEvent implements StructClass {
 
 export function isReserve(type: string): boolean {
   type = compressSuiType(type);
-  return type.startsWith(
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::Reserve<",
-  );
+  return type.startsWith(`${PKG_V1}::reserve::Reserve` + "<");
 }
 
 export interface ReserveFields<P extends PhantomTypeArgument> {
@@ -1180,13 +1165,12 @@ export type ReserveReified<P extends PhantomTypeArgument> = Reified<
 >;
 
 export class Reserve<P extends PhantomTypeArgument> implements StructClass {
-  static readonly $typeName =
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::Reserve";
+  static readonly $typeName = `${PKG_V1}::reserve::Reserve`;
   static readonly $numTypeParams = 1;
 
   readonly $typeName = Reserve.$typeName;
 
-  readonly $fullTypeName: `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::Reserve<${PhantomToTypeStr<P>}>`;
+  readonly $fullTypeName: `${typeof PKG_V1}::reserve::Reserve<${PhantomToTypeStr<P>}>`;
 
   readonly $typeArgs: [PhantomToTypeStr<P>];
 
@@ -1217,7 +1201,7 @@ export class Reserve<P extends PhantomTypeArgument> implements StructClass {
     this.$fullTypeName = composeSuiType(
       Reserve.$typeName,
       ...typeArgs,
-    ) as `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::Reserve<${PhantomToTypeStr<P>}>`;
+    ) as `${typeof PKG_V1}::reserve::Reserve<${PhantomToTypeStr<P>}>`;
     this.$typeArgs = typeArgs;
 
     this.id = fields.id;
@@ -1249,7 +1233,7 @@ export class Reserve<P extends PhantomTypeArgument> implements StructClass {
       fullTypeName: composeSuiType(
         Reserve.$typeName,
         ...[extractType(P)],
-      ) as `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::Reserve<${PhantomToTypeStr<ToPhantomTypeArgument<P>>}>`,
+      ) as `${typeof PKG_V1}::reserve::Reserve<${PhantomToTypeStr<ToPhantomTypeArgument<P>>}>`,
       typeArgs: [extractType(P)] as [
         PhantomToTypeStr<ToPhantomTypeArgument<P>>,
       ],
@@ -1597,10 +1581,7 @@ export class Reserve<P extends PhantomTypeArgument> implements StructClass {
 
 export function isReserveAssetDataEvent(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::ReserveAssetDataEvent"
-  );
+  return type === `${PKG_V1}::reserve::ReserveAssetDataEvent`;
 }
 
 export interface ReserveAssetDataEventFields {
@@ -1628,13 +1609,12 @@ export type ReserveAssetDataEventReified = Reified<
 >;
 
 export class ReserveAssetDataEvent implements StructClass {
-  static readonly $typeName =
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::ReserveAssetDataEvent";
+  static readonly $typeName = `${PKG_V1}::reserve::ReserveAssetDataEvent`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = ReserveAssetDataEvent.$typeName;
 
-  readonly $fullTypeName: "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::ReserveAssetDataEvent";
+  readonly $fullTypeName: `${typeof PKG_V1}::reserve::ReserveAssetDataEvent`;
 
   readonly $typeArgs: [];
 
@@ -1659,7 +1639,7 @@ export class ReserveAssetDataEvent implements StructClass {
     this.$fullTypeName = composeSuiType(
       ReserveAssetDataEvent.$typeName,
       ...typeArgs,
-    ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::ReserveAssetDataEvent";
+    ) as `${typeof PKG_V1}::reserve::ReserveAssetDataEvent`;
     this.$typeArgs = typeArgs;
 
     this.lendingMarketId = fields.lendingMarketId;
@@ -1686,7 +1666,7 @@ export class ReserveAssetDataEvent implements StructClass {
       fullTypeName: composeSuiType(
         ReserveAssetDataEvent.$typeName,
         ...[],
-      ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::ReserveAssetDataEvent",
+      ) as `${typeof PKG_V1}::reserve::ReserveAssetDataEvent`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>

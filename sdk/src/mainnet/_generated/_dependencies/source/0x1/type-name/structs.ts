@@ -15,14 +15,15 @@ import {
   compressSuiType,
 } from "../../../../_framework/util";
 import { String } from "../ascii/structs";
+import { PKG_V6 } from "../index";
 import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== TypeName =============================== */
 
 export function isTypeName(type: string): boolean {
   type = compressSuiType(type);
-  return type === "0x1::type_name::TypeName";
+  return type === `${PKG_V6}::type_name::TypeName`;
 }
 
 export interface TypeNameFields {
@@ -32,12 +33,12 @@ export interface TypeNameFields {
 export type TypeNameReified = Reified<TypeName, TypeNameFields>;
 
 export class TypeName implements StructClass {
-  static readonly $typeName = "0x1::type_name::TypeName";
+  static readonly $typeName = `${PKG_V6}::type_name::TypeName`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = TypeName.$typeName;
 
-  readonly $fullTypeName: "0x1::type_name::TypeName";
+  readonly $fullTypeName: `${typeof PKG_V6}::type_name::TypeName`;
 
   readonly $typeArgs: [];
 
@@ -47,7 +48,7 @@ export class TypeName implements StructClass {
     this.$fullTypeName = composeSuiType(
       TypeName.$typeName,
       ...typeArgs,
-    ) as "0x1::type_name::TypeName";
+    ) as `${typeof PKG_V6}::type_name::TypeName`;
     this.$typeArgs = typeArgs;
 
     this.name = fields.name;
@@ -59,7 +60,7 @@ export class TypeName implements StructClass {
       fullTypeName: composeSuiType(
         TypeName.$typeName,
         ...[],
-      ) as "0x1::type_name::TypeName",
+      ) as `${typeof PKG_V6}::type_name::TypeName`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => TypeName.fromFields(fields),

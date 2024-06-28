@@ -15,18 +15,16 @@ import {
   compressSuiType,
 } from "../../../../_framework/util";
 import { UID } from "../../0x2/object/structs";
+import { PKG_V1 } from "../index";
 import { PriceFeed } from "../price-feed/structs";
 import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== PriceInfo =============================== */
 
 export function isPriceInfo(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::price_info::PriceInfo"
-  );
+  return type === `${PKG_V1}::price_info::PriceInfo`;
 }
 
 export interface PriceInfoFields {
@@ -38,13 +36,12 @@ export interface PriceInfoFields {
 export type PriceInfoReified = Reified<PriceInfo, PriceInfoFields>;
 
 export class PriceInfo implements StructClass {
-  static readonly $typeName =
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::price_info::PriceInfo";
+  static readonly $typeName = `${PKG_V1}::price_info::PriceInfo`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = PriceInfo.$typeName;
 
-  readonly $fullTypeName: "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::price_info::PriceInfo";
+  readonly $fullTypeName: `${typeof PKG_V1}::price_info::PriceInfo`;
 
   readonly $typeArgs: [];
 
@@ -56,7 +53,7 @@ export class PriceInfo implements StructClass {
     this.$fullTypeName = composeSuiType(
       PriceInfo.$typeName,
       ...typeArgs,
-    ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::price_info::PriceInfo";
+    ) as `${typeof PKG_V1}::price_info::PriceInfo`;
     this.$typeArgs = typeArgs;
 
     this.attestationTime = fields.attestationTime;
@@ -70,7 +67,7 @@ export class PriceInfo implements StructClass {
       fullTypeName: composeSuiType(
         PriceInfo.$typeName,
         ...[],
-      ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::price_info::PriceInfo",
+      ) as `${typeof PKG_V1}::price_info::PriceInfo`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => PriceInfo.fromFields(fields),
@@ -205,10 +202,7 @@ export class PriceInfo implements StructClass {
 
 export function isPriceInfoObject(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::price_info::PriceInfoObject"
-  );
+  return type === `${PKG_V1}::price_info::PriceInfoObject`;
 }
 
 export interface PriceInfoObjectFields {
@@ -222,13 +216,12 @@ export type PriceInfoObjectReified = Reified<
 >;
 
 export class PriceInfoObject implements StructClass {
-  static readonly $typeName =
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::price_info::PriceInfoObject";
+  static readonly $typeName = `${PKG_V1}::price_info::PriceInfoObject`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = PriceInfoObject.$typeName;
 
-  readonly $fullTypeName: "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::price_info::PriceInfoObject";
+  readonly $fullTypeName: `${typeof PKG_V1}::price_info::PriceInfoObject`;
 
   readonly $typeArgs: [];
 
@@ -239,7 +232,7 @@ export class PriceInfoObject implements StructClass {
     this.$fullTypeName = composeSuiType(
       PriceInfoObject.$typeName,
       ...typeArgs,
-    ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::price_info::PriceInfoObject";
+    ) as `${typeof PKG_V1}::price_info::PriceInfoObject`;
     this.$typeArgs = typeArgs;
 
     this.id = fields.id;
@@ -252,7 +245,7 @@ export class PriceInfoObject implements StructClass {
       fullTypeName: composeSuiType(
         PriceInfoObject.$typeName,
         ...[],
-      ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::price_info::PriceInfoObject",
+      ) as `${typeof PKG_V1}::price_info::PriceInfoObject`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>

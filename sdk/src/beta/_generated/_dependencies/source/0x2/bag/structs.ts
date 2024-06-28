@@ -14,15 +14,16 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
+import { PKG_V23 } from "../index";
 import { UID } from "../object/structs";
 import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== Bag =============================== */
 
 export function isBag(type: string): boolean {
   type = compressSuiType(type);
-  return type === "0x2::bag::Bag";
+  return type === `${PKG_V23}::bag::Bag`;
 }
 
 export interface BagFields {
@@ -33,12 +34,12 @@ export interface BagFields {
 export type BagReified = Reified<Bag, BagFields>;
 
 export class Bag implements StructClass {
-  static readonly $typeName = "0x2::bag::Bag";
+  static readonly $typeName = `${PKG_V23}::bag::Bag`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = Bag.$typeName;
 
-  readonly $fullTypeName: "0x2::bag::Bag";
+  readonly $fullTypeName: `${typeof PKG_V23}::bag::Bag`;
 
   readonly $typeArgs: [];
 
@@ -49,7 +50,7 @@ export class Bag implements StructClass {
     this.$fullTypeName = composeSuiType(
       Bag.$typeName,
       ...typeArgs,
-    ) as "0x2::bag::Bag";
+    ) as `${typeof PKG_V23}::bag::Bag`;
     this.$typeArgs = typeArgs;
 
     this.id = fields.id;
@@ -59,7 +60,10 @@ export class Bag implements StructClass {
   static reified(): BagReified {
     return {
       typeName: Bag.$typeName,
-      fullTypeName: composeSuiType(Bag.$typeName, ...[]) as "0x2::bag::Bag",
+      fullTypeName: composeSuiType(
+        Bag.$typeName,
+        ...[],
+      ) as `${typeof PKG_V23}::bag::Bag`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => Bag.fromFields(fields),

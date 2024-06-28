@@ -23,17 +23,15 @@ import {
   compressSuiType,
 } from "../../../../_framework/util";
 import { Table } from "../../0x2/table/structs";
+import { PKG_V1 } from "../index";
 import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== Empty =============================== */
 
 export function isEmpty(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::set::Empty"
-  );
+  return type === `${PKG_V1}::set::Empty`;
 }
 
 export interface EmptyFields {
@@ -43,13 +41,12 @@ export interface EmptyFields {
 export type EmptyReified = Reified<Empty, EmptyFields>;
 
 export class Empty implements StructClass {
-  static readonly $typeName =
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::set::Empty";
+  static readonly $typeName = `${PKG_V1}::set::Empty`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = Empty.$typeName;
 
-  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::set::Empty";
+  readonly $fullTypeName: `${typeof PKG_V1}::set::Empty`;
 
   readonly $typeArgs: [];
 
@@ -59,7 +56,7 @@ export class Empty implements StructClass {
     this.$fullTypeName = composeSuiType(
       Empty.$typeName,
       ...typeArgs,
-    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::set::Empty";
+    ) as `${typeof PKG_V1}::set::Empty`;
     this.$typeArgs = typeArgs;
 
     this.dummyField = fields.dummyField;
@@ -71,7 +68,7 @@ export class Empty implements StructClass {
       fullTypeName: composeSuiType(
         Empty.$typeName,
         ...[],
-      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::set::Empty",
+      ) as `${typeof PKG_V1}::set::Empty`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => Empty.fromFields(fields),
@@ -189,9 +186,7 @@ export class Empty implements StructClass {
 
 export function isSet(type: string): boolean {
   type = compressSuiType(type);
-  return type.startsWith(
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::set::Set<",
-  );
+  return type.startsWith(`${PKG_V1}::set::Set` + "<");
 }
 
 export interface SetFields<T extends PhantomTypeArgument> {
@@ -204,13 +199,12 @@ export type SetReified<T extends PhantomTypeArgument> = Reified<
 >;
 
 export class Set<T extends PhantomTypeArgument> implements StructClass {
-  static readonly $typeName =
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::set::Set";
+  static readonly $typeName = `${PKG_V1}::set::Set`;
   static readonly $numTypeParams = 1;
 
   readonly $typeName = Set.$typeName;
 
-  readonly $fullTypeName: `0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::set::Set<${PhantomToTypeStr<T>}>`;
+  readonly $fullTypeName: `${typeof PKG_V1}::set::Set<${PhantomToTypeStr<T>}>`;
 
   readonly $typeArgs: [PhantomToTypeStr<T>];
 
@@ -220,7 +214,7 @@ export class Set<T extends PhantomTypeArgument> implements StructClass {
     this.$fullTypeName = composeSuiType(
       Set.$typeName,
       ...typeArgs,
-    ) as `0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::set::Set<${PhantomToTypeStr<T>}>`;
+    ) as `${typeof PKG_V1}::set::Set<${PhantomToTypeStr<T>}>`;
     this.$typeArgs = typeArgs;
 
     this.items = fields.items;
@@ -234,7 +228,7 @@ export class Set<T extends PhantomTypeArgument> implements StructClass {
       fullTypeName: composeSuiType(
         Set.$typeName,
         ...[extractType(T)],
-      ) as `0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::set::Set<${PhantomToTypeStr<ToPhantomTypeArgument<T>>}>`,
+      ) as `${typeof PKG_V1}::set::Set<${PhantomToTypeStr<ToPhantomTypeArgument<T>>}>`,
       typeArgs: [extractType(T)] as [
         PhantomToTypeStr<ToPhantomTypeArgument<T>>,
       ],

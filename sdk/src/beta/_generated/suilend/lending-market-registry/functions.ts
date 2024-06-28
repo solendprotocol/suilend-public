@@ -1,22 +1,22 @@
 import { PUBLISHED_AT } from "..";
-import { ObjectArg, obj } from "../../_framework/util";
-import { TransactionBlock } from "@mysten/sui.js/transactions";
+import { obj } from "../../_framework/util";
+import { Transaction, TransactionObjectInput } from "@mysten/sui/transactions";
 
-export function init(txb: TransactionBlock) {
-  return txb.moveCall({
+export function init(tx: Transaction) {
+  return tx.moveCall({
     target: `${PUBLISHED_AT}::lending_market_registry::init`,
     arguments: [],
   });
 }
 
 export function createLendingMarket(
-  txb: TransactionBlock,
+  tx: Transaction,
   typeArg: string,
-  registry: ObjectArg,
+  registry: TransactionObjectInput,
 ) {
-  return txb.moveCall({
+  return tx.moveCall({
     target: `${PUBLISHED_AT}::lending_market_registry::create_lending_market`,
     typeArguments: [typeArg],
-    arguments: [obj(txb, registry)],
+    arguments: [obj(tx, registry)],
   });
 }

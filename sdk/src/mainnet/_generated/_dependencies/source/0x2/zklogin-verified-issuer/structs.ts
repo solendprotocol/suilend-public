@@ -15,15 +15,16 @@ import {
   compressSuiType,
 } from "../../../../_framework/util";
 import { String } from "../../0x1/string/structs";
+import { PKG_V23 } from "../index";
 import { UID } from "../object/structs";
 import { bcs, fromB64, fromHEX, toHEX } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== VerifiedIssuer =============================== */
 
 export function isVerifiedIssuer(type: string): boolean {
   type = compressSuiType(type);
-  return type === "0x2::zklogin_verified_issuer::VerifiedIssuer";
+  return type === `${PKG_V23}::zklogin_verified_issuer::VerifiedIssuer`;
 }
 
 export interface VerifiedIssuerFields {
@@ -38,12 +39,12 @@ export type VerifiedIssuerReified = Reified<
 >;
 
 export class VerifiedIssuer implements StructClass {
-  static readonly $typeName = "0x2::zklogin_verified_issuer::VerifiedIssuer";
+  static readonly $typeName = `${PKG_V23}::zklogin_verified_issuer::VerifiedIssuer`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = VerifiedIssuer.$typeName;
 
-  readonly $fullTypeName: "0x2::zklogin_verified_issuer::VerifiedIssuer";
+  readonly $fullTypeName: `${typeof PKG_V23}::zklogin_verified_issuer::VerifiedIssuer`;
 
   readonly $typeArgs: [];
 
@@ -55,7 +56,7 @@ export class VerifiedIssuer implements StructClass {
     this.$fullTypeName = composeSuiType(
       VerifiedIssuer.$typeName,
       ...typeArgs,
-    ) as "0x2::zklogin_verified_issuer::VerifiedIssuer";
+    ) as `${typeof PKG_V23}::zklogin_verified_issuer::VerifiedIssuer`;
     this.$typeArgs = typeArgs;
 
     this.id = fields.id;
@@ -69,7 +70,7 @@ export class VerifiedIssuer implements StructClass {
       fullTypeName: composeSuiType(
         VerifiedIssuer.$typeName,
         ...[],
-      ) as "0x2::zklogin_verified_issuer::VerifiedIssuer",
+      ) as `${typeof PKG_V23}::zklogin_verified_issuer::VerifiedIssuer`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>

@@ -18,17 +18,15 @@ import {
 } from "../../../../_framework/util";
 import { Balance } from "../../0x2/balance/structs";
 import { SUI } from "../../0x2/sui/structs";
+import { PKG_V1 } from "../index";
 import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== FeeCollector =============================== */
 
 export function isFeeCollector(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::fee_collector::FeeCollector"
-  );
+  return type === `${PKG_V1}::fee_collector::FeeCollector`;
 }
 
 export interface FeeCollectorFields {
@@ -39,13 +37,12 @@ export interface FeeCollectorFields {
 export type FeeCollectorReified = Reified<FeeCollector, FeeCollectorFields>;
 
 export class FeeCollector implements StructClass {
-  static readonly $typeName =
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::fee_collector::FeeCollector";
+  static readonly $typeName = `${PKG_V1}::fee_collector::FeeCollector`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = FeeCollector.$typeName;
 
-  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::fee_collector::FeeCollector";
+  readonly $fullTypeName: `${typeof PKG_V1}::fee_collector::FeeCollector`;
 
   readonly $typeArgs: [];
 
@@ -56,7 +53,7 @@ export class FeeCollector implements StructClass {
     this.$fullTypeName = composeSuiType(
       FeeCollector.$typeName,
       ...typeArgs,
-    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::fee_collector::FeeCollector";
+    ) as `${typeof PKG_V1}::fee_collector::FeeCollector`;
     this.$typeArgs = typeArgs;
 
     this.feeAmount = fields.feeAmount;
@@ -69,7 +66,7 @@ export class FeeCollector implements StructClass {
       fullTypeName: composeSuiType(
         FeeCollector.$typeName,
         ...[],
-      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::fee_collector::FeeCollector",
+      ) as `${typeof PKG_V1}::fee_collector::FeeCollector`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>

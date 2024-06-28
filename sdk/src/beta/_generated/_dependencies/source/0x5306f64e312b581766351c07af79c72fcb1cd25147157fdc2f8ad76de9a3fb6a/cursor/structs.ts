@@ -23,16 +23,15 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
+import { PKG_V1 } from "../index";
 import { BcsType, bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== Cursor =============================== */
 
 export function isCursor(type: string): boolean {
   type = compressSuiType(type);
-  return type.startsWith(
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::cursor::Cursor<",
-  );
+  return type.startsWith(`${PKG_V1}::cursor::Cursor` + "<");
 }
 
 export interface CursorFields<T extends TypeArgument> {
@@ -45,13 +44,12 @@ export type CursorReified<T extends TypeArgument> = Reified<
 >;
 
 export class Cursor<T extends TypeArgument> implements StructClass {
-  static readonly $typeName =
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::cursor::Cursor";
+  static readonly $typeName = `${PKG_V1}::cursor::Cursor`;
   static readonly $numTypeParams = 1;
 
   readonly $typeName = Cursor.$typeName;
 
-  readonly $fullTypeName: `0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::cursor::Cursor<${ToTypeStr<T>}>`;
+  readonly $fullTypeName: `${typeof PKG_V1}::cursor::Cursor<${ToTypeStr<T>}>`;
 
   readonly $typeArgs: [ToTypeStr<T>];
 
@@ -61,7 +59,7 @@ export class Cursor<T extends TypeArgument> implements StructClass {
     this.$fullTypeName = composeSuiType(
       Cursor.$typeName,
       ...typeArgs,
-    ) as `0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::cursor::Cursor<${ToTypeStr<T>}>`;
+    ) as `${typeof PKG_V1}::cursor::Cursor<${ToTypeStr<T>}>`;
     this.$typeArgs = typeArgs;
 
     this.data = fields.data;
@@ -75,7 +73,7 @@ export class Cursor<T extends TypeArgument> implements StructClass {
       fullTypeName: composeSuiType(
         Cursor.$typeName,
         ...[extractType(T)],
-      ) as `0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::cursor::Cursor<${ToTypeStr<ToTypeArgument<T>>}>`,
+      ) as `${typeof PKG_V1}::cursor::Cursor<${ToTypeStr<ToTypeArgument<T>>}>`,
       typeArgs: [extractType(T)] as [ToTypeStr<ToTypeArgument<T>>],
       reifiedTypeArgs: [T],
       fromFields: (fields: Record<string, any>) => Cursor.fromFields(T, fields),

@@ -18,17 +18,15 @@ import {
   compressSuiType,
 } from "../../../../_framework/util";
 import { ID } from "../../0x2/object/structs";
+import { PKG_V1 } from "../index";
 import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== MessageTicket =============================== */
 
 export function isMessageTicket(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::publish_message::MessageTicket"
-  );
+  return type === `${PKG_V1}::publish_message::MessageTicket`;
 }
 
 export interface MessageTicketFields {
@@ -41,13 +39,12 @@ export interface MessageTicketFields {
 export type MessageTicketReified = Reified<MessageTicket, MessageTicketFields>;
 
 export class MessageTicket implements StructClass {
-  static readonly $typeName =
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::publish_message::MessageTicket";
+  static readonly $typeName = `${PKG_V1}::publish_message::MessageTicket`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = MessageTicket.$typeName;
 
-  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::publish_message::MessageTicket";
+  readonly $fullTypeName: `${typeof PKG_V1}::publish_message::MessageTicket`;
 
   readonly $typeArgs: [];
 
@@ -60,7 +57,7 @@ export class MessageTicket implements StructClass {
     this.$fullTypeName = composeSuiType(
       MessageTicket.$typeName,
       ...typeArgs,
-    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::publish_message::MessageTicket";
+    ) as `${typeof PKG_V1}::publish_message::MessageTicket`;
     this.$typeArgs = typeArgs;
 
     this.sender = fields.sender;
@@ -75,7 +72,7 @@ export class MessageTicket implements StructClass {
       fullTypeName: composeSuiType(
         MessageTicket.$typeName,
         ...[],
-      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::publish_message::MessageTicket",
+      ) as `${typeof PKG_V1}::publish_message::MessageTicket`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
@@ -213,10 +210,7 @@ export class MessageTicket implements StructClass {
 
 export function isWormholeMessage(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::publish_message::WormholeMessage"
-  );
+  return type === `${PKG_V1}::publish_message::WormholeMessage`;
 }
 
 export interface WormholeMessageFields {
@@ -234,13 +228,12 @@ export type WormholeMessageReified = Reified<
 >;
 
 export class WormholeMessage implements StructClass {
-  static readonly $typeName =
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::publish_message::WormholeMessage";
+  static readonly $typeName = `${PKG_V1}::publish_message::WormholeMessage`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = WormholeMessage.$typeName;
 
-  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::publish_message::WormholeMessage";
+  readonly $fullTypeName: `${typeof PKG_V1}::publish_message::WormholeMessage`;
 
   readonly $typeArgs: [];
 
@@ -255,7 +248,7 @@ export class WormholeMessage implements StructClass {
     this.$fullTypeName = composeSuiType(
       WormholeMessage.$typeName,
       ...typeArgs,
-    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::publish_message::WormholeMessage";
+    ) as `${typeof PKG_V1}::publish_message::WormholeMessage`;
     this.$typeArgs = typeArgs;
 
     this.sender = fields.sender;
@@ -272,7 +265,7 @@ export class WormholeMessage implements StructClass {
       fullTypeName: composeSuiType(
         WormholeMessage.$typeName,
         ...[],
-      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::publish_message::WormholeMessage",
+      ) as `${typeof PKG_V1}::publish_message::WormholeMessage`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>

@@ -18,17 +18,15 @@ import {
   compressSuiType,
 } from "../../../../_framework/util";
 import { DataSource } from "../data-source/structs";
+import { PKG_V1 } from "../index";
 import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== DataSources =============================== */
 
 export function isDataSources(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set_data_sources::DataSources"
-  );
+  return type === `${PKG_V1}::set_data_sources::DataSources`;
 }
 
 export interface DataSourcesFields {
@@ -38,13 +36,12 @@ export interface DataSourcesFields {
 export type DataSourcesReified = Reified<DataSources, DataSourcesFields>;
 
 export class DataSources implements StructClass {
-  static readonly $typeName =
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set_data_sources::DataSources";
+  static readonly $typeName = `${PKG_V1}::set_data_sources::DataSources`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = DataSources.$typeName;
 
-  readonly $fullTypeName: "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set_data_sources::DataSources";
+  readonly $fullTypeName: `${typeof PKG_V1}::set_data_sources::DataSources`;
 
   readonly $typeArgs: [];
 
@@ -54,7 +51,7 @@ export class DataSources implements StructClass {
     this.$fullTypeName = composeSuiType(
       DataSources.$typeName,
       ...typeArgs,
-    ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set_data_sources::DataSources";
+    ) as `${typeof PKG_V1}::set_data_sources::DataSources`;
     this.$typeArgs = typeArgs;
 
     this.sources = fields.sources;
@@ -66,7 +63,7 @@ export class DataSources implements StructClass {
       fullTypeName: composeSuiType(
         DataSources.$typeName,
         ...[],
-      ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set_data_sources::DataSources",
+      ) as `${typeof PKG_V1}::set_data_sources::DataSources`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
@@ -134,7 +131,7 @@ export class DataSources implements StructClass {
   toJSONField() {
     return {
       sources: fieldToJSON<Vector<DataSource>>(
-        `vector<0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::data_source::DataSource>`,
+        `vector<${DataSource.$typeName}>`,
         this.sources,
       ),
     };

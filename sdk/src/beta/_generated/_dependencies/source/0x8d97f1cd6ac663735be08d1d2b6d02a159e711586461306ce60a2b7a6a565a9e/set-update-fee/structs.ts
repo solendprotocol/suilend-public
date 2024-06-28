@@ -14,17 +14,15 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
+import { PKG_V1 } from "../index";
 import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== UpdateFee =============================== */
 
 export function isUpdateFee(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set_update_fee::UpdateFee"
-  );
+  return type === `${PKG_V1}::set_update_fee::UpdateFee`;
 }
 
 export interface UpdateFeeFields {
@@ -35,13 +33,12 @@ export interface UpdateFeeFields {
 export type UpdateFeeReified = Reified<UpdateFee, UpdateFeeFields>;
 
 export class UpdateFee implements StructClass {
-  static readonly $typeName =
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set_update_fee::UpdateFee";
+  static readonly $typeName = `${PKG_V1}::set_update_fee::UpdateFee`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = UpdateFee.$typeName;
 
-  readonly $fullTypeName: "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set_update_fee::UpdateFee";
+  readonly $fullTypeName: `${typeof PKG_V1}::set_update_fee::UpdateFee`;
 
   readonly $typeArgs: [];
 
@@ -52,7 +49,7 @@ export class UpdateFee implements StructClass {
     this.$fullTypeName = composeSuiType(
       UpdateFee.$typeName,
       ...typeArgs,
-    ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set_update_fee::UpdateFee";
+    ) as `${typeof PKG_V1}::set_update_fee::UpdateFee`;
     this.$typeArgs = typeArgs;
 
     this.mantissa = fields.mantissa;
@@ -65,7 +62,7 @@ export class UpdateFee implements StructClass {
       fullTypeName: composeSuiType(
         UpdateFee.$typeName,
         ...[],
-      ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set_update_fee::UpdateFee",
+      ) as `${typeof PKG_V1}::set_update_fee::UpdateFee`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => UpdateFee.fromFields(fields),

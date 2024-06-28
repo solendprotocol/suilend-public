@@ -17,18 +17,16 @@ import {
   compressSuiType,
 } from "../../../../_framework/util";
 import { Bytes32 } from "../bytes32/structs";
+import { PKG_V1 } from "../index";
 import { Set } from "../set/structs";
 import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== ConsumedVAAs =============================== */
 
 export function isConsumedVAAs(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::consumed_vaas::ConsumedVAAs"
-  );
+  return type === `${PKG_V1}::consumed_vaas::ConsumedVAAs`;
 }
 
 export interface ConsumedVAAsFields {
@@ -38,13 +36,12 @@ export interface ConsumedVAAsFields {
 export type ConsumedVAAsReified = Reified<ConsumedVAAs, ConsumedVAAsFields>;
 
 export class ConsumedVAAs implements StructClass {
-  static readonly $typeName =
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::consumed_vaas::ConsumedVAAs";
+  static readonly $typeName = `${PKG_V1}::consumed_vaas::ConsumedVAAs`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = ConsumedVAAs.$typeName;
 
-  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::consumed_vaas::ConsumedVAAs";
+  readonly $fullTypeName: `${typeof PKG_V1}::consumed_vaas::ConsumedVAAs`;
 
   readonly $typeArgs: [];
 
@@ -54,7 +51,7 @@ export class ConsumedVAAs implements StructClass {
     this.$fullTypeName = composeSuiType(
       ConsumedVAAs.$typeName,
       ...typeArgs,
-    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::consumed_vaas::ConsumedVAAs";
+    ) as `${typeof PKG_V1}::consumed_vaas::ConsumedVAAs`;
     this.$typeArgs = typeArgs;
 
     this.hashes = fields.hashes;
@@ -66,7 +63,7 @@ export class ConsumedVAAs implements StructClass {
       fullTypeName: composeSuiType(
         ConsumedVAAs.$typeName,
         ...[],
-      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::consumed_vaas::ConsumedVAAs",
+      ) as `${typeof PKG_V1}::consumed_vaas::ConsumedVAAs`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>

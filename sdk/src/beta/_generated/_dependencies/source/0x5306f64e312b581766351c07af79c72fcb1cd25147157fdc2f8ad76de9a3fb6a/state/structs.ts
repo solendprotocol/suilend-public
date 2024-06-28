@@ -23,17 +23,15 @@ import { ConsumedVAAs } from "../consumed-vaas/structs";
 import { ExternalAddress } from "../external-address/structs";
 import { FeeCollector } from "../fee-collector/structs";
 import { GuardianSet } from "../guardian-set/structs";
+import { PKG_V1 } from "../index";
 import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== LatestOnly =============================== */
 
 export function isLatestOnly(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::state::LatestOnly"
-  );
+  return type === `${PKG_V1}::state::LatestOnly`;
 }
 
 export interface LatestOnlyFields {
@@ -43,13 +41,12 @@ export interface LatestOnlyFields {
 export type LatestOnlyReified = Reified<LatestOnly, LatestOnlyFields>;
 
 export class LatestOnly implements StructClass {
-  static readonly $typeName =
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::state::LatestOnly";
+  static readonly $typeName = `${PKG_V1}::state::LatestOnly`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = LatestOnly.$typeName;
 
-  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::state::LatestOnly";
+  readonly $fullTypeName: `${typeof PKG_V1}::state::LatestOnly`;
 
   readonly $typeArgs: [];
 
@@ -59,7 +56,7 @@ export class LatestOnly implements StructClass {
     this.$fullTypeName = composeSuiType(
       LatestOnly.$typeName,
       ...typeArgs,
-    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::state::LatestOnly";
+    ) as `${typeof PKG_V1}::state::LatestOnly`;
     this.$typeArgs = typeArgs;
 
     this.dummyField = fields.dummyField;
@@ -71,7 +68,7 @@ export class LatestOnly implements StructClass {
       fullTypeName: composeSuiType(
         LatestOnly.$typeName,
         ...[],
-      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::state::LatestOnly",
+      ) as `${typeof PKG_V1}::state::LatestOnly`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
@@ -191,10 +188,7 @@ export class LatestOnly implements StructClass {
 
 export function isState(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::state::State"
-  );
+  return type === `${PKG_V1}::state::State`;
 }
 
 export interface StateFields {
@@ -212,13 +206,12 @@ export interface StateFields {
 export type StateReified = Reified<State, StateFields>;
 
 export class State implements StructClass {
-  static readonly $typeName =
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::state::State";
+  static readonly $typeName = `${PKG_V1}::state::State`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = State.$typeName;
 
-  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::state::State";
+  readonly $fullTypeName: `${typeof PKG_V1}::state::State`;
 
   readonly $typeArgs: [];
 
@@ -236,7 +229,7 @@ export class State implements StructClass {
     this.$fullTypeName = composeSuiType(
       State.$typeName,
       ...typeArgs,
-    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::state::State";
+    ) as `${typeof PKG_V1}::state::State`;
     this.$typeArgs = typeArgs;
 
     this.id = fields.id;
@@ -256,7 +249,7 @@ export class State implements StructClass {
       fullTypeName: composeSuiType(
         State.$typeName,
         ...[],
-      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::state::State",
+      ) as `${typeof PKG_V1}::state::State`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => State.fromFields(fields),

@@ -14,18 +14,16 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
+import { PKG_V1 } from "../index";
 import { PriceFeed } from "../price-feed/structs";
 import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== PriceFeedUpdateEvent =============================== */
 
 export function isPriceFeedUpdateEvent(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::event::PriceFeedUpdateEvent"
-  );
+  return type === `${PKG_V1}::event::PriceFeedUpdateEvent`;
 }
 
 export interface PriceFeedUpdateEventFields {
@@ -39,13 +37,12 @@ export type PriceFeedUpdateEventReified = Reified<
 >;
 
 export class PriceFeedUpdateEvent implements StructClass {
-  static readonly $typeName =
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::event::PriceFeedUpdateEvent";
+  static readonly $typeName = `${PKG_V1}::event::PriceFeedUpdateEvent`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = PriceFeedUpdateEvent.$typeName;
 
-  readonly $fullTypeName: "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::event::PriceFeedUpdateEvent";
+  readonly $fullTypeName: `${typeof PKG_V1}::event::PriceFeedUpdateEvent`;
 
   readonly $typeArgs: [];
 
@@ -56,7 +53,7 @@ export class PriceFeedUpdateEvent implements StructClass {
     this.$fullTypeName = composeSuiType(
       PriceFeedUpdateEvent.$typeName,
       ...typeArgs,
-    ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::event::PriceFeedUpdateEvent";
+    ) as `${typeof PKG_V1}::event::PriceFeedUpdateEvent`;
     this.$typeArgs = typeArgs;
 
     this.priceFeed = fields.priceFeed;
@@ -69,7 +66,7 @@ export class PriceFeedUpdateEvent implements StructClass {
       fullTypeName: composeSuiType(
         PriceFeedUpdateEvent.$typeName,
         ...[],
-      ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::event::PriceFeedUpdateEvent",
+      ) as `${typeof PKG_V1}::event::PriceFeedUpdateEvent`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
@@ -205,10 +202,7 @@ export class PriceFeedUpdateEvent implements StructClass {
 
 export function isPythInitializationEvent(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::event::PythInitializationEvent"
-  );
+  return type === `${PKG_V1}::event::PythInitializationEvent`;
 }
 
 export interface PythInitializationEventFields {
@@ -221,13 +215,12 @@ export type PythInitializationEventReified = Reified<
 >;
 
 export class PythInitializationEvent implements StructClass {
-  static readonly $typeName =
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::event::PythInitializationEvent";
+  static readonly $typeName = `${PKG_V1}::event::PythInitializationEvent`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = PythInitializationEvent.$typeName;
 
-  readonly $fullTypeName: "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::event::PythInitializationEvent";
+  readonly $fullTypeName: `${typeof PKG_V1}::event::PythInitializationEvent`;
 
   readonly $typeArgs: [];
 
@@ -237,7 +230,7 @@ export class PythInitializationEvent implements StructClass {
     this.$fullTypeName = composeSuiType(
       PythInitializationEvent.$typeName,
       ...typeArgs,
-    ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::event::PythInitializationEvent";
+    ) as `${typeof PKG_V1}::event::PythInitializationEvent`;
     this.$typeArgs = typeArgs;
 
     this.dummyField = fields.dummyField;
@@ -249,7 +242,7 @@ export class PythInitializationEvent implements StructClass {
       fullTypeName: composeSuiType(
         PythInitializationEvent.$typeName,
         ...[],
-      ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::event::PythInitializationEvent",
+      ) as `${typeof PKG_V1}::event::PythInitializationEvent`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>

@@ -14,19 +14,17 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
+import { PKG_V1 } from "../index";
 import { PriceIdentifier } from "../price-identifier/structs";
 import { Price } from "../price/structs";
 import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== PriceFeed =============================== */
 
 export function isPriceFeed(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::price_feed::PriceFeed"
-  );
+  return type === `${PKG_V1}::price_feed::PriceFeed`;
 }
 
 export interface PriceFeedFields {
@@ -38,13 +36,12 @@ export interface PriceFeedFields {
 export type PriceFeedReified = Reified<PriceFeed, PriceFeedFields>;
 
 export class PriceFeed implements StructClass {
-  static readonly $typeName =
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::price_feed::PriceFeed";
+  static readonly $typeName = `${PKG_V1}::price_feed::PriceFeed`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = PriceFeed.$typeName;
 
-  readonly $fullTypeName: "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::price_feed::PriceFeed";
+  readonly $fullTypeName: `${typeof PKG_V1}::price_feed::PriceFeed`;
 
   readonly $typeArgs: [];
 
@@ -56,7 +53,7 @@ export class PriceFeed implements StructClass {
     this.$fullTypeName = composeSuiType(
       PriceFeed.$typeName,
       ...typeArgs,
-    ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::price_feed::PriceFeed";
+    ) as `${typeof PKG_V1}::price_feed::PriceFeed`;
     this.$typeArgs = typeArgs;
 
     this.priceIdentifier = fields.priceIdentifier;
@@ -70,7 +67,7 @@ export class PriceFeed implements StructClass {
       fullTypeName: composeSuiType(
         PriceFeed.$typeName,
         ...[],
-      ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::price_feed::PriceFeed",
+      ) as `${typeof PKG_V1}::price_feed::PriceFeed`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => PriceFeed.fromFields(fields),

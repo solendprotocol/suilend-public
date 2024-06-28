@@ -15,17 +15,15 @@ import {
   compressSuiType,
 } from "../../../../_framework/util";
 import { ID, UID } from "../../0x2/object/structs";
+import { PKG_V1 } from "../index";
 import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== EmitterCap =============================== */
 
 export function isEmitterCap(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::emitter::EmitterCap"
-  );
+  return type === `${PKG_V1}::emitter::EmitterCap`;
 }
 
 export interface EmitterCapFields {
@@ -36,13 +34,12 @@ export interface EmitterCapFields {
 export type EmitterCapReified = Reified<EmitterCap, EmitterCapFields>;
 
 export class EmitterCap implements StructClass {
-  static readonly $typeName =
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::emitter::EmitterCap";
+  static readonly $typeName = `${PKG_V1}::emitter::EmitterCap`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = EmitterCap.$typeName;
 
-  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::emitter::EmitterCap";
+  readonly $fullTypeName: `${typeof PKG_V1}::emitter::EmitterCap`;
 
   readonly $typeArgs: [];
 
@@ -53,7 +50,7 @@ export class EmitterCap implements StructClass {
     this.$fullTypeName = composeSuiType(
       EmitterCap.$typeName,
       ...typeArgs,
-    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::emitter::EmitterCap";
+    ) as `${typeof PKG_V1}::emitter::EmitterCap`;
     this.$typeArgs = typeArgs;
 
     this.id = fields.id;
@@ -66,7 +63,7 @@ export class EmitterCap implements StructClass {
       fullTypeName: composeSuiType(
         EmitterCap.$typeName,
         ...[],
-      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::emitter::EmitterCap",
+      ) as `${typeof PKG_V1}::emitter::EmitterCap`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
@@ -191,10 +188,7 @@ export class EmitterCap implements StructClass {
 
 export function isEmitterCreated(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::emitter::EmitterCreated"
-  );
+  return type === `${PKG_V1}::emitter::EmitterCreated`;
 }
 
 export interface EmitterCreatedFields {
@@ -207,13 +201,12 @@ export type EmitterCreatedReified = Reified<
 >;
 
 export class EmitterCreated implements StructClass {
-  static readonly $typeName =
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::emitter::EmitterCreated";
+  static readonly $typeName = `${PKG_V1}::emitter::EmitterCreated`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = EmitterCreated.$typeName;
 
-  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::emitter::EmitterCreated";
+  readonly $fullTypeName: `${typeof PKG_V1}::emitter::EmitterCreated`;
 
   readonly $typeArgs: [];
 
@@ -223,7 +216,7 @@ export class EmitterCreated implements StructClass {
     this.$fullTypeName = composeSuiType(
       EmitterCreated.$typeName,
       ...typeArgs,
-    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::emitter::EmitterCreated";
+    ) as `${typeof PKG_V1}::emitter::EmitterCreated`;
     this.$typeArgs = typeArgs;
 
     this.emitterCap = fields.emitterCap;
@@ -235,7 +228,7 @@ export class EmitterCreated implements StructClass {
       fullTypeName: composeSuiType(
         EmitterCreated.$typeName,
         ...[],
-      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::emitter::EmitterCreated",
+      ) as `${typeof PKG_V1}::emitter::EmitterCreated`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
@@ -358,10 +351,7 @@ export class EmitterCreated implements StructClass {
 
 export function isEmitterDestroyed(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::emitter::EmitterDestroyed"
-  );
+  return type === `${PKG_V1}::emitter::EmitterDestroyed`;
 }
 
 export interface EmitterDestroyedFields {
@@ -374,13 +364,12 @@ export type EmitterDestroyedReified = Reified<
 >;
 
 export class EmitterDestroyed implements StructClass {
-  static readonly $typeName =
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::emitter::EmitterDestroyed";
+  static readonly $typeName = `${PKG_V1}::emitter::EmitterDestroyed`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = EmitterDestroyed.$typeName;
 
-  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::emitter::EmitterDestroyed";
+  readonly $fullTypeName: `${typeof PKG_V1}::emitter::EmitterDestroyed`;
 
   readonly $typeArgs: [];
 
@@ -390,7 +379,7 @@ export class EmitterDestroyed implements StructClass {
     this.$fullTypeName = composeSuiType(
       EmitterDestroyed.$typeName,
       ...typeArgs,
-    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::emitter::EmitterDestroyed";
+    ) as `${typeof PKG_V1}::emitter::EmitterDestroyed`;
     this.$typeArgs = typeArgs;
 
     this.emitterCap = fields.emitterCap;
@@ -402,7 +391,7 @@ export class EmitterDestroyed implements StructClass {
       fullTypeName: composeSuiType(
         EmitterDestroyed.$typeName,
         ...[],
-      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::emitter::EmitterDestroyed",
+      ) as `${typeof PKG_V1}::emitter::EmitterDestroyed`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>

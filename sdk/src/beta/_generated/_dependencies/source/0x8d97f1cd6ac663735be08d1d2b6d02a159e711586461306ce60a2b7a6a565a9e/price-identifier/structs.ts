@@ -17,17 +17,15 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
+import { PKG_V1 } from "../index";
 import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== PriceIdentifier =============================== */
 
 export function isPriceIdentifier(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::price_identifier::PriceIdentifier"
-  );
+  return type === `${PKG_V1}::price_identifier::PriceIdentifier`;
 }
 
 export interface PriceIdentifierFields {
@@ -40,13 +38,12 @@ export type PriceIdentifierReified = Reified<
 >;
 
 export class PriceIdentifier implements StructClass {
-  static readonly $typeName =
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::price_identifier::PriceIdentifier";
+  static readonly $typeName = `${PKG_V1}::price_identifier::PriceIdentifier`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = PriceIdentifier.$typeName;
 
-  readonly $fullTypeName: "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::price_identifier::PriceIdentifier";
+  readonly $fullTypeName: `${typeof PKG_V1}::price_identifier::PriceIdentifier`;
 
   readonly $typeArgs: [];
 
@@ -56,7 +53,7 @@ export class PriceIdentifier implements StructClass {
     this.$fullTypeName = composeSuiType(
       PriceIdentifier.$typeName,
       ...typeArgs,
-    ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::price_identifier::PriceIdentifier";
+    ) as `${typeof PKG_V1}::price_identifier::PriceIdentifier`;
     this.$typeArgs = typeArgs;
 
     this.bytes = fields.bytes;
@@ -68,7 +65,7 @@ export class PriceIdentifier implements StructClass {
       fullTypeName: composeSuiType(
         PriceIdentifier.$typeName,
         ...[],
-      ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::price_identifier::PriceIdentifier",
+      ) as `${typeof PKG_V1}::price_identifier::PriceIdentifier`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>

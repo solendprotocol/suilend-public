@@ -15,17 +15,15 @@ import {
   compressSuiType,
 } from "../../../../_framework/util";
 import { ID } from "../../0x2/object/structs";
+import { PKG_V1 } from "../index";
 import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== MigrateComplete =============================== */
 
 export function isMigrateComplete(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::migrate::MigrateComplete"
-  );
+  return type === `${PKG_V1}::migrate::MigrateComplete`;
 }
 
 export interface MigrateCompleteFields {
@@ -38,13 +36,12 @@ export type MigrateCompleteReified = Reified<
 >;
 
 export class MigrateComplete implements StructClass {
-  static readonly $typeName =
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::migrate::MigrateComplete";
+  static readonly $typeName = `${PKG_V1}::migrate::MigrateComplete`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = MigrateComplete.$typeName;
 
-  readonly $fullTypeName: "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::migrate::MigrateComplete";
+  readonly $fullTypeName: `${typeof PKG_V1}::migrate::MigrateComplete`;
 
   readonly $typeArgs: [];
 
@@ -54,7 +51,7 @@ export class MigrateComplete implements StructClass {
     this.$fullTypeName = composeSuiType(
       MigrateComplete.$typeName,
       ...typeArgs,
-    ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::migrate::MigrateComplete";
+    ) as `${typeof PKG_V1}::migrate::MigrateComplete`;
     this.$typeArgs = typeArgs;
 
     this.package = fields.package;
@@ -66,7 +63,7 @@ export class MigrateComplete implements StructClass {
       fullTypeName: composeSuiType(
         MigrateComplete.$typeName,
         ...[],
-      ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::migrate::MigrateComplete",
+      ) as `${typeof PKG_V1}::migrate::MigrateComplete`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>

@@ -14,17 +14,15 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
+import { PKG_V1 } from "../index";
 import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== GovernanceWitness =============================== */
 
 export function isGovernanceWitness(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::set_fee::GovernanceWitness"
-  );
+  return type === `${PKG_V1}::set_fee::GovernanceWitness`;
 }
 
 export interface GovernanceWitnessFields {
@@ -37,13 +35,12 @@ export type GovernanceWitnessReified = Reified<
 >;
 
 export class GovernanceWitness implements StructClass {
-  static readonly $typeName =
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::set_fee::GovernanceWitness";
+  static readonly $typeName = `${PKG_V1}::set_fee::GovernanceWitness`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = GovernanceWitness.$typeName;
 
-  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::set_fee::GovernanceWitness";
+  readonly $fullTypeName: `${typeof PKG_V1}::set_fee::GovernanceWitness`;
 
   readonly $typeArgs: [];
 
@@ -53,7 +50,7 @@ export class GovernanceWitness implements StructClass {
     this.$fullTypeName = composeSuiType(
       GovernanceWitness.$typeName,
       ...typeArgs,
-    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::set_fee::GovernanceWitness";
+    ) as `${typeof PKG_V1}::set_fee::GovernanceWitness`;
     this.$typeArgs = typeArgs;
 
     this.dummyField = fields.dummyField;
@@ -65,7 +62,7 @@ export class GovernanceWitness implements StructClass {
       fullTypeName: composeSuiType(
         GovernanceWitness.$typeName,
         ...[],
-      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::set_fee::GovernanceWitness",
+      ) as `${typeof PKG_V1}::set_fee::GovernanceWitness`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
@@ -188,10 +185,7 @@ export class GovernanceWitness implements StructClass {
 
 export function isSetFee(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::set_fee::SetFee"
-  );
+  return type === `${PKG_V1}::set_fee::SetFee`;
 }
 
 export interface SetFeeFields {
@@ -201,13 +195,12 @@ export interface SetFeeFields {
 export type SetFeeReified = Reified<SetFee, SetFeeFields>;
 
 export class SetFee implements StructClass {
-  static readonly $typeName =
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::set_fee::SetFee";
+  static readonly $typeName = `${PKG_V1}::set_fee::SetFee`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = SetFee.$typeName;
 
-  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::set_fee::SetFee";
+  readonly $fullTypeName: `${typeof PKG_V1}::set_fee::SetFee`;
 
   readonly $typeArgs: [];
 
@@ -217,7 +210,7 @@ export class SetFee implements StructClass {
     this.$fullTypeName = composeSuiType(
       SetFee.$typeName,
       ...typeArgs,
-    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::set_fee::SetFee";
+    ) as `${typeof PKG_V1}::set_fee::SetFee`;
     this.$typeArgs = typeArgs;
 
     this.amount = fields.amount;
@@ -229,7 +222,7 @@ export class SetFee implements StructClass {
       fullTypeName: composeSuiType(
         SetFee.$typeName,
         ...[],
-      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::set_fee::SetFee",
+      ) as `${typeof PKG_V1}::set_fee::SetFee`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => SetFee.fromFields(fields),

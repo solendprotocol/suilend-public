@@ -28,20 +28,18 @@ import {
   compressSuiType,
 } from "../../_framework/util";
 import { Decimal } from "../decimal/structs";
+import { PKG_V1 } from "../index";
 import { Obligation } from "../obligation/structs";
 import { RateLimiter } from "../rate-limiter/structs";
 import { Reserve } from "../reserve/structs";
 import { bcs, fromB64, fromHEX, toHEX } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== BorrowEvent =============================== */
 
 export function isBorrowEvent(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::BorrowEvent"
-  );
+  return type === `${PKG_V1}::lending_market::BorrowEvent`;
 }
 
 export interface BorrowEventFields {
@@ -56,13 +54,12 @@ export interface BorrowEventFields {
 export type BorrowEventReified = Reified<BorrowEvent, BorrowEventFields>;
 
 export class BorrowEvent implements StructClass {
-  static readonly $typeName =
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::BorrowEvent";
+  static readonly $typeName = `${PKG_V1}::lending_market::BorrowEvent`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = BorrowEvent.$typeName;
 
-  readonly $fullTypeName: "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::BorrowEvent";
+  readonly $fullTypeName: `${typeof PKG_V1}::lending_market::BorrowEvent`;
 
   readonly $typeArgs: [];
 
@@ -77,7 +74,7 @@ export class BorrowEvent implements StructClass {
     this.$fullTypeName = composeSuiType(
       BorrowEvent.$typeName,
       ...typeArgs,
-    ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::BorrowEvent";
+    ) as `${typeof PKG_V1}::lending_market::BorrowEvent`;
     this.$typeArgs = typeArgs;
 
     this.lendingMarketId = fields.lendingMarketId;
@@ -94,7 +91,7 @@ export class BorrowEvent implements StructClass {
       fullTypeName: composeSuiType(
         BorrowEvent.$typeName,
         ...[],
-      ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::BorrowEvent",
+      ) as `${typeof PKG_V1}::lending_market::BorrowEvent`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
@@ -275,10 +272,7 @@ export class BorrowEvent implements StructClass {
 
 export function isClaimRewardEvent(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::ClaimRewardEvent"
-  );
+  return type === `${PKG_V1}::lending_market::ClaimRewardEvent`;
 }
 
 export interface ClaimRewardEventFields {
@@ -297,13 +291,12 @@ export type ClaimRewardEventReified = Reified<
 >;
 
 export class ClaimRewardEvent implements StructClass {
-  static readonly $typeName =
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::ClaimRewardEvent";
+  static readonly $typeName = `${PKG_V1}::lending_market::ClaimRewardEvent`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = ClaimRewardEvent.$typeName;
 
-  readonly $fullTypeName: "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::ClaimRewardEvent";
+  readonly $fullTypeName: `${typeof PKG_V1}::lending_market::ClaimRewardEvent`;
 
   readonly $typeArgs: [];
 
@@ -319,7 +312,7 @@ export class ClaimRewardEvent implements StructClass {
     this.$fullTypeName = composeSuiType(
       ClaimRewardEvent.$typeName,
       ...typeArgs,
-    ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::ClaimRewardEvent";
+    ) as `${typeof PKG_V1}::lending_market::ClaimRewardEvent`;
     this.$typeArgs = typeArgs;
 
     this.lendingMarketId = fields.lendingMarketId;
@@ -337,7 +330,7 @@ export class ClaimRewardEvent implements StructClass {
       fullTypeName: composeSuiType(
         ClaimRewardEvent.$typeName,
         ...[],
-      ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::ClaimRewardEvent",
+      ) as `${typeof PKG_V1}::lending_market::ClaimRewardEvent`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
@@ -525,10 +518,7 @@ export class ClaimRewardEvent implements StructClass {
 
 export function isDepositEvent(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::DepositEvent"
-  );
+  return type === `${PKG_V1}::lending_market::DepositEvent`;
 }
 
 export interface DepositEventFields {
@@ -542,13 +532,12 @@ export interface DepositEventFields {
 export type DepositEventReified = Reified<DepositEvent, DepositEventFields>;
 
 export class DepositEvent implements StructClass {
-  static readonly $typeName =
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::DepositEvent";
+  static readonly $typeName = `${PKG_V1}::lending_market::DepositEvent`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = DepositEvent.$typeName;
 
-  readonly $fullTypeName: "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::DepositEvent";
+  readonly $fullTypeName: `${typeof PKG_V1}::lending_market::DepositEvent`;
 
   readonly $typeArgs: [];
 
@@ -562,7 +551,7 @@ export class DepositEvent implements StructClass {
     this.$fullTypeName = composeSuiType(
       DepositEvent.$typeName,
       ...typeArgs,
-    ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::DepositEvent";
+    ) as `${typeof PKG_V1}::lending_market::DepositEvent`;
     this.$typeArgs = typeArgs;
 
     this.lendingMarketId = fields.lendingMarketId;
@@ -578,7 +567,7 @@ export class DepositEvent implements StructClass {
       fullTypeName: composeSuiType(
         DepositEvent.$typeName,
         ...[],
-      ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::DepositEvent",
+      ) as `${typeof PKG_V1}::lending_market::DepositEvent`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
@@ -742,10 +731,7 @@ export class DepositEvent implements StructClass {
 
 export function isForgiveEvent(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::ForgiveEvent"
-  );
+  return type === `${PKG_V1}::lending_market::ForgiveEvent`;
 }
 
 export interface ForgiveEventFields {
@@ -759,13 +745,12 @@ export interface ForgiveEventFields {
 export type ForgiveEventReified = Reified<ForgiveEvent, ForgiveEventFields>;
 
 export class ForgiveEvent implements StructClass {
-  static readonly $typeName =
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::ForgiveEvent";
+  static readonly $typeName = `${PKG_V1}::lending_market::ForgiveEvent`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = ForgiveEvent.$typeName;
 
-  readonly $fullTypeName: "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::ForgiveEvent";
+  readonly $fullTypeName: `${typeof PKG_V1}::lending_market::ForgiveEvent`;
 
   readonly $typeArgs: [];
 
@@ -779,7 +764,7 @@ export class ForgiveEvent implements StructClass {
     this.$fullTypeName = composeSuiType(
       ForgiveEvent.$typeName,
       ...typeArgs,
-    ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::ForgiveEvent";
+    ) as `${typeof PKG_V1}::lending_market::ForgiveEvent`;
     this.$typeArgs = typeArgs;
 
     this.lendingMarketId = fields.lendingMarketId;
@@ -795,7 +780,7 @@ export class ForgiveEvent implements StructClass {
       fullTypeName: composeSuiType(
         ForgiveEvent.$typeName,
         ...[],
-      ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::ForgiveEvent",
+      ) as `${typeof PKG_V1}::lending_market::ForgiveEvent`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
@@ -962,10 +947,7 @@ export class ForgiveEvent implements StructClass {
 
 export function isLENDING_MARKET(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::LENDING_MARKET"
-  );
+  return type === `${PKG_V1}::lending_market::LENDING_MARKET`;
 }
 
 export interface LENDING_MARKETFields {
@@ -978,13 +960,12 @@ export type LENDING_MARKETReified = Reified<
 >;
 
 export class LENDING_MARKET implements StructClass {
-  static readonly $typeName =
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::LENDING_MARKET";
+  static readonly $typeName = `${PKG_V1}::lending_market::LENDING_MARKET`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = LENDING_MARKET.$typeName;
 
-  readonly $fullTypeName: "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::LENDING_MARKET";
+  readonly $fullTypeName: `${typeof PKG_V1}::lending_market::LENDING_MARKET`;
 
   readonly $typeArgs: [];
 
@@ -994,7 +975,7 @@ export class LENDING_MARKET implements StructClass {
     this.$fullTypeName = composeSuiType(
       LENDING_MARKET.$typeName,
       ...typeArgs,
-    ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::LENDING_MARKET";
+    ) as `${typeof PKG_V1}::lending_market::LENDING_MARKET`;
     this.$typeArgs = typeArgs;
 
     this.dummyField = fields.dummyField;
@@ -1006,7 +987,7 @@ export class LENDING_MARKET implements StructClass {
       fullTypeName: composeSuiType(
         LENDING_MARKET.$typeName,
         ...[],
-      ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::LENDING_MARKET",
+      ) as `${typeof PKG_V1}::lending_market::LENDING_MARKET`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
@@ -1126,9 +1107,7 @@ export class LENDING_MARKET implements StructClass {
 
 export function isLendingMarket(type: string): boolean {
   type = compressSuiType(type);
-  return type.startsWith(
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::LendingMarket<",
-  );
+  return type.startsWith(`${PKG_V1}::lending_market::LendingMarket` + "<");
 }
 
 export interface LendingMarketFields<P extends PhantomTypeArgument> {
@@ -1150,13 +1129,12 @@ export type LendingMarketReified<P extends PhantomTypeArgument> = Reified<
 export class LendingMarket<P extends PhantomTypeArgument>
   implements StructClass
 {
-  static readonly $typeName =
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::LendingMarket";
+  static readonly $typeName = `${PKG_V1}::lending_market::LendingMarket`;
   static readonly $numTypeParams = 1;
 
   readonly $typeName = LendingMarket.$typeName;
 
-  readonly $fullTypeName: `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::LendingMarket<${PhantomToTypeStr<P>}>`;
+  readonly $fullTypeName: `${typeof PKG_V1}::lending_market::LendingMarket<${PhantomToTypeStr<P>}>`;
 
   readonly $typeArgs: [PhantomToTypeStr<P>];
 
@@ -1178,7 +1156,7 @@ export class LendingMarket<P extends PhantomTypeArgument>
     this.$fullTypeName = composeSuiType(
       LendingMarket.$typeName,
       ...typeArgs,
-    ) as `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::LendingMarket<${PhantomToTypeStr<P>}>`;
+    ) as `${typeof PKG_V1}::lending_market::LendingMarket<${PhantomToTypeStr<P>}>`;
     this.$typeArgs = typeArgs;
 
     this.id = fields.id;
@@ -1199,7 +1177,7 @@ export class LendingMarket<P extends PhantomTypeArgument>
       fullTypeName: composeSuiType(
         LendingMarket.$typeName,
         ...[extractType(P)],
-      ) as `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::LendingMarket<${PhantomToTypeStr<ToPhantomTypeArgument<P>>}>`,
+      ) as `${typeof PKG_V1}::lending_market::LendingMarket<${PhantomToTypeStr<ToPhantomTypeArgument<P>>}>`,
       typeArgs: [extractType(P)] as [
         PhantomToTypeStr<ToPhantomTypeArgument<P>>,
       ],
@@ -1336,7 +1314,7 @@ export class LendingMarket<P extends PhantomTypeArgument>
       id: this.id,
       version: this.version.toString(),
       reserves: fieldToJSON<Vector<Reserve<P>>>(
-        `vector<0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::Reserve<${this.$typeArgs[0]}>>`,
+        `vector<${Reserve.$typeName}<${this.$typeArgs[0]}>>`,
         this.reserves,
       ),
       obligations: this.obligations.toJSONField(),
@@ -1443,7 +1421,7 @@ export class LendingMarket<P extends PhantomTypeArgument>
 export function isLendingMarketOwnerCap(type: string): boolean {
   type = compressSuiType(type);
   return type.startsWith(
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::LendingMarketOwnerCap<",
+    `${PKG_V1}::lending_market::LendingMarketOwnerCap` + "<",
   );
 }
 
@@ -1458,13 +1436,12 @@ export type LendingMarketOwnerCapReified<P extends PhantomTypeArgument> =
 export class LendingMarketOwnerCap<P extends PhantomTypeArgument>
   implements StructClass
 {
-  static readonly $typeName =
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::LendingMarketOwnerCap";
+  static readonly $typeName = `${PKG_V1}::lending_market::LendingMarketOwnerCap`;
   static readonly $numTypeParams = 1;
 
   readonly $typeName = LendingMarketOwnerCap.$typeName;
 
-  readonly $fullTypeName: `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::LendingMarketOwnerCap<${PhantomToTypeStr<P>}>`;
+  readonly $fullTypeName: `${typeof PKG_V1}::lending_market::LendingMarketOwnerCap<${PhantomToTypeStr<P>}>`;
 
   readonly $typeArgs: [PhantomToTypeStr<P>];
 
@@ -1478,7 +1455,7 @@ export class LendingMarketOwnerCap<P extends PhantomTypeArgument>
     this.$fullTypeName = composeSuiType(
       LendingMarketOwnerCap.$typeName,
       ...typeArgs,
-    ) as `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::LendingMarketOwnerCap<${PhantomToTypeStr<P>}>`;
+    ) as `${typeof PKG_V1}::lending_market::LendingMarketOwnerCap<${PhantomToTypeStr<P>}>`;
     this.$typeArgs = typeArgs;
 
     this.id = fields.id;
@@ -1493,7 +1470,7 @@ export class LendingMarketOwnerCap<P extends PhantomTypeArgument>
       fullTypeName: composeSuiType(
         LendingMarketOwnerCap.$typeName,
         ...[extractType(P)],
-      ) as `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::LendingMarketOwnerCap<${PhantomToTypeStr<ToPhantomTypeArgument<P>>}>`,
+      ) as `${typeof PKG_V1}::lending_market::LendingMarketOwnerCap<${PhantomToTypeStr<ToPhantomTypeArgument<P>>}>`,
       typeArgs: [extractType(P)] as [
         PhantomToTypeStr<ToPhantomTypeArgument<P>>,
       ],
@@ -1665,10 +1642,7 @@ export class LendingMarketOwnerCap<P extends PhantomTypeArgument>
 
 export function isLiquidateEvent(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::LiquidateEvent"
-  );
+  return type === `${PKG_V1}::lending_market::LiquidateEvent`;
 }
 
 export interface LiquidateEventFields {
@@ -1690,13 +1664,12 @@ export type LiquidateEventReified = Reified<
 >;
 
 export class LiquidateEvent implements StructClass {
-  static readonly $typeName =
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::LiquidateEvent";
+  static readonly $typeName = `${PKG_V1}::lending_market::LiquidateEvent`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = LiquidateEvent.$typeName;
 
-  readonly $fullTypeName: "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::LiquidateEvent";
+  readonly $fullTypeName: `${typeof PKG_V1}::lending_market::LiquidateEvent`;
 
   readonly $typeArgs: [];
 
@@ -1715,7 +1688,7 @@ export class LiquidateEvent implements StructClass {
     this.$fullTypeName = composeSuiType(
       LiquidateEvent.$typeName,
       ...typeArgs,
-    ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::LiquidateEvent";
+    ) as `${typeof PKG_V1}::lending_market::LiquidateEvent`;
     this.$typeArgs = typeArgs;
 
     this.lendingMarketId = fields.lendingMarketId;
@@ -1736,7 +1709,7 @@ export class LiquidateEvent implements StructClass {
       fullTypeName: composeSuiType(
         LiquidateEvent.$typeName,
         ...[],
-      ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::LiquidateEvent",
+      ) as `${typeof PKG_V1}::lending_market::LiquidateEvent`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
@@ -1972,10 +1945,7 @@ export class LiquidateEvent implements StructClass {
 
 export function isMintEvent(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::MintEvent"
-  );
+  return type === `${PKG_V1}::lending_market::MintEvent`;
 }
 
 export interface MintEventFields {
@@ -1989,13 +1959,12 @@ export interface MintEventFields {
 export type MintEventReified = Reified<MintEvent, MintEventFields>;
 
 export class MintEvent implements StructClass {
-  static readonly $typeName =
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::MintEvent";
+  static readonly $typeName = `${PKG_V1}::lending_market::MintEvent`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = MintEvent.$typeName;
 
-  readonly $fullTypeName: "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::MintEvent";
+  readonly $fullTypeName: `${typeof PKG_V1}::lending_market::MintEvent`;
 
   readonly $typeArgs: [];
 
@@ -2009,7 +1978,7 @@ export class MintEvent implements StructClass {
     this.$fullTypeName = composeSuiType(
       MintEvent.$typeName,
       ...typeArgs,
-    ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::MintEvent";
+    ) as `${typeof PKG_V1}::lending_market::MintEvent`;
     this.$typeArgs = typeArgs;
 
     this.lendingMarketId = fields.lendingMarketId;
@@ -2025,7 +1994,7 @@ export class MintEvent implements StructClass {
       fullTypeName: composeSuiType(
         MintEvent.$typeName,
         ...[],
-      ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::MintEvent",
+      ) as `${typeof PKG_V1}::lending_market::MintEvent`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => MintEvent.fromFields(fields),
@@ -2183,9 +2152,7 @@ export class MintEvent implements StructClass {
 
 export function isObligationOwnerCap(type: string): boolean {
   type = compressSuiType(type);
-  return type.startsWith(
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::ObligationOwnerCap<",
-  );
+  return type.startsWith(`${PKG_V1}::lending_market::ObligationOwnerCap` + "<");
 }
 
 export interface ObligationOwnerCapFields<P extends PhantomTypeArgument> {
@@ -2201,13 +2168,12 @@ export type ObligationOwnerCapReified<P extends PhantomTypeArgument> = Reified<
 export class ObligationOwnerCap<P extends PhantomTypeArgument>
   implements StructClass
 {
-  static readonly $typeName =
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::ObligationOwnerCap";
+  static readonly $typeName = `${PKG_V1}::lending_market::ObligationOwnerCap`;
   static readonly $numTypeParams = 1;
 
   readonly $typeName = ObligationOwnerCap.$typeName;
 
-  readonly $fullTypeName: `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::ObligationOwnerCap<${PhantomToTypeStr<P>}>`;
+  readonly $fullTypeName: `${typeof PKG_V1}::lending_market::ObligationOwnerCap<${PhantomToTypeStr<P>}>`;
 
   readonly $typeArgs: [PhantomToTypeStr<P>];
 
@@ -2221,7 +2187,7 @@ export class ObligationOwnerCap<P extends PhantomTypeArgument>
     this.$fullTypeName = composeSuiType(
       ObligationOwnerCap.$typeName,
       ...typeArgs,
-    ) as `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::ObligationOwnerCap<${PhantomToTypeStr<P>}>`;
+    ) as `${typeof PKG_V1}::lending_market::ObligationOwnerCap<${PhantomToTypeStr<P>}>`;
     this.$typeArgs = typeArgs;
 
     this.id = fields.id;
@@ -2236,7 +2202,7 @@ export class ObligationOwnerCap<P extends PhantomTypeArgument>
       fullTypeName: composeSuiType(
         ObligationOwnerCap.$typeName,
         ...[extractType(P)],
-      ) as `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::ObligationOwnerCap<${PhantomToTypeStr<ToPhantomTypeArgument<P>>}>`,
+      ) as `${typeof PKG_V1}::lending_market::ObligationOwnerCap<${PhantomToTypeStr<ToPhantomTypeArgument<P>>}>`,
       typeArgs: [extractType(P)] as [
         PhantomToTypeStr<ToPhantomTypeArgument<P>>,
       ],
@@ -2401,7 +2367,7 @@ export class ObligationOwnerCap<P extends PhantomTypeArgument>
 export function isRateLimiterExemption(type: string): boolean {
   type = compressSuiType(type);
   return type.startsWith(
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::RateLimiterExemption<",
+    `${PKG_V1}::lending_market::RateLimiterExemption` + "<",
   );
 }
 
@@ -2422,13 +2388,12 @@ export class RateLimiterExemption<
   T extends PhantomTypeArgument,
 > implements StructClass
 {
-  static readonly $typeName =
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::RateLimiterExemption";
+  static readonly $typeName = `${PKG_V1}::lending_market::RateLimiterExemption`;
   static readonly $numTypeParams = 2;
 
   readonly $typeName = RateLimiterExemption.$typeName;
 
-  readonly $fullTypeName: `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::RateLimiterExemption<${PhantomToTypeStr<P>}, ${PhantomToTypeStr<T>}>`;
+  readonly $fullTypeName: `${typeof PKG_V1}::lending_market::RateLimiterExemption<${PhantomToTypeStr<P>}, ${PhantomToTypeStr<T>}>`;
 
   readonly $typeArgs: [PhantomToTypeStr<P>, PhantomToTypeStr<T>];
 
@@ -2441,7 +2406,7 @@ export class RateLimiterExemption<
     this.$fullTypeName = composeSuiType(
       RateLimiterExemption.$typeName,
       ...typeArgs,
-    ) as `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::RateLimiterExemption<${PhantomToTypeStr<P>}, ${PhantomToTypeStr<T>}>`;
+    ) as `${typeof PKG_V1}::lending_market::RateLimiterExemption<${PhantomToTypeStr<P>}, ${PhantomToTypeStr<T>}>`;
     this.$typeArgs = typeArgs;
 
     this.amount = fields.amount;
@@ -2462,7 +2427,7 @@ export class RateLimiterExemption<
       fullTypeName: composeSuiType(
         RateLimiterExemption.$typeName,
         ...[extractType(P), extractType(T)],
-      ) as `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::RateLimiterExemption<${PhantomToTypeStr<ToPhantomTypeArgument<P>>}, ${PhantomToTypeStr<ToPhantomTypeArgument<T>>}>`,
+      ) as `${typeof PKG_V1}::lending_market::RateLimiterExemption<${PhantomToTypeStr<ToPhantomTypeArgument<P>>}, ${PhantomToTypeStr<ToPhantomTypeArgument<T>>}>`,
       typeArgs: [extractType(P), extractType(T)] as [
         PhantomToTypeStr<ToPhantomTypeArgument<P>>,
         PhantomToTypeStr<ToPhantomTypeArgument<T>>,
@@ -2667,10 +2632,7 @@ export class RateLimiterExemption<
 
 export function isRedeemEvent(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::RedeemEvent"
-  );
+  return type === `${PKG_V1}::lending_market::RedeemEvent`;
 }
 
 export interface RedeemEventFields {
@@ -2684,13 +2646,12 @@ export interface RedeemEventFields {
 export type RedeemEventReified = Reified<RedeemEvent, RedeemEventFields>;
 
 export class RedeemEvent implements StructClass {
-  static readonly $typeName =
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::RedeemEvent";
+  static readonly $typeName = `${PKG_V1}::lending_market::RedeemEvent`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = RedeemEvent.$typeName;
 
-  readonly $fullTypeName: "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::RedeemEvent";
+  readonly $fullTypeName: `${typeof PKG_V1}::lending_market::RedeemEvent`;
 
   readonly $typeArgs: [];
 
@@ -2704,7 +2665,7 @@ export class RedeemEvent implements StructClass {
     this.$fullTypeName = composeSuiType(
       RedeemEvent.$typeName,
       ...typeArgs,
-    ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::RedeemEvent";
+    ) as `${typeof PKG_V1}::lending_market::RedeemEvent`;
     this.$typeArgs = typeArgs;
 
     this.lendingMarketId = fields.lendingMarketId;
@@ -2720,7 +2681,7 @@ export class RedeemEvent implements StructClass {
       fullTypeName: composeSuiType(
         RedeemEvent.$typeName,
         ...[],
-      ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::RedeemEvent",
+      ) as `${typeof PKG_V1}::lending_market::RedeemEvent`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
@@ -2879,10 +2840,7 @@ export class RedeemEvent implements StructClass {
 
 export function isRepayEvent(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::RepayEvent"
-  );
+  return type === `${PKG_V1}::lending_market::RepayEvent`;
 }
 
 export interface RepayEventFields {
@@ -2896,13 +2854,12 @@ export interface RepayEventFields {
 export type RepayEventReified = Reified<RepayEvent, RepayEventFields>;
 
 export class RepayEvent implements StructClass {
-  static readonly $typeName =
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::RepayEvent";
+  static readonly $typeName = `${PKG_V1}::lending_market::RepayEvent`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = RepayEvent.$typeName;
 
-  readonly $fullTypeName: "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::RepayEvent";
+  readonly $fullTypeName: `${typeof PKG_V1}::lending_market::RepayEvent`;
 
   readonly $typeArgs: [];
 
@@ -2916,7 +2873,7 @@ export class RepayEvent implements StructClass {
     this.$fullTypeName = composeSuiType(
       RepayEvent.$typeName,
       ...typeArgs,
-    ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::RepayEvent";
+    ) as `${typeof PKG_V1}::lending_market::RepayEvent`;
     this.$typeArgs = typeArgs;
 
     this.lendingMarketId = fields.lendingMarketId;
@@ -2932,7 +2889,7 @@ export class RepayEvent implements StructClass {
       fullTypeName: composeSuiType(
         RepayEvent.$typeName,
         ...[],
-      ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::RepayEvent",
+      ) as `${typeof PKG_V1}::lending_market::RepayEvent`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
@@ -3099,10 +3056,7 @@ export class RepayEvent implements StructClass {
 
 export function isWithdrawEvent(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::WithdrawEvent"
-  );
+  return type === `${PKG_V1}::lending_market::WithdrawEvent`;
 }
 
 export interface WithdrawEventFields {
@@ -3116,13 +3070,12 @@ export interface WithdrawEventFields {
 export type WithdrawEventReified = Reified<WithdrawEvent, WithdrawEventFields>;
 
 export class WithdrawEvent implements StructClass {
-  static readonly $typeName =
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::WithdrawEvent";
+  static readonly $typeName = `${PKG_V1}::lending_market::WithdrawEvent`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = WithdrawEvent.$typeName;
 
-  readonly $fullTypeName: "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::WithdrawEvent";
+  readonly $fullTypeName: `${typeof PKG_V1}::lending_market::WithdrawEvent`;
 
   readonly $typeArgs: [];
 
@@ -3136,7 +3089,7 @@ export class WithdrawEvent implements StructClass {
     this.$fullTypeName = composeSuiType(
       WithdrawEvent.$typeName,
       ...typeArgs,
-    ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::WithdrawEvent";
+    ) as `${typeof PKG_V1}::lending_market::WithdrawEvent`;
     this.$typeArgs = typeArgs;
 
     this.lendingMarketId = fields.lendingMarketId;
@@ -3152,7 +3105,7 @@ export class WithdrawEvent implements StructClass {
       fullTypeName: composeSuiType(
         WithdrawEvent.$typeName,
         ...[],
-      ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::WithdrawEvent",
+      ) as `${typeof PKG_V1}::lending_market::WithdrawEvent`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>

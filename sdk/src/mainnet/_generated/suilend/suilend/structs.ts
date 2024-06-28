@@ -14,17 +14,15 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../_framework/util";
+import { PKG_V1 } from "../index";
 import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== MAIN_POOL =============================== */
 
 export function isMAIN_POOL(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::suilend::MAIN_POOL"
-  );
+  return type === `${PKG_V1}::suilend::MAIN_POOL`;
 }
 
 export interface MAIN_POOLFields {
@@ -34,13 +32,12 @@ export interface MAIN_POOLFields {
 export type MAIN_POOLReified = Reified<MAIN_POOL, MAIN_POOLFields>;
 
 export class MAIN_POOL implements StructClass {
-  static readonly $typeName =
-    "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::suilend::MAIN_POOL";
+  static readonly $typeName = `${PKG_V1}::suilend::MAIN_POOL`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = MAIN_POOL.$typeName;
 
-  readonly $fullTypeName: "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::suilend::MAIN_POOL";
+  readonly $fullTypeName: `${typeof PKG_V1}::suilend::MAIN_POOL`;
 
   readonly $typeArgs: [];
 
@@ -50,7 +47,7 @@ export class MAIN_POOL implements StructClass {
     this.$fullTypeName = composeSuiType(
       MAIN_POOL.$typeName,
       ...typeArgs,
-    ) as "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::suilend::MAIN_POOL";
+    ) as `${typeof PKG_V1}::suilend::MAIN_POOL`;
     this.$typeArgs = typeArgs;
 
     this.dummyField = fields.dummyField;
@@ -62,7 +59,7 @@ export class MAIN_POOL implements StructClass {
       fullTypeName: composeSuiType(
         MAIN_POOL.$typeName,
         ...[],
-      ) as "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::suilend::MAIN_POOL",
+      ) as `${typeof PKG_V1}::suilend::MAIN_POOL`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => MAIN_POOL.fromFields(fields),

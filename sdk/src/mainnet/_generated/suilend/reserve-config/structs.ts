@@ -18,17 +18,15 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../_framework/util";
+import { PKG_V1 } from "../index";
 import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== ReserveConfig =============================== */
 
 export function isReserveConfig(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve_config::ReserveConfig"
-  );
+  return type === `${PKG_V1}::reserve_config::ReserveConfig`;
 }
 
 export interface ReserveConfigFields {
@@ -56,13 +54,12 @@ export interface ReserveConfigFields {
 export type ReserveConfigReified = Reified<ReserveConfig, ReserveConfigFields>;
 
 export class ReserveConfig implements StructClass {
-  static readonly $typeName =
-    "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve_config::ReserveConfig";
+  static readonly $typeName = `${PKG_V1}::reserve_config::ReserveConfig`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = ReserveConfig.$typeName;
 
-  readonly $fullTypeName: "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve_config::ReserveConfig";
+  readonly $fullTypeName: `${typeof PKG_V1}::reserve_config::ReserveConfig`;
 
   readonly $typeArgs: [];
 
@@ -90,7 +87,7 @@ export class ReserveConfig implements StructClass {
     this.$fullTypeName = composeSuiType(
       ReserveConfig.$typeName,
       ...typeArgs,
-    ) as "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve_config::ReserveConfig";
+    ) as `${typeof PKG_V1}::reserve_config::ReserveConfig`;
     this.$typeArgs = typeArgs;
 
     this.openLtvPct = fields.openLtvPct;
@@ -120,7 +117,7 @@ export class ReserveConfig implements StructClass {
       fullTypeName: composeSuiType(
         ReserveConfig.$typeName,
         ...[],
-      ) as "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve_config::ReserveConfig",
+      ) as `${typeof PKG_V1}::reserve_config::ReserveConfig`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
@@ -428,10 +425,7 @@ export class ReserveConfig implements StructClass {
 
 export function isReserveConfigBuilder(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve_config::ReserveConfigBuilder"
-  );
+  return type === `${PKG_V1}::reserve_config::ReserveConfigBuilder`;
 }
 
 export interface ReserveConfigBuilderFields {
@@ -444,13 +438,12 @@ export type ReserveConfigBuilderReified = Reified<
 >;
 
 export class ReserveConfigBuilder implements StructClass {
-  static readonly $typeName =
-    "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve_config::ReserveConfigBuilder";
+  static readonly $typeName = `${PKG_V1}::reserve_config::ReserveConfigBuilder`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = ReserveConfigBuilder.$typeName;
 
-  readonly $fullTypeName: "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve_config::ReserveConfigBuilder";
+  readonly $fullTypeName: `${typeof PKG_V1}::reserve_config::ReserveConfigBuilder`;
 
   readonly $typeArgs: [];
 
@@ -460,7 +453,7 @@ export class ReserveConfigBuilder implements StructClass {
     this.$fullTypeName = composeSuiType(
       ReserveConfigBuilder.$typeName,
       ...typeArgs,
-    ) as "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve_config::ReserveConfigBuilder";
+    ) as `${typeof PKG_V1}::reserve_config::ReserveConfigBuilder`;
     this.$typeArgs = typeArgs;
 
     this.fields = fields.fields;
@@ -472,7 +465,7 @@ export class ReserveConfigBuilder implements StructClass {
       fullTypeName: composeSuiType(
         ReserveConfigBuilder.$typeName,
         ...[],
-      ) as "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve_config::ReserveConfigBuilder",
+      ) as `${typeof PKG_V1}::reserve_config::ReserveConfigBuilder`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>

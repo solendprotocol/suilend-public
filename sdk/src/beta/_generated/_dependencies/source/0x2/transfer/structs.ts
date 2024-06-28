@@ -20,15 +20,16 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
+import { PKG_V23 } from "../index";
 import { ID } from "../object/structs";
 import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== Receiving =============================== */
 
 export function isReceiving(type: string): boolean {
   type = compressSuiType(type);
-  return type.startsWith("0x2::transfer::Receiving<");
+  return type.startsWith(`${PKG_V23}::transfer::Receiving` + "<");
 }
 
 export interface ReceivingFields<T extends PhantomTypeArgument> {
@@ -42,12 +43,12 @@ export type ReceivingReified<T extends PhantomTypeArgument> = Reified<
 >;
 
 export class Receiving<T extends PhantomTypeArgument> implements StructClass {
-  static readonly $typeName = "0x2::transfer::Receiving";
+  static readonly $typeName = `${PKG_V23}::transfer::Receiving`;
   static readonly $numTypeParams = 1;
 
   readonly $typeName = Receiving.$typeName;
 
-  readonly $fullTypeName: `0x2::transfer::Receiving<${PhantomToTypeStr<T>}>`;
+  readonly $fullTypeName: `${typeof PKG_V23}::transfer::Receiving<${PhantomToTypeStr<T>}>`;
 
   readonly $typeArgs: [PhantomToTypeStr<T>];
 
@@ -61,7 +62,7 @@ export class Receiving<T extends PhantomTypeArgument> implements StructClass {
     this.$fullTypeName = composeSuiType(
       Receiving.$typeName,
       ...typeArgs,
-    ) as `0x2::transfer::Receiving<${PhantomToTypeStr<T>}>`;
+    ) as `${typeof PKG_V23}::transfer::Receiving<${PhantomToTypeStr<T>}>`;
     this.$typeArgs = typeArgs;
 
     this.id = fields.id;
@@ -76,7 +77,7 @@ export class Receiving<T extends PhantomTypeArgument> implements StructClass {
       fullTypeName: composeSuiType(
         Receiving.$typeName,
         ...[extractType(T)],
-      ) as `0x2::transfer::Receiving<${PhantomToTypeStr<ToPhantomTypeArgument<T>>}>`,
+      ) as `${typeof PKG_V23}::transfer::Receiving<${PhantomToTypeStr<ToPhantomTypeArgument<T>>}>`,
       typeArgs: [extractType(T)] as [
         PhantomToTypeStr<ToPhantomTypeArgument<T>>,
       ],

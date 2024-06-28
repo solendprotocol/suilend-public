@@ -14,17 +14,15 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
+import { PKG_V1 } from "../index";
 import { bcs, fromB64, fromHEX, toHEX } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== PythFeeRecipient =============================== */
 
 export function isPythFeeRecipient(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set_fee_recipient::PythFeeRecipient"
-  );
+  return type === `${PKG_V1}::set_fee_recipient::PythFeeRecipient`;
 }
 
 export interface PythFeeRecipientFields {
@@ -37,13 +35,12 @@ export type PythFeeRecipientReified = Reified<
 >;
 
 export class PythFeeRecipient implements StructClass {
-  static readonly $typeName =
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set_fee_recipient::PythFeeRecipient";
+  static readonly $typeName = `${PKG_V1}::set_fee_recipient::PythFeeRecipient`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = PythFeeRecipient.$typeName;
 
-  readonly $fullTypeName: "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set_fee_recipient::PythFeeRecipient";
+  readonly $fullTypeName: `${typeof PKG_V1}::set_fee_recipient::PythFeeRecipient`;
 
   readonly $typeArgs: [];
 
@@ -53,7 +50,7 @@ export class PythFeeRecipient implements StructClass {
     this.$fullTypeName = composeSuiType(
       PythFeeRecipient.$typeName,
       ...typeArgs,
-    ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set_fee_recipient::PythFeeRecipient";
+    ) as `${typeof PKG_V1}::set_fee_recipient::PythFeeRecipient`;
     this.$typeArgs = typeArgs;
 
     this.recipient = fields.recipient;
@@ -65,7 +62,7 @@ export class PythFeeRecipient implements StructClass {
       fullTypeName: composeSuiType(
         PythFeeRecipient.$typeName,
         ...[],
-      ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set_fee_recipient::PythFeeRecipient",
+      ) as `${typeof PKG_V1}::set_fee_recipient::PythFeeRecipient`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>

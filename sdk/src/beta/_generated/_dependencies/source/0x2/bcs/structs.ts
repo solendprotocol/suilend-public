@@ -17,14 +17,15 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
+import { PKG_V23 } from "../index";
 import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== BCS =============================== */
 
 export function isBCS(type: string): boolean {
   type = compressSuiType(type);
-  return type === "0x2::bcs::BCS";
+  return type === `${PKG_V23}::bcs::BCS`;
 }
 
 export interface BCSFields {
@@ -34,12 +35,12 @@ export interface BCSFields {
 export type BCSReified = Reified<BCS, BCSFields>;
 
 export class BCS implements StructClass {
-  static readonly $typeName = "0x2::bcs::BCS";
+  static readonly $typeName = `${PKG_V23}::bcs::BCS`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = BCS.$typeName;
 
-  readonly $fullTypeName: "0x2::bcs::BCS";
+  readonly $fullTypeName: `${typeof PKG_V23}::bcs::BCS`;
 
   readonly $typeArgs: [];
 
@@ -49,7 +50,7 @@ export class BCS implements StructClass {
     this.$fullTypeName = composeSuiType(
       BCS.$typeName,
       ...typeArgs,
-    ) as "0x2::bcs::BCS";
+    ) as `${typeof PKG_V23}::bcs::BCS`;
     this.$typeArgs = typeArgs;
 
     this.bytes = fields.bytes;
@@ -58,7 +59,10 @@ export class BCS implements StructClass {
   static reified(): BCSReified {
     return {
       typeName: BCS.$typeName,
-      fullTypeName: composeSuiType(BCS.$typeName, ...[]) as "0x2::bcs::BCS",
+      fullTypeName: composeSuiType(
+        BCS.$typeName,
+        ...[],
+      ) as `${typeof PKG_V23}::bcs::BCS`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => BCS.fromFields(fields),

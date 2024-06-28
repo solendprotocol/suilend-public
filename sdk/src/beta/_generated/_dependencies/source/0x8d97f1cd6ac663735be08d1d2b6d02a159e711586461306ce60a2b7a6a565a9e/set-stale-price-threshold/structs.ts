@@ -14,17 +14,15 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
+import { PKG_V1 } from "../index";
 import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== StalePriceThreshold =============================== */
 
 export function isStalePriceThreshold(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set_stale_price_threshold::StalePriceThreshold"
-  );
+  return type === `${PKG_V1}::set_stale_price_threshold::StalePriceThreshold`;
 }
 
 export interface StalePriceThresholdFields {
@@ -37,13 +35,12 @@ export type StalePriceThresholdReified = Reified<
 >;
 
 export class StalePriceThreshold implements StructClass {
-  static readonly $typeName =
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set_stale_price_threshold::StalePriceThreshold";
+  static readonly $typeName = `${PKG_V1}::set_stale_price_threshold::StalePriceThreshold`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = StalePriceThreshold.$typeName;
 
-  readonly $fullTypeName: "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set_stale_price_threshold::StalePriceThreshold";
+  readonly $fullTypeName: `${typeof PKG_V1}::set_stale_price_threshold::StalePriceThreshold`;
 
   readonly $typeArgs: [];
 
@@ -53,7 +50,7 @@ export class StalePriceThreshold implements StructClass {
     this.$fullTypeName = composeSuiType(
       StalePriceThreshold.$typeName,
       ...typeArgs,
-    ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set_stale_price_threshold::StalePriceThreshold";
+    ) as `${typeof PKG_V1}::set_stale_price_threshold::StalePriceThreshold`;
     this.$typeArgs = typeArgs;
 
     this.threshold = fields.threshold;
@@ -65,7 +62,7 @@ export class StalePriceThreshold implements StructClass {
       fullTypeName: composeSuiType(
         StalePriceThreshold.$typeName,
         ...[],
-      ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set_stale_price_threshold::StalePriceThreshold",
+      ) as `${typeof PKG_V1}::set_stale_price_threshold::StalePriceThreshold`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>

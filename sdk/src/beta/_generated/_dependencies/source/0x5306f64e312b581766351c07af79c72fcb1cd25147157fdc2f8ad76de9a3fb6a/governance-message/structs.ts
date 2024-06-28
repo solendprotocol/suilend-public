@@ -25,16 +25,15 @@ import {
 } from "../../../../_framework/util";
 import { Bytes32 } from "../bytes32/structs";
 import { ExternalAddress } from "../external-address/structs";
+import { PKG_V1 } from "../index";
 import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== DecreeReceipt =============================== */
 
 export function isDecreeReceipt(type: string): boolean {
   type = compressSuiType(type);
-  return type.startsWith(
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::governance_message::DecreeReceipt<",
-  );
+  return type.startsWith(`${PKG_V1}::governance_message::DecreeReceipt` + "<");
 }
 
 export interface DecreeReceiptFields<T extends PhantomTypeArgument> {
@@ -51,13 +50,12 @@ export type DecreeReceiptReified<T extends PhantomTypeArgument> = Reified<
 export class DecreeReceipt<T extends PhantomTypeArgument>
   implements StructClass
 {
-  static readonly $typeName =
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::governance_message::DecreeReceipt";
+  static readonly $typeName = `${PKG_V1}::governance_message::DecreeReceipt`;
   static readonly $numTypeParams = 1;
 
   readonly $typeName = DecreeReceipt.$typeName;
 
-  readonly $fullTypeName: `0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::governance_message::DecreeReceipt<${PhantomToTypeStr<T>}>`;
+  readonly $fullTypeName: `${typeof PKG_V1}::governance_message::DecreeReceipt<${PhantomToTypeStr<T>}>`;
 
   readonly $typeArgs: [PhantomToTypeStr<T>];
 
@@ -72,7 +70,7 @@ export class DecreeReceipt<T extends PhantomTypeArgument>
     this.$fullTypeName = composeSuiType(
       DecreeReceipt.$typeName,
       ...typeArgs,
-    ) as `0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::governance_message::DecreeReceipt<${PhantomToTypeStr<T>}>`;
+    ) as `${typeof PKG_V1}::governance_message::DecreeReceipt<${PhantomToTypeStr<T>}>`;
     this.$typeArgs = typeArgs;
 
     this.payload = fields.payload;
@@ -88,7 +86,7 @@ export class DecreeReceipt<T extends PhantomTypeArgument>
       fullTypeName: composeSuiType(
         DecreeReceipt.$typeName,
         ...[extractType(T)],
-      ) as `0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::governance_message::DecreeReceipt<${PhantomToTypeStr<ToPhantomTypeArgument<T>>}>`,
+      ) as `${typeof PKG_V1}::governance_message::DecreeReceipt<${PhantomToTypeStr<ToPhantomTypeArgument<T>>}>`,
       typeArgs: [extractType(T)] as [
         PhantomToTypeStr<ToPhantomTypeArgument<T>>,
       ],
@@ -253,9 +251,7 @@ export class DecreeReceipt<T extends PhantomTypeArgument>
 
 export function isDecreeTicket(type: string): boolean {
   type = compressSuiType(type);
-  return type.startsWith(
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::governance_message::DecreeTicket<",
-  );
+  return type.startsWith(`${PKG_V1}::governance_message::DecreeTicket` + "<");
 }
 
 export interface DecreeTicketFields<T extends PhantomTypeArgument> {
@@ -274,13 +270,12 @@ export type DecreeTicketReified<T extends PhantomTypeArgument> = Reified<
 export class DecreeTicket<T extends PhantomTypeArgument>
   implements StructClass
 {
-  static readonly $typeName =
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::governance_message::DecreeTicket";
+  static readonly $typeName = `${PKG_V1}::governance_message::DecreeTicket`;
   static readonly $numTypeParams = 1;
 
   readonly $typeName = DecreeTicket.$typeName;
 
-  readonly $fullTypeName: `0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::governance_message::DecreeTicket<${PhantomToTypeStr<T>}>`;
+  readonly $fullTypeName: `${typeof PKG_V1}::governance_message::DecreeTicket<${PhantomToTypeStr<T>}>`;
 
   readonly $typeArgs: [PhantomToTypeStr<T>];
 
@@ -297,7 +292,7 @@ export class DecreeTicket<T extends PhantomTypeArgument>
     this.$fullTypeName = composeSuiType(
       DecreeTicket.$typeName,
       ...typeArgs,
-    ) as `0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::governance_message::DecreeTicket<${PhantomToTypeStr<T>}>`;
+    ) as `${typeof PKG_V1}::governance_message::DecreeTicket<${PhantomToTypeStr<T>}>`;
     this.$typeArgs = typeArgs;
 
     this.governanceChain = fields.governanceChain;
@@ -315,7 +310,7 @@ export class DecreeTicket<T extends PhantomTypeArgument>
       fullTypeName: composeSuiType(
         DecreeTicket.$typeName,
         ...[extractType(T)],
-      ) as `0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::governance_message::DecreeTicket<${PhantomToTypeStr<ToPhantomTypeArgument<T>>}>`,
+      ) as `${typeof PKG_V1}::governance_message::DecreeTicket<${PhantomToTypeStr<ToPhantomTypeArgument<T>>}>`,
       typeArgs: [extractType(T)] as [
         PhantomToTypeStr<ToPhantomTypeArgument<T>>,
       ],

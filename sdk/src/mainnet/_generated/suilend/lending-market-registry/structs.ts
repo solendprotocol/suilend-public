@@ -19,17 +19,15 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../_framework/util";
+import { PKG_V1 } from "../index";
 import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== LENDING_MARKET_2 =============================== */
 
 export function isLENDING_MARKET_2(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::lending_market_registry::LENDING_MARKET_2"
-  );
+  return type === `${PKG_V1}::lending_market_registry::LENDING_MARKET_2`;
 }
 
 export interface LENDING_MARKET_2Fields {
@@ -42,13 +40,12 @@ export type LENDING_MARKET_2Reified = Reified<
 >;
 
 export class LENDING_MARKET_2 implements StructClass {
-  static readonly $typeName =
-    "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::lending_market_registry::LENDING_MARKET_2";
+  static readonly $typeName = `${PKG_V1}::lending_market_registry::LENDING_MARKET_2`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = LENDING_MARKET_2.$typeName;
 
-  readonly $fullTypeName: "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::lending_market_registry::LENDING_MARKET_2";
+  readonly $fullTypeName: `${typeof PKG_V1}::lending_market_registry::LENDING_MARKET_2`;
 
   readonly $typeArgs: [];
 
@@ -58,7 +55,7 @@ export class LENDING_MARKET_2 implements StructClass {
     this.$fullTypeName = composeSuiType(
       LENDING_MARKET_2.$typeName,
       ...typeArgs,
-    ) as "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::lending_market_registry::LENDING_MARKET_2";
+    ) as `${typeof PKG_V1}::lending_market_registry::LENDING_MARKET_2`;
     this.$typeArgs = typeArgs;
 
     this.dummyField = fields.dummyField;
@@ -70,7 +67,7 @@ export class LENDING_MARKET_2 implements StructClass {
       fullTypeName: composeSuiType(
         LENDING_MARKET_2.$typeName,
         ...[],
-      ) as "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::lending_market_registry::LENDING_MARKET_2",
+      ) as `${typeof PKG_V1}::lending_market_registry::LENDING_MARKET_2`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
@@ -190,10 +187,7 @@ export class LENDING_MARKET_2 implements StructClass {
 
 export function isRegistry(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::lending_market_registry::Registry"
-  );
+  return type === `${PKG_V1}::lending_market_registry::Registry`;
 }
 
 export interface RegistryFields {
@@ -205,13 +199,12 @@ export interface RegistryFields {
 export type RegistryReified = Reified<Registry, RegistryFields>;
 
 export class Registry implements StructClass {
-  static readonly $typeName =
-    "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::lending_market_registry::Registry";
+  static readonly $typeName = `${PKG_V1}::lending_market_registry::Registry`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = Registry.$typeName;
 
-  readonly $fullTypeName: "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::lending_market_registry::Registry";
+  readonly $fullTypeName: `${typeof PKG_V1}::lending_market_registry::Registry`;
 
   readonly $typeArgs: [];
 
@@ -223,7 +216,7 @@ export class Registry implements StructClass {
     this.$fullTypeName = composeSuiType(
       Registry.$typeName,
       ...typeArgs,
-    ) as "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::lending_market_registry::Registry";
+    ) as `${typeof PKG_V1}::lending_market_registry::Registry`;
     this.$typeArgs = typeArgs;
 
     this.id = fields.id;
@@ -237,7 +230,7 @@ export class Registry implements StructClass {
       fullTypeName: composeSuiType(
         Registry.$typeName,
         ...[],
-      ) as "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::lending_market_registry::Registry",
+      ) as `${typeof PKG_V1}::lending_market_registry::Registry`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => Registry.fromFields(fields),

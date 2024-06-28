@@ -17,18 +17,16 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
+import { PKG_V1 } from "../index";
 import { PriceInfo } from "../price-info/structs";
 import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== BatchPriceAttestation =============================== */
 
 export function isBatchPriceAttestation(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::batch_price_attestation::BatchPriceAttestation"
-  );
+  return type === `${PKG_V1}::batch_price_attestation::BatchPriceAttestation`;
 }
 
 export interface BatchPriceAttestationFields {
@@ -44,13 +42,12 @@ export type BatchPriceAttestationReified = Reified<
 >;
 
 export class BatchPriceAttestation implements StructClass {
-  static readonly $typeName =
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::batch_price_attestation::BatchPriceAttestation";
+  static readonly $typeName = `${PKG_V1}::batch_price_attestation::BatchPriceAttestation`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = BatchPriceAttestation.$typeName;
 
-  readonly $fullTypeName: "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::batch_price_attestation::BatchPriceAttestation";
+  readonly $fullTypeName: `${typeof PKG_V1}::batch_price_attestation::BatchPriceAttestation`;
 
   readonly $typeArgs: [];
 
@@ -63,7 +60,7 @@ export class BatchPriceAttestation implements StructClass {
     this.$fullTypeName = composeSuiType(
       BatchPriceAttestation.$typeName,
       ...typeArgs,
-    ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::batch_price_attestation::BatchPriceAttestation";
+    ) as `${typeof PKG_V1}::batch_price_attestation::BatchPriceAttestation`;
     this.$typeArgs = typeArgs;
 
     this.header = fields.header;
@@ -78,7 +75,7 @@ export class BatchPriceAttestation implements StructClass {
       fullTypeName: composeSuiType(
         BatchPriceAttestation.$typeName,
         ...[],
-      ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::batch_price_attestation::BatchPriceAttestation",
+      ) as `${typeof PKG_V1}::batch_price_attestation::BatchPriceAttestation`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
@@ -167,7 +164,7 @@ export class BatchPriceAttestation implements StructClass {
       attestationSize: this.attestationSize.toString(),
       attestationCount: this.attestationCount.toString(),
       priceInfos: fieldToJSON<Vector<PriceInfo>>(
-        `vector<0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::price_info::PriceInfo>`,
+        `vector<${PriceInfo.$typeName}>`,
         this.priceInfos,
       ),
     };
@@ -239,10 +236,7 @@ export class BatchPriceAttestation implements StructClass {
 
 export function isHeader(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::batch_price_attestation::Header"
-  );
+  return type === `${PKG_V1}::batch_price_attestation::Header`;
 }
 
 export interface HeaderFields {
@@ -256,13 +250,12 @@ export interface HeaderFields {
 export type HeaderReified = Reified<Header, HeaderFields>;
 
 export class Header implements StructClass {
-  static readonly $typeName =
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::batch_price_attestation::Header";
+  static readonly $typeName = `${PKG_V1}::batch_price_attestation::Header`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = Header.$typeName;
 
-  readonly $fullTypeName: "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::batch_price_attestation::Header";
+  readonly $fullTypeName: `${typeof PKG_V1}::batch_price_attestation::Header`;
 
   readonly $typeArgs: [];
 
@@ -276,7 +269,7 @@ export class Header implements StructClass {
     this.$fullTypeName = composeSuiType(
       Header.$typeName,
       ...typeArgs,
-    ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::batch_price_attestation::Header";
+    ) as `${typeof PKG_V1}::batch_price_attestation::Header`;
     this.$typeArgs = typeArgs;
 
     this.magic = fields.magic;
@@ -292,7 +285,7 @@ export class Header implements StructClass {
       fullTypeName: composeSuiType(
         Header.$typeName,
         ...[],
-      ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::batch_price_attestation::Header",
+      ) as `${typeof PKG_V1}::batch_price_attestation::Header`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => Header.fromFields(fields),

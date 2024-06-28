@@ -14,17 +14,15 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../_framework/util";
+import { PKG_V1 } from "../index";
 import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== Decimal =============================== */
 
 export function isDecimal(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::decimal::Decimal"
-  );
+  return type === `${PKG_V1}::decimal::Decimal`;
 }
 
 export interface DecimalFields {
@@ -34,13 +32,12 @@ export interface DecimalFields {
 export type DecimalReified = Reified<Decimal, DecimalFields>;
 
 export class Decimal implements StructClass {
-  static readonly $typeName =
-    "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::decimal::Decimal";
+  static readonly $typeName = `${PKG_V1}::decimal::Decimal`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = Decimal.$typeName;
 
-  readonly $fullTypeName: "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::decimal::Decimal";
+  readonly $fullTypeName: `${typeof PKG_V1}::decimal::Decimal`;
 
   readonly $typeArgs: [];
 
@@ -50,7 +47,7 @@ export class Decimal implements StructClass {
     this.$fullTypeName = composeSuiType(
       Decimal.$typeName,
       ...typeArgs,
-    ) as "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::decimal::Decimal";
+    ) as `${typeof PKG_V1}::decimal::Decimal`;
     this.$typeArgs = typeArgs;
 
     this.value = fields.value;
@@ -62,7 +59,7 @@ export class Decimal implements StructClass {
       fullTypeName: composeSuiType(
         Decimal.$typeName,
         ...[],
-      ) as "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::decimal::Decimal",
+      ) as `${typeof PKG_V1}::decimal::Decimal`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => Decimal.fromFields(fields),

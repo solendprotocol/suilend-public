@@ -23,14 +23,15 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
+import { PKG_V23 } from "../index";
 import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== Element =============================== */
 
 export function isElement(type: string): boolean {
   type = compressSuiType(type);
-  return type.startsWith("0x2::group_ops::Element<");
+  return type.startsWith(`${PKG_V23}::group_ops::Element` + "<");
 }
 
 export interface ElementFields<T extends PhantomTypeArgument> {
@@ -43,12 +44,12 @@ export type ElementReified<T extends PhantomTypeArgument> = Reified<
 >;
 
 export class Element<T extends PhantomTypeArgument> implements StructClass {
-  static readonly $typeName = "0x2::group_ops::Element";
+  static readonly $typeName = `${PKG_V23}::group_ops::Element`;
   static readonly $numTypeParams = 1;
 
   readonly $typeName = Element.$typeName;
 
-  readonly $fullTypeName: `0x2::group_ops::Element<${PhantomToTypeStr<T>}>`;
+  readonly $fullTypeName: `${typeof PKG_V23}::group_ops::Element<${PhantomToTypeStr<T>}>`;
 
   readonly $typeArgs: [PhantomToTypeStr<T>];
 
@@ -61,7 +62,7 @@ export class Element<T extends PhantomTypeArgument> implements StructClass {
     this.$fullTypeName = composeSuiType(
       Element.$typeName,
       ...typeArgs,
-    ) as `0x2::group_ops::Element<${PhantomToTypeStr<T>}>`;
+    ) as `${typeof PKG_V23}::group_ops::Element<${PhantomToTypeStr<T>}>`;
     this.$typeArgs = typeArgs;
 
     this.bytes = fields.bytes;
@@ -75,7 +76,7 @@ export class Element<T extends PhantomTypeArgument> implements StructClass {
       fullTypeName: composeSuiType(
         Element.$typeName,
         ...[extractType(T)],
-      ) as `0x2::group_ops::Element<${PhantomToTypeStr<ToPhantomTypeArgument<T>>}>`,
+      ) as `${typeof PKG_V23}::group_ops::Element<${PhantomToTypeStr<ToPhantomTypeArgument<T>>}>`,
       typeArgs: [extractType(T)] as [
         PhantomToTypeStr<ToPhantomTypeArgument<T>>,
       ],

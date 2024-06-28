@@ -23,14 +23,15 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
+import { PKG_V6 } from "../index";
 import { BcsType, bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== Option =============================== */
 
 export function isOption(type: string): boolean {
   type = compressSuiType(type);
-  return type.startsWith("0x1::option::Option<");
+  return type.startsWith(`${PKG_V6}::option::Option` + "<");
 }
 
 export interface OptionFields<Element extends TypeArgument> {
@@ -43,14 +44,14 @@ export type OptionReified<Element extends TypeArgument> = Reified<
 >;
 
 export class Option<Element extends TypeArgument> implements StructClass {
-  static readonly $typeName = "0x1::option::Option";
+  static readonly $typeName = `${PKG_V6}::option::Option`;
   static readonly $numTypeParams = 1;
 
   __inner: Element = null as unknown as Element; // for type checking in reified.ts
 
   readonly $typeName = Option.$typeName;
 
-  readonly $fullTypeName: `0x1::option::Option<${ToTypeStr<Element>}>`;
+  readonly $fullTypeName: `${typeof PKG_V6}::option::Option<${ToTypeStr<Element>}>`;
 
   readonly $typeArgs: [ToTypeStr<Element>];
 
@@ -63,7 +64,7 @@ export class Option<Element extends TypeArgument> implements StructClass {
     this.$fullTypeName = composeSuiType(
       Option.$typeName,
       ...typeArgs,
-    ) as `0x1::option::Option<${ToTypeStr<Element>}>`;
+    ) as `${typeof PKG_V6}::option::Option<${ToTypeStr<Element>}>`;
     this.$typeArgs = typeArgs;
 
     this.vec = fields.vec;
@@ -77,7 +78,7 @@ export class Option<Element extends TypeArgument> implements StructClass {
       fullTypeName: composeSuiType(
         Option.$typeName,
         ...[extractType(Element)],
-      ) as `0x1::option::Option<${ToTypeStr<ToTypeArgument<Element>>}>`,
+      ) as `${typeof PKG_V6}::option::Option<${ToTypeStr<ToTypeArgument<Element>>}>`,
       typeArgs: [extractType(Element)] as [ToTypeStr<ToTypeArgument<Element>>],
       reifiedTypeArgs: [Element],
       fromFields: (fields: Record<string, any>) =>

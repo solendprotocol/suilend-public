@@ -23,16 +23,15 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
+import { PKG_V1 } from "../index";
 import { BcsType, bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== HotPotatoVector =============================== */
 
 export function isHotPotatoVector(type: string): boolean {
   type = compressSuiType(type);
-  return type.startsWith(
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::hot_potato_vector::HotPotatoVector<",
-  );
+  return type.startsWith(`${PKG_V1}::hot_potato_vector::HotPotatoVector` + "<");
 }
 
 export interface HotPotatoVectorFields<T extends TypeArgument> {
@@ -45,13 +44,12 @@ export type HotPotatoVectorReified<T extends TypeArgument> = Reified<
 >;
 
 export class HotPotatoVector<T extends TypeArgument> implements StructClass {
-  static readonly $typeName =
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::hot_potato_vector::HotPotatoVector";
+  static readonly $typeName = `${PKG_V1}::hot_potato_vector::HotPotatoVector`;
   static readonly $numTypeParams = 1;
 
   readonly $typeName = HotPotatoVector.$typeName;
 
-  readonly $fullTypeName: `0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::hot_potato_vector::HotPotatoVector<${ToTypeStr<T>}>`;
+  readonly $fullTypeName: `${typeof PKG_V1}::hot_potato_vector::HotPotatoVector<${ToTypeStr<T>}>`;
 
   readonly $typeArgs: [ToTypeStr<T>];
 
@@ -64,7 +62,7 @@ export class HotPotatoVector<T extends TypeArgument> implements StructClass {
     this.$fullTypeName = composeSuiType(
       HotPotatoVector.$typeName,
       ...typeArgs,
-    ) as `0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::hot_potato_vector::HotPotatoVector<${ToTypeStr<T>}>`;
+    ) as `${typeof PKG_V1}::hot_potato_vector::HotPotatoVector<${ToTypeStr<T>}>`;
     this.$typeArgs = typeArgs;
 
     this.contents = fields.contents;
@@ -78,7 +76,7 @@ export class HotPotatoVector<T extends TypeArgument> implements StructClass {
       fullTypeName: composeSuiType(
         HotPotatoVector.$typeName,
         ...[extractType(T)],
-      ) as `0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::hot_potato_vector::HotPotatoVector<${ToTypeStr<ToTypeArgument<T>>}>`,
+      ) as `${typeof PKG_V1}::hot_potato_vector::HotPotatoVector<${ToTypeStr<ToTypeArgument<T>>}>`,
       typeArgs: [extractType(T)] as [ToTypeStr<ToTypeArgument<T>>],
       reifiedTypeArgs: [T],
       fromFields: (fields: Record<string, any>) =>

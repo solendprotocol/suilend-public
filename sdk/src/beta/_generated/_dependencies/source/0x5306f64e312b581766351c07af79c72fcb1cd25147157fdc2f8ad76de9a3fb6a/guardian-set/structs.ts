@@ -18,17 +18,15 @@ import {
   compressSuiType,
 } from "../../../../_framework/util";
 import { Guardian } from "../guardian/structs";
+import { PKG_V1 } from "../index";
 import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== GuardianSet =============================== */
 
 export function isGuardianSet(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::guardian_set::GuardianSet"
-  );
+  return type === `${PKG_V1}::guardian_set::GuardianSet`;
 }
 
 export interface GuardianSetFields {
@@ -40,13 +38,12 @@ export interface GuardianSetFields {
 export type GuardianSetReified = Reified<GuardianSet, GuardianSetFields>;
 
 export class GuardianSet implements StructClass {
-  static readonly $typeName =
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::guardian_set::GuardianSet";
+  static readonly $typeName = `${PKG_V1}::guardian_set::GuardianSet`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = GuardianSet.$typeName;
 
-  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::guardian_set::GuardianSet";
+  readonly $fullTypeName: `${typeof PKG_V1}::guardian_set::GuardianSet`;
 
   readonly $typeArgs: [];
 
@@ -58,7 +55,7 @@ export class GuardianSet implements StructClass {
     this.$fullTypeName = composeSuiType(
       GuardianSet.$typeName,
       ...typeArgs,
-    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::guardian_set::GuardianSet";
+    ) as `${typeof PKG_V1}::guardian_set::GuardianSet`;
     this.$typeArgs = typeArgs;
 
     this.index = fields.index;
@@ -72,7 +69,7 @@ export class GuardianSet implements StructClass {
       fullTypeName: composeSuiType(
         GuardianSet.$typeName,
         ...[],
-      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::guardian_set::GuardianSet",
+      ) as `${typeof PKG_V1}::guardian_set::GuardianSet`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
@@ -153,7 +150,7 @@ export class GuardianSet implements StructClass {
     return {
       index: this.index,
       guardians: fieldToJSON<Vector<Guardian>>(
-        `vector<0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::guardian::Guardian>`,
+        `vector<${Guardian.$typeName}>`,
         this.guardians,
       ),
       expirationTimestampMs: this.expirationTimestampMs.toString(),

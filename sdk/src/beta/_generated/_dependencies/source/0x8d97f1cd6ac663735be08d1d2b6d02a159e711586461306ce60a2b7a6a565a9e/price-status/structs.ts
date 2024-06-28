@@ -14,17 +14,15 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
+import { PKG_V1 } from "../index";
 import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { SuiClient, SuiParsedData } from "@mysten/sui/client";
 
 /* ============================== PriceStatus =============================== */
 
 export function isPriceStatus(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::price_status::PriceStatus"
-  );
+  return type === `${PKG_V1}::price_status::PriceStatus`;
 }
 
 export interface PriceStatusFields {
@@ -34,13 +32,12 @@ export interface PriceStatusFields {
 export type PriceStatusReified = Reified<PriceStatus, PriceStatusFields>;
 
 export class PriceStatus implements StructClass {
-  static readonly $typeName =
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::price_status::PriceStatus";
+  static readonly $typeName = `${PKG_V1}::price_status::PriceStatus`;
   static readonly $numTypeParams = 0;
 
   readonly $typeName = PriceStatus.$typeName;
 
-  readonly $fullTypeName: "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::price_status::PriceStatus";
+  readonly $fullTypeName: `${typeof PKG_V1}::price_status::PriceStatus`;
 
   readonly $typeArgs: [];
 
@@ -50,7 +47,7 @@ export class PriceStatus implements StructClass {
     this.$fullTypeName = composeSuiType(
       PriceStatus.$typeName,
       ...typeArgs,
-    ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::price_status::PriceStatus";
+    ) as `${typeof PKG_V1}::price_status::PriceStatus`;
     this.$typeArgs = typeArgs;
 
     this.status = fields.status;
@@ -62,7 +59,7 @@ export class PriceStatus implements StructClass {
       fullTypeName: composeSuiType(
         PriceStatus.$typeName,
         ...[],
-      ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::price_status::PriceStatus",
+      ) as `${typeof PKG_V1}::price_status::PriceStatus`,
       typeArgs: [] as [],
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
