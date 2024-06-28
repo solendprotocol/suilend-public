@@ -1,11 +1,11 @@
+import Link from "next/link";
 import { forwardRef } from "react";
 
 import { useFlags } from "launchdarkly-react-client-sdk";
 import { ArrowLeftRight, Info, LucideIcon } from "lucide-react";
 
 import Container from "@/components/shared/Container";
-import TextLink from "@/components/shared/TextLink";
-import { bodySansClassNames } from "@/components/shared/Typography";
+import { TBody, TBodySans } from "@/components/shared/Typography";
 import { cn } from "@/lib/utils";
 
 interface BannerProps {
@@ -39,34 +39,28 @@ const Banner = forwardRef<HTMLDivElement, BannerProps>(({ height }, ref) => {
       >
         {flags.banner?.message && (
           <Container>
-            <div className="flex min-h-10 w-full flex-row items-center justify-between gap-4 py-2">
-              <div className="flex flex-row gap-2">
-                {Icon && (
-                  <Icon className="my-0.5 h-4 w-4 shrink-0 text-secondary-foreground" />
-                )}
-
-                <TextLink
-                  className={cn(
-                    bodySansClassNames,
-                    "block !text-secondary-foreground !no-underline",
+            <div className="flex w-full flex-row justify-center">
+              <Link
+                className="block flex min-h-10 flex-row items-center gap-4 py-2"
+                target={flags.banner.isLinkRelative ? undefined : "_blank"}
+                href={flags.banner.link}
+              >
+                <div className="flex flex-row gap-2">
+                  {Icon && (
+                    <Icon className="my-0.5 h-4 w-4 flex-shrink-0 text-secondary-foreground" />
                   )}
-                  href={flags.banner.link}
-                  isRelative={flags.banner.isLinkRelative}
-                  noIcon
-                >
-                  {flags.banner.message}
-                </TextLink>
-              </div>
 
-              {flags.banner.link && (
-                <TextLink
-                  className="block shrink-0 text-sm uppercase !text-secondary-foreground decoration-secondary-foreground hover:no-underline"
-                  href={flags.banner.link}
-                  isRelative={flags.banner.isLinkRelative}
-                >
-                  {flags.banner.linkTitle || "Learn more"}
-                </TextLink>
-              )}
+                  <TBodySans className="text-secondary-foreground">
+                    {flags.banner.message}
+                  </TBodySans>
+                </div>
+
+                {flags.banner.link && (
+                  <TBody className="uppercase text-secondary-foreground underline decoration-secondary-foreground hover:no-underline">
+                    {flags.banner.linkTitle}
+                  </TBody>
+                )}
+              </Link>
             </div>
           </Container>
         )}

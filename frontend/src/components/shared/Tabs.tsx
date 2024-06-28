@@ -40,7 +40,9 @@ export default function Tabs({
             value={tab.id}
           >
             {tab.icon &&
-              cloneElement(tab.icon, { className: cn("w-4 h-4 shrink-0") })}
+              cloneElement(tab.icon, {
+                className: cn("w-4 h-4 flex-shrink-0"),
+              })}
             {tab.title}
           </TabsTrigger>
         ))}

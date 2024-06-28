@@ -47,13 +47,13 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         >
           {startIcon &&
             cloneElement(startIcon, {
-              className: cn("w-3 h-3 shrink-0", startIcon.props.className),
+              className: cn("w-3 h-3 flex-shrink-0", startIcon.props.className),
             })}
 
           {icon ? (
             <>
               {cloneElement(icon, {
-                className: cn("w-4 h-4 shrink-0", icon.props.className),
+                className: cn("w-4 h-4 flex-shrink-0", icon.props.className),
               })}
               <span className="sr-only">{children}</span>
             </>
@@ -65,7 +65,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
           {endIcon &&
             cloneElement(endIcon, {
-              className: cn("w-3 h-3 shrink-0", endIcon.props.className),
+              className: cn("w-3 h-3 flex-shrink-0", endIcon.props.className),
             })}
         </ButtonComponent>
       </Tooltip>

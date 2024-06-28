@@ -52,7 +52,7 @@ export default function Dashboard() {
             <MarketTable />
             <RewardsCard />
           </div>
-          <div className="flex w-[360px] shrink-0 flex-col gap-4">
+          <div className="flex w-[360px] flex-shrink-0 flex-col gap-4">
             <Cards />
           </div>
         </div>
