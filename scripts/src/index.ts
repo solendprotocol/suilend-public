@@ -1,4 +1,9 @@
-import { SuiClient } from "@mysten/sui.js/client";
+import { SuiClient } from "@mysten/sui/client";
+import { Transaction } from "@mysten/sui/transactions";
+import { fromB64 } from "@mysten/sui/utils";
+import { Ed25519Keypair } from "@mysten/sui/keypairs/ed25519";
+import { HermesClient } from "@pythnetwork/hermes-client";
+
 import {
   LENDING_MARKET_ID,
   LENDING_MARKET_TYPE,
@@ -9,11 +14,7 @@ import { fetchAllObligationsForMarket } from "../../sdk/src/mainnet/utils/obliga
 import { phantom } from "../../sdk/src/mainnet/_generated/_framework/reified";
 import { Reserve } from "../../sdk/src/mainnet/_generated/suilend/reserve/structs";
 import * as simulate from "../../sdk/src/mainnet/utils/simulate";
-import { SuiPriceServiceConnection } from "../../pyth-sdk/src";
-import { TransactionBlock } from "@mysten/sui.js/transactions";
 import { Side } from "../../sdk/src/core/types";
-import { fromB64, fromHEX } from "@mysten/sui.js/utils";
-import { Ed25519Keypair } from "@mysten/sui.js/keypairs/ed25519";
 import { Obligation } from "../../sdk/src/mainnet/_generated/suilend/obligation/structs";
 
 const REWARD_TYPE = "0x2::sui::SUI";
@@ -37,9 +38,6 @@ async function crankRewards(
     LENDING_MARKET_TYPE,
     client
   );
-  const connection = new SuiPriceServiceConnection(
-    "https://hermes.pyth.network"
-  );
 
   let lendingMarket = await LendingMarket.fetch(
     client,
@@ -51,7 +49,7 @@ async function crankRewards(
   let refreshedReserves = lendingMarket.reserves as Reserve<string>[];
   refreshedReserves = await simulate.refreshReservePrice(
     lendingMarket.reserves.map((r) => simulate.compoundReserveInterest(r, now)),
-    connection
+    new HermesClient("https://hermes.pyth.network")
   );
 
   const poolManager = IS_DEPOSIT_REWARD
@@ -95,7 +93,7 @@ async function crankRewards(
 
   let i = 0;
   while (i < refreshedObligations.length) {
-    let txb = new TransactionBlock();
+    let tx = new Transaction();
     for (let j = 0; j < BATCH_SIZE && i < refreshedObligations.length; j++) {
       let obligation = refreshedObligations[i];
 
@@ -106,14 +104,14 @@ async function crankRewards(
         REWARD_TYPE,
         IS_DEPOSIT_REWARD ? Side.DEPOSIT : Side.BORROW,
         BigInt(DEPOSIT_RESERVE_INDEX),
-        txb
+        tx
       );
 
       i++;
     }
 
-    let res = await client.signAndExecuteTransactionBlock({
-      transactionBlock: txb,
+    let res = await client.signAndExecuteTransaction({
+      transaction: tx,
       signer: keypair,
     });
     console.log(res);

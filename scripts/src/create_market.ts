@@ -1,14 +1,13 @@
-import { TransactionBlock } from "@mysten/sui.js/transactions";
-import { SuiClient } from "@mysten/sui.js/client";
+import { fromB64 } from "@mysten/bcs";
+import { Transaction } from "@mysten/sui/transactions";
+import { SuiClient } from "@mysten/sui/client";
+import { Ed25519Keypair } from "@mysten/sui/keypairs/ed25519";
+
 import {
   SuilendClient,
   LENDING_MARKET_ID,
   LENDING_MARKET_TYPE
 } from "../../sdk/src/beta/client";
-import { Obligation } from "@suilend/sdk/_generated/suilend/obligation/structs";
-import { fromHEX, fromB64 } from "@mysten/bcs";
-import { Ed25519Keypair } from "@mysten/sui.js/keypairs/ed25519";
-import { phantom } from "@suilend/sdk/_generated/_framework/reified";
 import {Side} from "../../sdk/src/core/types";
 
 const keypair = Ed25519Keypair.fromSecretKey(
@@ -18,16 +17,16 @@ const keypair = Ed25519Keypair.fromSecretKey(
 async function createLendingMarket() {
   const client = new SuiClient({ url: "https://fullnode.mainnet.sui.io:443" });
 
-  const txb = new TransactionBlock();
+  const tx = new Transaction();
   const ownerCap = await SuilendClient.createNewLendingMarket(
     "0xddb6304a726ff1da7d8b5240c35a5f4d1c43f289258d440ba42044a4ed6c7dc6", 
     "0x2::sui::SUI",
-    txb
+    tx
   );
-  txb.transferObjects([ownerCap], keypair.toSuiAddress());
+  tx.transferObjects([ownerCap], keypair.toSuiAddress());
   console.log(
-    await client.signAndExecuteTransactionBlock({
-      transactionBlock: txb,
+    await client.signAndExecuteTransaction({
+      transaction: tx,
       signer: keypair,
     }),
   );
@@ -36,7 +35,7 @@ async function createLendingMarket() {
 async function claimRewards() {
   const client = new SuiClient({ url: "https://fullnode.mainnet.sui.io:443" });
 
-  const txb = new TransactionBlock();
+  const tx = new Transaction();
   let suilendClient = await SuilendClient.initialize(LENDING_MARKET_ID, LENDING_MARKET_TYPE, client);
 
   let [coin] = suilendClient.claimReward(
@@ -45,12 +44,12 @@ async function claimRewards() {
     BigInt(1), 
     "0x34fe4f3c9e450fed4d0a3c587ed842eec5313c30c3cc3c0841247c49425e246b::suilend_point::SUILEND_POINT", 
     Side.DEPOSIT, 
-    txb
+    tx
   );
-  txb.transferObjects([coin], keypair.toSuiAddress());
+  tx.transferObjects([coin], keypair.toSuiAddress());
 
-  console.log(await client.signAndExecuteTransactionBlock({
-    transactionBlock: txb,
+  console.log(await client.signAndExecuteTransaction({
+    transaction: tx,
     signer: keypair,
   }));
 

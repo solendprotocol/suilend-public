@@ -6,8 +6,9 @@
   "license": "MIT",
   "dependencies": {
     "@cetusprotocol/cetus-sui-clmm-sdk": "^3.17.9",
-    "@mysten/bcs": "^0.10.1",
-    "@mysten/sui.js": "^0.51.2",
+    "@mysten/bcs": "1.0.2",
+    "@mysten/sui": "1.2.0",
+    "@pythnetwork/hermes-client": "1.0.3",
     "@types/node": "^20.11.10",
     "bignumber.js": "^9.1.2",
     "commander": "^11.1.0",
