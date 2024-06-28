@@ -6,11 +6,10 @@ import {
   TransactionResult,
 } from "@mysten/sui/transactions";
 import { SUI_CLOCK_OBJECT_ID, normalizeStructTag } from "@mysten/sui/utils";
-
 import {
   SuiPriceServiceConnection,
   SuiPythClient,
-} from "../../../pyth-sdk/src";
+} from "@pythnetwork/pyth-sui-js";
 
 import {
   AddPoolRewardArgs,
