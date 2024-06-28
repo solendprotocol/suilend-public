@@ -90,7 +90,7 @@ export default function Admin() {
 
     try {
       try {
-        suilendClient.migrate(tx as any, data.lendingMarketOwnerCapId);
+        suilendClient.migrate(tx, data.lendingMarketOwnerCapId);
       } catch (err) {
         Sentry.captureException(err);
         console.error(err);

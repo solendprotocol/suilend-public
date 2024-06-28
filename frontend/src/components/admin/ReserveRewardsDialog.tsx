@@ -95,7 +95,7 @@ export default function ReserveRewardsDialog({
           isDepositReward,
           rewardIndex,
           rewardCoinType,
-          tx as any,
+          tx,
         );
         tx.transferObjects([unclaimedRewards], address);
       } catch (err) {
@@ -136,7 +136,7 @@ export default function ReserveRewardsDialog({
           isDepositReward,
           rewardIndex,
           rewardCoinType,
-          tx as any,
+          tx,
         );
         tx.transferObjects([unclaimedRewards], address);
       } catch (err) {

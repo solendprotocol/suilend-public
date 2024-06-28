@@ -95,7 +95,7 @@ export function DashboardContextProvider({ children }: PropsWithChildren) {
               side: r.stats.side,
             };
           }),
-          tx as any,
+          tx,
         );
       } catch (err) {
         Sentry.captureException(err);

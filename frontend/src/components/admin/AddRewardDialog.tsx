@@ -149,7 +149,7 @@ export default function AddRewardDialog({
           rewardValue,
           BigInt(startTimeMs),
           BigInt(endTimeMs),
-          tx as any,
+          tx,
         );
       } catch (err) {
         Sentry.captureException(err);

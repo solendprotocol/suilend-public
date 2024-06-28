@@ -178,7 +178,7 @@ export default function LiquidateDialog({
           repayCoinId = splitSui;
         }
         const [withdrawn] = await suilendClient.liquidateAndRedeem(
-          tx as any,
+          tx,
           obligation.original,
           repayCoinType,
           obligation.deposits.find(

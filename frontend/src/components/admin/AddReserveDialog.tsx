@@ -167,7 +167,7 @@ export default function AddReserveDialog() {
       try {
         await suilendClient.createReserve(
           data.lendingMarketOwnerCapId,
-          tx as any,
+          tx,
           pythPriceId,
           coin.coinType,
           newConfig,

@@ -210,7 +210,7 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
           address,
           coinType,
           value,
-          tx as any,
+          tx,
           obligationOwnerCap?.id,
         );
       } catch (err) {
@@ -240,7 +240,7 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
           obligation.id,
           coinType,
           value,
-          tx as any,
+          tx,
         );
       } catch (err) {
         Sentry.captureException(err);
@@ -275,7 +275,7 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
           obligation.id,
           coinType,
           value,
-          tx as any,
+          tx,
         );
       } catch (err) {
         Sentry.captureException(err);
@@ -308,7 +308,7 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
           obligation.id,
           coinType,
           value,
-          tx as any,
+          tx,
         );
       } catch (err) {
         Sentry.captureException(err);

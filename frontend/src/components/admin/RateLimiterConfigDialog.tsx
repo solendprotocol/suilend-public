@@ -79,7 +79,7 @@ export default function RateLimiterConfigDialog() {
       try {
         await suilendClient.updateRateLimiterConfig(
           data.lendingMarketOwnerCapId,
-          tx as any,
+          tx,
           newConfig,
         );
       } catch (err) {

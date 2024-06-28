@@ -130,7 +130,7 @@ export default function ReserveConfigDialog({
         await suilendClient.updateReserveConfig(
           address,
           data.lendingMarketOwnerCapId,
-          tx as any,
+          tx,
           reserve.coinType,
           newConfig,
         );
