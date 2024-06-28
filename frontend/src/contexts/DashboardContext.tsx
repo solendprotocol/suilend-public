@@ -9,8 +9,7 @@ import {
   useState,
 } from "react";
 
-import { SuiTransactionBlockResponse } from "@mysten/sui.js/client";
-import { TransactionBlock } from "@mysten/sui.js/transactions";
+import { Transaction } from "@mysten/sui/transactions";
 import * as Sentry from "@sentry/nextjs";
 import pLimit from "p-limit";
 
@@ -23,7 +22,7 @@ import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 
 import { ActionsModalContextProvider } from "@/components/dashboard/actions-modal/ActionsModalContext";
 import { AppData, useAppContext } from "@/contexts/AppContext";
-import { useWalletContext } from "@/contexts/WalletContext";
+import { WalletContext, useWalletContext } from "@/contexts/WalletContext";
 import { DAYS, Days, RESERVE_EVENT_SAMPLE_INTERVAL_S_MAP } from "@/lib/events";
 import { RewardSummary } from "@/lib/liquidityMining";
 
@@ -35,7 +34,7 @@ type ReserveAssetDataEventsMap = Record<
 interface DashboardContext {
   claimRewards: (
     rewards: RewardSummary[],
-  ) => Promise<SuiTransactionBlockResponse>;
+  ) => ReturnType<WalletContext["signExecuteAndWaitTransaction"]>;
 
   reserveAssetDataEventsMap?: ReserveAssetDataEventsMap;
   fetchReserveAssetDataEvents: (
@@ -64,7 +63,7 @@ export function DashboardContextProvider({ children }: PropsWithChildren) {
   const {
     suilendClient,
     obligation,
-    signExecuteAndWaitTransactionBlock,
+    signExecuteAndWaitTransaction,
     ...restAppContext
   } = useAppContext();
   const data = restAppContext.data as AppData;
@@ -81,7 +80,7 @@ export function DashboardContextProvider({ children }: PropsWithChildren) {
       if (!obligationOwnerCap || !obligation)
         throw Error("Obligation not found");
 
-      const txb = new TransactionBlock();
+      const tx = new Transaction();
       try {
         await suilendClient.claimRewardsToObligation(
           address,
@@ -96,7 +95,7 @@ export function DashboardContextProvider({ children }: PropsWithChildren) {
               side: r.stats.side,
             };
           }),
-          txb,
+          tx as any,
         );
       } catch (err) {
         Sentry.captureException(err);
@@ -104,13 +103,13 @@ export function DashboardContextProvider({ children }: PropsWithChildren) {
         throw err;
       }
 
-      const res = await signExecuteAndWaitTransactionBlock(txb);
+      const res = await signExecuteAndWaitTransaction(tx);
       return res;
     },
     [
       address,
       suilendClient,
-      signExecuteAndWaitTransactionBlock,
+      signExecuteAndWaitTransaction,
       obligationOwnerCap,
       obligation,
     ],

@@ -1,7 +1,7 @@
 import { useRef } from "react";
 
-import { CoinBalance, SuiClient } from "@mysten/sui.js/client";
-import { normalizeStructTag } from "@mysten/sui.js/utils";
+import { CoinBalance, SuiClient } from "@mysten/sui/client";
+import { normalizeStructTag } from "@mysten/sui/utils";
 import * as Sentry from "@sentry/nextjs";
 import { toast } from "sonner";
 import useSWR from "swr";

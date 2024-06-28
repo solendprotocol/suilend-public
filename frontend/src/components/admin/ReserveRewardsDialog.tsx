@@ -1,6 +1,6 @@
 import { useRouter } from "next/router";
 
-import { TransactionBlock } from "@mysten/sui.js/transactions";
+import { Transaction } from "@mysten/sui/transactions";
 import * as Sentry from "@sentry/nextjs";
 import { formatISO } from "date-fns";
 import { Sparkle } from "lucide-react";
@@ -41,7 +41,7 @@ export default function ReserveRewardsDialog({
   const {
     refreshData,
     explorer,
-    signExecuteAndWaitTransactionBlock,
+    signExecuteAndWaitTransaction,
     ...restAppContext
   } = useAppContext();
   const suilendClient = restAppContext.suilendClient as SuilendClient<string>;
@@ -80,7 +80,7 @@ export default function ReserveRewardsDialog({
     if (!data.lendingMarketOwnerCapId)
       throw new Error("Error: No lending market owner cap");
 
-    const txb = new TransactionBlock();
+    const tx = new Transaction();
 
     const reserveArrayIndex = reserve.arrayIndex;
     const isDepositReward = selectedTab === Tab.DEPOSITS;
@@ -95,16 +95,16 @@ export default function ReserveRewardsDialog({
           isDepositReward,
           rewardIndex,
           rewardCoinType,
-          txb,
+          tx as any,
         );
-        txb.transferObjects([unclaimedRewards], address);
+        tx.transferObjects([unclaimedRewards], address);
       } catch (err) {
         Sentry.captureException(err);
         console.error(err);
         throw err;
       }
 
-      await signExecuteAndWaitTransactionBlock(txb);
+      await signExecuteAndWaitTransaction(tx);
 
       toast.success("Canceled reward");
     } catch (err) {
@@ -121,7 +121,7 @@ export default function ReserveRewardsDialog({
     if (!data.lendingMarketOwnerCapId)
       throw new Error("Error: No lending market owner cap");
 
-    const txb = new TransactionBlock();
+    const tx = new Transaction();
 
     const reserveArrayIndex = reserve.arrayIndex;
     const isDepositReward = selectedTab === Tab.DEPOSITS;
@@ -136,16 +136,16 @@ export default function ReserveRewardsDialog({
           isDepositReward,
           rewardIndex,
           rewardCoinType,
-          txb,
+          tx as any,
         );
-        txb.transferObjects([unclaimedRewards], address);
+        tx.transferObjects([unclaimedRewards], address);
       } catch (err) {
         Sentry.captureException(err);
         console.error(err);
         throw err;
       }
 
-      await signExecuteAndWaitTransactionBlock(txb);
+      await signExecuteAndWaitTransaction(tx);
 
       toast.success("Closed reward");
     } catch (err) {

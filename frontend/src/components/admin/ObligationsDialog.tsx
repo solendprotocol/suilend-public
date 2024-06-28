@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { SuiClient } from "@mysten/sui.js/client";
+import { SuiClient } from "@mysten/sui/client";
 import { ColumnDef } from "@tanstack/react-table";
 
 import { phantom } from "@suilend/sdk/_generated/_framework/reified";

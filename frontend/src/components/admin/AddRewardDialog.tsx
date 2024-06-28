@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { CoinMetadata, SuiClient } from "@mysten/sui.js/client";
-import { TransactionBlock } from "@mysten/sui.js/transactions";
+import { CoinMetadata, SuiClient } from "@mysten/sui/client";
+import { Transaction } from "@mysten/sui/transactions";
 import * as Sentry from "@sentry/nextjs";
 import BigNumber from "bignumber.js";
 import { isEqual } from "lodash";
@@ -32,7 +32,7 @@ export default function AddRewardDialog({
   isDepositReward,
 }: AddRewardDialogProps) {
   const { address } = useWalletContext();
-  const { refreshData, signExecuteAndWaitTransactionBlock, ...restAppContext } =
+  const { refreshData, signExecuteAndWaitTransaction, ...restAppContext } =
     useAppContext();
   const suiClient = restAppContext.suiClient as SuiClient;
   const suilendClient = restAppContext.suilendClient as SuilendClient<string>;
@@ -130,7 +130,7 @@ export default function AddRewardDialog({
       return;
     }
 
-    const txb = new TransactionBlock();
+    const tx = new Transaction();
 
     const reserveArrayIndex = reserve.arrayIndex;
     const rewardCoinType = coin.coinType;
@@ -149,7 +149,7 @@ export default function AddRewardDialog({
           rewardValue,
           BigInt(startTimeMs),
           BigInt(endTimeMs),
-          txb,
+          tx as any,
         );
       } catch (err) {
         Sentry.captureException(err);
@@ -157,7 +157,7 @@ export default function AddRewardDialog({
         throw err;
       }
 
-      await signExecuteAndWaitTransactionBlock(txb);
+      await signExecuteAndWaitTransaction(tx);
 
       toast.success("Added reward");
       setIsDialogOpen(false);

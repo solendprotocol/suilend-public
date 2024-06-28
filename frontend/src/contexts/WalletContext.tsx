@@ -12,14 +12,11 @@ import {
   useState,
 } from "react";
 
+import { SuiClient } from "@mysten/sui/client";
+import { Transaction } from "@mysten/sui/transactions";
 import {
-  DevInspectTransactionBlockParams,
-  SuiClient,
-  SuiTransactionBlockResponse,
-} from "@mysten/sui.js/client";
-import { TransactionBlock } from "@mysten/sui.js/transactions";
-import {
-  SuiSignTransactionBlockInput,
+  IdentifierString,
+  SuiSignAndExecuteTransactionOutput,
   WalletAccount,
 } from "@mysten/wallet-standard";
 import * as Sentry from "@sentry/nextjs";
@@ -35,7 +32,7 @@ export enum QueryParams {
   WALLET = "wallet",
 }
 
-interface WalletContext {
+export interface WalletContext {
   isConnectWalletDropdownOpen: boolean;
   setIsConnectWalletDropdownOpen: Dispatch<SetStateAction<boolean>>;
   accounts: readonly WalletAccount[];
@@ -45,10 +42,10 @@ interface WalletContext {
   isImpersonatingAddress?: boolean;
   selectWallet: (name: string) => Promise<void>;
   disconnectWallet: () => Promise<void>;
-  signExecuteAndWaitTransactionBlock: (
+  signExecuteAndWaitTransaction: (
     suiClient: SuiClient,
-    txb: TransactionBlock,
-  ) => Promise<SuiTransactionBlockResponse>;
+    tx: Transaction,
+  ) => Promise<SuiSignAndExecuteTransactionOutput>;
 }
 
 const WalletContext = createContext<WalletContext>({
@@ -69,7 +66,7 @@ const WalletContext = createContext<WalletContext>({
   disconnectWallet: async () => {
     throw new Error("WalletContextProvider not initialized");
   },
-  signExecuteAndWaitTransactionBlock: async () => {
+  signExecuteAndWaitTransaction: async () => {
     throw new Error("WalletContextProvider not initialized");
   },
 });
@@ -202,18 +199,17 @@ export function WalletContextProvider({ children }: PropsWithChildren) {
   }, [ldClient, impersonatedAddress, account?.address]);
 
   // Tx
-  // Note: Do NOT import and use this function directly. Instead, use the signExecuteAndWaitTransactionBlock
+  // Note: Do NOT import and use this function directly. Instead, use the signExecuteAndWaitTransaction
   // from AppContext.
-  const signExecuteAndWaitTransactionBlock = useCallback(
-    async (suiClient: SuiClient, txb: TransactionBlock) => {
+  const signExecuteAndWaitTransaction = useCallback(
+    async (suiClient: SuiClient, tx: Transaction) => {
       const _address = impersonatedAddress ?? account?.address;
       if (_address) {
         (async () => {
           try {
             const simResult = await suiClient.devInspectTransactionBlock({
               sender: _address,
-              transactionBlock:
-                txb as unknown as DevInspectTransactionBlockParams["transactionBlock"],
+              transactionBlock: tx,
             });
 
             if (simResult.error) {
@@ -234,21 +230,13 @@ export function WalletContextProvider({ children }: PropsWithChildren) {
       if (!account) throw new Error("Missing account");
 
       try {
-        const signedTxb = await adapter.signTransactionBlock({
-          transactionBlock: txb as unknown,
+        const res = await adapter.signAndExecuteTransaction({
+          transaction: tx,
           account,
-          chain: chain.id,
-        } as SuiSignTransactionBlockInput);
-
-        const res = await suiClient.executeTransactionBlock({
-          transactionBlock: signedTxb.transactionBlockBytes,
-          signature: signedTxb.signature,
-          options: {
-            showEffects: true,
-          },
+          chain: chain.id as IdentifierString,
         });
 
-        await suiClient.waitForTransactionBlock({
+        await suiClient.waitForTransaction({
           digest: res.digest,
         });
 
@@ -293,7 +281,7 @@ export function WalletContextProvider({ children }: PropsWithChildren) {
         await disconnectWallet();
         toast.info("Disconnected wallet");
       },
-      signExecuteAndWaitTransactionBlock,
+      signExecuteAndWaitTransaction,
     }),
     [
       isConnectWalletDropdownOpen,
@@ -303,7 +291,7 @@ export function WalletContextProvider({ children }: PropsWithChildren) {
       impersonatedAddress,
       selectWallet,
       disconnectWallet,
-      signExecuteAndWaitTransactionBlock,
+      signExecuteAndWaitTransaction,
     ],
   );
 

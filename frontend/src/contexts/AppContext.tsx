@@ -10,13 +10,8 @@ import {
   useRef,
 } from "react";
 
-import {
-  CoinBalance,
-  CoinMetadata,
-  SuiClient,
-  SuiTransactionBlockResponse,
-} from "@mysten/sui.js/client";
-import { TransactionBlock } from "@mysten/sui.js/transactions";
+import { CoinBalance, CoinMetadata, SuiClient } from "@mysten/sui/client";
+import { Transaction } from "@mysten/sui/transactions";
 import { isEqual } from "lodash";
 import { toast } from "sonner";
 import { useLocalStorage } from "usehooks-ts";
@@ -27,7 +22,7 @@ import { ParsedLendingMarket } from "@suilend/sdk/parsers/lendingMarket";
 import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
 import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 
-import { useWalletContext } from "@/contexts/WalletContext";
+import { WalletContext, useWalletContext } from "@/contexts/WalletContext";
 import useFetchAppData from "@/fetchers/useFetchAppData";
 import { ParsedCoinBalance } from "@/lib/coinBalance";
 import { EXPLORERS, RPCS } from "@/lib/constants";
@@ -56,9 +51,9 @@ export interface AppContext {
   setExplorerId: (value: string) => void;
   obligation: ParsedObligation | null;
   setObligationId: Dispatch<SetStateAction<string | null>>;
-  signExecuteAndWaitTransactionBlock: (
-    txb: TransactionBlock,
-  ) => Promise<SuiTransactionBlockResponse>;
+  signExecuteAndWaitTransaction: (
+    tx: Transaction,
+  ) => ReturnType<WalletContext["signExecuteAndWaitTransaction"]>;
 }
 
 const defaultContextValue: AppContext = {
@@ -80,7 +75,7 @@ const defaultContextValue: AppContext = {
   setObligationId: () => {
     throw Error("AppContextProvider not initialized");
   },
-  signExecuteAndWaitTransactionBlock: () => {
+  signExecuteAndWaitTransaction: () => {
     throw Error("AppContextProvider not initialized");
   },
 };
@@ -90,7 +85,7 @@ const AppContext = createContext<AppContext>(defaultContextValue);
 export const useAppContext = () => useContext(AppContext);
 
 export function AppContextProvider({ children }: PropsWithChildren) {
-  const { address, signExecuteAndWaitTransactionBlock } = useWalletContext();
+  const { address, signExecuteAndWaitTransaction } = useWalletContext();
 
   // RPC
   const [rpcId, setRpcId] = useLocalStorage<string>(
@@ -210,8 +205,8 @@ export function AppContextProvider({ children }: PropsWithChildren) {
         data?.obligations?.[0] ??
         null,
       setObligationId,
-      signExecuteAndWaitTransactionBlock: (txb: TransactionBlock) =>
-        signExecuteAndWaitTransactionBlock(suiClient, txb),
+      signExecuteAndWaitTransaction: (tx: Transaction) =>
+        signExecuteAndWaitTransaction(suiClient, tx),
     }),
     [
       suiClient,
@@ -224,7 +219,7 @@ export function AppContextProvider({ children }: PropsWithChildren) {
       setExplorerId,
       obligationId,
       setObligationId,
-      signExecuteAndWaitTransactionBlock,
+      signExecuteAndWaitTransaction,
     ],
   );
 

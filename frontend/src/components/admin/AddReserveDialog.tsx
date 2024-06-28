@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { CoinMetadata, SuiClient } from "@mysten/sui.js/client";
-import { TransactionBlock } from "@mysten/sui.js/transactions";
+import { CoinMetadata, SuiClient } from "@mysten/sui/client";
+import { Transaction } from "@mysten/sui/transactions";
 import * as Sentry from "@sentry/nextjs";
 import { isEqual } from "lodash";
 import { Eraser, Plus } from "lucide-react";
@@ -25,7 +25,7 @@ import { parseCoinBalances } from "@/lib/coinBalance";
 import { getCoinMetadataMap } from "@/lib/coinMetadata";
 
 export default function AddReserveDialog() {
-  const { refreshData, signExecuteAndWaitTransactionBlock, ...restAppContext } =
+  const { refreshData, signExecuteAndWaitTransaction, ...restAppContext } =
     useAppContext();
   const suiClient = restAppContext.suiClient as SuiClient;
   const suilendClient = restAppContext.suilendClient as SuilendClient<string>;
@@ -160,14 +160,14 @@ export default function AddReserveDialog() {
       return;
     }
 
-    const txb = new TransactionBlock();
+    const tx = new Transaction();
     const newConfig = parseConfigState(configState, coin.mintDecimals);
 
     try {
       try {
         await suilendClient.createReserve(
           data.lendingMarketOwnerCapId,
-          txb,
+          tx as any,
           pythPriceId,
           coin.coinType,
           newConfig,
@@ -178,7 +178,7 @@ export default function AddReserveDialog() {
         throw err;
       }
 
-      await signExecuteAndWaitTransactionBlock(txb);
+      await signExecuteAndWaitTransaction(tx);
 
       toast.success("Reserve added");
       setIsDialogOpen(false);
