@@ -2,6 +2,7 @@ import Image from "next/image";
 import { useState } from "react";
 
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { useLocalStorage } from "usehooks-ts";
 
 import UtilizationBar from "@/components/dashboard/UtilizationBar";
 import Button from "@/components/shared/Button";
@@ -41,6 +42,23 @@ export default function ConnectedWalletDropdownMenu({
   // State
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const Icon = isOpen ? ChevronUp : ChevronDown;
+
+  // Subaccounts
+  const [areSubaccountsCollapsed, setAreSubaccountsCollapsed] =
+    useLocalStorage<boolean>("areSubaccountsCollapsed", false);
+  const toggleAreSubaccountsCollapsed = () =>
+    setAreSubaccountsCollapsed((are) => !are);
+
+  const SubaccountsCollapseIcon = !areSubaccountsCollapsed
+    ? ChevronUp
+    : ChevronDown;
+
+  // Wallets
+  const [areWalletsCollapsed, setAreWalletsCollapsed] =
+    useLocalStorage<boolean>("areWalletsCollapsed", false);
+  const toggleAreWalletsCollapsed = () => setAreWalletsCollapsed((are) => !are);
+
+  const WalletsCollapseIcon = !areWalletsCollapsed ? ChevronUp : ChevronDown;
 
   return (
     <DropdownMenu
@@ -97,80 +115,101 @@ export default function ConnectedWalletDropdownMenu({
             data.obligations.length > 1 &&
             obligation && (
               <>
-                <TLabelSans className="mt-4">Subaccounts</TLabelSans>
-                {data.obligations.map((o, index, array) => (
-                  <DropdownMenuItem
-                    key={o.id}
-                    className="flex flex-col items-start gap-1"
-                    isSelected={o.id === obligation.id}
-                    onClick={() => setObligationId(o.id)}
-                  >
-                    <div className="flex w-full justify-between">
-                      <TLabelSans className="text-foreground">
-                        Subaccount {array.findIndex((_o) => _o.id === o.id) + 1}
-                      </TLabelSans>
-                      <TLabelSans>
-                        {o.positionCount} position
-                        {o.positionCount > 1 ? "s" : ""}
-                      </TLabelSans>
-                    </div>
+                <Button
+                  className="mt-2 h-4 justify-start p-0 text-muted-foreground hover:bg-transparent"
+                  labelClassName="font-sans text-xs"
+                  endIcon={<SubaccountsCollapseIcon />}
+                  variant="ghost"
+                  onClick={toggleAreSubaccountsCollapsed}
+                >
+                  Subaccounts
+                </Button>
 
-                    <div className="flex w-full justify-between">
-                      <TLabelSans>
-                        {formatUsd(o.depositedAmountUsd)} deposited
-                      </TLabelSans>
-                      <TLabelSans>
-                        {formatUsd(o.borrowedAmountUsd)} borrowed
-                      </TLabelSans>
-                    </div>
+                {!areSubaccountsCollapsed &&
+                  data.obligations.map((o, index, array) => (
+                    <DropdownMenuItem
+                      key={o.id}
+                      className="flex flex-col items-start gap-1"
+                      isSelected={o.id === obligation.id}
+                      onClick={() => setObligationId(o.id)}
+                    >
+                      <div className="flex w-full justify-between">
+                        <TLabelSans className="text-foreground">
+                          Subaccount{" "}
+                          {array.findIndex((_o) => _o.id === o.id) + 1}
+                        </TLabelSans>
+                        <TLabelSans>
+                          {o.positionCount} position
+                          {o.positionCount > 1 ? "s" : ""}
+                        </TLabelSans>
+                      </div>
 
-                    <UtilizationBar
-                      className="mt-2 h-1"
-                      obligation={o}
-                      noTooltip
-                    />
-                  </DropdownMenuItem>
-                ))}
+                      <div className="flex w-full justify-between">
+                        <TLabelSans>
+                          {formatUsd(o.depositedAmountUsd)} deposited
+                        </TLabelSans>
+                        <TLabelSans>
+                          {formatUsd(o.borrowedAmountUsd)} borrowed
+                        </TLabelSans>
+                      </div>
+
+                      <UtilizationBar
+                        className="mt-2 h-1"
+                        obligation={o}
+                        noTooltip
+                      />
+                    </DropdownMenuItem>
+                  ))}
               </>
             )}
 
           {/* Wallets */}
           {accounts.length > 1 && (
             <>
-              <TLabelSans className="mt-4">Wallets</TLabelSans>
-              {accounts.map((a) => (
-                <DropdownMenuItem
-                  key={a.address}
-                  className="flex flex-col items-start gap-1"
-                  isSelected={a.address === address}
-                  onClick={() =>
-                    selectAccount(
-                      a.address,
-                      addressNameServiceNameMap[a.address],
-                    )
-                  }
-                >
-                  <div className="flex w-full flex-row items-center justify-between gap-2">
-                    <TLabel
-                      className={cn(
-                        "uppercase text-foreground",
-                        addressNameServiceNameMap[a.address]
-                          ? "overflow-hidden text-ellipsis text-nowrap"
-                          : "shrink-0",
-                      )}
-                    >
-                      {addressNameServiceNameMap[a.address] ??
-                        formatAddress(a.address)}
-                    </TLabel>
+              <Button
+                className="mt-2 h-4 justify-start p-0 text-muted-foreground hover:bg-transparent"
+                labelClassName="font-sans text-xs"
+                endIcon={<WalletsCollapseIcon />}
+                variant="ghost"
+                onClick={toggleAreWalletsCollapsed}
+              >
+                Wallets
+              </Button>
 
-                    {a.label && (
-                      <TLabelSans className="overflow-hidden text-ellipsis text-nowrap">
-                        {a.label}
-                      </TLabelSans>
-                    )}
-                  </div>
-                </DropdownMenuItem>
-              ))}
+              {!areWalletsCollapsed &&
+                accounts.map((a) => (
+                  <DropdownMenuItem
+                    key={a.address}
+                    className="flex flex-col items-start gap-1"
+                    isSelected={a.address === address}
+                    onClick={() =>
+                      selectAccount(
+                        a.address,
+                        addressNameServiceNameMap[a.address],
+                      )
+                    }
+                  >
+                    <div className="flex w-full flex-row items-center justify-between gap-2">
+                      <TLabel
+                        className={cn(
+                          "uppercase text-foreground",
+                          addressNameServiceNameMap[a.address]
+                            ? "overflow-hidden text-ellipsis text-nowrap"
+                            : "shrink-0",
+                        )}
+                      >
+                        {addressNameServiceNameMap[a.address] ??
+                          formatAddress(a.address)}
+                      </TLabel>
+
+                      {a.label && (
+                        <TLabelSans className="overflow-hidden text-ellipsis text-nowrap">
+                          {a.label}
+                        </TLabelSans>
+                      )}
+                    </div>
+                  </DropdownMenuItem>
+                ))}
             </>
           )}
         </>
