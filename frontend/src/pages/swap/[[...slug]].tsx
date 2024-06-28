@@ -522,8 +522,7 @@ function Page() {
 
   const swap = async (deposit?: boolean) => {
     if (!address) throw new Error("Wallet not connected");
-    if (!quote || quoteAmountOut === undefined || isFetchingQuote)
-      throw new Error("Quote not found");
+    if (!quote) throw new Error("Quote not found");
     if (deposit && !hasTokenOutReserve)
       throw new Error("Cannot deposit this token");
 
@@ -579,7 +578,13 @@ function Page() {
     } else {
       if (swapButtonState.isDisabled) return;
     }
-    if (quoteAmountOut === undefined || isFetchingQuote) return;
+    if (
+      quoteAmountOut === undefined ||
+      tokenInUsdValue === undefined ||
+      tokenOutUsdValue === undefined ||
+      isFetchingQuote
+    )
+      return;
 
     (deposit ? setIsSwappingAndDepositing : setIsSwapping)(true);
 
@@ -605,6 +610,8 @@ function Page() {
         assetOut: tokenOut.ticker,
         amountIn: value,
         amountOut: quoteAmountOut.toString(),
+        amountInUsd: tokenInUsdValue.toString(),
+        amountOutUsd: tokenOutUsdValue.toString(),
         deposit: deposit ? "true" : "false",
       });
     } catch (err) {
