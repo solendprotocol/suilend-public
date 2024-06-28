@@ -175,10 +175,14 @@ function RatesTabContent({ side, reserve }: TabContentProps) {
 
       <LabelWithValue
         label="Current utilization"
+        labelEndDecorator={
+          <div className="my-1.5 h-1 w-1 rounded-full bg-foreground" />
+        }
         value={formatPercent(reserve.utilizationPercent)}
         horizontal
       />
       <LabelWithValue
+        className="-mt-1.5"
         label="Current borrow APR"
         value={formatPercent(reserve.borrowAprPercent)}
         horizontal
@@ -191,7 +195,8 @@ function RatesTabContent({ side, reserve }: TabContentProps) {
             horizontal
           />
           <LabelWithValue
-            label={`Borrow APR at threshold ${index + 1}`}
+            className="-mt-1.5"
+            label={`Borrow APR at ${formatPercent(new BigNumber(rate.utilPercent))} util.`}
             value={formatPercent(new BigNumber(rate.aprPercent))}
             horizontal
           />
