@@ -12,7 +12,6 @@
   "private": true,
   "workspaces": [
     "frontend",
-    "pyth-sdk",
     "sdk"
   ]
 }
