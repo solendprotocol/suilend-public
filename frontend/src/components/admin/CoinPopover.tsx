@@ -33,10 +33,7 @@ export default function CoinPopover({
     <Popover
       label="coin"
       id="coin"
-      rootProps={{
-        open: isOpen,
-        onOpenChange: setIsOpen,
-      }}
+      rootProps={{ open: isOpen, onOpenChange: setIsOpen }}
       trigger={
         <Button
           className="justify-between"
@@ -70,14 +67,16 @@ export default function CoinPopover({
               <div className="mr-2">
                 <TokenLogo
                   className="h-4 w-4"
-                  coinType={cb.coinType}
-                  symbol={cb.symbol}
-                  src={cb.iconUrl}
+                  token={{
+                    coinType: cb.coinType,
+                    symbol: cb.symbol,
+                    iconUrl: cb.iconUrl,
+                  }}
                 />
               </div>
 
               <div className="flex w-full flex-row items-center justify-between">
-                <TLabel className="text-inherit">{cb.symbol}</TLabel>
+                <TLabel>{cb.symbol}</TLabel>
                 <TLabelSans>
                   {formatToken(cb.balance, { dp: cb.mintDecimals })} {cb.symbol}
                 </TLabelSans>

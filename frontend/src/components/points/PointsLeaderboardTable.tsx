@@ -1,24 +1,26 @@
 import { useMemo } from "react";
 
 import { ColumnDef } from "@tanstack/react-table";
+import { VenetianMask } from "lucide-react";
 
 import DataTable, {
   decimalSortingFn,
   tableHeader,
 } from "@/components/dashboard/DataTable";
-import LeaderboardDataLastUpdated from "@/components/points/LeaderboardDataLastUpdated";
-import LeaderboardDataUsers from "@/components/points/LeaderboardDataUsers";
 import PointsCount from "@/components/points/PointsCount";
 import PointsRank from "@/components/points/PointsRank";
+import CopyToClipboardButton from "@/components/shared/CopyToClipboardButton";
+import OpenURLButton from "@/components/shared/OpenURLButton";
 import Tooltip from "@/components/shared/Tooltip";
-import { TBody, TLabelSans } from "@/components/shared/Typography";
-import { Skeleton } from "@/components/ui/skeleton";
+import { TBody } from "@/components/shared/Typography";
+import { useAppContext } from "@/contexts/AppContext";
 import { LeaderboardRowData, usePointsContext } from "@/contexts/PointsContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 import { formatAddress } from "@/lib/format";
-import { cn } from "@/lib/utils";
+import { DASHBOARD_URL } from "@/lib/navigation";
 
 export default function PointsLeaderboardTable() {
+  const { explorer } = useAppContext();
   const { address } = useWalletContext();
   const { leaderboardRows } = usePointsContext();
 
@@ -42,11 +44,24 @@ export default function PointsLeaderboardTable() {
           const { address } = row.original;
 
           return (
-            <Tooltip title={address}>
-              <TBody className="w-max uppercase">
-                {formatAddress(address, 12)}
-              </TBody>
-            </Tooltip>
+            <div className="flex flex-row items-center gap-2">
+              <Tooltip title={address}>
+                <TBody className="w-max uppercase">
+                  {formatAddress(address, 12)}
+                </TBody>
+              </Tooltip>
+
+              <div className="flex h-5 flex-row items-center">
+                <CopyToClipboardButton value={address} />
+                <OpenURLButton url={explorer.buildAddressUrl(address)} />
+                <OpenURLButton
+                  url={`${DASHBOARD_URL}?wallet=${address}`}
+                  icon={<VenetianMask />}
+                >
+                  View Dashboard as this user
+                </OpenURLButton>
+              </div>
+            </div>
           );
         },
       },
@@ -81,29 +96,16 @@ export default function PointsLeaderboardTable() {
         },
       },
     ],
-    [],
+    [explorer],
   );
 
   return (
     <div className="flex w-full max-w-[960px] flex-col gap-6">
-      {leaderboardRows ? (
-        <TLabelSans>
-          <LeaderboardDataUsers />
-          {" • "}
-          <LeaderboardDataLastUpdated />
-        </TLabelSans>
-      ) : (
-        <Skeleton className="h-4 w-40" />
-      )}
-
       <DataTable<LeaderboardRowData>
         columns={columns}
         data={leaderboardRows}
         noDataMessage="No users"
         pageSize={100}
-        container={{
-          className: cn(!leaderboardRows && "-mb-6"),
-        }}
         tableRowClassName={(row) =>
           address &&
           row?.original.address === address &&

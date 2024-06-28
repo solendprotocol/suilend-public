@@ -6,6 +6,7 @@ import { capitalize } from "lodash";
 import * as Recharts from "recharts";
 import { useLocalStorage } from "usehooks-ts";
 
+import { ParsedDownsampledApiReserveAssetDataEvent } from "@suilend/sdk/parsers/apiReserveAssetDataEvent";
 import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 import { Side } from "@suilend/sdk/types";
 
@@ -15,7 +16,7 @@ import CartesianGridVerticalLine from "@/components/shared/CartesianGridVertical
 import TokenLogo from "@/components/shared/TokenLogo";
 import { TBody, TBodySans, TLabelSans } from "@/components/shared/Typography";
 import { AppData, useAppContext } from "@/contexts/AppContext";
-import { useDashboardContext } from "@/contexts/DashboardContext";
+import { useReserveAssetDataEventsContext } from "@/contexts/ReserveAssetDataEventsContext";
 import useBreakpoint from "@/hooks/useBreakpoint";
 import useIsTouchscreen from "@/hooks/useIsTouchscreen";
 import {
@@ -26,15 +27,19 @@ import {
   line,
   tooltip,
 } from "@/lib/chart";
-import { COINTYPE_COLOR_MAP, NORMALIZED_SUI_COINTYPE } from "@/lib/coinType";
+import { COINTYPE_COLOR_MAP } from "@/lib/coinType";
 import {
   DAYS,
   DAY_S,
   Days,
   RESERVE_EVENT_SAMPLE_INTERVAL_S_MAP,
-  calculateRewardsDepositAprPercent,
+  calculateRewardDepositAprPercent,
 } from "@/lib/events";
 import { formatPercent } from "@/lib/format";
+import {
+  getDedupedAprRewards,
+  getFilteredRewards,
+} from "@/lib/liquidityMining";
 import { cn } from "@/lib/utils";
 
 const getFieldCoinType = (field: string) =>
@@ -46,7 +51,7 @@ const getFieldColor = (field: string) => {
 
 type ChartData = {
   timestampS: number;
-  [interestAprPercent: string]: number;
+  [interestAprPercent: string]: number | undefined;
 };
 
 interface TooltipContentProps {
@@ -61,6 +66,7 @@ function TooltipContent({ side, fields, d, viewBox, x }: TooltipContentProps) {
   const appContext = useAppContext();
   const data = appContext.data as AppData;
 
+  if (fields.every((field) => d[field] === undefined)) return null;
   if (viewBox === undefined || x === undefined) return null;
   return (
     // Subset of TooltipContent className
@@ -78,7 +84,10 @@ function TooltipContent({ side, fields, d, viewBox, x }: TooltipContentProps) {
           <TBody>
             {formatPercent(
               new BigNumber(
-                fields.reduce((acc: number, field) => acc + d[field], 0),
+                fields.reduce(
+                  (acc: number, field) => acc + (d[field] as number),
+                  0,
+                ),
               ),
             )}
           </TBody>
@@ -94,7 +103,7 @@ function TooltipContent({ side, fields, d, viewBox, x }: TooltipContentProps) {
               isLast={index === fields.length - 1}
               value={
                 <span style={{ color }}>
-                  {formatPercent(new BigNumber(d[field]))}
+                  {formatPercent(new BigNumber(d[field] as number))}
                 </span>
               }
             >
@@ -105,9 +114,11 @@ function TooltipContent({ side, fields, d, viewBox, x }: TooltipContentProps) {
                   <TLabelSans>Rewards in</TLabelSans>
                   <TokenLogo
                     className="h-4 w-4"
-                    coinType={coinType}
-                    symbol={data.coinMetadataMap[coinType].symbol}
-                    src={data.coinMetadataMap[coinType].iconUrl}
+                    token={{
+                      coinType,
+                      symbol: data.coinMetadataMap[coinType].symbol,
+                      iconUrl: data.coinMetadataMap[coinType].iconUrl,
+                    }}
                   />
                   <TLabelSans>
                     {data.coinMetadataMap[coinType].symbol}
@@ -159,7 +170,7 @@ function Chart({ side, data }: ChartProps) {
   const minY = 0;
   const maxY = Math.max(
     ...data.map((d) =>
-      fields.reduce((acc: number, field) => acc + d[field], 0),
+      fields.reduce((acc: number, field) => acc + (d[field] ?? 0), 0),
     ),
   );
 
@@ -288,7 +299,7 @@ export default function HistoricalAprLineChart({
   const appContext = useAppContext();
   const data = appContext.data as AppData;
   const { reserveAssetDataEventsMap, fetchReserveAssetDataEvents } =
-    useDashboardContext();
+    useReserveAssetDataEventsContext();
 
   // Events
   const [days, setDays] = useLocalStorage<Days>(
@@ -296,10 +307,20 @@ export default function HistoricalAprLineChart({
     7,
   );
 
-  const suiReserve = data.reserveMap[NORMALIZED_SUI_COINTYPE];
+  const aprRewardReserves = useMemo(() => {
+    const rewards = data.rewardMap[reserve.coinType]?.[side] ?? [];
+    const filteredRewards = getFilteredRewards(rewards);
+    const aprRewards = getDedupedAprRewards(filteredRewards);
+
+    return aprRewards.map(
+      (aprReward) => data.reserveMap[aprReward.stats.rewardCoinType],
+    );
+  }, [data.rewardMap, reserve.coinType, side, data.reserveMap]);
 
   const didFetchInitialReserveAssetDataEventsRef = useRef<boolean>(false);
-  const didFetchInitialSuiReserveAssetDataEventsRef = useRef<boolean>(false);
+  const didFetchInitialRewardReservesAssetDataEventsRef = useRef<
+    Record<string, boolean>
+  >({});
   useEffect(() => {
     const events = reserveAssetDataEventsMap?.[reserve.id]?.[days];
     if (events === undefined) {
@@ -309,20 +330,29 @@ export default function HistoricalAprLineChart({
       didFetchInitialReserveAssetDataEventsRef.current = true;
     }
 
-    if (reserve.id === suiReserve.id) return;
-    const suiEvents = reserveAssetDataEventsMap?.[suiReserve.id]?.[days];
-    if (suiEvents === undefined) {
-      if (didFetchInitialSuiReserveAssetDataEventsRef.current) return;
+    // Rewards
+    aprRewardReserves.forEach((rewardReserve) => {
+      if (reserve.id === rewardReserve.id) return;
+      if (reserveAssetDataEventsMap?.[rewardReserve.id]?.[days] === undefined) {
+        if (
+          didFetchInitialRewardReservesAssetDataEventsRef.current[
+            rewardReserve.coinType
+          ]
+        )
+          return;
 
-      fetchReserveAssetDataEvents(suiReserve, days);
-      didFetchInitialSuiReserveAssetDataEventsRef.current = true;
-    }
+        fetchReserveAssetDataEvents(rewardReserve, days);
+        didFetchInitialRewardReservesAssetDataEventsRef.current[
+          rewardReserve.coinType
+        ] = true;
+      }
+    });
   }, [
     reserveAssetDataEventsMap,
     reserve,
     days,
     fetchReserveAssetDataEvents,
-    suiReserve,
+    aprRewardReserves,
   ]);
 
   const onDaysClick = (value: Days) => {
@@ -331,18 +361,26 @@ export default function HistoricalAprLineChart({
     const events = reserveAssetDataEventsMap?.[reserve.id]?.[value];
     if (events === undefined) fetchReserveAssetDataEvents(reserve, value);
 
-    if (reserve.id === suiReserve.id) return;
-    const suiEvents = reserveAssetDataEventsMap?.[suiReserve.id]?.[value];
-    if (suiEvents === undefined) fetchReserveAssetDataEvents(suiReserve, value);
+    // Rewards
+    aprRewardReserves.forEach((rewardReserve) => {
+      if (reserve.id === rewardReserve.id) return;
+      if (reserveAssetDataEventsMap?.[rewardReserve.id]?.[value] === undefined)
+        fetchReserveAssetDataEvents(rewardReserve, value);
+    });
   };
 
   // Data
   const chartData = useMemo(() => {
     const events = reserveAssetDataEventsMap?.[reserve.id]?.[days];
     if (events === undefined) return;
-
-    const suiEvents = reserveAssetDataEventsMap?.[suiReserve.id]?.[days];
-    if (suiEvents === undefined) return;
+    if (events.length === 0) return [];
+    if (
+      aprRewardReserves.some(
+        (rewardReserve) =>
+          reserveAssetDataEventsMap?.[rewardReserve.id]?.[days] === undefined,
+      )
+    )
+      return;
 
     // Data
     const sampleIntervalS = RESERVE_EVENT_SAMPLE_INTERVAL_S_MAP[days];
@@ -359,34 +397,33 @@ export default function HistoricalAprLineChart({
     const result: (Pick<ChartData, "timestampS"> & Partial<ChartData>)[] = [];
     timestampsS.forEach((timestampS) => {
       const event = events.findLast((e) => e.sampleTimestampS <= timestampS);
-      result.push({
-        timestampS,
-        depositInterestAprPercent: event ? +event.depositAprPercent : undefined,
-        borrowInterestAprPercent: event ? +event.borrowAprPercent : undefined,
-        [`depositInterestAprPercent_${NORMALIZED_SUI_COINTYPE}`]: event
-          ? calculateRewardsDepositAprPercent(event, suiEvents, reserve)
-          : undefined,
-      });
+
+      const d = aprRewardReserves.reduce(
+        (acc, rewardReserve) => ({
+          ...acc,
+          [`depositInterestAprPercent_${rewardReserve.coinType}`]: event
+            ? calculateRewardDepositAprPercent(
+                event,
+                reserveAssetDataEventsMap?.[rewardReserve.id]?.[
+                  days
+                ] as ParsedDownsampledApiReserveAssetDataEvent[],
+                reserve,
+              )
+            : undefined,
+        }),
+        {
+          timestampS,
+          depositInterestAprPercent: event
+            ? +event.depositAprPercent
+            : undefined,
+          borrowInterestAprPercent: event ? +event.borrowAprPercent : undefined,
+        },
+      );
+      result.push(d);
     });
 
-    const fields =
-      result.length > 0
-        ? Object.keys(result[0]).filter((key) => key !== "timestampS")
-        : [];
-
-    for (const d of result) {
-      let hasUndefined = false;
-      for (const field of fields) {
-        if (d[field] === undefined) {
-          d[field] = result.find((_d) => _d[field] !== undefined)?.[field];
-          hasUndefined = true;
-        }
-      }
-      if (!hasUndefined) break;
-    }
-
     return result as ChartData[];
-  }, [reserveAssetDataEventsMap, reserve, days, suiReserve.id]);
+  }, [reserveAssetDataEventsMap, reserve, days, aprRewardReserves]);
   const isLoading = chartData === undefined;
 
   return (
@@ -395,9 +432,9 @@ export default function HistoricalAprLineChart({
         {DAYS.map((_days) => (
           <Button
             key={_days}
-            className="px-2 text-muted-foreground"
+            className="px-2"
             labelClassName={cn(
-              "text-xs font-sans uppercase",
+              "text-muted-foreground text-xs font-sans uppercase",
               days === _days && "text-primary-foreground",
             )}
             variant="ghost"
@@ -410,7 +447,7 @@ export default function HistoricalAprLineChart({
       </div>
 
       <div
-        className="historical-apr-line-chart h-[140px] w-full flex-shrink-0 transform-gpu md:h-[160px]"
+        className="historical-apr-line-chart h-[140px] w-full shrink-0 transform-gpu md:h-[160px]"
         is-loading={isLoading ? "true" : "false"}
       >
         <Chart side={side} data={chartData ?? []} />

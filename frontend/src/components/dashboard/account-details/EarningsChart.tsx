@@ -73,9 +73,11 @@ function TooltipContent({
                 <div className="flex flex-row items-center gap-1.5">
                   <TokenLogo
                     className="h-4 w-4"
-                    coinType={coinType}
-                    symbol={coinMetadata.symbol}
-                    src={coinMetadata.iconUrl}
+                    token={{
+                      coinType,
+                      symbol: coinMetadata.symbol,
+                      iconUrl: coinMetadata.iconUrl,
+                    }}
                   />
                   <TLabelSans>{coinMetadata.symbol}</TLabelSans>
                 </div>
@@ -163,7 +165,7 @@ export default function EarningsChart({
 
   return (
     <div
-      className="earnings-chart h-[160px] w-full flex-shrink-0 transform-gpu md:h-[200px]"
+      className="earnings-chart h-[160px] w-full shrink-0 transform-gpu md:h-[200px]"
       is-loading={isLoading ? "true" : "false"}
     >
       <Recharts.ResponsiveContainer width="100%" height="100%">

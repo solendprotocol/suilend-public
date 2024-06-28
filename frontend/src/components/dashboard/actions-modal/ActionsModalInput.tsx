@@ -12,7 +12,12 @@ import { formatUsd } from "@/lib/format";
 import { Action } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-export const getActionInputId = (id: string) => `action-input.${id}`;
+const INPUT_HEIGHT = 70; // px
+const INPUT_BORDER_Y = 1; // px
+const INPUT_INNER_HEIGHT = INPUT_HEIGHT - 2 * INPUT_BORDER_Y; // px
+const MAX_BUTTON_WIDTH = 60; // px
+const MAX_BUTTON_HEIGHT = 40; // px
+const USD_LABEL_HEIGHT = 16; // px
 
 interface ActionsModalInputProps {
   value: string;
@@ -25,31 +30,30 @@ interface ActionsModalInputProps {
 
 const ActionsModalInput = forwardRef<HTMLInputElement, ActionsModalInputProps>(
   ({ value, onChange, reserve, action, useMaxAmount, onMaxClick }, ref) => {
-    const actionInputId = getActionInputId("value");
-
+    // Autofocus
     const localRef = useRef<HTMLInputElement>(null);
     useEffect(() => {
       setTimeout(() => localRef.current?.focus());
     }, [action]);
 
-    const INPUT_HEIGHT = 70; // px
-    const INPUT_BORDER_Y = 1; // px
-    const INPUT_INNER_HEIGHT = INPUT_HEIGHT - 2 * INPUT_BORDER_Y; // px
-    const MAX_BUTTON_WIDTH = 60; // px
-    const MAX_BUTTON_HEIGHT = INPUT_HEIGHT - 3 * 4 * 2; // px
-    const USD_LABEL_HEIGHT = 16; // px
+    // Usd
+    const usdValue = new BigNumber(value || 0).times(reserve.price);
 
     return (
       <div className="relative w-full">
         <div className="absolute left-3 top-1/2 z-[2] -translate-y-2/4">
           <Button
             className={cn(
-              "rounded-md uppercase",
               useMaxAmount &&
-                "border-secondary bg-secondary/5 text-primary-foreground",
+                "border-secondary bg-secondary/5 disabled:opacity-100",
+            )}
+            labelClassName={cn(
+              "uppercase",
+              useMaxAmount && "text-primary-foreground",
             )}
             variant="secondaryOutline"
             onClick={onMaxClick}
+            disabled={useMaxAmount}
             style={{
               width: `${MAX_BUTTON_WIDTH}px`,
               height: `${MAX_BUTTON_HEIGHT}px`,
@@ -61,22 +65,23 @@ const ActionsModalInput = forwardRef<HTMLInputElement, ActionsModalInputProps>(
 
         <InputComponent
           ref={mergeRefs([localRef, ref])}
-          id={actionInputId}
-          className="relative z-[1] flex-1 border-primary bg-card px-0 py-0 text-right text-2xl [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+          className="relative z-[1] border-primary bg-card px-0 py-0 text-right text-2xl"
           type="number"
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          onWheel={(e) => e.currentTarget.blur()}
           style={{
             height: `${INPUT_HEIGHT}px`,
             paddingLeft: `${3 * 4 + MAX_BUTTON_WIDTH + 3 * 4}px`,
-            paddingRight: `${3 * 4 + reserve.symbol.length * 14.4 + 4 * 4}px`,
+            paddingRight: `${3 * 4 + reserve.symbol.length * 14.4 + 3 * 4}px`,
             paddingTop: `${(INPUT_INNER_HEIGHT - MAX_BUTTON_HEIGHT) / 2}px`,
             paddingBottom: `${(INPUT_INNER_HEIGHT - MAX_BUTTON_HEIGHT) / 2 + USD_LABEL_HEIGHT}px`,
           }}
           step="any"
         />
+
         <div
-          className="absolute right-0 top-0 z-[2] flex flex-col items-end justify-center pl-3 pr-4"
+          className="absolute right-3 top-0 z-[2] flex flex-col items-end justify-center"
           style={{ height: `${INPUT_HEIGHT}px` }}
         >
           <TBody className="text-right text-2xl">{reserve.symbol}</TBody>
@@ -84,7 +89,8 @@ const ActionsModalInput = forwardRef<HTMLInputElement, ActionsModalInputProps>(
             className="text-right"
             style={{ height: `${USD_LABEL_HEIGHT}px` }}
           >
-            ≈{formatUsd(new BigNumber(value || "0").times(reserve.price))}
+            {!usdValue.eq(0) && "≈"}
+            {formatUsd(usdValue)}
           </TLabel>
         </div>
       </div>

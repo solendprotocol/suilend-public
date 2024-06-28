@@ -18,7 +18,6 @@ import {
 } from "@mysten/sui.js/client";
 import { TransactionBlock } from "@mysten/sui.js/transactions";
 import { isEqual } from "lodash";
-import { toast } from "sonner";
 import { useLocalStorage } from "usehooks-ts";
 
 import { ObligationOwnerCap } from "@suilend/sdk/_generated/suilend/lending-market/structs";
@@ -30,7 +29,7 @@ import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 import { useWalletContext } from "@/contexts/WalletContext";
 import useFetchAppData from "@/fetchers/useFetchAppData";
 import { ParsedCoinBalance } from "@/lib/coinBalance";
-import { EXPLORERS, RPCS } from "@/lib/constants";
+import { EXPLORERS, Explorer, RPCS, Rpc } from "@/lib/constants";
 import { RewardMap } from "@/lib/liquidityMining";
 
 export interface AppData {
@@ -51,9 +50,10 @@ export interface AppContext {
   data: AppData | null;
   refreshData: () => Promise<void>;
   rpc: (typeof RPCS)[number];
-  setRpcId: (value: string) => void;
+  customRpcUrl: string;
+  setRpc: (id: Rpc, customUrl: string) => void;
   explorer: (typeof EXPLORERS)[number];
-  setExplorerId: (value: string) => void;
+  setExplorerId: (id: Explorer) => void;
   obligation: ParsedObligation | null;
   setObligationId: Dispatch<SetStateAction<string | null>>;
   signExecuteAndWaitTransactionBlock: (
@@ -69,7 +69,8 @@ const defaultContextValue: AppContext = {
     throw Error("AppContextProvider not initialized");
   },
   rpc: RPCS[0],
-  setRpcId: () => {
+  customRpcUrl: "",
+  setRpc: () => {
     throw Error("AppContextProvider not initialized");
   },
   explorer: EXPLORERS[0],
@@ -97,7 +98,18 @@ export function AppContextProvider({ children }: PropsWithChildren) {
     "selectedRpc",
     defaultContextValue.rpc.id,
   );
-  const rpc = RPCS.find((rpc) => rpc.id === rpcId) ?? RPCS[0];
+  const [customRpcUrl, setCustomRpcUrl] = useLocalStorage<string>(
+    "customRpcUrl",
+    defaultContextValue.customRpcUrl,
+  );
+
+  const rpc = useMemo(
+    () =>
+      rpcId === Rpc.CUSTOM
+        ? { id: Rpc.CUSTOM, name: "Custom", url: customRpcUrl }
+        : RPCS.find((rpc) => rpc.id === rpcId) ?? RPCS[0],
+    [rpcId, customRpcUrl],
+  );
 
   // Explorer
   const [explorerId, setExplorerId] = useLocalStorage<string>(
@@ -187,22 +199,15 @@ export function AppContextProvider({ children }: PropsWithChildren) {
       data: data ?? null,
       refreshData,
       rpc,
-      setRpcId: async (value: string) => {
-        const newRpc = RPCS.find((r) => r.id === value);
-        if (!newRpc) return;
+      customRpcUrl,
+      setRpc: (id: Rpc, customUrl: string) => {
+        setRpcId(id);
+        if (id === Rpc.CUSTOM) setCustomRpcUrl(customUrl);
 
-        setRpcId(value);
-        await refreshData();
-        toast.info(`Switched RPC to ${newRpc.name}`);
+        setTimeout(() => refreshData(), 100); // Wait for suiClient to update
       },
       explorer,
-      setExplorerId: (value: string) => {
-        const newExplorer = EXPLORERS.find((e) => e.id === value);
-        if (!newExplorer) return;
-
-        setExplorerId(value);
-        toast.info(`Switched explorer to ${newExplorer.name}`);
-      },
+      setExplorerId: (id: Explorer) => setExplorerId(id),
       obligation:
         data?.obligations?.find(
           (obligation) => obligation.id === obligationId,
@@ -219,7 +224,9 @@ export function AppContextProvider({ children }: PropsWithChildren) {
       data,
       refreshData,
       rpc,
+      customRpcUrl,
       setRpcId,
+      setCustomRpcUrl,
       explorer,
       setExplorerId,
       obligationId,

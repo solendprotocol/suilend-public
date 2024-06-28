@@ -24,7 +24,6 @@ import {
 import EarningsChart, {
   ChartData,
 } from "@/components/dashboard/account-details/EarningsChart";
-import Card from "@/components/dashboard/Card";
 import DataTable, { tableHeader } from "@/components/dashboard/DataTable";
 import TitleWithIcon from "@/components/shared/TitleWithIcon";
 import TokenLogo from "@/components/shared/TokenLogo";
@@ -33,7 +32,7 @@ import { TBody, TLabelSans } from "@/components/shared/Typography";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AppData, useAppContext } from "@/contexts/AppContext";
-import { useDashboardContext } from "@/contexts/DashboardContext";
+import { useReserveAssetDataEventsContext } from "@/contexts/ReserveAssetDataEventsContext";
 import { msPerYear } from "@/lib/constants";
 import { DAY_S, Days, EventType, eventSortAsc } from "@/lib/events";
 import { formatToken, formatUsd } from "@/lib/format";
@@ -61,7 +60,7 @@ export default function EarningsTabContent({
   const appContext = useAppContext();
   const data = appContext.data as AppData;
   const obligation = appContext.obligation as ParsedObligation;
-  const { reserveAssetDataEventsMap } = useDashboardContext();
+  const { reserveAssetDataEventsMap } = useReserveAssetDataEventsContext();
 
   type CumInterestMap = {
     [coinType: string]: {
@@ -733,9 +732,11 @@ export default function EarningsTabContent({
             <div className="flex w-max flex-row items-center gap-2">
               <TokenLogo
                 className="h-4 w-4"
-                coinType={coinType}
-                symbol={coinMetadata.symbol}
-                src={coinMetadata.iconUrl}
+                token={{
+                  coinType,
+                  symbol: coinMetadata.symbol,
+                  iconUrl: coinMetadata.iconUrl,
+                }}
               />
 
               <TBody className="w-max">{coinMetadata.symbol}</TBody>
@@ -778,9 +779,11 @@ export default function EarningsTabContent({
                   <TokenAmount
                     key={coinType}
                     amount={rewards[coinType][nowS]}
-                    coinType={coinType}
-                    symbol={coinMetadata.symbol}
-                    src={coinMetadata.iconUrl}
+                    token={{
+                      coinType,
+                      symbol: coinMetadata.symbol,
+                      iconUrl: coinMetadata.iconUrl,
+                    }}
                     decimals={coinMetadata.decimals}
                   />
                 );
@@ -868,14 +871,17 @@ export default function EarningsTabContent({
   return (
     <div className="flex flex-1 flex-col gap-6 overflow-y-auto overflow-x-hidden py-4">
       <div className="flex flex-col gap-2 px-4">
-        <Card>
-          <div className="grid grid-cols-2 gap-4 p-4 md:grid-cols-4">
-            <div className="flex flex-1 flex-col items-center gap-1">
+        <div className="relative w-full">
+          <div className="absolute bottom-0 left-0 right-3/4 top-0 z-[1] rounded-l-sm bg-gradient-to-r from-primary/20 to-transparent" />
+
+          <div className="relative z-[2] flex flex-row items-center justify-around rounded-sm border border-primary/5 px-2 py-3 md:px-4">
+            <div className="flex flex-col items-center gap-1">
               <TLabelSans className="text-center">Net earnings</TLabelSans>
               {totalEarningsUsd !== undefined ? (
                 <Tooltip title={formatUsd(totalEarningsUsd, { exact: true })}>
                   <TBody
                     className={cn(
+                      "text-center",
                       totalEarningsUsd.gt(0) && "text-success",
                       totalEarningsUsd.lt(0) && "text-destructive",
                     )}
@@ -889,7 +895,26 @@ export default function EarningsTabContent({
               )}
             </div>
 
-            <div className="flex flex-1 flex-col items-center gap-1">
+            <TLabelSans>=</TLabelSans>
+
+            <div className="flex flex-col items-center gap-1">
+              <TLabelSans className="text-center">Rewards earned</TLabelSans>
+              {totalRewardsEarnedUsd !== undefined ? (
+                <Tooltip
+                  title={formatUsd(totalRewardsEarnedUsd, { exact: true })}
+                >
+                  <TBody className="text-center">
+                    {formatUsd(totalRewardsEarnedUsd)}
+                  </TBody>
+                </Tooltip>
+              ) : (
+                <Skeleton className="h-5 w-10" />
+              )}
+            </div>
+
+            <TLabelSans>+</TLabelSans>
+
+            <div className="flex flex-col items-center gap-1">
               <TLabelSans className="text-center">Interest earned</TLabelSans>
               {cumInterestEarnedUsd !== undefined ? (
                 <Tooltip
@@ -904,11 +929,13 @@ export default function EarningsTabContent({
               )}
             </div>
 
-            <div className="flex flex-1 flex-col items-center gap-1">
+            <TLabelSans>-</TLabelSans>
+
+            <div className="flex flex-col items-center gap-1">
               <TLabelSans className="text-center">Interest paid</TLabelSans>
               {cumInterestPaidUsd ? (
                 <Tooltip title={formatUsd(cumInterestPaidUsd, { exact: true })}>
-                  <TBody className="text-right">
+                  <TBody className="text-center">
                     {formatUsd(cumInterestPaidUsd)}
                   </TBody>
                 </Tooltip>
@@ -916,23 +943,8 @@ export default function EarningsTabContent({
                 <Skeleton className="h-5 w-10" />
               )}
             </div>
-
-            <div className="flex flex-1 flex-col items-center gap-1">
-              <TLabelSans className="text-center">Rewards earned</TLabelSans>
-              {totalRewardsEarnedUsd !== undefined ? (
-                <Tooltip
-                  title={formatUsd(totalRewardsEarnedUsd, { exact: true })}
-                >
-                  <TBody className="text-center">
-                    {formatUsd(totalRewardsEarnedUsd)}
-                  </TBody>
-                </Tooltip>
-              ) : (
-                <Skeleton className="h-5 w-10" />
-              )}
-            </div>
           </div>
-        </Card>
+        </div>
 
         <TLabelSans>
           Note: The above are estimates calculated using current prices.
@@ -954,61 +966,64 @@ export default function EarningsTabContent({
           data: rows?.borrow,
           noDataMessage: "No borrows",
         },
-      ].map((table, index, array) => (
-        <Fragment key={table.title}>
-          <div className="flex flex-col gap-4">
-            <TitleWithIcon className="px-4">{table.title}</TitleWithIcon>
+      ].map((table, index, array) => {
+        const chartData =
+          table.side === Side.DEPOSIT
+            ? interpolatedCumInterestEarnedData
+            : interpolatedCumInterestPaidData;
 
-            <div
-              key={table.title}
-              className="flex flex-col max-lg:gap-4 lg:flex-row"
-            >
-              <div className="max-lg:w-full lg:min-w-0 lg:flex-1">
-                <DataTable<RowData>
-                  columns={table.columns}
-                  data={table.data}
-                  noDataMessage={table.noDataMessage}
-                  skeletonRows={data.lendingMarket.reserves.length}
-                  container={{
-                    className: "overflow-y-visible overflow-x-auto",
-                  }}
-                  tableClassName="border-y-0"
-                  tableCellClassName={(cell) =>
-                    cn(
-                      cell &&
-                        Object.entries(cell.row.original.rewards).length > 1
-                        ? "py-2 h-auto"
-                        : "py-0 h-12",
-                    )
-                  }
-                />
-              </div>
+        return (
+          <Fragment key={table.title}>
+            <div className="flex flex-col gap-4">
+              <TitleWithIcon className="px-4">{table.title}</TitleWithIcon>
 
-              <Separator
-                orientation="vertical"
-                className="max-lg:hidden lg:mr-2"
-              />
+              <div
+                key={table.title}
+                className="flex flex-col max-lg:gap-4 lg:flex-row"
+              >
+                <div className="max-lg:w-full lg:min-w-0 lg:flex-1">
+                  <DataTable<RowData>
+                    columns={table.columns}
+                    data={table.data}
+                    noDataMessage={table.noDataMessage}
+                    skeletonRows={data.lendingMarket.reserves.length}
+                    container={{
+                      className: "overflow-y-visible overflow-x-auto",
+                    }}
+                    tableClassName="border-y-0"
+                    tableCellClassName={(cell) =>
+                      cn(
+                        cell &&
+                          Object.entries(cell.row.original.rewards).length > 1
+                          ? "py-2 h-auto"
+                          : "py-0 h-12",
+                      )
+                    }
+                  />
+                </div>
 
-              <div className="max-lg:w-full lg:min-w-0 lg:flex-1">
-                <EarningsChart
-                  side={table.side}
-                  isLoading={
-                    (table.side === Side.DEPOSIT
-                      ? interpolatedCumInterestEarnedData
-                      : interpolatedCumInterestPaidData) === undefined
-                  }
-                  data={
-                    (table.side === Side.DEPOSIT
-                      ? interpolatedCumInterestEarnedData
-                      : interpolatedCumInterestPaidData) ?? []
-                  }
-                />
+                {(chartData === undefined || chartData.length > 0) && (
+                  <>
+                    <Separator
+                      orientation="vertical"
+                      className="max-lg:hidden lg:mr-2"
+                    />
+
+                    <div className="max-lg:w-full lg:min-w-0 lg:flex-1">
+                      <EarningsChart
+                        side={table.side}
+                        isLoading={chartData === undefined}
+                        data={chartData ?? []}
+                      />
+                    </div>
+                  </>
+                )}
               </div>
             </div>
-          </div>
-          {index !== array.length - 1 && <Separator />}
-        </Fragment>
-      ))}
+            {index !== array.length - 1 && <Separator />}
+          </Fragment>
+        );
+      })}
     </div>
   );
 }

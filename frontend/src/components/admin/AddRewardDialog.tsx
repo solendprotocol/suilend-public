@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { CoinMetadata, SuiClient } from "@mysten/sui.js/client";
 import { TransactionBlock } from "@mysten/sui.js/transactions";
 import * as Sentry from "@sentry/nextjs";
 import BigNumber from "bignumber.js";
+import { isEqual } from "lodash";
 import { Eraser, Plus } from "lucide-react";
 import { toast } from "sonner";
 
@@ -12,9 +13,9 @@ import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 
 import CoinPopover from "@/components/admin/CoinPopover";
 import Dialog from "@/components/admin/Dialog";
-import Input from "@/components/admin/Input";
 import Button from "@/components/shared/Button";
 import Grid from "@/components/shared/Grid";
+import Input from "@/components/shared/Input";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 import { parseCoinBalances } from "@/lib/coinBalance";
@@ -46,6 +47,7 @@ export default function AddRewardDialog({
     return Array.from(new Set(coinTypes));
   }, [data.coinBalancesRaw]);
 
+  const fetchingCoinTypesRef = useRef<string[] | undefined>(undefined);
   const [coinMetadataMap, setCoinMetadataMap] = useState<
     Record<string, CoinMetadata>
   >({});
@@ -56,6 +58,13 @@ export default function AddRewardDialog({
       );
       if (filteredCoinTypes.length === 0) return;
 
+      if (
+        fetchingCoinTypesRef.current !== undefined &&
+        !isEqual(filteredCoinTypes, fetchingCoinTypesRef.current)
+      )
+        return;
+
+      fetchingCoinTypesRef.current = filteredCoinTypes;
       const result = await getCoinMetadataMap(suiClient, filteredCoinTypes);
       setCoinMetadataMap(result);
     })();

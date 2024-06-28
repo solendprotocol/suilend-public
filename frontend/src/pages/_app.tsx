@@ -65,19 +65,19 @@ export default function App({
               process.env.NEXT_PUBLIC_LAUNCHDARKLY_CLIENT_SIDE_ID as string
             }
           >
-            <WalletProvider>
-              <WalletContextProvider>
-                <AppContextProvider>
-                  <RefreshDataContextProvider>
-                    <PointsContextProvider>
-                      <WormholeConnectContextProvider>
+            <WormholeConnectContextProvider>
+              <WalletProvider>
+                <WalletContextProvider>
+                  <AppContextProvider>
+                    <RefreshDataContextProvider>
+                      <PointsContextProvider>
                         {getLayout(<Component {...pageProps} />)}
-                      </WormholeConnectContextProvider>
-                    </PointsContextProvider>
-                  </RefreshDataContextProvider>
-                </AppContextProvider>
-              </WalletContextProvider>
-            </WalletProvider>
+                      </PointsContextProvider>
+                    </RefreshDataContextProvider>
+                  </AppContextProvider>
+                </WalletContextProvider>
+              </WalletProvider>
+            </WormholeConnectContextProvider>
           </LDProvider>
           <Toaster />
         </TooltipProvider>

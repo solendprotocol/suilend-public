@@ -15,7 +15,6 @@ import { toast } from "sonner";
 import { phantom } from "@suilend/sdk/_generated/_framework/reified";
 import { LendingMarket } from "@suilend/sdk/_generated/suilend/lending-market/structs";
 import { Obligation } from "@suilend/sdk/_generated/suilend/obligation/structs";
-import { Reserve } from "@suilend/sdk/_generated/suilend/reserve/structs";
 import {
   LENDING_MARKET_ID,
   LENDING_MARKET_TYPE,
@@ -34,7 +33,6 @@ import {
 } from "@suilend/sdk/utils/obligation";
 import * as simulate from "@suilend/sdk/utils/simulate";
 
-import Input from "@/components/admin/Input";
 import DataTable, {
   decimalSortingFn,
   tableHeader,
@@ -42,6 +40,7 @@ import DataTable, {
 import UtilizationBar from "@/components/dashboard/UtilizationBar";
 import Button from "@/components/shared/Button";
 import Grid from "@/components/shared/Grid";
+import Input from "@/components/shared/Input";
 import LabelWithValue from "@/components/shared/LabelWithValue";
 import { TBody } from "@/components/shared/Typography";
 import { AppData, useAppContext } from "@/contexts/AppContext";

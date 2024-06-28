@@ -1,11 +1,14 @@
 import { Fragment, PropsWithChildren } from "react";
 
 import BigNumber from "bignumber.js";
+import { capitalize } from "lodash";
 
 import { SuilendClient } from "@suilend/sdk/client";
 import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
+import { Side } from "@suilend/sdk/types";
 
 import { useActionsModalContext } from "@/components/dashboard/actions-modal/ActionsModalContext";
+import HistoricalAprLineChart from "@/components/dashboard/actions-modal/HistoricalAprLineChart";
 import PythLogo from "@/components/dashboard/actions-modal/PythLogo";
 import AprLineChart from "@/components/shared/AprLineChart";
 import Button from "@/components/shared/Button";
@@ -27,19 +30,25 @@ import {
 } from "@/lib/tooltips";
 import { cn } from "@/lib/utils";
 
-export enum Panel {
-  LIMITS = "limits",
+export enum ParametersPanelTab {
+  ADVANCED = "advanced",
   RATES = "rates",
   OBJECTS = "objects",
 }
 
-interface PanelProps {
+interface TabContentProps {
+  side: Side;
   reserve: ParsedReserve;
 }
 
-function LimitsPanel({ reserve }: PanelProps) {
+function AdvancedTabContent({ side, reserve }: TabContentProps) {
   return (
     <>
+      <div className="mb-1 flex w-full flex-col gap-4">
+        <HistoricalAprLineChart reserve={reserve} side={side} />
+        <Separator />
+      </div>
+
       <LabelWithValue
         label="Deposit limit"
         value={`${formatToken(reserve.config.depositLimit, { dp: 0 })} ${reserve.symbol}`}
@@ -145,9 +154,25 @@ function LimitsPanel({ reserve }: PanelProps) {
   );
 }
 
-function RatesPanel({ reserve }: PanelProps) {
+function RatesTabContent({ side, reserve }: TabContentProps) {
   return (
     <>
+      <div className="mb-1 w-full">
+        <AprLineChart
+          data={reserve.config.interestRate
+            .slice()
+            .sort((a, b) => +a.utilPercent - +b.utilPercent)
+            .map((row) => ({
+              utilPercent: +row.utilPercent,
+              aprPercent: +row.aprPercent,
+            }))}
+          reference={{
+            utilPercent: +reserve.utilizationPercent,
+            aprPercent: +reserve.borrowAprPercent,
+          }}
+        />
+      </div>
+
       <LabelWithValue
         label="Current utilization"
         value={formatPercent(reserve.utilizationPercent)}
@@ -176,7 +201,7 @@ function RatesPanel({ reserve }: PanelProps) {
   );
 }
 
-function ObjectsPanel({ reserve }: PanelProps) {
+function ObjectsTabContent({ side, reserve }: TabContentProps) {
   const { explorer, obligation, ...restAppContext } = useAppContext();
   const suilendClient = restAppContext.suilendClient as SuilendClient<string>;
 
@@ -232,80 +257,62 @@ function ObjectsPanel({ reserve }: PanelProps) {
   );
 }
 
-interface PanelButtonProps extends PropsWithChildren {
+interface TabButtonProps extends PropsWithChildren {
   isActive: boolean;
   onClick: () => void;
 }
 
-function PanelButton({ isActive, onClick, children }: PanelButtonProps) {
+function TabButton({ isActive, onClick, children }: TabButtonProps) {
   return (
     <Button
       className={cn(
         "h-7 flex-1 py-0 uppercase",
-        isActive && "border-secondary bg-secondary/5 text-primary-foreground",
+        isActive && "border border-secondary disabled:opacity-100",
       )}
       labelClassName="text-xs"
-      variant="secondaryOutline"
+      variant={isActive ? "secondary" : "secondaryOutline"}
       onClick={onClick}
+      disabled={isActive}
     >
       {children}
     </Button>
   );
 }
 
-interface ParametersPanelProps {
+interface ParametersTabContentProps {
+  side: Side;
   reserve: ParsedReserve;
 }
 
-export default function ParametersPanel({ reserve }: ParametersPanelProps) {
-  const { activePanel, setActivePanel } = useActionsModalContext();
+export default function ParametersPanel({
+  side,
+  reserve,
+}: ParametersTabContentProps) {
+  const { selectedParametersPanelTab, onSelectedParametersPanelTabChange } =
+    useActionsModalContext();
+
+  const TabContent = {
+    [ParametersPanelTab.ADVANCED]: AdvancedTabContent,
+    [ParametersPanelTab.RATES]: RatesTabContent,
+    [ParametersPanelTab.OBJECTS]: ObjectsTabContent,
+  }[selectedParametersPanelTab];
 
   return (
     <>
       <div className="flex flex-row gap-2">
-        <PanelButton
-          isActive={activePanel === Panel.LIMITS}
-          onClick={() => setActivePanel(Panel.LIMITS)}
-        >
-          Limits
-        </PanelButton>
-        <PanelButton
-          isActive={activePanel === Panel.RATES}
-          onClick={() => setActivePanel(Panel.RATES)}
-        >
-          Rates
-        </PanelButton>
-
-        <PanelButton
-          isActive={activePanel === Panel.OBJECTS}
-          onClick={() => setActivePanel(Panel.OBJECTS)}
-        >
-          Objects
-        </PanelButton>
+        {Object.values(ParametersPanelTab).map((tab) => (
+          <TabButton
+            key={tab}
+            isActive={selectedParametersPanelTab === tab}
+            onClick={() => onSelectedParametersPanelTabChange(tab)}
+          >
+            {capitalize(tab)}
+          </TabButton>
+        ))}
       </div>
 
-      <div className="flex flex-col gap-2.5 md:-m-4 md:h-[266px] md:overflow-y-auto md:p-4">
-        {activePanel === Panel.LIMITS && <LimitsPanel reserve={reserve} />}
-        {activePanel === Panel.RATES && <RatesPanel reserve={reserve} />}
-        {activePanel === Panel.OBJECTS && <ObjectsPanel reserve={reserve} />}
-      </div>
-
-      <Separator className="hidden md:block" />
-
-      <div className="h-[140px] w-full flex-shrink-0 md:h-[160px]">
-        <AprLineChart
-          data={reserve.config.interestRate
-            .slice()
-            .sort((a, b) => +a.utilPercent - +b.utilPercent)
-            .map((row) => ({
-              utilPercent: +row.utilPercent,
-              aprPercent: +row.aprPercent,
-            }))}
-          reference={{
-            utilPercent: +reserve.utilizationPercent,
-            aprPercent: +reserve.borrowAprPercent,
-          }}
-        />
+      <div className="flex flex-col gap-3 md:-m-4 md:overflow-y-auto md:p-4">
+        <TabContent side={side} reserve={reserve} />
       </div>
     </>
   );

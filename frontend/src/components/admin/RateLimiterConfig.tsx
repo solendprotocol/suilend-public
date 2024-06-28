@@ -5,8 +5,8 @@ import { Infinity } from "lucide-react";
 import { NewConfigArgs as NewRateLimitedConfigArgs } from "@suilend/sdk/_generated/suilend/rate-limiter/functions";
 import { maxU64 } from "@suilend/sdk/constants";
 
-import Input from "@/components/admin/Input";
 import Button from "@/components/shared/Button";
+import Input from "@/components/shared/Input";
 
 export interface ConfigState {
   maxOutflow: string;

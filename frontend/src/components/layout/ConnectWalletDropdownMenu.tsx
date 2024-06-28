@@ -2,7 +2,7 @@ import Image from "next/image";
 import React, { useState } from "react";
 
 import * as Sentry from "@sentry/nextjs";
-import { ChevronDown, ChevronRight, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "sonner";
 
 import Button from "@/components/shared/Button";
@@ -10,7 +10,7 @@ import Collapsible from "@/components/shared/Collapsible";
 import DropdownMenu, {
   DropdownMenuItem,
 } from "@/components/shared/DropdownMenu";
-import { TLabel, TLabelSans } from "@/components/shared/Typography";
+import { TLabelSans } from "@/components/shared/Typography";
 import { useWalletContext } from "@/contexts/WalletContext";
 import useIsAndroid from "@/hooks/useIsAndroid";
 import useIsiOS from "@/hooks/useIsiOS";
@@ -68,15 +68,10 @@ function WalletDropdownItem({ wallet }: WalletDropdownItemProps) {
             <div className="h-6 w-6" />
           )}
 
-          <TLabelSans className="text-inherit">{wallet.name}</TLabelSans>
+          <TLabelSans className="text-foreground">{wallet.name}</TLabelSans>
         </div>
 
-        <div className="flex flex-row items-center gap-2">
-          {wallet.isInstalled && (
-            <TLabel className="uppercase text-inherit">Installed</TLabel>
-          )}
-          <ChevronRight className="h-4 w-4" />
-        </div>
+        {wallet.isInstalled && <TLabelSans>Installed</TLabelSans>}
       </div>
     </DropdownMenuItem>
   );
@@ -99,7 +94,7 @@ export default function ConnectWalletDropdownMenu() {
 
   return (
     <DropdownMenu
-      root={{
+      rootProps={{
         open: isConnectWalletDropdownOpen,
         onOpenChange: setIsConnectWalletDropdownOpen,
       }}
@@ -129,10 +124,7 @@ export default function ConnectWalletDropdownMenu() {
             open={showOtherWallets}
             onOpenChange={setShowOtherWallets}
             title="Other wallets"
-            buttonClassName={cn(
-              "!bg-popover w-full justify-between px-0",
-              showOtherWallets && "!text-primary-foreground",
-            )}
+            buttonClassName="!bg-popover w-full justify-between px-0"
           >
             <div
               className={cn("flex flex-col gap-2", showOtherWallets && "mt-4")}

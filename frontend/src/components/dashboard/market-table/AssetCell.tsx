@@ -16,12 +16,7 @@ export default function AssetCell({
 }: AssetCellProps) {
   return (
     <div className="flex flex-row items-center gap-3">
-      <TokenLogo
-        showTooltip
-        coinType={coinType}
-        symbol={symbol}
-        src={iconUrl}
-      />
+      <TokenLogo showTooltip token={{ coinType, symbol, iconUrl }} />
 
       <div className="flex flex-col gap-1">
         <TBody>{symbol}</TBody>

@@ -10,6 +10,7 @@ export enum Rpc {
   TRITON_ONE = "tritonOne",
   FULL_NODE = "fullNode",
   ALL_THAT_NODE = "allThatNode",
+  CUSTOM = "custom",
 }
 
 export const RPCS = [
@@ -29,6 +30,11 @@ export const RPCS = [
     id: Rpc.ALL_THAT_NODE,
     name: "All That Node",
     url: "https://sui-mainnet-rpc.allthatnode.com",
+  },
+  {
+    id: Rpc.CUSTOM,
+    name: "Custom",
+    url: "",
   },
 ];
 

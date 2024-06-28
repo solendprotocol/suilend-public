@@ -4,7 +4,7 @@ import * as Sentry from "@sentry/nextjs";
 
 import styles from "@/components/bridge/WormholeConnect.module.scss";
 import Container from "@/components/shared/Container";
-import { RPCS, Rpc } from "@/lib/constants";
+import { useAppContext } from "@/contexts/AppContext";
 import { DASHBOARD_URL } from "@/lib/navigation";
 import track from "@/lib/track";
 import { cn } from "@/lib/utils";
@@ -14,9 +14,7 @@ interface WormholeConnectProps {
 }
 
 export default function WormholeConnect({ isHidden }: WormholeConnectProps) {
-  // RPCs
-  const solanaRpc = `https://solendf-solendf-67c7.rpcpool.com/${process.env.NEXT_PUBLIC_SOL_TRITON_ONE_DEV_API_KEY ?? ""}`;
-  const suiRpc = RPCS.find((rpc) => rpc.id === Rpc.TRITON_ONE)?.url;
+  const { rpc } = useAppContext();
 
   // Analytics
   const [didSubmit, setDidSubmit] = useState<boolean>(false);
@@ -142,24 +140,17 @@ export default function WormholeConnect({ isHidden }: WormholeConnectProps) {
           rpcs: {
             ethereum:
               "https://rpc.ankr.com/eth/d57d49c5cc988185579623ea8fc23e7a0fc7005e843939bc29ed460952b381cb",
-            solana: solanaRpc,
-            sui: suiRpc,
+            solana: `https://solendf-solendf-67c7.rpcpool.com/${process.env.NEXT_PUBLIC_SOL_TRITON_ONE_DEV_API_KEY ?? ""}`,
+            sui: rpc.url,
+            base: "https://rpc.ankr.com/base/d57d49c5cc988185579623ea8fc23e7a0fc7005e843939bc29ed460952b381cb",
+            arbitrum:
+              "https://rpc.ankr.com/arbitrum/d57d49c5cc988185579623ea8fc23e7a0fc7005e843939bc29ed460952b381cb",
           },
-          tokens: [
-            "USDCeth",
-            // "USDCpolygon",
-            // "USDCavax",
-            // "USDCsol",
-            // "USDCarbitrum",
-            // "USDCoptimism",
-            // "USDCbase",
-            "USDT",
-            // "SUI",
-          ],
+          tokens: ["WETH", "USDCeth", "USDT"],
           cta: { text: "Deposit", link: DASHBOARD_URL },
           bridgeDefaults: { toNetwork: "sui", requiredNetwork: "sui" },
           pageHeader: "Bridge",
-          networks: ["ethereum", "solana", "sui"],
+          networks: ["ethereum", "solana", "sui", "base", "arbitrum"],
           showHamburgerMenu: false,
         })}
         data-theme={JSON.stringify({

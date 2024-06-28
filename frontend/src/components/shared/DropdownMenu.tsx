@@ -15,18 +15,21 @@ import { cn } from "@/lib/utils";
 
 interface DropdownMenuItemProps extends PropsWithChildren {
   className?: ClassValue;
+  isSelected?: boolean;
   onClick: () => void;
 }
 
 export function DropdownMenuItem({
   className,
   onClick,
+  isSelected,
   children,
 }: DropdownMenuItemProps) {
   return (
     <DropdownMenuItemComponent
       className={cn(
-        "cursor-pointer border px-3 py-2 font-sans text-xs text-muted-foreground focus:border-secondary focus:bg-secondary/5 focus:text-primary-foreground",
+        "cursor-pointer border px-3 py-2 font-sans text-xs text-muted-foreground focus:border-transparent focus:bg-muted/10 focus:text-foreground",
+        isSelected && "border-transparent bg-muted/15 text-foreground",
         className,
       )}
       onClick={onClick}
@@ -41,7 +44,7 @@ export function DropdownMenuSeparator() {
 }
 
 interface DropdownMenuProps {
-  root?: DropdownMenuRootProps;
+  rootProps?: DropdownMenuRootProps;
   trigger: ReactNode;
   title?: string;
   description?: ReactNode;
@@ -49,14 +52,14 @@ interface DropdownMenuProps {
 }
 
 export default function DropdownMenu({
-  root,
+  rootProps,
   trigger,
   title,
   description,
   items,
 }: DropdownMenuProps) {
   return (
-    <DropdownMenuRoot {...root}>
+    <DropdownMenuRoot {...rootProps}>
       <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
       <DropdownMenuContent
         className="rounded-md p-4"

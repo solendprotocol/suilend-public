@@ -3,54 +3,28 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
-  useRef,
-  useState,
 } from "react";
 
 import { SuiTransactionBlockResponse } from "@mysten/sui.js/client";
 import { TransactionBlock } from "@mysten/sui.js/transactions";
 import * as Sentry from "@sentry/nextjs";
-import pLimit from "p-limit";
 
-import { fetchDownsampledApiReserveAssetDataEvents } from "@suilend/sdk/api/events";
-import {
-  ParsedDownsampledApiReserveAssetDataEvent,
-  parseDownsampledApiReserveAssetDataEvent,
-} from "@suilend/sdk/parsers/apiReserveAssetDataEvent";
-import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
+import { SuilendClient } from "@suilend/sdk/client";
 
 import { ActionsModalContextProvider } from "@/components/dashboard/actions-modal/ActionsModalContext";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { useWalletContext } from "@/contexts/WalletContext";
-import { DAYS, Days, RESERVE_EVENT_SAMPLE_INTERVAL_S_MAP } from "@/lib/events";
 import { RewardSummary } from "@/lib/liquidityMining";
-
-type ReserveAssetDataEventsMap = Record<
-  string,
-  Record<Days, ParsedDownsampledApiReserveAssetDataEvent[]>
->;
 
 interface DashboardContext {
   claimRewards: (
     rewards: RewardSummary[],
   ) => Promise<SuiTransactionBlockResponse>;
-
-  reserveAssetDataEventsMap?: ReserveAssetDataEventsMap;
-  fetchReserveAssetDataEvents: (
-    reserve: ParsedReserve,
-    days: Days,
-  ) => Promise<void>;
 }
 
 const defaultContextValue: DashboardContext = {
   claimRewards: async () => {
-    throw Error("DashboardContextProvider not initialized");
-  },
-
-  reserveAssetDataEventsMap: undefined,
-  fetchReserveAssetDataEvents: async () => {
     throw Error("DashboardContextProvider not initialized");
   },
 };
@@ -61,15 +35,11 @@ export const useDashboardContext = () => useContext(DashboardContext);
 
 export function DashboardContextProvider({ children }: PropsWithChildren) {
   const { address } = useWalletContext();
-  const {
-    suilendClient,
-    obligation,
-    signExecuteAndWaitTransactionBlock,
-    ...restAppContext
-  } = useAppContext();
+  const { obligation, signExecuteAndWaitTransactionBlock, ...restAppContext } =
+    useAppContext();
+  const suilendClient = restAppContext.suilendClient as SuilendClient<string>;
   const data = restAppContext.data as AppData;
 
-  // Actions
   const obligationOwnerCap = data.obligationOwnerCaps?.find(
     (o) => o.obligationId === obligation?.id,
   );
@@ -77,7 +47,6 @@ export function DashboardContextProvider({ children }: PropsWithChildren) {
   const claimRewards = useCallback(
     async (rewards: RewardSummary[]) => {
       if (!address) throw Error("Wallet not connected");
-      if (!suilendClient) throw Error("Suilend client not initialized");
       if (!obligationOwnerCap || !obligation)
         throw Error("Obligation not found");
 
@@ -116,66 +85,12 @@ export function DashboardContextProvider({ children }: PropsWithChildren) {
     ],
   );
 
-  // ReserveAssetData events
-  const [reserveAssetDataEventsMap, setReserveAssetDataEventsMap] = useState<
-    DashboardContext["reserveAssetDataEventsMap"]
-  >(defaultContextValue.reserveAssetDataEventsMap);
-
-  const fetchReserveAssetDataEvents = useCallback(
-    async (reserve: ParsedReserve, days: Days) => {
-      try {
-        const sampleIntervalS = RESERVE_EVENT_SAMPLE_INTERVAL_S_MAP[days];
-
-        const events = await fetchDownsampledApiReserveAssetDataEvents(
-          reserve.id,
-          days,
-          sampleIntervalS,
-        );
-        const parsedEvents = events.map((event) =>
-          parseDownsampledApiReserveAssetDataEvent(event, reserve),
-        );
-
-        setReserveAssetDataEventsMap((_eventsMap) => ({
-          ..._eventsMap,
-          [reserve.id]: {
-            ...((_eventsMap !== undefined && _eventsMap[reserve.id]
-              ? _eventsMap[reserve.id]
-              : {}) as Record<
-              Days,
-              ParsedDownsampledApiReserveAssetDataEvent[]
-            >),
-            [days]: parsedEvents,
-          },
-        }));
-      } catch (err) {
-        console.error(err);
-      }
-    },
-    [],
-  );
-
-  // Prefetch
-  const didFetchReserveAssetDataEventsRef = useRef<boolean>(false);
-  useEffect(() => {
-    if (didFetchReserveAssetDataEventsRef.current) return;
-
-    const limit = pLimit(3);
-    for (const reserve of data.lendingMarket.reserves) {
-      for (const days of DAYS)
-        limit(async () => await fetchReserveAssetDataEvents(reserve, days));
-    }
-    didFetchReserveAssetDataEventsRef.current = true;
-  }, [data.lendingMarket.reserves, fetchReserveAssetDataEvents]);
-
   // Context
   const contextValue: DashboardContext = useMemo(
     () => ({
       claimRewards,
-
-      reserveAssetDataEventsMap,
-      fetchReserveAssetDataEvents,
     }),
-    [claimRewards, reserveAssetDataEventsMap, fetchReserveAssetDataEvents],
+    [claimRewards],
   );
 
   return (

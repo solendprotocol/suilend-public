@@ -1,16 +1,18 @@
 import { useRouter } from "next/router";
 
 import BigNumber from "bignumber.js";
-import { FileClock, TrendingUp, User } from "lucide-react";
+import { FileClock, TrendingUp } from "lucide-react";
 
 import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
 
 import AccountBreakdown from "@/components/dashboard/account/AccountBreakdown";
 import BorrowLimitTitle from "@/components/dashboard/account/BorrowLimitTitle";
 import LiquidationThresholdTitle from "@/components/dashboard/account/LiquidationThresholdTitle";
-import SubaccountDropdownMenu from "@/components/dashboard/account/SubaccountDropdownMenu";
 import WeightedBorrowsTitle from "@/components/dashboard/account/WeightedBorrowsTitle";
-import { Tab as AccountDetailsTab } from "@/components/dashboard/account-details/AccountDetailsDialog";
+import {
+  QueryParams as AccountDetailsQueryParams,
+  Tab as AccountDetailsTab,
+} from "@/components/dashboard/account-details/AccountDetailsDialog";
 import Card from "@/components/dashboard/Card";
 import UtilizationBar, {
   getWeightedBorrowsUsd,
@@ -18,13 +20,14 @@ import UtilizationBar, {
 import Button from "@/components/shared/Button";
 import LabelWithTooltip from "@/components/shared/LabelWithTooltip";
 import Tooltip from "@/components/shared/Tooltip";
-import { TBody, TLabel, TLabelSans } from "@/components/shared/Typography";
+import { TBody, TLabelSans } from "@/components/shared/Typography";
 import { CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 import { formatPercent, formatUsd } from "@/lib/format";
 import { getFilteredRewards, getTotalAprPercent } from "@/lib/liquidityMining";
+import { shallowPushQuery } from "@/lib/router";
 import {
   BORROWS_TOOLTIP,
   DEPOSITS_TOOLTIP,
@@ -64,44 +67,51 @@ function AccountPositionCardContent() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-row justify-between gap-2">
-        <div className="flex flex-col gap-1">
-          <LabelWithTooltip tooltip={DEPOSITS_TOOLTIP}>
-            Deposits
-          </LabelWithTooltip>
-          <Tooltip
-            title={formatUsd(obligation.depositedAmountUsd, { exact: true })}
-          >
-            <TBody className="w-max">
-              {formatUsd(obligation.depositedAmountUsd)}
-            </TBody>
-          </Tooltip>
-        </div>
+      <div className="relative w-full">
+        <div className="absolute bottom-0 left-0 right-2/3 top-0 z-[1] rounded-l-sm bg-gradient-to-r from-primary/20 to-transparent" />
 
-        <TLabel>-</TLabel>
+        <div className="relative z-[2] flex flex-row items-center justify-around gap-1 rounded-sm border border-primary/5 px-4 py-3">
+          <div className="flex flex-col items-center gap-1">
+            <LabelWithTooltip className="text-center">Equity</LabelWithTooltip>
+            <Tooltip title={formatUsd(obligation.netValueUsd, { exact: true })}>
+              <TBody className="w-max text-center">
+                {formatUsd(obligation.netValueUsd)}
+              </TBody>
+            </Tooltip>
+          </div>
 
-        <div className="flex flex-col items-center gap-1">
-          <LabelWithTooltip className="text-center" tooltip={BORROWS_TOOLTIP}>
-            Borrows
-          </LabelWithTooltip>
-          <Tooltip
-            title={formatUsd(obligation.borrowedAmountUsd, { exact: true })}
-          >
-            <TBody className="w-max text-center">
-              {formatUsd(obligation.borrowedAmountUsd)}
-            </TBody>
-          </Tooltip>
-        </div>
+          <TLabelSans>=</TLabelSans>
 
-        <TLabel>=</TLabel>
+          <div className="flex flex-col items-center gap-1">
+            <LabelWithTooltip
+              className="text-center"
+              tooltip={DEPOSITS_TOOLTIP}
+            >
+              Deposits
+            </LabelWithTooltip>
+            <Tooltip
+              title={formatUsd(obligation.depositedAmountUsd, { exact: true })}
+            >
+              <TBody className="w-max text-center">
+                {formatUsd(obligation.depositedAmountUsd)}
+              </TBody>
+            </Tooltip>
+          </div>
 
-        <div className="flex flex-col items-end gap-1">
-          <LabelWithTooltip className="text-right">Equity</LabelWithTooltip>
-          <Tooltip title={formatUsd(obligation.netValueUsd, { exact: true })}>
-            <TBody className="w-max text-right">
-              {formatUsd(obligation.netValueUsd)}
-            </TBody>
-          </Tooltip>
+          <TLabelSans>-</TLabelSans>
+
+          <div className="flex flex-col items-center gap-1">
+            <LabelWithTooltip className="text-center" tooltip={BORROWS_TOOLTIP}>
+              Borrows
+            </LabelWithTooltip>
+            <Tooltip
+              title={formatUsd(obligation.borrowedAmountUsd, { exact: true })}
+            >
+              <TBody className="w-max text-center">
+                {formatUsd(obligation.borrowedAmountUsd)}
+              </TBody>
+            </Tooltip>
+          </div>
         </div>
       </div>
 
@@ -169,17 +179,13 @@ function AccountPositionCardContent() {
 export default function AccountPositionCard() {
   const router = useRouter();
   const { address } = useWalletContext();
-  const { obligation, ...restAppContext } = useAppContext();
-  const data = restAppContext.data as AppData;
+  const { obligation } = useAppContext();
 
   const openAccountDetailsTab = (tab: AccountDetailsTab) => {
-    const { accountDetails, accountDetailsTab, ...restQuery } = router.query;
-    router.push({
-      query: {
-        ...restQuery,
-        accountDetails: true,
-        accountDetailsTab: tab,
-      },
+    shallowPushQuery(router, {
+      ...router.query,
+      [AccountDetailsQueryParams.ACCOUNT_DETAILS]: true,
+      [AccountDetailsQueryParams.TAB]: tab,
     });
   };
 
@@ -187,40 +193,27 @@ export default function AccountPositionCard() {
     <Card
       id={address && obligation ? "position" : undefined}
       header={{
-        titleIcon: <User />,
         title: "Account",
-        endContent: (
+        endContent: address && obligation && (
           <>
-            {address && obligation && (
-              <>
-                <Button
-                  className="text-muted-foreground"
-                  icon={<TrendingUp />}
-                  variant="ghost"
-                  size="icon"
-                  onClick={() =>
-                    openAccountDetailsTab(AccountDetailsTab.EARNINGS)
-                  }
-                >
-                  Earnings
-                </Button>
-                <Button
-                  className="text-muted-foreground"
-                  icon={<FileClock />}
-                  variant="ghost"
-                  size="icon"
-                  onClick={() =>
-                    openAccountDetailsTab(AccountDetailsTab.HISTORY)
-                  }
-                >
-                  History
-                </Button>
-              </>
-            )}
-
-            {data.obligations && data.obligations.length > 1 && (
-              <SubaccountDropdownMenu />
-            )}
+            <Button
+              className="text-muted-foreground"
+              icon={<TrendingUp />}
+              variant="ghost"
+              size="icon"
+              onClick={() => openAccountDetailsTab(AccountDetailsTab.EARNINGS)}
+            >
+              Earnings
+            </Button>
+            <Button
+              className="text-muted-foreground"
+              icon={<FileClock />}
+              variant="ghost"
+              size="icon"
+              onClick={() => openAccountDetailsTab(AccountDetailsTab.HISTORY)}
+            >
+              History
+            </Button>
           </>
         ),
         noSeparator: true,

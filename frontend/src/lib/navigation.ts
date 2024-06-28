@@ -1,6 +1,7 @@
 export const ROOT_URL = "/";
 export const DASHBOARD_URL = "/dashboard";
 export const POINTS_URL = "/points";
+export const SWAP_URL = "/swap";
 export const BRIDGE_URL = "/bridge";
 export const ADMIN_URL = "/admin";
 
