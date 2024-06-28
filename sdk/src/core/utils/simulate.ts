@@ -1,5 +1,5 @@
-import { bcs } from "@mysten/sui.js/bcs";
-import { toHEX } from "@mysten/sui.js/utils";
+import { bcs } from "@mysten/sui/bcs";
+import { toHEX } from "@mysten/sui/utils";
 import BigNumber from "bignumber.js";
 import { v4 as uuidv4 } from "uuid";
 

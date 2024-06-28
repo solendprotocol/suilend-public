@@ -1,5 +1,5 @@
-import { CoinMetadata } from "@mysten/sui.js/client";
-import { normalizeStructTag } from "@mysten/sui.js/utils";
+import { CoinMetadata } from "@mysten/sui/client";
+import { normalizeStructTag } from "@mysten/sui/utils";
 import BigNumber from "bignumber.js";
 import { v4 as uuidv4 } from "uuid";
 

@@ -1,4 +1,4 @@
-import { SuiClient, SuiEvent } from "@mysten/sui.js/client";
+import { SuiClient, SuiEvent } from "@mysten/sui/client";
 
 type TypeName = {
   name: string;
