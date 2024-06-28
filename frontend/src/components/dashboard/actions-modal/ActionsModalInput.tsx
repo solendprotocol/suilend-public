@@ -6,7 +6,6 @@ import { mergeRefs } from "react-merge-refs";
 import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 
 import Button from "@/components/shared/Button";
-import TokenLogo from "@/components/shared/TokenLogo";
 import { TBody, TLabel } from "@/components/shared/Typography";
 import { Input as InputComponent } from "@/components/ui/input";
 import { formatUsd } from "@/lib/format";
@@ -37,15 +36,21 @@ const ActionsModalInput = forwardRef<HTMLInputElement, ActionsModalInputProps>(
       setTimeout(() => localRef.current?.focus());
     }, [action]);
 
+    // Usd
+    const usdValue = new BigNumber(value || 0).times(reserve.price);
+
     return (
       <div className="relative w-full">
         <div className="absolute left-3 top-1/2 z-[2] -translate-y-2/4">
           <Button
             className={cn(
               useMaxAmount &&
-                "border-secondary bg-secondary/5 text-primary-foreground disabled:opacity-100",
+                "border-secondary bg-secondary/5 disabled:opacity-100",
             )}
-            labelClassName="uppercase"
+            labelClassName={cn(
+              "uppercase",
+              useMaxAmount && "text-primary-foreground",
+            )}
             variant="secondaryOutline"
             onClick={onMaxClick}
             disabled={useMaxAmount}
@@ -60,37 +65,32 @@ const ActionsModalInput = forwardRef<HTMLInputElement, ActionsModalInputProps>(
 
         <InputComponent
           ref={mergeRefs([localRef, ref])}
-          className="relative z-[1] border-primary bg-card px-0 py-0 text-right text-2xl [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+          className="relative z-[1] border-primary bg-card px-0 py-0 text-right text-2xl"
           type="number"
           value={value}
           onChange={(e) => onChange(e.target.value)}
+          onWheel={(e) => e.currentTarget.blur()}
           style={{
             height: `${INPUT_HEIGHT}px`,
             paddingLeft: `${3 * 4 + MAX_BUTTON_WIDTH + 3 * 4}px`,
-            paddingRight: `${3 * 4 + (5 * 4 + 2 * 4 + reserve.symbol.length * 14.4) + 4 * 4}px`,
+            paddingRight: `${3 * 4 + reserve.symbol.length * 14.4 + 3 * 4}px`,
             paddingTop: `${(INPUT_INNER_HEIGHT - MAX_BUTTON_HEIGHT) / 2}px`,
             paddingBottom: `${(INPUT_INNER_HEIGHT - MAX_BUTTON_HEIGHT) / 2 + USD_LABEL_HEIGHT}px`,
           }}
           step="any"
         />
+
         <div
-          className="absolute right-0 top-0 z-[2] flex flex-col items-end justify-center pl-3 pr-4"
+          className="absolute right-3 top-0 z-[2] flex flex-col items-end justify-center"
           style={{ height: `${INPUT_HEIGHT}px` }}
         >
-          <div className="flex flex-row items-center gap-2">
-            <TokenLogo
-              className="h-5 w-5"
-              coinType={reserve.coinType}
-              symbol={reserve.symbol}
-              src={reserve.iconUrl}
-            />
-            <TBody className="text-right text-2xl">{reserve.symbol}</TBody>
-          </div>
+          <TBody className="text-right text-2xl">{reserve.symbol}</TBody>
           <TLabel
             className="text-right"
             style={{ height: `${USD_LABEL_HEIGHT}px` }}
           >
-            ≈{formatUsd(new BigNumber(value || "0").times(reserve.price))}
+            {!usdValue.eq(0) && "≈"}
+            {formatUsd(usdValue)}
           </TLabel>
         </div>
       </div>

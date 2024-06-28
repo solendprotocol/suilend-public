@@ -1,11 +1,11 @@
+import Link from "next/link";
 import { forwardRef } from "react";
 
 import { useFlags } from "launchdarkly-react-client-sdk";
-import { Info, LucideIcon } from "lucide-react";
+import { ArrowLeftRight, Info, LucideIcon } from "lucide-react";
 
 import Container from "@/components/shared/Container";
-import TextLink from "@/components/shared/TextLink";
-import { TBodySans } from "@/components/shared/Typography";
+import { TBody, TBodySans } from "@/components/shared/Typography";
 import { cn } from "@/lib/utils";
 
 interface BannerProps {
@@ -17,6 +17,7 @@ const Banner = forwardRef<HTMLDivElement, BannerProps>(({ height }, ref) => {
 
   const IconMap: Record<string, LucideIcon> = {
     info: Info,
+    arrowLeftRight: ArrowLeftRight,
   };
 
   const Icon = flags.banner?.icon
@@ -38,25 +39,28 @@ const Banner = forwardRef<HTMLDivElement, BannerProps>(({ height }, ref) => {
       >
         {flags.banner?.message && (
           <Container>
-            <div className="flex w-full flex-row justify-between gap-4 py-2">
-              <div className="flex flex-row gap-2">
-                {Icon && (
-                  <Icon className="my-0.5 h-4 w-4 shrink-0 text-secondary-foreground" />
+            <div className="flex w-full flex-row justify-center">
+              <Link
+                className="block flex min-h-10 flex-row items-center gap-4 py-2"
+                target={flags.banner.isLinkRelative ? undefined : "_blank"}
+                href={flags.banner.link}
+              >
+                <div className="flex flex-row gap-2">
+                  {Icon && (
+                    <Icon className="my-0.5 h-4 w-4 shrink-0 text-secondary-foreground" />
+                  )}
+
+                  <TBodySans className="text-secondary-foreground">
+                    {flags.banner.message}
+                  </TBodySans>
+                </div>
+
+                {flags.banner.link && (
+                  <TBody className="uppercase text-secondary-foreground underline decoration-secondary-foreground hover:no-underline">
+                    {flags.banner.linkTitle}
+                  </TBody>
                 )}
-
-                <TBodySans className="text-secondary-foreground">
-                  {flags.banner.message}
-                </TBodySans>
-              </div>
-
-              {flags.banner.link && (
-                <TextLink
-                  className="hover:decoration-none shrink-0 text-sm !text-secondary-foreground decoration-secondary-foreground"
-                  href={flags.banner.link}
-                >
-                  {flags.banner.linkTitle || "Learn more"}
-                </TextLink>
-              )}
+              </Link>
             </div>
           </Container>
         )}

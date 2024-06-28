@@ -12,7 +12,6 @@ import { SuilendClient } from "@suilend/sdk/client";
 
 import CoinPopover from "@/components/admin/CoinPopover";
 import Dialog from "@/components/admin/Dialog";
-import Input from "@/components/admin/Input";
 import ReserveConfig, {
   ConfigState,
   parseConfigState,
@@ -20,6 +19,7 @@ import ReserveConfig, {
 } from "@/components/admin/ReserveConfig";
 import Button from "@/components/shared/Button";
 import Grid from "@/components/shared/Grid";
+import Input from "@/components/shared/Input";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { parseCoinBalances } from "@/lib/coinBalance";
 import { getCoinMetadataMap } from "@/lib/coinMetadata";

@@ -20,6 +20,7 @@ import { TBody, TLabelSans } from "@/components/shared/Typography";
 import Value from "@/components/shared/Value";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { useWalletContext } from "@/contexts/WalletContext";
+import { shallowPushQuery } from "@/lib/router";
 
 enum QueryParams {
   TAB = "rewardsTab",
@@ -64,9 +65,7 @@ export default function ReserveRewardsDialog({
       ? queryParams[QueryParams.TAB]
       : Tab.DEPOSITS;
   const onSelectedTabChange = (tab: Tab) => {
-    router.push({
-      query: { ...router.query, [QueryParams.TAB]: tab },
-    });
+    shallowPushQuery(router, { ...router.query, [QueryParams.TAB]: tab });
   };
 
   // Actions

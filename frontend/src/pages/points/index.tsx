@@ -18,7 +18,7 @@ export default function Points() {
 
       <ImpersonationModeBanner />
 
-      <div className="flex w-full flex-col items-center gap-6">
+      <div className="flex w-full flex-col items-center">
         <div
           className={cn(
             "w-full",
@@ -27,6 +27,7 @@ export default function Points() {
         >
           <PointsHeader />
         </div>
+
         <PointsLeaderboardTable />
       </div>
     </>

@@ -35,8 +35,10 @@ export default function PointsCountPopover() {
       rootProps={{ open: isOpen, onOpenChange: setIsOpen }}
       trigger={
         <Button
-          className="gap-1.5 bg-[#142142] hover:bg-[#142142]/80"
+          className="gap-1.5 bg-muted/15"
           startIcon={<PointsIcon className="h-4 w-4" />}
+          variant="ghost"
+          role="combobox"
         >
           {pointsStats ? (
             formatPoints(pointsStats.totalPoints.total)
@@ -73,8 +75,8 @@ export default function PointsCountPopover() {
         {!router.asPath.startsWith(POINTS_URL) && (
           <NextLink href={POINTS_URL} className="w-full">
             <Button
-              className="w-full border-secondary text-primary-foreground"
-              labelClassName="uppercase"
+              className="w-full border-secondary"
+              labelClassName="uppercase text-primary-foreground"
               variant="secondaryOutline"
               onClick={() => setIsOpen(false)}
             >

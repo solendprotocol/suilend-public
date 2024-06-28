@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import {
   DrawerContent,
+  DrawerContentProps,
   DrawerHeader,
   Drawer as DrawerRoot,
   DrawerTrigger,
@@ -28,7 +29,9 @@ import { cn } from "@/lib/utils";
 interface DialogProps extends PropsWithChildren {
   rootProps?: DialogRootProps;
   trigger?: ReactNode;
-  contentProps?: DialogContentProps;
+  dialogContentProps?: DialogContentProps;
+  drawerContentProps?: DrawerContentProps;
+  isAutoHeight?: boolean;
   headerClassName?: ClassValue;
   titleIcon?: ReactElement;
   title: string;
@@ -38,15 +41,19 @@ interface DialogProps extends PropsWithChildren {
 export default function Dialog({
   rootProps,
   trigger,
-  contentProps,
+  dialogContentProps,
+  drawerContentProps,
+  isAutoHeight,
   headerClassName,
   titleIcon,
   title,
   headerEndContent,
   children,
 }: DialogProps) {
-  const { className: contentClassName, ...restContentProps } =
-    contentProps || {};
+  const { className: dialogContentClassName, ...restDialogContentProps } =
+    dialogContentProps || {};
+  const { className: drawerContentClassName, ...restDrawerContentProps } =
+    drawerContentProps || {};
 
   const { md } = useBreakpoint();
 
@@ -61,13 +68,16 @@ export default function Dialog({
 
         <DialogContent
           className={cn(
-            "flex h-[calc(100dvh-var(--sm-my)*2)] max-h-none w-[calc(100dvw-var(--sm-mx)*2)] max-w-4xl flex-col gap-0 overflow-hidden bg-popover p-0",
-            contentClassName,
+            "flex w-[calc(100dvw-var(--sm-mx)*2)] max-w-4xl flex-col gap-0 overflow-hidden bg-popover p-0",
+            !isAutoHeight
+              ? "h-[calc(100dvh-var(--sm-my)*2)] max-h-none"
+              : "h-auto max-h-[calc(100dvh-var(--sm-my)*2)]",
+            dialogContentClassName,
           )}
           style={{ "--sm-mx": "2rem", "--sm-my": "2rem" } as CSSProperties}
           onOpenAutoFocus={(e) => e.preventDefault()}
           overlay={{ className: "bg-background/80" }}
-          {...restContentProps}
+          {...restDialogContentProps}
         >
           <DialogHeader
             className={cn("relative space-y-0 p-4", headerClassName)}
@@ -94,9 +104,14 @@ export default function Dialog({
       )}
 
       <DrawerContent
-        className="!bottom-0 !top-auto mt-0 !h-dvh max-h-dvh rounded-t-lg bg-popover p-0"
+        className={cn(
+          "mt-0 max-h-dvh rounded-t-lg bg-popover p-0",
+          !isAutoHeight ? "!bottom-0 !top-auto !h-dvh" : "min-h-[50dvh]",
+          drawerContentClassName,
+        )}
         thumbClassName="hidden"
         overlay={{ className: "bg-background/80" }}
+        {...restDrawerContentProps}
       >
         <DrawerHeader className={cn("relative p-4", headerClassName)}>
           <TitleWithIcon icon={titleIcon}>{title}</TitleWithIcon>

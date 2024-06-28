@@ -5,8 +5,8 @@ import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 
 import {
   NORMALIZED_SUI_COINTYPE,
-  NORMALIZED_USDC_ET_COINTYPE,
-  NORMALIZED_USDT_ET_COINTYPE,
+  NORMALIZED_USDC_COINTYPE,
+  NORMALIZED_USDT_COINTYPE,
 } from "@/lib/coinType";
 import { msPerYear } from "@/lib/constants";
 
@@ -72,19 +72,19 @@ type ReducedPoolReward = {
   endTimeMs: number;
 };
 
-export const calculateRewardsDepositAprPercent = (
+export const calculateRewardDepositAprPercent = (
   event: ParsedDownsampledApiReserveAssetDataEvent,
-  rewardsEvents: ParsedDownsampledApiReserveAssetDataEvent[],
+  rewardEvents: ParsedDownsampledApiReserveAssetDataEvent[],
   reserve: ParsedReserve,
 ) => {
-  if (rewardsEvents.length === 0) return 0;
+  if (rewardEvents.length === 0) return 0;
 
-  const rewardsEvent = rewardsEvents.findLast(
+  const rewardEvent = rewardEvents.findLast(
     (e) => e.sampleTimestampS <= event.sampleTimestampS,
   );
-  if (!rewardsEvent) return 0;
+  if (!rewardEvent) return 0;
 
-  const rewardCoinType = rewardsEvent.coinType;
+  const rewardCoinType = rewardEvent.coinType;
 
   const historicalRewardsMap: Record<string, ReducedPoolReward[]> = {
     [NORMALIZED_SUI_COINTYPE]: [
@@ -107,7 +107,7 @@ export const calculateRewardsDepositAprPercent = (
         endTimeMs: 1716249600000, //2024-05-21 08:00:00
       },
     ],
-    [NORMALIZED_USDC_ET_COINTYPE]: [
+    [NORMALIZED_USDC_COINTYPE]: [
       {
         coinType: NORMALIZED_SUI_COINTYPE,
         totalRewards: new BigNumber(75915.32),
@@ -127,7 +127,7 @@ export const calculateRewardsDepositAprPercent = (
         endTimeMs: 1716249600000, //2024-05-21 08:00:00
       },
     ],
-    [NORMALIZED_USDT_ET_COINTYPE]: [
+    [NORMALIZED_USDT_COINTYPE]: [
       {
         coinType: NORMALIZED_SUI_COINTYPE,
         totalRewards: new BigNumber(64602.32),
@@ -179,11 +179,11 @@ export const calculateRewardsDepositAprPercent = (
   );
   if (poolRewards.length === 0) return 0;
 
-  const rewardsAprPercent = poolRewards.reduce(
+  const rewardAprPercent = poolRewards.reduce(
     (acc, pr) =>
       acc.plus(
         pr.totalRewards
-          .times(rewardsEvent.price)
+          .times(rewardEvent.price)
           .times(new BigNumber(msPerYear).div(pr.endTimeMs - pr.startTimeMs))
           .div(event.depositedAmountUsd)
           .times(100),
@@ -191,5 +191,5 @@ export const calculateRewardsDepositAprPercent = (
     new BigNumber(0),
   );
 
-  return +rewardsAprPercent;
+  return +rewardAprPercent;
 };

@@ -1,9 +1,9 @@
 import { CoinMetadata, SuiClient } from "@mysten/sui/client";
 
 import {
-  LOGO_MAP,
+  COINTYPE_LOGO_MAP,
+  COINTYPE_SYMBOL_MAP,
   extractSymbolFromCoinType,
-  isSuilendPoints,
 } from "@/lib/coinType";
 
 export const getCoinMetadataMap = async (
@@ -20,11 +20,12 @@ export const getCoinMetadataMap = async (
     if (!metadata) continue;
 
     const coinType = uniqueCoinTypes[i];
-    const symbol = isSuilendPoints(coinType)
-      ? "Suilend Points"
-      : metadata?.symbol ?? extractSymbolFromCoinType(coinType);
+    const symbol =
+      COINTYPE_SYMBOL_MAP[coinType] ??
+      metadata?.symbol ??
+      extractSymbolFromCoinType(coinType);
     const name = metadata?.name ?? symbol;
-    const iconUrl = LOGO_MAP[coinType] ?? metadata?.iconUrl;
+    const iconUrl = COINTYPE_LOGO_MAP[coinType] ?? metadata?.iconUrl;
 
     coinMetadataMap[coinType] = {
       ...metadata,

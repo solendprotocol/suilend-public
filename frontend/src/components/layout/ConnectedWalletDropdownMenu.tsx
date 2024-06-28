@@ -2,7 +2,9 @@ import Image from "next/image";
 import { useState } from "react";
 
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { useLocalStorage } from "usehooks-ts";
 
+import UtilizationBar from "@/components/dashboard/UtilizationBar";
 import Button from "@/components/shared/Button";
 import CopyToClipboardButton from "@/components/shared/CopyToClipboardButton";
 import DropdownMenu, {
@@ -13,7 +15,7 @@ import Tooltip from "@/components/shared/Tooltip";
 import { TLabel, TLabelSans } from "@/components/shared/Typography";
 import { useAppContext } from "@/contexts/AppContext";
 import { useWalletContext } from "@/contexts/WalletContext";
-import { formatAddress } from "@/lib/format";
+import { formatAddress, formatUsd } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { Wallet } from "@/lib/wallets";
 
@@ -35,15 +37,32 @@ export default function ConnectedWalletDropdownMenu({
     ...restWalletContext
   } = useWalletContext();
   const address = restWalletContext.address as string;
-  const { explorer } = useAppContext();
+  const { data, explorer, obligation, setObligationId } = useAppContext();
 
   // State
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const Icon = isOpen ? ChevronUp : ChevronDown;
 
+  // Subaccounts
+  const [areSubaccountsCollapsed, setAreSubaccountsCollapsed] =
+    useLocalStorage<boolean>("areSubaccountsCollapsed", false);
+  const toggleAreSubaccountsCollapsed = () =>
+    setAreSubaccountsCollapsed((are) => !are);
+
+  const SubaccountsCollapseIcon = !areSubaccountsCollapsed
+    ? ChevronUp
+    : ChevronDown;
+
+  // Wallets
+  const [areWalletsCollapsed, setAreWalletsCollapsed] =
+    useLocalStorage<boolean>("areWalletsCollapsed", false);
+  const toggleAreWalletsCollapsed = () => setAreWalletsCollapsed((are) => !are);
+
+  const WalletsCollapseIcon = !areWalletsCollapsed ? ChevronUp : ChevronDown;
+
   return (
     <DropdownMenu
-      root={{ open: isOpen, onOpenChange: setIsOpen }}
+      rootProps={{ open: isOpen, onOpenChange: setIsOpen }}
       trigger={
         <Button
           className="min-w-0"
@@ -51,7 +70,7 @@ export default function ConnectedWalletDropdownMenu({
           startIcon={
             !isImpersonatingAddress && connectedWallet?.logoUrl ? (
               <Image
-                className="h-4 w-4"
+                className="h-4 w-4 min-w-4 shrink-0"
                 src={connectedWallet.logoUrl}
                 alt={`${connectedWallet.name} logo`}
                 width={16}
@@ -90,15 +109,79 @@ export default function ConnectedWalletDropdownMenu({
             Disconnect
           </DropdownMenuItem>
 
+          {/* Subaccounts */}
+          {data &&
+            data.obligations &&
+            data.obligations.length > 1 &&
+            obligation && (
+              <>
+                <Button
+                  className="mt-2 h-4 justify-start p-0 text-muted-foreground hover:bg-transparent"
+                  labelClassName="font-sans text-xs"
+                  endIcon={<SubaccountsCollapseIcon />}
+                  variant="ghost"
+                  onClick={toggleAreSubaccountsCollapsed}
+                >
+                  Subaccounts
+                </Button>
+
+                {!areSubaccountsCollapsed &&
+                  data.obligations.map((o, index, array) => (
+                    <DropdownMenuItem
+                      key={o.id}
+                      className="flex flex-col items-start gap-1"
+                      isSelected={o.id === obligation.id}
+                      onClick={() => setObligationId(o.id)}
+                    >
+                      <div className="flex w-full justify-between">
+                        <TLabelSans className="text-foreground">
+                          Subaccount{" "}
+                          {array.findIndex((_o) => _o.id === o.id) + 1}
+                        </TLabelSans>
+                        <TLabelSans>
+                          {o.positionCount} position
+                          {o.positionCount > 1 ? "s" : ""}
+                        </TLabelSans>
+                      </div>
+
+                      <div className="flex w-full justify-between">
+                        <TLabelSans>
+                          {formatUsd(o.depositedAmountUsd)} deposited
+                        </TLabelSans>
+                        <TLabelSans>
+                          {formatUsd(o.borrowedAmountUsd)} borrowed
+                        </TLabelSans>
+                      </div>
+
+                      <UtilizationBar
+                        className="mt-2 h-1"
+                        obligation={o}
+                        noTooltip
+                      />
+                    </DropdownMenuItem>
+                  ))}
+              </>
+            )}
+
+          {/* Wallets */}
           {accounts.length > 1 && (
             <>
-              <TLabelSans className="mt-4">Switch to</TLabelSans>
-              {accounts
-                .filter((a) => a.address !== address)
-                .map((a) => (
+              <Button
+                className="mt-2 h-4 justify-start p-0 text-muted-foreground hover:bg-transparent"
+                labelClassName="font-sans text-xs"
+                endIcon={<WalletsCollapseIcon />}
+                variant="ghost"
+                onClick={toggleAreWalletsCollapsed}
+              >
+                Wallets
+              </Button>
+
+              {!areWalletsCollapsed &&
+                accounts.map((a) => (
                   <DropdownMenuItem
                     key={a.address}
                     className="flex flex-col items-start gap-1"
+                    isSelected={a.address === address}
                     onClick={() =>
                       selectAccount(
                         a.address,
@@ -112,7 +195,7 @@ export default function ConnectedWalletDropdownMenu({
                           "uppercase text-foreground",
                           addressNameServiceNameMap[a.address]
                             ? "overflow-hidden text-ellipsis text-nowrap"
-                            : "flex-shrink-0",
+                            : "shrink-0",
                         )}
                       >
                         {addressNameServiceNameMap[a.address] ??
@@ -120,7 +203,7 @@ export default function ConnectedWalletDropdownMenu({
                       </TLabel>
 
                       {a.label && (
-                        <TLabelSans className="overflow-hidden text-ellipsis text-nowrap text-inherit">
+                        <TLabelSans className="overflow-hidden text-ellipsis text-nowrap">
                           {a.label}
                         </TLabelSans>
                       )}

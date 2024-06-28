@@ -15,7 +15,7 @@ export default function HeaderBase({ className, children }: HeaderBaseProps) {
   return (
     <>
       <div
-        className={cn("w-full flex-shrink-0", className)}
+        className={cn("w-full shrink-0", className)}
         style={{ height: `${headerHeight}px` }}
       />
       <div

@@ -151,7 +151,7 @@ export function tableHeader<T>(
   return (
     <Button
       className={cn(
-        "h-full w-full rounded-none px-4 py-0 hover:bg-transparent",
+        "h-full w-full rounded-none px-4 py-0 text-muted-foreground hover:bg-transparent",
         isNumerical ? "justify-end" : "justify-start",
         borderBottom && "border-b",
         column.getIsSorted() && "!text-primary-foreground",

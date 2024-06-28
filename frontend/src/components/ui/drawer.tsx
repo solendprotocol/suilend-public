@@ -34,12 +34,16 @@ const DrawerOverlay = React.forwardRef<
 ));
 DrawerOverlay.displayName = DrawerPrimitive.Overlay.displayName;
 
+export type DrawerContentProps = React.ComponentPropsWithoutRef<
+  typeof DrawerPrimitive.Content
+> & {
+  overlay?: React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Overlay>;
+  thumbClassName?: ClassValue;
+};
+
 const DrawerContent = React.forwardRef<
   React.ElementRef<typeof DrawerPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content> & {
-    overlay?: React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Overlay>;
-    thumbClassName?: ClassValue;
-  }
+  DrawerContentProps
 >(({ className, children, overlay, thumbClassName, ...props }, ref) => (
   <DrawerPortal
     container={
@@ -59,7 +63,7 @@ const DrawerContent = React.forwardRef<
     >
       <div
         className={cn(
-          "mx-auto mt-4 h-2 w-[100px] flex-shrink-0 rounded-full bg-muted",
+          "mx-auto mt-4 h-2 w-[100px] shrink-0 rounded-full bg-muted",
           thumbClassName,
         )}
       />

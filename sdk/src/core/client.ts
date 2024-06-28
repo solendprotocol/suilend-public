@@ -791,10 +791,10 @@ export class SuilendClient {
     );
   }
 
-  async depositIntoObligation(
+  async depositCoin(
     ownerId: string,
+    sendCoin: ObjectArg,
     coinType: string,
-    value: string,
     txb: TransactionBlock,
     obligationOwnerCapId?: string,
   ) {
@@ -802,6 +802,26 @@ export class SuilendClient {
     if (!obligationOwnerCapId) {
       createdObligationOwnerCap = this.createObligation(txb)[0];
     }
+
+    this.deposit(
+      sendCoin,
+      coinType,
+      (obligationOwnerCapId ?? createdObligationOwnerCap) as ObjectArg,
+      txb,
+    );
+
+    if (createdObligationOwnerCap) {
+      txb.transferObjects([createdObligationOwnerCap], txb.pure(ownerId));
+    }
+  }
+
+  async depositIntoObligation(
+    ownerId: string,
+    coinType: string,
+    value: string,
+    txb: TransactionBlock,
+    obligationOwnerCapId?: string,
+  ) {
     const isSui =
       normalizeStructTag(coinType) === normalizeStructTag(SUI_COINTYPE);
 
@@ -825,16 +845,7 @@ export class SuilendClient {
       [txb.pure(value)],
     );
 
-    this.deposit(
-      sendCoin,
-      coinType,
-      (obligationOwnerCapId ?? createdObligationOwnerCap) as ObjectArg,
-      txb,
-    );
-
-    if (createdObligationOwnerCap) {
-      txb.transferObjects([createdObligationOwnerCap], txb.pure(ownerId));
-    }
+    this.depositCoin(ownerId, sendCoin, coinType, txb, obligationOwnerCapId);
   }
 
   async withdraw(

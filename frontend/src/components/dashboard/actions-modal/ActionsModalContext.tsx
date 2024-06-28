@@ -14,9 +14,12 @@ import * as Sentry from "@sentry/nextjs";
 import { cloneDeep } from "lodash";
 import { useLocalStorage } from "usehooks-ts";
 
+import { SuilendClient } from "@suilend/sdk/client";
+
 import { ParametersPanelTab } from "@/components/dashboard/actions-modal/ParametersPanel";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { WalletContext, useWalletContext } from "@/contexts/WalletContext";
+import { shallowPushQuery, shallowReplaceQuery } from "@/lib/router";
 
 const QUERY_PARAMS_PREFIX = "assetActions";
 enum QueryParams {
@@ -115,24 +118,19 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
   };
 
   const { address } = useWalletContext();
-  const {
-    suilendClient,
-    obligation,
-    signExecuteAndWaitTransaction,
-    ...restAppContext
-  } = useAppContext();
+  const { obligation, signExecuteAndWaitTransaction, ...restAppContext } =
+    useAppContext();
+  const suilendClient = restAppContext.suilendClient as SuilendClient<string>;
   const data = restAppContext.data as AppData;
 
   // Open
   const isOpen = queryParams[QueryParams.ASSET_ACTIONS] !== undefined;
   const open = useCallback(
     (_reserveIndex: number) => {
-      router.push({
-        query: {
-          ...router.query,
-          [QueryParams.ASSET_ACTIONS]: true,
-          [QueryParams.RESERVE_INDEX]: _reserveIndex,
-        },
+      shallowPushQuery(router, {
+        ...router.query,
+        [QueryParams.ASSET_ACTIONS]: true,
+        [QueryParams.RESERVE_INDEX]: _reserveIndex,
       });
     },
     [router],
@@ -140,12 +138,12 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
   const close = useCallback(() => {
     const restQuery = cloneDeep(router.query);
     delete restQuery[QueryParams.ASSET_ACTIONS];
-    router.push({ query: restQuery });
+    shallowPushQuery(router, restQuery);
 
     setTimeout(() => {
       const restQuery2 = cloneDeep(restQuery);
       delete restQuery2[QueryParams.RESERVE_INDEX];
-      router.push({ query: restQuery2 });
+      shallowReplaceQuery(router, restQuery2);
     }, 250);
   }, [router]);
 
@@ -163,9 +161,7 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
       : defaultContextValue.selectedTab;
   const onSelectedTabChange = useCallback(
     (tab: Tab) => {
-      router.push({
-        query: { ...router.query, [QueryParams.TAB]: tab },
-      });
+      shallowPushQuery(router, { ...router.query, [QueryParams.TAB]: tab });
     },
     [router],
   );
@@ -187,8 +183,9 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
       : defaultContextValue.selectedParametersPanelTab;
   const onSelectedParametersPanelTabChange = useCallback(
     (tab: ParametersPanelTab) => {
-      router.push({
-        query: { ...router.query, [QueryParams.PARAMETERS_PANEL_TAB]: tab },
+      shallowPushQuery(router, {
+        ...router.query,
+        [QueryParams.PARAMETERS_PANEL_TAB]: tab,
       });
     },
     [router],
@@ -202,7 +199,6 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
   const deposit = useCallback(
     async (coinType: string, value: string) => {
       if (!address) throw Error("Wallet not connected");
-      if (!suilendClient) throw Error("Suilend client not initialized");
 
       const tx = new Transaction();
       try {
@@ -228,7 +224,6 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
   const borrow = useCallback(
     async (coinType: string, value: string) => {
       if (!address) throw Error("Wallet not connected");
-      if (!suilendClient) throw Error("Suilend client not initialized");
       if (!obligationOwnerCap || !obligation)
         throw Error("Obligation not found");
 
@@ -263,7 +258,6 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
   const withdraw = useCallback(
     async (coinType: string, value: string) => {
       if (!address) throw Error("Wallet not connected");
-      if (!suilendClient) throw Error("Suilend client not initialized");
       if (!obligationOwnerCap || !obligation)
         throw Error("Obligation not found");
 
@@ -298,7 +292,6 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
   const repay = useCallback(
     async (coinType: string, value: string) => {
       if (!address) throw Error("Wallet not connected");
-      if (!suilendClient) throw Error("Suilend client not initialized");
       if (!obligation) throw Error("Obligation not found");
 
       const tx = new Transaction();

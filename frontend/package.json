@@ -14,6 +14,8 @@
     "lint": "bun eslint && bun prettier"
   },
   "dependencies": {
+    "@dagrejs/dagre": "^1.1.2",
+    "@hop.ag/sdk": "^3.1.3",
     "@launchdarkly/node-server-sdk": "^9.2.0",
     "@mysten/sui": "1.2.0",
     "@mysten/wallet-standard": "0.12.10",
@@ -54,6 +56,7 @@
     "react-latex-next": "^3.0.0",
     "react-merge-refs": "^2.1.1",
     "react-responsive": "^10.0.0",
+    "reactflow": "^11.11.4",
     "recharts": "^2.12.0",
     "sass": "^1.72.0",
     "sonner": "^1.4.41",

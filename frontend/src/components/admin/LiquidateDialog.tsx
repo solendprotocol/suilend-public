@@ -32,7 +32,6 @@ import * as simulate from "@suilend/sdk/utils/simulate";
 
 import { SuiPriceServiceConnection } from "@pyth-sdk";
 
-import Input from "@/components/admin/Input";
 import DataTable, {
   decimalSortingFn,
   tableHeader,
@@ -40,6 +39,7 @@ import DataTable, {
 import UtilizationBar from "@/components/dashboard/UtilizationBar";
 import Button from "@/components/shared/Button";
 import Grid from "@/components/shared/Grid";
+import Input from "@/components/shared/Input";
 import LabelWithValue from "@/components/shared/LabelWithValue";
 import { TBody } from "@/components/shared/Typography";
 import { AppData, useAppContext } from "@/contexts/AppContext";

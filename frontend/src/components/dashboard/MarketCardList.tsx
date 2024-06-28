@@ -17,6 +17,7 @@ import DepositAprCell from "@/components/dashboard/market-table/DepositAprCell";
 import OpenLtvBwCell from "@/components/dashboard/market-table/OpenLtvBwCell";
 import TotalBorrowsCell from "@/components/dashboard/market-table/TotalBorrowsCell";
 import TotalDepositsCell from "@/components/dashboard/market-table/TotalDepositsCell";
+import styles from "@/components/dashboard/MarketCardList.module.scss";
 import { ReservesRowData } from "@/components/dashboard/MarketTable";
 import Button from "@/components/shared/Button";
 import LabelWithTooltip from "@/components/shared/LabelWithTooltip";
@@ -35,7 +36,10 @@ interface MarketCardProps {
 function MarketCard({ rowData, onClick }: MarketCardProps) {
   return (
     <Card
-      className="cursor-pointer transition-colors hover:bg-muted/10"
+      className={cn(
+        "cursor-pointer transition-colors hover:bg-muted/10",
+        styles.card,
+      )}
       onClick={onClick}
     >
       <div className="flex w-full flex-col items-center gap-2 p-4">
@@ -196,7 +200,7 @@ export default function MarketCardList({
 
         <div className="flex h-5 flex-row items-center gap-1">
           <Select
-            root={{ open: isSortByOpen, onOpenChange: setIsSortByOpen }}
+            rootProps={{ open: isSortByOpen, onOpenChange: setIsSortByOpen }}
             trigger={
               <SelectTrigger
                 className={cn(
@@ -218,8 +222,8 @@ export default function MarketCardList({
               id: key,
               name: value.name,
             }))}
-            selectedItemId={sortBy}
-            setValue={onSortChange}
+            value={sortBy}
+            onChange={onSortChange}
             title="Sort by"
           />
 

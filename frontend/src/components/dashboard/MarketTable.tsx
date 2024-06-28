@@ -19,7 +19,9 @@ import OpenLtvBwCell from "@/components/dashboard/market-table/OpenLtvBwCell";
 import TotalBorrowsCell from "@/components/dashboard/market-table/TotalBorrowsCell";
 import TotalDepositsCell from "@/components/dashboard/market-table/TotalDepositsCell";
 import MarketCardList from "@/components/dashboard/MarketCardList";
+import styles from "@/components/dashboard/MarketTable.module.scss";
 import { AppData, useAppContext } from "@/contexts/AppContext";
+import { isEth } from "@/lib/coinType";
 import { formatToken, formatUsd } from "@/lib/format";
 import {
   RewardSummary,
@@ -119,7 +121,10 @@ export default function MarketTable() {
   const rows: ReservesRowData[] = useMemo(
     () =>
       data.lendingMarket.reserves
-        .slice()
+        .filter(
+          (reserve) =>
+            !isEth(reserve.coinType) || reserve.config.depositLimit.gt(0),
+        )
         .sort(reserveSort)
         .map((reserve) => {
           const coinType = reserve.coinType;
@@ -271,6 +276,7 @@ export default function MarketTable() {
           onRowClick={(row) => () =>
             openActionsModal(Number(row.original.reserve.arrayIndex))
           }
+          tableRowClassName={() => styles.tableRow}
         />
       </div>
       <div className="w-full md:hidden">

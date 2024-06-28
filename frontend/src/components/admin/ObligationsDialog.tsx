@@ -18,12 +18,12 @@ import * as simulate from "@suilend/sdk/utils/simulate";
 import { SuiPriceServiceConnection } from "@pyth-sdk";
 
 import Dialog from "@/components/admin/Dialog";
-import Input from "@/components/admin/Input";
 import LiquidateDialog from "@/components/admin/LiquidateDialog";
 import DataTable, { tableHeader } from "@/components/dashboard/DataTable";
 import UtilizationBar from "@/components/dashboard/UtilizationBar";
 import Button from "@/components/shared/Button";
 import Grid from "@/components/shared/Grid";
+import Input from "@/components/shared/Input";
 import Switch from "@/components/shared/Switch";
 import { TBody } from "@/components/shared/Typography";
 import Value from "@/components/shared/Value";

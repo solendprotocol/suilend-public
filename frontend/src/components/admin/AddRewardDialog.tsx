@@ -13,9 +13,9 @@ import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 
 import CoinPopover from "@/components/admin/CoinPopover";
 import Dialog from "@/components/admin/Dialog";
-import Input from "@/components/admin/Input";
 import Button from "@/components/shared/Button";
 import Grid from "@/components/shared/Grid";
+import Input from "@/components/shared/Input";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 import { parseCoinBalances } from "@/lib/coinBalance";

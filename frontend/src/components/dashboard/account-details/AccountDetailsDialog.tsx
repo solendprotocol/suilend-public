@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { normalizeStructTag } from "@mysten/sui/utils";
 import BigNumber from "bignumber.js";
 import { cloneDeep } from "lodash";
-import { FileClock, RotateCw, TrendingUp } from "lucide-react";
+import { RotateCw } from "lucide-react";
 
 import { WAD } from "@suilend/sdk/constants";
 import {
@@ -18,7 +18,6 @@ import {
   ApiWithdrawEvent,
 } from "@suilend/sdk/types";
 
-import SubaccountDropdownMenu from "@/components/dashboard/account/SubaccountDropdownMenu";
 import EarningsTabContent from "@/components/dashboard/account-details/EarningsTabContent";
 import HistoryTabContent from "@/components/dashboard/account-details/HistoryTabContent";
 import Dialog from "@/components/dashboard/Dialog";
@@ -27,11 +26,13 @@ import Tabs from "@/components/shared/Tabs";
 import TokenLogo from "@/components/shared/TokenLogo";
 import Tooltip from "@/components/shared/Tooltip";
 import { TBody } from "@/components/shared/Typography";
-import { AppData, useAppContext } from "@/contexts/AppContext";
+import { useAppContext } from "@/contexts/AppContext";
 import { isSuilendPoints } from "@/lib/coinType";
 import { EventType, eventSortAsc } from "@/lib/events";
 import { formatPoints, formatToken } from "@/lib/format";
 import { API_URL } from "@/lib/navigation";
+import { shallowPushQuery, shallowReplaceQuery } from "@/lib/router";
+import { Token } from "@/lib/types";
 
 const QUERY_PARAMS_PREFIX = "accountDetails";
 export enum QueryParams {
@@ -62,33 +63,20 @@ export type EventsData = {
 
 interface TokenAmountProps {
   amount?: BigNumber;
-  coinType: string;
-  symbol: string;
-  src?: string | null;
+  token: Token;
   decimals: number;
 }
 
-export function TokenAmount({
-  amount,
-  coinType,
-  symbol,
-  src,
-  decimals,
-}: TokenAmountProps) {
+export function TokenAmount({ amount, token, decimals }: TokenAmountProps) {
   return (
     <div className="flex w-max flex-row items-center gap-2">
-      <TokenLogo
-        className="h-4 w-4"
-        coinType={coinType}
-        symbol={symbol}
-        src={src}
-      />
+      <TokenLogo className="h-4 w-4" token={token} />
 
       <Tooltip
         title={
-          amount !== undefined && isSuilendPoints(coinType) ? (
+          amount !== undefined && isSuilendPoints(token.coinType) ? (
             <>
-              {formatPoints(amount, { dp: decimals })} {symbol}
+              {formatPoints(amount, { dp: decimals })} {token.symbol}
             </>
           ) : undefined
         }
@@ -96,10 +84,10 @@ export function TokenAmount({
         <TBody className="uppercase">
           {amount === undefined
             ? "N/A"
-            : isSuilendPoints(coinType)
+            : isSuilendPoints(token.coinType)
               ? formatPoints(amount)
               : formatToken(amount, { dp: decimals })}{" "}
-          {symbol}
+          {token.symbol}
         </TBody>
       </Tooltip>
     </div>
@@ -115,13 +103,12 @@ export default function AccountDetailsDialog() {
     [QueryParams.TAB]: router.query[QueryParams.TAB] as Tab | undefined,
   };
 
-  const { refreshData, obligation, ...restAppContext } = useAppContext();
-  const data = restAppContext.data as AppData;
+  const { refreshData, obligation } = useAppContext();
 
   // Tabs
   const tabs = [
-    { id: Tab.EARNINGS, icon: <TrendingUp />, title: "Earnings" },
-    { id: Tab.HISTORY, icon: <FileClock />, title: "History" },
+    { id: Tab.EARNINGS, title: "Earnings" },
+    { id: Tab.HISTORY, title: "History" },
   ];
 
   const selectedTab =
@@ -130,9 +117,7 @@ export default function AccountDetailsDialog() {
       ? queryParams[QueryParams.TAB]
       : Object.values(Tab)[0];
   const onSelectedTabChange = (tab: Tab) => {
-    router.push({
-      query: { ...router.query, [QueryParams.TAB]: tab },
-    });
+    shallowPushQuery(router, { ...router.query, [QueryParams.TAB]: tab });
   };
 
   // Events
@@ -157,8 +142,8 @@ export default function AccountDetailsDialog() {
             EventType.REPAY,
             EventType.LIQUIDATE,
           ].join(","),
-          obligationId,
           joinEventTypes: EventType.RESERVE_ASSET_DATA,
+          obligationId,
         })}`;
         const res1 = await fetch(url1);
         const json1 = await res1.json();
@@ -180,12 +165,12 @@ export default function AccountDetailsDialog() {
         // Parse
         const data = { ...json1, ...json2, ...json3 } as EventsData;
         for (const event of [
-          ...data.reserveAssetData,
-          ...data.deposit,
-          ...data.borrow,
-          ...data.withdraw,
-          ...data.repay,
-          ...data.claimReward,
+          ...(data.reserveAssetData ?? []),
+          ...(data.deposit ?? []),
+          ...(data.borrow ?? []),
+          ...(data.withdraw ?? []),
+          ...(data.repay ?? []),
+          ...(data.claimReward ?? []),
         ]) {
           event.coinType = normalizeStructTag(event.coinType);
         }
@@ -243,12 +228,12 @@ export default function AccountDetailsDialog() {
 
     const restQuery = cloneDeep(router.query);
     delete restQuery[QueryParams.ACCOUNT_DETAILS];
-    router.push({ query: restQuery });
+    shallowPushQuery(router, restQuery);
 
     setTimeout(() => {
       const restQuery2 = cloneDeep(restQuery);
       delete restQuery2[QueryParams.TAB];
-      router.replace({ query: restQuery2 });
+      shallowReplaceQuery(router, restQuery2);
 
       clearEventsData();
       fetchedDataObligationIdRef.current = undefined;
@@ -259,25 +244,19 @@ export default function AccountDetailsDialog() {
   return (
     <Dialog
       rootProps={{ open: isOpen, onOpenChange }}
-      contentProps={{ className: "max-w-6xl" }}
+      dialogContentProps={{ className: "max-w-6xl" }}
       headerClassName="border-b-0"
       title="Account"
       headerEndContent={
-        <>
-          {data.obligations && data.obligations.length > 1 && (
-            <SubaccountDropdownMenu />
-          )}
-
-          <Button
-            className="text-muted-foreground"
-            icon={<RotateCw />}
-            variant="ghost"
-            size="icon"
-            onClick={refresh}
-          >
-            Refresh
-          </Button>
-        </>
+        <Button
+          className="text-muted-foreground"
+          icon={<RotateCw />}
+          variant="ghost"
+          size="icon"
+          onClick={refresh}
+        >
+          Refresh
+        </Button>
       }
     >
       <div className="px-4">
