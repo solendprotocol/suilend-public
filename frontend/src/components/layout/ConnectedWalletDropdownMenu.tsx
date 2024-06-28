@@ -4,6 +4,8 @@ import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useLocalStorage } from "usehooks-ts";
 
+import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
+
 import UtilizationBar from "@/components/dashboard/UtilizationBar";
 import Button from "@/components/shared/Button";
 import CopyToClipboardButton from "@/components/shared/CopyToClipboardButton";
@@ -43,7 +45,13 @@ export default function ConnectedWalletDropdownMenu({
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const Icon = isOpen ? ChevronUp : ChevronDown;
 
+  // Disconnect
+  const hasDisconnect = !isImpersonatingAddress;
+
   // Subaccounts
+  const hasSubaccounts =
+    data && data.obligations && data.obligations.length > 1 && obligation;
+
   const [areSubaccountsCollapsed, setAreSubaccountsCollapsed] =
     useLocalStorage<boolean>("areSubaccountsCollapsed", false);
   const toggleAreSubaccountsCollapsed = () =>
@@ -54,11 +62,16 @@ export default function ConnectedWalletDropdownMenu({
     : ChevronDown;
 
   // Wallets
+  const hasWallets = !isImpersonatingAddress && accounts.length > 1;
+
   const [areWalletsCollapsed, setAreWalletsCollapsed] =
     useLocalStorage<boolean>("areWalletsCollapsed", false);
   const toggleAreWalletsCollapsed = () => setAreWalletsCollapsed((are) => !are);
 
   const WalletsCollapseIcon = !areWalletsCollapsed ? ChevronUp : ChevronDown;
+
+  // Items
+  const noItems = !hasDisconnect && !hasSubaccounts && !hasWallets;
 
   return (
     <DropdownMenu
@@ -79,14 +92,16 @@ export default function ConnectedWalletDropdownMenu({
             ) : undefined
           }
           endIcon={<Icon />}
-          disabled={isImpersonatingAddress}
         >
           {(!isImpersonatingAddress ? account?.label : undefined) ??
             addressNameServiceNameMap[address] ??
             formatAddress(address)}
         </Button>
       }
-      title={account?.label ?? "Connected"}
+      title={
+        (!isImpersonatingAddress ? account?.label : "Impersonating") ??
+        "Connected"
+      }
       description={
         <div className="flex flex-row items-center gap-1">
           <Tooltip title={address}>
@@ -103,30 +118,34 @@ export default function ConnectedWalletDropdownMenu({
           </div>
         </div>
       }
+      noItems={noItems}
       items={
         <>
-          <DropdownMenuItem onClick={disconnectWallet}>
-            Disconnect
-          </DropdownMenuItem>
+          {hasDisconnect && (
+            <DropdownMenuItem onClick={disconnectWallet}>
+              Disconnect
+            </DropdownMenuItem>
+          )}
 
           {/* Subaccounts */}
-          {data &&
-            data.obligations &&
-            data.obligations.length > 1 &&
-            obligation && (
-              <>
-                <Button
-                  className="mt-2 h-4 justify-start p-0 text-muted-foreground hover:bg-transparent"
-                  labelClassName="font-sans text-xs"
-                  endIcon={<SubaccountsCollapseIcon />}
-                  variant="ghost"
-                  onClick={toggleAreSubaccountsCollapsed}
-                >
-                  Subaccounts
-                </Button>
+          {hasSubaccounts && (
+            <>
+              <Button
+                className={cn(
+                  "h-4 justify-start p-0 text-muted-foreground hover:bg-transparent",
+                  hasDisconnect && "mt-2",
+                )}
+                labelClassName="font-sans text-xs"
+                endIcon={<SubaccountsCollapseIcon />}
+                variant="ghost"
+                onClick={toggleAreSubaccountsCollapsed}
+              >
+                Subaccounts
+              </Button>
 
-                {!areSubaccountsCollapsed &&
-                  data.obligations.map((o, index, array) => (
+              {!areSubaccountsCollapsed &&
+                (data.obligations as ParsedObligation[]).map(
+                  (o, index, array) => (
                     <DropdownMenuItem
                       key={o.id}
                       className="flex flex-col items-start gap-1"
@@ -159,15 +178,19 @@ export default function ConnectedWalletDropdownMenu({
                         noTooltip
                       />
                     </DropdownMenuItem>
-                  ))}
-              </>
-            )}
+                  ),
+                )}
+            </>
+          )}
 
           {/* Wallets */}
-          {accounts.length > 1 && (
+          {hasWallets && (
             <>
               <Button
-                className="mt-2 h-4 justify-start p-0 text-muted-foreground hover:bg-transparent"
+                className={cn(
+                  "h-4 justify-start p-0 text-muted-foreground hover:bg-transparent",
+                  (hasDisconnect || hasSubaccounts) && "mt-2",
+                )}
                 labelClassName="font-sans text-xs"
                 endIcon={<WalletsCollapseIcon />}
                 variant="ghost"

@@ -105,8 +105,29 @@ export default function useFetchAppData(
       );
 
       if (obligationOwnerCaps.length > 0) {
+        const obligationOwnerCapTimestampsMs = (
+          await Promise.all(
+            obligationOwnerCaps.map((ownerCap) =>
+              suiClient.queryTransactionBlocks({
+                limit: 1,
+                order: "ascending",
+                filter: { ChangedObject: ownerCap.id },
+                options: { showRawInput: true },
+              }),
+            ),
+          )
+        ).map((res) => +(res.data[0].timestampMs as string));
+
+        const sortedObligationOwnerCaps = obligationOwnerCaps
+          .map((ownerCap, index) => ({
+            ...ownerCap,
+            timestampMs: obligationOwnerCapTimestampsMs[index],
+          }))
+          .slice()
+          .sort((a, b) => a.timestampMs - b.timestampMs);
+
         const rawObligations = await Promise.all(
-          obligationOwnerCaps.map((ownerCap) =>
+          sortedObligationOwnerCaps.map((ownerCap) =>
             SuilendClient.getObligation(
               ownerCap.obligationId,
               rawLendingMarket.$typeArgs,
@@ -121,11 +142,6 @@ export default function useFetchAppData(
           )
           .map((refreshedObligation) =>
             parseObligation(refreshedObligation, reserveMap),
-          )
-          .sort(
-            (a, b) =>
-              +b.depositedAmountUsd.plus(b.borrowedAmountUsd) -
-              +a.depositedAmountUsd.plus(a.borrowedAmountUsd),
           );
       }
 

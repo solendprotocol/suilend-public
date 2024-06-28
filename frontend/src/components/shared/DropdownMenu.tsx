@@ -48,6 +48,7 @@ interface DropdownMenuProps {
   trigger: ReactNode;
   title?: string;
   description?: ReactNode;
+  noItems?: boolean;
   items: ReactNode;
 }
 
@@ -56,6 +57,7 @@ export default function DropdownMenu({
   trigger,
   title,
   description,
+  noItems,
   items,
 }: DropdownMenuProps) {
   return (
@@ -73,7 +75,7 @@ export default function DropdownMenu({
         }}
       >
         {title && (
-          <div className="mb-4 flex flex-col gap-1">
+          <div className={cn("flex flex-col gap-1", !noItems && "mb-4")}>
             <DropdownMenuLabel className="overflow-hidden text-ellipsis px-0 py-0 font-sans font-normal text-primary-foreground">
               {title}
             </DropdownMenuLabel>
