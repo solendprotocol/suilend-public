@@ -17,7 +17,7 @@ export default function NavigationLinks() {
   return (
     <>
       <Link href={DASHBOARD_URL}>Dashboard</Link>
-      <div className="flex h-[20px] flex-shrink-0 flex-row items-center gap-4">
+      <div className="flex h-[20px] shrink-0 flex-row items-center gap-4">
         <Link href={POINTS_URL} className="flex-1">
           Points
         </Link>

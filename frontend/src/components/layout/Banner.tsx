@@ -47,7 +47,7 @@ const Banner = forwardRef<HTMLDivElement, BannerProps>(({ height }, ref) => {
               >
                 <div className="flex flex-row gap-2">
                   {Icon && (
-                    <Icon className="my-0.5 h-4 w-4 flex-shrink-0 text-secondary-foreground" />
+                    <Icon className="my-0.5 h-4 w-4 shrink-0 text-secondary-foreground" />
                   )}
 
                   <TBodySans className="text-secondary-foreground">

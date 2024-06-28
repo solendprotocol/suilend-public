@@ -63,7 +63,7 @@ const DrawerContent = React.forwardRef<
     >
       <div
         className={cn(
-          "mx-auto mt-4 h-2 w-[100px] flex-shrink-0 rounded-full bg-muted",
+          "mx-auto mt-4 h-2 w-[100px] shrink-0 rounded-full bg-muted",
           thumbClassName,
         )}
       />

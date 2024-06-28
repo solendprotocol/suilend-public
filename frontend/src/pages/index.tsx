@@ -148,7 +148,7 @@ export default function Home() {
         </div>
 
         {/* Ticker */}
-        <div className="h-16 w-full flex-shrink-0 overflow-hidden border-t bg-background">
+        <div className="h-16 w-full shrink-0 overflow-hidden border-t bg-background">
           {!data ? (
             <Skeleton className="h-full w-full bg-muted/10" />
           ) : (

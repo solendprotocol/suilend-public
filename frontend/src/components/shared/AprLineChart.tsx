@@ -124,7 +124,7 @@ export default function AprLineChart({ data, reference }: AprLineChartProps) {
 
   return (
     <div
-      className="apr-line-chart h-[140px] w-full flex-shrink-0 transform-gpu md:h-[160px]"
+      className="apr-line-chart h-[140px] w-full shrink-0 transform-gpu md:h-[160px]"
       is-loading="false"
     >
       <Recharts.ResponsiveContainer width="100%" height="100%">

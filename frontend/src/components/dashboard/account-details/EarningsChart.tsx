@@ -165,7 +165,7 @@ export default function EarningsChart({
 
   return (
     <div
-      className="earnings-chart h-[160px] w-full flex-shrink-0 transform-gpu md:h-[200px]"
+      className="earnings-chart h-[160px] w-full shrink-0 transform-gpu md:h-[200px]"
       is-loading={isLoading ? "true" : "false"}
     >
       <Recharts.ResponsiveContainer width="100%" height="100%">

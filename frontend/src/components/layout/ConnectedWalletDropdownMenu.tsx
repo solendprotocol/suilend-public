@@ -52,7 +52,7 @@ export default function ConnectedWalletDropdownMenu({
           startIcon={
             !isImpersonatingAddress && connectedWallet?.logoUrl ? (
               <Image
-                className="h-4 w-4 min-w-4 flex-shrink-0"
+                className="h-4 w-4 min-w-4 shrink-0"
                 src={connectedWallet.logoUrl}
                 alt={`${connectedWallet.name} logo`}
                 width={16}
@@ -156,7 +156,7 @@ export default function ConnectedWalletDropdownMenu({
                         "uppercase text-foreground",
                         addressNameServiceNameMap[a.address]
                           ? "overflow-hidden text-ellipsis text-nowrap"
-                          : "flex-shrink-0",
+                          : "shrink-0",
                       )}
                     >
                       {addressNameServiceNameMap[a.address] ??

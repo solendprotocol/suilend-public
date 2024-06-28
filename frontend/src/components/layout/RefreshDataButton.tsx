@@ -66,7 +66,7 @@ export default function RefreshDataButton() {
       }
     >
       <Button
-        className="h-auto w-auto flex-shrink-0 hover:bg-transparent"
+        className="h-auto w-auto shrink-0 hover:bg-transparent"
         variant="ghost"
         size="icon"
         onClick={manuallyRefreshData}

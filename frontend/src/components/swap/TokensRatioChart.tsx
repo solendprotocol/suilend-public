@@ -25,7 +25,7 @@ export default function TokensRatioChart({ data }: TokensRatioChartProps) {
   const domainY = [minY, maxY];
 
   return (
-    <div className="relative h-full w-full flex-shrink-0 transform-gpu">
+    <div className="relative h-full w-full shrink-0 transform-gpu">
       <div
         className="absolute left-0 right-0 z-[1] h-[1px] border-b border-dashed border-foreground/25"
         style={{ bottom: `${((data[0].ratio - minY) / (maxY - minY)) * 100}%` }}

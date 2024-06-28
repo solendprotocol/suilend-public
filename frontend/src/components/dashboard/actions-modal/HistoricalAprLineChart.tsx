@@ -447,7 +447,7 @@ export default function HistoricalAprLineChart({
       </div>
 
       <div
-        className="historical-apr-line-chart h-[140px] w-full flex-shrink-0 transform-gpu md:h-[160px]"
+        className="historical-apr-line-chart h-[140px] w-full shrink-0 transform-gpu md:h-[160px]"
         is-loading={isLoading ? "true" : "false"}
       >
         <Chart side={side} data={chartData ?? []} />

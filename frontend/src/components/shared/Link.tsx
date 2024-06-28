@@ -38,7 +38,7 @@ export default function Link({
       target={isExternal ? "_blank" : undefined}
       className={cn(
         labelSansClassNames,
-        "group flex flex-shrink-0 flex-row items-center gap-1.5 text-sm transition-colors hover:text-foreground",
+        "group flex shrink-0 flex-row items-center gap-1.5 text-sm transition-colors hover:text-foreground",
         isActive && "text-foreground",
         className,
       )}

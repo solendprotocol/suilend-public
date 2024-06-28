@@ -72,7 +72,7 @@ export default function Dialog({
                   {titleIcon &&
                     cloneElement(titleIcon, {
                       className:
-                        "text-muted-foreground w-4 h-4 flex-shrink-0 my-[var(--my)]",
+                        "text-muted-foreground w-4 h-4 shrink-0 my-[var(--my)]",
                       style: { "--my": `${(20 - 16) / 2}px` },
                     })}
                   {title}

@@ -44,7 +44,7 @@ export default function AppHeader() {
   return (
     <HeaderBase>
       {/* Start */}
-      <div className="flex flex-shrink-0 flex-row items-center gap-12">
+      <div className="flex shrink-0 flex-row items-center gap-12">
         {/* Logo */}
         <NextLink href={ROOT_URL}>
           <Logo />
@@ -62,19 +62,19 @@ export default function AppHeader() {
 
         <div className="flex min-w-0 flex-row items-center gap-2">
           {address && (
-            <div className="hidden flex-shrink-0 sm:flex">
+            <div className="hidden shrink-0 sm:flex">
               <HeaderPointsPopover />
             </div>
           )}
 
           <ConnectWalletButton />
 
-          <div className="-mr-1 flex-shrink-0">
+          <div className="-mr-1 shrink-0">
             <SettingsDialog />
           </div>
 
           <Button
-            className="flex-shrink-0 lg:hidden"
+            className="shrink-0 lg:hidden"
             icon={!isMenuOpen ? <Menu /> : <X />}
             variant="ghost"
             size="icon"

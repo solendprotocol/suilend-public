@@ -19,7 +19,7 @@ export default function TitleWithIcon({
     >
       {icon &&
         cloneElement(icon, {
-          className: "w-4 h-4 flex-shrink-0",
+          className: "w-4 h-4 shrink-0",
         })}
       {children}
     </TTitle>
