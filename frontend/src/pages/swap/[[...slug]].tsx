@@ -567,8 +567,8 @@ function Page() {
     }
     if (
       quoteAmountOut === undefined ||
-      tokenInUsdValue === undefined ||
-      tokenOutUsdValue === undefined ||
+      // tokenInUsdValue === undefined ||
+      // tokenOutUsdValue === undefined ||
       isFetchingQuote
     )
       return;
@@ -592,15 +592,19 @@ function Page() {
       );
       formatAndSetValue("", tokenIn);
 
-      track("swap_success", {
+      const properties: Record<string, string | number> = {
         assetIn: tokenIn.ticker,
         assetOut: tokenOut.ticker,
         amountIn: value,
         amountOut: quoteAmountOut.toString(),
-        amountInUsd: tokenInUsdValue.toString(),
-        amountOutUsd: tokenOutUsdValue.toString(),
         deposit: deposit ? "true" : "false",
-      });
+      };
+      if (tokenInUsdValue !== undefined)
+        properties.amountInUsd = tokenInUsdValue.toString();
+      if (tokenOutUsdValue !== undefined)
+        properties.amountOutUsd = tokenOutUsdValue.toString();
+
+      track("swap_success", properties);
     } catch (err) {
       toast.error("Failed to swap", {
         description: ((err as Error)?.message || err) as string,
