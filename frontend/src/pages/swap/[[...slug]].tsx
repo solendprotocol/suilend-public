@@ -353,9 +353,9 @@ function Page() {
     )
       return undefined;
 
-    const timestampsS = tokenInHistoricalUsdPrices.map(
-      (item) => item.timestampS,
-    );
+    const timestampsS = tokenInHistoricalUsdPrices
+      .filter((_, index) => index % 10 === 0) // 1*10 = 10 minutes
+      .map((item) => item.timestampS);
 
     return timestampsS.map((timestampS) => ({
       timestampS,
@@ -380,7 +380,7 @@ function Page() {
   const fetchTokenHistoricalUsdPrice = useCallback(
     async (token: VerifiedToken) => {
       try {
-        const url = `https://public-api.birdeye.so/defi/history_price?address=${isSui(token.coin_type) ? SUI_COINTYPE : token.coin_type}&address_type=token&type=5m&time_from=${Math.floor(new Date().getTime() / 1000) - 24 * 60 * 60}&time_to=${Math.floor(new Date().getTime() / 1000)}`;
+        const url = `https://public-api.birdeye.so/defi/history_price?address=${isSui(token.coin_type) ? SUI_COINTYPE : token.coin_type}&address_type=token&type=1m&time_from=${Math.floor(new Date().getTime() / 1000) - 24 * 60 * 60}&time_to=${Math.floor(new Date().getTime() / 1000)}`;
         const res = await fetch(url, {
           headers: {
             "X-API-KEY": process.env.NEXT_PUBLIC_BIRDEYE_API_KEY as string,
