@@ -346,8 +346,10 @@ function Page() {
 
   useEffect(() => {
     fetchTokenUsdPrice(tokenIn);
+  }, [tokenIn, fetchTokenUsdPrice]);
+  useEffect(() => {
     fetchTokenUsdPrice(tokenOut);
-  }, [tokenIn, tokenOut, fetchTokenUsdPrice]);
+  }, [tokenOut, fetchTokenUsdPrice]);
 
   // Historical USD prices
   type HistoricalPriceData = {
@@ -424,8 +426,10 @@ function Page() {
 
   useEffect(() => {
     fetchTokenHistoricalUsdPrice(tokenIn);
+  }, [tokenIn, fetchTokenHistoricalUsdPrice]);
+  useEffect(() => {
     fetchTokenHistoricalUsdPrice(tokenOut);
-  }, [tokenIn, tokenOut, fetchTokenHistoricalUsdPrice]);
+  }, [tokenOut, fetchTokenHistoricalUsdPrice]);
 
   // Reverse tokens
   const reverseTokens = () => {
