@@ -344,22 +344,9 @@ function Page() {
     }
   }, []);
 
-  const usdPricesIntervalRef = useRef<NodeJS.Timeout | undefined>(undefined);
   useEffect(() => {
     fetchTokenUsdPrice(tokenIn);
     fetchTokenUsdPrice(tokenOut);
-
-    if (usdPricesIntervalRef.current !== undefined)
-      clearInterval(usdPricesIntervalRef.current);
-    usdPricesIntervalRef.current = setInterval(() => {
-      fetchTokenUsdPrice(tokenIn);
-      fetchTokenUsdPrice(tokenOut);
-    }, 30 * 1000);
-
-    return () => {
-      if (usdPricesIntervalRef.current !== undefined)
-        clearInterval(usdPricesIntervalRef.current);
-    };
   }, [tokenIn, tokenOut, fetchTokenUsdPrice]);
 
   // Historical USD prices
