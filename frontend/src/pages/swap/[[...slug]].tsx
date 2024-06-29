@@ -304,53 +304,6 @@ function Page() {
     inputRef.current?.focus();
   };
 
-  // USD prices
-  const [usdPriceMap, setUsdPriceMap] = useState<Record<string, number>>({});
-  const tokenInUsdPrice = usdPriceMap[tokenIn.coin_type];
-  const tokenOutUsdPrice = usdPriceMap[tokenOut.coin_type];
-
-  const tokensRatio =
-    tokenInUsdPrice !== undefined && tokenOutUsdPrice !== undefined
-      ? new BigNumber(tokenInUsdPrice).div(tokenOutUsdPrice)
-      : undefined;
-  const tokensRatioDp =
-    tokensRatio !== undefined
-      ? Math.max(0, -Math.floor(Math.log10(+tokensRatio)) - 1) + 4
-      : undefined;
-
-  const tokenInUsdValue =
-    quoteAmountIn !== undefined && tokenInUsdPrice !== undefined
-      ? quoteAmountIn.times(tokenInUsdPrice)
-      : undefined;
-  const tokenOutUsdValue =
-    quoteAmountOut !== undefined && tokenOutUsdPrice !== undefined
-      ? quoteAmountOut.times(tokenOutUsdPrice)
-      : undefined;
-
-  const fetchTokenUsdPrice = useCallback(async (token: VerifiedToken) => {
-    try {
-      const url = `https://public-api.birdeye.so/defi/price?address=${isSui(token.coin_type) ? SUI_COINTYPE : token.coin_type}`;
-      const res = await fetch(url, {
-        headers: {
-          "X-API-KEY": process.env.NEXT_PUBLIC_BIRDEYE_API_KEY as string,
-          "x-chain": "sui",
-        },
-      });
-      const json = await res.json();
-      if (json.data?.value)
-        setUsdPriceMap((o) => ({ ...o, [token.coin_type]: json.data.value }));
-    } catch (err) {
-      console.error(err);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchTokenUsdPrice(tokenIn);
-  }, [tokenIn, fetchTokenUsdPrice]);
-  useEffect(() => {
-    fetchTokenUsdPrice(tokenOut);
-  }, [tokenOut, fetchTokenUsdPrice]);
-
   // Historical USD prices
   type HistoricalPriceData = {
     timestampS: number;
@@ -363,6 +316,35 @@ function Page() {
   const tokenInHistoricalUsdPrices = historicalUsdPricesMap[tokenIn.coin_type];
   const tokenOutHistoricalUsdPrices =
     historicalUsdPricesMap[tokenOut.coin_type];
+
+  const tokenInCurrentUsdPrice =
+    tokenInHistoricalUsdPrices !== undefined
+      ? tokenInHistoricalUsdPrices[tokenInHistoricalUsdPrices.length - 1].value
+      : undefined;
+  const tokenOutCurrentUsdPrice =
+    tokenOutHistoricalUsdPrices !== undefined
+      ? tokenOutHistoricalUsdPrices[tokenOutHistoricalUsdPrices.length - 1]
+          .value
+      : undefined;
+
+  const tokenInUsdValue =
+    quoteAmountIn !== undefined && tokenInCurrentUsdPrice !== undefined
+      ? quoteAmountIn.times(tokenInCurrentUsdPrice)
+      : undefined;
+  const tokenOutUsdValue =
+    quoteAmountOut !== undefined && tokenOutCurrentUsdPrice !== undefined
+      ? quoteAmountOut.times(tokenOutCurrentUsdPrice)
+      : undefined;
+
+  const tokensCurrentRatio =
+    tokenInCurrentUsdPrice !== undefined &&
+    tokenOutCurrentUsdPrice !== undefined
+      ? new BigNumber(tokenInCurrentUsdPrice).div(tokenOutCurrentUsdPrice)
+      : undefined;
+  const tokensCurrentRatioDp =
+    tokensCurrentRatio !== undefined
+      ? Math.max(0, -Math.floor(Math.log10(+tokensCurrentRatio)) - 1) + 4
+      : undefined;
 
   const tokensHistoricalRatios = (() => {
     if (
@@ -389,8 +371,8 @@ function Page() {
     }));
   })();
   const tokensRatio1DChange =
-    tokensRatio !== undefined && tokensHistoricalRatios !== undefined
-      ? new BigNumber(tokensRatio.minus(tokensHistoricalRatios[0].ratio))
+    tokensCurrentRatio !== undefined && tokensHistoricalRatios !== undefined
+      ? new BigNumber(tokensCurrentRatio.minus(tokensHistoricalRatios[0].ratio))
           .div(tokensHistoricalRatios[0].ratio)
           .times(100)
       : undefined;
@@ -398,7 +380,7 @@ function Page() {
   const fetchTokenHistoricalUsdPrice = useCallback(
     async (token: VerifiedToken) => {
       try {
-        const url = `https://public-api.birdeye.so/defi/history_price?address=${isSui(token.coin_type) ? SUI_COINTYPE : token.coin_type}&address_type=token&type=15m&time_from=${Math.floor(new Date().getTime() / 1000) - 24 * 60 * 60}&time_to=${Math.floor(new Date().getTime() / 1000)}`;
+        const url = `https://public-api.birdeye.so/defi/history_price?address=${isSui(token.coin_type) ? SUI_COINTYPE : token.coin_type}&address_type=token&type=5m&time_from=${Math.floor(new Date().getTime() / 1000) - 24 * 60 * 60}&time_to=${Math.floor(new Date().getTime() / 1000)}`;
         const res = await fetch(url, {
           headers: {
             "X-API-KEY": process.env.NEXT_PUBLIC_BIRDEYE_API_KEY as string,
@@ -424,12 +406,14 @@ function Page() {
     [],
   );
 
+  const fetchedInitialTokenHistoricalUsdPricesRef = useRef<boolean>(false);
   useEffect(() => {
+    if (fetchedInitialTokenHistoricalUsdPricesRef.current) return;
+
     fetchTokenHistoricalUsdPrice(tokenIn);
-  }, [tokenIn, fetchTokenHistoricalUsdPrice]);
-  useEffect(() => {
     fetchTokenHistoricalUsdPrice(tokenOut);
-  }, [tokenOut, fetchTokenHistoricalUsdPrice]);
+    fetchedInitialTokenHistoricalUsdPricesRef.current = true;
+  }, [fetchTokenHistoricalUsdPrice, tokenIn, tokenOut]);
 
   // Reverse tokens
   const reverseTokens = () => {
@@ -469,6 +453,8 @@ function Page() {
         direction === TokenDirection.IN ? tokenOut : _token,
         value,
       );
+      if (historicalUsdPricesMap[_token.coin_type] === undefined)
+        fetchTokenHistoricalUsdPrice(_token);
     }
 
     inputRef.current?.focus();
@@ -882,12 +868,12 @@ function Page() {
                 </TBody>
               </div>
 
-              {tokensRatio !== undefined &&
-              tokensRatioDp !== undefined &&
+              {tokensCurrentRatio !== undefined &&
+              tokensCurrentRatioDp !== undefined &&
               tokensRatio1DChange !== undefined ? (
                 <TBody className="text-xs">
-                  {formatToken(tokensRatio, {
-                    dp: tokensRatioDp,
+                  {formatToken(tokensCurrentRatio, {
+                    dp: tokensCurrentRatioDp,
                     exact: true,
                   })}{" "}
                   <span
