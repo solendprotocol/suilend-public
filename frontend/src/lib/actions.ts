@@ -6,6 +6,7 @@ import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 import { AppData } from "@/contexts/AppContext";
 import { isSui } from "@/lib/coinType";
 import {
+  LOOPING_THRESHOLD,
   SUI_DEPOSIT_GAS_MIN,
   SUI_REPAY_GAS_MIN,
   msPerYear,
@@ -17,7 +18,7 @@ const getMaxCalculations = (
   reserve: ParsedReserve,
   balance: BigNumber,
   data: AppData,
-  obligation?: ParsedObligation | null,
+  obligation: ParsedObligation | null,
 ) => {
   if (action === Action.DEPOSIT) {
     // Calculate safe deposit limit (subtract 10 mins of deposit APR from cap)
@@ -197,7 +198,7 @@ export const getMaxValue =
     reserve: ParsedReserve,
     balance: BigNumber,
     data: AppData,
-    obligation?: ParsedObligation | null,
+    obligation: ParsedObligation | null,
   ) =>
   () => {
     const maxCalculations = getMaxCalculations(
@@ -217,17 +218,17 @@ export const getMaxValue =
   };
 
 export const getSubmitButtonNoValueState =
-  (
-    action: Action,
-    reserve: ParsedReserve,
-    obligation?: ParsedObligation | null,
-  ) =>
+  (action: Action, reserve: ParsedReserve, obligations?: ParsedObligation[]) =>
   () => {
     if (action === Action.DEPOSIT) {
-      const borrowPosition = obligation?.borrows?.find(
-        (d) => d.coinType === reserve.coinType,
+      const borrowedAmountAcrossObligations = (obligations ?? []).reduce(
+        (acc, obligation) =>
+          acc.plus(
+            obligation.borrows.find((b) => b.coinType === reserve.coinType)
+              ?.borrowedAmount ?? new BigNumber(0),
+          ),
+        new BigNumber(0),
       );
-      const borrowedAmount = borrowPosition?.borrowedAmount ?? new BigNumber(0);
 
       if (reserve.depositedAmount.gte(reserve.config.depositLimit))
         return {
@@ -243,15 +244,18 @@ export const getSubmitButtonNoValueState =
           isDisabled: true,
           title: "Reserve USD deposit limit reached",
         };
-      if (borrowedAmount.gt(0.01))
+      if (borrowedAmountAcrossObligations.gt(LOOPING_THRESHOLD))
         return { isDisabled: true, title: "Cannot deposit borrowed asset" };
       return undefined;
     } else if (action === Action.BORROW) {
-      const depositPosition = obligation?.deposits?.find(
-        (d) => d.coinType === reserve.coinType,
+      const depositedAmountAcrossObligations = (obligations ?? []).reduce(
+        (acc, obligation) =>
+          acc.plus(
+            obligation.deposits.find((d) => d.coinType === reserve.coinType)
+              ?.depositedAmount ?? new BigNumber(0),
+          ),
+        new BigNumber(0),
       );
-      const depositedAmount =
-        depositPosition?.depositedAmount ?? new BigNumber(0);
 
       if (reserve.borrowedAmount.gte(reserve.config.borrowLimit))
         return {
@@ -267,7 +271,7 @@ export const getSubmitButtonNoValueState =
           isDisabled: true,
           title: "Reserve USD borrow limit reached",
         };
-      if (depositedAmount.gt(0.01))
+      if (depositedAmountAcrossObligations.gt(LOOPING_THRESHOLD))
         return { isDisabled: true, title: "Cannot borrow deposited asset" };
       return undefined;
     }
@@ -279,7 +283,7 @@ export const getSubmitButtonState =
     reserve: ParsedReserve,
     balance: BigNumber,
     data: AppData,
-    obligation?: ParsedObligation | null,
+    obligation: ParsedObligation | null,
   ) =>
   (value: string) => {
     const maxCalculations = getMaxCalculations(

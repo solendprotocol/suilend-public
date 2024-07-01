@@ -108,7 +108,7 @@ export default function ActionsModal() {
         getSubmitButtonNoValueState: getSubmitButtonNoValueState(
           Action.DEPOSIT,
           reserve,
-          obligation,
+          data.obligations,
         ),
         getSubmitButtonState: getSubmitButtonState(
           Action.DEPOSIT,
@@ -166,7 +166,7 @@ export default function ActionsModal() {
         getSubmitButtonNoValueState: getSubmitButtonNoValueState(
           Action.BORROW,
           reserve,
-          obligation,
+          data.obligations,
         ),
         getSubmitButtonState: getSubmitButtonState(
           Action.BORROW,

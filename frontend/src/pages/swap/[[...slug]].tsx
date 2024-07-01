@@ -613,7 +613,7 @@ function Page() {
     const depositSubmitButtonNoValueState = getSubmitButtonNoValueState(
       Action.DEPOSIT,
       tokenOutReserve,
-      obligation,
+      data.obligations,
     )();
     const depositSubmitButtonState = getSubmitButtonState(
       Action.DEPOSIT,
