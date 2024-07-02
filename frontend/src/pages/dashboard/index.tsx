@@ -2,6 +2,7 @@ import Head from "next/head";
 
 import AccountPositionCard from "@/components/dashboard/account/AccountPositionCard";
 import ActionsModal from "@/components/dashboard/actions-modal/ActionsModal";
+import FirstDepositDialog from "@/components/dashboard/FirstDepositDialog";
 import MarketOverview from "@/components/dashboard/MarketOverview";
 import MarketTable from "@/components/dashboard/MarketTable";
 import ObligationBorrowsCard from "@/components/dashboard/ObligationBorrowsCard";
@@ -59,6 +60,7 @@ export default function Dashboard() {
       )}
 
       <ActionsModal />
+      <FirstDepositDialog />
     </DashboardContextProvider>
   );
 }

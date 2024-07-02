@@ -102,7 +102,10 @@ export default function Dialog({
           {...restDialogContentProps}
         >
           <DialogHeader
-            className={cn("relative space-y-0 p-4", headerClassName)}
+            className={cn(
+              "relative space-y-0 p-4 pr-[calc(8px+20px+16px)] text-left",
+              headerClassName,
+            )}
           >
             <TitleWithIcon className={titleClassName} icon={titleIcon}>
               {title}
@@ -140,7 +143,7 @@ export default function Dialog({
         }}
         {...restDrawerContentProps}
       >
-        <DrawerHeader className={cn("relative p-4", headerClassName)}>
+        <DrawerHeader className={cn("relative p-4 text-left", headerClassName)}>
           <TitleWithIcon className={titleClassName} icon={titleIcon}>
             {title}
           </TitleWithIcon>
