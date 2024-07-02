@@ -31,14 +31,14 @@ interface DialogProps extends PropsWithChildren {
   trigger?: ReactNode;
   dialogContentProps?: DialogContentProps;
   drawerContentProps?: DrawerContentProps;
-  isAutoHeight?: boolean;
-  headerProps?: {
+  headerProps: {
     className?: ClassValue;
     titleClassName?: ClassValue;
+    titleIcon?: ReactElement;
+    title: string | ReactNode;
+    endContent?: ReactNode;
   };
-  titleIcon?: ReactElement;
-  title: string;
-  headerEndContent?: ReactNode;
+  isAutoHeight?: boolean;
 }
 
 export default function Dialog({
@@ -46,18 +46,21 @@ export default function Dialog({
   trigger,
   dialogContentProps,
   drawerContentProps,
-  isAutoHeight,
   headerProps,
-  titleIcon,
-  title,
-  headerEndContent,
+  isAutoHeight,
   children,
 }: DialogProps) {
   const { className: dialogContentClassName, ...restDialogContentProps } =
     dialogContentProps || {};
   const { className: drawerContentClassName, ...restDrawerContentProps } =
     drawerContentProps || {};
-  const { className: headerClassName, titleClassName } = headerProps || {};
+  const {
+    className: headerClassName,
+    titleClassName,
+    titleIcon,
+    title,
+    endContent: headerEndContent,
+  } = headerProps;
 
   const { md } = useBreakpoint();
 

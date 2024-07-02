@@ -11,7 +11,7 @@ export default function MarketOverview() {
 
   return (
     <Card
-      header={{
+      headerProps={{
         title: "Pool overview",
         startContent: <MarketOverviewPopover />,
         noSeparator: true,

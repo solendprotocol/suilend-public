@@ -10,7 +10,7 @@ export default function ObligationDepositsCard() {
   return (
     <Card
       id="assets-deposited"
-      header={{
+      headerProps={{
         title: "Deposited assets",
         noSeparator: true,
       }}

@@ -245,19 +245,21 @@ export default function AccountDetailsDialog() {
     <Dialog
       rootProps={{ open: isOpen, onOpenChange }}
       dialogContentProps={{ className: "max-w-6xl" }}
-      headerProps={{ className: "border-b-0" }}
-      title="Account"
-      headerEndContent={
-        <Button
-          className="text-muted-foreground"
-          icon={<RotateCw />}
-          variant="ghost"
-          size="icon"
-          onClick={refresh}
-        >
-          Refresh
-        </Button>
-      }
+      headerProps={{
+        className: "border-b-0",
+        title: "Account",
+        endContent: (
+          <Button
+            className="text-muted-foreground"
+            icon={<RotateCw />}
+            variant="ghost"
+            size="icon"
+            onClick={refresh}
+          >
+            Refresh
+          </Button>
+        ),
+      }}
     >
       <div className="px-4">
         <Tabs

@@ -114,7 +114,7 @@ export default function TokenSelectionDialog({
         </Button>
       }
       dialogContentProps={{ className: "max-w-lg" }}
-      title="Select token"
+      headerProps={{ title: "Select token" }}
     >
       <div className="mx-4 mb-4 flex flex-row items-center gap-3 rounded-md bg-muted/5 px-3">
         <Search className="h-4 w-4 text-muted-foreground" />

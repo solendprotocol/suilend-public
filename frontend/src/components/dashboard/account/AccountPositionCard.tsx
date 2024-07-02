@@ -192,7 +192,7 @@ export default function AccountPositionCard() {
   return (
     <Card
       id={address && obligation ? "position" : undefined}
-      header={{
+      headerProps={{
         title: "Account",
         endContent: address && obligation && (
           <>

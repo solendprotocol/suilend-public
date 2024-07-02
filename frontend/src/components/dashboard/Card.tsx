@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 
 interface CardProps extends PropsWithChildren, CardRootProps {
   id?: string;
-  header?: {
+  headerProps?: {
     titleIcon?: ReactElement;
     title?: string | ReactNode;
     startContent?: ReactNode;
@@ -24,7 +24,12 @@ interface CardProps extends PropsWithChildren, CardRootProps {
   };
 }
 
-export default function Card({ id, header, children, ...props }: CardProps) {
+export default function Card({
+  id,
+  headerProps,
+  children,
+  ...props
+}: CardProps) {
   const { className, ...restProps } = props;
 
   const [isCollapsed, setIsCollapsed] = useLocalStorage<boolean>(
@@ -43,27 +48,32 @@ export default function Card({ id, header, children, ...props }: CardProps) {
       )}
       {...restProps}
     >
-      {header && (
+      {headerProps && (
         <CardHeader className="flex flex-col gap-2 space-y-0">
           <div className="flex h-5 flex-row items-center justify-between">
-            {(header.titleIcon || header.title || header.startContent) && (
+            {(headerProps.titleIcon ||
+              headerProps.title ||
+              headerProps.startContent) && (
               <div className="flex flex-row items-center gap-1">
                 <div
                   className={cn(isCollapsible && "cursor-pointer")}
                   onClick={isCollapsible ? toggleIsCollapsed : undefined}
                 >
-                  <TitleWithIcon className="w-full" icon={header.titleIcon}>
-                    {header.title}
+                  <TitleWithIcon
+                    className="w-full"
+                    icon={headerProps.titleIcon}
+                  >
+                    {headerProps.title}
                   </TitleWithIcon>
                 </div>
 
-                {header.startContent}
+                {headerProps.startContent}
               </div>
             )}
 
-            {(header.endContent || isCollapsible) && (
+            {(headerProps.endContent || isCollapsible) && (
               <div className="flex flex-row items-center justify-end gap-1">
-                {header.endContent}
+                {headerProps.endContent}
 
                 {isCollapsible && (
                   <Button
@@ -80,7 +90,7 @@ export default function Card({ id, header, children, ...props }: CardProps) {
             )}
           </div>
 
-          {!isCollapsed && !header.noSeparator && <Separator />}
+          {!isCollapsed && !headerProps.noSeparator && <Separator />}
         </CardHeader>
       )}
 

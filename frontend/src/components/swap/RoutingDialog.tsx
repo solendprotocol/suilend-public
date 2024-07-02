@@ -459,9 +459,11 @@ export default function RoutingDialog({ quote }: RoutingDialogProps) {
           </TLabelSans>
         </div>
       }
-      headerProps={{ className: "pb-0" }}
-      titleIcon={<Route />}
-      title="Routing"
+      headerProps={{
+        className: "pb-0",
+        titleIcon: <Route />,
+        title: "Routing",
+      }}
     >
       {isLoading ? (
         <div className="flex h-full w-full flex-row items-center justify-center">
