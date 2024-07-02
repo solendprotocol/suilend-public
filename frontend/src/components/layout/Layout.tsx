@@ -8,6 +8,7 @@ import AccountDetailsDialog from "@/components/dashboard/account-details/Account
 import AppHeader from "@/components/layout/AppHeader";
 import Banner from "@/components/layout/Banner";
 import Footer from "@/components/layout/Footer";
+import LoopingDialog from "@/components/layout/LoopingDialog";
 import Container from "@/components/shared/Container";
 import FullPageSpinner from "@/components/shared/FullPageSpinner";
 import { useAppContext } from "@/contexts/AppContext";
@@ -46,7 +47,7 @@ export default function Layout({ children }: PropsWithChildren) {
 
   return (
     <div
-      className="relative flex min-h-dvh flex-col"
+      className="relative z-[1] flex min-h-dvh flex-col"
       style={
         {
           background: "url('/assets/footer.svg') bottom no-repeat",
@@ -69,7 +70,9 @@ export default function Layout({ children }: PropsWithChildren) {
             {!isPageLoading && (
               <ReserveAssetDataEventsContextProvider>
                 {children}
+
                 <AccountDetailsDialog />
+                <LoopingDialog />
               </ReserveAssetDataEventsContextProvider>
             )}
           </Container>

@@ -58,7 +58,7 @@ export default function App({
         />
       </Head>
 
-      <main id="__app_main" className={cn("light", ...fontClassNames)}>
+      <main id="__app_main" className={cn("light relative", ...fontClassNames)}>
         <TooltipProvider>
           <LDProvider
             clientSideID={
