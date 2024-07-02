@@ -32,7 +32,10 @@ interface DialogProps extends PropsWithChildren {
   dialogContentProps?: DialogContentProps;
   drawerContentProps?: DrawerContentProps;
   isAutoHeight?: boolean;
-  headerClassName?: ClassValue;
+  headerProps?: {
+    className?: ClassValue;
+    titleClassName?: ClassValue;
+  };
   titleIcon?: ReactElement;
   title: string;
   headerEndContent?: ReactNode;
@@ -44,7 +47,7 @@ export default function Dialog({
   dialogContentProps,
   drawerContentProps,
   isAutoHeight,
-  headerClassName,
+  headerProps,
   titleIcon,
   title,
   headerEndContent,
@@ -54,6 +57,7 @@ export default function Dialog({
     dialogContentProps || {};
   const { className: drawerContentClassName, ...restDrawerContentProps } =
     drawerContentProps || {};
+  const { className: headerClassName, titleClassName } = headerProps || {};
 
   const { md } = useBreakpoint();
 
@@ -82,7 +86,9 @@ export default function Dialog({
           <DialogHeader
             className={cn("relative space-y-0 p-4", headerClassName)}
           >
-            <TitleWithIcon icon={titleIcon}>{title}</TitleWithIcon>
+            <TitleWithIcon className={titleClassName} icon={titleIcon}>
+              {title}
+            </TitleWithIcon>
 
             {headerEndContent && (
               <div className="absolute right-[calc(8px+20px+16px)] top-1/2 flex -translate-y-2/4 flex-row gap-1">

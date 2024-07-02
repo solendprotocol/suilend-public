@@ -459,7 +459,7 @@ export default function RoutingDialog({ quote }: RoutingDialogProps) {
           </TLabelSans>
         </div>
       }
-      headerClassName="pb-0"
+      headerProps={{ className: "pb-0" }}
       titleIcon={<Route />}
       title="Routing"
     >

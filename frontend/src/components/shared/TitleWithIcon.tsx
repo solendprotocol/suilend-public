@@ -1,10 +1,12 @@
 import { PropsWithChildren, ReactElement, cloneElement } from "react";
 
+import { ClassValue } from "clsx";
+
 import { TTitle } from "@/components/shared/Typography";
 import { cn } from "@/lib/utils";
 
 interface TitleWithIconProps extends PropsWithChildren {
-  className?: string;
+  className?: ClassValue;
   icon?: ReactElement;
 }
 
