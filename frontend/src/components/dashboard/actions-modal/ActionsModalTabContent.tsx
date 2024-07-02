@@ -335,13 +335,6 @@ export default function ActionsModalTabContent({
             horizontal
             value="0"
           />
-          {action === Action.BORROW && (
-            <LabelWithValue
-              label="Borrow fee"
-              value={`${formatToken(borrowFee, { dp: 4 })} ${reserve.symbol}`}
-              horizontal
-            />
-          )}
           <LabelWithValue
             label="Your borrow limit"
             value={
@@ -366,6 +359,15 @@ export default function ActionsModalTabContent({
             }
             horizontal
           />
+          {action === Action.BORROW ? (
+            <LabelWithValue
+              label="Borrow fee"
+              value={`${formatToken(borrowFee, { dp: 4 })} ${reserve.symbol}`}
+              horizontal
+            />
+          ) : (
+            <div className="h-5 w-full" />
+          )}
         </div>
 
         {!md && isMoreParametersOpen && (
