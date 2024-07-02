@@ -161,7 +161,7 @@ export default function ConnectedWalletDropdownMenu({
                         </TLabelSans>
                         <TLabelSans>
                           {o.positionCount} position
-                          {o.positionCount > 1 ? "s" : ""}
+                          {o.positionCount !== 1 ? "s" : ""}
                         </TLabelSans>
                       </div>
 
