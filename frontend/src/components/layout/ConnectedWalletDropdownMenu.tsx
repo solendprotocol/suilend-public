@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { useState } from "react";
 
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, VenetianMask } from "lucide-react";
 import { useLocalStorage } from "usehooks-ts";
 
 import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
@@ -81,7 +81,9 @@ export default function ConnectedWalletDropdownMenu({
           className="min-w-0"
           labelClassName="uppercase text-ellipsis overflow-hidden"
           startIcon={
-            !isImpersonatingAddress && connectedWallet?.logoUrl ? (
+            isImpersonatingAddress ? (
+              <VenetianMask />
+            ) : connectedWallet?.logoUrl ? (
               <Image
                 className="h-4 w-4 min-w-4 shrink-0"
                 src={connectedWallet.logoUrl}

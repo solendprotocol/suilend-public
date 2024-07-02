@@ -40,7 +40,6 @@ export type SubmitButtonState = {
   isLoading?: boolean;
   isDisabled?: boolean;
   title?: string;
-  description?: string;
 };
 
 interface ActionsModalTabContentProps {
@@ -162,10 +161,6 @@ export default function ActionsModalTabContent({
 
     return {
       title: `${capitalize(action)} ${formattedValue}`,
-      description:
-        action === Action.BORROW
-          ? `+${formatToken(borrowFee, { dp: reserve.mintDecimals })} ${reserve.symbol} in fees`
-          : undefined,
     };
   })();
 
@@ -340,6 +335,13 @@ export default function ActionsModalTabContent({
             horizontal
             value="0"
           />
+          {action === Action.BORROW && (
+            <LabelWithValue
+              label="Borrow fee"
+              value={`${formatToken(borrowFee, { dp: 4 })} ${reserve.symbol}`}
+              horizontal
+            />
+          )}
           <LabelWithValue
             label="Your borrow limit"
             value={
@@ -398,12 +400,6 @@ export default function ActionsModalTabContent({
             <Spinner size="md" />
           ) : (
             submitButtonState.title
-          )}
-
-          {submitButtonState.description && (
-            <span className="block font-sans text-xs normal-case opacity-75">
-              {submitButtonState.description}
-            </span>
           )}
         </Button>
       </div>
