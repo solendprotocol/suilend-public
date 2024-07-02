@@ -4,6 +4,7 @@ import { ApiDepositEvent } from "@suilend/sdk/types";
 
 import Dialog from "@/components/dashboard/Dialog";
 import { TLabelSans } from "@/components/shared/Typography";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { useDashboardContext } from "@/contexts/DashboardContext";
 
 export type EventsData = {
@@ -26,7 +27,7 @@ export default function FirstDepositDialog() {
         className: "pb-0",
         titleClassName: "text-success",
         titleIcon: <PartyPopper />,
-        title: "Congrats on your first deposit",
+        title: "Congrats on your deposit!",
       }}
       isAutoHeight
     >
@@ -37,7 +38,27 @@ export default function FirstDepositDialog() {
           }
         </TLabelSans>
 
-        <div className="h-[200px] w-full bg-muted/10" />
+        <AspectRatio
+          className="overflow-hidden rounded-sm bg-muted/10"
+          ratio={1240 / 720}
+        >
+          <video
+            autoPlay
+            controls={false}
+            loop
+            muted
+            playsInline
+            disablePictureInPicture
+            disableRemotePlayback
+            width="100%"
+            height="auto"
+          >
+            <source
+              src="/assets/dashboard/account-nft-explainer.mp4"
+              type="video/mp4"
+            />
+          </video>
+        </AspectRatio>
       </div>
     </Dialog>
   );
