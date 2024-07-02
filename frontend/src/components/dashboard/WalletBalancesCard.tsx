@@ -18,7 +18,7 @@ export default function WalletBalancesCard() {
   return (
     <Card
       id="wallet-balances"
-      header={{
+      headerProps={{
         title: (
           <>
             Wallet balances

@@ -10,7 +10,7 @@ export default function ObligationBorrowsCard() {
   return (
     <Card
       id="assets-borrowed"
-      header={{
+      headerProps={{
         title: "Borrowed assets",
         noSeparator: true,
       }}

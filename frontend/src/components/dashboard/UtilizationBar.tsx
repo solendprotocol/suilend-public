@@ -67,7 +67,7 @@ function Segment({ className, style, widthPercent }: SegmentProps) {
 }
 
 interface ThresholdProps {
-  className?: string;
+  className?: ClassValue;
   leftPercent: number;
 }
 

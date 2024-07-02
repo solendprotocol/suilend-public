@@ -31,11 +31,14 @@ interface DialogProps extends PropsWithChildren {
   trigger?: ReactNode;
   dialogContentProps?: DialogContentProps;
   drawerContentProps?: DrawerContentProps;
+  headerProps: {
+    className?: ClassValue;
+    titleClassName?: ClassValue;
+    titleIcon?: ReactElement;
+    title: string | ReactNode;
+    endContent?: ReactNode;
+  };
   isAutoHeight?: boolean;
-  headerClassName?: ClassValue;
-  titleIcon?: ReactElement;
-  title: string;
-  headerEndContent?: ReactNode;
 }
 
 export default function Dialog({
@@ -43,17 +46,33 @@ export default function Dialog({
   trigger,
   dialogContentProps,
   drawerContentProps,
+  headerProps,
   isAutoHeight,
-  headerClassName,
-  titleIcon,
-  title,
-  headerEndContent,
   children,
 }: DialogProps) {
-  const { className: dialogContentClassName, ...restDialogContentProps } =
-    dialogContentProps || {};
-  const { className: drawerContentClassName, ...restDrawerContentProps } =
-    drawerContentProps || {};
+  const {
+    className: dialogContentClassName,
+    overlay: dialogOverlay,
+    ...restDialogContentProps
+  } = dialogContentProps || {};
+  const { className: dialogOverlayClassName, ...restDialogOverlayProps } =
+    dialogOverlay || {};
+
+  const {
+    className: drawerContentClassName,
+    overlay: drawerOverlay,
+    ...restDrawerContentProps
+  } = drawerContentProps || {};
+  const { className: drawerOverlayClassName, ...restDrawerOverlayProps } =
+    drawerOverlay || {};
+
+  const {
+    className: headerClassName,
+    titleClassName,
+    titleIcon,
+    title,
+    endContent: headerEndContent,
+  } = headerProps;
 
   const { md } = useBreakpoint();
 
@@ -76,13 +95,18 @@ export default function Dialog({
           )}
           style={{ "--sm-mx": "2rem", "--sm-my": "2rem" } as CSSProperties}
           onOpenAutoFocus={(e) => e.preventDefault()}
-          overlay={{ className: "bg-background/80" }}
+          overlay={{
+            className: cn("bg-background/80", dialogOverlayClassName),
+            ...restDialogOverlayProps,
+          }}
           {...restDialogContentProps}
         >
           <DialogHeader
             className={cn("relative space-y-0 p-4", headerClassName)}
           >
-            <TitleWithIcon icon={titleIcon}>{title}</TitleWithIcon>
+            <TitleWithIcon className={titleClassName} icon={titleIcon}>
+              {title}
+            </TitleWithIcon>
 
             {headerEndContent && (
               <div className="absolute right-[calc(8px+20px+16px)] top-1/2 flex -translate-y-2/4 flex-row gap-1">
@@ -106,15 +130,20 @@ export default function Dialog({
       <DrawerContent
         className={cn(
           "mt-0 max-h-dvh rounded-t-lg bg-popover p-0",
-          !isAutoHeight ? "!bottom-0 !top-auto !h-dvh" : "min-h-[50dvh]",
+          !isAutoHeight && "!bottom-0 !top-auto !h-dvh",
           drawerContentClassName,
         )}
         thumbClassName="hidden"
-        overlay={{ className: "bg-background/80" }}
+        overlay={{
+          className: cn("bg-background/80", drawerOverlayClassName),
+          ...restDrawerOverlayProps,
+        }}
         {...restDrawerContentProps}
       >
         <DrawerHeader className={cn("relative p-4", headerClassName)}>
-          <TitleWithIcon icon={titleIcon}>{title}</TitleWithIcon>
+          <TitleWithIcon className={titleClassName} icon={titleIcon}>
+            {title}
+          </TitleWithIcon>
 
           {headerEndContent && (
             <div className="absolute right-4 top-1/2 flex -translate-y-2/4 flex-row gap-1">

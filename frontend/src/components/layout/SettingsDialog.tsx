@@ -87,8 +87,8 @@ export default function SettingsDialog() {
       dialogContentProps={{
         className: "max-w-md",
       }}
+      headerProps={{ title: "Settings" }}
       isAutoHeight
-      title="Settings"
     >
       <div className="flex w-full flex-col gap-4 overflow-y-auto p-4 pt-0">
         <div className="flex w-full flex-col gap-4">
