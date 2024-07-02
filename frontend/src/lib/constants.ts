@@ -7,6 +7,8 @@ export const SUI_DEPOSIT_GAS_MIN = 0.025;
 export const SUI_REPAY_GAS_MIN = 0.01;
 export const LOOPING_THRESHOLD = 0.01;
 
+export const FIRST_DEPOSIT_DIALOG_START_DATE = new Date("2024-07-02T13:15:00Z");
+
 export enum Rpc {
   TRITON_ONE = "tritonOne",
   FULL_NODE = "fullNode",

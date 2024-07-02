@@ -1,9 +1,12 @@
 import {
+  Dispatch,
   PropsWithChildren,
+  SetStateAction,
   createContext,
   useCallback,
   useContext,
   useMemo,
+  useState,
 } from "react";
 
 import { SuiTransactionBlockResponse } from "@mysten/sui.js/client";
@@ -18,12 +21,20 @@ import { useWalletContext } from "@/contexts/WalletContext";
 import { RewardSummary } from "@/lib/liquidityMining";
 
 interface DashboardContext {
+  isFirstDepositDialogOpen: boolean;
+  setIsFirstDepositDialogOpen: Dispatch<SetStateAction<boolean>>;
+
   claimRewards: (
     rewards: RewardSummary[],
   ) => Promise<SuiTransactionBlockResponse>;
 }
 
 const defaultContextValue: DashboardContext = {
+  isFirstDepositDialogOpen: false,
+  setIsFirstDepositDialogOpen: () => {
+    throw Error("DashboardContextProvider not initialized");
+  },
+
   claimRewards: async () => {
     throw Error("DashboardContextProvider not initialized");
   },
@@ -40,6 +51,11 @@ export function DashboardContextProvider({ children }: PropsWithChildren) {
   const suilendClient = restAppContext.suilendClient as SuilendClient<string>;
   const data = restAppContext.data as AppData;
 
+  // First deposit
+  const [isFirstDepositDialogOpen, setIsFirstDepositDialogOpen] =
+    useState<boolean>(defaultContextValue.isFirstDepositDialogOpen);
+
+  // Actions
   const obligationOwnerCap = data.obligationOwnerCaps?.find(
     (o) => o.obligationId === obligation?.id,
   );
@@ -88,9 +104,12 @@ export function DashboardContextProvider({ children }: PropsWithChildren) {
   // Context
   const contextValue: DashboardContext = useMemo(
     () => ({
+      isFirstDepositDialogOpen,
+      setIsFirstDepositDialogOpen,
+
       claimRewards,
     }),
-    [claimRewards],
+    [isFirstDepositDialogOpen, setIsFirstDepositDialogOpen, claimRewards],
   );
 
   return (

@@ -1,12 +1,13 @@
 import { CSSProperties, useCallback, useEffect, useRef, useState } from "react";
 
+import { normalizeStructTag } from "@mysten/sui.js/utils";
 import BigNumber from "bignumber.js";
 import { capitalize } from "lodash";
 import { toast } from "sonner";
 
 import { maxU64 } from "@suilend/sdk/constants";
 import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
-import { Side } from "@suilend/sdk/types";
+import { ApiDepositEvent, Side } from "@suilend/sdk/types";
 
 import {
   ActionSignature,
@@ -23,16 +24,23 @@ import TextLink from "@/components/shared/TextLink";
 import { TBody, TLabelSans } from "@/components/shared/Typography";
 import { Separator } from "@/components/ui/separator";
 import { AppData, useAppContext } from "@/contexts/AppContext";
+import { useDashboardContext } from "@/contexts/DashboardContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 import useBreakpoint from "@/hooks/useBreakpoint";
 import { isSui } from "@/lib/coinType";
-import { SUI_REPAY_GAS_MIN, TX_TOAST_DURATION } from "@/lib/constants";
+import {
+  FIRST_DEPOSIT_DIALOG_START_DATE,
+  SUI_REPAY_GAS_MIN,
+  TX_TOAST_DURATION,
+} from "@/lib/constants";
+import { EventType } from "@/lib/events";
 import {
   formatPercent,
   formatPrice,
   formatToken,
   formatUsd,
 } from "@/lib/format";
+import { API_URL } from "@/lib/navigation";
 import { Action } from "@/lib/types";
 import { cn, hoverUnderlineClassName } from "@/lib/utils";
 
@@ -72,10 +80,50 @@ export default function ActionsModalTabContent({
   const { refreshData, explorer, obligation, ...restAppContext } =
     useAppContext();
   const data = restAppContext.data as AppData;
+  const { setIsFirstDepositDialogOpen } = useDashboardContext();
   const { isMoreParametersOpen, setIsMoreParametersOpen } =
     useActionsModalContext();
 
   const { md } = useBreakpoint();
+
+  // First deposit
+  const [justDeposited, setJustDeposited] = useState<boolean>(false);
+
+  const isFetchingDepositEventsRef = useRef<boolean>(false);
+  useEffect(() => {
+    if (!justDeposited) return;
+    if (!obligation) return;
+
+    // Fetch deposit events
+    if (isFetchingDepositEventsRef.current) return;
+    isFetchingDepositEventsRef.current = true;
+
+    (async () => {
+      try {
+        const url = `${API_URL}/events?${new URLSearchParams({
+          eventTypes: [EventType.DEPOSIT].join(","),
+          obligationId: obligation.id,
+        })}`;
+        const res = await fetch(url);
+        const json = await res.json();
+
+        const depositEvents = (json.deposit ?? []) as ApiDepositEvent[];
+        for (const event of depositEvents) {
+          event.coinType = normalizeStructTag(event.coinType);
+        }
+
+        const depositsSinceDialogStart = depositEvents.filter(
+          (depositEvent) =>
+            depositEvent.timestamp >
+            FIRST_DEPOSIT_DIALOG_START_DATE.getTime() / 1000,
+        ).length;
+
+        if (depositsSinceDialogStart <= 1) setIsFirstDepositDialogOpen(true);
+      } catch (err) {
+        console.error(err);
+      }
+    })();
+  }, [justDeposited, obligation, setIsFirstDepositDialogOpen]);
 
   // Balance
   const balance =
@@ -223,6 +271,9 @@ export default function ActionsModalTabContent({
       });
       setUseMaxAmount(false);
       setValue("");
+
+      if (action === Action.DEPOSIT)
+        setTimeout(() => setJustDeposited(true), 1000);
     } catch (err) {
       toast.error(`Failed to ${action.toLowerCase()} ${formattedValue}`, {
         description: ((err as Error)?.message || err) as string,
