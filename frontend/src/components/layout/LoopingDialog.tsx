@@ -5,8 +5,7 @@ import { AlertTriangle } from "lucide-react";
 
 import Dialog from "@/components/dashboard/Dialog";
 import TokenLogo from "@/components/shared/TokenLogo";
-import { TBodySans, TLabelSans } from "@/components/shared/Typography";
-import { Separator } from "@/components/ui/separator";
+import { TLabelSans } from "@/components/shared/Typography";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import {
   NORMALIZED_USDC_COINTYPE,
@@ -113,11 +112,7 @@ export default function LoopingDialog() {
           Eliminate looping to maximize rewards.
         </TLabelSans>
 
-        <Separator />
-
         <div className="flex flex-col gap-2">
-          <TBodySans>Looped positions</TBodySans>
-
           {loopedAssetCoinTypes.map((coinTypes) => {
             const coinsMetadata = coinTypes.map(
               (coinType) => data.coinMetadataMap[coinType],
