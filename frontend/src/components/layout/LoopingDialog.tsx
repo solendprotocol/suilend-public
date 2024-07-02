@@ -102,7 +102,7 @@ export default function LoopingDialog() {
         className: "pb-0",
         titleClassName: "text-warning",
         titleIcon: <AlertTriangle />,
-        title: "Looped assets",
+        title: "Looped positions",
       }}
       isAutoHeight
     >
