@@ -55,7 +55,6 @@ type SubmitButtonState = {
   isLoading?: boolean;
   isDisabled?: boolean;
   title?: string;
-  description?: string;
 };
 
 function Page() {
@@ -813,12 +812,6 @@ function Page() {
                 <Spinner size="md" />
               ) : (
                 swapButtonState.title
-              )}
-
-              {swapButtonState.description && (
-                <span className="block font-sans text-xs normal-case opacity-75">
-                  {swapButtonState.description}
-                </span>
               )}
             </Button>
 
