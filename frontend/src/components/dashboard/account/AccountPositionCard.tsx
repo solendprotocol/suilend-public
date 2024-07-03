@@ -1,7 +1,7 @@
 import { useRouter } from "next/router";
 
 import BigNumber from "bignumber.js";
-import { FileClock, TrendingUp } from "lucide-react";
+import { AlertTriangle, FileClock, TrendingUp } from "lucide-react";
 
 import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
 
@@ -17,16 +17,18 @@ import Card from "@/components/dashboard/Card";
 import UtilizationBar, {
   getWeightedBorrowsUsd,
 } from "@/components/dashboard/UtilizationBar";
+import LoopedPosition from "@/components/layout/LoopedPosition";
 import Button from "@/components/shared/Button";
 import LabelWithTooltip from "@/components/shared/LabelWithTooltip";
 import Tooltip from "@/components/shared/Tooltip";
-import { TBody, TLabelSans } from "@/components/shared/Typography";
+import { TBody, TBodySans, TLabelSans } from "@/components/shared/Typography";
 import { CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 import { formatPercent, formatUsd } from "@/lib/format";
 import { getFilteredRewards, getTotalAprPercent } from "@/lib/liquidityMining";
+import { LOOPING_MESSAGE, getLoopedAssetCoinTypes } from "@/lib/looping";
 import { shallowPushQuery } from "@/lib/router";
 import {
   BORROWS_TOOLTIP,
@@ -38,6 +40,8 @@ function AccountPositionCardContent() {
   const appContext = useAppContext();
   const data = appContext.data as AppData;
   const obligation = appContext.obligation as ParsedObligation;
+
+  const loopedAssetCoinTypes = getLoopedAssetCoinTypes(data);
 
   // APR
   const aprWeightedDepositsUsd = obligation.deposits.reduce((acc, deposit) => {
@@ -117,9 +121,35 @@ function AccountPositionCardContent() {
 
       <div className="flex flex-row items-center justify-between gap-2">
         <LabelWithTooltip tooltip={NET_APR_TOOLTIP}>Net APR</LabelWithTooltip>
-        <TBody className="w-max text-right">
-          {formatPercent(netAprPercent)}
-        </TBody>
+        <Tooltip
+          contentProps={{ className: "flex-col flex gap-4" }}
+          content={
+            loopedAssetCoinTypes.length > 0 && (
+              <>
+                <TBodySans className="text-xs">{LOOPING_MESSAGE}</TBodySans>
+
+                <div className="flex flex-col gap-2">
+                  {loopedAssetCoinTypes.map((coinTypes) => (
+                    <LoopedPosition
+                      key={coinTypes.join(".")}
+                      coinTypes={coinTypes}
+                    />
+                  ))}
+                </div>
+              </>
+            )
+          }
+        >
+          <div className="flex w-max flex-row items-center justify-end gap-2">
+            {loopedAssetCoinTypes.length > 0 && (
+              <AlertTriangle className="h-4 w-4 text-warning" />
+            )}
+
+            <TBody className="w-max text-right">
+              {formatPercent(netAprPercent)}
+            </TBody>
+          </div>
+        </Tooltip>
       </div>
 
       {obligation.positionCount > 0 && (

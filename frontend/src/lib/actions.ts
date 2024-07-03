@@ -6,11 +6,11 @@ import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 import { AppData } from "@/contexts/AppContext";
 import { isSui } from "@/lib/coinType";
 import {
-  LOOPING_THRESHOLD,
   SUI_DEPOSIT_GAS_MIN,
   SUI_REPAY_GAS_MIN,
   msPerYear,
 } from "@/lib/constants";
+import { LOOPING_THRESHOLD } from "@/lib/looping";
 import { Action } from "@/lib/types";
 
 const getMaxCalculations = (
