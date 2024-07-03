@@ -101,15 +101,15 @@ export default function LoopingDialog() {
         className: "pb-0",
         titleClassName: "text-warning",
         titleIcon: <AlertTriangle />,
-        title: "Looped positions",
+        title: "Looping detected",
       }}
       isAutoHeight
     >
       <div className="flex flex-col gap-4 p-4">
         <TLabelSans className="text-foreground">
-          You are looping (depositing and borrowing the same asset, or
-          USDT-USDC) which is penalized to receive less SUI incentives.
-          Eliminate looping to maximize rewards.
+          You are looping (depositing and borrowing the same asset or
+          USDT-USDC). Soon, looped positions will no longer be eligible for LM
+          rewards. Please unloop to remain eligible.
         </TLabelSans>
 
         <div className="flex flex-col gap-2">
