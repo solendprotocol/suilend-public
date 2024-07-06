@@ -742,44 +742,46 @@ function Page() {
                 </TBody>
               </div>
 
-              <div className="flex w-max flex-row items-center justify-end">
-                <div className="flex h-4 flex-col items-end justify-center">
-                  <div
-                    className={cn(
-                      "flex h-0 w-max flex-row items-center gap-2 opacity-0 transition-opacity duration-500",
-                      isShowingTokenOutDepositPosition && "opacity-100",
-                    )}
-                  >
-                    <TLabelSans>Deposited</TLabelSans>
-                    <TBody className="text-xs">
-                      {formatToken(tokenOutDepositPositionAmount, {
-                        exact: false,
-                      })}
-                    </TBody>
+              {hasTokenOutReserve && (
+                <div className="flex w-max flex-row items-center justify-end">
+                  <div className="flex h-4 flex-col items-end justify-center">
+                    <div
+                      className={cn(
+                        "flex h-0 w-max flex-row items-center gap-2 opacity-0 transition-opacity duration-500",
+                        isShowingTokenOutDepositPosition && "opacity-100",
+                      )}
+                    >
+                      <TLabelSans>Deposited</TLabelSans>
+                      <TBody className="text-xs">
+                        {formatToken(tokenOutDepositPositionAmount, {
+                          exact: false,
+                        })}
+                      </TBody>
+                    </div>
+
+                    <div
+                      className={cn(
+                        "flex h-0 w-max flex-row items-center gap-2 opacity-0 transition-opacity duration-500",
+                        !isShowingTokenOutDepositPosition && "opacity-100",
+                      )}
+                    >
+                      <TLabelSans>Borrowed</TLabelSans>
+                      <TBody className="text-xs">
+                        {formatToken(tokenOutBorrowPositionAmount, {
+                          exact: false,
+                        })}
+                      </TBody>
+                    </div>
                   </div>
 
-                  <div
-                    className={cn(
-                      "flex h-0 w-max flex-row items-center gap-2 opacity-0 transition-opacity duration-500",
-                      !isShowingTokenOutDepositPosition && "opacity-100",
-                    )}
+                  <TBody
+                    className="text-xs"
+                    style={{ marginLeft: `${7.2 * 1}px` }}
                   >
-                    <TLabelSans>Borrowed</TLabelSans>
-                    <TBody className="text-xs">
-                      {formatToken(tokenOutBorrowPositionAmount, {
-                        exact: false,
-                      })}
-                    </TBody>
-                  </div>
+                    {tokenOut.ticker}
+                  </TBody>
                 </div>
-
-                <TBody
-                  className="text-xs"
-                  style={{ marginLeft: `${7.2 * 1}px` }}
-                >
-                  {tokenOut.ticker}
-                </TBody>
-              </div>
+              )}
             </div>
           </div>
 
