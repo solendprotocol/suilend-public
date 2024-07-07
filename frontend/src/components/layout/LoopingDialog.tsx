@@ -36,7 +36,7 @@ export default function LoopingDialog() {
       isAutoHeight
     >
       <div className="flex flex-col gap-4 p-4">
-        <TBodySans className="text-xs">{LOOPING_MESSAGE}</TBodySans>
+        <TBodySans>{LOOPING_MESSAGE}</TBodySans>
 
         <div className="flex flex-col gap-2">
           {loopedAssetCoinTypes.map((coinTypes) => (

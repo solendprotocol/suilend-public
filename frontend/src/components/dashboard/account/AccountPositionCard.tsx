@@ -132,6 +132,7 @@ function AccountPositionCardContent() {
                   {loopedAssetCoinTypes.map((coinTypes) => (
                     <LoopedPosition
                       key={coinTypes.join(".")}
+                      labelClassName="text-xs"
                       coinTypes={coinTypes}
                     />
                   ))}

@@ -3,7 +3,7 @@ import { PartyPopper } from "lucide-react";
 import { ApiDepositEvent } from "@suilend/sdk/types";
 
 import Dialog from "@/components/dashboard/Dialog";
-import { TLabelSans } from "@/components/shared/Typography";
+import { TBodySans } from "@/components/shared/Typography";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { useDashboardContext } from "@/contexts/DashboardContext";
 
@@ -32,11 +32,11 @@ export default function FirstDepositDialog() {
       isAutoHeight
     >
       <div className="flex flex-col gap-4 p-4">
-        <TLabelSans className="text-foreground">
+        <TBodySans>
           {
             "Your account is represented as an NFT, which can be viewed from your wallet's NFT section. Remember, do not burn!"
           }
-        </TLabelSans>
+        </TBodySans>
 
         <AspectRatio
           className="overflow-hidden rounded-sm bg-muted/10"
