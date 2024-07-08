@@ -352,22 +352,34 @@ function Page() {
     )
       return undefined;
 
-    const timestampsS = tokenInHistoricalUsdPrices
-      .filter((_, index) => index % 10 === 0) // 1*10 = 10 minutes
-      .map((item) => item.timestampS);
+    const minTimestampS = Math.max(
+      Math.min(...tokenInHistoricalUsdPrices.map((item) => item.timestampS)),
+      Math.min(...tokenOutHistoricalUsdPrices.map((item) => item.timestampS)),
+    );
+    const maxTimestampS = Math.min(
+      Math.max(...tokenInHistoricalUsdPrices.map((item) => item.timestampS)),
+      Math.max(...tokenOutHistoricalUsdPrices.map((item) => item.timestampS)),
+    );
 
-    return timestampsS.map((timestampS) => ({
-      timestampS,
-      ratio: +new BigNumber(
-        tokenInHistoricalUsdPrices.find(
-          (item) => item.timestampS === timestampS,
-        )?.value ?? 0,
-      ).div(
-        tokenOutHistoricalUsdPrices.find(
-          (item) => item.timestampS === timestampS,
-        )?.value ?? 1,
-      ),
-    }));
+    const timestampsS: number[] = [minTimestampS];
+    while (timestampsS[timestampsS.length - 1] < maxTimestampS) {
+      timestampsS.push(timestampsS[timestampsS.length - 1] + 60 * 1); // 1 minute
+    }
+
+    return timestampsS
+      .filter((timestampS, index) => index % 10 === 0) // 1*10 = 10 minutes
+      .map((timestampS) => ({
+        timestampS,
+        ratio: +new BigNumber(
+          tokenInHistoricalUsdPrices.find(
+            (item) => item.timestampS === timestampS,
+          )?.value ?? 0,
+        ).div(
+          tokenOutHistoricalUsdPrices.find(
+            (item) => item.timestampS === timestampS,
+          )?.value ?? 1,
+        ),
+      }));
   })();
   const tokensRatio1DChange =
     tokensCurrentRatio !== undefined && tokensHistoricalRatios !== undefined
