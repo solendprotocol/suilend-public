@@ -85,7 +85,7 @@ type QuoteNodeWithTokens = QuoteNode & {
   amount_out: QuoteNode["amount_out"] & VerifiedToken;
 };
 
-const START_END_NODE_WIDTH = 240; // px
+const START_END_NODE_WIDTH = 200; // px
 const START_END_NODE_HEIGHT = 36; // px
 
 interface StartEndNodeProps {
@@ -326,13 +326,13 @@ function NodeChart({ quote, quoteNodesWithTokens }: NodeChartProps) {
   );
 
   return (
-    <div className="h-full w-full">
+    <div className="h-full w-full pt-0 md:p-4">
       <ReactFlow
         nodeTypes={nodeTypes}
         defaultNodes={initialNodesEdges.nodes}
         defaultEdges={initialNodesEdges.edges}
         fitView
-        fitViewOptions={{ maxZoom: 1 }}
+        fitViewOptions={{ padding: 0, minZoom: 0.25, maxZoom: 1 }}
       />
     </div>
   );
