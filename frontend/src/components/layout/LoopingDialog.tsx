@@ -33,10 +33,11 @@ export default function LoopingDialog() {
         titleIcon: <AlertTriangle />,
         title: "Looping detected",
       }}
-      isAutoHeight
+      isDialogAutoHeight
+      isDrawerAutoHeight
     >
       <div className="flex flex-col gap-4 p-4">
-        <TBodySans>{LOOPING_MESSAGE}</TBodySans>
+        <TBodySans className="text-xs">{LOOPING_MESSAGE}</TBodySans>
 
         <div className="flex flex-col gap-2">
           {loopedAssetCoinTypes.map((coinTypes) => (

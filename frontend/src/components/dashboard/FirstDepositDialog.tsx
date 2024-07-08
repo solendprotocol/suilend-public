@@ -29,7 +29,8 @@ export default function FirstDepositDialog() {
         titleIcon: <PartyPopper />,
         title: "Congrats on your deposit!",
       }}
-      isAutoHeight
+      isDialogAutoHeight
+      isDrawerAutoHeight
     >
       <div className="flex flex-col gap-4 p-4">
         <TBodySans>

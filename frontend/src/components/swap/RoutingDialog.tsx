@@ -21,7 +21,6 @@ import {
   Quote,
   useSwapContext,
 } from "@/contexts/SwapContext";
-import useBreakpoint from "@/hooks/useBreakpoint";
 import { getCoinMetadataMap } from "@/lib/coinMetadata";
 import { formatId, formatList, formatToken } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -100,17 +99,13 @@ interface StartEndNodeProps {
 function StartEndNode({ data }: StartEndNodeProps) {
   const { isStart, token, amount } = data;
 
-  const { md } = useBreakpoint();
-
   return (
     <>
-      {!isStart && (
-        <Handle type="target" position={md ? Position.Left : Position.Top} />
-      )}
+      {!isStart && <Handle type="target" position={Position.Left} />}
       <div
         className={cn(
           "flex flex-row justify-center",
-          isStart ? "md:justify-end" : "md:justify-start",
+          isStart ? "justify-end" : "justify-start",
         )}
         style={{
           width: `${START_END_NODE_WIDTH}px`,
@@ -132,12 +127,7 @@ function StartEndNode({ data }: StartEndNodeProps) {
           </TBody>
         </div>
       </div>
-      {isStart && (
-        <Handle
-          type="source"
-          position={md ? Position.Right : Position.Bottom}
-        />
-      )}
+      {isStart && <Handle type="source" position={Position.Right} />}
     </>
   );
 }
@@ -152,8 +142,6 @@ interface ExchangeNodeProps {
 function ExchangeNode({ data }: ExchangeNodeProps) {
   const { explorer } = useAppContext();
 
-  const { md } = useBreakpoint();
-
   const amountIn = BigNumber(data.amount_in.amount.toString()).div(
     10 ** data.amount_in.decimals,
   );
@@ -163,7 +151,7 @@ function ExchangeNode({ data }: ExchangeNodeProps) {
 
   return (
     <>
-      <Handle type="target" position={md ? Position.Left : Position.Top} />
+      <Handle type="target" position={Position.Left} />
       <div
         className="flex flex-col items-center gap-1.5 rounded-md bg-card px-4 py-3"
         style={{
@@ -228,7 +216,7 @@ function ExchangeNode({ data }: ExchangeNodeProps) {
           </div>
         </Tooltip>
       </div>
-      <Handle type="source" position={md ? Position.Right : Position.Bottom} />
+      <Handle type="source" position={Position.Right} />
     </>
   );
 }
@@ -242,8 +230,6 @@ function NodeChart({ quote, quoteNodesWithTokens }: NodeChartProps) {
   const swapContext = useSwapContext();
   const tokenIn = swapContext.tokenIn as VerifiedToken;
   const tokenOut = swapContext.tokenOut as VerifiedToken;
-
-  const { md } = useBreakpoint();
 
   // Layout
   const initialNodesEdges = (() => {
@@ -325,7 +311,7 @@ function NodeChart({ quote, quoteNodesWithTokens }: NodeChartProps) {
 
     // Layout
     const layouted = getLayoutedElements(initialNodes, initialEdges, {
-      direction: md ? "LR" : "TB",
+      direction: "LR",
     });
 
     return {
@@ -459,11 +445,13 @@ export default function RoutingDialog({ quote }: RoutingDialogProps) {
           </TLabelSans>
         </div>
       }
+      dialogContentProps={{ className: "h-[600px]" }}
       headerProps={{
         className: "pb-0",
         titleIcon: <Route />,
         title: "Routing",
       }}
+      isDialogAutoHeight
     >
       {isLoading ? (
         <div className="flex h-full w-full flex-row items-center justify-center">

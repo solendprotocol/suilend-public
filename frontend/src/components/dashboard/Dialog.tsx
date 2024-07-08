@@ -38,7 +38,8 @@ interface DialogProps extends PropsWithChildren {
     title: string | ReactNode;
     endContent?: ReactNode;
   };
-  isAutoHeight?: boolean;
+  isDialogAutoHeight?: boolean;
+  isDrawerAutoHeight?: boolean;
 }
 
 export default function Dialog({
@@ -47,7 +48,8 @@ export default function Dialog({
   dialogContentProps,
   drawerContentProps,
   headerProps,
-  isAutoHeight,
+  isDialogAutoHeight,
+  isDrawerAutoHeight,
   children,
 }: DialogProps) {
   const {
@@ -88,7 +90,7 @@ export default function Dialog({
         <DialogContent
           className={cn(
             "flex w-[calc(100dvw-var(--sm-mx)*2)] max-w-4xl flex-col gap-0 overflow-hidden bg-popover p-0",
-            !isAutoHeight
+            !isDialogAutoHeight
               ? "h-[calc(100dvh-var(--sm-my)*2)] max-h-none"
               : "h-auto max-h-[calc(100dvh-var(--sm-my)*2)]",
             dialogContentClassName,
@@ -133,7 +135,7 @@ export default function Dialog({
       <DrawerContent
         className={cn(
           "mt-0 max-h-dvh rounded-t-lg bg-popover p-0",
-          !isAutoHeight && "!bottom-0 !top-auto !h-dvh",
+          !isDrawerAutoHeight && "!bottom-0 !top-auto !h-dvh",
           drawerContentClassName,
         )}
         thumbClassName="hidden"

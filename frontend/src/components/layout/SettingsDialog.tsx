@@ -88,7 +88,8 @@ export default function SettingsDialog() {
         className: "max-w-md",
       }}
       headerProps={{ title: "Settings" }}
-      isAutoHeight
+      isDialogAutoHeight
+      isDrawerAutoHeight
     >
       <div className="flex w-full flex-col gap-4 overflow-y-auto p-4 pt-0">
         <div className="flex w-full flex-col gap-4">
