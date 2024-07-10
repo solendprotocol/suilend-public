@@ -106,6 +106,7 @@ export default function PointsLeaderboardTable() {
         data={leaderboardRows}
         noDataMessage="No users"
         pageSize={100}
+        tableClassName="border-y"
         tableRowClassName={(row) =>
           address &&
           row?.original.address === address &&

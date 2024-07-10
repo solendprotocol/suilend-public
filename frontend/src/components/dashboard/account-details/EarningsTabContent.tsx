@@ -990,7 +990,6 @@ export default function EarningsTabContent({
                     container={{
                       className: "overflow-y-visible overflow-x-auto",
                     }}
-                    tableClassName="border-y-0"
                     tableCellClassName={(cell) =>
                       cn(
                         cell &&

@@ -14,7 +14,7 @@ export default function OpenLtvBwCell({
   borrowWeight,
 }: OpenLtvBwCellProps) {
   return (
-    <div className="flex flex-row items-center gap-2">
+    <div className="flex flex-row items-center justify-end gap-2">
       <TBody>{formatLtvPercent(new BigNumber(openLtvPercent))}</TBody>
       <TLabel>/</TLabel>
       <TBody>{formatBorrowWeight(borrowWeight)}</TBody>

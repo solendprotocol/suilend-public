@@ -121,11 +121,13 @@ export function tableHeader<T>(
   title: string,
   {
     isNumerical,
+    isRightAligned,
     isDate,
     tooltip,
     borderBottom,
   }: {
     isNumerical?: boolean;
+    isRightAligned?: boolean;
     isDate?: boolean;
     tooltip?: string | ReactNode;
     borderBottom?: boolean;
@@ -140,7 +142,7 @@ export function tableHeader<T>(
       <LabelWithTooltip
         className={cn(
           "flex h-full w-full min-w-max flex-col justify-center px-4",
-          isNumerical ? "items-end" : "items-start",
+          isNumerical || isRightAligned ? "items-end" : "items-start",
           borderBottom && "border-b",
         )}
         tooltip={tooltip}
@@ -152,13 +154,13 @@ export function tableHeader<T>(
     <Button
       className={cn(
         "h-full w-full rounded-none px-4 py-0 text-muted-foreground hover:bg-transparent",
-        isNumerical ? "justify-end" : "justify-start",
+        isNumerical || isRightAligned ? "justify-end" : "justify-start",
         borderBottom && "border-b",
         column.getIsSorted() && "!text-primary-foreground",
       )}
       labelClassName="font-sans text-xs min-w-max"
       tooltip={sortState.tooltip}
-      tooltipAlign={isNumerical ? "end" : "start"}
+      tooltipAlign={isNumerical || isRightAligned ? "end" : "start"}
       endIcon={sortState.icon}
       variant="ghost"
       onClick={sortState.action}
@@ -277,7 +279,7 @@ export default function DataTable<T>({
 
   return (
     <>
-      <Table container={container} className={cn("border-y", tableClassName)}>
+      <Table container={container} className={cn(tableClassName)}>
         <TableHeader className="relative z-[2]">
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow

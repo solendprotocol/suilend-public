@@ -201,7 +201,6 @@ export default function PoolRewardsTable({
         columns={columns}
         data={poolRewards}
         noDataMessage={noPoolRewardsMessage}
-        tableClassName="border-y-0"
       />
     </div>
   );

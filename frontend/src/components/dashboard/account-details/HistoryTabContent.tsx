@@ -656,7 +656,7 @@ export default function HistoryTabContent({
         container={{
           className: cn(rows === undefined && "overflow-y-hidden"),
         }}
-        tableClassName="border-y-0 relative"
+        tableClassName="relative"
         tableHeaderRowClassName="border-none"
         tableHeadClassName={(header) =>
           cn(

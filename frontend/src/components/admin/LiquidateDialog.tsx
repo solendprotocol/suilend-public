@@ -291,7 +291,6 @@ export default function LiquidateDialog({
                 };
               })}
               noDataMessage="No Deposits"
-              tableClassName="border-y-0"
               onRowClick={(row) => () => {
                 if (selectedWithdrawAsset === row.original.symbol) {
                   setSelectedWithdrawAsset("");
@@ -313,7 +312,6 @@ export default function LiquidateDialog({
                 };
               })}
               noDataMessage="No Borrows"
-              tableClassName="border-y-0"
               onRowClick={(row) => () => {
                 if (selectedRepayAsset === row.original.symbol) {
                   setSelectedRepayAsset("");
@@ -344,8 +342,7 @@ export default function LiquidateDialog({
             <DataTable<FormattedObligationHistory>
               columns={historyColumnDefinition(data.lendingMarket.reserves)}
               data={obligationHistory}
-              noDataMessage={"Loading obligation history"}
-              tableClassName="border-y-0"
+              noDataMessage="Loading obligation history"
               onRowClick={(row) => async () => {
                 await navigator.clipboard.writeText(row.original.digest);
                 toast.info(`Copied ${row.original.digest} to clipboard`);

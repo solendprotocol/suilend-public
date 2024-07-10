@@ -29,6 +29,7 @@ import {
   getTotalAprPercent,
 } from "@/lib/liquidityMining";
 import { OPEN_LTV_BORROW_WEIGHT_TOOLTIP } from "@/lib/tooltips";
+import { cn } from "@/lib/utils";
 
 export interface ReservesRowData {
   coinType: string;
@@ -69,20 +70,28 @@ export default function MarketTable() {
         cell: ({ row }) => <AssetCell {...row.original} />,
       },
       {
-        accessorKey: "openLtvBw",
-        enableSorting: false,
-        header: ({ column }) =>
-          tableHeader(column, "LTV / BW", {
-            tooltip: OPEN_LTV_BORROW_WEIGHT_TOOLTIP,
-          }),
-        cell: ({ row }) => <OpenLtvBwCell {...row.original} />,
-      },
-      {
         accessorKey: "depositedAmount",
         sortingFn: decimalSortingFn("depositedAmount"),
         header: ({ column }) =>
           tableHeader(column, "Deposits", { isNumerical: true }),
         cell: ({ row }) => <TotalDepositsCell {...row.original} />,
+      },
+      {
+        accessorKey: "borrowedAmount",
+        sortingFn: decimalSortingFn("borrowedAmount"),
+        header: ({ column }) =>
+          tableHeader(column, "Borrows", { isNumerical: true }),
+        cell: ({ row }) => <TotalBorrowsCell {...row.original} />,
+      },
+      {
+        accessorKey: "openLtvBw",
+        enableSorting: false,
+        header: ({ column }) =>
+          tableHeader(column, "LTV / BW", {
+            isRightAligned: true,
+            tooltip: OPEN_LTV_BORROW_WEIGHT_TOOLTIP,
+          }),
+        cell: ({ row }) => <OpenLtvBwCell {...row.original} />,
       },
       {
         accessorKey: "depositAprPercent",
@@ -94,13 +103,6 @@ export default function MarketTable() {
             <DepositAprCell {...row.original} />
           </div>
         ),
-      },
-      {
-        accessorKey: "borrowedAmount",
-        sortingFn: decimalSortingFn("borrowedAmount"),
-        header: ({ column }) =>
-          tableHeader(column, "Borrows", { isNumerical: true }),
-        cell: ({ row }) => <TotalBorrowsCell {...row.original} />,
       },
       {
         accessorKey: "borrowAprPercent",
@@ -272,11 +274,10 @@ export default function MarketTable() {
           columns={columns}
           data={rows}
           noDataMessage="No assets"
-          tableClassName="border-t-0"
           onRowClick={(row) => () =>
             openActionsModal(Number(row.original.reserve.arrayIndex))
           }
-          tableRowClassName={() => styles.tableRow}
+          tableRowClassName={() => cn("border-0", styles.tableRow)}
         />
       </div>
       <div className="w-full md:hidden">
