@@ -36,6 +36,7 @@ interface BreakdownColumn {
   title: string;
   titleTooltip?: string | ReactNode;
   data: string[];
+  isSymbol?: boolean;
 }
 
 interface BreakdownColumnProps {
@@ -51,7 +52,7 @@ function BreakdownColumn({
   isFirst,
   isLast,
 }: BreakdownColumnProps) {
-  return column.data.length === 0 ? (
+  return column.isSymbol ? (
     <LabelWithTooltip
       className={cn(
         "h-fit w-auto flex-1 py-2 text-center",
@@ -178,13 +179,13 @@ export default function AccountBreakdown() {
                     `${formatToken(b.borrowedAmount, { exact: false })} ${b.reserve.symbol}`,
                 ),
               },
-              { title: "×", data: [] },
+              { title: "×", data: [], isSymbol: true },
               {
                 title: "Price",
                 titleTooltip: WEIGHTED_BORROWS_PRICE_TOOLTIP,
                 data: sortedBorrows.map((b) => formatPrice(b.reserve.maxPrice)),
               },
-              { title: "×", data: [] },
+              { title: "×", data: [], isSymbol: true },
               {
                 title: "BW",
                 titleTooltip: BORROW_WEIGHT_TOOLTIP,
@@ -194,7 +195,7 @@ export default function AccountBreakdown() {
                   ),
                 ),
               },
-              { title: "=", data: [] },
+              { title: "=", data: [], isSymbol: true },
               {
                 title: "Total",
                 data: sortedBorrows.map((b) =>
@@ -235,7 +236,7 @@ export default function AccountBreakdown() {
                     `${formatToken(d.depositedAmount, { exact: false })} ${d.reserve.symbol}`,
                 ),
               },
-              { title: "×", data: [] },
+              { title: "×", data: [], isSymbol: true },
               {
                 title: "Price",
                 titleTooltip: BORROW_LIMIT_PRICE_TOOLTIP,
@@ -243,7 +244,7 @@ export default function AccountBreakdown() {
                   formatPrice(d.reserve.minPrice),
                 ),
               },
-              { title: "×", data: [] },
+              { title: "×", data: [], isSymbol: true },
               {
                 title: "Open LTV",
                 titleTooltip: OPEN_LTV_TOOLTIP,
@@ -251,7 +252,7 @@ export default function AccountBreakdown() {
                   formatLtvPercent(new BigNumber(d.reserve.config.openLtvPct)),
                 ),
               },
-              { title: "=", data: [] },
+              { title: "=", data: [], isSymbol: true },
               {
                 title: "Total",
                 data: sortedDeposits.map((d) =>
@@ -290,12 +291,12 @@ export default function AccountBreakdown() {
                     `${formatToken(d.depositedAmount, { exact: false })} ${d.reserve.symbol}`,
                 ),
               },
-              { title: "×", data: [] },
+              { title: "×", data: [], isSymbol: true },
               {
                 title: "Price",
                 data: sortedDeposits.map((d) => formatPrice(d.reserve.price)),
               },
-              { title: "×", data: [] },
+              { title: "×", data: [], isSymbol: true },
               {
                 title: "Close LTV",
                 titleTooltip: CLOSE_LTV_TOOLTIP,
@@ -303,7 +304,7 @@ export default function AccountBreakdown() {
                   formatLtvPercent(new BigNumber(d.reserve.config.closeLtvPct)),
                 ),
               },
-              { title: "=", data: [] },
+              { title: "=", data: [], isSymbol: true },
               {
                 title: "Total",
                 data: sortedDeposits.map((d) =>
