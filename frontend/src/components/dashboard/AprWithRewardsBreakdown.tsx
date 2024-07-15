@@ -79,8 +79,8 @@ const formatAprPercent = (
   showChange: boolean,
 ) =>
   showChange && !newValue.eq(value)
-    ? `${formatPercent(value)} → ${isAprModifierInvalid ? "N/A" : formatPercent(newValue)}`
-    : formatPercent(value);
+    ? `${formatPercent(value, { useAccountingSign: true })} → ${isAprModifierInvalid ? "N/A" : formatPercent(newValue, { useAccountingSign: true })}`
+    : formatPercent(value, { useAccountingSign: true });
 
 interface AprWithRewardsBreakdownProps {
   side: Side;
@@ -159,13 +159,11 @@ export default function AprWithRewardsBreakdown({
   }));
 
   // Total APR
-  const totalAprPercent = getTotalAprPercent(aprPercent, filteredRewards);
-  const newTotalAprPercent = newAprRewards.reduce(
-    (acc, reward) =>
-      side === Side.DEPOSIT
-        ? acc.plus(reward.stats.aprPercent)
-        : acc.minus(reward.stats.aprPercent),
+  const totalAprPercent = getTotalAprPercent(side, aprPercent, filteredRewards);
+  const newTotalAprPercent = getTotalAprPercent(
+    side,
     newAprPercent,
+    newAprRewards,
   );
 
   if (filteredRewards.length === 0)
@@ -263,8 +261,12 @@ export default function AprWithRewardsBreakdown({
                   key={index}
                   isLast={index === aprRewards.length - 1}
                   value={formatAprPercent(
-                    reward.stats.aprPercent,
-                    newAprRewards[index].stats.aprPercent,
+                    reward.stats.aprPercent.times(
+                      side === Side.DEPOSIT ? 1 : -1,
+                    ),
+                    newAprRewards[index].stats.aprPercent.times(
+                      side === Side.DEPOSIT ? 1 : -1,
+                    ),
                     isAprModifierInvalid,
                     showChange,
                   )}

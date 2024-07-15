@@ -143,11 +143,13 @@ export default function MarketTable() {
           const borrowedAmountUsd = reserve.borrowedAmountUsd;
           const depositAprPercent = reserve.depositAprPercent;
           const totalDepositAprPercent = getTotalAprPercent(
+            Side.DEPOSIT,
             reserve.depositAprPercent,
             getFilteredRewards(data.rewardMap[coinType].deposit),
           );
           const borrowAprPercent = reserve.borrowAprPercent;
           const totalBorrowAprPercent = getTotalAprPercent(
+            Side.BORROW,
             reserve.borrowAprPercent,
             getFilteredRewards(data.rewardMap[coinType].borrow),
           );

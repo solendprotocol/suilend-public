@@ -2,6 +2,7 @@ import BigNumber from "bignumber.js";
 
 import { ParsedDownsampledApiReserveAssetDataEvent } from "@suilend/sdk/parsers/apiReserveAssetDataEvent";
 import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
+import { Side } from "@suilend/sdk/types";
 
 import {
   NORMALIZED_SUI_COINTYPE,
@@ -72,7 +73,8 @@ type ReducedPoolReward = {
   endTimeMs: number;
 };
 
-export const calculateRewardDepositAprPercent = (
+export const calculateRewardAprPercent = (
+  side: Side,
   event: ParsedDownsampledApiReserveAssetDataEvent,
   rewardEvents: ParsedDownsampledApiReserveAssetDataEvent[],
   reserve: ParsedReserve,
@@ -86,73 +88,81 @@ export const calculateRewardDepositAprPercent = (
 
   const rewardCoinType = rewardEvent.coinType;
 
-  const historicalRewardsMap: Record<string, ReducedPoolReward[]> = {
-    [NORMALIZED_SUI_COINTYPE]: [
-      {
-        coinType: NORMALIZED_SUI_COINTYPE,
-        totalRewards: new BigNumber(93613.13),
-        startTimeMs: 1713225600000,
-        endTimeMs: 1713830400000,
-      },
-      {
-        coinType: NORMALIZED_SUI_COINTYPE,
-        totalRewards: new BigNumber(177579),
-        startTimeMs: 1713830400000, // 2024-04-23 08:00:00
-        endTimeMs: 1715040000000, // 2024-05-07 08:00:00
-      },
-      {
-        coinType: NORMALIZED_SUI_COINTYPE,
-        totalRewards: new BigNumber(162386.57),
-        startTimeMs: 1715040000000, // 2024-05-07 08:00:00
-        endTimeMs: 1716249600000, //2024-05-21 08:00:00
-      },
-    ],
-    [NORMALIZED_USDC_COINTYPE]: [
-      {
-        coinType: NORMALIZED_SUI_COINTYPE,
-        totalRewards: new BigNumber(75915.32),
-        startTimeMs: 1713225600000,
-        endTimeMs: 1713830400000,
-      },
-      {
-        coinType: NORMALIZED_SUI_COINTYPE,
-        totalRewards: new BigNumber(168534),
-        startTimeMs: 1713830400000, // 2024-04-23 08:00:00
-        endTimeMs: 1715040000000, // 2024-05-07 08:00:00
-      },
-      {
-        coinType: NORMALIZED_SUI_COINTYPE,
-        totalRewards: new BigNumber(176679.79),
-        startTimeMs: 1715040000000, // 2024-05-07 08:00:00
-        endTimeMs: 1716249600000, //2024-05-21 08:00:00
-      },
-    ],
-    [NORMALIZED_USDT_COINTYPE]: [
-      {
-        coinType: NORMALIZED_SUI_COINTYPE,
-        totalRewards: new BigNumber(64602.32),
-        startTimeMs: 1713225600000,
-        endTimeMs: 1713830400000,
-      },
-      {
-        coinType: NORMALIZED_SUI_COINTYPE,
-        totalRewards: new BigNumber(128939),
-        startTimeMs: 1713830400000, // 2024-04-23 08:00:00
-        endTimeMs: 1715040000000, // 2024-05-07 08:00:00
-      },
-      {
-        coinType: NORMALIZED_SUI_COINTYPE,
-        totalRewards: new BigNumber(116534.73),
-        startTimeMs: 1715040000000, // 2024-05-07 08:00:00
-        endTimeMs: 1716249600000, //2024-05-21 08:00:00
-      },
-    ],
+  const historicalRewardsMap: Record<
+    Side,
+    Record<string, ReducedPoolReward[]>
+  > = {
+    [Side.DEPOSIT]: {
+      [NORMALIZED_SUI_COINTYPE]: [
+        {
+          coinType: NORMALIZED_SUI_COINTYPE,
+          totalRewards: new BigNumber(93613.13),
+          startTimeMs: 1713225600000,
+          endTimeMs: 1713830400000,
+        },
+        {
+          coinType: NORMALIZED_SUI_COINTYPE,
+          totalRewards: new BigNumber(177579),
+          startTimeMs: 1713830400000, // 2024-04-23 08:00:00
+          endTimeMs: 1715040000000, // 2024-05-07 08:00:00
+        },
+        {
+          coinType: NORMALIZED_SUI_COINTYPE,
+          totalRewards: new BigNumber(162386.57),
+          startTimeMs: 1715040000000, // 2024-05-07 08:00:00
+          endTimeMs: 1716249600000, //2024-05-21 08:00:00
+        },
+      ],
+      [NORMALIZED_USDC_COINTYPE]: [
+        {
+          coinType: NORMALIZED_SUI_COINTYPE,
+          totalRewards: new BigNumber(75915.32),
+          startTimeMs: 1713225600000,
+          endTimeMs: 1713830400000,
+        },
+        {
+          coinType: NORMALIZED_SUI_COINTYPE,
+          totalRewards: new BigNumber(168534),
+          startTimeMs: 1713830400000, // 2024-04-23 08:00:00
+          endTimeMs: 1715040000000, // 2024-05-07 08:00:00
+        },
+        {
+          coinType: NORMALIZED_SUI_COINTYPE,
+          totalRewards: new BigNumber(176679.79),
+          startTimeMs: 1715040000000, // 2024-05-07 08:00:00
+          endTimeMs: 1716249600000, //2024-05-21 08:00:00
+        },
+      ],
+      [NORMALIZED_USDT_COINTYPE]: [
+        {
+          coinType: NORMALIZED_SUI_COINTYPE,
+          totalRewards: new BigNumber(64602.32),
+          startTimeMs: 1713225600000,
+          endTimeMs: 1713830400000,
+        },
+        {
+          coinType: NORMALIZED_SUI_COINTYPE,
+          totalRewards: new BigNumber(128939),
+          startTimeMs: 1713830400000, // 2024-04-23 08:00:00
+          endTimeMs: 1715040000000, // 2024-05-07 08:00:00
+        },
+        {
+          coinType: NORMALIZED_SUI_COINTYPE,
+          totalRewards: new BigNumber(116534.73),
+          startTimeMs: 1715040000000, // 2024-05-07 08:00:00
+          endTimeMs: 1716249600000, //2024-05-21 08:00:00
+        },
+      ],
+    },
+    [Side.BORROW]: {},
   };
 
   const allPoolRewards: ReducedPoolReward[] = [
-    ...reserve.depositsPoolRewardManager.poolRewards,
+    ...(side === Side.DEPOSIT
+      ? reserve.depositsPoolRewardManager.poolRewards
+      : reserve.borrowsPoolRewardManager.poolRewards),
   ];
-  (historicalRewardsMap[event.coinType] ?? []).forEach((hr) => {
+  (historicalRewardsMap[side][event.coinType] ?? []).forEach((hr) => {
     if (
       allPoolRewards.find(
         (pr) =>
@@ -185,7 +195,11 @@ export const calculateRewardDepositAprPercent = (
         pr.totalRewards
           .times(rewardEvent.price)
           .times(new BigNumber(msPerYear).div(pr.endTimeMs - pr.startTimeMs))
-          .div(event.depositedAmountUsd)
+          .div(
+            side === Side.DEPOSIT
+              ? event.depositedAmountUsd
+              : event.borrowedAmountUsd,
+          )
           .times(100),
       ),
     new BigNumber(0),

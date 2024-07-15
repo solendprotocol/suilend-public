@@ -14,6 +14,7 @@ import { useLocalStorage } from "usehooks-ts";
 import { v4 as uuidv4 } from "uuid";
 
 import { SuilendClient } from "@suilend/sdk/client";
+import { Side } from "@suilend/sdk/types";
 
 import Button from "@/components/shared/Button";
 import Spinner from "@/components/shared/Spinner";
@@ -120,6 +121,7 @@ function Page() {
   );
   const tokenOutReserveDepositAprPercent = tokenOutReserve
     ? getTotalAprPercent(
+        Side.DEPOSIT,
         tokenOutReserve.depositAprPercent,
         getFilteredRewards(data.rewardMap[tokenOutReserve.coinType].deposit),
       )

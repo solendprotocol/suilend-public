@@ -4,6 +4,7 @@ import BigNumber from "bignumber.js";
 import { AlertTriangle, FileClock, TrendingUp } from "lucide-react";
 
 import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
+import { Side } from "@suilend/sdk/types";
 
 import AccountBreakdown from "@/components/dashboard/account/AccountBreakdown";
 import BorrowLimitTitle from "@/components/dashboard/account/BorrowLimitTitle";
@@ -46,6 +47,7 @@ function AccountPositionCardContent() {
   // APR
   const aprWeightedDepositsUsd = obligation.deposits.reduce((acc, deposit) => {
     const totalAprPercent = getTotalAprPercent(
+      Side.DEPOSIT,
       deposit.reserve.depositAprPercent,
       getFilteredRewards(data.rewardMap[deposit.reserve.coinType].deposit),
     );
@@ -55,6 +57,7 @@ function AccountPositionCardContent() {
 
   const aprWeightedBorrowsUsd = obligation.borrows.reduce((acc, borrow) => {
     const totalAprPercent = getTotalAprPercent(
+      Side.BORROW,
       borrow.reserve.borrowAprPercent,
       getFilteredRewards(data.rewardMap[borrow.reserve.coinType].borrow),
     );

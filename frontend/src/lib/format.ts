@@ -154,14 +154,22 @@ export const formatPoints = (value: BigNumber, options?: { dp?: number }) => {
   });
 };
 
-export const formatPercent = (value: BigNumber, options?: { dp?: number }) => {
+export const formatPercent = (
+  value: BigNumber,
+  options?: { dp?: number; useAccountingSign?: boolean },
+) => {
   const dp = options?.dp ?? 2;
+  const useAccountingSign = options?.useAccountingSign ?? false;
 
-  return Intl.NumberFormat(undefined, {
+  const formattedValue = Intl.NumberFormat(undefined, {
     style: "percent",
     minimumFractionDigits: dp,
     maximumFractionDigits: dp,
-  }).format(value.div(100).toNumber());
+  }).format(value.abs().div(100).toNumber());
+
+  return !useAccountingSign || value.gte(0)
+    ? formattedValue
+    : `(${formattedValue})`;
 };
 
 export const formatDuration = (seconds: BigNumber) => {

@@ -33,7 +33,7 @@ import {
   DAY_S,
   Days,
   RESERVE_EVENT_SAMPLE_INTERVAL_S_MAP,
-  calculateRewardDepositAprPercent,
+  calculateRewardAprPercent,
 } from "@/lib/events";
 import { formatPercent } from "@/lib/format";
 import {
@@ -68,6 +68,19 @@ function TooltipContent({ side, fields, d, viewBox, x }: TooltipContentProps) {
 
   if (fields.every((field) => d[field] === undefined)) return null;
   if (viewBox === undefined || x === undefined) return null;
+
+  const interestField = `${side}InterestAprPercent`;
+  const rewardFields = fields.filter((field) => field !== interestField);
+
+  const aprPercent = new BigNumber(d[interestField] as number);
+  const totalAprPercent = rewardFields.reduce(
+    (acc, field) =>
+      acc.plus(
+        new BigNumber(d[field] as number).times(side === Side.DEPOSIT ? 1 : -1),
+      ),
+    new BigNumber(aprPercent),
+  );
+
   return (
     // Subset of TooltipContent className
     <div
@@ -82,14 +95,7 @@ function TooltipContent({ side, fields, d, viewBox, x }: TooltipContentProps) {
         <div className="flex w-full flex-row items-center justify-between gap-4">
           <TBodySans>{capitalize(side)} APR</TBodySans>
           <TBody>
-            {formatPercent(
-              new BigNumber(
-                fields.reduce(
-                  (acc: number, field) => acc + (d[field] as number),
-                  0,
-                ),
-              ),
-            )}
+            {formatPercent(totalAprPercent, { useAccountingSign: true })}
           </TBody>
         </div>
 
@@ -103,7 +109,14 @@ function TooltipContent({ side, fields, d, viewBox, x }: TooltipContentProps) {
               isLast={index === fields.length - 1}
               value={
                 <span style={{ color }}>
-                  {formatPercent(new BigNumber(d[field] as number))}
+                  {formatPercent(
+                    !coinType
+                      ? aprPercent
+                      : new BigNumber(d[field] as number).times(
+                          side === Side.DEPOSIT ? 1 : -1,
+                        ),
+                    { useAccountingSign: true },
+                  )}
                 </span>
               }
             >
@@ -401,8 +414,9 @@ export default function HistoricalAprLineChart({
       const d = aprRewardReserves.reduce(
         (acc, rewardReserve) => ({
           ...acc,
-          [`depositInterestAprPercent_${rewardReserve.coinType}`]: event
-            ? calculateRewardDepositAprPercent(
+          [`${side}InterestAprPercent_${rewardReserve.coinType}`]: event
+            ? calculateRewardAprPercent(
+                side,
                 event,
                 reserveAssetDataEventsMap?.[rewardReserve.id]?.[
                   days
@@ -423,7 +437,7 @@ export default function HistoricalAprLineChart({
     });
 
     return result as ChartData[];
-  }, [reserveAssetDataEventsMap, reserve, days, aprRewardReserves]);
+  }, [reserveAssetDataEventsMap, reserve, days, aprRewardReserves, side]);
   const isLoading = chartData === undefined;
 
   return (
