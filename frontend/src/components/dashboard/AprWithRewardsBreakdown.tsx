@@ -161,7 +161,10 @@ export default function AprWithRewardsBreakdown({
   // Total APR
   const totalAprPercent = getTotalAprPercent(aprPercent, filteredRewards);
   const newTotalAprPercent = newAprRewards.reduce(
-    (acc, reward) => acc.plus(reward.stats.aprPercent),
+    (acc, reward) =>
+      side === Side.DEPOSIT
+        ? acc.plus(reward.stats.aprPercent)
+        : acc.minus(reward.stats.aprPercent),
     newAprPercent,
   );
 
