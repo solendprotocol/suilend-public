@@ -24,7 +24,7 @@ type ObligationClaim = {
 export type RewardSummary = {
   stats: {
     id: string;
-    active: boolean;
+    isActive: boolean;
     rewardIndex: number;
     reserveCoinType: string;
     rewardCoinType: string;
@@ -69,6 +69,10 @@ export function formatRewards(
     const rewardReserve = parsedReserveMap[poolReward.coinType];
     const rewardCoinMetadata = coinMetadataMap[poolReward.coinType];
 
+    const isActive =
+      currentTime >= poolReward.startTimeMs &&
+      currentTime < poolReward.endTimeMs;
+
     const aprPercent = rewardReserve
       ? poolReward.totalRewards
           .times(rewardReserve.price)
@@ -94,9 +98,7 @@ export function formatRewards(
     return {
       stats: {
         id: poolReward.id,
-        active:
-          currentTime >= poolReward.startTimeMs &&
-          currentTime < poolReward.endTimeMs,
+        isActive,
         rewardIndex: poolReward.rewardIndex,
         reserveCoinType: reserve.coinType,
         rewardCoinType: poolReward.coinType,
@@ -173,7 +175,7 @@ function getObligationClaims(
 }
 
 export const getFilteredRewards = (rewards: RewardSummary[]): RewardSummary[] =>
-  rewards.filter((r) => r.stats.active);
+  rewards.filter((r) => r.stats.isActive);
 
 export const getDedupedAprRewards = (
   filteredRewards: RewardSummary[],

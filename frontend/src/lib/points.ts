@@ -3,7 +3,7 @@ import BigNumber from "bignumber.js";
 import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
 
 import { isSuilendPoints } from "@/lib/coinType";
-import { RewardMap, getFilteredRewards } from "@/lib/liquidityMining";
+import { RewardMap } from "@/lib/liquidityMining";
 
 export const roundPoints = (value: BigNumber) =>
   value.decimalPlaces(0, BigNumber.ROUND_HALF_UP);
@@ -26,15 +26,11 @@ export const getPointsStats = (
     return { totalPoints, pointsPerDay };
 
   const pointsRewards = {
-    deposit: getFilteredRewards(
-      Object.values(rewardMap).flatMap((rewards) =>
-        rewards.deposit.filter((r) => isSuilendPoints(r.stats.rewardCoinType)),
-      ),
+    deposit: Object.values(rewardMap).flatMap((rewards) =>
+      rewards.deposit.filter((r) => isSuilendPoints(r.stats.rewardCoinType)),
     ),
-    borrow: getFilteredRewards(
-      Object.values(rewardMap).flatMap((rewards) =>
-        rewards.borrow.filter((r) => isSuilendPoints(r.stats.rewardCoinType)),
-      ),
+    borrow: Object.values(rewardMap).flatMap((rewards) =>
+      rewards.borrow.filter((r) => isSuilendPoints(r.stats.rewardCoinType)),
     ),
   };
 
@@ -45,12 +41,14 @@ export const getPointsStats = (
           new BigNumber(0),
       );
 
-      pointsPerDay.deposit = pointsPerDay.deposit.plus(
-        obligation.deposits
-          .find((d) => d.coinType === reward.stats.reserveCoinType)
-          ?.depositedAmount.times(reward.stats.perDay ?? new BigNumber(0)) ??
-          new BigNumber(0),
-      );
+      if (reward.stats.isActive) {
+        pointsPerDay.deposit = pointsPerDay.deposit.plus(
+          obligation.deposits
+            .find((d) => d.coinType === reward.stats.reserveCoinType)
+            ?.depositedAmount.times(reward.stats.perDay ?? new BigNumber(0)) ??
+            new BigNumber(0),
+        );
+      }
     });
 
     pointsRewards.borrow.forEach((reward) => {
@@ -59,12 +57,14 @@ export const getPointsStats = (
           new BigNumber(0),
       );
 
-      pointsPerDay.borrow = pointsPerDay.borrow.plus(
-        obligation.borrows
-          .find((d) => d.coinType === reward.stats.reserveCoinType)
-          ?.borrowedAmount.times(reward.stats.perDay ?? new BigNumber(0)) ??
-          new BigNumber(0),
-      );
+      if (reward.stats.isActive) {
+        pointsPerDay.borrow = pointsPerDay.borrow.plus(
+          obligation.borrows
+            .find((d) => d.coinType === reward.stats.reserveCoinType)
+            ?.borrowedAmount.times(reward.stats.perDay ?? new BigNumber(0)) ??
+            new BigNumber(0),
+        );
+      }
     });
   });
 
