@@ -324,18 +324,7 @@ export default function ActionsModalTabContent({
             </TBody>
           </div>
 
-          <div
-            className={cn(
-              "flex flex-row items-center gap-2",
-              [Action.WITHDRAW, Action.REPAY].includes(action) &&
-                "cursor-pointer",
-            )}
-            onClick={
-              [Action.WITHDRAW, Action.REPAY].includes(action)
-                ? useMaxValueWrapper
-                : undefined
-            }
-          >
+          <div className="flex flex-row items-center gap-2">
             <TLabelSans>
               {side === Side.DEPOSIT ? "Deposited" : "Borrowed"}
             </TLabelSans>
