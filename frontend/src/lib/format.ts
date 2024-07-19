@@ -165,11 +165,11 @@ export const formatPercent = (
     style: "percent",
     minimumFractionDigits: dp,
     maximumFractionDigits: dp,
-  }).format(value.abs().div(100).toNumber());
+  }).format(+value.div(100));
 
   return !useAccountingSign || value.gte(0)
     ? formattedValue
-    : `(${formattedValue})`;
+    : `(${formattedValue[0] === "-" ? formattedValue.slice(1) : formattedValue})`;
 };
 
 export const formatDuration = (seconds: BigNumber) => {

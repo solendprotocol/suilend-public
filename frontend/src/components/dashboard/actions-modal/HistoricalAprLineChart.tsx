@@ -74,10 +74,7 @@ function TooltipContent({ side, fields, d, viewBox, x }: TooltipContentProps) {
 
   const aprPercent = new BigNumber(d[interestField] as number);
   const totalAprPercent = rewardFields.reduce(
-    (acc, field) =>
-      acc.plus(
-        new BigNumber(d[field] as number).times(side === Side.DEPOSIT ? 1 : -1),
-      ),
+    (acc, field) => acc.plus(new BigNumber(d[field] as number)),
     new BigNumber(aprPercent),
   );
 
@@ -110,11 +107,7 @@ function TooltipContent({ side, fields, d, viewBox, x }: TooltipContentProps) {
               value={
                 <span style={{ color }}>
                   {formatPercent(
-                    !coinType
-                      ? aprPercent
-                      : new BigNumber(d[field] as number).times(
-                          side === Side.DEPOSIT ? 1 : -1,
-                        ),
+                    !coinType ? aprPercent : new BigNumber(d[field] as number),
                     { useAccountingSign: true },
                   )}
                 </span>
@@ -180,12 +173,37 @@ function Chart({ side, data }: ChartProps) {
   const minX = Math.min(...data.map((d) => d.timestampS));
   const maxX = Math.max(...data.map((d) => d.timestampS));
 
-  const minY = 0;
-  const maxY = Math.max(
+  let minY = Math.min(
+    0,
+    ...data.map(
+      (d) =>
+        d[
+          side === Side.DEPOSIT
+            ? "depositInterestAprPercent"
+            : "borrowInterestAprPercent"
+        ] ?? 0,
+    ),
     ...data.map((d) =>
       fields.reduce((acc: number, field) => acc + (d[field] ?? 0), 0),
     ),
   );
+  if (minY < 0) minY -= 1;
+
+  let maxY = Math.max(
+    0,
+    ...data.map(
+      (d) =>
+        d[
+          side === Side.DEPOSIT
+            ? "depositInterestAprPercent"
+            : "borrowInterestAprPercent"
+        ] ?? 0,
+    ),
+    ...data.map((d) =>
+      fields.reduce((acc: number, field) => acc + (d[field] ?? 0), 0),
+    ),
+  );
+  if (maxY > 0) maxY += 1;
 
   // Ticks
   const ticksX = data
@@ -200,7 +218,7 @@ function Chart({ side, data }: ChartProps) {
       return d.timestampS + new Date().getTimezoneOffset() * 60;
     });
   const ticksY = Array.from({ length: 4 }).map(
-    (_, index, array) => Math.ceil(maxY / (array.length - 1)) * index,
+    (_, index, array) => minY + ((maxY - minY) / (array.length - 1)) * index,
   );
 
   const tickFormatterX = (timestampS: number) => {
@@ -208,7 +226,7 @@ function Chart({ side, data }: ChartProps) {
     return format(new Date(timestampS * 1000), "MM/dd");
   };
   const tickFormatterY = (value: number) =>
-    formatPercent(new BigNumber(value), { dp: 0 });
+    formatPercent(new BigNumber(value), { dp: 1 });
 
   // Domain
   const domainX = [minX, maxX];

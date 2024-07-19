@@ -200,7 +200,8 @@ export const calculateRewardAprPercent = (
               ? event.depositedAmountUsd
               : event.borrowedAmountUsd,
           )
-          .times(100),
+          .times(100)
+          .times(side === Side.DEPOSIT ? 1 : -1),
       ),
     new BigNumber(0),
   );
