@@ -45,7 +45,7 @@ import { formatPercent, formatToken } from "@/lib/format";
 import { getFilteredRewards, getTotalAprPercent } from "@/lib/liquidityMining";
 import track from "@/lib/track";
 import { Action } from "@/lib/types";
-import { cn, hoverUnderlineClassName } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 enum TokenDirection {
   IN = "in",
@@ -700,12 +700,7 @@ function Page() {
                 onClick={useMaxValueWrapper}
               >
                 <TLabelSans>Balance</TLabelSans>
-                <TBody
-                  className={cn(
-                    "text-xs",
-                    cn("decoration-foreground/50", hoverUnderlineClassName),
-                  )}
-                >
+                <TBody className="text-xs">
                   {formatToken(tokenInBalance, { exact: false })}{" "}
                   {tokenIn.ticker}
                 </TBody>

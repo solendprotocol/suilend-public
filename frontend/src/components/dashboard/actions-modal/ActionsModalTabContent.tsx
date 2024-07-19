@@ -42,7 +42,7 @@ import {
 } from "@/lib/format";
 import { API_URL } from "@/lib/navigation";
 import { Action } from "@/lib/types";
-import { cn, hoverUnderlineClassName } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 export type SubmitButtonState = {
   isLoading?: boolean;
@@ -319,13 +319,7 @@ export default function ActionsModalTabContent({
             }
           >
             <TLabelSans>Balance</TLabelSans>
-            <TBody
-              className={cn(
-                "text-xs",
-                [Action.DEPOSIT].includes(action) &&
-                  cn("decoration-foreground/50", hoverUnderlineClassName),
-              )}
-            >
+            <TBody className="text-xs">
               {formatToken(balance, { exact: false })} {reserve.symbol}
             </TBody>
           </div>
@@ -345,13 +339,7 @@ export default function ActionsModalTabContent({
             <TLabelSans>
               {side === Side.DEPOSIT ? "Deposited" : "Borrowed"}
             </TLabelSans>
-            <TBody
-              className={cn(
-                "text-xs",
-                [Action.WITHDRAW, Action.REPAY].includes(action) &&
-                  cn("decoration-foreground/50", hoverUnderlineClassName),
-              )}
-            >
+            <TBody className="text-xs">
               {formatToken(positionAmount, { exact: false })} {reserve.symbol}
             </TBody>
           </div>
