@@ -7,6 +7,8 @@ export const PYTH_PRICE_ID_SYMBOL_MAP: Record<string, string> = {
     "Crypto.USDT/USD",
   "0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace":
     "Crypto.ETH/USD",
+  "0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d":
+    "Crypto.SOL/USD",
 };
 
 export const getPythOracleUrl = (priceId: string) => {

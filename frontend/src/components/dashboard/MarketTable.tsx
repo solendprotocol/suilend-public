@@ -21,7 +21,6 @@ import TotalDepositsCell from "@/components/dashboard/market-table/TotalDeposits
 import MarketCardList from "@/components/dashboard/MarketCardList";
 import styles from "@/components/dashboard/MarketTable.module.scss";
 import { AppData, useAppContext } from "@/contexts/AppContext";
-import { isEth } from "@/lib/coinType";
 import { formatToken, formatUsd } from "@/lib/format";
 import {
   RewardSummary,
@@ -123,10 +122,7 @@ export default function MarketTable() {
   const rows: ReservesRowData[] = useMemo(
     () =>
       data.lendingMarket.reserves
-        .filter(
-          (reserve) =>
-            !isEth(reserve.coinType) || reserve.config.depositLimit.gt(0),
-        )
+        .filter((reserve) => reserve.config.depositLimit.gt(0))
         .sort(reserveSort)
         .map((reserve) => {
           const coinType = reserve.coinType;

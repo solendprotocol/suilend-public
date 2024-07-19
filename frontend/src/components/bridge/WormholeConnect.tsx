@@ -146,7 +146,7 @@ export default function WormholeConnect({ isHidden }: WormholeConnectProps) {
             arbitrum:
               "https://rpc.ankr.com/arbitrum/d57d49c5cc988185579623ea8fc23e7a0fc7005e843939bc29ed460952b381cb",
           },
-          tokens: ["WETH", "USDCeth", "USDT"],
+          tokens: ["WETH", "USDCeth", "USDT", "WSOL"],
           cta: { text: "Deposit", link: DASHBOARD_URL },
           bridgeDefaults: { toNetwork: "sui", requiredNetwork: "sui" },
           pageHeader: "Bridge",

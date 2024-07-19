@@ -8,6 +8,7 @@ import Tooltip from "@/components/shared/Tooltip";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import {
   NORMALIZED_ETH_COINTYPE,
+  NORMALIZED_SOL_COINTYPE,
   NORMALIZED_USDC_COINTYPE,
   NORMALIZED_USDT_COINTYPE,
 } from "@/lib/coinType";
@@ -37,6 +38,7 @@ export default function TokenLogo({
     [NORMALIZED_USDC_COINTYPE]: "Wormhole Wrapped Ethereum-native USDC",
     [NORMALIZED_USDT_COINTYPE]: "Wormhole Wrapped Ethereum-native USDT",
     [NORMALIZED_ETH_COINTYPE]: "Wormhole Wrapped Ethereum-native Ethereum",
+    [NORMALIZED_SOL_COINTYPE]: "Wormhole Wrapped Solana-native Solana",
   };
   const nativeAsset = nativeAssetMap[token.coinType];
 
