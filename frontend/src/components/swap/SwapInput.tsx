@@ -2,12 +2,15 @@ import { forwardRef, useEffect, useRef } from "react";
 
 import { VerifiedToken } from "@hop.ag/sdk";
 import BigNumber from "bignumber.js";
+import { Wallet } from "lucide-react";
 import { mergeRefs } from "react-merge-refs";
 
 import { TLabel, TLabelSans } from "@/components/shared/Typography";
 import TokenSelectionDialog from "@/components/swap/TokenSelectionDialog";
 import { Input as InputComponent } from "@/components/ui/input";
-import { formatUsd } from "@/lib/format";
+import { useSwapContext } from "@/contexts/SwapContext";
+import { ParsedCoinBalance } from "@/lib/coinBalance";
+import { formatToken, formatUsd } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 const INPUT_HEIGHT = 70; // px
@@ -41,6 +44,15 @@ const SwapInput = forwardRef<HTMLInputElement, SwapInputProps>(
     },
     ref,
   ) => {
+    const swapContext = useSwapContext();
+    const coinBalancesMap = swapContext.coinBalancesMap as Record<
+      string,
+      ParsedCoinBalance
+    >;
+
+    const tokenBalance =
+      coinBalancesMap[token.coin_type]?.balance ?? new BigNumber(0);
+
     // Autofocus
     const localRef = useRef<HTMLInputElement>(null);
     useEffect(() => {
@@ -63,9 +75,7 @@ const SwapInput = forwardRef<HTMLInputElement, SwapInputProps>(
             isValueLoading && "animate-pulse bg-muted/10",
           )}
         >
-          {title && (
-            <TLabelSans className="-mb-1 px-3 pt-3">{title}</TLabelSans>
-          )}
+          {title && <TLabelSans className="px-3 pt-3">{title}</TLabelSans>}
 
           <div className="relative w-full">
             <InputComponent
@@ -101,7 +111,7 @@ const SwapInput = forwardRef<HTMLInputElement, SwapInputProps>(
               )}
 
             <div
-              className="absolute right-3 z-[2]"
+              className="absolute right-3 z-[2] flex h-8 flex-col items-end justify-center gap-1"
               style={{ top: `${INPUT_PADDING_Y}px` }}
             >
               <TokenSelectionDialog
@@ -109,6 +119,13 @@ const SwapInput = forwardRef<HTMLInputElement, SwapInputProps>(
                 token={token}
                 onSelectToken={onSelectToken}
               />
+
+              <div className="flex flex-row items-center gap-1.5 pr-2">
+                <Wallet className="h-3 w-3 text-muted-foreground" />
+                <TLabel>
+                  {formatToken(tokenBalance)} {token.ticker}
+                </TLabel>
+              </div>
             </div>
           </div>
         </div>
