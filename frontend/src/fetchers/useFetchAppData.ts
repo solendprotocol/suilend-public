@@ -187,11 +187,11 @@ export default function useFetchAppData(
         console.log("Refreshed app data", data);
       },
       onError: (err) => {
-        console.error(err);
         toast.error("Failed to refresh app data. Try changing RPC providers.", {
           description: ((err as Error)?.message || err) as string,
         });
         Sentry.captureException(err);
+        console.error(err);
       },
     },
   );

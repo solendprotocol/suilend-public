@@ -28,9 +28,7 @@ export default function NavigationLinks() {
           </div>
         )}
       </div>
-      <Link href={SWAP_URL} label="Beta">
-        Swap
-      </Link>
+      <Link href={SWAP_URL}>Swap</Link>
       <Link href={BRIDGE_URL}>Bridge</Link>
       {data?.lendingMarketOwnerCapId && <Link href={ADMIN_URL}>Admin</Link>}
     </>
