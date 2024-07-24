@@ -677,35 +677,20 @@ function Page() {
           </div>
 
           {/* In */}
-          <div className="relative z-[1] flex flex-col">
-            <div className="relative z-[2] w-full">
-              <SwapInput
-                ref={inputRef}
-                title="You're paying"
-                autoFocus
-                value={value}
-                onChange={onValueChange}
-                usdValue={tokenInUsdValue}
-                tokens={tokens}
-                token={tokenIn}
-                onSelectToken={(t: VerifiedToken) =>
-                  onTokenCoinTypeChange(t.coin_type, TokenDirection.IN)
-                }
-              />
-            </div>
-
-            <div className="relative z-[1] -mt-2 flex w-full flex-row rounded-b-md bg-primary/25 px-3 pb-2 pt-4">
-              <div
-                className="flex cursor-pointer flex-row items-center gap-2"
-                onClick={useMaxValueWrapper}
-              >
-                <TLabelSans>Balance</TLabelSans>
-                <TBody className="text-xs">
-                  {formatToken(tokenInBalance, { exact: false })}{" "}
-                  {tokenIn.ticker}
-                </TBody>
-              </div>
-            </div>
+          <div className="relative z-[1]">
+            <SwapInput
+              ref={inputRef}
+              title="You're paying"
+              autoFocus
+              value={value}
+              onChange={onValueChange}
+              usdValue={tokenInUsdValue}
+              tokens={tokens}
+              token={tokenIn}
+              onSelectToken={(t: VerifiedToken) =>
+                onTokenCoinTypeChange(t.coin_type, TokenDirection.IN)
+              }
+            />
           </div>
 
           {/* Reverse */}
@@ -722,7 +707,7 @@ function Page() {
           </div>
 
           {/* Out */}
-          <div className="relative z-[1] mb-4 flex flex-col">
+          <div className="relative z-[1] mb-4">
             <div className="relative z-[2] w-full">
               <SwapInput
                 title="To receive"
@@ -742,16 +727,8 @@ function Page() {
               />
             </div>
 
-            <div className="relative z-[1] -mt-2 flex w-full flex-row flex-wrap justify-between gap-x-2 gap-y-1 rounded-b-md bg-border px-3 pb-2 pt-4">
-              <div className="flex flex-row items-center gap-2">
-                <TLabelSans>Balance</TLabelSans>
-                <TBody className="text-xs">
-                  {formatToken(tokenOutBalance, { exact: false })}{" "}
-                  {tokenOut.ticker}
-                </TBody>
-              </div>
-
-              {hasTokenOutReserve && (
+            {hasTokenOutReserve && (
+              <div className="relative z-[1] -mt-2 flex w-full flex-row flex-wrap justify-end gap-x-2 gap-y-1 rounded-b-md bg-border px-3 pb-2 pt-4">
                 <div className="flex w-max flex-row items-center justify-end">
                   <div className="flex h-4 flex-col items-end justify-center">
                     <div
@@ -790,8 +767,8 @@ function Page() {
                     {tokenOut.ticker}
                   </TBody>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
 
           {/* Routing */}

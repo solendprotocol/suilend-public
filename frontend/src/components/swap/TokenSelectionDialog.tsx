@@ -10,7 +10,6 @@ import Input from "@/components/shared/Input";
 import TextLink from "@/components/shared/TextLink";
 import TokenLogo from "@/components/shared/TokenLogo";
 import { TBody, TLabelSans } from "@/components/shared/Typography";
-import { Separator } from "@/components/ui/separator";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { useSwapContext } from "@/contexts/SwapContext";
 import { ParsedCoinBalance } from "@/lib/coinBalance";
@@ -141,8 +140,10 @@ export default function TokenSelectionDialog({
             <Button
               key={t.coin_type}
               className={cn(
-                "gap-1.5 rounded-full border hover:border-transparent",
-                isSelected && "border-transparent bg-muted/15",
+                "gap-1.5 rounded-full border",
+                isSelected
+                  ? "border-transparent bg-muted/10"
+                  : "hover:border-transparent",
               )}
               startIcon={
                 <TokenLogo
@@ -169,9 +170,7 @@ export default function TokenSelectionDialog({
         })}
       </div>
 
-      <Separator />
-
-      <div className="relative w-full overflow-auto">
+      <div className="relative flex w-full flex-col gap-[1px] overflow-auto">
         {filteredTokenList.length > 0 ? (
           filteredTokenList.map((t) => {
             const tokenBalance =
@@ -183,8 +182,9 @@ export default function TokenSelectionDialog({
                 key={t.coin_type}
                 className={cn(
                   "flex w-full cursor-pointer flex-row justify-between p-4 transition-colors hover:bg-muted/10",
-                  isSelected &&
-                    "bg-muted/15 shadow-[inset_2px_0_0_0_hsl(var(--foreground))]",
+                  isSelected
+                    ? "border-transparent bg-muted/10 shadow-[inset_2px_0_0_0_hsl(var(--foreground))]"
+                    : "hover:border-transparent",
                 )}
                 onClick={() => onTokenClick(t)}
               >
