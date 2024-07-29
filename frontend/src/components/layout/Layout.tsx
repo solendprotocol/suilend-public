@@ -18,8 +18,17 @@ import { useWormholeConnectContext } from "@/contexts/WormholeConnectContext";
 import { BRIDGE_URL, ROOT_URL } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 
+export enum QueryParams {
+  SUI_WALLET_CAMPAIGN = "sui-wallet-campaign",
+}
+
 export default function Layout({ children }: PropsWithChildren) {
   const router = useRouter();
+  const queryParams = {
+    [QueryParams.SUI_WALLET_CAMPAIGN]: router.query[
+      QueryParams.SUI_WALLET_CAMPAIGN
+    ] as string | undefined,
+  };
   const { suilendClient, data } = useAppContext();
   const { isLoading: isWormholeConnectLoading } = useWormholeConnectContext();
 
@@ -75,11 +84,13 @@ export default function Layout({ children }: PropsWithChildren) {
         ref={launchDarklyBannerRef}
         height={launchDarklyBannerHeight}
       />
-      <Banner
-        ref={suiWalletCampaignBannerRef}
-        height={suiWalletCampaignBannerHeight}
-        message="Deposit $50 for a chance to win a Suilend capsule! The campaign ends 13 August."
-      />
+      {queryParams[QueryParams.SUI_WALLET_CAMPAIGN] !== undefined && (
+        <Banner
+          ref={suiWalletCampaignBannerRef}
+          height={suiWalletCampaignBannerHeight}
+          message="Deposit $50 for a chance to win a Suilend capsule! The campaign ends 13 August."
+        />
+      )}
       {!isOnLandingPage && <AppHeader />}
 
       {isPageLoading && <FullPageSpinner />}

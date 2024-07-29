@@ -17,6 +17,7 @@ import {
 import ActionsModalInput from "@/components/dashboard/actions-modal/ActionsModalInput";
 import ParametersPanel from "@/components/dashboard/actions-modal/ParametersPanel";
 import AprWithRewardsBreakdown from "@/components/dashboard/AprWithRewardsBreakdown";
+import { QueryParams as LayoutQueryParams } from "@/components/layout/Layout";
 import Button from "@/components/shared/Button";
 import Collapsible from "@/components/shared/Collapsible";
 import LabelWithValue from "@/components/shared/LabelWithValue";
@@ -44,10 +45,6 @@ import {
 import { API_URL } from "@/lib/navigation";
 import { Action } from "@/lib/types";
 import { cn } from "@/lib/utils";
-
-enum QueryParams {
-  SUI_WALLET_CAMPAIGN = "sui-wallet-campaign",
-}
 
 export type SubmitButtonState = {
   isLoading?: boolean;
@@ -83,8 +80,8 @@ export default function ActionsModalTabContent({
 }: ActionsModalTabContentProps) {
   const router = useRouter();
   const queryParams = {
-    [QueryParams.SUI_WALLET_CAMPAIGN]: router.query[
-      QueryParams.SUI_WALLET_CAMPAIGN
+    [LayoutQueryParams.SUI_WALLET_CAMPAIGN]: router.query[
+      LayoutQueryParams.SUI_WALLET_CAMPAIGN
     ] as string | undefined,
   };
 
@@ -155,7 +152,7 @@ export default function ActionsModalTabContent({
 
   // Value
   const getInitialValue = () => {
-    return queryParams[QueryParams.SUI_WALLET_CAMPAIGN] !== undefined
+    return queryParams[LayoutQueryParams.SUI_WALLET_CAMPAIGN] !== undefined
       ? `${new BigNumber(50.1).div(reserve.price).toFixed(reserve.mintDecimals, BigNumber.ROUND_UP)}`
       : "";
   };
