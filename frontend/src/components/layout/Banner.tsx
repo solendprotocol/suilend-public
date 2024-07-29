@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { PropsWithChildren, forwardRef } from "react";
+import { CSSProperties, PropsWithChildren, forwardRef } from "react";
 
 import { ArrowLeftRight, Info, LucideIcon } from "lucide-react";
 
@@ -31,18 +31,19 @@ function LinkWrapper({ isLinkRelative, link, children }: LinkWrapperProps) {
 }
 
 interface BannerProps {
+  style?: CSSProperties;
   icon?: keyof typeof IconMap;
   message?: string;
   isLinkRelative?: boolean;
   link?: string;
   linkTitle?: string;
-  isHidden?: boolean;
   height: number | null;
+  isHidden?: boolean;
 }
 
 const Banner = forwardRef<HTMLDivElement, BannerProps>(
   (
-    { icon, isLinkRelative, link, linkTitle, message, isHidden, height },
+    { style, icon, isLinkRelative, link, linkTitle, message, height, isHidden },
     ref,
   ) => {
     const IconMap: Record<string, LucideIcon> = {
@@ -59,10 +60,12 @@ const Banner = forwardRef<HTMLDivElement, BannerProps>(
           ref={ref}
           className={cn(
             "fixed left-0 top-0 z-[3] bg-secondary",
-            isHidden && "opacity-0",
+            isHidden && "hidden",
+            !isHidden && [0, null].includes(height) && "opacity-0",
           )}
           style={{
             right: "var(--removed-body-scroll-bar-size, 0)",
+            ...(style ?? {}),
           }}
         >
           <Container>

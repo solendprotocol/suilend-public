@@ -12,17 +12,29 @@ const LaunchDarklyBanner = forwardRef<HTMLDivElement, LaunchDarklyBannerProps>(
   ({ height }, ref) => {
     const flags = useFlags();
 
-    if (!flags?.banner || Object.keys(flags.banner).length === 0) return null;
+    const { icon, isLinkRelative, link, linkTitle, message } =
+      flags?.banner || {};
+    console.log(
+      "XXX LaunchDarklyBanner",
+      flags?.banner,
+      flags?.banner ? Object.keys(flags.banner).length : "--",
+      icon,
+      isLinkRelative,
+      link,
+      linkTitle,
+      message,
+    );
+
     return (
       <Banner
         ref={ref}
-        icon={flags.banner.icon}
-        isLinkRelative={flags.banner.isLinkRelative}
-        link={flags.banner.link}
-        linkTitle={flags.banner.linkTitle}
-        message={flags.banner.message}
-        isHidden={flags.banner.message && [0, null].includes(height)}
+        icon={icon}
+        isLinkRelative={isLinkRelative}
+        link={link}
+        linkTitle={linkTitle}
+        message={message}
         height={height}
+        isHidden={!flags?.banner || Object.keys(flags.banner).length === 0}
       />
     );
   },

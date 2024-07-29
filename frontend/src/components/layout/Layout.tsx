@@ -84,13 +84,13 @@ export default function Layout({ children }: PropsWithChildren) {
         ref={launchDarklyBannerRef}
         height={launchDarklyBannerHeight}
       />
-      {queryParams[QueryParams.SUI_WALLET_CAMPAIGN] !== undefined && (
-        <Banner
-          ref={suiWalletCampaignBannerRef}
-          height={suiWalletCampaignBannerHeight}
-          message="Deposit $50 for a chance to win a Suilend capsule! The campaign ends 13 August."
-        />
-      )}
+      <Banner
+        ref={suiWalletCampaignBannerRef}
+        style={{ top: launchDarklyBannerHeight ?? 0 }}
+        message="Deposit $50 for a chance to win a capsule! Campaign ends August 13."
+        height={suiWalletCampaignBannerHeight}
+        isHidden={queryParams[QueryParams.SUI_WALLET_CAMPAIGN] === undefined}
+      />
       {!isOnLandingPage && <AppHeader />}
 
       {isPageLoading && <FullPageSpinner />}
