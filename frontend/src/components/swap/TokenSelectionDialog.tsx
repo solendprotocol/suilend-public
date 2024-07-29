@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import { VerifiedToken } from "@hop.ag/sdk";
 import BigNumber from "bignumber.js";
-import { Check, ChevronDown, Search } from "lucide-react";
+import { Check, ChevronDown, Search, Wallet } from "lucide-react";
 
 import Dialog from "@/components/dashboard/Dialog";
 import Button from "@/components/shared/Button";
@@ -181,7 +181,7 @@ export default function TokenSelectionDialog({
               <div
                 key={t.coin_type}
                 className={cn(
-                  "flex w-full cursor-pointer flex-row justify-between p-4 transition-colors hover:bg-muted/10",
+                  "flex w-full cursor-pointer p-4 transition-colors hover:bg-muted/10",
                   isSelected
                     ? "border-transparent bg-muted/10 shadow-[inset_2px_0_0_0_hsl(var(--foreground))]"
                     : "hover:border-transparent",
@@ -199,27 +199,37 @@ export default function TokenSelectionDialog({
                     }}
                   />
 
-                  <div className="flex flex-col gap-1">
-                    <div className="flex flex-row items-center gap-2">
-                      <TBody className="w-max">{t.ticker}</TBody>
-                      {isSelected && (
-                        <Check className="h-4 w-4 text-foreground" />
-                      )}
-                    </div>
-                    <TLabelSans className="w-max">{t.name}</TLabelSans>
-                  </div>
-                </div>
+                  <div className="flex flex-1 flex-col gap-1">
+                    <div className="flex w-full flex-row items-center justify-between">
+                      <div className="flex flex-row items-center gap-2">
+                        <TBody className="w-max">{t.ticker}</TBody>
+                        {isSelected && (
+                          <Check className="h-4 w-4 text-foreground" />
+                        )}
+                      </div>
 
-                <div className="flex flex-col items-end gap-1">
-                  <TBody className="w-max">
-                    {formatToken(tokenBalance, { exact: false })} {t.ticker}
-                  </TBody>
-                  <TextLink
-                    className="block w-max text-xs text-muted-foreground no-underline hover:text-foreground"
-                    href={explorer.buildCoinUrl(t.coin_type)}
-                  >
-                    {isSui(t.coin_type) ? SUI_COINTYPE : formatId(t.coin_type)}
-                  </TextLink>
+                      <div className="flex flex-row items-center gap-1.5">
+                        <Wallet className="h-3 w-3 text-foreground" />
+                        <TBody className="w-max">
+                          {formatToken(tokenBalance, { exact: false })}{" "}
+                          {t.ticker}
+                        </TBody>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-row items-center gap-2">
+                      <TLabelSans className="w-max">{t.name}</TLabelSans>
+
+                      <TextLink
+                        className="block w-max text-xs text-muted-foreground no-underline hover:text-foreground"
+                        href={explorer.buildCoinUrl(t.coin_type)}
+                      >
+                        {isSui(t.coin_type)
+                          ? SUI_COINTYPE
+                          : formatId(t.coin_type)}
+                      </TextLink>
+                    </div>
+                  </div>
                 </div>
               </div>
             );
