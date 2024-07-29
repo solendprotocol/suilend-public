@@ -78,7 +78,7 @@ export default function Layout({ children }: PropsWithChildren) {
       <Banner
         ref={suiWalletCampaignBannerRef}
         height={suiWalletCampaignBannerHeight}
-        message="Deposit $50 for a chance to win a Suilend capsule! The campaign ends 11 August."
+        message="Deposit $50 for a chance to win a Suilend capsule! The campaign ends 13 August."
       />
       {!isOnLandingPage && <AppHeader />}
 
