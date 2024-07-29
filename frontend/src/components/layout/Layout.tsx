@@ -8,6 +8,7 @@ import AccountDetailsDialog from "@/components/dashboard/account-details/Account
 import AppHeader from "@/components/layout/AppHeader";
 import Banner from "@/components/layout/Banner";
 import Footer from "@/components/layout/Footer";
+import LaunchDarklyBanner from "@/components/layout/LaunchDarklyBanner";
 import LoopingDialog from "@/components/layout/LoopingDialog";
 import Container from "@/components/shared/Container";
 import FullPageSpinner from "@/components/shared/FullPageSpinner";
@@ -22,15 +23,30 @@ export default function Layout({ children }: PropsWithChildren) {
   const { suilendClient, data } = useAppContext();
   const { isLoading: isWormholeConnectLoading } = useWormholeConnectContext();
 
-  // Banner
-  const bannerRef = useRef<HTMLDivElement>(null);
-  const [bannerHeight, setBannerHeight] = useState<number | null>(null);
+  // Launch Darkly banner
+  const launchDarklyBannerRef = useRef<HTMLDivElement>(null);
+  const [launchDarklyBannerHeight, setLaunchDarklyBannerHeight] = useState<
+    number | null
+  >(null);
 
   useResizeObserver<HTMLDivElement>({
-    ref: bannerRef,
+    ref: launchDarklyBannerRef,
     onResize: ({ height }) => {
       if (height === undefined) return;
-      setBannerHeight(height);
+      setLaunchDarklyBannerHeight(height);
+    },
+  });
+
+  // Sui Wallet campaign banner
+  const suiWalletCampaignBannerRef = useRef<HTMLDivElement>(null);
+  const [suiWalletCampaignBannerHeight, setSuiWalletCampaignBannerHeight] =
+    useState<number | null>(null);
+
+  useResizeObserver<HTMLDivElement>({
+    ref: suiWalletCampaignBannerRef,
+    onResize: ({ height }) => {
+      if (height === undefined) return;
+      setSuiWalletCampaignBannerHeight(height);
     },
   });
 
@@ -51,11 +67,19 @@ export default function Layout({ children }: PropsWithChildren) {
       style={
         {
           background: "url('/assets/footer.svg') bottom no-repeat",
-          "--header-top": `${bannerHeight ?? 0}px`,
+          "--header-top": `${(launchDarklyBannerHeight ?? 0) + (suiWalletCampaignBannerHeight ?? 0)}px`,
         } as CSSProperties
       }
     >
-      <Banner ref={bannerRef} height={bannerHeight} />
+      <LaunchDarklyBanner
+        ref={launchDarklyBannerRef}
+        height={launchDarklyBannerHeight}
+      />
+      <Banner
+        ref={suiWalletCampaignBannerRef}
+        height={suiWalletCampaignBannerHeight}
+        message="Deposit $50 for a chance to win a Suilend capsule! The campaign ends 11 August."
+      />
       {!isOnLandingPage && <AppHeader />}
 
       {isPageLoading && <FullPageSpinner />}

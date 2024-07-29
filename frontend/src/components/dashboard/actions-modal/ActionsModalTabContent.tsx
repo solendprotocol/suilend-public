@@ -1,3 +1,4 @@
+import { useRouter } from "next/router";
 import { CSSProperties, useCallback, useEffect, useRef, useState } from "react";
 
 import { normalizeStructTag } from "@mysten/sui.js/utils";
@@ -44,6 +45,10 @@ import { API_URL } from "@/lib/navigation";
 import { Action } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
+enum QueryParams {
+  SUI_WALLET_CAMPAIGN = "sui-wallet-campaign",
+}
+
 export type SubmitButtonState = {
   isLoading?: boolean;
   isDisabled?: boolean;
@@ -76,6 +81,13 @@ export default function ActionsModalTabContent({
   getSubmitButtonState,
   submit,
 }: ActionsModalTabContentProps) {
+  const router = useRouter();
+  const queryParams = {
+    [QueryParams.SUI_WALLET_CAMPAIGN]: router.query[
+      QueryParams.SUI_WALLET_CAMPAIGN
+    ] as string | undefined,
+  };
+
   const { address } = useWalletContext();
   const { refreshData, explorer, obligation, ...restAppContext } =
     useAppContext();
@@ -142,8 +154,14 @@ export default function ActionsModalTabContent({
       : borrowPosition?.borrowedAmount) ?? new BigNumber(0);
 
   // Value
+  const getInitialValue = () => {
+    return queryParams[QueryParams.SUI_WALLET_CAMPAIGN] !== undefined
+      ? `${new BigNumber(50.1).div(reserve.price).toFixed(reserve.mintDecimals, BigNumber.ROUND_UP)}`
+      : "";
+  };
+
   const inputRef = useRef<HTMLInputElement>(null);
-  const [value, setValue] = useState<string>("");
+  const [value, setValue] = useState<string>(getInitialValue);
 
   const [useMaxAmount, setUseMaxAmount] = useState<boolean>(false);
   const maxAmount = getMaxValue();
