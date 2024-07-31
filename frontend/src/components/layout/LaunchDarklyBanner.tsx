@@ -14,16 +14,6 @@ const LaunchDarklyBanner = forwardRef<HTMLDivElement, LaunchDarklyBannerProps>(
 
     const { icon, isLinkRelative, link, linkTitle, message } =
       flags?.banner || {};
-    console.log(
-      "XXX LaunchDarklyBanner",
-      flags?.banner,
-      flags?.banner ? Object.keys(flags.banner).length : "--",
-      icon,
-      isLinkRelative,
-      link,
-      linkTitle,
-      message,
-    );
 
     return (
       <Banner

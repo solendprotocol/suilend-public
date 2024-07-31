@@ -18,6 +18,8 @@ import { useWormholeConnectContext } from "@/contexts/WormholeConnectContext";
 import { BRIDGE_URL, ROOT_URL } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 
+export const SUI_WALLET_CAMPAIGN_DEPOSIT_MIN_USD = 50;
+
 export enum QueryParams {
   SUI_WALLET_CAMPAIGN = "sui-wallet-campaign",
 }
@@ -87,7 +89,7 @@ export default function Layout({ children }: PropsWithChildren) {
       <Banner
         ref={suiWalletCampaignBannerRef}
         style={{ top: launchDarklyBannerHeight ?? 0 }}
-        message="Deposit $50 for a chance to win a capsule! Campaign ends August 13."
+        message={`Deposit $${SUI_WALLET_CAMPAIGN_DEPOSIT_MIN_USD} for a chance to win a Capsule! Campaign ends August 13.`}
         height={suiWalletCampaignBannerHeight}
         isHidden={queryParams[QueryParams.SUI_WALLET_CAMPAIGN] === undefined}
       />

@@ -690,6 +690,7 @@ function Page() {
               onSelectToken={(t: VerifiedToken) =>
                 onTokenCoinTypeChange(t.coin_type, TokenDirection.IN)
               }
+              onBalanceClick={useMaxValueWrapper}
             />
           </div>
 

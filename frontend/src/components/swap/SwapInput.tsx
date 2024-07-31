@@ -27,6 +27,7 @@ interface SwapInputProps {
   tokens: VerifiedToken[];
   token: VerifiedToken;
   onSelectToken: (token: VerifiedToken) => void;
+  onBalanceClick?: () => void;
 }
 
 const SwapInput = forwardRef<HTMLInputElement, SwapInputProps>(
@@ -41,6 +42,7 @@ const SwapInput = forwardRef<HTMLInputElement, SwapInputProps>(
       tokens,
       token,
       onSelectToken,
+      onBalanceClick,
     },
     ref,
   ) => {
@@ -120,7 +122,13 @@ const SwapInput = forwardRef<HTMLInputElement, SwapInputProps>(
                 onSelectToken={onSelectToken}
               />
 
-              <div className="flex flex-row items-center gap-1.5 pr-2">
+              <div
+                className={cn(
+                  "flex flex-row items-center gap-1.5 pr-2",
+                  onBalanceClick && "cursor-pointer",
+                )}
+                onClick={onBalanceClick}
+              >
                 <Wallet className="h-3 w-3 text-muted-foreground" />
                 <TLabel>
                   {formatToken(tokenBalance)} {token.ticker}

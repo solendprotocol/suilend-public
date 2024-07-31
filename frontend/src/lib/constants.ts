@@ -17,16 +17,16 @@ export enum Rpc {
 
 export const RPCS = [
   {
-    id: Rpc.FULL_NODE,
-    name: "Full Node",
-    url: "https://fullnode.mainnet.sui.io:443",
-  },
-  {
     id: Rpc.TRITON_ONE,
     name: "Triton One",
     url: `https://solendf-suishar-0c55.mainnet.sui.rpcpool.com/${
       process.env.NEXT_PUBLIC_SUI_TRITON_ONE_DEV_API_KEY ?? ""
     }`,
+  },
+  {
+    id: Rpc.FULL_NODE,
+    name: "Full Node",
+    url: "https://fullnode.mainnet.sui.io:443",
   },
   {
     id: Rpc.ALL_THAT_NODE,
