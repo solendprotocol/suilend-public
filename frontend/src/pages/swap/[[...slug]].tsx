@@ -6,7 +6,7 @@ import { TransactionBlock } from "@mysten/sui.js/transactions";
 import { normalizeStructTag } from "@mysten/sui.js/utils";
 import * as Sentry from "@sentry/nextjs";
 import BigNumber from "bignumber.js";
-import { ArrowUpDown, RotateCw } from "lucide-react";
+import { ArrowRightLeft, ArrowUpDown, RotateCw } from "lucide-react";
 import { ReactFlowProvider } from "reactflow";
 import { toast } from "sonner";
 import useSWR from "swr";
@@ -210,6 +210,9 @@ function Page() {
         10 ** tokenOut.decimals,
       )
     : undefined;
+
+  const [isQuoteRatioInverted, setIsQuoteRatioInverted] =
+    useState<boolean>(false);
 
   const isFetchingQuote = (() => {
     const timestamps = Object.keys(quoteMap).map((timestamp) => +timestamp);
@@ -772,6 +775,40 @@ function Page() {
             )}
           </div>
 
+          {/* Quote */}
+          {new BigNumber(value || 0).gt(0) && (
+            <div className="mb-2 w-full">
+              {quoteAmountIn && quoteAmountOut ? (
+                <div
+                  className="group flex w-max cursor-pointer flex-row items-center gap-2"
+                  onClick={() => setIsQuoteRatioInverted((is) => !is)}
+                >
+                  <TLabelSans className="transition-colors group-hover:text-foreground">
+                    {"1 "}
+                    {(!isQuoteRatioInverted ? tokenIn : tokenOut).ticker}
+                    {" ≈ "}
+                    {formatToken(
+                      (!isQuoteRatioInverted
+                        ? quoteAmountOut
+                        : quoteAmountIn
+                      ).div(
+                        !isQuoteRatioInverted ? quoteAmountIn : quoteAmountOut,
+                      ),
+                      {
+                        dp: (!isQuoteRatioInverted ? tokenOut : tokenIn)
+                          .decimals,
+                      },
+                    )}{" "}
+                    {(!isQuoteRatioInverted ? tokenOut : tokenIn).ticker}
+                  </TLabelSans>
+                  <ArrowRightLeft className="h-3 w-3 text-muted-foreground transition-colors group-hover:text-foreground" />
+                </div>
+              ) : (
+                <Skeleton className="h-4 w-40" />
+              )}
+            </div>
+          )}
+
           {/* Routing */}
           {new BigNumber(value || 0).gt(0) && (
             <div className="mb-4 w-full">
@@ -780,7 +817,7 @@ function Page() {
                   <RoutingDialog quote={quote} />
                 </ReactFlowProvider>
               ) : (
-                <Skeleton className="h-5 w-40" />
+                <Skeleton className="h-5 w-60" />
               )}
             </div>
           )}

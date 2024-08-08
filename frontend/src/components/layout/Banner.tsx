@@ -76,7 +76,7 @@ const Banner = forwardRef<HTMLDivElement, BannerProps>(
                     <Icon className="my-0.5 h-4 w-4 shrink-0 text-secondary-foreground" />
                   )}
 
-                  <TBodySans className="text-secondary-foreground">
+                  <TBodySans className="text-center text-secondary-foreground">
                     {message}
                   </TBodySans>
                 </div>
