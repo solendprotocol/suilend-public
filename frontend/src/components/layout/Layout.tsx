@@ -19,6 +19,7 @@ import { BRIDGE_URL, ROOT_URL } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 
 export const SUI_WALLET_CAMPAIGN_DEPOSIT_MIN_USD = 50;
+export const SUI_WALLET_CAMPAIGN_END_TIMESTAMP_MS = 1723564800000; // 4PM UTC, August 13
 
 export enum QueryParams {
   SUI_WALLET_CAMPAIGN = "sui-wallet-campaign",
@@ -89,7 +90,11 @@ export default function Layout({ children }: PropsWithChildren) {
       <Banner
         ref={suiWalletCampaignBannerRef}
         style={{ top: launchDarklyBannerHeight ?? 0 }}
-        message={`Deposit $${SUI_WALLET_CAMPAIGN_DEPOSIT_MIN_USD} for a chance to win a Capsule! Campaign ends August 13.`}
+        message={
+          Date.now() <= SUI_WALLET_CAMPAIGN_END_TIMESTAMP_MS
+            ? `Deposit $${SUI_WALLET_CAMPAIGN_DEPOSIT_MIN_USD} for a chance to win a Capsule! Campaign ends 4PM UTC, August 13.`
+            : "The Campaign has ended! Winners will be announced on Thursday, August 15 in the Suilend Discord."
+        }
         height={suiWalletCampaignBannerHeight}
         isHidden={queryParams[QueryParams.SUI_WALLET_CAMPAIGN] === undefined}
       />

@@ -21,6 +21,7 @@ import AprWithRewardsBreakdown from "@/components/dashboard/AprWithRewardsBreakd
 import {
   QueryParams as LayoutQueryParams,
   SUI_WALLET_CAMPAIGN_DEPOSIT_MIN_USD,
+  SUI_WALLET_CAMPAIGN_END_TIMESTAMP_MS,
 } from "@/components/layout/Layout";
 import Button from "@/components/shared/Button";
 import Collapsible from "@/components/shared/Collapsible";
@@ -89,6 +90,10 @@ export default function ActionsModalTabContent({
     ] as string | undefined,
   };
 
+  const isSuiWalletCampaignActive =
+    queryParams[LayoutQueryParams.SUI_WALLET_CAMPAIGN] !== undefined &&
+    Date.now() <= SUI_WALLET_CAMPAIGN_END_TIMESTAMP_MS;
+
   const { address } = useWalletContext();
   const { refreshData, explorer, obligation, ...restAppContext } =
     useAppContext();
@@ -156,8 +161,7 @@ export default function ActionsModalTabContent({
 
   // Value
   const getInitialValue = () => {
-    return queryParams[LayoutQueryParams.SUI_WALLET_CAMPAIGN] !== undefined &&
-      action === Action.DEPOSIT
+    return isSuiWalletCampaignActive && action === Action.DEPOSIT
       ? `${new BigNumber(SUI_WALLET_CAMPAIGN_DEPOSIT_MIN_USD * 1.01).div(reserve.price).toFixed(reserve.mintDecimals, BigNumber.ROUND_UP)}`
       : "";
   };
@@ -279,7 +283,7 @@ export default function ActionsModalTabContent({
 
     try {
       const isSuiWalletEligibleDeposit =
-        queryParams[LayoutQueryParams.SUI_WALLET_CAMPAIGN] !== undefined &&
+        isSuiWalletCampaignActive &&
         action === Action.DEPOSIT &&
         new BigNumber(value)
           .times(reserve.price)
