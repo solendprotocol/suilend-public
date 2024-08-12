@@ -130,8 +130,6 @@ export default function AddRewardsDialog() {
       return;
     }
 
-    const txb = new TransactionBlock();
-
     const rewardCoinType = coin.coinType;
 
     for (const reserve of data.lendingMarket.reserves) {
@@ -145,6 +143,8 @@ export default function AddRewardsDialog() {
           .toString();
 
         if (rewardValue !== "0") {
+          const txb = new TransactionBlock();
+
           console.log("XXX", reserveArrayIndex, side, rewardValue);
           try {
             try {
