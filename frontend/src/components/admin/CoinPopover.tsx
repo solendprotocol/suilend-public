@@ -37,6 +37,7 @@ export default function CoinPopover({
       trigger={
         <Button
           className="justify-between"
+          labelClassName="uppercase"
           endIcon={<ChevronsUpDown />}
           variant="secondary"
           size="lg"

@@ -1,36 +1,29 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 
 import { CoinMetadata, SuiClient } from "@mysten/sui.js/client";
 import { TransactionBlock } from "@mysten/sui.js/transactions";
 import * as Sentry from "@sentry/nextjs";
 import BigNumber from "bignumber.js";
 import { isEqual } from "lodash";
-import { Eraser, Plus } from "lucide-react";
+import { Eraser, Sparkle } from "lucide-react";
 import { toast } from "sonner";
 
 import { SuilendClient } from "@suilend/sdk/client";
-import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
+import { Side } from "@suilend/sdk/types";
 
 import CoinPopover from "@/components/admin/CoinPopover";
 import Dialog from "@/components/admin/Dialog";
 import Button from "@/components/shared/Button";
-import Grid from "@/components/shared/Grid";
 import Input from "@/components/shared/Input";
+import TokenLogo from "@/components/shared/TokenLogo";
+import { TBody } from "@/components/shared/Typography";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 import { parseCoinBalances } from "@/lib/coinBalance";
 import { getCoinMetadataMap } from "@/lib/coinMetadata";
-import { formatToken } from "@/lib/format";
+import { cn } from "@/lib/utils";
 
-interface AddRewardDialogProps {
-  reserve: ParsedReserve;
-  isDepositReward: boolean;
-}
-
-export default function AddRewardDialog({
-  reserve,
-  isDepositReward,
-}: AddRewardDialogProps) {
+export default function AddRewardsDialog() {
   const { address } = useWalletContext();
   const { refreshData, signExecuteAndWaitTransactionBlock, ...restAppContext } =
     useAppContext();
@@ -84,15 +77,26 @@ export default function AddRewardDialog({
   const coin =
     coinIndex !== null ? Object.values(coinBalancesMap)[coinIndex] : undefined;
 
-  const [amount, setAmount] = useState<string>("");
   const [startTimeMs, setStartTimeMs] = useState<string>("");
   const [endTimeMs, setEndTimeMs] = useState<string>("");
 
+  const [rewardsMap, setRewardsMap] = useState<
+    Record<string, Record<string, string>>
+  >({});
+  const setRewardsValue =
+    (coinType: string, rewardType: string) => (value: string) =>
+      setRewardsMap((prev) => ({
+        ...prev,
+        [coinType]: { ...prev[coinType], [rewardType]: value },
+      }));
+
   const reset = () => {
     setCoinIndex(null);
-    setAmount("");
+
     setStartTimeMs("");
     setEndTimeMs("");
+
+    setRewardsMap({});
   };
 
   // Submit
@@ -107,10 +111,6 @@ export default function AddRewardDialog({
     }
     if (!coin) {
       toast.error("Invalid coin selected");
-      return;
-    }
-    if (amount === "") {
-      toast.error("Enter an amount");
       return;
     }
     if (startTimeMs === "") {
@@ -132,43 +132,56 @@ export default function AddRewardDialog({
 
     const txb = new TransactionBlock();
 
-    const reserveArrayIndex = reserve.arrayIndex;
     const rewardCoinType = coin.coinType;
-    const rewardValue = new BigNumber(amount)
-      .times(10 ** coin.mintDecimals)
-      .toString();
 
-    try {
-      try {
-        await suilendClient.addReward(
-          address,
-          data.lendingMarketOwnerCapId,
-          reserveArrayIndex,
-          isDepositReward,
-          rewardCoinType,
-          rewardValue,
-          BigInt(startTimeMs),
-          BigInt(endTimeMs),
-          txb,
-        );
-      } catch (err) {
-        Sentry.captureException(err);
-        console.error(err);
-        throw err;
+    for (const reserve of data.lendingMarket.reserves) {
+      const reserveArrayIndex = reserve.arrayIndex;
+
+      for (const side of Object.values(Side)) {
+        const rewardValue = new BigNumber(
+          rewardsMap?.[reserve.coinType]?.[side] || 0,
+        )
+          .times(10 ** coin.mintDecimals)
+          .toString();
+
+        if (rewardValue !== "0") {
+          console.log("XXX", reserveArrayIndex, side, rewardValue);
+          try {
+            try {
+              await suilendClient.addReward(
+                address,
+                data.lendingMarketOwnerCapId,
+                reserveArrayIndex,
+                side === Side.DEPOSIT,
+                rewardCoinType,
+                rewardValue,
+                BigInt(startTimeMs),
+                BigInt(endTimeMs),
+                txb,
+              );
+            } catch (err) {
+              Sentry.captureException(err);
+              console.error(err);
+              throw err;
+            }
+
+            await signExecuteAndWaitTransactionBlock(txb);
+
+            toast.success(`Added ${reserve.symbol} reward`);
+          } catch (err) {
+            toast.error(`Failed to add ${reserve.symbol} reward`, {
+              description: ((err as Error)?.message || err) as string,
+            });
+          } finally {
+            await refreshData();
+          }
+        }
       }
-
-      await signExecuteAndWaitTransactionBlock(txb);
-
-      toast.success("Added reward");
-      setIsDialogOpen(false);
-      reset();
-    } catch (err) {
-      toast.error("Failed to add reward", {
-        description: ((err as Error)?.message || err) as string,
-      });
-    } finally {
-      await refreshData();
     }
+
+    setIsDialogOpen(false);
+    reset();
+    toast.info("Finished adding rewards");
   };
 
   return (
@@ -178,15 +191,14 @@ export default function AddRewardDialog({
         <Button
           className="w-fit"
           labelClassName="uppercase"
-          startIcon={<Plus />}
+          startIcon={<Sparkle />}
           variant="secondary"
         >
-          Add reward
+          Add rewards
         </Button>
       }
-      contentProps={{ className: "sm:max-w-lg" }}
-      titleIcon={<Plus />}
-      title="Add Reward"
+      titleIcon={<Sparkle />}
+      title="Add Rewards"
       footer={
         <div className="flex w-full flex-row items-center gap-2">
           <Button
@@ -210,25 +222,11 @@ export default function AddRewardDialog({
         </div>
       }
     >
-      <Grid>
+      <div className="grid w-full grid-cols-1 grid-cols-3 gap-x-4 gap-y-6">
         <CoinPopover
           coinBalancesMap={coinBalancesMap}
           index={coinIndex}
           onIndexChange={setCoinIndex}
-        />
-        <Input
-          label="amount"
-          labelRight={
-            coin
-              ? `Max: ${formatToken(coin.balance, { dp: coin.mintDecimals })}`
-              : undefined
-          }
-          id="amount"
-          type="number"
-          value={amount}
-          onChange={setAmount}
-          inputProps={{ disabled: coinIndex === null }}
-          endDecorator={coin ? coin.symbol : undefined}
         />
         <Input
           label="startTimeMs"
@@ -246,7 +244,45 @@ export default function AddRewardDialog({
           onChange={setEndTimeMs}
           endDecorator="ms"
         />
-      </Grid>
+
+        {data.lendingMarket.reserves.map((reserve, index) => (
+          <Fragment key={reserve.coinType}>
+            <div
+              className={cn(
+                "flex flex-row items-center gap-2",
+                index === 0 && "pt-6",
+              )}
+            >
+              <TokenLogo
+                className="h-4 w-4"
+                token={{
+                  coinType: reserve.coinType,
+                  symbol: reserve.symbol,
+                  iconUrl: reserve.iconUrl,
+                }}
+              />
+              <TBody>{reserve.symbol}</TBody>
+            </div>
+
+            <Input
+              label={index === 0 ? "depositRewards" : undefined}
+              id={`depositRewards-${reserve.coinType}`}
+              type="number"
+              value={rewardsMap?.[reserve.coinType]?.deposit || ""}
+              onChange={setRewardsValue(reserve.coinType, Side.DEPOSIT)}
+              endDecorator={coin ? coin.symbol : undefined}
+            />
+            <Input
+              label={index === 0 ? "borrowRewards" : undefined}
+              id={`borrowRewards-${reserve.coinType}`}
+              type="number"
+              value={rewardsMap?.[reserve.coinType]?.borrow || ""}
+              onChange={setRewardsValue(reserve.coinType, Side.BORROW)}
+              endDecorator={coin ? coin.symbol : undefined}
+            />
+          </Fragment>
+        ))}
+      </div>
     </Dialog>
   );
 }

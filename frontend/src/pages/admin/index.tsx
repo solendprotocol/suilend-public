@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { SuilendClient } from "@suilend/sdk/client";
 
 import AddReserveDialog from "@/components/admin/AddReserveDialog";
+import AddRewardsDialog from "@/components/admin/AddRewardsDialog";
 import LiquidateDialog from "@/components/admin/LiquidateDialog";
 import ObligationsDialog from "@/components/admin/ObligationsDialog";
 import RateLimiterConfigDialog from "@/components/admin/RateLimiterConfigDialog";
@@ -158,7 +159,10 @@ export default function Admin() {
                 );
               })}
 
-              <AddReserveDialog />
+              <div className="flex flex-row flex-wrap gap-2">
+                <AddReserveDialog />
+                <AddRewardsDialog />
+              </div>
             </div>
           )}
 

@@ -196,7 +196,12 @@ export default function AddReserveDialog() {
     <Dialog
       rootProps={{ open: isDialogOpen, onOpenChange: setIsDialogOpen }}
       trigger={
-        <Button className="w-fit" startIcon={<Plus />} variant="secondary">
+        <Button
+          className="w-fit"
+          labelClassName="uppercase"
+          startIcon={<Plus />}
+          variant="secondary"
+        >
           Add reserve
         </Button>
       }
@@ -215,6 +220,7 @@ export default function AddReserveDialog() {
           </Button>
           <Button
             className="flex-1"
+            labelClassName="uppercase"
             size="lg"
             onClick={submit}
             disabled={!isEditable}
