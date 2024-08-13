@@ -132,10 +132,10 @@ export default function AddRewardsDialog() {
 
     const rewardCoinType = coin.coinType;
 
-    for (const reserve of data.lendingMarket.reserves) {
-      const reserveArrayIndex = reserve.arrayIndex;
+    for (const side of Object.values(Side)) {
+      for (const reserve of data.lendingMarket.reserves) {
+        const reserveArrayIndex = reserve.arrayIndex;
 
-      for (const side of Object.values(Side)) {
         const rewardValue = new BigNumber(
           rewardsMap?.[reserve.coinType]?.[side] || 0,
         )
@@ -145,7 +145,7 @@ export default function AddRewardsDialog() {
         if (rewardValue !== "0") {
           const txb = new TransactionBlock();
 
-          console.log("XXX", reserveArrayIndex, side, rewardValue);
+          console.log("XXX", side, reserveArrayIndex, rewardValue);
           try {
             try {
               await suilendClient.addReward(
