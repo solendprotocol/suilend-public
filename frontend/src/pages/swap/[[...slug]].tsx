@@ -309,6 +309,9 @@ function Page() {
   };
 
   // Historical USD prices
+  const HISTORICAL_PRICES_INTERVAL = "3m";
+  const HISTORICAL_PRICES_INTERVAL_S = 3 * 60;
+
   type HistoricalPriceData = {
     timestampS: number;
     value: number;
@@ -368,11 +371,13 @@ function Page() {
 
     const timestampsS: number[] = [minTimestampS];
     while (timestampsS[timestampsS.length - 1] < maxTimestampS) {
-      timestampsS.push(timestampsS[timestampsS.length - 1] + 60 * 1); // 1 minute
+      timestampsS.push(
+        timestampsS[timestampsS.length - 1] + HISTORICAL_PRICES_INTERVAL_S,
+      );
     }
 
     return timestampsS
-      .filter((timestampS, index) => index % 10 === 0) // 1*10 = 10 minutes
+      .filter((timestampS, index) => index % 3 === 0) // Every third value
       .map((timestampS) => ({
         timestampS,
         ratio: +new BigNumber(
@@ -396,7 +401,7 @@ function Page() {
   const fetchTokenHistoricalUsdPrice = useCallback(
     async (token: VerifiedToken) => {
       try {
-        const url = `https://public-api.birdeye.so/defi/history_price?address=${isSui(token.coin_type) ? SUI_COINTYPE : token.coin_type}&address_type=token&type=1m&time_from=${Math.floor(new Date().getTime() / 1000) - 24 * 60 * 60}&time_to=${Math.floor(new Date().getTime() / 1000)}`;
+        const url = `https://public-api.birdeye.so/defi/history_price?address=${isSui(token.coin_type) ? SUI_COINTYPE : token.coin_type}&address_type=token&type=${HISTORICAL_PRICES_INTERVAL}&time_from=${Math.floor(new Date().getTime() / 1000) - 24 * 60 * 60}&time_to=${Math.floor(new Date().getTime() / 1000)}`;
         const res = await fetch(url, {
           headers: {
             "X-API-KEY": process.env.NEXT_PUBLIC_BIRDEYE_API_KEY as string,
