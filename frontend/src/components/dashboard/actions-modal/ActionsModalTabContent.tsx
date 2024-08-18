@@ -1,10 +1,8 @@
-import { useRouter } from "next/router";
 import { CSSProperties, useCallback, useEffect, useRef, useState } from "react";
 
 import { normalizeStructTag } from "@mysten/sui.js/utils";
 import BigNumber from "bignumber.js";
 import { capitalize } from "lodash";
-import { PartyPopper } from "lucide-react";
 import { toast } from "sonner";
 
 import { maxU64 } from "@suilend/sdk/constants";
@@ -18,11 +16,6 @@ import {
 import ActionsModalInput from "@/components/dashboard/actions-modal/ActionsModalInput";
 import ParametersPanel from "@/components/dashboard/actions-modal/ParametersPanel";
 import AprWithRewardsBreakdown from "@/components/dashboard/AprWithRewardsBreakdown";
-import {
-  QueryParams as LayoutQueryParams,
-  SUI_WALLET_CAMPAIGN_DEPOSIT_MIN_USD,
-  SUI_WALLET_CAMPAIGN_END_TIMESTAMP_MS,
-} from "@/components/layout/Layout";
 import Button from "@/components/shared/Button";
 import Collapsible from "@/components/shared/Collapsible";
 import LabelWithValue from "@/components/shared/LabelWithValue";
@@ -83,17 +76,6 @@ export default function ActionsModalTabContent({
   getSubmitButtonState,
   submit,
 }: ActionsModalTabContentProps) {
-  const router = useRouter();
-  const queryParams = {
-    [LayoutQueryParams.SUI_WALLET_CAMPAIGN]: router.query[
-      LayoutQueryParams.SUI_WALLET_CAMPAIGN
-    ] as string | undefined,
-  };
-
-  const isSuiWalletCampaignActive =
-    queryParams[LayoutQueryParams.SUI_WALLET_CAMPAIGN] !== undefined &&
-    Date.now() <= SUI_WALLET_CAMPAIGN_END_TIMESTAMP_MS;
-
   const { address } = useWalletContext();
   const { refreshData, explorer, obligation, ...restAppContext } =
     useAppContext();
@@ -160,14 +142,8 @@ export default function ActionsModalTabContent({
       : borrowPosition?.borrowedAmount) ?? new BigNumber(0);
 
   // Value
-  const getInitialValue = () => {
-    return isSuiWalletCampaignActive && action === Action.DEPOSIT
-      ? `${new BigNumber(SUI_WALLET_CAMPAIGN_DEPOSIT_MIN_USD * 1.01).div(reserve.price).toFixed(reserve.mintDecimals, BigNumber.ROUND_UP)}`
-      : "";
-  };
-
   const inputRef = useRef<HTMLInputElement>(null);
-  const [value, setValue] = useState<string>(getInitialValue);
+  const [value, setValue] = useState<string>("");
 
   const [useMaxAmount, setUseMaxAmount] = useState<boolean>(false);
   const maxAmount = getMaxValue();
@@ -282,23 +258,10 @@ export default function ActionsModalTabContent({
     }
 
     try {
-      const isSuiWalletEligibleDeposit =
-        isSuiWalletCampaignActive &&
-        action === Action.DEPOSIT &&
-        new BigNumber(value)
-          .times(reserve.price)
-          .gt(SUI_WALLET_CAMPAIGN_DEPOSIT_MIN_USD);
-
       const res = await submit(reserve.coinType, submitAmount);
       const txUrl = explorer.buildTxUrl(res.digest);
 
       toast.success(`${capitalize(actionPastTense)} ${formattedValue}`, {
-        icon: isSuiWalletEligibleDeposit ? (
-          <PartyPopper className="h-5 w-5 text-success" />
-        ) : undefined,
-        description: isSuiWalletEligibleDeposit
-          ? "Congrats on your deposit, you've been entered for a chance to win a Capsule! Keep your deposit until the end of the campaign period to qualify."
-          : undefined,
         action: (
           <TextLink className="block" href={txUrl}>
             View tx on {explorer.name}

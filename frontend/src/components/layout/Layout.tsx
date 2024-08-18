@@ -6,7 +6,6 @@ import { useResizeObserver } from "usehooks-ts";
 import WormholeConnect from "@/components/bridge/WormholeConnect";
 import AccountDetailsDialog from "@/components/dashboard/account-details/AccountDetailsDialog";
 import AppHeader from "@/components/layout/AppHeader";
-import Banner from "@/components/layout/Banner";
 import Footer from "@/components/layout/Footer";
 import LaunchDarklyBanner from "@/components/layout/LaunchDarklyBanner";
 import LoopingDialog from "@/components/layout/LoopingDialog";
@@ -18,20 +17,8 @@ import { useWormholeConnectContext } from "@/contexts/WormholeConnectContext";
 import { BRIDGE_URL, ROOT_URL } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 
-export const SUI_WALLET_CAMPAIGN_DEPOSIT_MIN_USD = 50;
-export const SUI_WALLET_CAMPAIGN_END_TIMESTAMP_MS = 1723564800000; // 4PM UTC, August 13
-
-export enum QueryParams {
-  SUI_WALLET_CAMPAIGN = "sui-wallet-campaign",
-}
-
 export default function Layout({ children }: PropsWithChildren) {
   const router = useRouter();
-  const queryParams = {
-    [QueryParams.SUI_WALLET_CAMPAIGN]: router.query[
-      QueryParams.SUI_WALLET_CAMPAIGN
-    ] as string | undefined,
-  };
   const { suilendClient, data } = useAppContext();
   const { isLoading: isWormholeConnectLoading } = useWormholeConnectContext();
 
@@ -46,19 +33,6 @@ export default function Layout({ children }: PropsWithChildren) {
     onResize: ({ height }) => {
       if (height === undefined) return;
       setLaunchDarklyBannerHeight(height);
-    },
-  });
-
-  // Sui Wallet campaign banner
-  const suiWalletCampaignBannerRef = useRef<HTMLDivElement>(null);
-  const [suiWalletCampaignBannerHeight, setSuiWalletCampaignBannerHeight] =
-    useState<number | null>(null);
-
-  useResizeObserver<HTMLDivElement>({
-    ref: suiWalletCampaignBannerRef,
-    onResize: ({ height }) => {
-      if (height === undefined) return;
-      setSuiWalletCampaignBannerHeight(height);
     },
   });
 
@@ -79,24 +53,13 @@ export default function Layout({ children }: PropsWithChildren) {
       style={
         {
           background: "url('/assets/footer.svg') bottom no-repeat",
-          "--header-top": `${(launchDarklyBannerHeight ?? 0) + (suiWalletCampaignBannerHeight ?? 0)}px`,
+          "--header-top": `${launchDarklyBannerHeight ?? 0}px`,
         } as CSSProperties
       }
     >
       <LaunchDarklyBanner
         ref={launchDarklyBannerRef}
         height={launchDarklyBannerHeight}
-      />
-      <Banner
-        ref={suiWalletCampaignBannerRef}
-        style={{ top: launchDarklyBannerHeight ?? 0 }}
-        message={
-          Date.now() <= SUI_WALLET_CAMPAIGN_END_TIMESTAMP_MS
-            ? `Deposit $${SUI_WALLET_CAMPAIGN_DEPOSIT_MIN_USD} for a chance to win a Capsule! Campaign ends 4PM UTC, August 13.`
-            : "The Campaign has ended! Winners will be announced on Thursday, August 15 in the Suilend Discord."
-        }
-        height={suiWalletCampaignBannerHeight}
-        isHidden={queryParams[QueryParams.SUI_WALLET_CAMPAIGN] === undefined}
       />
       {!isOnLandingPage && <AppHeader />}
 
