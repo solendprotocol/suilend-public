@@ -1,8 +1,8 @@
 import Head from "next/head";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { HopApi, VerifiedToken } from "@hop.ag/sdk";
-import { TransactionBlock } from "@mysten/sui.js/transactions";
+import { GetQuoteResponse, HopApi, VerifiedToken } from "@hop.ag/sdk";
+import { TransactionBlock, TransactionResult } from "@mysten/sui.js/transactions";
 import { normalizeStructTag } from "@mysten/sui.js/utils";
 import * as Sentry from "@sentry/nextjs";
 import BigNumber from "bignumber.js";
@@ -46,6 +46,21 @@ import { getFilteredRewards, getTotalAprPercent } from "@/lib/liquidityMining";
 import track from "@/lib/track";
 import { Action } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { Router, RouterCompleteTradeRoute } from "aftermath-ts-sdk";
+
+export type UnifiedQuote = {
+  id: string;
+  amount_in: BigNumber;
+  amount_out: BigNumber;
+  coin_type_in: string;
+  coin_type_out: string;
+} & ({
+  type: "hop";
+  routeOrQuote: GetQuoteResponse ;
+} | {
+  type: "aftermath";
+  routeOrQuote: RouterCompleteTradeRoute;
+})
 
 enum TokenDirection {
   IN = "in",
@@ -73,6 +88,7 @@ function Page() {
   const { setTokenSymbol, reverseTokenSymbols, ...restSwapContext } =
     useSwapContext();
   const sdk = restSwapContext.sdk as HopApi;
+  const afRouter = restSwapContext.afRouter as Router;
   const tokens = restSwapContext.tokens as VerifiedToken[];
   const tokenIn = restSwapContext.tokenIn as VerifiedToken;
   const tokenOut = restSwapContext.tokenOut as VerifiedToken;
@@ -183,7 +199,7 @@ function Page() {
   const [value, setValue] = useState<string>("");
 
   // Quote
-  const [quoteMap, setQuoteMap] = useState<Record<number, Quote | undefined>>(
+  const [quoteMap, setQuoteMap] = useState<Record<number, UnifiedQuote | undefined>>(
     {},
   );
   const quote = (() => {
@@ -191,8 +207,8 @@ function Page() {
       .filter(
         ([timestamp, quote]) =>
           quote !== undefined &&
-          quote.trade.amount_in.token === tokenIn.coin_type &&
-          quote.trade.amount_out.token === tokenOut.coin_type,
+          quote.coin_type_in === tokenIn.coin_type &&
+          quote.coin_type_out === tokenOut.coin_type,
       )
       .map(([timestamp]) => +timestamp);
 
@@ -201,12 +217,12 @@ function Page() {
       : quoteMap[Math.max(...timestamps)];
   })();
   const quoteAmountIn = quote
-    ? BigNumber(quote.trade.amount_in.amount.toString()).div(
+    ? BigNumber(quote.amount_in.toString()).div(
         10 ** tokenIn.decimals,
       )
     : undefined;
   const quoteAmountOut = quote
-    ? BigNumber(quote.trade.amount_out.amount.toString()).div(
+    ? BigNumber(quote.amount_out.toString()).div(
         10 ** tokenOut.decimals,
       )
     : undefined;
@@ -226,10 +242,10 @@ function Page() {
     async (_tokenIn = tokenIn, _tokenOut = tokenOut, _value = value) => {
       if (_tokenIn.coin_type === _tokenOut.coin_type) return;
       if (new BigNumber(_value || 0).lte(0)) return;
-
+  
       const timestamp = new Date().getTime();
       setQuoteMap((o) => ({ ...o, [timestamp]: undefined }));
-
+  
       try {
         const params = {
           token_in: _tokenIn.coin_type,
@@ -238,36 +254,92 @@ function Page() {
             new BigNumber(_value).times(10 ** _tokenIn.decimals).toString(),
           ),
         };
-
-        const result = await sdk.fetchQuote(params);
-        result.trade.amount_in.token = normalizeStructTag(
-          result.trade.amount_in.token,
-        );
-        result.trade.amount_out.token = normalizeStructTag(
-          result.trade.amount_out.token,
-        );
-        for (const node of Object.values(result.trade.nodes)) {
-          node.amount_in.token = normalizeStructTag(node.amount_in.token);
-          node.amount_out.token = normalizeStructTag(node.amount_out.token);
+  
+        const timeout = (promise: Promise<any>, time: number) =>
+          new Promise((resolve, reject) => {
+            setTimeout(() => reject(new Error("Timeout")), time);
+            promise.then(resolve).catch(reject);
+          });
+  
+        // Fetch both quotes in parallel with timeout
+        const [hopResult, aftermathResult] = await Promise.allSettled([
+          timeout(sdk.fetchQuote(params), 5000),
+          timeout(
+            afRouter.getCompleteTradeRouteGivenAmountIn({
+              coinInType: params.token_in,
+              coinOutType: params.token_out,
+              coinInAmount: params.amount_in,
+            }),
+            5000
+          ),
+        ]);
+  
+        let hopUnifiedQuote: UnifiedQuote | null = null;
+        let aftermathUnifiedQuote: UnifiedQuote | null = null;
+  
+        if (hopResult.status === "fulfilled") {
+          const existingQuote = hopResult.value as GetQuoteResponse;
+          hopUnifiedQuote = {
+            id: uuidv4(),
+            amount_in: new BigNumber(existingQuote.trade.amount_in.amount.toString()).div(10 ** _tokenIn.decimals),
+            amount_out: new BigNumber(existingQuote.trade.amount_out.amount.toString()).div(10 ** _tokenOut.decimals),
+            coin_type_in: existingQuote.trade.amount_in.token,
+            coin_type_out: existingQuote.trade.amount_out.token,
+            type: "hop",
+            routeOrQuote: existingQuote,
+          };
+        } else {
+          console.error("Hop SDK failed or timed out:", hopResult.reason);
         }
-
-        const resultWithId = { ...result, id: uuidv4() };
-        setQuoteMap((o) => ({ ...o, [timestamp]: resultWithId }));
-        return resultWithId;
+  
+        if (aftermathResult.status === "fulfilled") {
+          const aftermathQuote = aftermathResult.value as RouterCompleteTradeRoute;
+          aftermathUnifiedQuote = {
+            id: uuidv4(),
+            amount_in: new BigNumber(aftermathQuote.coinIn.amount.toString()),
+            amount_out: new BigNumber(aftermathQuote.coinOut.amount.toString()),
+            coin_type_in: aftermathQuote.coinIn.type,
+            coin_type_out: aftermathQuote.coinOut.type,
+            type: "aftermath",
+            routeOrQuote: aftermathQuote,
+          };
+        } else {
+          console.error("Aftermath SDK failed or timed out:", aftermathResult.reason);
+        }
+  
+        // Determine the best quote based on the greatest amount out
+        let bestQuote: UnifiedQuote | null = null;
+  
+        if (hopUnifiedQuote && aftermathUnifiedQuote) {
+          bestQuote = aftermathUnifiedQuote.amount_out.gt(hopUnifiedQuote.amount_out)
+            ? aftermathUnifiedQuote
+            : hopUnifiedQuote;
+        } else if (hopUnifiedQuote) {
+          bestQuote = hopUnifiedQuote;
+        } else if (aftermathUnifiedQuote) {
+          bestQuote = aftermathUnifiedQuote;
+        } else {
+          throw new Error("Both routers failed or timed out.");
+        }
+  
+        setQuoteMap((o) => ({ ...o, [timestamp]: bestQuote }));
+        return bestQuote;
       } catch (err) {
-        console.error(err);
-
+        console.error("Both routers failed or timed out:", err);
+  
         setQuoteMap((o) => {
           delete o[timestamp];
           return o;
         });
       }
     },
-    [tokenIn, tokenOut, value, sdk],
+    [tokenIn, tokenOut, value, sdk, afRouter],
   );
+  
+  
   const fetchQuoteWrapper = useCallback(() => fetchQuote(), [fetchQuote]);
 
-  useSWR<Quote | undefined>("quote", fetchQuoteWrapper, {
+  useSWR<UnifiedQuote | undefined>("quote", fetchQuoteWrapper, {
     refreshInterval: 30 * 1000,
     onSuccess: (data) => {
       console.log("Fetched quote", data);
@@ -518,6 +590,56 @@ function Page() {
     };
   })();
 
+  const getTransactionForUnifiedQuote = async (
+    quote: UnifiedQuote,
+    slippage: number,
+    address: string,
+    isDepositing: boolean
+  ): Promise<{
+    tx: TransactionBlock;
+    outputCoin: TransactionResult | undefined;
+  }> => {
+    if (quote.type === "hop") {
+      const res = await sdk.fetchTx({
+        trade: (quote.routeOrQuote as GetQuoteResponse).trade,
+        sui_address: address,
+        gas_budget: 0.25 * 10 ** 9, // Set to 0.25 SUI
+        max_slippage_bps: slippage * 100,
+        return_output_coin_argument: isDepositing,
+      });
+      return {
+        tx: res.transaction as unknown as TransactionBlock,
+        outputCoin: res.output_coin as unknown as TransactionResult | undefined
+      }
+    } else if (quote.type === "aftermath") {
+      if (isDepositing) {        
+        const tx = new TransactionBlock()
+        const res = await afRouter.addTransactionForCompleteTradeRouteV0({
+          tx,
+          walletAddress: address,
+          completeRoute: quote.routeOrQuote as RouterCompleteTradeRoute,
+          slippage: slippage / 100,
+        });
+        return {
+          tx: res.tx as unknown as TransactionBlock,
+          outputCoin: res.coinOutId as unknown as TransactionResult | undefined
+        }
+      } else {
+        const tx = await afRouter.getTransactionForCompleteTradeRouteV0({
+          walletAddress: address,
+          completeRoute: quote.routeOrQuote as RouterCompleteTradeRoute,
+          slippage: slippage / 100,
+        });
+        return {
+          tx,
+          outputCoin: undefined
+        }
+      }
+    } else {
+      throw new Error("Unknown quote type");
+    }
+  };
+
   const swap = async (deposit?: boolean) => {
     if (!address) throw new Error("Wallet not connected");
     if (!quote) throw new Error("Quote not found");
@@ -528,21 +650,13 @@ function Page() {
 
     let txb = new TransactionBlock();
     try {
-      const tx = await sdk.fetchTx({
-        trade: quote.trade,
-        sui_address: address,
+      const tx = await getTransactionForUnifiedQuote(quote, +slippage, address, isDepositing)
 
-        gas_budget: 0.25 * 10 ** 9, // Set to 0.25 SUI
-        max_slippage_bps: +slippage * 100,
-
-        return_output_coin_argument: isDepositing,
-      });
-
-      txb = new TransactionBlock(tx.transaction as unknown as TransactionBlock);
+      txb = new TransactionBlock(tx.tx);
       txb.setGasBudget("" as any); // Set to dynamic
 
       if (isDepositing) {
-        if (!tx.output_coin) throw new Error("Missing coin to deposit");
+        if (!tx.outputCoin) throw new Error("Missing coin to deposit");
 
         const obligationOwnerCap = data.obligationOwnerCaps?.find(
           (o) => o.obligationId === obligation?.id,
@@ -550,7 +664,7 @@ function Page() {
 
         await suilendClient.depositCoin(
           address,
-          tx.output_coin as any,
+          tx.outputCoin as any,
           tokenOutReserve.coinType,
           txb,
           obligationOwnerCap?.id,
@@ -929,6 +1043,14 @@ function Page() {
 
         <TLabelSans className="opacity-50">
           Powered by{" "}
+          <TextLink
+            className="text-muted-foreground decoration-muted-foreground/50"
+            href="https://aftermath.finance/trade"
+            noIcon
+          >
+            Aftermath
+          </TextLink>
+          {" "}&{" "}
           <TextLink
             className="text-muted-foreground decoration-muted-foreground/50"
             href="https://hop.ag/"
