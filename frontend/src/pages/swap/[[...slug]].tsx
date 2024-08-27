@@ -738,41 +738,12 @@ function Page() {
 
             {hasTokenOutReserve && (
               <div className="relative z-[1] -mt-2 flex w-full flex-row flex-wrap justify-end gap-x-2 gap-y-1 rounded-b-md bg-border px-3 pb-2 pt-4">
-                <div className="flex w-max flex-row items-center justify-end">
-                  <div className="flex h-4 flex-col items-end justify-center">
-                    <div
-                      className={cn(
-                        "flex h-0 w-max flex-row items-center gap-2 opacity-0 transition-opacity duration-500",
-                        isShowingTokenOutDepositPosition && "opacity-100",
-                      )}
-                    >
-                      <TLabelSans>Deposited</TLabelSans>
-                      <TBody className="text-xs">
-                        {formatToken(tokenOutDepositPositionAmount, {
-                          exact: false,
-                        })}
-                      </TBody>
-                    </div>
-
-                    <div
-                      className={cn(
-                        "flex h-0 w-max flex-row items-center gap-2 opacity-0 transition-opacity duration-500",
-                        !isShowingTokenOutDepositPosition && "opacity-100",
-                      )}
-                    >
-                      <TLabelSans>Borrowed</TLabelSans>
-                      <TBody className="text-xs">
-                        {formatToken(tokenOutBorrowPositionAmount, {
-                          exact: false,
-                        })}
-                      </TBody>
-                    </div>
-                  </div>
-
-                  <TBody
-                    className="text-xs"
-                    style={{ marginLeft: `${7.2 * 1}px` }}
-                  >
+                <div className="flex flex-row items-center gap-2">
+                  <TLabelSans>Deposited</TLabelSans>
+                  <TBody className="text-xs">
+                    {formatToken(tokenOutDepositPositionAmount, {
+                      exact: false,
+                    })}{" "}
                     {tokenOut.ticker}
                   </TBody>
                 </div>
