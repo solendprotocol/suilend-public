@@ -7,7 +7,6 @@ import {
   ToTypeArgument,
   ToTypeStr,
   TypeArgument,
-  Vector,
   assertFieldsWithTypesArgsMatch,
   assertReifiedTypeArgsMatch,
   decodeFromFields,
@@ -23,18 +22,20 @@ import {
   FieldsWithTypes,
   composeSuiType,
   compressSuiType,
+  parseTypeName,
 } from "../../../../_framework/util";
+import { Vector } from "../../../../_framework/vector";
 import { Table } from "../../0x2/table/structs";
-import { BcsType, bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { PKG_V1 } from "../index";
+import { BcsType, bcs } from "@mysten/sui/bcs";
+import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
+import { fromB64 } from "@mysten/sui/utils";
 
 /* ============================== Set =============================== */
 
 export function isSet(type: string): boolean {
   type = compressSuiType(type);
-  return type.startsWith(
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set::Set<",
-  );
+  return type.startsWith(`${PKG_V1}::set::Set` + "<");
 }
 
 export interface SetFields<A extends TypeArgument> {
@@ -45,15 +46,16 @@ export interface SetFields<A extends TypeArgument> {
 export type SetReified<A extends TypeArgument> = Reified<Set<A>, SetFields<A>>;
 
 export class Set<A extends TypeArgument> implements StructClass {
-  static readonly $typeName =
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set::Set";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V1}::set::Set`;
   static readonly $numTypeParams = 1;
+  static readonly $isPhantom = [false] as const;
 
   readonly $typeName = Set.$typeName;
-
-  readonly $fullTypeName: `0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set::Set<${ToTypeStr<A>}>`;
-
+  readonly $fullTypeName: `${typeof PKG_V1}::set::Set<${ToTypeStr<A>}>`;
   readonly $typeArgs: [ToTypeStr<A>];
+  readonly $isPhantom = Set.$isPhantom;
 
   readonly keys: ToField<Vector<A>>;
   readonly elems: ToField<Table<ToPhantom<A>, ToPhantom<Unit>>>;
@@ -62,7 +64,7 @@ export class Set<A extends TypeArgument> implements StructClass {
     this.$fullTypeName = composeSuiType(
       Set.$typeName,
       ...typeArgs,
-    ) as `0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set::Set<${ToTypeStr<A>}>`;
+    ) as `${typeof PKG_V1}::set::Set<${ToTypeStr<A>}>`;
     this.$typeArgs = typeArgs;
 
     this.keys = fields.keys;
@@ -77,8 +79,9 @@ export class Set<A extends TypeArgument> implements StructClass {
       fullTypeName: composeSuiType(
         Set.$typeName,
         ...[extractType(A)],
-      ) as `0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set::Set<${ToTypeStr<ToTypeArgument<A>>}>`,
+      ) as `${typeof PKG_V1}::set::Set<${ToTypeStr<ToTypeArgument<A>>}>`,
       typeArgs: [extractType(A)] as [ToTypeStr<ToTypeArgument<A>>],
+      isPhantom: Set.$isPhantom,
       reifiedTypeArgs: [A],
       fromFields: (fields: Record<string, any>) => Set.fromFields(A, fields),
       fromFieldsWithTypes: (item: FieldsWithTypes) =>
@@ -89,6 +92,8 @@ export class Set<A extends TypeArgument> implements StructClass {
       fromJSON: (json: Record<string, any>) => Set.fromJSON(A, json),
       fromSuiParsedData: (content: SuiParsedData) =>
         Set.fromSuiParsedData(A, content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        Set.fromSuiObjectData(A, content),
       fetch: async (client: SuiClient, id: string) => Set.fetch(client, A, id),
       new: (fields: SetFields<ToTypeArgument<A>>) => {
         return new Set([extractType(A)], fields);
@@ -229,6 +234,39 @@ export class Set<A extends TypeArgument> implements StructClass {
     return Set.fromFieldsWithTypes(typeArg, content);
   }
 
+  static fromSuiObjectData<A extends Reified<TypeArgument, any>>(
+    typeArg: A,
+    data: SuiObjectData,
+  ): Set<ToTypeArgument<A>> {
+    if (data.bcs) {
+      if (data.bcs.dataType !== "moveObject" || !isSet(data.bcs.type)) {
+        throw new Error(`object at is not a Set object`);
+      }
+
+      const gotTypeArgs = parseTypeName(data.bcs.type).typeArgs;
+      if (gotTypeArgs.length !== 1) {
+        throw new Error(
+          `type argument mismatch: expected 1 type argument but got '${gotTypeArgs.length}'`,
+        );
+      }
+      const gotTypeArg = compressSuiType(gotTypeArgs[0]);
+      const expectedTypeArg = compressSuiType(extractType(typeArg));
+      if (gotTypeArg !== compressSuiType(extractType(typeArg))) {
+        throw new Error(
+          `type argument mismatch: expected '${expectedTypeArg}' but got '${gotTypeArg}'`,
+        );
+      }
+
+      return Set.fromBcs(typeArg, fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return Set.fromSuiParsedData(typeArg, data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch<A extends Reified<TypeArgument, any>>(
     client: SuiClient,
     typeArg: A,
@@ -243,7 +281,8 @@ export class Set<A extends TypeArgument> implements StructClass {
     if (res.data?.bcs?.dataType !== "moveObject" || !isSet(res.data.bcs.type)) {
       throw new Error(`object at id ${id} is not a Set object`);
     }
-    return Set.fromBcs(typeArg, fromB64(res.data.bcs.bcsBytes));
+
+    return Set.fromSuiObjectData(typeArg, res.data);
   }
 }
 
@@ -251,10 +290,7 @@ export class Set<A extends TypeArgument> implements StructClass {
 
 export function isUnit(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set::Unit"
-  );
+  return type === `${PKG_V1}::set::Unit`;
 }
 
 export interface UnitFields {
@@ -264,15 +300,16 @@ export interface UnitFields {
 export type UnitReified = Reified<Unit, UnitFields>;
 
 export class Unit implements StructClass {
-  static readonly $typeName =
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set::Unit";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V1}::set::Unit`;
   static readonly $numTypeParams = 0;
+  static readonly $isPhantom = [] as const;
 
   readonly $typeName = Unit.$typeName;
-
-  readonly $fullTypeName: "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set::Unit";
-
+  readonly $fullTypeName: `${typeof PKG_V1}::set::Unit`;
   readonly $typeArgs: [];
+  readonly $isPhantom = Unit.$isPhantom;
 
   readonly dummyField: ToField<"bool">;
 
@@ -280,7 +317,7 @@ export class Unit implements StructClass {
     this.$fullTypeName = composeSuiType(
       Unit.$typeName,
       ...typeArgs,
-    ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set::Unit";
+    ) as `${typeof PKG_V1}::set::Unit`;
     this.$typeArgs = typeArgs;
 
     this.dummyField = fields.dummyField;
@@ -292,8 +329,9 @@ export class Unit implements StructClass {
       fullTypeName: composeSuiType(
         Unit.$typeName,
         ...[],
-      ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set::Unit",
+      ) as `${typeof PKG_V1}::set::Unit`,
       typeArgs: [] as [],
+      isPhantom: Unit.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => Unit.fromFields(fields),
       fromFieldsWithTypes: (item: FieldsWithTypes) =>
@@ -304,6 +342,8 @@ export class Unit implements StructClass {
       fromJSON: (json: Record<string, any>) => Unit.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         Unit.fromSuiParsedData(content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        Unit.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) => Unit.fetch(client, id),
       new: (fields: UnitFields) => {
         return new Unit([], fields);
@@ -389,6 +429,22 @@ export class Unit implements StructClass {
     return Unit.fromFieldsWithTypes(content);
   }
 
+  static fromSuiObjectData(data: SuiObjectData): Unit {
+    if (data.bcs) {
+      if (data.bcs.dataType !== "moveObject" || !isUnit(data.bcs.type)) {
+        throw new Error(`object at is not a Unit object`);
+      }
+
+      return Unit.fromBcs(fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return Unit.fromSuiParsedData(data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch(client: SuiClient, id: string): Promise<Unit> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -402,6 +458,7 @@ export class Unit implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a Unit object`);
     }
-    return Unit.fromBcs(fromB64(res.data.bcs.bcsBytes));
+
+    return Unit.fromSuiObjectData(res.data);
   }
 }

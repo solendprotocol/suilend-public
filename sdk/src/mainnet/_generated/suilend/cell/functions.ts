@@ -1,48 +1,48 @@
 import { PUBLISHED_AT } from "..";
-import { GenericArg, ObjectArg, generic, obj } from "../../_framework/util";
-import { TransactionBlock } from "@mysten/sui.js/transactions";
+import { GenericArg, generic, obj } from "../../_framework/util";
+import { Transaction, TransactionObjectInput } from "@mysten/sui/transactions";
 
-export function new_(
-  txb: TransactionBlock,
-  typeArg: string,
-  element: GenericArg,
-) {
-  return txb.moveCall({
+export function new_(tx: Transaction, typeArg: string, element: GenericArg) {
+  return tx.moveCall({
     target: `${PUBLISHED_AT}::cell::new`,
     typeArguments: [typeArg],
-    arguments: [generic(txb, `${typeArg}`, element)],
+    arguments: [generic(tx, `${typeArg}`, element)],
   });
 }
 
 export interface SetArgs {
-  cell: ObjectArg;
+  cell: TransactionObjectInput;
   element: GenericArg;
 }
 
-export function set(txb: TransactionBlock, typeArg: string, args: SetArgs) {
-  return txb.moveCall({
+export function set(tx: Transaction, typeArg: string, args: SetArgs) {
+  return tx.moveCall({
     target: `${PUBLISHED_AT}::cell::set`,
     typeArguments: [typeArg],
-    arguments: [obj(txb, args.cell), generic(txb, `${typeArg}`, args.element)],
+    arguments: [obj(tx, args.cell), generic(tx, `${typeArg}`, args.element)],
   });
 }
 
-export function get(txb: TransactionBlock, typeArg: string, cell: ObjectArg) {
-  return txb.moveCall({
+export function get(
+  tx: Transaction,
+  typeArg: string,
+  cell: TransactionObjectInput,
+) {
+  return tx.moveCall({
     target: `${PUBLISHED_AT}::cell::get`,
     typeArguments: [typeArg],
-    arguments: [obj(txb, cell)],
+    arguments: [obj(tx, cell)],
   });
 }
 
 export function destroy(
-  txb: TransactionBlock,
+  tx: Transaction,
   typeArg: string,
-  cell: ObjectArg,
+  cell: TransactionObjectInput,
 ) {
-  return txb.moveCall({
+  return tx.moveCall({
     target: `${PUBLISHED_AT}::cell::destroy`,
     typeArguments: [typeArg],
-    arguments: [obj(txb, cell)],
+    arguments: [obj(tx, cell)],
   });
 }

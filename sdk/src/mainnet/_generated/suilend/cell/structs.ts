@@ -21,17 +21,18 @@ import {
   FieldsWithTypes,
   composeSuiType,
   compressSuiType,
+  parseTypeName,
 } from "../../_framework/util";
-import { BcsType, bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { PKG_V1 } from "../index";
+import { BcsType, bcs } from "@mysten/sui/bcs";
+import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
+import { fromB64 } from "@mysten/sui/utils";
 
 /* ============================== Cell =============================== */
 
 export function isCell(type: string): boolean {
   type = compressSuiType(type);
-  return type.startsWith(
-    "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::cell::Cell<",
-  );
+  return type.startsWith(`${PKG_V1}::cell::Cell` + "<");
 }
 
 export interface CellFields<Element extends TypeArgument> {
@@ -44,15 +45,16 @@ export type CellReified<Element extends TypeArgument> = Reified<
 >;
 
 export class Cell<Element extends TypeArgument> implements StructClass {
-  static readonly $typeName =
-    "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::cell::Cell";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V1}::cell::Cell`;
   static readonly $numTypeParams = 1;
+  static readonly $isPhantom = [false] as const;
 
   readonly $typeName = Cell.$typeName;
-
-  readonly $fullTypeName: `0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::cell::Cell<${ToTypeStr<Element>}>`;
-
+  readonly $fullTypeName: `${typeof PKG_V1}::cell::Cell<${ToTypeStr<Element>}>`;
   readonly $typeArgs: [ToTypeStr<Element>];
+  readonly $isPhantom = Cell.$isPhantom;
 
   readonly element: ToField<Option<Element>>;
 
@@ -63,7 +65,7 @@ export class Cell<Element extends TypeArgument> implements StructClass {
     this.$fullTypeName = composeSuiType(
       Cell.$typeName,
       ...typeArgs,
-    ) as `0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::cell::Cell<${ToTypeStr<Element>}>`;
+    ) as `${typeof PKG_V1}::cell::Cell<${ToTypeStr<Element>}>`;
     this.$typeArgs = typeArgs;
 
     this.element = fields.element;
@@ -77,8 +79,9 @@ export class Cell<Element extends TypeArgument> implements StructClass {
       fullTypeName: composeSuiType(
         Cell.$typeName,
         ...[extractType(Element)],
-      ) as `0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::cell::Cell<${ToTypeStr<ToTypeArgument<Element>>}>`,
+      ) as `${typeof PKG_V1}::cell::Cell<${ToTypeStr<ToTypeArgument<Element>>}>`,
       typeArgs: [extractType(Element)] as [ToTypeStr<ToTypeArgument<Element>>],
+      isPhantom: Cell.$isPhantom,
       reifiedTypeArgs: [Element],
       fromFields: (fields: Record<string, any>) =>
         Cell.fromFields(Element, fields),
@@ -90,6 +93,8 @@ export class Cell<Element extends TypeArgument> implements StructClass {
       fromJSON: (json: Record<string, any>) => Cell.fromJSON(Element, json),
       fromSuiParsedData: (content: SuiParsedData) =>
         Cell.fromSuiParsedData(Element, content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        Cell.fromSuiObjectData(Element, content),
       fetch: async (client: SuiClient, id: string) =>
         Cell.fetch(client, Element, id),
       new: (fields: CellFields<ToTypeArgument<Element>>) => {
@@ -157,7 +162,7 @@ export class Cell<Element extends TypeArgument> implements StructClass {
   toJSONField() {
     return {
       element: fieldToJSON<Option<Element>>(
-        `0x1::option::Option<${this.$typeArgs[0]}>`,
+        `${Option.$typeName}<${this.$typeArgs[0]}>`,
         this.element,
       ),
     };
@@ -211,6 +216,39 @@ export class Cell<Element extends TypeArgument> implements StructClass {
     return Cell.fromFieldsWithTypes(typeArg, content);
   }
 
+  static fromSuiObjectData<Element extends Reified<TypeArgument, any>>(
+    typeArg: Element,
+    data: SuiObjectData,
+  ): Cell<ToTypeArgument<Element>> {
+    if (data.bcs) {
+      if (data.bcs.dataType !== "moveObject" || !isCell(data.bcs.type)) {
+        throw new Error(`object at is not a Cell object`);
+      }
+
+      const gotTypeArgs = parseTypeName(data.bcs.type).typeArgs;
+      if (gotTypeArgs.length !== 1) {
+        throw new Error(
+          `type argument mismatch: expected 1 type argument but got '${gotTypeArgs.length}'`,
+        );
+      }
+      const gotTypeArg = compressSuiType(gotTypeArgs[0]);
+      const expectedTypeArg = compressSuiType(extractType(typeArg));
+      if (gotTypeArg !== compressSuiType(extractType(typeArg))) {
+        throw new Error(
+          `type argument mismatch: expected '${expectedTypeArg}' but got '${gotTypeArg}'`,
+        );
+      }
+
+      return Cell.fromBcs(typeArg, fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return Cell.fromSuiParsedData(typeArg, data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch<Element extends Reified<TypeArgument, any>>(
     client: SuiClient,
     typeArg: Element,
@@ -228,6 +266,7 @@ export class Cell<Element extends TypeArgument> implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a Cell object`);
     }
-    return Cell.fromBcs(typeArg, fromB64(res.data.bcs.bcsBytes));
+
+    return Cell.fromSuiObjectData(typeArg, res.data);
   }
 }

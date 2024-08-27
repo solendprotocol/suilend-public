@@ -7,7 +7,6 @@ import {
   ToTypeArgument,
   ToTypeStr,
   TypeArgument,
-  Vector,
   assertFieldsWithTypesArgsMatch,
   assertReifiedTypeArgsMatch,
   decodeFromFields,
@@ -22,15 +21,19 @@ import {
   FieldsWithTypes,
   composeSuiType,
   compressSuiType,
+  parseTypeName,
 } from "../../../../_framework/util";
-import { BcsType, bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { Vector } from "../../../../_framework/vector";
+import { PKG_V25 } from "../index";
+import { BcsType, bcs } from "@mysten/sui/bcs";
+import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
+import { fromB64 } from "@mysten/sui/utils";
 
 /* ============================== Entry =============================== */
 
 export function isEntry(type: string): boolean {
   type = compressSuiType(type);
-  return type.startsWith("0x2::vec_map::Entry<");
+  return type.startsWith(`${PKG_V25}::vec_map::Entry` + "<");
 }
 
 export interface EntryFields<K extends TypeArgument, V extends TypeArgument> {
@@ -46,14 +49,16 @@ export type EntryReified<
 export class Entry<K extends TypeArgument, V extends TypeArgument>
   implements StructClass
 {
-  static readonly $typeName = "0x2::vec_map::Entry";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V25}::vec_map::Entry`;
   static readonly $numTypeParams = 2;
+  static readonly $isPhantom = [false, false] as const;
 
   readonly $typeName = Entry.$typeName;
-
-  readonly $fullTypeName: `0x2::vec_map::Entry<${ToTypeStr<K>}, ${ToTypeStr<V>}>`;
-
+  readonly $fullTypeName: `${typeof PKG_V25}::vec_map::Entry<${ToTypeStr<K>}, ${ToTypeStr<V>}>`;
   readonly $typeArgs: [ToTypeStr<K>, ToTypeStr<V>];
+  readonly $isPhantom = Entry.$isPhantom;
 
   readonly key: ToField<K>;
   readonly value: ToField<V>;
@@ -65,7 +70,7 @@ export class Entry<K extends TypeArgument, V extends TypeArgument>
     this.$fullTypeName = composeSuiType(
       Entry.$typeName,
       ...typeArgs,
-    ) as `0x2::vec_map::Entry<${ToTypeStr<K>}, ${ToTypeStr<V>}>`;
+    ) as `${typeof PKG_V25}::vec_map::Entry<${ToTypeStr<K>}, ${ToTypeStr<V>}>`;
     this.$typeArgs = typeArgs;
 
     this.key = fields.key;
@@ -81,11 +86,12 @@ export class Entry<K extends TypeArgument, V extends TypeArgument>
       fullTypeName: composeSuiType(
         Entry.$typeName,
         ...[extractType(K), extractType(V)],
-      ) as `0x2::vec_map::Entry<${ToTypeStr<ToTypeArgument<K>>}, ${ToTypeStr<ToTypeArgument<V>>}>`,
+      ) as `${typeof PKG_V25}::vec_map::Entry<${ToTypeStr<ToTypeArgument<K>>}, ${ToTypeStr<ToTypeArgument<V>>}>`,
       typeArgs: [extractType(K), extractType(V)] as [
         ToTypeStr<ToTypeArgument<K>>,
         ToTypeStr<ToTypeArgument<V>>,
       ],
+      isPhantom: Entry.$isPhantom,
       reifiedTypeArgs: [K, V],
       fromFields: (fields: Record<string, any>) =>
         Entry.fromFields([K, V], fields),
@@ -97,6 +103,8 @@ export class Entry<K extends TypeArgument, V extends TypeArgument>
       fromJSON: (json: Record<string, any>) => Entry.fromJSON([K, V], json),
       fromSuiParsedData: (content: SuiParsedData) =>
         Entry.fromSuiParsedData([K, V], content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        Entry.fromSuiObjectData([K, V], content),
       fetch: async (client: SuiClient, id: string) =>
         Entry.fetch(client, [K, V], id),
       new: (fields: EntryFields<ToTypeArgument<K>, ToTypeArgument<V>>) => {
@@ -237,6 +245,44 @@ export class Entry<K extends TypeArgument, V extends TypeArgument>
     return Entry.fromFieldsWithTypes(typeArgs, content);
   }
 
+  static fromSuiObjectData<
+    K extends Reified<TypeArgument, any>,
+    V extends Reified<TypeArgument, any>,
+  >(
+    typeArgs: [K, V],
+    data: SuiObjectData,
+  ): Entry<ToTypeArgument<K>, ToTypeArgument<V>> {
+    if (data.bcs) {
+      if (data.bcs.dataType !== "moveObject" || !isEntry(data.bcs.type)) {
+        throw new Error(`object at is not a Entry object`);
+      }
+
+      const gotTypeArgs = parseTypeName(data.bcs.type).typeArgs;
+      if (gotTypeArgs.length !== 2) {
+        throw new Error(
+          `type argument mismatch: expected 2 type arguments but got ${gotTypeArgs.length}`,
+        );
+      }
+      for (let i = 0; i < 2; i++) {
+        const gotTypeArg = compressSuiType(gotTypeArgs[i]);
+        const expectedTypeArg = compressSuiType(extractType(typeArgs[i]));
+        if (gotTypeArg !== expectedTypeArg) {
+          throw new Error(
+            `type argument mismatch at position ${i}: expected '${expectedTypeArg}' but got '${gotTypeArg}'`,
+          );
+        }
+      }
+
+      return Entry.fromBcs(typeArgs, fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return Entry.fromSuiParsedData(typeArgs, data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch<
     K extends Reified<TypeArgument, any>,
     V extends Reified<TypeArgument, any>,
@@ -257,7 +303,8 @@ export class Entry<K extends TypeArgument, V extends TypeArgument>
     ) {
       throw new Error(`object at id ${id} is not a Entry object`);
     }
-    return Entry.fromBcs(typeArgs, fromB64(res.data.bcs.bcsBytes));
+
+    return Entry.fromSuiObjectData(typeArgs, res.data);
   }
 }
 
@@ -265,7 +312,7 @@ export class Entry<K extends TypeArgument, V extends TypeArgument>
 
 export function isVecMap(type: string): boolean {
   type = compressSuiType(type);
-  return type.startsWith("0x2::vec_map::VecMap<");
+  return type.startsWith(`${PKG_V25}::vec_map::VecMap` + "<");
 }
 
 export interface VecMapFields<K extends TypeArgument, V extends TypeArgument> {
@@ -280,14 +327,16 @@ export type VecMapReified<
 export class VecMap<K extends TypeArgument, V extends TypeArgument>
   implements StructClass
 {
-  static readonly $typeName = "0x2::vec_map::VecMap";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V25}::vec_map::VecMap`;
   static readonly $numTypeParams = 2;
+  static readonly $isPhantom = [false, false] as const;
 
   readonly $typeName = VecMap.$typeName;
-
-  readonly $fullTypeName: `0x2::vec_map::VecMap<${ToTypeStr<K>}, ${ToTypeStr<V>}>`;
-
+  readonly $fullTypeName: `${typeof PKG_V25}::vec_map::VecMap<${ToTypeStr<K>}, ${ToTypeStr<V>}>`;
   readonly $typeArgs: [ToTypeStr<K>, ToTypeStr<V>];
+  readonly $isPhantom = VecMap.$isPhantom;
 
   readonly contents: ToField<Vector<Entry<K, V>>>;
 
@@ -298,7 +347,7 @@ export class VecMap<K extends TypeArgument, V extends TypeArgument>
     this.$fullTypeName = composeSuiType(
       VecMap.$typeName,
       ...typeArgs,
-    ) as `0x2::vec_map::VecMap<${ToTypeStr<K>}, ${ToTypeStr<V>}>`;
+    ) as `${typeof PKG_V25}::vec_map::VecMap<${ToTypeStr<K>}, ${ToTypeStr<V>}>`;
     this.$typeArgs = typeArgs;
 
     this.contents = fields.contents;
@@ -313,11 +362,12 @@ export class VecMap<K extends TypeArgument, V extends TypeArgument>
       fullTypeName: composeSuiType(
         VecMap.$typeName,
         ...[extractType(K), extractType(V)],
-      ) as `0x2::vec_map::VecMap<${ToTypeStr<ToTypeArgument<K>>}, ${ToTypeStr<ToTypeArgument<V>>}>`,
+      ) as `${typeof PKG_V25}::vec_map::VecMap<${ToTypeStr<ToTypeArgument<K>>}, ${ToTypeStr<ToTypeArgument<V>>}>`,
       typeArgs: [extractType(K), extractType(V)] as [
         ToTypeStr<ToTypeArgument<K>>,
         ToTypeStr<ToTypeArgument<V>>,
       ],
+      isPhantom: VecMap.$isPhantom,
       reifiedTypeArgs: [K, V],
       fromFields: (fields: Record<string, any>) =>
         VecMap.fromFields([K, V], fields),
@@ -329,6 +379,8 @@ export class VecMap<K extends TypeArgument, V extends TypeArgument>
       fromJSON: (json: Record<string, any>) => VecMap.fromJSON([K, V], json),
       fromSuiParsedData: (content: SuiParsedData) =>
         VecMap.fromSuiParsedData([K, V], content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        VecMap.fromSuiObjectData([K, V], content),
       fetch: async (client: SuiClient, id: string) =>
         VecMap.fetch(client, [K, V], id),
       new: (fields: VecMapFields<ToTypeArgument<K>, ToTypeArgument<V>>) => {
@@ -413,7 +465,7 @@ export class VecMap<K extends TypeArgument, V extends TypeArgument>
   toJSONField() {
     return {
       contents: fieldToJSON<Vector<Entry<K, V>>>(
-        `vector<0x2::vec_map::Entry<${this.$typeArgs[0]}, ${this.$typeArgs[1]}>>`,
+        `vector<${Entry.$typeName}<${this.$typeArgs[0]}, ${this.$typeArgs[1]}>>`,
         this.contents,
       ),
     };
@@ -479,6 +531,44 @@ export class VecMap<K extends TypeArgument, V extends TypeArgument>
     return VecMap.fromFieldsWithTypes(typeArgs, content);
   }
 
+  static fromSuiObjectData<
+    K extends Reified<TypeArgument, any>,
+    V extends Reified<TypeArgument, any>,
+  >(
+    typeArgs: [K, V],
+    data: SuiObjectData,
+  ): VecMap<ToTypeArgument<K>, ToTypeArgument<V>> {
+    if (data.bcs) {
+      if (data.bcs.dataType !== "moveObject" || !isVecMap(data.bcs.type)) {
+        throw new Error(`object at is not a VecMap object`);
+      }
+
+      const gotTypeArgs = parseTypeName(data.bcs.type).typeArgs;
+      if (gotTypeArgs.length !== 2) {
+        throw new Error(
+          `type argument mismatch: expected 2 type arguments but got ${gotTypeArgs.length}`,
+        );
+      }
+      for (let i = 0; i < 2; i++) {
+        const gotTypeArg = compressSuiType(gotTypeArgs[i]);
+        const expectedTypeArg = compressSuiType(extractType(typeArgs[i]));
+        if (gotTypeArg !== expectedTypeArg) {
+          throw new Error(
+            `type argument mismatch at position ${i}: expected '${expectedTypeArg}' but got '${gotTypeArg}'`,
+          );
+        }
+      }
+
+      return VecMap.fromBcs(typeArgs, fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return VecMap.fromSuiParsedData(typeArgs, data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch<
     K extends Reified<TypeArgument, any>,
     V extends Reified<TypeArgument, any>,
@@ -499,6 +589,7 @@ export class VecMap<K extends TypeArgument, V extends TypeArgument>
     ) {
       throw new Error(`object at id ${id} is not a VecMap object`);
     }
-    return VecMap.fromBcs(typeArgs, fromB64(res.data.bcs.bcsBytes));
+
+    return VecMap.fromSuiObjectData(typeArgs, res.data);
   }
 }

@@ -5,7 +5,6 @@ import {
   StructClass,
   ToField,
   ToTypeStr,
-  Vector,
   decodeFromFields,
   decodeFromFieldsWithTypes,
   decodeFromJSONField,
@@ -17,18 +16,18 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
+import { Vector } from "../../../../_framework/vector";
 import { GovernanceAction } from "../governance-action/structs";
-import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { PKG_V1 } from "../index";
+import { bcs } from "@mysten/sui/bcs";
+import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
+import { fromB64 } from "@mysten/sui/utils";
 
 /* ============================== GovernanceInstruction =============================== */
 
 export function isGovernanceInstruction(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::governance_instruction::GovernanceInstruction"
-  );
+  return type === `${PKG_V1}::governance_instruction::GovernanceInstruction`;
 }
 
 export interface GovernanceInstructionFields {
@@ -44,15 +43,16 @@ export type GovernanceInstructionReified = Reified<
 >;
 
 export class GovernanceInstruction implements StructClass {
-  static readonly $typeName =
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::governance_instruction::GovernanceInstruction";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V1}::governance_instruction::GovernanceInstruction`;
   static readonly $numTypeParams = 0;
+  static readonly $isPhantom = [] as const;
 
   readonly $typeName = GovernanceInstruction.$typeName;
-
-  readonly $fullTypeName: "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::governance_instruction::GovernanceInstruction";
-
+  readonly $fullTypeName: `${typeof PKG_V1}::governance_instruction::GovernanceInstruction`;
   readonly $typeArgs: [];
+  readonly $isPhantom = GovernanceInstruction.$isPhantom;
 
   readonly module: ToField<"u8">;
   readonly action: ToField<GovernanceAction>;
@@ -63,7 +63,7 @@ export class GovernanceInstruction implements StructClass {
     this.$fullTypeName = composeSuiType(
       GovernanceInstruction.$typeName,
       ...typeArgs,
-    ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::governance_instruction::GovernanceInstruction";
+    ) as `${typeof PKG_V1}::governance_instruction::GovernanceInstruction`;
     this.$typeArgs = typeArgs;
 
     this.module = fields.module;
@@ -78,8 +78,9 @@ export class GovernanceInstruction implements StructClass {
       fullTypeName: composeSuiType(
         GovernanceInstruction.$typeName,
         ...[],
-      ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::governance_instruction::GovernanceInstruction",
+      ) as `${typeof PKG_V1}::governance_instruction::GovernanceInstruction`,
       typeArgs: [] as [],
+      isPhantom: GovernanceInstruction.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         GovernanceInstruction.fromFields(fields),
@@ -92,6 +93,8 @@ export class GovernanceInstruction implements StructClass {
         GovernanceInstruction.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         GovernanceInstruction.fromSuiParsedData(content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        GovernanceInstruction.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         GovernanceInstruction.fetch(client, id),
       new: (fields: GovernanceInstructionFields) => {
@@ -204,6 +207,25 @@ export class GovernanceInstruction implements StructClass {
     return GovernanceInstruction.fromFieldsWithTypes(content);
   }
 
+  static fromSuiObjectData(data: SuiObjectData): GovernanceInstruction {
+    if (data.bcs) {
+      if (
+        data.bcs.dataType !== "moveObject" ||
+        !isGovernanceInstruction(data.bcs.type)
+      ) {
+        throw new Error(`object at is not a GovernanceInstruction object`);
+      }
+
+      return GovernanceInstruction.fromBcs(fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return GovernanceInstruction.fromSuiParsedData(data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch(
     client: SuiClient,
     id: string,
@@ -222,6 +244,7 @@ export class GovernanceInstruction implements StructClass {
         `object at id ${id} is not a GovernanceInstruction object`,
       );
     }
-    return GovernanceInstruction.fromBcs(fromB64(res.data.bcs.bcsBytes));
+
+    return GovernanceInstruction.fromSuiObjectData(res.data);
   }
 }

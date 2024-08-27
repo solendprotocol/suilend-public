@@ -5,7 +5,6 @@ import {
   StructClass,
   ToField,
   ToTypeStr,
-  Vector,
   decodeFromFields,
   decodeFromFieldsWithTypes,
   decodeFromJSONField,
@@ -17,18 +16,18 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
+import { Vector } from "../../../../_framework/vector";
 import { Guardian } from "../guardian/structs";
-import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { PKG_V1 } from "../index";
+import { bcs } from "@mysten/sui/bcs";
+import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
+import { fromB64 } from "@mysten/sui/utils";
 
 /* ============================== GuardianSet =============================== */
 
 export function isGuardianSet(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::guardian_set::GuardianSet"
-  );
+  return type === `${PKG_V1}::guardian_set::GuardianSet`;
 }
 
 export interface GuardianSetFields {
@@ -40,15 +39,16 @@ export interface GuardianSetFields {
 export type GuardianSetReified = Reified<GuardianSet, GuardianSetFields>;
 
 export class GuardianSet implements StructClass {
-  static readonly $typeName =
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::guardian_set::GuardianSet";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V1}::guardian_set::GuardianSet`;
   static readonly $numTypeParams = 0;
+  static readonly $isPhantom = [] as const;
 
   readonly $typeName = GuardianSet.$typeName;
-
-  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::guardian_set::GuardianSet";
-
+  readonly $fullTypeName: `${typeof PKG_V1}::guardian_set::GuardianSet`;
   readonly $typeArgs: [];
+  readonly $isPhantom = GuardianSet.$isPhantom;
 
   readonly index: ToField<"u32">;
   readonly guardians: ToField<Vector<Guardian>>;
@@ -58,7 +58,7 @@ export class GuardianSet implements StructClass {
     this.$fullTypeName = composeSuiType(
       GuardianSet.$typeName,
       ...typeArgs,
-    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::guardian_set::GuardianSet";
+    ) as `${typeof PKG_V1}::guardian_set::GuardianSet`;
     this.$typeArgs = typeArgs;
 
     this.index = fields.index;
@@ -72,8 +72,9 @@ export class GuardianSet implements StructClass {
       fullTypeName: composeSuiType(
         GuardianSet.$typeName,
         ...[],
-      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::guardian_set::GuardianSet",
+      ) as `${typeof PKG_V1}::guardian_set::GuardianSet`,
       typeArgs: [] as [],
+      isPhantom: GuardianSet.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         GuardianSet.fromFields(fields),
@@ -85,6 +86,8 @@ export class GuardianSet implements StructClass {
       fromJSON: (json: Record<string, any>) => GuardianSet.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         GuardianSet.fromSuiParsedData(content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        GuardianSet.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         GuardianSet.fetch(client, id),
       new: (fields: GuardianSetFields) => {
@@ -153,7 +156,7 @@ export class GuardianSet implements StructClass {
     return {
       index: this.index,
       guardians: fieldToJSON<Vector<Guardian>>(
-        `vector<0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::guardian::Guardian>`,
+        `vector<${Guardian.$typeName}>`,
         this.guardians,
       ),
       expirationTimestampMs: this.expirationTimestampMs.toString(),
@@ -202,6 +205,22 @@ export class GuardianSet implements StructClass {
     return GuardianSet.fromFieldsWithTypes(content);
   }
 
+  static fromSuiObjectData(data: SuiObjectData): GuardianSet {
+    if (data.bcs) {
+      if (data.bcs.dataType !== "moveObject" || !isGuardianSet(data.bcs.type)) {
+        throw new Error(`object at is not a GuardianSet object`);
+      }
+
+      return GuardianSet.fromBcs(fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return GuardianSet.fromSuiParsedData(data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch(client: SuiClient, id: string): Promise<GuardianSet> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -215,6 +234,7 @@ export class GuardianSet implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a GuardianSet object`);
     }
-    return GuardianSet.fromBcs(fromB64(res.data.bcs.bcsBytes));
+
+    return GuardianSet.fromSuiObjectData(res.data);
   }
 }

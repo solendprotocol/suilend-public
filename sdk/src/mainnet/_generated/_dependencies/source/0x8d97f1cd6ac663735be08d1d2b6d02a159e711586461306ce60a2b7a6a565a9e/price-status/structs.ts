@@ -14,17 +14,16 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
-import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { PKG_V1 } from "../index";
+import { bcs } from "@mysten/sui/bcs";
+import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
+import { fromB64 } from "@mysten/sui/utils";
 
 /* ============================== PriceStatus =============================== */
 
 export function isPriceStatus(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::price_status::PriceStatus"
-  );
+  return type === `${PKG_V1}::price_status::PriceStatus`;
 }
 
 export interface PriceStatusFields {
@@ -34,15 +33,16 @@ export interface PriceStatusFields {
 export type PriceStatusReified = Reified<PriceStatus, PriceStatusFields>;
 
 export class PriceStatus implements StructClass {
-  static readonly $typeName =
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::price_status::PriceStatus";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V1}::price_status::PriceStatus`;
   static readonly $numTypeParams = 0;
+  static readonly $isPhantom = [] as const;
 
   readonly $typeName = PriceStatus.$typeName;
-
-  readonly $fullTypeName: "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::price_status::PriceStatus";
-
+  readonly $fullTypeName: `${typeof PKG_V1}::price_status::PriceStatus`;
   readonly $typeArgs: [];
+  readonly $isPhantom = PriceStatus.$isPhantom;
 
   readonly status: ToField<"u64">;
 
@@ -50,7 +50,7 @@ export class PriceStatus implements StructClass {
     this.$fullTypeName = composeSuiType(
       PriceStatus.$typeName,
       ...typeArgs,
-    ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::price_status::PriceStatus";
+    ) as `${typeof PKG_V1}::price_status::PriceStatus`;
     this.$typeArgs = typeArgs;
 
     this.status = fields.status;
@@ -62,8 +62,9 @@ export class PriceStatus implements StructClass {
       fullTypeName: composeSuiType(
         PriceStatus.$typeName,
         ...[],
-      ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::price_status::PriceStatus",
+      ) as `${typeof PKG_V1}::price_status::PriceStatus`,
       typeArgs: [] as [],
+      isPhantom: PriceStatus.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         PriceStatus.fromFields(fields),
@@ -75,6 +76,8 @@ export class PriceStatus implements StructClass {
       fromJSON: (json: Record<string, any>) => PriceStatus.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         PriceStatus.fromSuiParsedData(content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        PriceStatus.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         PriceStatus.fetch(client, id),
       new: (fields: PriceStatusFields) => {
@@ -161,6 +164,22 @@ export class PriceStatus implements StructClass {
     return PriceStatus.fromFieldsWithTypes(content);
   }
 
+  static fromSuiObjectData(data: SuiObjectData): PriceStatus {
+    if (data.bcs) {
+      if (data.bcs.dataType !== "moveObject" || !isPriceStatus(data.bcs.type)) {
+        throw new Error(`object at is not a PriceStatus object`);
+      }
+
+      return PriceStatus.fromBcs(fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return PriceStatus.fromSuiParsedData(data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch(client: SuiClient, id: string): Promise<PriceStatus> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -174,6 +193,7 @@ export class PriceStatus implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a PriceStatus object`);
     }
-    return PriceStatus.fromBcs(fromB64(res.data.bcs.bcsBytes));
+
+    return PriceStatus.fromSuiObjectData(res.data);
   }
 }

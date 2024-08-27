@@ -19,16 +19,19 @@ import {
   FieldsWithTypes,
   composeSuiType,
   compressSuiType,
+  parseTypeName,
 } from "../../../../_framework/util";
+import { PKG_V25 } from "../index";
 import { UID } from "../object/structs";
-import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { bcs } from "@mysten/sui/bcs";
+import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
+import { fromB64 } from "@mysten/sui/utils";
 
 /* ============================== Table =============================== */
 
 export function isTable(type: string): boolean {
   type = compressSuiType(type);
-  return type.startsWith("0x2::table::Table<");
+  return type.startsWith(`${PKG_V25}::table::Table` + "<");
 }
 
 export interface TableFields<
@@ -47,14 +50,16 @@ export type TableReified<
 export class Table<K extends PhantomTypeArgument, V extends PhantomTypeArgument>
   implements StructClass
 {
-  static readonly $typeName = "0x2::table::Table";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V25}::table::Table`;
   static readonly $numTypeParams = 2;
+  static readonly $isPhantom = [true, true] as const;
 
   readonly $typeName = Table.$typeName;
-
-  readonly $fullTypeName: `0x2::table::Table<${PhantomToTypeStr<K>}, ${PhantomToTypeStr<V>}>`;
-
+  readonly $fullTypeName: `${typeof PKG_V25}::table::Table<${PhantomToTypeStr<K>}, ${PhantomToTypeStr<V>}>`;
   readonly $typeArgs: [PhantomToTypeStr<K>, PhantomToTypeStr<V>];
+  readonly $isPhantom = Table.$isPhantom;
 
   readonly id: ToField<UID>;
   readonly size: ToField<"u64">;
@@ -66,7 +71,7 @@ export class Table<K extends PhantomTypeArgument, V extends PhantomTypeArgument>
     this.$fullTypeName = composeSuiType(
       Table.$typeName,
       ...typeArgs,
-    ) as `0x2::table::Table<${PhantomToTypeStr<K>}, ${PhantomToTypeStr<V>}>`;
+    ) as `${typeof PKG_V25}::table::Table<${PhantomToTypeStr<K>}, ${PhantomToTypeStr<V>}>`;
     this.$typeArgs = typeArgs;
 
     this.id = fields.id;
@@ -85,11 +90,12 @@ export class Table<K extends PhantomTypeArgument, V extends PhantomTypeArgument>
       fullTypeName: composeSuiType(
         Table.$typeName,
         ...[extractType(K), extractType(V)],
-      ) as `0x2::table::Table<${PhantomToTypeStr<ToPhantomTypeArgument<K>>}, ${PhantomToTypeStr<ToPhantomTypeArgument<V>>}>`,
+      ) as `${typeof PKG_V25}::table::Table<${PhantomToTypeStr<ToPhantomTypeArgument<K>>}, ${PhantomToTypeStr<ToPhantomTypeArgument<V>>}>`,
       typeArgs: [extractType(K), extractType(V)] as [
         PhantomToTypeStr<ToPhantomTypeArgument<K>>,
         PhantomToTypeStr<ToPhantomTypeArgument<V>>,
       ],
+      isPhantom: Table.$isPhantom,
       reifiedTypeArgs: [K, V],
       fromFields: (fields: Record<string, any>) =>
         Table.fromFields([K, V], fields),
@@ -101,6 +107,8 @@ export class Table<K extends PhantomTypeArgument, V extends PhantomTypeArgument>
       fromJSON: (json: Record<string, any>) => Table.fromJSON([K, V], json),
       fromSuiParsedData: (content: SuiParsedData) =>
         Table.fromSuiParsedData([K, V], content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        Table.fromSuiObjectData([K, V], content),
       fetch: async (client: SuiClient, id: string) =>
         Table.fetch(client, [K, V], id),
       new: (
@@ -244,6 +252,44 @@ export class Table<K extends PhantomTypeArgument, V extends PhantomTypeArgument>
     return Table.fromFieldsWithTypes(typeArgs, content);
   }
 
+  static fromSuiObjectData<
+    K extends PhantomReified<PhantomTypeArgument>,
+    V extends PhantomReified<PhantomTypeArgument>,
+  >(
+    typeArgs: [K, V],
+    data: SuiObjectData,
+  ): Table<ToPhantomTypeArgument<K>, ToPhantomTypeArgument<V>> {
+    if (data.bcs) {
+      if (data.bcs.dataType !== "moveObject" || !isTable(data.bcs.type)) {
+        throw new Error(`object at is not a Table object`);
+      }
+
+      const gotTypeArgs = parseTypeName(data.bcs.type).typeArgs;
+      if (gotTypeArgs.length !== 2) {
+        throw new Error(
+          `type argument mismatch: expected 2 type arguments but got ${gotTypeArgs.length}`,
+        );
+      }
+      for (let i = 0; i < 2; i++) {
+        const gotTypeArg = compressSuiType(gotTypeArgs[i]);
+        const expectedTypeArg = compressSuiType(extractType(typeArgs[i]));
+        if (gotTypeArg !== expectedTypeArg) {
+          throw new Error(
+            `type argument mismatch at position ${i}: expected '${expectedTypeArg}' but got '${gotTypeArg}'`,
+          );
+        }
+      }
+
+      return Table.fromBcs(typeArgs, fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return Table.fromSuiParsedData(typeArgs, data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch<
     K extends PhantomReified<PhantomTypeArgument>,
     V extends PhantomReified<PhantomTypeArgument>,
@@ -264,6 +310,7 @@ export class Table<K extends PhantomTypeArgument, V extends PhantomTypeArgument>
     ) {
       throw new Error(`object at id ${id} is not a Table object`);
     }
-    return Table.fromBcs(typeArgs, fromB64(res.data.bcs.bcsBytes));
+
+    return Table.fromSuiObjectData(typeArgs, res.data);
   }
 }

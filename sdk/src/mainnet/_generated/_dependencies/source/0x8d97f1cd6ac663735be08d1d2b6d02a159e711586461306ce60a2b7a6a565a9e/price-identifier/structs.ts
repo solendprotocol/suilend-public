@@ -5,7 +5,6 @@ import {
   StructClass,
   ToField,
   ToTypeStr,
-  Vector,
   decodeFromFields,
   decodeFromFieldsWithTypes,
   decodeFromJSONField,
@@ -17,17 +16,17 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
-import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { Vector } from "../../../../_framework/vector";
+import { PKG_V1 } from "../index";
+import { bcs } from "@mysten/sui/bcs";
+import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
+import { fromB64 } from "@mysten/sui/utils";
 
 /* ============================== PriceIdentifier =============================== */
 
 export function isPriceIdentifier(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::price_identifier::PriceIdentifier"
-  );
+  return type === `${PKG_V1}::price_identifier::PriceIdentifier`;
 }
 
 export interface PriceIdentifierFields {
@@ -40,15 +39,16 @@ export type PriceIdentifierReified = Reified<
 >;
 
 export class PriceIdentifier implements StructClass {
-  static readonly $typeName =
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::price_identifier::PriceIdentifier";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V1}::price_identifier::PriceIdentifier`;
   static readonly $numTypeParams = 0;
+  static readonly $isPhantom = [] as const;
 
   readonly $typeName = PriceIdentifier.$typeName;
-
-  readonly $fullTypeName: "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::price_identifier::PriceIdentifier";
-
+  readonly $fullTypeName: `${typeof PKG_V1}::price_identifier::PriceIdentifier`;
   readonly $typeArgs: [];
+  readonly $isPhantom = PriceIdentifier.$isPhantom;
 
   readonly bytes: ToField<Vector<"u8">>;
 
@@ -56,7 +56,7 @@ export class PriceIdentifier implements StructClass {
     this.$fullTypeName = composeSuiType(
       PriceIdentifier.$typeName,
       ...typeArgs,
-    ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::price_identifier::PriceIdentifier";
+    ) as `${typeof PKG_V1}::price_identifier::PriceIdentifier`;
     this.$typeArgs = typeArgs;
 
     this.bytes = fields.bytes;
@@ -68,8 +68,9 @@ export class PriceIdentifier implements StructClass {
       fullTypeName: composeSuiType(
         PriceIdentifier.$typeName,
         ...[],
-      ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::price_identifier::PriceIdentifier",
+      ) as `${typeof PKG_V1}::price_identifier::PriceIdentifier`,
       typeArgs: [] as [],
+      isPhantom: PriceIdentifier.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         PriceIdentifier.fromFields(fields),
@@ -81,6 +82,8 @@ export class PriceIdentifier implements StructClass {
       fromJSON: (json: Record<string, any>) => PriceIdentifier.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         PriceIdentifier.fromSuiParsedData(content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        PriceIdentifier.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         PriceIdentifier.fetch(client, id),
       new: (fields: PriceIdentifierFields) => {
@@ -167,6 +170,25 @@ export class PriceIdentifier implements StructClass {
     return PriceIdentifier.fromFieldsWithTypes(content);
   }
 
+  static fromSuiObjectData(data: SuiObjectData): PriceIdentifier {
+    if (data.bcs) {
+      if (
+        data.bcs.dataType !== "moveObject" ||
+        !isPriceIdentifier(data.bcs.type)
+      ) {
+        throw new Error(`object at is not a PriceIdentifier object`);
+      }
+
+      return PriceIdentifier.fromBcs(fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return PriceIdentifier.fromSuiParsedData(data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch(client: SuiClient, id: string): Promise<PriceIdentifier> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -180,6 +202,7 @@ export class PriceIdentifier implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a PriceIdentifier object`);
     }
-    return PriceIdentifier.fromBcs(fromB64(res.data.bcs.bcsBytes));
+
+    return PriceIdentifier.fromSuiObjectData(res.data);
   }
 }

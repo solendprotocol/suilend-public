@@ -19,16 +19,19 @@ import {
   FieldsWithTypes,
   composeSuiType,
   compressSuiType,
+  parseTypeName,
 } from "../../../../_framework/util";
+import { PKG_V25 } from "../index";
 import { ID } from "../object/structs";
-import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { bcs } from "@mysten/sui/bcs";
+import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
+import { fromB64 } from "@mysten/sui/utils";
 
 /* ============================== Receiving =============================== */
 
 export function isReceiving(type: string): boolean {
   type = compressSuiType(type);
-  return type.startsWith("0x2::transfer::Receiving<");
+  return type.startsWith(`${PKG_V25}::transfer::Receiving` + "<");
 }
 
 export interface ReceivingFields<T extends PhantomTypeArgument> {
@@ -42,14 +45,16 @@ export type ReceivingReified<T extends PhantomTypeArgument> = Reified<
 >;
 
 export class Receiving<T extends PhantomTypeArgument> implements StructClass {
-  static readonly $typeName = "0x2::transfer::Receiving";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V25}::transfer::Receiving`;
   static readonly $numTypeParams = 1;
+  static readonly $isPhantom = [true] as const;
 
   readonly $typeName = Receiving.$typeName;
-
-  readonly $fullTypeName: `0x2::transfer::Receiving<${PhantomToTypeStr<T>}>`;
-
+  readonly $fullTypeName: `${typeof PKG_V25}::transfer::Receiving<${PhantomToTypeStr<T>}>`;
   readonly $typeArgs: [PhantomToTypeStr<T>];
+  readonly $isPhantom = Receiving.$isPhantom;
 
   readonly id: ToField<ID>;
   readonly version: ToField<"u64">;
@@ -61,7 +66,7 @@ export class Receiving<T extends PhantomTypeArgument> implements StructClass {
     this.$fullTypeName = composeSuiType(
       Receiving.$typeName,
       ...typeArgs,
-    ) as `0x2::transfer::Receiving<${PhantomToTypeStr<T>}>`;
+    ) as `${typeof PKG_V25}::transfer::Receiving<${PhantomToTypeStr<T>}>`;
     this.$typeArgs = typeArgs;
 
     this.id = fields.id;
@@ -76,10 +81,11 @@ export class Receiving<T extends PhantomTypeArgument> implements StructClass {
       fullTypeName: composeSuiType(
         Receiving.$typeName,
         ...[extractType(T)],
-      ) as `0x2::transfer::Receiving<${PhantomToTypeStr<ToPhantomTypeArgument<T>>}>`,
+      ) as `${typeof PKG_V25}::transfer::Receiving<${PhantomToTypeStr<ToPhantomTypeArgument<T>>}>`,
       typeArgs: [extractType(T)] as [
         PhantomToTypeStr<ToPhantomTypeArgument<T>>,
       ],
+      isPhantom: Receiving.$isPhantom,
       reifiedTypeArgs: [T],
       fromFields: (fields: Record<string, any>) =>
         Receiving.fromFields(T, fields),
@@ -91,6 +97,8 @@ export class Receiving<T extends PhantomTypeArgument> implements StructClass {
       fromJSON: (json: Record<string, any>) => Receiving.fromJSON(T, json),
       fromSuiParsedData: (content: SuiParsedData) =>
         Receiving.fromSuiParsedData(T, content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        Receiving.fromSuiObjectData(T, content),
       fetch: async (client: SuiClient, id: string) =>
         Receiving.fetch(client, T, id),
       new: (fields: ReceivingFields<ToPhantomTypeArgument<T>>) => {
@@ -208,6 +216,39 @@ export class Receiving<T extends PhantomTypeArgument> implements StructClass {
     return Receiving.fromFieldsWithTypes(typeArg, content);
   }
 
+  static fromSuiObjectData<T extends PhantomReified<PhantomTypeArgument>>(
+    typeArg: T,
+    data: SuiObjectData,
+  ): Receiving<ToPhantomTypeArgument<T>> {
+    if (data.bcs) {
+      if (data.bcs.dataType !== "moveObject" || !isReceiving(data.bcs.type)) {
+        throw new Error(`object at is not a Receiving object`);
+      }
+
+      const gotTypeArgs = parseTypeName(data.bcs.type).typeArgs;
+      if (gotTypeArgs.length !== 1) {
+        throw new Error(
+          `type argument mismatch: expected 1 type argument but got '${gotTypeArgs.length}'`,
+        );
+      }
+      const gotTypeArg = compressSuiType(gotTypeArgs[0]);
+      const expectedTypeArg = compressSuiType(extractType(typeArg));
+      if (gotTypeArg !== compressSuiType(extractType(typeArg))) {
+        throw new Error(
+          `type argument mismatch: expected '${expectedTypeArg}' but got '${gotTypeArg}'`,
+        );
+      }
+
+      return Receiving.fromBcs(typeArg, fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return Receiving.fromSuiParsedData(typeArg, data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch<T extends PhantomReified<PhantomTypeArgument>>(
     client: SuiClient,
     typeArg: T,
@@ -225,6 +266,7 @@ export class Receiving<T extends PhantomTypeArgument> implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a Receiving object`);
     }
-    return Receiving.fromBcs(typeArg, fromB64(res.data.bcs.bcsBytes));
+
+    return Receiving.fromSuiObjectData(typeArg, res.data);
   }
 }

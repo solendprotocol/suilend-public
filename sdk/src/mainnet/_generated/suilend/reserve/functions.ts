@@ -1,641 +1,643 @@
 import { PUBLISHED_AT } from "..";
-import { ObjectArg, obj, pure } from "../../_framework/util";
+import { ID } from "../../_dependencies/source/0x2/object/structs";
+import { obj, pure } from "../../_framework/util";
 import {
+  Transaction,
   TransactionArgument,
-  TransactionBlock,
-} from "@mysten/sui.js/transactions";
+  TransactionObjectInput,
+} from "@mysten/sui/transactions";
+
+export function config(
+  tx: Transaction,
+  typeArg: string,
+  reserve: TransactionObjectInput,
+) {
+  return tx.moveCall({
+    target: `${PUBLISHED_AT}::reserve::config`,
+    typeArguments: [typeArg],
+    arguments: [obj(tx, reserve)],
+  });
+}
 
 export function totalSupply(
-  txb: TransactionBlock,
+  tx: Transaction,
   typeArg: string,
-  reserve: ObjectArg,
+  reserve: TransactionObjectInput,
 ) {
-  return txb.moveCall({
+  return tx.moveCall({
     target: `${PUBLISHED_AT}::reserve::total_supply`,
     typeArguments: [typeArg],
-    arguments: [obj(txb, reserve)],
+    arguments: [obj(tx, reserve)],
   });
 }
 
 export function price(
-  txb: TransactionBlock,
+  tx: Transaction,
   typeArg: string,
-  reserve: ObjectArg,
+  reserve: TransactionObjectInput,
 ) {
-  return txb.moveCall({
+  return tx.moveCall({
     target: `${PUBLISHED_AT}::reserve::price`,
     typeArguments: [typeArg],
-    arguments: [obj(txb, reserve)],
-  });
-}
-
-export function config(
-  txb: TransactionBlock,
-  typeArg: string,
-  reserve: ObjectArg,
-) {
-  return txb.moveCall({
-    target: `${PUBLISHED_AT}::reserve::config`,
-    typeArguments: [typeArg],
-    arguments: [obj(txb, reserve)],
+    arguments: [obj(tx, reserve)],
   });
 }
 
 export function coinType(
-  txb: TransactionBlock,
+  tx: Transaction,
   typeArg: string,
-  reserve: ObjectArg,
+  reserve: TransactionObjectInput,
 ) {
-  return txb.moveCall({
+  return tx.moveCall({
     target: `${PUBLISHED_AT}::reserve::coin_type`,
     typeArguments: [typeArg],
-    arguments: [obj(txb, reserve)],
+    arguments: [obj(tx, reserve)],
   });
 }
 
 export function arrayIndex(
-  txb: TransactionBlock,
+  tx: Transaction,
   typeArg: string,
-  reserve: ObjectArg,
+  reserve: TransactionObjectInput,
 ) {
-  return txb.moveCall({
+  return tx.moveCall({
     target: `${PUBLISHED_AT}::reserve::array_index`,
     typeArguments: [typeArg],
-    arguments: [obj(txb, reserve)],
+    arguments: [obj(tx, reserve)],
   });
 }
 
 export interface AssertPriceIsFreshArgs {
-  reserve: ObjectArg;
-  clock: ObjectArg;
+  reserve: TransactionObjectInput;
+  clock: TransactionObjectInput;
 }
 
 export function assertPriceIsFresh(
-  txb: TransactionBlock,
+  tx: Transaction,
   typeArg: string,
   args: AssertPriceIsFreshArgs,
 ) {
-  return txb.moveCall({
+  return tx.moveCall({
     target: `${PUBLISHED_AT}::reserve::assert_price_is_fresh`,
     typeArguments: [typeArg],
-    arguments: [obj(txb, args.reserve), obj(txb, args.clock)],
+    arguments: [obj(tx, args.reserve), obj(tx, args.clock)],
   });
 }
 
 export function availableAmount(
-  txb: TransactionBlock,
+  tx: Transaction,
   typeArg: string,
-  reserve: ObjectArg,
+  reserve: TransactionObjectInput,
 ) {
-  return txb.moveCall({
+  return tx.moveCall({
     target: `${PUBLISHED_AT}::reserve::available_amount`,
     typeArguments: [typeArg],
-    arguments: [obj(txb, reserve)],
+    arguments: [obj(tx, reserve)],
   });
 }
 
 export interface BorrowLiquidityArgs {
-  reserve: ObjectArg;
+  reserve: TransactionObjectInput;
   amount: bigint | TransactionArgument;
 }
 
 export function borrowLiquidity(
-  txb: TransactionBlock,
+  tx: Transaction,
   typeArgs: [string, string],
   args: BorrowLiquidityArgs,
 ) {
-  return txb.moveCall({
+  return tx.moveCall({
     target: `${PUBLISHED_AT}::reserve::borrow_liquidity`,
     typeArguments: typeArgs,
-    arguments: [obj(txb, args.reserve), pure(txb, args.amount, `u64`)],
+    arguments: [obj(tx, args.reserve), pure(tx, args.amount, `u64`)],
   });
 }
 
 export function borrowedAmount(
-  txb: TransactionBlock,
+  tx: Transaction,
   typeArg: string,
-  reserve: ObjectArg,
+  reserve: TransactionObjectInput,
 ) {
-  return txb.moveCall({
+  return tx.moveCall({
     target: `${PUBLISHED_AT}::reserve::borrowed_amount`,
     typeArguments: [typeArg],
-    arguments: [obj(txb, reserve)],
+    arguments: [obj(tx, reserve)],
   });
 }
 
 export function borrowsPoolRewardManager(
-  txb: TransactionBlock,
+  tx: Transaction,
   typeArg: string,
-  reserve: ObjectArg,
+  reserve: TransactionObjectInput,
 ) {
-  return txb.moveCall({
+  return tx.moveCall({
     target: `${PUBLISHED_AT}::reserve::borrows_pool_reward_manager`,
     typeArguments: [typeArg],
-    arguments: [obj(txb, reserve)],
+    arguments: [obj(tx, reserve)],
   });
 }
 
 export function borrowsPoolRewardManagerMut(
-  txb: TransactionBlock,
+  tx: Transaction,
   typeArg: string,
-  reserve: ObjectArg,
+  reserve: TransactionObjectInput,
 ) {
-  return txb.moveCall({
+  return tx.moveCall({
     target: `${PUBLISHED_AT}::reserve::borrows_pool_reward_manager_mut`,
     typeArguments: [typeArg],
-    arguments: [obj(txb, reserve)],
+    arguments: [obj(tx, reserve)],
   });
 }
 
 export interface CalculateBorrowFeeArgs {
-  reserve: ObjectArg;
+  reserve: TransactionObjectInput;
   borrowAmount: bigint | TransactionArgument;
 }
 
 export function calculateBorrowFee(
-  txb: TransactionBlock,
+  tx: Transaction,
   typeArg: string,
   args: CalculateBorrowFeeArgs,
 ) {
-  return txb.moveCall({
+  return tx.moveCall({
     target: `${PUBLISHED_AT}::reserve::calculate_borrow_fee`,
     typeArguments: [typeArg],
-    arguments: [obj(txb, args.reserve), pure(txb, args.borrowAmount, `u64`)],
+    arguments: [obj(tx, args.reserve), pure(tx, args.borrowAmount, `u64`)],
   });
 }
 
 export function calculateUtilizationRate(
-  txb: TransactionBlock,
+  tx: Transaction,
   typeArg: string,
-  reserve: ObjectArg,
+  reserve: TransactionObjectInput,
 ) {
-  return txb.moveCall({
+  return tx.moveCall({
     target: `${PUBLISHED_AT}::reserve::calculate_utilization_rate`,
     typeArguments: [typeArg],
-    arguments: [obj(txb, reserve)],
+    arguments: [obj(tx, reserve)],
   });
 }
 
 export function claimFees(
-  txb: TransactionBlock,
+  tx: Transaction,
   typeArgs: [string, string],
-  reserve: ObjectArg,
+  reserve: TransactionObjectInput,
 ) {
-  return txb.moveCall({
+  return tx.moveCall({
     target: `${PUBLISHED_AT}::reserve::claim_fees`,
     typeArguments: typeArgs,
-    arguments: [obj(txb, reserve)],
+    arguments: [obj(tx, reserve)],
   });
 }
 
 export interface CompoundInterestArgs {
-  reserve: ObjectArg;
-  clock: ObjectArg;
+  reserve: TransactionObjectInput;
+  clock: TransactionObjectInput;
 }
 
 export function compoundInterest(
-  txb: TransactionBlock,
+  tx: Transaction,
   typeArg: string,
   args: CompoundInterestArgs,
 ) {
-  return txb.moveCall({
+  return tx.moveCall({
     target: `${PUBLISHED_AT}::reserve::compound_interest`,
     typeArguments: [typeArg],
-    arguments: [obj(txb, args.reserve), obj(txb, args.clock)],
+    arguments: [obj(tx, args.reserve), obj(tx, args.clock)],
   });
 }
 
 export interface CreateReserveArgs {
   lendingMarketId: string | TransactionArgument;
-  config: ObjectArg;
+  config: TransactionObjectInput;
   arrayIndex: bigint | TransactionArgument;
-  coinMetadata: ObjectArg;
-  priceInfoObj: ObjectArg;
-  clock: ObjectArg;
+  coinMetadata: TransactionObjectInput;
+  priceInfoObj: TransactionObjectInput;
+  clock: TransactionObjectInput;
 }
 
 export function createReserve(
-  txb: TransactionBlock,
+  tx: Transaction,
   typeArgs: [string, string],
   args: CreateReserveArgs,
 ) {
-  return txb.moveCall({
+  return tx.moveCall({
     target: `${PUBLISHED_AT}::reserve::create_reserve`,
     typeArguments: typeArgs,
     arguments: [
-      pure(txb, args.lendingMarketId, `0x2::object::ID`),
-      obj(txb, args.config),
-      pure(txb, args.arrayIndex, `u64`),
-      obj(txb, args.coinMetadata),
-      obj(txb, args.priceInfoObj),
-      obj(txb, args.clock),
+      pure(tx, args.lendingMarketId, `${ID.$typeName}`),
+      obj(tx, args.config),
+      pure(tx, args.arrayIndex, `u64`),
+      obj(tx, args.coinMetadata),
+      obj(tx, args.priceInfoObj),
+      obj(tx, args.clock),
     ],
   });
 }
 
 export interface CtokenMarketValueArgs {
-  reserve: ObjectArg;
+  reserve: TransactionObjectInput;
   ctokenAmount: bigint | TransactionArgument;
 }
 
 export function ctokenMarketValue(
-  txb: TransactionBlock,
+  tx: Transaction,
   typeArg: string,
   args: CtokenMarketValueArgs,
 ) {
-  return txb.moveCall({
+  return tx.moveCall({
     target: `${PUBLISHED_AT}::reserve::ctoken_market_value`,
     typeArguments: [typeArg],
-    arguments: [obj(txb, args.reserve), pure(txb, args.ctokenAmount, `u64`)],
+    arguments: [obj(tx, args.reserve), pure(tx, args.ctokenAmount, `u64`)],
   });
 }
 
 export interface CtokenMarketValueLowerBoundArgs {
-  reserve: ObjectArg;
+  reserve: TransactionObjectInput;
   ctokenAmount: bigint | TransactionArgument;
 }
 
 export function ctokenMarketValueLowerBound(
-  txb: TransactionBlock,
+  tx: Transaction,
   typeArg: string,
   args: CtokenMarketValueLowerBoundArgs,
 ) {
-  return txb.moveCall({
+  return tx.moveCall({
     target: `${PUBLISHED_AT}::reserve::ctoken_market_value_lower_bound`,
     typeArguments: [typeArg],
-    arguments: [obj(txb, args.reserve), pure(txb, args.ctokenAmount, `u64`)],
+    arguments: [obj(tx, args.reserve), pure(tx, args.ctokenAmount, `u64`)],
   });
 }
 
 export interface CtokenMarketValueUpperBoundArgs {
-  reserve: ObjectArg;
+  reserve: TransactionObjectInput;
   ctokenAmount: bigint | TransactionArgument;
 }
 
 export function ctokenMarketValueUpperBound(
-  txb: TransactionBlock,
+  tx: Transaction,
   typeArg: string,
   args: CtokenMarketValueUpperBoundArgs,
 ) {
-  return txb.moveCall({
+  return tx.moveCall({
     target: `${PUBLISHED_AT}::reserve::ctoken_market_value_upper_bound`,
     typeArguments: [typeArg],
-    arguments: [obj(txb, args.reserve), pure(txb, args.ctokenAmount, `u64`)],
+    arguments: [obj(tx, args.reserve), pure(tx, args.ctokenAmount, `u64`)],
   });
 }
 
 export function ctokenRatio(
-  txb: TransactionBlock,
+  tx: Transaction,
   typeArg: string,
-  reserve: ObjectArg,
+  reserve: TransactionObjectInput,
 ) {
-  return txb.moveCall({
+  return tx.moveCall({
     target: `${PUBLISHED_AT}::reserve::ctoken_ratio`,
     typeArguments: [typeArg],
-    arguments: [obj(txb, reserve)],
+    arguments: [obj(tx, reserve)],
   });
 }
 
 export function cumulativeBorrowRate(
-  txb: TransactionBlock,
+  tx: Transaction,
   typeArg: string,
-  reserve: ObjectArg,
+  reserve: TransactionObjectInput,
 ) {
-  return txb.moveCall({
+  return tx.moveCall({
     target: `${PUBLISHED_AT}::reserve::cumulative_borrow_rate`,
     typeArguments: [typeArg],
-    arguments: [obj(txb, reserve)],
+    arguments: [obj(tx, reserve)],
   });
 }
 
 export interface DeductLiquidationFeeArgs {
-  reserve: ObjectArg;
-  ctokens: ObjectArg;
+  reserve: TransactionObjectInput;
+  ctokens: TransactionObjectInput;
 }
 
 export function deductLiquidationFee(
-  txb: TransactionBlock,
+  tx: Transaction,
   typeArgs: [string, string],
   args: DeductLiquidationFeeArgs,
 ) {
-  return txb.moveCall({
+  return tx.moveCall({
     target: `${PUBLISHED_AT}::reserve::deduct_liquidation_fee`,
     typeArguments: typeArgs,
-    arguments: [obj(txb, args.reserve), obj(txb, args.ctokens)],
+    arguments: [obj(tx, args.reserve), obj(tx, args.ctokens)],
   });
 }
 
 export interface DepositCtokensArgs {
-  reserve: ObjectArg;
-  ctokens: ObjectArg;
+  reserve: TransactionObjectInput;
+  ctokens: TransactionObjectInput;
 }
 
 export function depositCtokens(
-  txb: TransactionBlock,
+  tx: Transaction,
   typeArgs: [string, string],
   args: DepositCtokensArgs,
 ) {
-  return txb.moveCall({
+  return tx.moveCall({
     target: `${PUBLISHED_AT}::reserve::deposit_ctokens`,
     typeArguments: typeArgs,
-    arguments: [obj(txb, args.reserve), obj(txb, args.ctokens)],
+    arguments: [obj(tx, args.reserve), obj(tx, args.ctokens)],
   });
 }
 
 export interface DepositLiquidityAndMintCtokensArgs {
-  reserve: ObjectArg;
-  liquidity: ObjectArg;
+  reserve: TransactionObjectInput;
+  liquidity: TransactionObjectInput;
 }
 
 export function depositLiquidityAndMintCtokens(
-  txb: TransactionBlock,
+  tx: Transaction,
   typeArgs: [string, string],
   args: DepositLiquidityAndMintCtokensArgs,
 ) {
-  return txb.moveCall({
+  return tx.moveCall({
     target: `${PUBLISHED_AT}::reserve::deposit_liquidity_and_mint_ctokens`,
     typeArguments: typeArgs,
-    arguments: [obj(txb, args.reserve), obj(txb, args.liquidity)],
+    arguments: [obj(tx, args.reserve), obj(tx, args.liquidity)],
   });
 }
 
 export function depositsPoolRewardManager(
-  txb: TransactionBlock,
+  tx: Transaction,
   typeArg: string,
-  reserve: ObjectArg,
+  reserve: TransactionObjectInput,
 ) {
-  return txb.moveCall({
+  return tx.moveCall({
     target: `${PUBLISHED_AT}::reserve::deposits_pool_reward_manager`,
     typeArguments: [typeArg],
-    arguments: [obj(txb, reserve)],
+    arguments: [obj(tx, reserve)],
   });
 }
 
 export function depositsPoolRewardManagerMut(
-  txb: TransactionBlock,
+  tx: Transaction,
   typeArg: string,
-  reserve: ObjectArg,
+  reserve: TransactionObjectInput,
 ) {
-  return txb.moveCall({
+  return tx.moveCall({
     target: `${PUBLISHED_AT}::reserve::deposits_pool_reward_manager_mut`,
     typeArguments: [typeArg],
-    arguments: [obj(txb, reserve)],
+    arguments: [obj(tx, reserve)],
   });
 }
 
 export interface ForgiveDebtArgs {
-  reserve: ObjectArg;
-  forgiveAmount: ObjectArg;
+  reserve: TransactionObjectInput;
+  forgiveAmount: TransactionObjectInput;
 }
 
 export function forgiveDebt(
-  txb: TransactionBlock,
+  tx: Transaction,
   typeArg: string,
   args: ForgiveDebtArgs,
 ) {
-  return txb.moveCall({
+  return tx.moveCall({
     target: `${PUBLISHED_AT}::reserve::forgive_debt`,
     typeArguments: [typeArg],
-    arguments: [obj(txb, args.reserve), obj(txb, args.forgiveAmount)],
+    arguments: [obj(tx, args.reserve), obj(tx, args.forgiveAmount)],
   });
 }
 
 export function logReserveData(
-  txb: TransactionBlock,
+  tx: Transaction,
   typeArg: string,
-  reserve: ObjectArg,
+  reserve: TransactionObjectInput,
 ) {
-  return txb.moveCall({
+  return tx.moveCall({
     target: `${PUBLISHED_AT}::reserve::log_reserve_data`,
     typeArguments: [typeArg],
-    arguments: [obj(txb, reserve)],
+    arguments: [obj(tx, reserve)],
   });
 }
 
 export interface MarketValueArgs {
-  reserve: ObjectArg;
-  liquidityAmount: ObjectArg;
+  reserve: TransactionObjectInput;
+  liquidityAmount: TransactionObjectInput;
 }
 
 export function marketValue(
-  txb: TransactionBlock,
+  tx: Transaction,
   typeArg: string,
   args: MarketValueArgs,
 ) {
-  return txb.moveCall({
+  return tx.moveCall({
     target: `${PUBLISHED_AT}::reserve::market_value`,
     typeArguments: [typeArg],
-    arguments: [obj(txb, args.reserve), obj(txb, args.liquidityAmount)],
+    arguments: [obj(tx, args.reserve), obj(tx, args.liquidityAmount)],
   });
 }
 
 export interface MarketValueLowerBoundArgs {
-  reserve: ObjectArg;
-  liquidityAmount: ObjectArg;
+  reserve: TransactionObjectInput;
+  liquidityAmount: TransactionObjectInput;
 }
 
 export function marketValueLowerBound(
-  txb: TransactionBlock,
+  tx: Transaction,
   typeArg: string,
   args: MarketValueLowerBoundArgs,
 ) {
-  return txb.moveCall({
+  return tx.moveCall({
     target: `${PUBLISHED_AT}::reserve::market_value_lower_bound`,
     typeArguments: [typeArg],
-    arguments: [obj(txb, args.reserve), obj(txb, args.liquidityAmount)],
+    arguments: [obj(tx, args.reserve), obj(tx, args.liquidityAmount)],
   });
 }
 
 export interface MarketValueUpperBoundArgs {
-  reserve: ObjectArg;
-  liquidityAmount: ObjectArg;
+  reserve: TransactionObjectInput;
+  liquidityAmount: TransactionObjectInput;
 }
 
 export function marketValueUpperBound(
-  txb: TransactionBlock,
+  tx: Transaction,
   typeArg: string,
   args: MarketValueUpperBoundArgs,
 ) {
-  return txb.moveCall({
+  return tx.moveCall({
     target: `${PUBLISHED_AT}::reserve::market_value_upper_bound`,
     typeArguments: [typeArg],
-    arguments: [obj(txb, args.reserve), obj(txb, args.liquidityAmount)],
+    arguments: [obj(tx, args.reserve), obj(tx, args.liquidityAmount)],
   });
 }
 
 export function maxBorrowAmount(
-  txb: TransactionBlock,
+  tx: Transaction,
   typeArg: string,
-  reserve: ObjectArg,
+  reserve: TransactionObjectInput,
 ) {
-  return txb.moveCall({
+  return tx.moveCall({
     target: `${PUBLISHED_AT}::reserve::max_borrow_amount`,
     typeArguments: [typeArg],
-    arguments: [obj(txb, reserve)],
+    arguments: [obj(tx, reserve)],
   });
 }
 
 export function maxRedeemAmount(
-  txb: TransactionBlock,
+  tx: Transaction,
   typeArg: string,
-  reserve: ObjectArg,
+  reserve: TransactionObjectInput,
 ) {
-  return txb.moveCall({
+  return tx.moveCall({
     target: `${PUBLISHED_AT}::reserve::max_redeem_amount`,
     typeArguments: [typeArg],
-    arguments: [obj(txb, reserve)],
+    arguments: [obj(tx, reserve)],
   });
 }
 
 export function priceLowerBound(
-  txb: TransactionBlock,
+  tx: Transaction,
   typeArg: string,
-  reserve: ObjectArg,
+  reserve: TransactionObjectInput,
 ) {
-  return txb.moveCall({
+  return tx.moveCall({
     target: `${PUBLISHED_AT}::reserve::price_lower_bound`,
     typeArguments: [typeArg],
-    arguments: [obj(txb, reserve)],
+    arguments: [obj(tx, reserve)],
   });
 }
 
 export function priceUpperBound(
-  txb: TransactionBlock,
+  tx: Transaction,
   typeArg: string,
-  reserve: ObjectArg,
+  reserve: TransactionObjectInput,
 ) {
-  return txb.moveCall({
+  return tx.moveCall({
     target: `${PUBLISHED_AT}::reserve::price_upper_bound`,
     typeArguments: [typeArg],
-    arguments: [obj(txb, reserve)],
+    arguments: [obj(tx, reserve)],
   });
 }
 
 export interface RedeemCtokensArgs {
-  reserve: ObjectArg;
-  ctokens: ObjectArg;
+  reserve: TransactionObjectInput;
+  ctokens: TransactionObjectInput;
 }
 
 export function redeemCtokens(
-  txb: TransactionBlock,
+  tx: Transaction,
   typeArgs: [string, string],
   args: RedeemCtokensArgs,
 ) {
-  return txb.moveCall({
+  return tx.moveCall({
     target: `${PUBLISHED_AT}::reserve::redeem_ctokens`,
     typeArguments: typeArgs,
-    arguments: [obj(txb, args.reserve), obj(txb, args.ctokens)],
+    arguments: [obj(tx, args.reserve), obj(tx, args.ctokens)],
   });
 }
 
 export interface RepayLiquidityArgs {
-  reserve: ObjectArg;
-  liquidity: ObjectArg;
-  settleAmount: ObjectArg;
+  reserve: TransactionObjectInput;
+  liquidity: TransactionObjectInput;
+  settleAmount: TransactionObjectInput;
 }
 
 export function repayLiquidity(
-  txb: TransactionBlock,
+  tx: Transaction,
   typeArgs: [string, string],
   args: RepayLiquidityArgs,
 ) {
-  return txb.moveCall({
+  return tx.moveCall({
     target: `${PUBLISHED_AT}::reserve::repay_liquidity`,
     typeArguments: typeArgs,
     arguments: [
-      obj(txb, args.reserve),
-      obj(txb, args.liquidity),
-      obj(txb, args.settleAmount),
+      obj(tx, args.reserve),
+      obj(tx, args.liquidity),
+      obj(tx, args.settleAmount),
     ],
   });
 }
 
 export interface UpdatePriceArgs {
-  reserve: ObjectArg;
-  clock: ObjectArg;
-  priceInfoObj: ObjectArg;
+  reserve: TransactionObjectInput;
+  clock: TransactionObjectInput;
+  priceInfoObj: TransactionObjectInput;
 }
 
 export function updatePrice(
-  txb: TransactionBlock,
+  tx: Transaction,
   typeArg: string,
   args: UpdatePriceArgs,
 ) {
-  return txb.moveCall({
+  return tx.moveCall({
     target: `${PUBLISHED_AT}::reserve::update_price`,
     typeArguments: [typeArg],
     arguments: [
-      obj(txb, args.reserve),
-      obj(txb, args.clock),
-      obj(txb, args.priceInfoObj),
+      obj(tx, args.reserve),
+      obj(tx, args.clock),
+      obj(tx, args.priceInfoObj),
     ],
   });
 }
 
 export interface UpdateReserveConfigArgs {
-  reserve: ObjectArg;
-  config: ObjectArg;
+  reserve: TransactionObjectInput;
+  config: TransactionObjectInput;
 }
 
 export function updateReserveConfig(
-  txb: TransactionBlock,
+  tx: Transaction,
   typeArg: string,
   args: UpdateReserveConfigArgs,
 ) {
-  return txb.moveCall({
+  return tx.moveCall({
     target: `${PUBLISHED_AT}::reserve::update_reserve_config`,
     typeArguments: [typeArg],
-    arguments: [obj(txb, args.reserve), obj(txb, args.config)],
+    arguments: [obj(tx, args.reserve), obj(tx, args.config)],
   });
 }
 
 export interface UsdToTokenAmountLowerBoundArgs {
-  reserve: ObjectArg;
-  usdAmount: ObjectArg;
+  reserve: TransactionObjectInput;
+  usdAmount: TransactionObjectInput;
 }
 
 export function usdToTokenAmountLowerBound(
-  txb: TransactionBlock,
+  tx: Transaction,
   typeArg: string,
   args: UsdToTokenAmountLowerBoundArgs,
 ) {
-  return txb.moveCall({
+  return tx.moveCall({
     target: `${PUBLISHED_AT}::reserve::usd_to_token_amount_lower_bound`,
     typeArguments: [typeArg],
-    arguments: [obj(txb, args.reserve), obj(txb, args.usdAmount)],
+    arguments: [obj(tx, args.reserve), obj(tx, args.usdAmount)],
   });
 }
 
 export interface UsdToTokenAmountUpperBoundArgs {
-  reserve: ObjectArg;
-  usdAmount: ObjectArg;
+  reserve: TransactionObjectInput;
+  usdAmount: TransactionObjectInput;
 }
 
 export function usdToTokenAmountUpperBound(
-  txb: TransactionBlock,
+  tx: Transaction,
   typeArg: string,
   args: UsdToTokenAmountUpperBoundArgs,
 ) {
-  return txb.moveCall({
+  return tx.moveCall({
     target: `${PUBLISHED_AT}::reserve::usd_to_token_amount_upper_bound`,
     typeArguments: [typeArg],
-    arguments: [obj(txb, args.reserve), obj(txb, args.usdAmount)],
+    arguments: [obj(tx, args.reserve), obj(tx, args.usdAmount)],
   });
 }
 
 export interface WithdrawCtokensArgs {
-  reserve: ObjectArg;
+  reserve: TransactionObjectInput;
   amount: bigint | TransactionArgument;
 }
 
 export function withdrawCtokens(
-  txb: TransactionBlock,
+  tx: Transaction,
   typeArgs: [string, string],
   args: WithdrawCtokensArgs,
 ) {
-  return txb.moveCall({
+  return tx.moveCall({
     target: `${PUBLISHED_AT}::reserve::withdraw_ctokens`,
     typeArguments: typeArgs,
-    arguments: [obj(txb, args.reserve), pure(txb, args.amount, `u64`)],
+    arguments: [obj(tx, args.reserve), pure(tx, args.amount, `u64`)],
   });
 }
