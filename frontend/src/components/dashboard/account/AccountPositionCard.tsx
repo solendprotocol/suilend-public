@@ -28,7 +28,12 @@ import { Separator } from "@/components/ui/separator";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 import { formatPercent, formatUsd } from "@/lib/format";
-import { getFilteredRewards, getTotalAprPercent } from "@/lib/liquidityMining";
+import {
+  getBorrowShareUsd,
+  getDepositShareUsd,
+  getFilteredRewards,
+  getTotalAprPercent,
+} from "@/lib/liquidityMining";
 import { LOOPING_MESSAGE, getLoopedAssetCoinTypes } from "@/lib/looping";
 import { shallowPushQuery } from "@/lib/router";
 import {
@@ -52,7 +57,14 @@ function AccountPositionCardContent() {
       getFilteredRewards(data.rewardMap[deposit.reserve.coinType].deposit),
     );
 
-    return acc.plus(totalAprPercent.times(deposit.depositedAmountUsd));
+    return acc.plus(
+      totalAprPercent.times(
+        getDepositShareUsd(
+          deposit.reserve,
+          new BigNumber(deposit.userRewardManager.share),
+        ),
+      ),
+    );
   }, new BigNumber(0));
 
   const aprWeightedBorrowsUsd = obligation.borrows.reduce((acc, borrow) => {
@@ -62,7 +74,14 @@ function AccountPositionCardContent() {
       getFilteredRewards(data.rewardMap[borrow.reserve.coinType].borrow),
     );
 
-    return acc.plus(totalAprPercent.times(borrow.borrowedAmountUsd));
+    return acc.plus(
+      totalAprPercent.times(
+        getBorrowShareUsd(
+          borrow.reserve,
+          new BigNumber(borrow.userRewardManager.share),
+        ),
+      ),
+    );
   }, new BigNumber(0));
 
   const aprWeightedNetValueUsd = aprWeightedDepositsUsd.minus(
