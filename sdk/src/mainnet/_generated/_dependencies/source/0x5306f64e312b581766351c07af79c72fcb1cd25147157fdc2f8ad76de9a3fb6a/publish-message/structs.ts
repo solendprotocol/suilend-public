@@ -5,7 +5,6 @@ import {
   StructClass,
   ToField,
   ToTypeStr,
-  Vector,
   decodeFromFields,
   decodeFromFieldsWithTypes,
   decodeFromJSONField,
@@ -17,18 +16,18 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
+import { Vector } from "../../../../_framework/vector";
 import { ID } from "../../0x2/object/structs";
-import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { PKG_V1 } from "../index";
+import { bcs } from "@mysten/sui/bcs";
+import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
+import { fromB64 } from "@mysten/sui/utils";
 
 /* ============================== MessageTicket =============================== */
 
 export function isMessageTicket(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::publish_message::MessageTicket"
-  );
+  return type === `${PKG_V1}::publish_message::MessageTicket`;
 }
 
 export interface MessageTicketFields {
@@ -41,15 +40,16 @@ export interface MessageTicketFields {
 export type MessageTicketReified = Reified<MessageTicket, MessageTicketFields>;
 
 export class MessageTicket implements StructClass {
-  static readonly $typeName =
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::publish_message::MessageTicket";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V1}::publish_message::MessageTicket`;
   static readonly $numTypeParams = 0;
+  static readonly $isPhantom = [] as const;
 
   readonly $typeName = MessageTicket.$typeName;
-
-  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::publish_message::MessageTicket";
-
+  readonly $fullTypeName: `${typeof PKG_V1}::publish_message::MessageTicket`;
   readonly $typeArgs: [];
+  readonly $isPhantom = MessageTicket.$isPhantom;
 
   readonly sender: ToField<ID>;
   readonly sequence: ToField<"u64">;
@@ -60,7 +60,7 @@ export class MessageTicket implements StructClass {
     this.$fullTypeName = composeSuiType(
       MessageTicket.$typeName,
       ...typeArgs,
-    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::publish_message::MessageTicket";
+    ) as `${typeof PKG_V1}::publish_message::MessageTicket`;
     this.$typeArgs = typeArgs;
 
     this.sender = fields.sender;
@@ -75,8 +75,9 @@ export class MessageTicket implements StructClass {
       fullTypeName: composeSuiType(
         MessageTicket.$typeName,
         ...[],
-      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::publish_message::MessageTicket",
+      ) as `${typeof PKG_V1}::publish_message::MessageTicket`,
       typeArgs: [] as [],
+      isPhantom: MessageTicket.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         MessageTicket.fromFields(fields),
@@ -88,6 +89,8 @@ export class MessageTicket implements StructClass {
       fromJSON: (json: Record<string, any>) => MessageTicket.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         MessageTicket.fromSuiParsedData(content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        MessageTicket.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         MessageTicket.fetch(client, id),
       new: (fields: MessageTicketFields) => {
@@ -192,6 +195,25 @@ export class MessageTicket implements StructClass {
     return MessageTicket.fromFieldsWithTypes(content);
   }
 
+  static fromSuiObjectData(data: SuiObjectData): MessageTicket {
+    if (data.bcs) {
+      if (
+        data.bcs.dataType !== "moveObject" ||
+        !isMessageTicket(data.bcs.type)
+      ) {
+        throw new Error(`object at is not a MessageTicket object`);
+      }
+
+      return MessageTicket.fromBcs(fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return MessageTicket.fromSuiParsedData(data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch(client: SuiClient, id: string): Promise<MessageTicket> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -205,7 +227,8 @@ export class MessageTicket implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a MessageTicket object`);
     }
-    return MessageTicket.fromBcs(fromB64(res.data.bcs.bcsBytes));
+
+    return MessageTicket.fromSuiObjectData(res.data);
   }
 }
 
@@ -213,10 +236,7 @@ export class MessageTicket implements StructClass {
 
 export function isWormholeMessage(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::publish_message::WormholeMessage"
-  );
+  return type === `${PKG_V1}::publish_message::WormholeMessage`;
 }
 
 export interface WormholeMessageFields {
@@ -234,15 +254,16 @@ export type WormholeMessageReified = Reified<
 >;
 
 export class WormholeMessage implements StructClass {
-  static readonly $typeName =
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::publish_message::WormholeMessage";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V1}::publish_message::WormholeMessage`;
   static readonly $numTypeParams = 0;
+  static readonly $isPhantom = [] as const;
 
   readonly $typeName = WormholeMessage.$typeName;
-
-  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::publish_message::WormholeMessage";
-
+  readonly $fullTypeName: `${typeof PKG_V1}::publish_message::WormholeMessage`;
   readonly $typeArgs: [];
+  readonly $isPhantom = WormholeMessage.$isPhantom;
 
   readonly sender: ToField<ID>;
   readonly sequence: ToField<"u64">;
@@ -255,7 +276,7 @@ export class WormholeMessage implements StructClass {
     this.$fullTypeName = composeSuiType(
       WormholeMessage.$typeName,
       ...typeArgs,
-    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::publish_message::WormholeMessage";
+    ) as `${typeof PKG_V1}::publish_message::WormholeMessage`;
     this.$typeArgs = typeArgs;
 
     this.sender = fields.sender;
@@ -272,8 +293,9 @@ export class WormholeMessage implements StructClass {
       fullTypeName: composeSuiType(
         WormholeMessage.$typeName,
         ...[],
-      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::publish_message::WormholeMessage",
+      ) as `${typeof PKG_V1}::publish_message::WormholeMessage`,
       typeArgs: [] as [],
+      isPhantom: WormholeMessage.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         WormholeMessage.fromFields(fields),
@@ -285,6 +307,8 @@ export class WormholeMessage implements StructClass {
       fromJSON: (json: Record<string, any>) => WormholeMessage.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         WormholeMessage.fromSuiParsedData(content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        WormholeMessage.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         WormholeMessage.fetch(client, id),
       new: (fields: WormholeMessageFields) => {
@@ -402,6 +426,25 @@ export class WormholeMessage implements StructClass {
     return WormholeMessage.fromFieldsWithTypes(content);
   }
 
+  static fromSuiObjectData(data: SuiObjectData): WormholeMessage {
+    if (data.bcs) {
+      if (
+        data.bcs.dataType !== "moveObject" ||
+        !isWormholeMessage(data.bcs.type)
+      ) {
+        throw new Error(`object at is not a WormholeMessage object`);
+      }
+
+      return WormholeMessage.fromBcs(fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return WormholeMessage.fromSuiParsedData(data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch(client: SuiClient, id: string): Promise<WormholeMessage> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -415,6 +458,7 @@ export class WormholeMessage implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a WormholeMessage object`);
     }
-    return WormholeMessage.fromBcs(fromB64(res.data.bcs.bcsBytes));
+
+    return WormholeMessage.fromSuiObjectData(res.data);
   }
 }

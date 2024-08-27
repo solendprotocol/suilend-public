@@ -1,22 +1,17 @@
+import { bcs, BcsType } from "@mysten/sui/bcs";
 import {
+  Transaction,
   TransactionArgument,
-  TransactionBlock,
   TransactionObjectArgument,
-} from "@mysten/sui.js/transactions";
-import { bcs, ObjectArg as SuiObjectArg } from "@mysten/sui.js/bcs";
-import { BcsType } from "@mysten/bcs";
+  TransactionObjectInput,
+} from "@mysten/sui/transactions";
 
 export interface FieldsWithTypes {
-  /* eslint-disable @typescript-eslint/no-explicit-any */
   fields: Record<string, any>;
   type: string;
 }
 
 export type ObjectId = string;
-
-export type ObjectCallArg = { Object: SuiObjectArg };
-
-export type ObjectArg = string | ObjectCallArg | TransactionArgument;
 
 export type PureArg =
   | bigint
@@ -27,18 +22,72 @@ export type PureArg =
   | TransactionArgument
   | Array<PureArg>;
 export type GenericArg =
-  | ObjectArg
+  | TransactionObjectInput
   | PureArg
-  | Array<ObjectArg>
+  | Array<TransactionObjectInput>
   | Array<PureArg>
   | Array<GenericArg>;
+
+export function splitGenericParameters(
+  str: string,
+  genericSeparators: [string, string] = ["<", ">"],
+) {
+  const [left, right] = genericSeparators;
+  const tok = [];
+  let word = "";
+  let nestedAngleBrackets = 0;
+
+  for (let i = 0; i < str.length; i++) {
+    const char = str[i];
+    if (char === left) {
+      nestedAngleBrackets++;
+    }
+    if (char === right) {
+      nestedAngleBrackets--;
+    }
+    if (nestedAngleBrackets === 0 && char === ",") {
+      tok.push(word.trim());
+      word = "";
+      continue;
+    }
+    word += char;
+  }
+
+  tok.push(word.trim());
+
+  return tok;
+}
 
 export function parseTypeName(name: string): {
   typeName: string;
   typeArgs: string[];
 } {
-  const parsed = bcs.parseTypeName(name);
-  return { typeName: parsed.name, typeArgs: parsed.params as string[] };
+  if (typeof name !== "string") {
+    throw new Error(`Illegal type passed as a name of the type: ${name}`);
+  }
+
+  const [left, right] = ["<", ">"];
+
+  const l_bound = name.indexOf(left);
+  const r_bound = Array.from(name).reverse().indexOf(right);
+
+  // if there are no generics - exit gracefully.
+  if (l_bound === -1 && r_bound === -1) {
+    return { typeName: name, typeArgs: [] };
+  }
+
+  // if one of the bounds is not defined - throw an Error.
+  if (l_bound === -1 || r_bound === -1) {
+    throw new Error(`Unclosed generic in name '${name}'`);
+  }
+
+  const typeName = name.slice(0, l_bound);
+  const typeArgs = splitGenericParameters(
+    name.slice(l_bound + 1, name.length - r_bound - 1),
+    [left, right],
+  );
+
+  return { typeName, typeArgs };
 }
 
 export function isTransactionArgument(
@@ -48,30 +97,25 @@ export function isTransactionArgument(
     return false;
   }
 
-  return "kind" in arg;
+  return (
+    "GasCoin" in arg ||
+    "Input" in arg ||
+    "Result" in arg ||
+    "NestedResult" in arg
+  );
 }
 
-export function isTransactionObjectArgument(
-  arg: GenericArg,
-): arg is TransactionObjectArgument {
-  if (!isTransactionArgument(arg)) {
-    return false;
-  }
-
-  if (arg.kind === "Input" && arg.type === "pure") {
-    return false;
-  }
-
-  return true;
+export function obj(tx: Transaction, arg: TransactionObjectInput) {
+  return isTransactionArgument(arg) ? arg : tx.object(arg);
 }
 
-export function obj(txb: TransactionBlock, arg: ObjectArg) {
-  return isTransactionArgument(arg) ? arg : txb.object(arg);
-}
-
-export function pure(txb: TransactionBlock, arg: PureArg, type: string) {
+export function pure(
+  tx: Transaction,
+  arg: PureArg,
+  type: string,
+): TransactionArgument {
   if (isTransactionArgument(arg)) {
-    return obj(txb, arg);
+    return obj(tx, arg);
   }
 
   function getBcsForType(type: string): BcsType<any> {
@@ -107,11 +151,61 @@ export function pure(txb: TransactionBlock, arg: PureArg, type: string) {
     }
   }
 
-  function isOrHasNestedTransactionArgument(arg: PureArg): boolean {
-    if (Array.isArray(arg)) {
-      return arg.some((item) => isOrHasNestedTransactionArgument(item));
+  function hasUndefinedOrNull(items: PureArg[]) {
+    for (const item of items) {
+      if (typeof item === "undefined" || item === null) {
+        return true;
+      }
+
+      if (Array.isArray(item)) {
+        return hasUndefinedOrNull(item);
+      }
     }
-    return isTransactionArgument(arg);
+
+    return false;
+  }
+
+  function consistsOnlyOfPrimitiveValues(items: PureArg[]) {
+    for (const item of items) {
+      if (!Array.isArray(item)) {
+        if (item === null) {
+          continue;
+        }
+        switch (typeof item) {
+          case "string":
+          case "number":
+          case "bigint":
+          case "boolean":
+            continue;
+          default:
+            return false;
+        }
+      }
+
+      return consistsOnlyOfPrimitiveValues(item);
+    }
+
+    return true;
+  }
+
+  function hasPrimitiveValues(items: PureArg[]) {
+    for (const item of items) {
+      if (!Array.isArray(item)) {
+        switch (typeof item) {
+          case "string":
+          case "number":
+          case "bigint":
+          case "boolean":
+            return true;
+          default:
+            continue;
+        }
+      }
+
+      return hasPrimitiveValues(item);
+    }
+
+    return false;
   }
 
   // handle some cases when TransactionArgument is nested within a vector or option
@@ -119,121 +213,130 @@ export function pure(txb: TransactionBlock, arg: PureArg, type: string) {
   switch (typeName) {
     case "0x1::option::Option":
       if (arg === null) {
-        return txb.pure(bcs.option(bcs.Bool).serialize(null)); // bcs.Bool is arbitrary
+        return tx.pure.option("bool", null); // 'bool' is arbitrary
       }
-      if (isOrHasNestedTransactionArgument(arg)) {
-        throw new Error("nesting TransactionArgument is not supported");
+      if (consistsOnlyOfPrimitiveValues([arg])) {
+        return tx.pure(getBcsForType(type).serialize(arg));
       }
-      break;
+      if (hasPrimitiveValues([arg])) {
+        throw new Error(
+          "mixing primitive and TransactionArgument values is not supported",
+        );
+      }
+
+      // wrap it with some
+      return tx.moveCall({
+        target: `0x1::option::some`,
+        typeArguments: [typeArgs[0]],
+        arguments: [pure(tx, arg, typeArgs[0])],
+      });
     case "vector":
       if (!Array.isArray(arg)) {
         throw new Error("expected an array for vector type");
       }
       if (arg.length === 0) {
-        return txb.pure(bcs.vector(bcs.Bool).serialize([])); // bcs.Bool is arbitrary
+        return tx.pure(bcs.vector(bcs.Bool).serialize([])); // bcs.Bool is arbitrary
       }
-      if (
-        arg.some(
-          (arg) => Array.isArray(arg) && isOrHasNestedTransactionArgument(arg),
-        )
-      ) {
-        throw new Error("nesting TransactionArgument is not supported");
+      if (hasUndefinedOrNull(arg)) {
+        throw new Error("the provided array contains undefined or null values");
       }
-      if (
-        isTransactionArgument(arg[0]) &&
-        arg.filter((arg) => !isTransactionArgument(arg)).length > 0
-      ) {
+      if (consistsOnlyOfPrimitiveValues(arg)) {
+        return tx.pure(getBcsForType(type).serialize(arg));
+      }
+      if (hasPrimitiveValues(arg)) {
         throw new Error(
-          "mixing TransactionArgument with other types is not supported",
+          "mixing primitive and TransactionArgument values is not supported",
         );
       }
-      if (isTransactionObjectArgument(arg[0])) {
-        return txb.makeMoveVec({
-          objects: arg as Array<TransactionObjectArgument>,
-          type: typeArgs[0],
-        });
-      }
-  }
 
-  return txb.pure(getBcsForType(type).serialize(arg));
+      return tx.makeMoveVec({
+        type: typeArgs[0],
+        elements: arg as Array<TransactionObjectArgument>,
+      });
+    default:
+      return tx.pure(getBcsForType(type).serialize(arg));
+  }
 }
 
-export function option(
-  txb: TransactionBlock,
-  type: string,
-  arg: GenericArg | null,
-) {
+export function option(tx: Transaction, type: string, arg: GenericArg | null) {
   if (isTransactionArgument(arg)) {
     return arg;
   }
+
   if (typeArgIsPure(type)) {
     return pure(
-      txb,
+      tx,
       arg as PureArg | TransactionArgument,
       `0x1::option::Option<${type}>`,
     );
   }
+
   if (arg === null) {
-    return txb.moveCall({
+    return tx.moveCall({
       target: `0x1::option::none`,
       typeArguments: [type],
       arguments: [],
     });
   }
+
   // wrap it with some
-  const val = generic(txb, type, arg);
-  return txb.moveCall({
+  const val = generic(tx, type, arg);
+  return tx.moveCall({
     target: `0x1::option::some`,
     typeArguments: [type],
     arguments: [val],
   });
 }
 
-export function generic(txb: TransactionBlock, type: string, arg: GenericArg) {
+export function generic(tx: Transaction, type: string, arg: GenericArg) {
   if (typeArgIsPure(type)) {
-    return pure(txb, arg as PureArg | TransactionArgument, type);
+    return pure(tx, arg as PureArg | TransactionArgument, type);
   } else {
     const { typeName, typeArgs } = parseTypeName(type);
     if (typeName === "vector" && Array.isArray(arg)) {
       const itemType = typeArgs[0];
 
-      return txb.makeMoveVec({
-        objects: arg.map((item) =>
-          obj(txb, item as ObjectArg),
-        ) as Array<TransactionObjectArgument>,
+      return tx.makeMoveVec({
         type: itemType,
+        elements: arg.map((item) =>
+          obj(tx, item as TransactionObjectInput),
+        ) as Array<TransactionObjectArgument>,
       });
     } else {
-      return obj(txb, arg as ObjectArg);
+      return obj(tx, arg as TransactionObjectInput);
     }
   }
 }
 
 export function vector(
-  txb: TransactionBlock,
+  tx: Transaction,
   itemType: string,
   items: Array<GenericArg> | TransactionArgument,
 ) {
+  if (typeof items === "function") {
+    throw new Error("Transaction plugins are not supported");
+  }
+
   if (typeArgIsPure(itemType)) {
-    return pure(txb, items as PureArg, `vector<${itemType}>`);
+    return pure(tx, items as PureArg, `vector<${itemType}>`);
   } else if (isTransactionArgument(items)) {
     return items;
   } else {
     const { typeName: itemTypeName, typeArgs: itemTypeArgs } =
       parseTypeName(itemType);
     if (itemTypeName === "0x1::option::Option") {
-      const objects = items.map((item) =>
-        option(txb, itemTypeArgs[0], item),
+      const elements = items.map((item) =>
+        option(tx, itemTypeArgs[0], item),
       ) as Array<TransactionObjectArgument>;
-      return txb.makeMoveVec({
-        objects,
+      return tx.makeMoveVec({
         type: itemType,
+        elements,
       });
     }
 
-    return txb.makeMoveVec({
-      objects: items as Array<TransactionObjectArgument>,
+    return tx.makeMoveVec({
       type: itemType,
+      elements: items as Array<TransactionObjectArgument>,
     });
   }
 }

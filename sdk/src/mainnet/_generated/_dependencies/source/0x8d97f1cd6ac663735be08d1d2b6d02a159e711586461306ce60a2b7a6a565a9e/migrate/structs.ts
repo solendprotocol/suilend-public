@@ -15,17 +15,16 @@ import {
   compressSuiType,
 } from "../../../../_framework/util";
 import { ID } from "../../0x2/object/structs";
-import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { PKG_V1 } from "../index";
+import { bcs } from "@mysten/sui/bcs";
+import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
+import { fromB64 } from "@mysten/sui/utils";
 
 /* ============================== MigrateComplete =============================== */
 
 export function isMigrateComplete(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::migrate::MigrateComplete"
-  );
+  return type === `${PKG_V1}::migrate::MigrateComplete`;
 }
 
 export interface MigrateCompleteFields {
@@ -38,15 +37,16 @@ export type MigrateCompleteReified = Reified<
 >;
 
 export class MigrateComplete implements StructClass {
-  static readonly $typeName =
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::migrate::MigrateComplete";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V1}::migrate::MigrateComplete`;
   static readonly $numTypeParams = 0;
+  static readonly $isPhantom = [] as const;
 
   readonly $typeName = MigrateComplete.$typeName;
-
-  readonly $fullTypeName: "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::migrate::MigrateComplete";
-
+  readonly $fullTypeName: `${typeof PKG_V1}::migrate::MigrateComplete`;
   readonly $typeArgs: [];
+  readonly $isPhantom = MigrateComplete.$isPhantom;
 
   readonly package: ToField<ID>;
 
@@ -54,7 +54,7 @@ export class MigrateComplete implements StructClass {
     this.$fullTypeName = composeSuiType(
       MigrateComplete.$typeName,
       ...typeArgs,
-    ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::migrate::MigrateComplete";
+    ) as `${typeof PKG_V1}::migrate::MigrateComplete`;
     this.$typeArgs = typeArgs;
 
     this.package = fields.package;
@@ -66,8 +66,9 @@ export class MigrateComplete implements StructClass {
       fullTypeName: composeSuiType(
         MigrateComplete.$typeName,
         ...[],
-      ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::migrate::MigrateComplete",
+      ) as `${typeof PKG_V1}::migrate::MigrateComplete`,
       typeArgs: [] as [],
+      isPhantom: MigrateComplete.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         MigrateComplete.fromFields(fields),
@@ -79,6 +80,8 @@ export class MigrateComplete implements StructClass {
       fromJSON: (json: Record<string, any>) => MigrateComplete.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         MigrateComplete.fromSuiParsedData(content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        MigrateComplete.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         MigrateComplete.fetch(client, id),
       new: (fields: MigrateCompleteFields) => {
@@ -165,6 +168,25 @@ export class MigrateComplete implements StructClass {
     return MigrateComplete.fromFieldsWithTypes(content);
   }
 
+  static fromSuiObjectData(data: SuiObjectData): MigrateComplete {
+    if (data.bcs) {
+      if (
+        data.bcs.dataType !== "moveObject" ||
+        !isMigrateComplete(data.bcs.type)
+      ) {
+        throw new Error(`object at is not a MigrateComplete object`);
+      }
+
+      return MigrateComplete.fromBcs(fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return MigrateComplete.fromSuiParsedData(data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch(client: SuiClient, id: string): Promise<MigrateComplete> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -178,6 +200,7 @@ export class MigrateComplete implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a MigrateComplete object`);
     }
-    return MigrateComplete.fromBcs(fromB64(res.data.bcs.bcsBytes));
+
+    return MigrateComplete.fromSuiObjectData(res.data);
   }
 }

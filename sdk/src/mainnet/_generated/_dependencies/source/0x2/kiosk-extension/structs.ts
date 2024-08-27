@@ -19,16 +19,19 @@ import {
   FieldsWithTypes,
   composeSuiType,
   compressSuiType,
+  parseTypeName,
 } from "../../../../_framework/util";
 import { Bag } from "../bag/structs";
-import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { PKG_V25 } from "../index";
+import { bcs } from "@mysten/sui/bcs";
+import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
+import { fromB64 } from "@mysten/sui/utils";
 
 /* ============================== Extension =============================== */
 
 export function isExtension(type: string): boolean {
   type = compressSuiType(type);
-  return type === "0x2::kiosk_extension::Extension";
+  return type === `${PKG_V25}::kiosk_extension::Extension`;
 }
 
 export interface ExtensionFields {
@@ -40,14 +43,16 @@ export interface ExtensionFields {
 export type ExtensionReified = Reified<Extension, ExtensionFields>;
 
 export class Extension implements StructClass {
-  static readonly $typeName = "0x2::kiosk_extension::Extension";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V25}::kiosk_extension::Extension`;
   static readonly $numTypeParams = 0;
+  static readonly $isPhantom = [] as const;
 
   readonly $typeName = Extension.$typeName;
-
-  readonly $fullTypeName: "0x2::kiosk_extension::Extension";
-
+  readonly $fullTypeName: `${typeof PKG_V25}::kiosk_extension::Extension`;
   readonly $typeArgs: [];
+  readonly $isPhantom = Extension.$isPhantom;
 
   readonly storage: ToField<Bag>;
   readonly permissions: ToField<"u128">;
@@ -57,7 +62,7 @@ export class Extension implements StructClass {
     this.$fullTypeName = composeSuiType(
       Extension.$typeName,
       ...typeArgs,
-    ) as "0x2::kiosk_extension::Extension";
+    ) as `${typeof PKG_V25}::kiosk_extension::Extension`;
     this.$typeArgs = typeArgs;
 
     this.storage = fields.storage;
@@ -71,8 +76,9 @@ export class Extension implements StructClass {
       fullTypeName: composeSuiType(
         Extension.$typeName,
         ...[],
-      ) as "0x2::kiosk_extension::Extension",
+      ) as `${typeof PKG_V25}::kiosk_extension::Extension`,
       typeArgs: [] as [],
+      isPhantom: Extension.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => Extension.fromFields(fields),
       fromFieldsWithTypes: (item: FieldsWithTypes) =>
@@ -83,6 +89,8 @@ export class Extension implements StructClass {
       fromJSON: (json: Record<string, any>) => Extension.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         Extension.fromSuiParsedData(content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        Extension.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         Extension.fetch(client, id),
       new: (fields: ExtensionFields) => {
@@ -179,6 +187,22 @@ export class Extension implements StructClass {
     return Extension.fromFieldsWithTypes(content);
   }
 
+  static fromSuiObjectData(data: SuiObjectData): Extension {
+    if (data.bcs) {
+      if (data.bcs.dataType !== "moveObject" || !isExtension(data.bcs.type)) {
+        throw new Error(`object at is not a Extension object`);
+      }
+
+      return Extension.fromBcs(fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return Extension.fromSuiParsedData(data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch(client: SuiClient, id: string): Promise<Extension> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -192,7 +216,8 @@ export class Extension implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a Extension object`);
     }
-    return Extension.fromBcs(fromB64(res.data.bcs.bcsBytes));
+
+    return Extension.fromSuiObjectData(res.data);
   }
 }
 
@@ -200,7 +225,7 @@ export class Extension implements StructClass {
 
 export function isExtensionKey(type: string): boolean {
   type = compressSuiType(type);
-  return type.startsWith("0x2::kiosk_extension::ExtensionKey<");
+  return type.startsWith(`${PKG_V25}::kiosk_extension::ExtensionKey` + "<");
 }
 
 export interface ExtensionKeyFields<Ext extends PhantomTypeArgument> {
@@ -215,14 +240,16 @@ export type ExtensionKeyReified<Ext extends PhantomTypeArgument> = Reified<
 export class ExtensionKey<Ext extends PhantomTypeArgument>
   implements StructClass
 {
-  static readonly $typeName = "0x2::kiosk_extension::ExtensionKey";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V25}::kiosk_extension::ExtensionKey`;
   static readonly $numTypeParams = 1;
+  static readonly $isPhantom = [true] as const;
 
   readonly $typeName = ExtensionKey.$typeName;
-
-  readonly $fullTypeName: `0x2::kiosk_extension::ExtensionKey<${PhantomToTypeStr<Ext>}>`;
-
+  readonly $fullTypeName: `${typeof PKG_V25}::kiosk_extension::ExtensionKey<${PhantomToTypeStr<Ext>}>`;
   readonly $typeArgs: [PhantomToTypeStr<Ext>];
+  readonly $isPhantom = ExtensionKey.$isPhantom;
 
   readonly dummyField: ToField<"bool">;
 
@@ -233,7 +260,7 @@ export class ExtensionKey<Ext extends PhantomTypeArgument>
     this.$fullTypeName = composeSuiType(
       ExtensionKey.$typeName,
       ...typeArgs,
-    ) as `0x2::kiosk_extension::ExtensionKey<${PhantomToTypeStr<Ext>}>`;
+    ) as `${typeof PKG_V25}::kiosk_extension::ExtensionKey<${PhantomToTypeStr<Ext>}>`;
     this.$typeArgs = typeArgs;
 
     this.dummyField = fields.dummyField;
@@ -247,10 +274,11 @@ export class ExtensionKey<Ext extends PhantomTypeArgument>
       fullTypeName: composeSuiType(
         ExtensionKey.$typeName,
         ...[extractType(Ext)],
-      ) as `0x2::kiosk_extension::ExtensionKey<${PhantomToTypeStr<ToPhantomTypeArgument<Ext>>}>`,
+      ) as `${typeof PKG_V25}::kiosk_extension::ExtensionKey<${PhantomToTypeStr<ToPhantomTypeArgument<Ext>>}>`,
       typeArgs: [extractType(Ext)] as [
         PhantomToTypeStr<ToPhantomTypeArgument<Ext>>,
       ],
+      isPhantom: ExtensionKey.$isPhantom,
       reifiedTypeArgs: [Ext],
       fromFields: (fields: Record<string, any>) =>
         ExtensionKey.fromFields(Ext, fields),
@@ -262,6 +290,8 @@ export class ExtensionKey<Ext extends PhantomTypeArgument>
       fromJSON: (json: Record<string, any>) => ExtensionKey.fromJSON(Ext, json),
       fromSuiParsedData: (content: SuiParsedData) =>
         ExtensionKey.fromSuiParsedData(Ext, content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        ExtensionKey.fromSuiObjectData(Ext, content),
       fetch: async (client: SuiClient, id: string) =>
         ExtensionKey.fetch(client, Ext, id),
       new: (fields: ExtensionKeyFields<ToPhantomTypeArgument<Ext>>) => {
@@ -374,6 +404,42 @@ export class ExtensionKey<Ext extends PhantomTypeArgument>
     return ExtensionKey.fromFieldsWithTypes(typeArg, content);
   }
 
+  static fromSuiObjectData<Ext extends PhantomReified<PhantomTypeArgument>>(
+    typeArg: Ext,
+    data: SuiObjectData,
+  ): ExtensionKey<ToPhantomTypeArgument<Ext>> {
+    if (data.bcs) {
+      if (
+        data.bcs.dataType !== "moveObject" ||
+        !isExtensionKey(data.bcs.type)
+      ) {
+        throw new Error(`object at is not a ExtensionKey object`);
+      }
+
+      const gotTypeArgs = parseTypeName(data.bcs.type).typeArgs;
+      if (gotTypeArgs.length !== 1) {
+        throw new Error(
+          `type argument mismatch: expected 1 type argument but got '${gotTypeArgs.length}'`,
+        );
+      }
+      const gotTypeArg = compressSuiType(gotTypeArgs[0]);
+      const expectedTypeArg = compressSuiType(extractType(typeArg));
+      if (gotTypeArg !== compressSuiType(extractType(typeArg))) {
+        throw new Error(
+          `type argument mismatch: expected '${expectedTypeArg}' but got '${gotTypeArg}'`,
+        );
+      }
+
+      return ExtensionKey.fromBcs(typeArg, fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return ExtensionKey.fromSuiParsedData(typeArg, data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch<Ext extends PhantomReified<PhantomTypeArgument>>(
     client: SuiClient,
     typeArg: Ext,
@@ -391,6 +457,7 @@ export class ExtensionKey<Ext extends PhantomTypeArgument>
     ) {
       throw new Error(`object at id ${id} is not a ExtensionKey object`);
     }
-    return ExtensionKey.fromBcs(typeArg, fromB64(res.data.bcs.bcsBytes));
+
+    return ExtensionKey.fromSuiObjectData(typeArg, res.data);
   }
 }

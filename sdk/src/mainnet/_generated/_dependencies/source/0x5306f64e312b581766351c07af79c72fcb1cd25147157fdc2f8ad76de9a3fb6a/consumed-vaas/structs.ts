@@ -17,18 +17,17 @@ import {
   compressSuiType,
 } from "../../../../_framework/util";
 import { Bytes32 } from "../bytes32/structs";
+import { PKG_V1 } from "../index";
 import { Set } from "../set/structs";
-import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { bcs } from "@mysten/sui/bcs";
+import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
+import { fromB64 } from "@mysten/sui/utils";
 
 /* ============================== ConsumedVAAs =============================== */
 
 export function isConsumedVAAs(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::consumed_vaas::ConsumedVAAs"
-  );
+  return type === `${PKG_V1}::consumed_vaas::ConsumedVAAs`;
 }
 
 export interface ConsumedVAAsFields {
@@ -38,15 +37,16 @@ export interface ConsumedVAAsFields {
 export type ConsumedVAAsReified = Reified<ConsumedVAAs, ConsumedVAAsFields>;
 
 export class ConsumedVAAs implements StructClass {
-  static readonly $typeName =
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::consumed_vaas::ConsumedVAAs";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V1}::consumed_vaas::ConsumedVAAs`;
   static readonly $numTypeParams = 0;
+  static readonly $isPhantom = [] as const;
 
   readonly $typeName = ConsumedVAAs.$typeName;
-
-  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::consumed_vaas::ConsumedVAAs";
-
+  readonly $fullTypeName: `${typeof PKG_V1}::consumed_vaas::ConsumedVAAs`;
   readonly $typeArgs: [];
+  readonly $isPhantom = ConsumedVAAs.$isPhantom;
 
   readonly hashes: ToField<Set<ToPhantom<Bytes32>>>;
 
@@ -54,7 +54,7 @@ export class ConsumedVAAs implements StructClass {
     this.$fullTypeName = composeSuiType(
       ConsumedVAAs.$typeName,
       ...typeArgs,
-    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::consumed_vaas::ConsumedVAAs";
+    ) as `${typeof PKG_V1}::consumed_vaas::ConsumedVAAs`;
     this.$typeArgs = typeArgs;
 
     this.hashes = fields.hashes;
@@ -66,8 +66,9 @@ export class ConsumedVAAs implements StructClass {
       fullTypeName: composeSuiType(
         ConsumedVAAs.$typeName,
         ...[],
-      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::consumed_vaas::ConsumedVAAs",
+      ) as `${typeof PKG_V1}::consumed_vaas::ConsumedVAAs`,
       typeArgs: [] as [],
+      isPhantom: ConsumedVAAs.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         ConsumedVAAs.fromFields(fields),
@@ -79,6 +80,8 @@ export class ConsumedVAAs implements StructClass {
       fromJSON: (json: Record<string, any>) => ConsumedVAAs.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         ConsumedVAAs.fromSuiParsedData(content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        ConsumedVAAs.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         ConsumedVAAs.fetch(client, id),
       new: (fields: ConsumedVAAsFields) => {
@@ -174,6 +177,25 @@ export class ConsumedVAAs implements StructClass {
     return ConsumedVAAs.fromFieldsWithTypes(content);
   }
 
+  static fromSuiObjectData(data: SuiObjectData): ConsumedVAAs {
+    if (data.bcs) {
+      if (
+        data.bcs.dataType !== "moveObject" ||
+        !isConsumedVAAs(data.bcs.type)
+      ) {
+        throw new Error(`object at is not a ConsumedVAAs object`);
+      }
+
+      return ConsumedVAAs.fromBcs(fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return ConsumedVAAs.fromSuiParsedData(data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch(client: SuiClient, id: string): Promise<ConsumedVAAs> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -187,6 +209,7 @@ export class ConsumedVAAs implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a ConsumedVAAs object`);
     }
-    return ConsumedVAAs.fromBcs(fromB64(res.data.bcs.bcsBytes));
+
+    return ConsumedVAAs.fromSuiObjectData(res.data);
   }
 }

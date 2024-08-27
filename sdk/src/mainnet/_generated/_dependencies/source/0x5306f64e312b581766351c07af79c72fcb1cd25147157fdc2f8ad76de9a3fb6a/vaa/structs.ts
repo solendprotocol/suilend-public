@@ -5,7 +5,6 @@ import {
   StructClass,
   ToField,
   ToTypeStr,
-  Vector,
   decodeFromFields,
   decodeFromFieldsWithTypes,
   decodeFromJSONField,
@@ -17,19 +16,19 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
+import { Vector } from "../../../../_framework/vector";
 import { Bytes32 } from "../bytes32/structs";
 import { ExternalAddress } from "../external-address/structs";
-import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { PKG_V1 } from "../index";
+import { bcs } from "@mysten/sui/bcs";
+import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
+import { fromB64 } from "@mysten/sui/utils";
 
 /* ============================== VAA =============================== */
 
 export function isVAA(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::vaa::VAA"
-  );
+  return type === `${PKG_V1}::vaa::VAA`;
 }
 
 export interface VAAFields {
@@ -47,15 +46,16 @@ export interface VAAFields {
 export type VAAReified = Reified<VAA, VAAFields>;
 
 export class VAA implements StructClass {
-  static readonly $typeName =
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::vaa::VAA";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V1}::vaa::VAA`;
   static readonly $numTypeParams = 0;
+  static readonly $isPhantom = [] as const;
 
   readonly $typeName = VAA.$typeName;
-
-  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::vaa::VAA";
-
+  readonly $fullTypeName: `${typeof PKG_V1}::vaa::VAA`;
   readonly $typeArgs: [];
+  readonly $isPhantom = VAA.$isPhantom;
 
   readonly guardianSetIndex: ToField<"u32">;
   readonly timestamp: ToField<"u32">;
@@ -71,7 +71,7 @@ export class VAA implements StructClass {
     this.$fullTypeName = composeSuiType(
       VAA.$typeName,
       ...typeArgs,
-    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::vaa::VAA";
+    ) as `${typeof PKG_V1}::vaa::VAA`;
     this.$typeArgs = typeArgs;
 
     this.guardianSetIndex = fields.guardianSetIndex;
@@ -91,8 +91,9 @@ export class VAA implements StructClass {
       fullTypeName: composeSuiType(
         VAA.$typeName,
         ...[],
-      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::vaa::VAA",
+      ) as `${typeof PKG_V1}::vaa::VAA`,
       typeArgs: [] as [],
+      isPhantom: VAA.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => VAA.fromFields(fields),
       fromFieldsWithTypes: (item: FieldsWithTypes) =>
@@ -103,6 +104,8 @@ export class VAA implements StructClass {
       fromJSON: (json: Record<string, any>) => VAA.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         VAA.fromSuiParsedData(content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        VAA.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) => VAA.fetch(client, id),
       new: (fields: VAAFields) => {
         return new VAA([], fields);
@@ -246,6 +249,22 @@ export class VAA implements StructClass {
     return VAA.fromFieldsWithTypes(content);
   }
 
+  static fromSuiObjectData(data: SuiObjectData): VAA {
+    if (data.bcs) {
+      if (data.bcs.dataType !== "moveObject" || !isVAA(data.bcs.type)) {
+        throw new Error(`object at is not a VAA object`);
+      }
+
+      return VAA.fromBcs(fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return VAA.fromSuiParsedData(data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch(client: SuiClient, id: string): Promise<VAA> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -256,6 +275,7 @@ export class VAA implements StructClass {
     if (res.data?.bcs?.dataType !== "moveObject" || !isVAA(res.data.bcs.type)) {
       throw new Error(`object at id ${id} is not a VAA object`);
     }
-    return VAA.fromBcs(fromB64(res.data.bcs.bcsBytes));
+
+    return VAA.fromSuiObjectData(res.data);
   }
 }

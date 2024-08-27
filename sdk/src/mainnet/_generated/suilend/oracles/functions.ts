@@ -1,25 +1,28 @@
 import { PUBLISHED_AT } from "..";
-import { ObjectArg, obj } from "../../_framework/util";
-import { TransactionBlock } from "@mysten/sui.js/transactions";
+import { obj } from "../../_framework/util";
+import { Transaction, TransactionObjectInput } from "@mysten/sui/transactions";
 
 export interface GetPythPriceAndIdentifierArgs {
-  priceInfoObj: ObjectArg;
-  clock: ObjectArg;
+  priceInfoObj: TransactionObjectInput;
+  clock: TransactionObjectInput;
 }
 
 export function getPythPriceAndIdentifier(
-  txb: TransactionBlock,
+  tx: Transaction,
   args: GetPythPriceAndIdentifierArgs,
 ) {
-  return txb.moveCall({
+  return tx.moveCall({
     target: `${PUBLISHED_AT}::oracles::get_pyth_price_and_identifier`,
-    arguments: [obj(txb, args.priceInfoObj), obj(txb, args.clock)],
+    arguments: [obj(tx, args.priceInfoObj), obj(tx, args.clock)],
   });
 }
 
-export function parsePriceToDecimal(txb: TransactionBlock, price: ObjectArg) {
-  return txb.moveCall({
+export function parsePriceToDecimal(
+  tx: Transaction,
+  price: TransactionObjectInput,
+) {
+  return tx.moveCall({
     target: `${PUBLISHED_AT}::oracles::parse_price_to_decimal`,
-    arguments: [obj(txb, price)],
+    arguments: [obj(tx, price)],
   });
 }

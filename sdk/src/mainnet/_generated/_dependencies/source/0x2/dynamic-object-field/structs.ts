@@ -20,15 +20,18 @@ import {
   FieldsWithTypes,
   composeSuiType,
   compressSuiType,
+  parseTypeName,
 } from "../../../../_framework/util";
-import { BcsType, bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { PKG_V25 } from "../index";
+import { BcsType, bcs } from "@mysten/sui/bcs";
+import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
+import { fromB64 } from "@mysten/sui/utils";
 
 /* ============================== Wrapper =============================== */
 
 export function isWrapper(type: string): boolean {
   type = compressSuiType(type);
-  return type.startsWith("0x2::dynamic_object_field::Wrapper<");
+  return type.startsWith(`${PKG_V25}::dynamic_object_field::Wrapper` + "<");
 }
 
 export interface WrapperFields<Name extends TypeArgument> {
@@ -41,14 +44,16 @@ export type WrapperReified<Name extends TypeArgument> = Reified<
 >;
 
 export class Wrapper<Name extends TypeArgument> implements StructClass {
-  static readonly $typeName = "0x2::dynamic_object_field::Wrapper";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V25}::dynamic_object_field::Wrapper`;
   static readonly $numTypeParams = 1;
+  static readonly $isPhantom = [false] as const;
 
   readonly $typeName = Wrapper.$typeName;
-
-  readonly $fullTypeName: `0x2::dynamic_object_field::Wrapper<${ToTypeStr<Name>}>`;
-
+  readonly $fullTypeName: `${typeof PKG_V25}::dynamic_object_field::Wrapper<${ToTypeStr<Name>}>`;
   readonly $typeArgs: [ToTypeStr<Name>];
+  readonly $isPhantom = Wrapper.$isPhantom;
 
   readonly name: ToField<Name>;
 
@@ -59,7 +64,7 @@ export class Wrapper<Name extends TypeArgument> implements StructClass {
     this.$fullTypeName = composeSuiType(
       Wrapper.$typeName,
       ...typeArgs,
-    ) as `0x2::dynamic_object_field::Wrapper<${ToTypeStr<Name>}>`;
+    ) as `${typeof PKG_V25}::dynamic_object_field::Wrapper<${ToTypeStr<Name>}>`;
     this.$typeArgs = typeArgs;
 
     this.name = fields.name;
@@ -73,8 +78,9 @@ export class Wrapper<Name extends TypeArgument> implements StructClass {
       fullTypeName: composeSuiType(
         Wrapper.$typeName,
         ...[extractType(Name)],
-      ) as `0x2::dynamic_object_field::Wrapper<${ToTypeStr<ToTypeArgument<Name>>}>`,
+      ) as `${typeof PKG_V25}::dynamic_object_field::Wrapper<${ToTypeStr<ToTypeArgument<Name>>}>`,
       typeArgs: [extractType(Name)] as [ToTypeStr<ToTypeArgument<Name>>],
+      isPhantom: Wrapper.$isPhantom,
       reifiedTypeArgs: [Name],
       fromFields: (fields: Record<string, any>) =>
         Wrapper.fromFields(Name, fields),
@@ -86,6 +92,8 @@ export class Wrapper<Name extends TypeArgument> implements StructClass {
       fromJSON: (json: Record<string, any>) => Wrapper.fromJSON(Name, json),
       fromSuiParsedData: (content: SuiParsedData) =>
         Wrapper.fromSuiParsedData(Name, content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        Wrapper.fromSuiObjectData(Name, content),
       fetch: async (client: SuiClient, id: string) =>
         Wrapper.fetch(client, Name, id),
       new: (fields: WrapperFields<ToTypeArgument<Name>>) => {
@@ -204,6 +212,39 @@ export class Wrapper<Name extends TypeArgument> implements StructClass {
     return Wrapper.fromFieldsWithTypes(typeArg, content);
   }
 
+  static fromSuiObjectData<Name extends Reified<TypeArgument, any>>(
+    typeArg: Name,
+    data: SuiObjectData,
+  ): Wrapper<ToTypeArgument<Name>> {
+    if (data.bcs) {
+      if (data.bcs.dataType !== "moveObject" || !isWrapper(data.bcs.type)) {
+        throw new Error(`object at is not a Wrapper object`);
+      }
+
+      const gotTypeArgs = parseTypeName(data.bcs.type).typeArgs;
+      if (gotTypeArgs.length !== 1) {
+        throw new Error(
+          `type argument mismatch: expected 1 type argument but got '${gotTypeArgs.length}'`,
+        );
+      }
+      const gotTypeArg = compressSuiType(gotTypeArgs[0]);
+      const expectedTypeArg = compressSuiType(extractType(typeArg));
+      if (gotTypeArg !== compressSuiType(extractType(typeArg))) {
+        throw new Error(
+          `type argument mismatch: expected '${expectedTypeArg}' but got '${gotTypeArg}'`,
+        );
+      }
+
+      return Wrapper.fromBcs(typeArg, fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return Wrapper.fromSuiParsedData(typeArg, data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch<Name extends Reified<TypeArgument, any>>(
     client: SuiClient,
     typeArg: Name,
@@ -221,6 +262,7 @@ export class Wrapper<Name extends TypeArgument> implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a Wrapper object`);
     }
-    return Wrapper.fromBcs(typeArg, fromB64(res.data.bcs.bcsBytes));
+
+    return Wrapper.fromSuiObjectData(typeArg, res.data);
   }
 }

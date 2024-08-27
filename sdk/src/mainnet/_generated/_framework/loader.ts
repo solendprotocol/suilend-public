@@ -9,14 +9,17 @@ import {
   TypeArgument,
   VectorClass,
   VectorClassReified,
+  phantom,
   vector,
 } from "./reified";
+import { registerClasses } from "./init-loader";
 
 export type PrimitiveValue = string | number | boolean | bigint;
 
 interface _StructClass {
   $typeName: string;
   $numTypeParams: number;
+  $isPhantom: readonly boolean[];
   reified(
     ...Ts: Array<
       Reified<TypeArgument, any> | PhantomReified<PhantomTypeArgument>
@@ -34,13 +37,13 @@ export class StructClassLoader {
   }
 
   reified<T extends Primitive>(type: T): T;
-  reified(type: `vector<${string}>`): VectorClassReified<VectorClass>;
+  reified(type: `vector<${string}>`): VectorClassReified<VectorClass, any>;
   reified(type: string): StructClassReified<StructClass, any>;
   reified(
     type: string,
   ):
     | StructClassReified<StructClass, any>
-    | VectorClassReified<VectorClass>
+    | VectorClassReified<VectorClass, any>
     | string {
     const { typeName, typeArgs } = parseTypeName(compressSuiType(type));
     switch (typeName) {
@@ -74,9 +77,20 @@ export class StructClassLoader {
       );
     }
 
-    return cls.reified(...typeArgs.map((t) => this.reified(t)));
+    const reifiedTypeArgs: Array<
+      Reified<TypeArgument, any> | PhantomReified<PhantomTypeArgument>
+    > = [];
+    for (let i = 0; i < typeArgs.length; i++) {
+      if (cls.$isPhantom[i]) {
+        reifiedTypeArgs.push(phantom(typeArgs[i]));
+      } else {
+        reifiedTypeArgs.push(this.reified(typeArgs[i]));
+      }
+    }
+
+    return cls.reified(...reifiedTypeArgs);
   }
 }
 
-export const structClassLoaderSource = new StructClassLoader();
-export const structClassLoaderOnchain = new StructClassLoader();
+export const loader = new StructClassLoader();
+registerClasses(loader);

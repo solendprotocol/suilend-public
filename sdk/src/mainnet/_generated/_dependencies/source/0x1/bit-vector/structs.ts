@@ -5,7 +5,6 @@ import {
   StructClass,
   ToField,
   ToTypeStr,
-  Vector,
   decodeFromFields,
   decodeFromFieldsWithTypes,
   decodeFromJSONField,
@@ -17,14 +16,17 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
-import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { Vector } from "../../../../_framework/vector";
+import { PKG_V8 } from "../index";
+import { bcs } from "@mysten/sui/bcs";
+import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
+import { fromB64 } from "@mysten/sui/utils";
 
 /* ============================== BitVector =============================== */
 
 export function isBitVector(type: string): boolean {
   type = compressSuiType(type);
-  return type === "0x1::bit_vector::BitVector";
+  return type === `${PKG_V8}::bit_vector::BitVector`;
 }
 
 export interface BitVectorFields {
@@ -35,14 +37,16 @@ export interface BitVectorFields {
 export type BitVectorReified = Reified<BitVector, BitVectorFields>;
 
 export class BitVector implements StructClass {
-  static readonly $typeName = "0x1::bit_vector::BitVector";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V8}::bit_vector::BitVector`;
   static readonly $numTypeParams = 0;
+  static readonly $isPhantom = [] as const;
 
   readonly $typeName = BitVector.$typeName;
-
-  readonly $fullTypeName: "0x1::bit_vector::BitVector";
-
+  readonly $fullTypeName: `${typeof PKG_V8}::bit_vector::BitVector`;
   readonly $typeArgs: [];
+  readonly $isPhantom = BitVector.$isPhantom;
 
   readonly length: ToField<"u64">;
   readonly bitField: ToField<Vector<"bool">>;
@@ -51,7 +55,7 @@ export class BitVector implements StructClass {
     this.$fullTypeName = composeSuiType(
       BitVector.$typeName,
       ...typeArgs,
-    ) as "0x1::bit_vector::BitVector";
+    ) as `${typeof PKG_V8}::bit_vector::BitVector`;
     this.$typeArgs = typeArgs;
 
     this.length = fields.length;
@@ -64,8 +68,9 @@ export class BitVector implements StructClass {
       fullTypeName: composeSuiType(
         BitVector.$typeName,
         ...[],
-      ) as "0x1::bit_vector::BitVector",
+      ) as `${typeof PKG_V8}::bit_vector::BitVector`,
       typeArgs: [] as [],
+      isPhantom: BitVector.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => BitVector.fromFields(fields),
       fromFieldsWithTypes: (item: FieldsWithTypes) =>
@@ -76,6 +81,8 @@ export class BitVector implements StructClass {
       fromJSON: (json: Record<string, any>) => BitVector.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         BitVector.fromSuiParsedData(content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        BitVector.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         BitVector.fetch(client, id),
       new: (fields: BitVectorFields) => {
@@ -170,6 +177,22 @@ export class BitVector implements StructClass {
     return BitVector.fromFieldsWithTypes(content);
   }
 
+  static fromSuiObjectData(data: SuiObjectData): BitVector {
+    if (data.bcs) {
+      if (data.bcs.dataType !== "moveObject" || !isBitVector(data.bcs.type)) {
+        throw new Error(`object at is not a BitVector object`);
+      }
+
+      return BitVector.fromBcs(fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return BitVector.fromSuiParsedData(data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch(client: SuiClient, id: string): Promise<BitVector> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -183,6 +206,7 @@ export class BitVector implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a BitVector object`);
     }
-    return BitVector.fromBcs(fromB64(res.data.bcs.bcsBytes));
+
+    return BitVector.fromSuiObjectData(res.data);
   }
 }

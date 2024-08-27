@@ -14,15 +14,17 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
+import { PKG_V25 } from "../index";
 import { ID, UID } from "../object/structs";
-import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { bcs } from "@mysten/sui/bcs";
+import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
+import { fromB64 } from "@mysten/sui/utils";
 
 /* ============================== VersionChangeCap =============================== */
 
 export function isVersionChangeCap(type: string): boolean {
   type = compressSuiType(type);
-  return type === "0x2::versioned::VersionChangeCap";
+  return type === `${PKG_V25}::versioned::VersionChangeCap`;
 }
 
 export interface VersionChangeCapFields {
@@ -36,14 +38,16 @@ export type VersionChangeCapReified = Reified<
 >;
 
 export class VersionChangeCap implements StructClass {
-  static readonly $typeName = "0x2::versioned::VersionChangeCap";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V25}::versioned::VersionChangeCap`;
   static readonly $numTypeParams = 0;
+  static readonly $isPhantom = [] as const;
 
   readonly $typeName = VersionChangeCap.$typeName;
-
-  readonly $fullTypeName: "0x2::versioned::VersionChangeCap";
-
+  readonly $fullTypeName: `${typeof PKG_V25}::versioned::VersionChangeCap`;
   readonly $typeArgs: [];
+  readonly $isPhantom = VersionChangeCap.$isPhantom;
 
   readonly versionedId: ToField<ID>;
   readonly oldVersion: ToField<"u64">;
@@ -52,7 +56,7 @@ export class VersionChangeCap implements StructClass {
     this.$fullTypeName = composeSuiType(
       VersionChangeCap.$typeName,
       ...typeArgs,
-    ) as "0x2::versioned::VersionChangeCap";
+    ) as `${typeof PKG_V25}::versioned::VersionChangeCap`;
     this.$typeArgs = typeArgs;
 
     this.versionedId = fields.versionedId;
@@ -65,8 +69,9 @@ export class VersionChangeCap implements StructClass {
       fullTypeName: composeSuiType(
         VersionChangeCap.$typeName,
         ...[],
-      ) as "0x2::versioned::VersionChangeCap",
+      ) as `${typeof PKG_V25}::versioned::VersionChangeCap`,
       typeArgs: [] as [],
+      isPhantom: VersionChangeCap.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         VersionChangeCap.fromFields(fields),
@@ -78,6 +83,8 @@ export class VersionChangeCap implements StructClass {
       fromJSON: (json: Record<string, any>) => VersionChangeCap.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         VersionChangeCap.fromSuiParsedData(content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        VersionChangeCap.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         VersionChangeCap.fetch(client, id),
       new: (fields: VersionChangeCapFields) => {
@@ -172,6 +179,25 @@ export class VersionChangeCap implements StructClass {
     return VersionChangeCap.fromFieldsWithTypes(content);
   }
 
+  static fromSuiObjectData(data: SuiObjectData): VersionChangeCap {
+    if (data.bcs) {
+      if (
+        data.bcs.dataType !== "moveObject" ||
+        !isVersionChangeCap(data.bcs.type)
+      ) {
+        throw new Error(`object at is not a VersionChangeCap object`);
+      }
+
+      return VersionChangeCap.fromBcs(fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return VersionChangeCap.fromSuiParsedData(data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch(client: SuiClient, id: string): Promise<VersionChangeCap> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -185,7 +211,8 @@ export class VersionChangeCap implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a VersionChangeCap object`);
     }
-    return VersionChangeCap.fromBcs(fromB64(res.data.bcs.bcsBytes));
+
+    return VersionChangeCap.fromSuiObjectData(res.data);
   }
 }
 
@@ -193,7 +220,7 @@ export class VersionChangeCap implements StructClass {
 
 export function isVersioned(type: string): boolean {
   type = compressSuiType(type);
-  return type === "0x2::versioned::Versioned";
+  return type === `${PKG_V25}::versioned::Versioned`;
 }
 
 export interface VersionedFields {
@@ -204,14 +231,16 @@ export interface VersionedFields {
 export type VersionedReified = Reified<Versioned, VersionedFields>;
 
 export class Versioned implements StructClass {
-  static readonly $typeName = "0x2::versioned::Versioned";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V25}::versioned::Versioned`;
   static readonly $numTypeParams = 0;
+  static readonly $isPhantom = [] as const;
 
   readonly $typeName = Versioned.$typeName;
-
-  readonly $fullTypeName: "0x2::versioned::Versioned";
-
+  readonly $fullTypeName: `${typeof PKG_V25}::versioned::Versioned`;
   readonly $typeArgs: [];
+  readonly $isPhantom = Versioned.$isPhantom;
 
   readonly id: ToField<UID>;
   readonly version: ToField<"u64">;
@@ -220,7 +249,7 @@ export class Versioned implements StructClass {
     this.$fullTypeName = composeSuiType(
       Versioned.$typeName,
       ...typeArgs,
-    ) as "0x2::versioned::Versioned";
+    ) as `${typeof PKG_V25}::versioned::Versioned`;
     this.$typeArgs = typeArgs;
 
     this.id = fields.id;
@@ -233,8 +262,9 @@ export class Versioned implements StructClass {
       fullTypeName: composeSuiType(
         Versioned.$typeName,
         ...[],
-      ) as "0x2::versioned::Versioned",
+      ) as `${typeof PKG_V25}::versioned::Versioned`,
       typeArgs: [] as [],
+      isPhantom: Versioned.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => Versioned.fromFields(fields),
       fromFieldsWithTypes: (item: FieldsWithTypes) =>
@@ -245,6 +275,8 @@ export class Versioned implements StructClass {
       fromJSON: (json: Record<string, any>) => Versioned.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         Versioned.fromSuiParsedData(content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        Versioned.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         Versioned.fetch(client, id),
       new: (fields: VersionedFields) => {
@@ -336,6 +368,22 @@ export class Versioned implements StructClass {
     return Versioned.fromFieldsWithTypes(content);
   }
 
+  static fromSuiObjectData(data: SuiObjectData): Versioned {
+    if (data.bcs) {
+      if (data.bcs.dataType !== "moveObject" || !isVersioned(data.bcs.type)) {
+        throw new Error(`object at is not a Versioned object`);
+      }
+
+      return Versioned.fromBcs(fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return Versioned.fromSuiParsedData(data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch(client: SuiClient, id: string): Promise<Versioned> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -349,6 +397,7 @@ export class Versioned implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a Versioned object`);
     }
-    return Versioned.fromBcs(fromB64(res.data.bcs.bcsBytes));
+
+    return Versioned.fromSuiObjectData(res.data);
   }
 }
