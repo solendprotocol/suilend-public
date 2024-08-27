@@ -5,7 +5,6 @@ import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 import { Side } from "@suilend/sdk/types";
 
 import { msPerYear } from "@/lib/constants";
-import { getBorrowShareUsd, getDepositShareUsd } from "@/lib/liquidityMining";
 
 export enum EventType {
   INTEREST_UPDATE = "interestUpdate",
@@ -103,14 +102,8 @@ export const calculateRewardAprPercent = (
           )
           .div(
             side === Side.DEPOSIT
-              ? getDepositShareUsd(
-                  reserve,
-                  new BigNumber(reserve.depositsPoolRewardManager.totalShares),
-                )
-              : getBorrowShareUsd(
-                  reserve,
-                  new BigNumber(reserve.borrowsPoolRewardManager.totalShares),
-                ),
+              ? event.depositedAmountUsd
+              : event.borrowedAmountUsd,
           )
           .times(100)
           .times(side === Side.DEPOSIT ? 1 : -1),
