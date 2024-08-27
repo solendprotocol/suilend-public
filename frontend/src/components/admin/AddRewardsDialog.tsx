@@ -145,7 +145,6 @@ export default function AddRewardsDialog() {
         if (rewardValue !== "0") {
           const txb = new TransactionBlock();
 
-          console.log("XXX", side, reserveArrayIndex, rewardValue);
           try {
             try {
               await suilendClient.addReward(

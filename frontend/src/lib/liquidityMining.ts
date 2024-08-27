@@ -83,8 +83,14 @@ export function formatRewards(
           )
           .div(
             side === Side.DEPOSIT
-              ? reserve.depositedAmountUsd
-              : reserve.borrowedAmountUsd,
+              ? new BigNumber(reserve.depositsPoolRewardManager.totalShares)
+                  .div(10 ** reserve.mintDecimals)
+                  .times(reserve.cTokenExchangeRate)
+                  .times(reserve.price)
+              : new BigNumber(reserve.borrowsPoolRewardManager.totalShares)
+                  .div(10 ** reserve.mintDecimals)
+                  .times(reserve.cumulativeBorrowRate)
+                  .times(reserve.price),
           )
           .times(100)
       : undefined;
