@@ -96,7 +96,7 @@ export default function Home() {
                   <div className="flex flex-row items-center gap-4">
                     <Server className="h-6 w-6 text-muted-foreground" />
                     <TBody className="w-full text-[16px] uppercase text-muted-foreground md:max-w-[300px]">
-                      3+ years of experience running Solend
+                      3+ years of experience running Save
                     </TBody>
                   </div>
 
