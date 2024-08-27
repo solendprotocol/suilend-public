@@ -7,6 +7,7 @@ import {
   ToTypeArgument,
   ToTypeStr,
   TypeArgument,
+  Vector,
   assertFieldsWithTypesArgsMatch,
   assertReifiedTypeArgsMatch,
   decodeFromFields,
@@ -21,19 +22,17 @@ import {
   FieldsWithTypes,
   composeSuiType,
   compressSuiType,
-  parseTypeName,
 } from "../../../../_framework/util";
-import { Vector } from "../../../../_framework/vector";
-import { PKG_V1 } from "../index";
-import { BcsType, bcs } from "@mysten/sui/bcs";
-import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
-import { fromB64 } from "@mysten/sui/utils";
+import { BcsType, bcs, fromB64 } from "@mysten/bcs";
+import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
 
 /* ============================== Cursor =============================== */
 
 export function isCursor(type: string): boolean {
   type = compressSuiType(type);
-  return type.startsWith(`${PKG_V1}::cursor::Cursor` + "<");
+  return type.startsWith(
+    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::cursor::Cursor<",
+  );
 }
 
 export interface CursorFields<T extends TypeArgument> {
@@ -46,16 +45,15 @@ export type CursorReified<T extends TypeArgument> = Reified<
 >;
 
 export class Cursor<T extends TypeArgument> implements StructClass {
-  __StructClass = true as const;
-
-  static readonly $typeName = `${PKG_V1}::cursor::Cursor`;
+  static readonly $typeName =
+    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::cursor::Cursor";
   static readonly $numTypeParams = 1;
-  static readonly $isPhantom = [false] as const;
 
   readonly $typeName = Cursor.$typeName;
-  readonly $fullTypeName: `${typeof PKG_V1}::cursor::Cursor<${ToTypeStr<T>}>`;
+
+  readonly $fullTypeName: `0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::cursor::Cursor<${ToTypeStr<T>}>`;
+
   readonly $typeArgs: [ToTypeStr<T>];
-  readonly $isPhantom = Cursor.$isPhantom;
 
   readonly data: ToField<Vector<T>>;
 
@@ -63,7 +61,7 @@ export class Cursor<T extends TypeArgument> implements StructClass {
     this.$fullTypeName = composeSuiType(
       Cursor.$typeName,
       ...typeArgs,
-    ) as `${typeof PKG_V1}::cursor::Cursor<${ToTypeStr<T>}>`;
+    ) as `0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::cursor::Cursor<${ToTypeStr<T>}>`;
     this.$typeArgs = typeArgs;
 
     this.data = fields.data;
@@ -77,9 +75,8 @@ export class Cursor<T extends TypeArgument> implements StructClass {
       fullTypeName: composeSuiType(
         Cursor.$typeName,
         ...[extractType(T)],
-      ) as `${typeof PKG_V1}::cursor::Cursor<${ToTypeStr<ToTypeArgument<T>>}>`,
+      ) as `0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::cursor::Cursor<${ToTypeStr<ToTypeArgument<T>>}>`,
       typeArgs: [extractType(T)] as [ToTypeStr<ToTypeArgument<T>>],
-      isPhantom: Cursor.$isPhantom,
       reifiedTypeArgs: [T],
       fromFields: (fields: Record<string, any>) => Cursor.fromFields(T, fields),
       fromFieldsWithTypes: (item: FieldsWithTypes) =>
@@ -90,8 +87,6 @@ export class Cursor<T extends TypeArgument> implements StructClass {
       fromJSON: (json: Record<string, any>) => Cursor.fromJSON(T, json),
       fromSuiParsedData: (content: SuiParsedData) =>
         Cursor.fromSuiParsedData(T, content),
-      fromSuiObjectData: (content: SuiObjectData) =>
-        Cursor.fromSuiObjectData(T, content),
       fetch: async (client: SuiClient, id: string) =>
         Cursor.fetch(client, T, id),
       new: (fields: CursorFields<ToTypeArgument<T>>) => {
@@ -213,39 +208,6 @@ export class Cursor<T extends TypeArgument> implements StructClass {
     return Cursor.fromFieldsWithTypes(typeArg, content);
   }
 
-  static fromSuiObjectData<T extends Reified<TypeArgument, any>>(
-    typeArg: T,
-    data: SuiObjectData,
-  ): Cursor<ToTypeArgument<T>> {
-    if (data.bcs) {
-      if (data.bcs.dataType !== "moveObject" || !isCursor(data.bcs.type)) {
-        throw new Error(`object at is not a Cursor object`);
-      }
-
-      const gotTypeArgs = parseTypeName(data.bcs.type).typeArgs;
-      if (gotTypeArgs.length !== 1) {
-        throw new Error(
-          `type argument mismatch: expected 1 type argument but got '${gotTypeArgs.length}'`,
-        );
-      }
-      const gotTypeArg = compressSuiType(gotTypeArgs[0]);
-      const expectedTypeArg = compressSuiType(extractType(typeArg));
-      if (gotTypeArg !== compressSuiType(extractType(typeArg))) {
-        throw new Error(
-          `type argument mismatch: expected '${expectedTypeArg}' but got '${gotTypeArg}'`,
-        );
-      }
-
-      return Cursor.fromBcs(typeArg, fromB64(data.bcs.bcsBytes));
-    }
-    if (data.content) {
-      return Cursor.fromSuiParsedData(typeArg, data.content);
-    }
-    throw new Error(
-      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
-    );
-  }
-
   static async fetch<T extends Reified<TypeArgument, any>>(
     client: SuiClient,
     typeArg: T,
@@ -263,7 +225,6 @@ export class Cursor<T extends TypeArgument> implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a Cursor object`);
     }
-
-    return Cursor.fromSuiObjectData(typeArg, res.data);
+    return Cursor.fromBcs(typeArg, fromB64(res.data.bcs.bcsBytes));
   }
 }

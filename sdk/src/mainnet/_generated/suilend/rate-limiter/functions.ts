@@ -1,32 +1,34 @@
 import { PUBLISHED_AT } from "..";
-import { obj, pure } from "../../_framework/util";
+import { ObjectArg, obj, pure } from "../../_framework/util";
 import {
-  Transaction,
   TransactionArgument,
-  TransactionObjectInput,
-} from "@mysten/sui/transactions";
+  TransactionBlock,
+} from "@mysten/sui.js/transactions";
 
 export interface NewArgs {
-  config: TransactionObjectInput;
+  config: ObjectArg;
   curTime: bigint | TransactionArgument;
 }
 
-export function new_(tx: Transaction, args: NewArgs) {
-  return tx.moveCall({
+export function new_(txb: TransactionBlock, args: NewArgs) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::rate_limiter::new`,
-    arguments: [obj(tx, args.config), pure(tx, args.curTime, `u64`)],
+    arguments: [obj(txb, args.config), pure(txb, args.curTime, `u64`)],
   });
 }
 
 export interface CurrentOutflowArgs {
-  rateLimiter: TransactionObjectInput;
+  rateLimiter: ObjectArg;
   curTime: bigint | TransactionArgument;
 }
 
-export function currentOutflow(tx: Transaction, args: CurrentOutflowArgs) {
-  return tx.moveCall({
+export function currentOutflow(
+  txb: TransactionBlock,
+  args: CurrentOutflowArgs,
+) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::rate_limiter::current_outflow`,
-    arguments: [obj(tx, args.rateLimiter), pure(tx, args.curTime, `u64`)],
+    arguments: [obj(txb, args.rateLimiter), pure(txb, args.curTime, `u64`)],
   });
 }
 
@@ -35,53 +37,59 @@ export interface NewConfigArgs {
   maxOutflow: bigint | TransactionArgument;
 }
 
-export function newConfig(tx: Transaction, args: NewConfigArgs) {
-  return tx.moveCall({
+export function newConfig(txb: TransactionBlock, args: NewConfigArgs) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::rate_limiter::new_config`,
     arguments: [
-      pure(tx, args.windowDuration, `u64`),
-      pure(tx, args.maxOutflow, `u64`),
+      pure(txb, args.windowDuration, `u64`),
+      pure(txb, args.maxOutflow, `u64`),
     ],
   });
 }
 
 export interface ProcessQtyArgs {
-  rateLimiter: TransactionObjectInput;
+  rateLimiter: ObjectArg;
   curTime: bigint | TransactionArgument;
-  qty: TransactionObjectInput;
+  qty: ObjectArg;
 }
 
-export function processQty(tx: Transaction, args: ProcessQtyArgs) {
-  return tx.moveCall({
+export function processQty(txb: TransactionBlock, args: ProcessQtyArgs) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::rate_limiter::process_qty`,
     arguments: [
-      obj(tx, args.rateLimiter),
-      pure(tx, args.curTime, `u64`),
-      obj(tx, args.qty),
+      obj(txb, args.rateLimiter),
+      pure(txb, args.curTime, `u64`),
+      obj(txb, args.qty),
     ],
   });
 }
 
 export interface RemainingOutflowArgs {
-  rateLimiter: TransactionObjectInput;
+  rateLimiter: ObjectArg;
   curTime: bigint | TransactionArgument;
 }
 
-export function remainingOutflow(tx: Transaction, args: RemainingOutflowArgs) {
-  return tx.moveCall({
+export function remainingOutflow(
+  txb: TransactionBlock,
+  args: RemainingOutflowArgs,
+) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::rate_limiter::remaining_outflow`,
-    arguments: [obj(tx, args.rateLimiter), pure(tx, args.curTime, `u64`)],
+    arguments: [obj(txb, args.rateLimiter), pure(txb, args.curTime, `u64`)],
   });
 }
 
 export interface UpdateInternalArgs {
-  rateLimiter: TransactionObjectInput;
+  rateLimiter: ObjectArg;
   curTime: bigint | TransactionArgument;
 }
 
-export function updateInternal(tx: Transaction, args: UpdateInternalArgs) {
-  return tx.moveCall({
+export function updateInternal(
+  txb: TransactionBlock,
+  args: UpdateInternalArgs,
+) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::rate_limiter::update_internal`,
-    arguments: [obj(tx, args.rateLimiter), pure(tx, args.curTime, `u64`)],
+    arguments: [obj(txb, args.rateLimiter), pure(txb, args.curTime, `u64`)],
   });
 }

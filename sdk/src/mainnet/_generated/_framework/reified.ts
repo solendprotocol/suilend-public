@@ -1,33 +1,38 @@
-import { bcs, BcsType } from "@mysten/sui/bcs";
-import { fromHEX, toHEX } from "@mysten/sui/utils";
+import { BcsType, bcs, fromHEX, toHEX } from "@mysten/bcs";
 import { FieldsWithTypes, compressSuiType, parseTypeName } from "./util";
-import { SuiClient, SuiParsedData, SuiObjectData } from "@mysten/sui/client";
-
-// for backwards compatibility
-export { vector } from "./vector";
+import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
 
 export interface StructClass {
-  readonly $typeName: string;
-  readonly $fullTypeName: string;
-  readonly $typeArgs: string[];
-  readonly $isPhantom: readonly boolean[];
+  $typeName: string;
+  $fullTypeName: string;
+  $typeArgs: string[];
   toJSONField(): Record<string, any>;
   toJSON(): Record<string, any>;
-
-  __StructClass: true;
 }
 
 export interface VectorClass {
-  readonly $typeName: "vector";
-  readonly $fullTypeName: string;
-  readonly $typeArgs: [string];
-  readonly $isPhantom: readonly [false];
+  $fullTypeName: string;
   toJSONField(): any[];
-  toJSON(): Record<string, any>;
 
-  readonly elements: any;
+  readonly vec: any;
 
-  __VectorClass: true;
+  readonly kind: "VectorClass";
+}
+
+export class Vector<T extends TypeArgument> implements VectorClass {
+  readonly $fullTypeName: `vector<${ToTypeStr<T>}>`;
+
+  readonly vec: Array<ToField<T>>;
+  constructor(fullTypeName: string, vec: Array<ToField<T>>) {
+    this.$fullTypeName = fullTypeName as `vector<${ToTypeStr<T>}>`;
+    this.vec = vec;
+  }
+
+  toJSONField(): Array<ToJSON<T>> {
+    return null as any;
+  }
+
+  readonly kind = "VectorClass";
 }
 
 export type Primitive =
@@ -45,7 +50,6 @@ export interface StructClassReified<T extends StructClass, Fields> {
   typeName: T["$typeName"]; // e.g., '0x2::balance::Balance', without type arguments
   fullTypeName: ToTypeStr<T>; // e.g., '0x2::balance::Balance<0x2::sui:SUI>'
   typeArgs: T["$typeArgs"]; // e.g., ['0x2::sui:SUI']
-  isPhantom: T["$isPhantom"]; // e.g., [true, false]
   reifiedTypeArgs: Array<
     Reified<TypeArgument, any> | PhantomReified<PhantomTypeArgument>
   >;
@@ -56,25 +60,17 @@ export interface StructClassReified<T extends StructClass, Fields> {
   fromJSONField: (field: any) => T;
   fromJSON: (json: Record<string, any>) => T;
   fromSuiParsedData: (content: SuiParsedData) => T;
-  fromSuiObjectData: (data: SuiObjectData) => T;
   fetch: (client: SuiClient, id: string) => Promise<T>;
   new: (fields: Fields) => T;
   kind: "StructClassReified";
 }
 
-export interface VectorClassReified<T extends VectorClass, Elements> {
-  typeName: T["$typeName"];
+export interface VectorClassReified<T extends VectorClass> {
   fullTypeName: ToTypeStr<T>;
-  typeArgs: T["$typeArgs"];
-  isPhantom: readonly [false];
-  reifiedTypeArgs: Array<Reified<TypeArgument, any>>;
   bcs: BcsType<any>;
   fromFields(fields: any[]): T;
   fromFieldsWithTypes(item: FieldsWithTypes): T;
-  fromBcs(data: Uint8Array): T;
   fromJSONField: (field: any) => T;
-  fromJSON: (json: Record<string, any>) => T;
-  new: (elements: Elements) => T;
   kind: "VectorClassReified";
 }
 
@@ -83,19 +79,19 @@ export type Reified<T extends TypeArgument, Fields> = T extends Primitive
   : T extends StructClass
     ? StructClassReified<T, Fields>
     : T extends VectorClass
-      ? VectorClassReified<T, Fields>
+      ? VectorClassReified<T>
       : never;
 
 export type ToTypeArgument<
   T extends
     | Primitive
     | StructClassReified<StructClass, any>
-    | VectorClassReified<VectorClass, any>,
+    | VectorClassReified<VectorClass>,
 > = T extends Primitive
   ? T
   : T extends StructClassReified<infer U, any>
     ? U
-    : T extends VectorClassReified<infer U, any>
+    : T extends VectorClassReified<infer U>
       ? U
       : never;
 
@@ -142,6 +138,39 @@ export type ToTypeStr<T extends TypeArgument> = T extends Primitive
 
 export type PhantomToTypeStr<T extends PhantomTypeArgument> =
   T extends PhantomTypeArgument ? T : never;
+
+export function vector<T extends Reified<TypeArgument, any>>(
+  T: T,
+): VectorClassReified<Vector<ToTypeArgument<T>>> {
+  const fullTypeName =
+    `vector<${extractType(T)}>` as `vector<${ToTypeStr<ToTypeArgument<T>>}>`;
+
+  return {
+    fullTypeName,
+    bcs: bcs.vector(toBcs(T)),
+    fromFieldsWithTypes: (item: FieldsWithTypes) => {
+      return new Vector(
+        fullTypeName,
+        (item as unknown as any[]).map((field: any) =>
+          decodeFromFieldsWithTypes(T, field),
+        ),
+      );
+    },
+    fromFields: (fields: any[]) => {
+      return new Vector(
+        fullTypeName,
+        fields.map((field) => decodeFromFields(T, field)),
+      );
+    },
+
+    fromJSONField: (field: any) =>
+      new Vector(
+        fullTypeName,
+        field.map((field: any) => decodeFromJSONField(T, field)),
+      ),
+    kind: "VectorClassReified",
+  };
+}
 
 export type ToJSON<T extends TypeArgument> = T extends "bool"
   ? boolean
@@ -212,7 +241,7 @@ export type ToField<T extends TypeArgument> = T extends "bool"
                               }
                             ? ToField<U> | null
                             : T extends VectorClass
-                              ? T["elements"]
+                              ? T["vec"]
                               : T extends StructClass
                                 ? T
                                 : never;
@@ -300,7 +329,7 @@ export function decodeFromFields(
       return `0x${field}`;
   }
   if (reified.kind === "VectorClassReified") {
-    return reified.fromFields(field).elements;
+    return reified.fromFields(field).vec;
   }
   switch (reified.typeName) {
     case "0x1::string::String":
@@ -343,7 +372,7 @@ export function decodeFromFieldsWithTypes(
       return item;
   }
   if (reified.kind === "VectorClassReified") {
-    return reified.fromFieldsWithTypes(item).elements;
+    return reified.fromFieldsWithTypes(item).vec;
   }
   switch (reified.typeName) {
     case "0x1::string::String":
@@ -460,7 +489,7 @@ export function decodeFromJSONField(
       return field;
   }
   if (typeArg.kind === "VectorClassReified") {
-    return typeArg.fromJSONField(field).elements;
+    return typeArg.fromJSONField(field).vec;
   }
   switch (typeArg.typeName) {
     case "0x1::string::String":

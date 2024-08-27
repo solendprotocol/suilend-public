@@ -1,253 +1,247 @@
 import { PUBLISHED_AT } from "..";
-import { obj, pure } from "../../_framework/util";
+import { ObjectArg, obj, pure } from "../../_framework/util";
 import {
-  Transaction,
   TransactionArgument,
-  TransactionObjectInput,
-} from "@mysten/sui/transactions";
+  TransactionBlock,
+} from "@mysten/sui.js/transactions";
 
 export interface AddPoolRewardArgs {
-  poolRewardManager: TransactionObjectInput;
-  rewards: TransactionObjectInput;
+  poolRewardManager: ObjectArg;
+  rewards: ObjectArg;
   startTimeMs: bigint | TransactionArgument;
   endTimeMs: bigint | TransactionArgument;
-  clock: TransactionObjectInput;
+  clock: ObjectArg;
 }
 
 export function addPoolReward(
-  tx: Transaction,
+  txb: TransactionBlock,
   typeArg: string,
   args: AddPoolRewardArgs,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::liquidity_mining::add_pool_reward`,
     typeArguments: [typeArg],
     arguments: [
-      obj(tx, args.poolRewardManager),
-      obj(tx, args.rewards),
-      pure(tx, args.startTimeMs, `u64`),
-      pure(tx, args.endTimeMs, `u64`),
-      obj(tx, args.clock),
+      obj(txb, args.poolRewardManager),
+      obj(txb, args.rewards),
+      pure(txb, args.startTimeMs, `u64`),
+      pure(txb, args.endTimeMs, `u64`),
+      obj(txb, args.clock),
     ],
   });
 }
 
-export function endTimeMs(tx: Transaction, poolReward: TransactionObjectInput) {
-  return tx.moveCall({
+export function endTimeMs(txb: TransactionBlock, poolReward: ObjectArg) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::liquidity_mining::end_time_ms`,
-    arguments: [obj(tx, poolReward)],
+    arguments: [obj(txb, poolReward)],
   });
 }
 
 export interface CancelPoolRewardArgs {
-  poolRewardManager: TransactionObjectInput;
+  poolRewardManager: ObjectArg;
   index: bigint | TransactionArgument;
-  clock: TransactionObjectInput;
+  clock: ObjectArg;
 }
 
 export function cancelPoolReward(
-  tx: Transaction,
+  txb: TransactionBlock,
   typeArg: string,
   args: CancelPoolRewardArgs,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::liquidity_mining::cancel_pool_reward`,
     typeArguments: [typeArg],
     arguments: [
-      obj(tx, args.poolRewardManager),
-      pure(tx, args.index, `u64`),
-      obj(tx, args.clock),
+      obj(txb, args.poolRewardManager),
+      pure(txb, args.index, `u64`),
+      obj(txb, args.clock),
     ],
   });
 }
 
 export interface ChangeUserRewardManagerShareArgs {
-  poolRewardManager: TransactionObjectInput;
-  userRewardManager: TransactionObjectInput;
+  poolRewardManager: ObjectArg;
+  userRewardManager: ObjectArg;
   newShare: bigint | TransactionArgument;
-  clock: TransactionObjectInput;
+  clock: ObjectArg;
 }
 
 export function changeUserRewardManagerShare(
-  tx: Transaction,
+  txb: TransactionBlock,
   args: ChangeUserRewardManagerShareArgs,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::liquidity_mining::change_user_reward_manager_share`,
     arguments: [
-      obj(tx, args.poolRewardManager),
-      obj(tx, args.userRewardManager),
-      pure(tx, args.newShare, `u64`),
-      obj(tx, args.clock),
+      obj(txb, args.poolRewardManager),
+      obj(txb, args.userRewardManager),
+      pure(txb, args.newShare, `u64`),
+      obj(txb, args.clock),
     ],
   });
 }
 
 export interface ClaimRewardsArgs {
-  poolRewardManager: TransactionObjectInput;
-  userRewardManager: TransactionObjectInput;
-  clock: TransactionObjectInput;
+  poolRewardManager: ObjectArg;
+  userRewardManager: ObjectArg;
+  clock: ObjectArg;
   rewardIndex: bigint | TransactionArgument;
 }
 
 export function claimRewards(
-  tx: Transaction,
+  txb: TransactionBlock,
   typeArg: string,
   args: ClaimRewardsArgs,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::liquidity_mining::claim_rewards`,
     typeArguments: [typeArg],
     arguments: [
-      obj(tx, args.poolRewardManager),
-      obj(tx, args.userRewardManager),
-      obj(tx, args.clock),
-      pure(tx, args.rewardIndex, `u64`),
+      obj(txb, args.poolRewardManager),
+      obj(txb, args.userRewardManager),
+      obj(txb, args.clock),
+      pure(txb, args.rewardIndex, `u64`),
     ],
   });
 }
 
 export interface ClosePoolRewardArgs {
-  poolRewardManager: TransactionObjectInput;
+  poolRewardManager: ObjectArg;
   index: bigint | TransactionArgument;
-  clock: TransactionObjectInput;
+  clock: ObjectArg;
 }
 
 export function closePoolReward(
-  tx: Transaction,
+  txb: TransactionBlock,
   typeArg: string,
   args: ClosePoolRewardArgs,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::liquidity_mining::close_pool_reward`,
     typeArguments: [typeArg],
     arguments: [
-      obj(tx, args.poolRewardManager),
-      pure(tx, args.index, `u64`),
-      obj(tx, args.clock),
+      obj(txb, args.poolRewardManager),
+      pure(txb, args.index, `u64`),
+      obj(txb, args.clock),
     ],
   });
 }
 
 export interface PoolRewardArgs {
-  poolRewardManager: TransactionObjectInput;
+  poolRewardManager: ObjectArg;
   index: bigint | TransactionArgument;
 }
 
-export function poolReward(tx: Transaction, args: PoolRewardArgs) {
-  return tx.moveCall({
+export function poolReward(txb: TransactionBlock, args: PoolRewardArgs) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::liquidity_mining::pool_reward`,
-    arguments: [obj(tx, args.poolRewardManager), pure(tx, args.index, `u64`)],
+    arguments: [obj(txb, args.poolRewardManager), pure(txb, args.index, `u64`)],
   });
 }
 
 export function findAvailableIndex(
-  tx: Transaction,
-  poolRewardManager: TransactionObjectInput,
+  txb: TransactionBlock,
+  poolRewardManager: ObjectArg,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::liquidity_mining::find_available_index`,
-    arguments: [obj(tx, poolRewardManager)],
+    arguments: [obj(txb, poolRewardManager)],
   });
 }
 
 export function lastUpdateTimeMs(
-  tx: Transaction,
-  userRewardManager: TransactionObjectInput,
+  txb: TransactionBlock,
+  userRewardManager: ObjectArg,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::liquidity_mining::last_update_time_ms`,
-    arguments: [obj(tx, userRewardManager)],
+    arguments: [obj(txb, userRewardManager)],
   });
 }
 
-export function newPoolRewardManager(tx: Transaction) {
-  return tx.moveCall({
+export function newPoolRewardManager(txb: TransactionBlock) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::liquidity_mining::new_pool_reward_manager`,
     arguments: [],
   });
 }
 
 export interface NewUserRewardManagerArgs {
-  poolRewardManager: TransactionObjectInput;
-  clock: TransactionObjectInput;
+  poolRewardManager: ObjectArg;
+  clock: ObjectArg;
 }
 
 export function newUserRewardManager(
-  tx: Transaction,
+  txb: TransactionBlock,
   args: NewUserRewardManagerArgs,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::liquidity_mining::new_user_reward_manager`,
-    arguments: [obj(tx, args.poolRewardManager), obj(tx, args.clock)],
+    arguments: [obj(txb, args.poolRewardManager), obj(txb, args.clock)],
   });
 }
 
 export interface PoolRewardIdArgs {
-  poolRewardManager: TransactionObjectInput;
+  poolRewardManager: ObjectArg;
   index: bigint | TransactionArgument;
 }
 
-export function poolRewardId(tx: Transaction, args: PoolRewardIdArgs) {
-  return tx.moveCall({
+export function poolRewardId(txb: TransactionBlock, args: PoolRewardIdArgs) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::liquidity_mining::pool_reward_id`,
-    arguments: [obj(tx, args.poolRewardManager), pure(tx, args.index, `u64`)],
+    arguments: [obj(txb, args.poolRewardManager), pure(txb, args.index, `u64`)],
   });
 }
 
 export function poolRewardManagerId(
-  tx: Transaction,
-  userRewardManager: TransactionObjectInput,
+  txb: TransactionBlock,
+  userRewardManager: ObjectArg,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::liquidity_mining::pool_reward_manager_id`,
-    arguments: [obj(tx, userRewardManager)],
+    arguments: [obj(txb, userRewardManager)],
   });
 }
 
-export function shares(
-  tx: Transaction,
-  userRewardManager: TransactionObjectInput,
-) {
-  return tx.moveCall({
+export function shares(txb: TransactionBlock, userRewardManager: ObjectArg) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::liquidity_mining::shares`,
-    arguments: [obj(tx, userRewardManager)],
+    arguments: [obj(txb, userRewardManager)],
   });
 }
 
 export interface UpdatePoolRewardManagerArgs {
-  poolRewardManager: TransactionObjectInput;
-  clock: TransactionObjectInput;
+  poolRewardManager: ObjectArg;
+  clock: ObjectArg;
 }
 
 export function updatePoolRewardManager(
-  tx: Transaction,
+  txb: TransactionBlock,
   args: UpdatePoolRewardManagerArgs,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::liquidity_mining::update_pool_reward_manager`,
-    arguments: [obj(tx, args.poolRewardManager), obj(tx, args.clock)],
+    arguments: [obj(txb, args.poolRewardManager), obj(txb, args.clock)],
   });
 }
 
 export interface UpdateUserRewardManagerArgs {
-  poolRewardManager: TransactionObjectInput;
-  userRewardManager: TransactionObjectInput;
-  clock: TransactionObjectInput;
-  newUserRewardManager: boolean | TransactionArgument;
+  poolRewardManager: ObjectArg;
+  userRewardManager: ObjectArg;
+  clock: ObjectArg;
 }
 
 export function updateUserRewardManager(
-  tx: Transaction,
+  txb: TransactionBlock,
   args: UpdateUserRewardManagerArgs,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::liquidity_mining::update_user_reward_manager`,
     arguments: [
-      obj(tx, args.poolRewardManager),
-      obj(tx, args.userRewardManager),
-      obj(tx, args.clock),
-      pure(tx, args.newUserRewardManager, `bool`),
+      obj(txb, args.poolRewardManager),
+      obj(txb, args.userRewardManager),
+      obj(txb, args.clock),
     ],
   });
 }

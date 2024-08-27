@@ -14,16 +14,17 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
-import { PKG_V1 } from "../index";
-import { bcs } from "@mysten/sui/bcs";
-import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
-import { fromB64 } from "@mysten/sui/utils";
+import { bcs, fromB64 } from "@mysten/bcs";
+import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
 
 /* ============================== StalePriceThreshold =============================== */
 
 export function isStalePriceThreshold(type: string): boolean {
   type = compressSuiType(type);
-  return type === `${PKG_V1}::set_stale_price_threshold::StalePriceThreshold`;
+  return (
+    type ===
+    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set_stale_price_threshold::StalePriceThreshold"
+  );
 }
 
 export interface StalePriceThresholdFields {
@@ -36,16 +37,15 @@ export type StalePriceThresholdReified = Reified<
 >;
 
 export class StalePriceThreshold implements StructClass {
-  __StructClass = true as const;
-
-  static readonly $typeName = `${PKG_V1}::set_stale_price_threshold::StalePriceThreshold`;
+  static readonly $typeName =
+    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set_stale_price_threshold::StalePriceThreshold";
   static readonly $numTypeParams = 0;
-  static readonly $isPhantom = [] as const;
 
   readonly $typeName = StalePriceThreshold.$typeName;
-  readonly $fullTypeName: `${typeof PKG_V1}::set_stale_price_threshold::StalePriceThreshold`;
+
+  readonly $fullTypeName: "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set_stale_price_threshold::StalePriceThreshold";
+
   readonly $typeArgs: [];
-  readonly $isPhantom = StalePriceThreshold.$isPhantom;
 
   readonly threshold: ToField<"u64">;
 
@@ -53,7 +53,7 @@ export class StalePriceThreshold implements StructClass {
     this.$fullTypeName = composeSuiType(
       StalePriceThreshold.$typeName,
       ...typeArgs,
-    ) as `${typeof PKG_V1}::set_stale_price_threshold::StalePriceThreshold`;
+    ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set_stale_price_threshold::StalePriceThreshold";
     this.$typeArgs = typeArgs;
 
     this.threshold = fields.threshold;
@@ -65,9 +65,8 @@ export class StalePriceThreshold implements StructClass {
       fullTypeName: composeSuiType(
         StalePriceThreshold.$typeName,
         ...[],
-      ) as `${typeof PKG_V1}::set_stale_price_threshold::StalePriceThreshold`,
+      ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set_stale_price_threshold::StalePriceThreshold",
       typeArgs: [] as [],
-      isPhantom: StalePriceThreshold.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         StalePriceThreshold.fromFields(fields),
@@ -80,8 +79,6 @@ export class StalePriceThreshold implements StructClass {
         StalePriceThreshold.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         StalePriceThreshold.fromSuiParsedData(content),
-      fromSuiObjectData: (content: SuiObjectData) =>
-        StalePriceThreshold.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         StalePriceThreshold.fetch(client, id),
       new: (fields: StalePriceThresholdFields) => {
@@ -168,25 +165,6 @@ export class StalePriceThreshold implements StructClass {
     return StalePriceThreshold.fromFieldsWithTypes(content);
   }
 
-  static fromSuiObjectData(data: SuiObjectData): StalePriceThreshold {
-    if (data.bcs) {
-      if (
-        data.bcs.dataType !== "moveObject" ||
-        !isStalePriceThreshold(data.bcs.type)
-      ) {
-        throw new Error(`object at is not a StalePriceThreshold object`);
-      }
-
-      return StalePriceThreshold.fromBcs(fromB64(data.bcs.bcsBytes));
-    }
-    if (data.content) {
-      return StalePriceThreshold.fromSuiParsedData(data.content);
-    }
-    throw new Error(
-      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
-    );
-  }
-
   static async fetch(
     client: SuiClient,
     id: string,
@@ -203,7 +181,6 @@ export class StalePriceThreshold implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a StalePriceThreshold object`);
     }
-
-    return StalePriceThreshold.fromSuiObjectData(res.data);
+    return StalePriceThreshold.fromBcs(fromB64(res.data.bcs.bcsBytes));
   }
 }

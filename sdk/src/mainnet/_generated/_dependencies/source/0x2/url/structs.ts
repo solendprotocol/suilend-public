@@ -15,16 +15,14 @@ import {
   compressSuiType,
 } from "../../../../_framework/util";
 import { String } from "../../0x1/ascii/structs";
-import { PKG_V25 } from "../index";
-import { bcs } from "@mysten/sui/bcs";
-import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
-import { fromB64 } from "@mysten/sui/utils";
+import { bcs, fromB64 } from "@mysten/bcs";
+import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
 
 /* ============================== Url =============================== */
 
 export function isUrl(type: string): boolean {
   type = compressSuiType(type);
-  return type === `${PKG_V25}::url::Url`;
+  return type === "0x2::url::Url";
 }
 
 export interface UrlFields {
@@ -34,16 +32,14 @@ export interface UrlFields {
 export type UrlReified = Reified<Url, UrlFields>;
 
 export class Url implements StructClass {
-  __StructClass = true as const;
-
-  static readonly $typeName = `${PKG_V25}::url::Url`;
+  static readonly $typeName = "0x2::url::Url";
   static readonly $numTypeParams = 0;
-  static readonly $isPhantom = [] as const;
 
   readonly $typeName = Url.$typeName;
-  readonly $fullTypeName: `${typeof PKG_V25}::url::Url`;
+
+  readonly $fullTypeName: "0x2::url::Url";
+
   readonly $typeArgs: [];
-  readonly $isPhantom = Url.$isPhantom;
 
   readonly url: ToField<String>;
 
@@ -51,7 +47,7 @@ export class Url implements StructClass {
     this.$fullTypeName = composeSuiType(
       Url.$typeName,
       ...typeArgs,
-    ) as `${typeof PKG_V25}::url::Url`;
+    ) as "0x2::url::Url";
     this.$typeArgs = typeArgs;
 
     this.url = fields.url;
@@ -60,12 +56,8 @@ export class Url implements StructClass {
   static reified(): UrlReified {
     return {
       typeName: Url.$typeName,
-      fullTypeName: composeSuiType(
-        Url.$typeName,
-        ...[],
-      ) as `${typeof PKG_V25}::url::Url`,
+      fullTypeName: composeSuiType(Url.$typeName, ...[]) as "0x2::url::Url",
       typeArgs: [] as [],
-      isPhantom: Url.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => Url.fromFields(fields),
       fromFieldsWithTypes: (item: FieldsWithTypes) =>
@@ -76,8 +68,6 @@ export class Url implements StructClass {
       fromJSON: (json: Record<string, any>) => Url.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         Url.fromSuiParsedData(content),
-      fromSuiObjectData: (content: SuiObjectData) =>
-        Url.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) => Url.fetch(client, id),
       new: (fields: UrlFields) => {
         return new Url([], fields);
@@ -163,22 +153,6 @@ export class Url implements StructClass {
     return Url.fromFieldsWithTypes(content);
   }
 
-  static fromSuiObjectData(data: SuiObjectData): Url {
-    if (data.bcs) {
-      if (data.bcs.dataType !== "moveObject" || !isUrl(data.bcs.type)) {
-        throw new Error(`object at is not a Url object`);
-      }
-
-      return Url.fromBcs(fromB64(data.bcs.bcsBytes));
-    }
-    if (data.content) {
-      return Url.fromSuiParsedData(data.content);
-    }
-    throw new Error(
-      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
-    );
-  }
-
   static async fetch(client: SuiClient, id: string): Promise<Url> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -189,7 +163,6 @@ export class Url implements StructClass {
     if (res.data?.bcs?.dataType !== "moveObject" || !isUrl(res.data.bcs.type)) {
       throw new Error(`object at id ${id} is not a Url object`);
     }
-
-    return Url.fromSuiObjectData(res.data);
+    return Url.fromBcs(fromB64(res.data.bcs.bcsBytes));
   }
 }

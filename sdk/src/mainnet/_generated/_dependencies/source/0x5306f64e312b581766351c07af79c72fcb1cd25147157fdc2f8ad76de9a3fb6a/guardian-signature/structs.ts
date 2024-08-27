@@ -15,16 +15,17 @@ import {
   compressSuiType,
 } from "../../../../_framework/util";
 import { Bytes32 } from "../bytes32/structs";
-import { PKG_V1 } from "../index";
-import { bcs } from "@mysten/sui/bcs";
-import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
-import { fromB64 } from "@mysten/sui/utils";
+import { bcs, fromB64 } from "@mysten/bcs";
+import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
 
 /* ============================== GuardianSignature =============================== */
 
 export function isGuardianSignature(type: string): boolean {
   type = compressSuiType(type);
-  return type === `${PKG_V1}::guardian_signature::GuardianSignature`;
+  return (
+    type ===
+    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::guardian_signature::GuardianSignature"
+  );
 }
 
 export interface GuardianSignatureFields {
@@ -40,16 +41,15 @@ export type GuardianSignatureReified = Reified<
 >;
 
 export class GuardianSignature implements StructClass {
-  __StructClass = true as const;
-
-  static readonly $typeName = `${PKG_V1}::guardian_signature::GuardianSignature`;
+  static readonly $typeName =
+    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::guardian_signature::GuardianSignature";
   static readonly $numTypeParams = 0;
-  static readonly $isPhantom = [] as const;
 
   readonly $typeName = GuardianSignature.$typeName;
-  readonly $fullTypeName: `${typeof PKG_V1}::guardian_signature::GuardianSignature`;
+
+  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::guardian_signature::GuardianSignature";
+
   readonly $typeArgs: [];
-  readonly $isPhantom = GuardianSignature.$isPhantom;
 
   readonly r: ToField<Bytes32>;
   readonly s: ToField<Bytes32>;
@@ -60,7 +60,7 @@ export class GuardianSignature implements StructClass {
     this.$fullTypeName = composeSuiType(
       GuardianSignature.$typeName,
       ...typeArgs,
-    ) as `${typeof PKG_V1}::guardian_signature::GuardianSignature`;
+    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::guardian_signature::GuardianSignature";
     this.$typeArgs = typeArgs;
 
     this.r = fields.r;
@@ -75,9 +75,8 @@ export class GuardianSignature implements StructClass {
       fullTypeName: composeSuiType(
         GuardianSignature.$typeName,
         ...[],
-      ) as `${typeof PKG_V1}::guardian_signature::GuardianSignature`,
+      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::guardian_signature::GuardianSignature",
       typeArgs: [] as [],
-      isPhantom: GuardianSignature.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         GuardianSignature.fromFields(fields),
@@ -89,8 +88,6 @@ export class GuardianSignature implements StructClass {
       fromJSON: (json: Record<string, any>) => GuardianSignature.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         GuardianSignature.fromSuiParsedData(content),
-      fromSuiObjectData: (content: SuiObjectData) =>
-        GuardianSignature.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         GuardianSignature.fetch(client, id),
       new: (fields: GuardianSignatureFields) => {
@@ -192,25 +189,6 @@ export class GuardianSignature implements StructClass {
     return GuardianSignature.fromFieldsWithTypes(content);
   }
 
-  static fromSuiObjectData(data: SuiObjectData): GuardianSignature {
-    if (data.bcs) {
-      if (
-        data.bcs.dataType !== "moveObject" ||
-        !isGuardianSignature(data.bcs.type)
-      ) {
-        throw new Error(`object at is not a GuardianSignature object`);
-      }
-
-      return GuardianSignature.fromBcs(fromB64(data.bcs.bcsBytes));
-    }
-    if (data.content) {
-      return GuardianSignature.fromSuiParsedData(data.content);
-    }
-    throw new Error(
-      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
-    );
-  }
-
   static async fetch(
     client: SuiClient,
     id: string,
@@ -227,7 +205,6 @@ export class GuardianSignature implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a GuardianSignature object`);
     }
-
-    return GuardianSignature.fromSuiObjectData(res.data);
+    return GuardianSignature.fromBcs(fromB64(res.data.bcs.bcsBytes));
   }
 }

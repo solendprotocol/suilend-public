@@ -14,17 +14,18 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
-import { PKG_V1 } from "../index";
 import { PriceFeed } from "../price-feed/structs";
-import { bcs } from "@mysten/sui/bcs";
-import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
-import { fromB64 } from "@mysten/sui/utils";
+import { bcs, fromB64 } from "@mysten/bcs";
+import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
 
 /* ============================== PriceFeedUpdateEvent =============================== */
 
 export function isPriceFeedUpdateEvent(type: string): boolean {
   type = compressSuiType(type);
-  return type === `${PKG_V1}::event::PriceFeedUpdateEvent`;
+  return (
+    type ===
+    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::event::PriceFeedUpdateEvent"
+  );
 }
 
 export interface PriceFeedUpdateEventFields {
@@ -38,16 +39,15 @@ export type PriceFeedUpdateEventReified = Reified<
 >;
 
 export class PriceFeedUpdateEvent implements StructClass {
-  __StructClass = true as const;
-
-  static readonly $typeName = `${PKG_V1}::event::PriceFeedUpdateEvent`;
+  static readonly $typeName =
+    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::event::PriceFeedUpdateEvent";
   static readonly $numTypeParams = 0;
-  static readonly $isPhantom = [] as const;
 
   readonly $typeName = PriceFeedUpdateEvent.$typeName;
-  readonly $fullTypeName: `${typeof PKG_V1}::event::PriceFeedUpdateEvent`;
+
+  readonly $fullTypeName: "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::event::PriceFeedUpdateEvent";
+
   readonly $typeArgs: [];
-  readonly $isPhantom = PriceFeedUpdateEvent.$isPhantom;
 
   readonly priceFeed: ToField<PriceFeed>;
   readonly timestamp: ToField<"u64">;
@@ -56,7 +56,7 @@ export class PriceFeedUpdateEvent implements StructClass {
     this.$fullTypeName = composeSuiType(
       PriceFeedUpdateEvent.$typeName,
       ...typeArgs,
-    ) as `${typeof PKG_V1}::event::PriceFeedUpdateEvent`;
+    ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::event::PriceFeedUpdateEvent";
     this.$typeArgs = typeArgs;
 
     this.priceFeed = fields.priceFeed;
@@ -69,9 +69,8 @@ export class PriceFeedUpdateEvent implements StructClass {
       fullTypeName: composeSuiType(
         PriceFeedUpdateEvent.$typeName,
         ...[],
-      ) as `${typeof PKG_V1}::event::PriceFeedUpdateEvent`,
+      ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::event::PriceFeedUpdateEvent",
       typeArgs: [] as [],
-      isPhantom: PriceFeedUpdateEvent.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         PriceFeedUpdateEvent.fromFields(fields),
@@ -84,8 +83,6 @@ export class PriceFeedUpdateEvent implements StructClass {
         PriceFeedUpdateEvent.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         PriceFeedUpdateEvent.fromSuiParsedData(content),
-      fromSuiObjectData: (content: SuiObjectData) =>
-        PriceFeedUpdateEvent.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         PriceFeedUpdateEvent.fetch(client, id),
       new: (fields: PriceFeedUpdateEventFields) => {
@@ -182,25 +179,6 @@ export class PriceFeedUpdateEvent implements StructClass {
     return PriceFeedUpdateEvent.fromFieldsWithTypes(content);
   }
 
-  static fromSuiObjectData(data: SuiObjectData): PriceFeedUpdateEvent {
-    if (data.bcs) {
-      if (
-        data.bcs.dataType !== "moveObject" ||
-        !isPriceFeedUpdateEvent(data.bcs.type)
-      ) {
-        throw new Error(`object at is not a PriceFeedUpdateEvent object`);
-      }
-
-      return PriceFeedUpdateEvent.fromBcs(fromB64(data.bcs.bcsBytes));
-    }
-    if (data.content) {
-      return PriceFeedUpdateEvent.fromSuiParsedData(data.content);
-    }
-    throw new Error(
-      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
-    );
-  }
-
   static async fetch(
     client: SuiClient,
     id: string,
@@ -219,8 +197,7 @@ export class PriceFeedUpdateEvent implements StructClass {
         `object at id ${id} is not a PriceFeedUpdateEvent object`,
       );
     }
-
-    return PriceFeedUpdateEvent.fromSuiObjectData(res.data);
+    return PriceFeedUpdateEvent.fromBcs(fromB64(res.data.bcs.bcsBytes));
   }
 }
 
@@ -228,7 +205,10 @@ export class PriceFeedUpdateEvent implements StructClass {
 
 export function isPythInitializationEvent(type: string): boolean {
   type = compressSuiType(type);
-  return type === `${PKG_V1}::event::PythInitializationEvent`;
+  return (
+    type ===
+    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::event::PythInitializationEvent"
+  );
 }
 
 export interface PythInitializationEventFields {
@@ -241,16 +221,15 @@ export type PythInitializationEventReified = Reified<
 >;
 
 export class PythInitializationEvent implements StructClass {
-  __StructClass = true as const;
-
-  static readonly $typeName = `${PKG_V1}::event::PythInitializationEvent`;
+  static readonly $typeName =
+    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::event::PythInitializationEvent";
   static readonly $numTypeParams = 0;
-  static readonly $isPhantom = [] as const;
 
   readonly $typeName = PythInitializationEvent.$typeName;
-  readonly $fullTypeName: `${typeof PKG_V1}::event::PythInitializationEvent`;
+
+  readonly $fullTypeName: "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::event::PythInitializationEvent";
+
   readonly $typeArgs: [];
-  readonly $isPhantom = PythInitializationEvent.$isPhantom;
 
   readonly dummyField: ToField<"bool">;
 
@@ -258,7 +237,7 @@ export class PythInitializationEvent implements StructClass {
     this.$fullTypeName = composeSuiType(
       PythInitializationEvent.$typeName,
       ...typeArgs,
-    ) as `${typeof PKG_V1}::event::PythInitializationEvent`;
+    ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::event::PythInitializationEvent";
     this.$typeArgs = typeArgs;
 
     this.dummyField = fields.dummyField;
@@ -270,9 +249,8 @@ export class PythInitializationEvent implements StructClass {
       fullTypeName: composeSuiType(
         PythInitializationEvent.$typeName,
         ...[],
-      ) as `${typeof PKG_V1}::event::PythInitializationEvent`,
+      ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::event::PythInitializationEvent",
       typeArgs: [] as [],
-      isPhantom: PythInitializationEvent.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         PythInitializationEvent.fromFields(fields),
@@ -286,8 +264,6 @@ export class PythInitializationEvent implements StructClass {
         PythInitializationEvent.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         PythInitializationEvent.fromSuiParsedData(content),
-      fromSuiObjectData: (content: SuiObjectData) =>
-        PythInitializationEvent.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         PythInitializationEvent.fetch(client, id),
       new: (fields: PythInitializationEventFields) => {
@@ -376,25 +352,6 @@ export class PythInitializationEvent implements StructClass {
     return PythInitializationEvent.fromFieldsWithTypes(content);
   }
 
-  static fromSuiObjectData(data: SuiObjectData): PythInitializationEvent {
-    if (data.bcs) {
-      if (
-        data.bcs.dataType !== "moveObject" ||
-        !isPythInitializationEvent(data.bcs.type)
-      ) {
-        throw new Error(`object at is not a PythInitializationEvent object`);
-      }
-
-      return PythInitializationEvent.fromBcs(fromB64(data.bcs.bcsBytes));
-    }
-    if (data.content) {
-      return PythInitializationEvent.fromSuiParsedData(data.content);
-    }
-    throw new Error(
-      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
-    );
-  }
-
   static async fetch(
     client: SuiClient,
     id: string,
@@ -413,7 +370,6 @@ export class PythInitializationEvent implements StructClass {
         `object at id ${id} is not a PythInitializationEvent object`,
       );
     }
-
-    return PythInitializationEvent.fromSuiObjectData(res.data);
+    return PythInitializationEvent.fromBcs(fromB64(res.data.bcs.bcsBytes));
   }
 }

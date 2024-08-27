@@ -5,6 +5,7 @@ import {
   StructClass,
   ToField,
   ToTypeStr,
+  Vector,
   decodeFromFields,
   decodeFromFieldsWithTypes,
   decodeFromJSONField,
@@ -16,17 +17,17 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
-import { Vector } from "../../../../_framework/vector";
-import { PKG_V1 } from "../index";
-import { bcs } from "@mysten/sui/bcs";
-import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
-import { fromB64 } from "@mysten/sui/utils";
+import { bcs, fromB64 } from "@mysten/bcs";
+import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
 
 /* ============================== Bytes32 =============================== */
 
 export function isBytes32(type: string): boolean {
   type = compressSuiType(type);
-  return type === `${PKG_V1}::bytes32::Bytes32`;
+  return (
+    type ===
+    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::bytes32::Bytes32"
+  );
 }
 
 export interface Bytes32Fields {
@@ -36,16 +37,15 @@ export interface Bytes32Fields {
 export type Bytes32Reified = Reified<Bytes32, Bytes32Fields>;
 
 export class Bytes32 implements StructClass {
-  __StructClass = true as const;
-
-  static readonly $typeName = `${PKG_V1}::bytes32::Bytes32`;
+  static readonly $typeName =
+    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::bytes32::Bytes32";
   static readonly $numTypeParams = 0;
-  static readonly $isPhantom = [] as const;
 
   readonly $typeName = Bytes32.$typeName;
-  readonly $fullTypeName: `${typeof PKG_V1}::bytes32::Bytes32`;
+
+  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::bytes32::Bytes32";
+
   readonly $typeArgs: [];
-  readonly $isPhantom = Bytes32.$isPhantom;
 
   readonly data: ToField<Vector<"u8">>;
 
@@ -53,7 +53,7 @@ export class Bytes32 implements StructClass {
     this.$fullTypeName = composeSuiType(
       Bytes32.$typeName,
       ...typeArgs,
-    ) as `${typeof PKG_V1}::bytes32::Bytes32`;
+    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::bytes32::Bytes32";
     this.$typeArgs = typeArgs;
 
     this.data = fields.data;
@@ -65,9 +65,8 @@ export class Bytes32 implements StructClass {
       fullTypeName: composeSuiType(
         Bytes32.$typeName,
         ...[],
-      ) as `${typeof PKG_V1}::bytes32::Bytes32`,
+      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::bytes32::Bytes32",
       typeArgs: [] as [],
-      isPhantom: Bytes32.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => Bytes32.fromFields(fields),
       fromFieldsWithTypes: (item: FieldsWithTypes) =>
@@ -78,8 +77,6 @@ export class Bytes32 implements StructClass {
       fromJSON: (json: Record<string, any>) => Bytes32.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         Bytes32.fromSuiParsedData(content),
-      fromSuiObjectData: (content: SuiObjectData) =>
-        Bytes32.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) => Bytes32.fetch(client, id),
       new: (fields: Bytes32Fields) => {
         return new Bytes32([], fields);
@@ -165,22 +162,6 @@ export class Bytes32 implements StructClass {
     return Bytes32.fromFieldsWithTypes(content);
   }
 
-  static fromSuiObjectData(data: SuiObjectData): Bytes32 {
-    if (data.bcs) {
-      if (data.bcs.dataType !== "moveObject" || !isBytes32(data.bcs.type)) {
-        throw new Error(`object at is not a Bytes32 object`);
-      }
-
-      return Bytes32.fromBcs(fromB64(data.bcs.bcsBytes));
-    }
-    if (data.content) {
-      return Bytes32.fromSuiParsedData(data.content);
-    }
-    throw new Error(
-      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
-    );
-  }
-
   static async fetch(client: SuiClient, id: string): Promise<Bytes32> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -194,7 +175,6 @@ export class Bytes32 implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a Bytes32 object`);
     }
-
-    return Bytes32.fromSuiObjectData(res.data);
+    return Bytes32.fromBcs(fromB64(res.data.bcs.bcsBytes));
   }
 }

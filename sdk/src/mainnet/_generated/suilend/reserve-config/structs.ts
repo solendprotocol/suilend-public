@@ -6,6 +6,7 @@ import {
   StructClass,
   ToField,
   ToTypeStr,
+  Vector,
   decodeFromFields,
   decodeFromFieldsWithTypes,
   decodeFromJSONField,
@@ -17,17 +18,17 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../_framework/util";
-import { Vector } from "../../_framework/vector";
-import { PKG_V1 } from "../index";
-import { bcs } from "@mysten/sui/bcs";
-import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
-import { fromB64 } from "@mysten/sui/utils";
+import { bcs, fromB64 } from "@mysten/bcs";
+import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
 
 /* ============================== ReserveConfig =============================== */
 
 export function isReserveConfig(type: string): boolean {
   type = compressSuiType(type);
-  return type === `${PKG_V1}::reserve_config::ReserveConfig`;
+  return (
+    type ===
+    "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve_config::ReserveConfig"
+  );
 }
 
 export interface ReserveConfigFields {
@@ -55,16 +56,15 @@ export interface ReserveConfigFields {
 export type ReserveConfigReified = Reified<ReserveConfig, ReserveConfigFields>;
 
 export class ReserveConfig implements StructClass {
-  __StructClass = true as const;
-
-  static readonly $typeName = `${PKG_V1}::reserve_config::ReserveConfig`;
+  static readonly $typeName =
+    "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve_config::ReserveConfig";
   static readonly $numTypeParams = 0;
-  static readonly $isPhantom = [] as const;
 
   readonly $typeName = ReserveConfig.$typeName;
-  readonly $fullTypeName: `${typeof PKG_V1}::reserve_config::ReserveConfig`;
+
+  readonly $fullTypeName: "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve_config::ReserveConfig";
+
   readonly $typeArgs: [];
-  readonly $isPhantom = ReserveConfig.$isPhantom;
 
   readonly openLtvPct: ToField<"u8">;
   readonly closeLtvPct: ToField<"u8">;
@@ -90,7 +90,7 @@ export class ReserveConfig implements StructClass {
     this.$fullTypeName = composeSuiType(
       ReserveConfig.$typeName,
       ...typeArgs,
-    ) as `${typeof PKG_V1}::reserve_config::ReserveConfig`;
+    ) as "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve_config::ReserveConfig";
     this.$typeArgs = typeArgs;
 
     this.openLtvPct = fields.openLtvPct;
@@ -120,9 +120,8 @@ export class ReserveConfig implements StructClass {
       fullTypeName: composeSuiType(
         ReserveConfig.$typeName,
         ...[],
-      ) as `${typeof PKG_V1}::reserve_config::ReserveConfig`,
+      ) as "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve_config::ReserveConfig",
       typeArgs: [] as [],
-      isPhantom: ReserveConfig.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         ReserveConfig.fromFields(fields),
@@ -134,8 +133,6 @@ export class ReserveConfig implements StructClass {
       fromJSON: (json: Record<string, any>) => ReserveConfig.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         ReserveConfig.fromSuiParsedData(content),
-      fromSuiObjectData: (content: SuiObjectData) =>
-        ReserveConfig.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         ReserveConfig.fetch(client, id),
       new: (fields: ReserveConfigFields) => {
@@ -410,25 +407,6 @@ export class ReserveConfig implements StructClass {
     return ReserveConfig.fromFieldsWithTypes(content);
   }
 
-  static fromSuiObjectData(data: SuiObjectData): ReserveConfig {
-    if (data.bcs) {
-      if (
-        data.bcs.dataType !== "moveObject" ||
-        !isReserveConfig(data.bcs.type)
-      ) {
-        throw new Error(`object at is not a ReserveConfig object`);
-      }
-
-      return ReserveConfig.fromBcs(fromB64(data.bcs.bcsBytes));
-    }
-    if (data.content) {
-      return ReserveConfig.fromSuiParsedData(data.content);
-    }
-    throw new Error(
-      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
-    );
-  }
-
   static async fetch(client: SuiClient, id: string): Promise<ReserveConfig> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -442,8 +420,7 @@ export class ReserveConfig implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a ReserveConfig object`);
     }
-
-    return ReserveConfig.fromSuiObjectData(res.data);
+    return ReserveConfig.fromBcs(fromB64(res.data.bcs.bcsBytes));
   }
 }
 
@@ -451,7 +428,10 @@ export class ReserveConfig implements StructClass {
 
 export function isReserveConfigBuilder(type: string): boolean {
   type = compressSuiType(type);
-  return type === `${PKG_V1}::reserve_config::ReserveConfigBuilder`;
+  return (
+    type ===
+    "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve_config::ReserveConfigBuilder"
+  );
 }
 
 export interface ReserveConfigBuilderFields {
@@ -464,16 +444,15 @@ export type ReserveConfigBuilderReified = Reified<
 >;
 
 export class ReserveConfigBuilder implements StructClass {
-  __StructClass = true as const;
-
-  static readonly $typeName = `${PKG_V1}::reserve_config::ReserveConfigBuilder`;
+  static readonly $typeName =
+    "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve_config::ReserveConfigBuilder";
   static readonly $numTypeParams = 0;
-  static readonly $isPhantom = [] as const;
 
   readonly $typeName = ReserveConfigBuilder.$typeName;
-  readonly $fullTypeName: `${typeof PKG_V1}::reserve_config::ReserveConfigBuilder`;
+
+  readonly $fullTypeName: "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve_config::ReserveConfigBuilder";
+
   readonly $typeArgs: [];
-  readonly $isPhantom = ReserveConfigBuilder.$isPhantom;
 
   readonly fields: ToField<Bag>;
 
@@ -481,7 +460,7 @@ export class ReserveConfigBuilder implements StructClass {
     this.$fullTypeName = composeSuiType(
       ReserveConfigBuilder.$typeName,
       ...typeArgs,
-    ) as `${typeof PKG_V1}::reserve_config::ReserveConfigBuilder`;
+    ) as "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve_config::ReserveConfigBuilder";
     this.$typeArgs = typeArgs;
 
     this.fields = fields.fields;
@@ -493,9 +472,8 @@ export class ReserveConfigBuilder implements StructClass {
       fullTypeName: composeSuiType(
         ReserveConfigBuilder.$typeName,
         ...[],
-      ) as `${typeof PKG_V1}::reserve_config::ReserveConfigBuilder`,
+      ) as "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve_config::ReserveConfigBuilder",
       typeArgs: [] as [],
-      isPhantom: ReserveConfigBuilder.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         ReserveConfigBuilder.fromFields(fields),
@@ -508,8 +486,6 @@ export class ReserveConfigBuilder implements StructClass {
         ReserveConfigBuilder.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         ReserveConfigBuilder.fromSuiParsedData(content),
-      fromSuiObjectData: (content: SuiObjectData) =>
-        ReserveConfigBuilder.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         ReserveConfigBuilder.fetch(client, id),
       new: (fields: ReserveConfigBuilderFields) => {
@@ -598,25 +574,6 @@ export class ReserveConfigBuilder implements StructClass {
     return ReserveConfigBuilder.fromFieldsWithTypes(content);
   }
 
-  static fromSuiObjectData(data: SuiObjectData): ReserveConfigBuilder {
-    if (data.bcs) {
-      if (
-        data.bcs.dataType !== "moveObject" ||
-        !isReserveConfigBuilder(data.bcs.type)
-      ) {
-        throw new Error(`object at is not a ReserveConfigBuilder object`);
-      }
-
-      return ReserveConfigBuilder.fromBcs(fromB64(data.bcs.bcsBytes));
-    }
-    if (data.content) {
-      return ReserveConfigBuilder.fromSuiParsedData(data.content);
-    }
-    throw new Error(
-      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
-    );
-  }
-
   static async fetch(
     client: SuiClient,
     id: string,
@@ -635,7 +592,6 @@ export class ReserveConfigBuilder implements StructClass {
         `object at id ${id} is not a ReserveConfigBuilder object`,
       );
     }
-
-    return ReserveConfigBuilder.fromSuiObjectData(res.data);
+    return ReserveConfigBuilder.fromBcs(fromB64(res.data.bcs.bcsBytes));
   }
 }

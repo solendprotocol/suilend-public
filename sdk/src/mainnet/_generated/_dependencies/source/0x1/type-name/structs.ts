@@ -15,16 +15,14 @@ import {
   compressSuiType,
 } from "../../../../_framework/util";
 import { String } from "../ascii/structs";
-import { PKG_V8 } from "../index";
-import { bcs } from "@mysten/sui/bcs";
-import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
-import { fromB64 } from "@mysten/sui/utils";
+import { bcs, fromB64 } from "@mysten/bcs";
+import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
 
 /* ============================== TypeName =============================== */
 
 export function isTypeName(type: string): boolean {
   type = compressSuiType(type);
-  return type === `${PKG_V8}::type_name::TypeName`;
+  return type === "0x1::type_name::TypeName";
 }
 
 export interface TypeNameFields {
@@ -34,16 +32,14 @@ export interface TypeNameFields {
 export type TypeNameReified = Reified<TypeName, TypeNameFields>;
 
 export class TypeName implements StructClass {
-  __StructClass = true as const;
-
-  static readonly $typeName = `${PKG_V8}::type_name::TypeName`;
+  static readonly $typeName = "0x1::type_name::TypeName";
   static readonly $numTypeParams = 0;
-  static readonly $isPhantom = [] as const;
 
   readonly $typeName = TypeName.$typeName;
-  readonly $fullTypeName: `${typeof PKG_V8}::type_name::TypeName`;
+
+  readonly $fullTypeName: "0x1::type_name::TypeName";
+
   readonly $typeArgs: [];
-  readonly $isPhantom = TypeName.$isPhantom;
 
   readonly name: ToField<String>;
 
@@ -51,7 +47,7 @@ export class TypeName implements StructClass {
     this.$fullTypeName = composeSuiType(
       TypeName.$typeName,
       ...typeArgs,
-    ) as `${typeof PKG_V8}::type_name::TypeName`;
+    ) as "0x1::type_name::TypeName";
     this.$typeArgs = typeArgs;
 
     this.name = fields.name;
@@ -63,9 +59,8 @@ export class TypeName implements StructClass {
       fullTypeName: composeSuiType(
         TypeName.$typeName,
         ...[],
-      ) as `${typeof PKG_V8}::type_name::TypeName`,
+      ) as "0x1::type_name::TypeName",
       typeArgs: [] as [],
-      isPhantom: TypeName.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => TypeName.fromFields(fields),
       fromFieldsWithTypes: (item: FieldsWithTypes) =>
@@ -76,8 +71,6 @@ export class TypeName implements StructClass {
       fromJSON: (json: Record<string, any>) => TypeName.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         TypeName.fromSuiParsedData(content),
-      fromSuiObjectData: (content: SuiObjectData) =>
-        TypeName.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         TypeName.fetch(client, id),
       new: (fields: TypeNameFields) => {
@@ -164,22 +157,6 @@ export class TypeName implements StructClass {
     return TypeName.fromFieldsWithTypes(content);
   }
 
-  static fromSuiObjectData(data: SuiObjectData): TypeName {
-    if (data.bcs) {
-      if (data.bcs.dataType !== "moveObject" || !isTypeName(data.bcs.type)) {
-        throw new Error(`object at is not a TypeName object`);
-      }
-
-      return TypeName.fromBcs(fromB64(data.bcs.bcsBytes));
-    }
-    if (data.content) {
-      return TypeName.fromSuiParsedData(data.content);
-    }
-    throw new Error(
-      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
-    );
-  }
-
   static async fetch(client: SuiClient, id: string): Promise<TypeName> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -193,7 +170,6 @@ export class TypeName implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a TypeName object`);
     }
-
-    return TypeName.fromSuiObjectData(res.data);
+    return TypeName.fromBcs(fromB64(res.data.bcs.bcsBytes));
   }
 }

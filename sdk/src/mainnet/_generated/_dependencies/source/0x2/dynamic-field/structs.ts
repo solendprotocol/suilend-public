@@ -20,19 +20,16 @@ import {
   FieldsWithTypes,
   composeSuiType,
   compressSuiType,
-  parseTypeName,
 } from "../../../../_framework/util";
-import { PKG_V25 } from "../index";
 import { UID } from "../object/structs";
-import { BcsType, bcs } from "@mysten/sui/bcs";
-import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
-import { fromB64 } from "@mysten/sui/utils";
+import { BcsType, bcs, fromB64 } from "@mysten/bcs";
+import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
 
 /* ============================== Field =============================== */
 
 export function isField(type: string): boolean {
   type = compressSuiType(type);
-  return type.startsWith(`${PKG_V25}::dynamic_field::Field` + "<");
+  return type.startsWith("0x2::dynamic_field::Field<");
 }
 
 export interface FieldFields<
@@ -52,16 +49,14 @@ export type FieldReified<
 export class Field<Name extends TypeArgument, Value extends TypeArgument>
   implements StructClass
 {
-  __StructClass = true as const;
-
-  static readonly $typeName = `${PKG_V25}::dynamic_field::Field`;
+  static readonly $typeName = "0x2::dynamic_field::Field";
   static readonly $numTypeParams = 2;
-  static readonly $isPhantom = [false, false] as const;
 
   readonly $typeName = Field.$typeName;
-  readonly $fullTypeName: `${typeof PKG_V25}::dynamic_field::Field<${ToTypeStr<Name>}, ${ToTypeStr<Value>}>`;
+
+  readonly $fullTypeName: `0x2::dynamic_field::Field<${ToTypeStr<Name>}, ${ToTypeStr<Value>}>`;
+
   readonly $typeArgs: [ToTypeStr<Name>, ToTypeStr<Value>];
-  readonly $isPhantom = Field.$isPhantom;
 
   readonly id: ToField<UID>;
   readonly name: ToField<Name>;
@@ -74,7 +69,7 @@ export class Field<Name extends TypeArgument, Value extends TypeArgument>
     this.$fullTypeName = composeSuiType(
       Field.$typeName,
       ...typeArgs,
-    ) as `${typeof PKG_V25}::dynamic_field::Field<${ToTypeStr<Name>}, ${ToTypeStr<Value>}>`;
+    ) as `0x2::dynamic_field::Field<${ToTypeStr<Name>}, ${ToTypeStr<Value>}>`;
     this.$typeArgs = typeArgs;
 
     this.id = fields.id;
@@ -94,12 +89,11 @@ export class Field<Name extends TypeArgument, Value extends TypeArgument>
       fullTypeName: composeSuiType(
         Field.$typeName,
         ...[extractType(Name), extractType(Value)],
-      ) as `${typeof PKG_V25}::dynamic_field::Field<${ToTypeStr<ToTypeArgument<Name>>}, ${ToTypeStr<ToTypeArgument<Value>>}>`,
+      ) as `0x2::dynamic_field::Field<${ToTypeStr<ToTypeArgument<Name>>}, ${ToTypeStr<ToTypeArgument<Value>>}>`,
       typeArgs: [extractType(Name), extractType(Value)] as [
         ToTypeStr<ToTypeArgument<Name>>,
         ToTypeStr<ToTypeArgument<Value>>,
       ],
-      isPhantom: Field.$isPhantom,
       reifiedTypeArgs: [Name, Value],
       fromFields: (fields: Record<string, any>) =>
         Field.fromFields([Name, Value], fields),
@@ -112,8 +106,6 @@ export class Field<Name extends TypeArgument, Value extends TypeArgument>
         Field.fromJSON([Name, Value], json),
       fromSuiParsedData: (content: SuiParsedData) =>
         Field.fromSuiParsedData([Name, Value], content),
-      fromSuiObjectData: (content: SuiObjectData) =>
-        Field.fromSuiObjectData([Name, Value], content),
       fetch: async (client: SuiClient, id: string) =>
         Field.fetch(client, [Name, Value], id),
       new: (
@@ -269,44 +261,6 @@ export class Field<Name extends TypeArgument, Value extends TypeArgument>
     return Field.fromFieldsWithTypes(typeArgs, content);
   }
 
-  static fromSuiObjectData<
-    Name extends Reified<TypeArgument, any>,
-    Value extends Reified<TypeArgument, any>,
-  >(
-    typeArgs: [Name, Value],
-    data: SuiObjectData,
-  ): Field<ToTypeArgument<Name>, ToTypeArgument<Value>> {
-    if (data.bcs) {
-      if (data.bcs.dataType !== "moveObject" || !isField(data.bcs.type)) {
-        throw new Error(`object at is not a Field object`);
-      }
-
-      const gotTypeArgs = parseTypeName(data.bcs.type).typeArgs;
-      if (gotTypeArgs.length !== 2) {
-        throw new Error(
-          `type argument mismatch: expected 2 type arguments but got ${gotTypeArgs.length}`,
-        );
-      }
-      for (let i = 0; i < 2; i++) {
-        const gotTypeArg = compressSuiType(gotTypeArgs[i]);
-        const expectedTypeArg = compressSuiType(extractType(typeArgs[i]));
-        if (gotTypeArg !== expectedTypeArg) {
-          throw new Error(
-            `type argument mismatch at position ${i}: expected '${expectedTypeArg}' but got '${gotTypeArg}'`,
-          );
-        }
-      }
-
-      return Field.fromBcs(typeArgs, fromB64(data.bcs.bcsBytes));
-    }
-    if (data.content) {
-      return Field.fromSuiParsedData(typeArgs, data.content);
-    }
-    throw new Error(
-      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
-    );
-  }
-
   static async fetch<
     Name extends Reified<TypeArgument, any>,
     Value extends Reified<TypeArgument, any>,
@@ -327,7 +281,6 @@ export class Field<Name extends TypeArgument, Value extends TypeArgument>
     ) {
       throw new Error(`object at id ${id} is not a Field object`);
     }
-
-    return Field.fromSuiObjectData(typeArgs, res.data);
+    return Field.fromBcs(typeArgs, fromB64(res.data.bcs.bcsBytes));
   }
 }

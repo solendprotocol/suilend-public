@@ -16,16 +16,17 @@ import {
 } from "../../../../_framework/util";
 import { ID } from "../../0x2/object/structs";
 import { Bytes32 } from "../bytes32/structs";
-import { PKG_V1 } from "../index";
-import { bcs } from "@mysten/sui/bcs";
-import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
-import { fromB64 } from "@mysten/sui/utils";
+import { bcs, fromB64 } from "@mysten/bcs";
+import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
 
 /* ============================== CurrentVersion =============================== */
 
 export function isCurrentVersion(type: string): boolean {
   type = compressSuiType(type);
-  return type === `${PKG_V1}::package_utils::CurrentVersion`;
+  return (
+    type ===
+    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::package_utils::CurrentVersion"
+  );
 }
 
 export interface CurrentVersionFields {
@@ -38,16 +39,15 @@ export type CurrentVersionReified = Reified<
 >;
 
 export class CurrentVersion implements StructClass {
-  __StructClass = true as const;
-
-  static readonly $typeName = `${PKG_V1}::package_utils::CurrentVersion`;
+  static readonly $typeName =
+    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::package_utils::CurrentVersion";
   static readonly $numTypeParams = 0;
-  static readonly $isPhantom = [] as const;
 
   readonly $typeName = CurrentVersion.$typeName;
-  readonly $fullTypeName: `${typeof PKG_V1}::package_utils::CurrentVersion`;
+
+  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::package_utils::CurrentVersion";
+
   readonly $typeArgs: [];
-  readonly $isPhantom = CurrentVersion.$isPhantom;
 
   readonly dummyField: ToField<"bool">;
 
@@ -55,7 +55,7 @@ export class CurrentVersion implements StructClass {
     this.$fullTypeName = composeSuiType(
       CurrentVersion.$typeName,
       ...typeArgs,
-    ) as `${typeof PKG_V1}::package_utils::CurrentVersion`;
+    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::package_utils::CurrentVersion";
     this.$typeArgs = typeArgs;
 
     this.dummyField = fields.dummyField;
@@ -67,9 +67,8 @@ export class CurrentVersion implements StructClass {
       fullTypeName: composeSuiType(
         CurrentVersion.$typeName,
         ...[],
-      ) as `${typeof PKG_V1}::package_utils::CurrentVersion`,
+      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::package_utils::CurrentVersion",
       typeArgs: [] as [],
-      isPhantom: CurrentVersion.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         CurrentVersion.fromFields(fields),
@@ -81,8 +80,6 @@ export class CurrentVersion implements StructClass {
       fromJSON: (json: Record<string, any>) => CurrentVersion.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         CurrentVersion.fromSuiParsedData(content),
-      fromSuiObjectData: (content: SuiObjectData) =>
-        CurrentVersion.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         CurrentVersion.fetch(client, id),
       new: (fields: CurrentVersionFields) => {
@@ -169,25 +166,6 @@ export class CurrentVersion implements StructClass {
     return CurrentVersion.fromFieldsWithTypes(content);
   }
 
-  static fromSuiObjectData(data: SuiObjectData): CurrentVersion {
-    if (data.bcs) {
-      if (
-        data.bcs.dataType !== "moveObject" ||
-        !isCurrentVersion(data.bcs.type)
-      ) {
-        throw new Error(`object at is not a CurrentVersion object`);
-      }
-
-      return CurrentVersion.fromBcs(fromB64(data.bcs.bcsBytes));
-    }
-    if (data.content) {
-      return CurrentVersion.fromSuiParsedData(data.content);
-    }
-    throw new Error(
-      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
-    );
-  }
-
   static async fetch(client: SuiClient, id: string): Promise<CurrentVersion> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -201,8 +179,7 @@ export class CurrentVersion implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a CurrentVersion object`);
     }
-
-    return CurrentVersion.fromSuiObjectData(res.data);
+    return CurrentVersion.fromBcs(fromB64(res.data.bcs.bcsBytes));
   }
 }
 
@@ -210,7 +187,10 @@ export class CurrentVersion implements StructClass {
 
 export function isCurrentPackage(type: string): boolean {
   type = compressSuiType(type);
-  return type === `${PKG_V1}::package_utils::CurrentPackage`;
+  return (
+    type ===
+    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::package_utils::CurrentPackage"
+  );
 }
 
 export interface CurrentPackageFields {
@@ -223,16 +203,15 @@ export type CurrentPackageReified = Reified<
 >;
 
 export class CurrentPackage implements StructClass {
-  __StructClass = true as const;
-
-  static readonly $typeName = `${PKG_V1}::package_utils::CurrentPackage`;
+  static readonly $typeName =
+    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::package_utils::CurrentPackage";
   static readonly $numTypeParams = 0;
-  static readonly $isPhantom = [] as const;
 
   readonly $typeName = CurrentPackage.$typeName;
-  readonly $fullTypeName: `${typeof PKG_V1}::package_utils::CurrentPackage`;
+
+  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::package_utils::CurrentPackage";
+
   readonly $typeArgs: [];
-  readonly $isPhantom = CurrentPackage.$isPhantom;
 
   readonly dummyField: ToField<"bool">;
 
@@ -240,7 +219,7 @@ export class CurrentPackage implements StructClass {
     this.$fullTypeName = composeSuiType(
       CurrentPackage.$typeName,
       ...typeArgs,
-    ) as `${typeof PKG_V1}::package_utils::CurrentPackage`;
+    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::package_utils::CurrentPackage";
     this.$typeArgs = typeArgs;
 
     this.dummyField = fields.dummyField;
@@ -252,9 +231,8 @@ export class CurrentPackage implements StructClass {
       fullTypeName: composeSuiType(
         CurrentPackage.$typeName,
         ...[],
-      ) as `${typeof PKG_V1}::package_utils::CurrentPackage`,
+      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::package_utils::CurrentPackage",
       typeArgs: [] as [],
-      isPhantom: CurrentPackage.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         CurrentPackage.fromFields(fields),
@@ -266,8 +244,6 @@ export class CurrentPackage implements StructClass {
       fromJSON: (json: Record<string, any>) => CurrentPackage.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         CurrentPackage.fromSuiParsedData(content),
-      fromSuiObjectData: (content: SuiObjectData) =>
-        CurrentPackage.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         CurrentPackage.fetch(client, id),
       new: (fields: CurrentPackageFields) => {
@@ -354,25 +330,6 @@ export class CurrentPackage implements StructClass {
     return CurrentPackage.fromFieldsWithTypes(content);
   }
 
-  static fromSuiObjectData(data: SuiObjectData): CurrentPackage {
-    if (data.bcs) {
-      if (
-        data.bcs.dataType !== "moveObject" ||
-        !isCurrentPackage(data.bcs.type)
-      ) {
-        throw new Error(`object at is not a CurrentPackage object`);
-      }
-
-      return CurrentPackage.fromBcs(fromB64(data.bcs.bcsBytes));
-    }
-    if (data.content) {
-      return CurrentPackage.fromSuiParsedData(data.content);
-    }
-    throw new Error(
-      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
-    );
-  }
-
   static async fetch(client: SuiClient, id: string): Promise<CurrentPackage> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -386,8 +343,7 @@ export class CurrentPackage implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a CurrentPackage object`);
     }
-
-    return CurrentPackage.fromSuiObjectData(res.data);
+    return CurrentPackage.fromBcs(fromB64(res.data.bcs.bcsBytes));
   }
 }
 
@@ -395,7 +351,10 @@ export class CurrentPackage implements StructClass {
 
 export function isPackageInfo(type: string): boolean {
   type = compressSuiType(type);
-  return type === `${PKG_V1}::package_utils::PackageInfo`;
+  return (
+    type ===
+    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::package_utils::PackageInfo"
+  );
 }
 
 export interface PackageInfoFields {
@@ -406,16 +365,15 @@ export interface PackageInfoFields {
 export type PackageInfoReified = Reified<PackageInfo, PackageInfoFields>;
 
 export class PackageInfo implements StructClass {
-  __StructClass = true as const;
-
-  static readonly $typeName = `${PKG_V1}::package_utils::PackageInfo`;
+  static readonly $typeName =
+    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::package_utils::PackageInfo";
   static readonly $numTypeParams = 0;
-  static readonly $isPhantom = [] as const;
 
   readonly $typeName = PackageInfo.$typeName;
-  readonly $fullTypeName: `${typeof PKG_V1}::package_utils::PackageInfo`;
+
+  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::package_utils::PackageInfo";
+
   readonly $typeArgs: [];
-  readonly $isPhantom = PackageInfo.$isPhantom;
 
   readonly package: ToField<ID>;
   readonly digest: ToField<Bytes32>;
@@ -424,7 +382,7 @@ export class PackageInfo implements StructClass {
     this.$fullTypeName = composeSuiType(
       PackageInfo.$typeName,
       ...typeArgs,
-    ) as `${typeof PKG_V1}::package_utils::PackageInfo`;
+    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::package_utils::PackageInfo";
     this.$typeArgs = typeArgs;
 
     this.package = fields.package;
@@ -437,9 +395,8 @@ export class PackageInfo implements StructClass {
       fullTypeName: composeSuiType(
         PackageInfo.$typeName,
         ...[],
-      ) as `${typeof PKG_V1}::package_utils::PackageInfo`,
+      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::package_utils::PackageInfo",
       typeArgs: [] as [],
-      isPhantom: PackageInfo.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         PackageInfo.fromFields(fields),
@@ -451,8 +408,6 @@ export class PackageInfo implements StructClass {
       fromJSON: (json: Record<string, any>) => PackageInfo.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         PackageInfo.fromSuiParsedData(content),
-      fromSuiObjectData: (content: SuiObjectData) =>
-        PackageInfo.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         PackageInfo.fetch(client, id),
       new: (fields: PackageInfoFields) => {
@@ -544,22 +499,6 @@ export class PackageInfo implements StructClass {
     return PackageInfo.fromFieldsWithTypes(content);
   }
 
-  static fromSuiObjectData(data: SuiObjectData): PackageInfo {
-    if (data.bcs) {
-      if (data.bcs.dataType !== "moveObject" || !isPackageInfo(data.bcs.type)) {
-        throw new Error(`object at is not a PackageInfo object`);
-      }
-
-      return PackageInfo.fromBcs(fromB64(data.bcs.bcsBytes));
-    }
-    if (data.content) {
-      return PackageInfo.fromSuiParsedData(data.content);
-    }
-    throw new Error(
-      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
-    );
-  }
-
   static async fetch(client: SuiClient, id: string): Promise<PackageInfo> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -573,8 +512,7 @@ export class PackageInfo implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a PackageInfo object`);
     }
-
-    return PackageInfo.fromSuiObjectData(res.data);
+    return PackageInfo.fromBcs(fromB64(res.data.bcs.bcsBytes));
   }
 }
 
@@ -582,7 +520,10 @@ export class PackageInfo implements StructClass {
 
 export function isPendingPackage(type: string): boolean {
   type = compressSuiType(type);
-  return type === `${PKG_V1}::package_utils::PendingPackage`;
+  return (
+    type ===
+    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::package_utils::PendingPackage"
+  );
 }
 
 export interface PendingPackageFields {
@@ -595,16 +536,15 @@ export type PendingPackageReified = Reified<
 >;
 
 export class PendingPackage implements StructClass {
-  __StructClass = true as const;
-
-  static readonly $typeName = `${PKG_V1}::package_utils::PendingPackage`;
+  static readonly $typeName =
+    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::package_utils::PendingPackage";
   static readonly $numTypeParams = 0;
-  static readonly $isPhantom = [] as const;
 
   readonly $typeName = PendingPackage.$typeName;
-  readonly $fullTypeName: `${typeof PKG_V1}::package_utils::PendingPackage`;
+
+  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::package_utils::PendingPackage";
+
   readonly $typeArgs: [];
-  readonly $isPhantom = PendingPackage.$isPhantom;
 
   readonly dummyField: ToField<"bool">;
 
@@ -612,7 +552,7 @@ export class PendingPackage implements StructClass {
     this.$fullTypeName = composeSuiType(
       PendingPackage.$typeName,
       ...typeArgs,
-    ) as `${typeof PKG_V1}::package_utils::PendingPackage`;
+    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::package_utils::PendingPackage";
     this.$typeArgs = typeArgs;
 
     this.dummyField = fields.dummyField;
@@ -624,9 +564,8 @@ export class PendingPackage implements StructClass {
       fullTypeName: composeSuiType(
         PendingPackage.$typeName,
         ...[],
-      ) as `${typeof PKG_V1}::package_utils::PendingPackage`,
+      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::package_utils::PendingPackage",
       typeArgs: [] as [],
-      isPhantom: PendingPackage.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         PendingPackage.fromFields(fields),
@@ -638,8 +577,6 @@ export class PendingPackage implements StructClass {
       fromJSON: (json: Record<string, any>) => PendingPackage.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         PendingPackage.fromSuiParsedData(content),
-      fromSuiObjectData: (content: SuiObjectData) =>
-        PendingPackage.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         PendingPackage.fetch(client, id),
       new: (fields: PendingPackageFields) => {
@@ -726,25 +663,6 @@ export class PendingPackage implements StructClass {
     return PendingPackage.fromFieldsWithTypes(content);
   }
 
-  static fromSuiObjectData(data: SuiObjectData): PendingPackage {
-    if (data.bcs) {
-      if (
-        data.bcs.dataType !== "moveObject" ||
-        !isPendingPackage(data.bcs.type)
-      ) {
-        throw new Error(`object at is not a PendingPackage object`);
-      }
-
-      return PendingPackage.fromBcs(fromB64(data.bcs.bcsBytes));
-    }
-    if (data.content) {
-      return PendingPackage.fromSuiParsedData(data.content);
-    }
-    throw new Error(
-      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
-    );
-  }
-
   static async fetch(client: SuiClient, id: string): Promise<PendingPackage> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -758,7 +676,6 @@ export class PendingPackage implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a PendingPackage object`);
     }
-
-    return PendingPackage.fromSuiObjectData(res.data);
+    return PendingPackage.fromBcs(fromB64(res.data.bcs.bcsBytes));
   }
 }

@@ -28,22 +28,22 @@ import {
   FieldsWithTypes,
   composeSuiType,
   compressSuiType,
-  parseTypeName,
 } from "../../_framework/util";
 import { Cell } from "../cell/structs";
 import { Decimal } from "../decimal/structs";
-import { PKG_V1 } from "../index";
 import { PoolRewardManager } from "../liquidity-mining/structs";
 import { ReserveConfig } from "../reserve-config/structs";
-import { bcs } from "@mysten/sui/bcs";
-import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
-import { fromB64, fromHEX, toHEX } from "@mysten/sui/utils";
+import { bcs, fromB64, fromHEX, toHEX } from "@mysten/bcs";
+import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
 
 /* ============================== BalanceKey =============================== */
 
 export function isBalanceKey(type: string): boolean {
   type = compressSuiType(type);
-  return type === `${PKG_V1}::reserve::BalanceKey`;
+  return (
+    type ===
+    "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve::BalanceKey"
+  );
 }
 
 export interface BalanceKeyFields {
@@ -53,16 +53,15 @@ export interface BalanceKeyFields {
 export type BalanceKeyReified = Reified<BalanceKey, BalanceKeyFields>;
 
 export class BalanceKey implements StructClass {
-  __StructClass = true as const;
-
-  static readonly $typeName = `${PKG_V1}::reserve::BalanceKey`;
+  static readonly $typeName =
+    "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve::BalanceKey";
   static readonly $numTypeParams = 0;
-  static readonly $isPhantom = [] as const;
 
   readonly $typeName = BalanceKey.$typeName;
-  readonly $fullTypeName: `${typeof PKG_V1}::reserve::BalanceKey`;
+
+  readonly $fullTypeName: "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve::BalanceKey";
+
   readonly $typeArgs: [];
-  readonly $isPhantom = BalanceKey.$isPhantom;
 
   readonly dummyField: ToField<"bool">;
 
@@ -70,7 +69,7 @@ export class BalanceKey implements StructClass {
     this.$fullTypeName = composeSuiType(
       BalanceKey.$typeName,
       ...typeArgs,
-    ) as `${typeof PKG_V1}::reserve::BalanceKey`;
+    ) as "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve::BalanceKey";
     this.$typeArgs = typeArgs;
 
     this.dummyField = fields.dummyField;
@@ -82,9 +81,8 @@ export class BalanceKey implements StructClass {
       fullTypeName: composeSuiType(
         BalanceKey.$typeName,
         ...[],
-      ) as `${typeof PKG_V1}::reserve::BalanceKey`,
+      ) as "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve::BalanceKey",
       typeArgs: [] as [],
-      isPhantom: BalanceKey.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         BalanceKey.fromFields(fields),
@@ -96,8 +94,6 @@ export class BalanceKey implements StructClass {
       fromJSON: (json: Record<string, any>) => BalanceKey.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         BalanceKey.fromSuiParsedData(content),
-      fromSuiObjectData: (content: SuiObjectData) =>
-        BalanceKey.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         BalanceKey.fetch(client, id),
       new: (fields: BalanceKeyFields) => {
@@ -184,22 +180,6 @@ export class BalanceKey implements StructClass {
     return BalanceKey.fromFieldsWithTypes(content);
   }
 
-  static fromSuiObjectData(data: SuiObjectData): BalanceKey {
-    if (data.bcs) {
-      if (data.bcs.dataType !== "moveObject" || !isBalanceKey(data.bcs.type)) {
-        throw new Error(`object at is not a BalanceKey object`);
-      }
-
-      return BalanceKey.fromBcs(fromB64(data.bcs.bcsBytes));
-    }
-    if (data.content) {
-      return BalanceKey.fromSuiParsedData(data.content);
-    }
-    throw new Error(
-      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
-    );
-  }
-
   static async fetch(client: SuiClient, id: string): Promise<BalanceKey> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -213,8 +193,7 @@ export class BalanceKey implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a BalanceKey object`);
     }
-
-    return BalanceKey.fromSuiObjectData(res.data);
+    return BalanceKey.fromBcs(fromB64(res.data.bcs.bcsBytes));
   }
 }
 
@@ -222,7 +201,9 @@ export class BalanceKey implements StructClass {
 
 export function isBalances(type: string): boolean {
   type = compressSuiType(type);
-  return type.startsWith(`${PKG_V1}::reserve::Balances` + "<");
+  return type.startsWith(
+    "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve::Balances<",
+  );
 }
 
 export interface BalancesFields<
@@ -246,16 +227,15 @@ export class Balances<
   T extends PhantomTypeArgument,
 > implements StructClass
 {
-  __StructClass = true as const;
-
-  static readonly $typeName = `${PKG_V1}::reserve::Balances`;
+  static readonly $typeName =
+    "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve::Balances";
   static readonly $numTypeParams = 2;
-  static readonly $isPhantom = [true, true] as const;
 
   readonly $typeName = Balances.$typeName;
-  readonly $fullTypeName: `${typeof PKG_V1}::reserve::Balances<${PhantomToTypeStr<P>}, ${PhantomToTypeStr<T>}>`;
+
+  readonly $fullTypeName: `0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve::Balances<${PhantomToTypeStr<P>}, ${PhantomToTypeStr<T>}>`;
+
   readonly $typeArgs: [PhantomToTypeStr<P>, PhantomToTypeStr<T>];
-  readonly $isPhantom = Balances.$isPhantom;
 
   readonly availableAmount: ToField<Balance<T>>;
   readonly ctokenSupply: ToField<Supply<ToPhantom<CToken<P, T>>>>;
@@ -270,7 +250,7 @@ export class Balances<
     this.$fullTypeName = composeSuiType(
       Balances.$typeName,
       ...typeArgs,
-    ) as `${typeof PKG_V1}::reserve::Balances<${PhantomToTypeStr<P>}, ${PhantomToTypeStr<T>}>`;
+    ) as `0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve::Balances<${PhantomToTypeStr<P>}, ${PhantomToTypeStr<T>}>`;
     this.$typeArgs = typeArgs;
 
     this.availableAmount = fields.availableAmount;
@@ -292,12 +272,11 @@ export class Balances<
       fullTypeName: composeSuiType(
         Balances.$typeName,
         ...[extractType(P), extractType(T)],
-      ) as `${typeof PKG_V1}::reserve::Balances<${PhantomToTypeStr<ToPhantomTypeArgument<P>>}, ${PhantomToTypeStr<ToPhantomTypeArgument<T>>}>`,
+      ) as `0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve::Balances<${PhantomToTypeStr<ToPhantomTypeArgument<P>>}, ${PhantomToTypeStr<ToPhantomTypeArgument<T>>}>`,
       typeArgs: [extractType(P), extractType(T)] as [
         PhantomToTypeStr<ToPhantomTypeArgument<P>>,
         PhantomToTypeStr<ToPhantomTypeArgument<T>>,
       ],
-      isPhantom: Balances.$isPhantom,
       reifiedTypeArgs: [P, T],
       fromFields: (fields: Record<string, any>) =>
         Balances.fromFields([P, T], fields),
@@ -309,8 +288,6 @@ export class Balances<
       fromJSON: (json: Record<string, any>) => Balances.fromJSON([P, T], json),
       fromSuiParsedData: (content: SuiParsedData) =>
         Balances.fromSuiParsedData([P, T], content),
-      fromSuiObjectData: (content: SuiObjectData) =>
-        Balances.fromSuiObjectData([P, T], content),
       fetch: async (client: SuiClient, id: string) =>
         Balances.fetch(client, [P, T], id),
       new: (
@@ -529,44 +506,6 @@ export class Balances<
     return Balances.fromFieldsWithTypes(typeArgs, content);
   }
 
-  static fromSuiObjectData<
-    P extends PhantomReified<PhantomTypeArgument>,
-    T extends PhantomReified<PhantomTypeArgument>,
-  >(
-    typeArgs: [P, T],
-    data: SuiObjectData,
-  ): Balances<ToPhantomTypeArgument<P>, ToPhantomTypeArgument<T>> {
-    if (data.bcs) {
-      if (data.bcs.dataType !== "moveObject" || !isBalances(data.bcs.type)) {
-        throw new Error(`object at is not a Balances object`);
-      }
-
-      const gotTypeArgs = parseTypeName(data.bcs.type).typeArgs;
-      if (gotTypeArgs.length !== 2) {
-        throw new Error(
-          `type argument mismatch: expected 2 type arguments but got ${gotTypeArgs.length}`,
-        );
-      }
-      for (let i = 0; i < 2; i++) {
-        const gotTypeArg = compressSuiType(gotTypeArgs[i]);
-        const expectedTypeArg = compressSuiType(extractType(typeArgs[i]));
-        if (gotTypeArg !== expectedTypeArg) {
-          throw new Error(
-            `type argument mismatch at position ${i}: expected '${expectedTypeArg}' but got '${gotTypeArg}'`,
-          );
-        }
-      }
-
-      return Balances.fromBcs(typeArgs, fromB64(data.bcs.bcsBytes));
-    }
-    if (data.content) {
-      return Balances.fromSuiParsedData(typeArgs, data.content);
-    }
-    throw new Error(
-      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
-    );
-  }
-
   static async fetch<
     P extends PhantomReified<PhantomTypeArgument>,
     T extends PhantomReified<PhantomTypeArgument>,
@@ -587,8 +526,7 @@ export class Balances<
     ) {
       throw new Error(`object at id ${id} is not a Balances object`);
     }
-
-    return Balances.fromSuiObjectData(typeArgs, res.data);
+    return Balances.fromBcs(typeArgs, fromB64(res.data.bcs.bcsBytes));
   }
 }
 
@@ -596,7 +534,9 @@ export class Balances<
 
 export function isCToken(type: string): boolean {
   type = compressSuiType(type);
-  return type.startsWith(`${PKG_V1}::reserve::CToken` + "<");
+  return type.startsWith(
+    "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve::CToken<",
+  );
 }
 
 export interface CTokenFields<
@@ -616,16 +556,15 @@ export class CToken<
   T extends PhantomTypeArgument,
 > implements StructClass
 {
-  __StructClass = true as const;
-
-  static readonly $typeName = `${PKG_V1}::reserve::CToken`;
+  static readonly $typeName =
+    "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve::CToken";
   static readonly $numTypeParams = 2;
-  static readonly $isPhantom = [true, true] as const;
 
   readonly $typeName = CToken.$typeName;
-  readonly $fullTypeName: `${typeof PKG_V1}::reserve::CToken<${PhantomToTypeStr<P>}, ${PhantomToTypeStr<T>}>`;
+
+  readonly $fullTypeName: `0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve::CToken<${PhantomToTypeStr<P>}, ${PhantomToTypeStr<T>}>`;
+
   readonly $typeArgs: [PhantomToTypeStr<P>, PhantomToTypeStr<T>];
-  readonly $isPhantom = CToken.$isPhantom;
 
   readonly dummyField: ToField<"bool">;
 
@@ -636,7 +575,7 @@ export class CToken<
     this.$fullTypeName = composeSuiType(
       CToken.$typeName,
       ...typeArgs,
-    ) as `${typeof PKG_V1}::reserve::CToken<${PhantomToTypeStr<P>}, ${PhantomToTypeStr<T>}>`;
+    ) as `0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve::CToken<${PhantomToTypeStr<P>}, ${PhantomToTypeStr<T>}>`;
     this.$typeArgs = typeArgs;
 
     this.dummyField = fields.dummyField;
@@ -654,12 +593,11 @@ export class CToken<
       fullTypeName: composeSuiType(
         CToken.$typeName,
         ...[extractType(P), extractType(T)],
-      ) as `${typeof PKG_V1}::reserve::CToken<${PhantomToTypeStr<ToPhantomTypeArgument<P>>}, ${PhantomToTypeStr<ToPhantomTypeArgument<T>>}>`,
+      ) as `0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve::CToken<${PhantomToTypeStr<ToPhantomTypeArgument<P>>}, ${PhantomToTypeStr<ToPhantomTypeArgument<T>>}>`,
       typeArgs: [extractType(P), extractType(T)] as [
         PhantomToTypeStr<ToPhantomTypeArgument<P>>,
         PhantomToTypeStr<ToPhantomTypeArgument<T>>,
       ],
-      isPhantom: CToken.$isPhantom,
       reifiedTypeArgs: [P, T],
       fromFields: (fields: Record<string, any>) =>
         CToken.fromFields([P, T], fields),
@@ -671,8 +609,6 @@ export class CToken<
       fromJSON: (json: Record<string, any>) => CToken.fromJSON([P, T], json),
       fromSuiParsedData: (content: SuiParsedData) =>
         CToken.fromSuiParsedData([P, T], content),
-      fromSuiObjectData: (content: SuiObjectData) =>
-        CToken.fromSuiObjectData([P, T], content),
       fetch: async (client: SuiClient, id: string) =>
         CToken.fetch(client, [P, T], id),
       new: (
@@ -814,44 +750,6 @@ export class CToken<
     return CToken.fromFieldsWithTypes(typeArgs, content);
   }
 
-  static fromSuiObjectData<
-    P extends PhantomReified<PhantomTypeArgument>,
-    T extends PhantomReified<PhantomTypeArgument>,
-  >(
-    typeArgs: [P, T],
-    data: SuiObjectData,
-  ): CToken<ToPhantomTypeArgument<P>, ToPhantomTypeArgument<T>> {
-    if (data.bcs) {
-      if (data.bcs.dataType !== "moveObject" || !isCToken(data.bcs.type)) {
-        throw new Error(`object at is not a CToken object`);
-      }
-
-      const gotTypeArgs = parseTypeName(data.bcs.type).typeArgs;
-      if (gotTypeArgs.length !== 2) {
-        throw new Error(
-          `type argument mismatch: expected 2 type arguments but got ${gotTypeArgs.length}`,
-        );
-      }
-      for (let i = 0; i < 2; i++) {
-        const gotTypeArg = compressSuiType(gotTypeArgs[i]);
-        const expectedTypeArg = compressSuiType(extractType(typeArgs[i]));
-        if (gotTypeArg !== expectedTypeArg) {
-          throw new Error(
-            `type argument mismatch at position ${i}: expected '${expectedTypeArg}' but got '${gotTypeArg}'`,
-          );
-        }
-      }
-
-      return CToken.fromBcs(typeArgs, fromB64(data.bcs.bcsBytes));
-    }
-    if (data.content) {
-      return CToken.fromSuiParsedData(typeArgs, data.content);
-    }
-    throw new Error(
-      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
-    );
-  }
-
   static async fetch<
     P extends PhantomReified<PhantomTypeArgument>,
     T extends PhantomReified<PhantomTypeArgument>,
@@ -872,8 +770,7 @@ export class CToken<
     ) {
       throw new Error(`object at id ${id} is not a CToken object`);
     }
-
-    return CToken.fromSuiObjectData(typeArgs, res.data);
+    return CToken.fromBcs(typeArgs, fromB64(res.data.bcs.bcsBytes));
   }
 }
 
@@ -881,7 +778,10 @@ export class CToken<
 
 export function isInterestUpdateEvent(type: string): boolean {
   type = compressSuiType(type);
-  return type === `${PKG_V1}::reserve::InterestUpdateEvent`;
+  return (
+    type ===
+    "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve::InterestUpdateEvent"
+  );
 }
 
 export interface InterestUpdateEventFields {
@@ -907,16 +807,15 @@ export type InterestUpdateEventReified = Reified<
 >;
 
 export class InterestUpdateEvent implements StructClass {
-  __StructClass = true as const;
-
-  static readonly $typeName = `${PKG_V1}::reserve::InterestUpdateEvent`;
+  static readonly $typeName =
+    "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve::InterestUpdateEvent";
   static readonly $numTypeParams = 0;
-  static readonly $isPhantom = [] as const;
 
   readonly $typeName = InterestUpdateEvent.$typeName;
-  readonly $fullTypeName: `${typeof PKG_V1}::reserve::InterestUpdateEvent`;
+
+  readonly $fullTypeName: "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve::InterestUpdateEvent";
+
   readonly $typeArgs: [];
-  readonly $isPhantom = InterestUpdateEvent.$isPhantom;
 
   readonly lendingMarketId: ToField<"address">;
   readonly coinType: ToField<TypeName>;
@@ -937,7 +836,7 @@ export class InterestUpdateEvent implements StructClass {
     this.$fullTypeName = composeSuiType(
       InterestUpdateEvent.$typeName,
       ...typeArgs,
-    ) as `${typeof PKG_V1}::reserve::InterestUpdateEvent`;
+    ) as "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve::InterestUpdateEvent";
     this.$typeArgs = typeArgs;
 
     this.lendingMarketId = fields.lendingMarketId;
@@ -963,9 +862,8 @@ export class InterestUpdateEvent implements StructClass {
       fullTypeName: composeSuiType(
         InterestUpdateEvent.$typeName,
         ...[],
-      ) as `${typeof PKG_V1}::reserve::InterestUpdateEvent`,
+      ) as "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve::InterestUpdateEvent",
       typeArgs: [] as [],
-      isPhantom: InterestUpdateEvent.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         InterestUpdateEvent.fromFields(fields),
@@ -978,8 +876,6 @@ export class InterestUpdateEvent implements StructClass {
         InterestUpdateEvent.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         InterestUpdateEvent.fromSuiParsedData(content),
-      fromSuiObjectData: (content: SuiObjectData) =>
-        InterestUpdateEvent.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         InterestUpdateEvent.fetch(client, id),
       new: (fields: InterestUpdateEventFields) => {
@@ -1227,25 +1123,6 @@ export class InterestUpdateEvent implements StructClass {
     return InterestUpdateEvent.fromFieldsWithTypes(content);
   }
 
-  static fromSuiObjectData(data: SuiObjectData): InterestUpdateEvent {
-    if (data.bcs) {
-      if (
-        data.bcs.dataType !== "moveObject" ||
-        !isInterestUpdateEvent(data.bcs.type)
-      ) {
-        throw new Error(`object at is not a InterestUpdateEvent object`);
-      }
-
-      return InterestUpdateEvent.fromBcs(fromB64(data.bcs.bcsBytes));
-    }
-    if (data.content) {
-      return InterestUpdateEvent.fromSuiParsedData(data.content);
-    }
-    throw new Error(
-      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
-    );
-  }
-
   static async fetch(
     client: SuiClient,
     id: string,
@@ -1262,8 +1139,7 @@ export class InterestUpdateEvent implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a InterestUpdateEvent object`);
     }
-
-    return InterestUpdateEvent.fromSuiObjectData(res.data);
+    return InterestUpdateEvent.fromBcs(fromB64(res.data.bcs.bcsBytes));
   }
 }
 
@@ -1271,7 +1147,9 @@ export class InterestUpdateEvent implements StructClass {
 
 export function isReserve(type: string): boolean {
   type = compressSuiType(type);
-  return type.startsWith(`${PKG_V1}::reserve::Reserve` + "<");
+  return type.startsWith(
+    "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve::Reserve<",
+  );
 }
 
 export interface ReserveFields<P extends PhantomTypeArgument> {
@@ -1302,16 +1180,15 @@ export type ReserveReified<P extends PhantomTypeArgument> = Reified<
 >;
 
 export class Reserve<P extends PhantomTypeArgument> implements StructClass {
-  __StructClass = true as const;
-
-  static readonly $typeName = `${PKG_V1}::reserve::Reserve`;
+  static readonly $typeName =
+    "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve::Reserve";
   static readonly $numTypeParams = 1;
-  static readonly $isPhantom = [true] as const;
 
   readonly $typeName = Reserve.$typeName;
-  readonly $fullTypeName: `${typeof PKG_V1}::reserve::Reserve<${PhantomToTypeStr<P>}>`;
+
+  readonly $fullTypeName: `0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve::Reserve<${PhantomToTypeStr<P>}>`;
+
   readonly $typeArgs: [PhantomToTypeStr<P>];
-  readonly $isPhantom = Reserve.$isPhantom;
 
   readonly id: ToField<UID>;
   readonly lendingMarketId: ToField<ID>;
@@ -1340,7 +1217,7 @@ export class Reserve<P extends PhantomTypeArgument> implements StructClass {
     this.$fullTypeName = composeSuiType(
       Reserve.$typeName,
       ...typeArgs,
-    ) as `${typeof PKG_V1}::reserve::Reserve<${PhantomToTypeStr<P>}>`;
+    ) as `0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve::Reserve<${PhantomToTypeStr<P>}>`;
     this.$typeArgs = typeArgs;
 
     this.id = fields.id;
@@ -1372,11 +1249,10 @@ export class Reserve<P extends PhantomTypeArgument> implements StructClass {
       fullTypeName: composeSuiType(
         Reserve.$typeName,
         ...[extractType(P)],
-      ) as `${typeof PKG_V1}::reserve::Reserve<${PhantomToTypeStr<ToPhantomTypeArgument<P>>}>`,
+      ) as `0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve::Reserve<${PhantomToTypeStr<ToPhantomTypeArgument<P>>}>`,
       typeArgs: [extractType(P)] as [
         PhantomToTypeStr<ToPhantomTypeArgument<P>>,
       ],
-      isPhantom: Reserve.$isPhantom,
       reifiedTypeArgs: [P],
       fromFields: (fields: Record<string, any>) =>
         Reserve.fromFields(P, fields),
@@ -1388,8 +1264,6 @@ export class Reserve<P extends PhantomTypeArgument> implements StructClass {
       fromJSON: (json: Record<string, any>) => Reserve.fromJSON(P, json),
       fromSuiParsedData: (content: SuiParsedData) =>
         Reserve.fromSuiParsedData(P, content),
-      fromSuiObjectData: (content: SuiObjectData) =>
-        Reserve.fromSuiObjectData(P, content),
       fetch: async (client: SuiClient, id: string) =>
         Reserve.fetch(client, P, id),
       new: (fields: ReserveFields<ToPhantomTypeArgument<P>>) => {
@@ -1698,39 +1572,6 @@ export class Reserve<P extends PhantomTypeArgument> implements StructClass {
     return Reserve.fromFieldsWithTypes(typeArg, content);
   }
 
-  static fromSuiObjectData<P extends PhantomReified<PhantomTypeArgument>>(
-    typeArg: P,
-    data: SuiObjectData,
-  ): Reserve<ToPhantomTypeArgument<P>> {
-    if (data.bcs) {
-      if (data.bcs.dataType !== "moveObject" || !isReserve(data.bcs.type)) {
-        throw new Error(`object at is not a Reserve object`);
-      }
-
-      const gotTypeArgs = parseTypeName(data.bcs.type).typeArgs;
-      if (gotTypeArgs.length !== 1) {
-        throw new Error(
-          `type argument mismatch: expected 1 type argument but got '${gotTypeArgs.length}'`,
-        );
-      }
-      const gotTypeArg = compressSuiType(gotTypeArgs[0]);
-      const expectedTypeArg = compressSuiType(extractType(typeArg));
-      if (gotTypeArg !== compressSuiType(extractType(typeArg))) {
-        throw new Error(
-          `type argument mismatch: expected '${expectedTypeArg}' but got '${gotTypeArg}'`,
-        );
-      }
-
-      return Reserve.fromBcs(typeArg, fromB64(data.bcs.bcsBytes));
-    }
-    if (data.content) {
-      return Reserve.fromSuiParsedData(typeArg, data.content);
-    }
-    throw new Error(
-      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
-    );
-  }
-
   static async fetch<P extends PhantomReified<PhantomTypeArgument>>(
     client: SuiClient,
     typeArg: P,
@@ -1748,8 +1589,7 @@ export class Reserve<P extends PhantomTypeArgument> implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a Reserve object`);
     }
-
-    return Reserve.fromSuiObjectData(typeArg, res.data);
+    return Reserve.fromBcs(typeArg, fromB64(res.data.bcs.bcsBytes));
   }
 }
 
@@ -1757,7 +1597,10 @@ export class Reserve<P extends PhantomTypeArgument> implements StructClass {
 
 export function isReserveAssetDataEvent(type: string): boolean {
   type = compressSuiType(type);
-  return type === `${PKG_V1}::reserve::ReserveAssetDataEvent`;
+  return (
+    type ===
+    "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve::ReserveAssetDataEvent"
+  );
 }
 
 export interface ReserveAssetDataEventFields {
@@ -1785,16 +1628,15 @@ export type ReserveAssetDataEventReified = Reified<
 >;
 
 export class ReserveAssetDataEvent implements StructClass {
-  __StructClass = true as const;
-
-  static readonly $typeName = `${PKG_V1}::reserve::ReserveAssetDataEvent`;
+  static readonly $typeName =
+    "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve::ReserveAssetDataEvent";
   static readonly $numTypeParams = 0;
-  static readonly $isPhantom = [] as const;
 
   readonly $typeName = ReserveAssetDataEvent.$typeName;
-  readonly $fullTypeName: `${typeof PKG_V1}::reserve::ReserveAssetDataEvent`;
+
+  readonly $fullTypeName: "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve::ReserveAssetDataEvent";
+
   readonly $typeArgs: [];
-  readonly $isPhantom = ReserveAssetDataEvent.$isPhantom;
 
   readonly lendingMarketId: ToField<"address">;
   readonly coinType: ToField<TypeName>;
@@ -1817,7 +1659,7 @@ export class ReserveAssetDataEvent implements StructClass {
     this.$fullTypeName = composeSuiType(
       ReserveAssetDataEvent.$typeName,
       ...typeArgs,
-    ) as `${typeof PKG_V1}::reserve::ReserveAssetDataEvent`;
+    ) as "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve::ReserveAssetDataEvent";
     this.$typeArgs = typeArgs;
 
     this.lendingMarketId = fields.lendingMarketId;
@@ -1844,9 +1686,8 @@ export class ReserveAssetDataEvent implements StructClass {
       fullTypeName: composeSuiType(
         ReserveAssetDataEvent.$typeName,
         ...[],
-      ) as `${typeof PKG_V1}::reserve::ReserveAssetDataEvent`,
+      ) as "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::reserve::ReserveAssetDataEvent",
       typeArgs: [] as [],
-      isPhantom: ReserveAssetDataEvent.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         ReserveAssetDataEvent.fromFields(fields),
@@ -1859,8 +1700,6 @@ export class ReserveAssetDataEvent implements StructClass {
         ReserveAssetDataEvent.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         ReserveAssetDataEvent.fromSuiParsedData(content),
-      fromSuiObjectData: (content: SuiObjectData) =>
-        ReserveAssetDataEvent.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         ReserveAssetDataEvent.fetch(client, id),
       new: (fields: ReserveAssetDataEventFields) => {
@@ -2118,25 +1957,6 @@ export class ReserveAssetDataEvent implements StructClass {
     return ReserveAssetDataEvent.fromFieldsWithTypes(content);
   }
 
-  static fromSuiObjectData(data: SuiObjectData): ReserveAssetDataEvent {
-    if (data.bcs) {
-      if (
-        data.bcs.dataType !== "moveObject" ||
-        !isReserveAssetDataEvent(data.bcs.type)
-      ) {
-        throw new Error(`object at is not a ReserveAssetDataEvent object`);
-      }
-
-      return ReserveAssetDataEvent.fromBcs(fromB64(data.bcs.bcsBytes));
-    }
-    if (data.content) {
-      return ReserveAssetDataEvent.fromSuiParsedData(data.content);
-    }
-    throw new Error(
-      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
-    );
-  }
-
   static async fetch(
     client: SuiClient,
     id: string,
@@ -2155,7 +1975,6 @@ export class ReserveAssetDataEvent implements StructClass {
         `object at id ${id} is not a ReserveAssetDataEvent object`,
       );
     }
-
-    return ReserveAssetDataEvent.fromSuiObjectData(res.data);
+    return ReserveAssetDataEvent.fromBcs(fromB64(res.data.bcs.bcsBytes));
   }
 }

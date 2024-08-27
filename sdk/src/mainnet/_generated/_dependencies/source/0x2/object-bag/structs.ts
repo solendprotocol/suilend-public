@@ -14,17 +14,15 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
-import { PKG_V25 } from "../index";
 import { UID } from "../object/structs";
-import { bcs } from "@mysten/sui/bcs";
-import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
-import { fromB64 } from "@mysten/sui/utils";
+import { bcs, fromB64 } from "@mysten/bcs";
+import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
 
 /* ============================== ObjectBag =============================== */
 
 export function isObjectBag(type: string): boolean {
   type = compressSuiType(type);
-  return type === `${PKG_V25}::object_bag::ObjectBag`;
+  return type === "0x2::object_bag::ObjectBag";
 }
 
 export interface ObjectBagFields {
@@ -35,16 +33,14 @@ export interface ObjectBagFields {
 export type ObjectBagReified = Reified<ObjectBag, ObjectBagFields>;
 
 export class ObjectBag implements StructClass {
-  __StructClass = true as const;
-
-  static readonly $typeName = `${PKG_V25}::object_bag::ObjectBag`;
+  static readonly $typeName = "0x2::object_bag::ObjectBag";
   static readonly $numTypeParams = 0;
-  static readonly $isPhantom = [] as const;
 
   readonly $typeName = ObjectBag.$typeName;
-  readonly $fullTypeName: `${typeof PKG_V25}::object_bag::ObjectBag`;
+
+  readonly $fullTypeName: "0x2::object_bag::ObjectBag";
+
   readonly $typeArgs: [];
-  readonly $isPhantom = ObjectBag.$isPhantom;
 
   readonly id: ToField<UID>;
   readonly size: ToField<"u64">;
@@ -53,7 +49,7 @@ export class ObjectBag implements StructClass {
     this.$fullTypeName = composeSuiType(
       ObjectBag.$typeName,
       ...typeArgs,
-    ) as `${typeof PKG_V25}::object_bag::ObjectBag`;
+    ) as "0x2::object_bag::ObjectBag";
     this.$typeArgs = typeArgs;
 
     this.id = fields.id;
@@ -66,9 +62,8 @@ export class ObjectBag implements StructClass {
       fullTypeName: composeSuiType(
         ObjectBag.$typeName,
         ...[],
-      ) as `${typeof PKG_V25}::object_bag::ObjectBag`,
+      ) as "0x2::object_bag::ObjectBag",
       typeArgs: [] as [],
-      isPhantom: ObjectBag.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => ObjectBag.fromFields(fields),
       fromFieldsWithTypes: (item: FieldsWithTypes) =>
@@ -79,8 +74,6 @@ export class ObjectBag implements StructClass {
       fromJSON: (json: Record<string, any>) => ObjectBag.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         ObjectBag.fromSuiParsedData(content),
-      fromSuiObjectData: (content: SuiObjectData) =>
-        ObjectBag.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         ObjectBag.fetch(client, id),
       new: (fields: ObjectBagFields) => {
@@ -172,22 +165,6 @@ export class ObjectBag implements StructClass {
     return ObjectBag.fromFieldsWithTypes(content);
   }
 
-  static fromSuiObjectData(data: SuiObjectData): ObjectBag {
-    if (data.bcs) {
-      if (data.bcs.dataType !== "moveObject" || !isObjectBag(data.bcs.type)) {
-        throw new Error(`object at is not a ObjectBag object`);
-      }
-
-      return ObjectBag.fromBcs(fromB64(data.bcs.bcsBytes));
-    }
-    if (data.content) {
-      return ObjectBag.fromSuiParsedData(data.content);
-    }
-    throw new Error(
-      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
-    );
-  }
-
   static async fetch(client: SuiClient, id: string): Promise<ObjectBag> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -201,7 +178,6 @@ export class ObjectBag implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a ObjectBag object`);
     }
-
-    return ObjectBag.fromSuiObjectData(res.data);
+    return ObjectBag.fromBcs(fromB64(res.data.bcs.bcsBytes));
   }
 }

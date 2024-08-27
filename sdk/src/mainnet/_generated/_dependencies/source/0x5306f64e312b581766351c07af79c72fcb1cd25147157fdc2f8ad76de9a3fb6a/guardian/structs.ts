@@ -15,16 +15,17 @@ import {
   compressSuiType,
 } from "../../../../_framework/util";
 import { Bytes20 } from "../bytes20/structs";
-import { PKG_V1 } from "../index";
-import { bcs } from "@mysten/sui/bcs";
-import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
-import { fromB64 } from "@mysten/sui/utils";
+import { bcs, fromB64 } from "@mysten/bcs";
+import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
 
 /* ============================== Guardian =============================== */
 
 export function isGuardian(type: string): boolean {
   type = compressSuiType(type);
-  return type === `${PKG_V1}::guardian::Guardian`;
+  return (
+    type ===
+    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::guardian::Guardian"
+  );
 }
 
 export interface GuardianFields {
@@ -34,16 +35,15 @@ export interface GuardianFields {
 export type GuardianReified = Reified<Guardian, GuardianFields>;
 
 export class Guardian implements StructClass {
-  __StructClass = true as const;
-
-  static readonly $typeName = `${PKG_V1}::guardian::Guardian`;
+  static readonly $typeName =
+    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::guardian::Guardian";
   static readonly $numTypeParams = 0;
-  static readonly $isPhantom = [] as const;
 
   readonly $typeName = Guardian.$typeName;
-  readonly $fullTypeName: `${typeof PKG_V1}::guardian::Guardian`;
+
+  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::guardian::Guardian";
+
   readonly $typeArgs: [];
-  readonly $isPhantom = Guardian.$isPhantom;
 
   readonly pubkey: ToField<Bytes20>;
 
@@ -51,7 +51,7 @@ export class Guardian implements StructClass {
     this.$fullTypeName = composeSuiType(
       Guardian.$typeName,
       ...typeArgs,
-    ) as `${typeof PKG_V1}::guardian::Guardian`;
+    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::guardian::Guardian";
     this.$typeArgs = typeArgs;
 
     this.pubkey = fields.pubkey;
@@ -63,9 +63,8 @@ export class Guardian implements StructClass {
       fullTypeName: composeSuiType(
         Guardian.$typeName,
         ...[],
-      ) as `${typeof PKG_V1}::guardian::Guardian`,
+      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::guardian::Guardian",
       typeArgs: [] as [],
-      isPhantom: Guardian.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => Guardian.fromFields(fields),
       fromFieldsWithTypes: (item: FieldsWithTypes) =>
@@ -76,8 +75,6 @@ export class Guardian implements StructClass {
       fromJSON: (json: Record<string, any>) => Guardian.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         Guardian.fromSuiParsedData(content),
-      fromSuiObjectData: (content: SuiObjectData) =>
-        Guardian.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         Guardian.fetch(client, id),
       new: (fields: GuardianFields) => {
@@ -164,22 +161,6 @@ export class Guardian implements StructClass {
     return Guardian.fromFieldsWithTypes(content);
   }
 
-  static fromSuiObjectData(data: SuiObjectData): Guardian {
-    if (data.bcs) {
-      if (data.bcs.dataType !== "moveObject" || !isGuardian(data.bcs.type)) {
-        throw new Error(`object at is not a Guardian object`);
-      }
-
-      return Guardian.fromBcs(fromB64(data.bcs.bcsBytes));
-    }
-    if (data.content) {
-      return Guardian.fromSuiParsedData(data.content);
-    }
-    throw new Error(
-      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
-    );
-  }
-
   static async fetch(client: SuiClient, id: string): Promise<Guardian> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -193,7 +174,6 @@ export class Guardian implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a Guardian object`);
     }
-
-    return Guardian.fromSuiObjectData(res.data);
+    return Guardian.fromBcs(fromB64(res.data.bcs.bcsBytes));
   }
 }

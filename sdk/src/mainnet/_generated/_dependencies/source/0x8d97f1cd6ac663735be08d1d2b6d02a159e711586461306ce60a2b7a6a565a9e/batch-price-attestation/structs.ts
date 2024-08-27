@@ -5,6 +5,7 @@ import {
   StructClass,
   ToField,
   ToTypeStr,
+  Vector,
   decodeFromFields,
   decodeFromFieldsWithTypes,
   decodeFromJSONField,
@@ -16,18 +17,18 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
-import { Vector } from "../../../../_framework/vector";
-import { PKG_V1 } from "../index";
 import { PriceInfo } from "../price-info/structs";
-import { bcs } from "@mysten/sui/bcs";
-import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
-import { fromB64 } from "@mysten/sui/utils";
+import { bcs, fromB64 } from "@mysten/bcs";
+import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
 
 /* ============================== BatchPriceAttestation =============================== */
 
 export function isBatchPriceAttestation(type: string): boolean {
   type = compressSuiType(type);
-  return type === `${PKG_V1}::batch_price_attestation::BatchPriceAttestation`;
+  return (
+    type ===
+    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::batch_price_attestation::BatchPriceAttestation"
+  );
 }
 
 export interface BatchPriceAttestationFields {
@@ -43,16 +44,15 @@ export type BatchPriceAttestationReified = Reified<
 >;
 
 export class BatchPriceAttestation implements StructClass {
-  __StructClass = true as const;
-
-  static readonly $typeName = `${PKG_V1}::batch_price_attestation::BatchPriceAttestation`;
+  static readonly $typeName =
+    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::batch_price_attestation::BatchPriceAttestation";
   static readonly $numTypeParams = 0;
-  static readonly $isPhantom = [] as const;
 
   readonly $typeName = BatchPriceAttestation.$typeName;
-  readonly $fullTypeName: `${typeof PKG_V1}::batch_price_attestation::BatchPriceAttestation`;
+
+  readonly $fullTypeName: "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::batch_price_attestation::BatchPriceAttestation";
+
   readonly $typeArgs: [];
-  readonly $isPhantom = BatchPriceAttestation.$isPhantom;
 
   readonly header: ToField<Header>;
   readonly attestationSize: ToField<"u64">;
@@ -63,7 +63,7 @@ export class BatchPriceAttestation implements StructClass {
     this.$fullTypeName = composeSuiType(
       BatchPriceAttestation.$typeName,
       ...typeArgs,
-    ) as `${typeof PKG_V1}::batch_price_attestation::BatchPriceAttestation`;
+    ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::batch_price_attestation::BatchPriceAttestation";
     this.$typeArgs = typeArgs;
 
     this.header = fields.header;
@@ -78,9 +78,8 @@ export class BatchPriceAttestation implements StructClass {
       fullTypeName: composeSuiType(
         BatchPriceAttestation.$typeName,
         ...[],
-      ) as `${typeof PKG_V1}::batch_price_attestation::BatchPriceAttestation`,
+      ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::batch_price_attestation::BatchPriceAttestation",
       typeArgs: [] as [],
-      isPhantom: BatchPriceAttestation.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         BatchPriceAttestation.fromFields(fields),
@@ -93,8 +92,6 @@ export class BatchPriceAttestation implements StructClass {
         BatchPriceAttestation.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         BatchPriceAttestation.fromSuiParsedData(content),
-      fromSuiObjectData: (content: SuiObjectData) =>
-        BatchPriceAttestation.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         BatchPriceAttestation.fetch(client, id),
       new: (fields: BatchPriceAttestationFields) => {
@@ -170,7 +167,7 @@ export class BatchPriceAttestation implements StructClass {
       attestationSize: this.attestationSize.toString(),
       attestationCount: this.attestationCount.toString(),
       priceInfos: fieldToJSON<Vector<PriceInfo>>(
-        `vector<${PriceInfo.$typeName}>`,
+        `vector<0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::price_info::PriceInfo>`,
         this.priceInfos,
       ),
     };
@@ -216,25 +213,6 @@ export class BatchPriceAttestation implements StructClass {
     return BatchPriceAttestation.fromFieldsWithTypes(content);
   }
 
-  static fromSuiObjectData(data: SuiObjectData): BatchPriceAttestation {
-    if (data.bcs) {
-      if (
-        data.bcs.dataType !== "moveObject" ||
-        !isBatchPriceAttestation(data.bcs.type)
-      ) {
-        throw new Error(`object at is not a BatchPriceAttestation object`);
-      }
-
-      return BatchPriceAttestation.fromBcs(fromB64(data.bcs.bcsBytes));
-    }
-    if (data.content) {
-      return BatchPriceAttestation.fromSuiParsedData(data.content);
-    }
-    throw new Error(
-      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
-    );
-  }
-
   static async fetch(
     client: SuiClient,
     id: string,
@@ -253,8 +231,7 @@ export class BatchPriceAttestation implements StructClass {
         `object at id ${id} is not a BatchPriceAttestation object`,
       );
     }
-
-    return BatchPriceAttestation.fromSuiObjectData(res.data);
+    return BatchPriceAttestation.fromBcs(fromB64(res.data.bcs.bcsBytes));
   }
 }
 
@@ -262,7 +239,10 @@ export class BatchPriceAttestation implements StructClass {
 
 export function isHeader(type: string): boolean {
   type = compressSuiType(type);
-  return type === `${PKG_V1}::batch_price_attestation::Header`;
+  return (
+    type ===
+    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::batch_price_attestation::Header"
+  );
 }
 
 export interface HeaderFields {
@@ -276,16 +256,15 @@ export interface HeaderFields {
 export type HeaderReified = Reified<Header, HeaderFields>;
 
 export class Header implements StructClass {
-  __StructClass = true as const;
-
-  static readonly $typeName = `${PKG_V1}::batch_price_attestation::Header`;
+  static readonly $typeName =
+    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::batch_price_attestation::Header";
   static readonly $numTypeParams = 0;
-  static readonly $isPhantom = [] as const;
 
   readonly $typeName = Header.$typeName;
-  readonly $fullTypeName: `${typeof PKG_V1}::batch_price_attestation::Header`;
+
+  readonly $fullTypeName: "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::batch_price_attestation::Header";
+
   readonly $typeArgs: [];
-  readonly $isPhantom = Header.$isPhantom;
 
   readonly magic: ToField<"u64">;
   readonly versionMajor: ToField<"u64">;
@@ -297,7 +276,7 @@ export class Header implements StructClass {
     this.$fullTypeName = composeSuiType(
       Header.$typeName,
       ...typeArgs,
-    ) as `${typeof PKG_V1}::batch_price_attestation::Header`;
+    ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::batch_price_attestation::Header";
     this.$typeArgs = typeArgs;
 
     this.magic = fields.magic;
@@ -313,9 +292,8 @@ export class Header implements StructClass {
       fullTypeName: composeSuiType(
         Header.$typeName,
         ...[],
-      ) as `${typeof PKG_V1}::batch_price_attestation::Header`,
+      ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::batch_price_attestation::Header",
       typeArgs: [] as [],
-      isPhantom: Header.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => Header.fromFields(fields),
       fromFieldsWithTypes: (item: FieldsWithTypes) =>
@@ -326,8 +304,6 @@ export class Header implements StructClass {
       fromJSON: (json: Record<string, any>) => Header.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         Header.fromSuiParsedData(content),
-      fromSuiObjectData: (content: SuiObjectData) =>
-        Header.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) => Header.fetch(client, id),
       new: (fields: HeaderFields) => {
         return new Header([], fields);
@@ -433,22 +409,6 @@ export class Header implements StructClass {
     return Header.fromFieldsWithTypes(content);
   }
 
-  static fromSuiObjectData(data: SuiObjectData): Header {
-    if (data.bcs) {
-      if (data.bcs.dataType !== "moveObject" || !isHeader(data.bcs.type)) {
-        throw new Error(`object at is not a Header object`);
-      }
-
-      return Header.fromBcs(fromB64(data.bcs.bcsBytes));
-    }
-    if (data.content) {
-      return Header.fromSuiParsedData(data.content);
-    }
-    throw new Error(
-      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
-    );
-  }
-
   static async fetch(client: SuiClient, id: string): Promise<Header> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -462,7 +422,6 @@ export class Header implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a Header object`);
     }
-
-    return Header.fromSuiObjectData(res.data);
+    return Header.fromBcs(fromB64(res.data.bcs.bcsBytes));
   }
 }

@@ -14,16 +14,17 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
-import { PKG_V1 } from "../index";
-import { bcs } from "@mysten/sui/bcs";
-import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
-import { fromB64, fromHEX, toHEX } from "@mysten/sui/utils";
+import { bcs, fromB64, fromHEX, toHEX } from "@mysten/bcs";
+import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
 
 /* ============================== GovernanceWitness =============================== */
 
 export function isGovernanceWitness(type: string): boolean {
   type = compressSuiType(type);
-  return type === `${PKG_V1}::transfer_fee::GovernanceWitness`;
+  return (
+    type ===
+    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::transfer_fee::GovernanceWitness"
+  );
 }
 
 export interface GovernanceWitnessFields {
@@ -36,16 +37,15 @@ export type GovernanceWitnessReified = Reified<
 >;
 
 export class GovernanceWitness implements StructClass {
-  __StructClass = true as const;
-
-  static readonly $typeName = `${PKG_V1}::transfer_fee::GovernanceWitness`;
+  static readonly $typeName =
+    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::transfer_fee::GovernanceWitness";
   static readonly $numTypeParams = 0;
-  static readonly $isPhantom = [] as const;
 
   readonly $typeName = GovernanceWitness.$typeName;
-  readonly $fullTypeName: `${typeof PKG_V1}::transfer_fee::GovernanceWitness`;
+
+  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::transfer_fee::GovernanceWitness";
+
   readonly $typeArgs: [];
-  readonly $isPhantom = GovernanceWitness.$isPhantom;
 
   readonly dummyField: ToField<"bool">;
 
@@ -53,7 +53,7 @@ export class GovernanceWitness implements StructClass {
     this.$fullTypeName = composeSuiType(
       GovernanceWitness.$typeName,
       ...typeArgs,
-    ) as `${typeof PKG_V1}::transfer_fee::GovernanceWitness`;
+    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::transfer_fee::GovernanceWitness";
     this.$typeArgs = typeArgs;
 
     this.dummyField = fields.dummyField;
@@ -65,9 +65,8 @@ export class GovernanceWitness implements StructClass {
       fullTypeName: composeSuiType(
         GovernanceWitness.$typeName,
         ...[],
-      ) as `${typeof PKG_V1}::transfer_fee::GovernanceWitness`,
+      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::transfer_fee::GovernanceWitness",
       typeArgs: [] as [],
-      isPhantom: GovernanceWitness.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         GovernanceWitness.fromFields(fields),
@@ -79,8 +78,6 @@ export class GovernanceWitness implements StructClass {
       fromJSON: (json: Record<string, any>) => GovernanceWitness.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         GovernanceWitness.fromSuiParsedData(content),
-      fromSuiObjectData: (content: SuiObjectData) =>
-        GovernanceWitness.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         GovernanceWitness.fetch(client, id),
       new: (fields: GovernanceWitnessFields) => {
@@ -167,25 +164,6 @@ export class GovernanceWitness implements StructClass {
     return GovernanceWitness.fromFieldsWithTypes(content);
   }
 
-  static fromSuiObjectData(data: SuiObjectData): GovernanceWitness {
-    if (data.bcs) {
-      if (
-        data.bcs.dataType !== "moveObject" ||
-        !isGovernanceWitness(data.bcs.type)
-      ) {
-        throw new Error(`object at is not a GovernanceWitness object`);
-      }
-
-      return GovernanceWitness.fromBcs(fromB64(data.bcs.bcsBytes));
-    }
-    if (data.content) {
-      return GovernanceWitness.fromSuiParsedData(data.content);
-    }
-    throw new Error(
-      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
-    );
-  }
-
   static async fetch(
     client: SuiClient,
     id: string,
@@ -202,8 +180,7 @@ export class GovernanceWitness implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a GovernanceWitness object`);
     }
-
-    return GovernanceWitness.fromSuiObjectData(res.data);
+    return GovernanceWitness.fromBcs(fromB64(res.data.bcs.bcsBytes));
   }
 }
 
@@ -211,7 +188,10 @@ export class GovernanceWitness implements StructClass {
 
 export function isTransferFee(type: string): boolean {
   type = compressSuiType(type);
-  return type === `${PKG_V1}::transfer_fee::TransferFee`;
+  return (
+    type ===
+    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::transfer_fee::TransferFee"
+  );
 }
 
 export interface TransferFeeFields {
@@ -222,16 +202,15 @@ export interface TransferFeeFields {
 export type TransferFeeReified = Reified<TransferFee, TransferFeeFields>;
 
 export class TransferFee implements StructClass {
-  __StructClass = true as const;
-
-  static readonly $typeName = `${PKG_V1}::transfer_fee::TransferFee`;
+  static readonly $typeName =
+    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::transfer_fee::TransferFee";
   static readonly $numTypeParams = 0;
-  static readonly $isPhantom = [] as const;
 
   readonly $typeName = TransferFee.$typeName;
-  readonly $fullTypeName: `${typeof PKG_V1}::transfer_fee::TransferFee`;
+
+  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::transfer_fee::TransferFee";
+
   readonly $typeArgs: [];
-  readonly $isPhantom = TransferFee.$isPhantom;
 
   readonly amount: ToField<"u64">;
   readonly recipient: ToField<"address">;
@@ -240,7 +219,7 @@ export class TransferFee implements StructClass {
     this.$fullTypeName = composeSuiType(
       TransferFee.$typeName,
       ...typeArgs,
-    ) as `${typeof PKG_V1}::transfer_fee::TransferFee`;
+    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::transfer_fee::TransferFee";
     this.$typeArgs = typeArgs;
 
     this.amount = fields.amount;
@@ -253,9 +232,8 @@ export class TransferFee implements StructClass {
       fullTypeName: composeSuiType(
         TransferFee.$typeName,
         ...[],
-      ) as `${typeof PKG_V1}::transfer_fee::TransferFee`,
+      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::transfer_fee::TransferFee",
       typeArgs: [] as [],
-      isPhantom: TransferFee.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         TransferFee.fromFields(fields),
@@ -267,8 +245,6 @@ export class TransferFee implements StructClass {
       fromJSON: (json: Record<string, any>) => TransferFee.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         TransferFee.fromSuiParsedData(content),
-      fromSuiObjectData: (content: SuiObjectData) =>
-        TransferFee.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         TransferFee.fetch(client, id),
       new: (fields: TransferFeeFields) => {
@@ -365,22 +341,6 @@ export class TransferFee implements StructClass {
     return TransferFee.fromFieldsWithTypes(content);
   }
 
-  static fromSuiObjectData(data: SuiObjectData): TransferFee {
-    if (data.bcs) {
-      if (data.bcs.dataType !== "moveObject" || !isTransferFee(data.bcs.type)) {
-        throw new Error(`object at is not a TransferFee object`);
-      }
-
-      return TransferFee.fromBcs(fromB64(data.bcs.bcsBytes));
-    }
-    if (data.content) {
-      return TransferFee.fromSuiParsedData(data.content);
-    }
-    throw new Error(
-      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
-    );
-  }
-
   static async fetch(client: SuiClient, id: string): Promise<TransferFee> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -394,7 +354,6 @@ export class TransferFee implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a TransferFee object`);
     }
-
-    return TransferFee.fromSuiObjectData(res.data);
+    return TransferFee.fromBcs(fromB64(res.data.bcs.bcsBytes));
   }
 }

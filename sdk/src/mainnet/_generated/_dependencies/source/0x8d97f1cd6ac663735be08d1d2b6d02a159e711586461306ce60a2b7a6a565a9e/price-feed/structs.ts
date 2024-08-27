@@ -14,18 +14,19 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
-import { PKG_V1 } from "../index";
 import { PriceIdentifier } from "../price-identifier/structs";
 import { Price } from "../price/structs";
-import { bcs } from "@mysten/sui/bcs";
-import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
-import { fromB64 } from "@mysten/sui/utils";
+import { bcs, fromB64 } from "@mysten/bcs";
+import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
 
 /* ============================== PriceFeed =============================== */
 
 export function isPriceFeed(type: string): boolean {
   type = compressSuiType(type);
-  return type === `${PKG_V1}::price_feed::PriceFeed`;
+  return (
+    type ===
+    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::price_feed::PriceFeed"
+  );
 }
 
 export interface PriceFeedFields {
@@ -37,16 +38,15 @@ export interface PriceFeedFields {
 export type PriceFeedReified = Reified<PriceFeed, PriceFeedFields>;
 
 export class PriceFeed implements StructClass {
-  __StructClass = true as const;
-
-  static readonly $typeName = `${PKG_V1}::price_feed::PriceFeed`;
+  static readonly $typeName =
+    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::price_feed::PriceFeed";
   static readonly $numTypeParams = 0;
-  static readonly $isPhantom = [] as const;
 
   readonly $typeName = PriceFeed.$typeName;
-  readonly $fullTypeName: `${typeof PKG_V1}::price_feed::PriceFeed`;
+
+  readonly $fullTypeName: "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::price_feed::PriceFeed";
+
   readonly $typeArgs: [];
-  readonly $isPhantom = PriceFeed.$isPhantom;
 
   readonly priceIdentifier: ToField<PriceIdentifier>;
   readonly price: ToField<Price>;
@@ -56,7 +56,7 @@ export class PriceFeed implements StructClass {
     this.$fullTypeName = composeSuiType(
       PriceFeed.$typeName,
       ...typeArgs,
-    ) as `${typeof PKG_V1}::price_feed::PriceFeed`;
+    ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::price_feed::PriceFeed";
     this.$typeArgs = typeArgs;
 
     this.priceIdentifier = fields.priceIdentifier;
@@ -70,9 +70,8 @@ export class PriceFeed implements StructClass {
       fullTypeName: composeSuiType(
         PriceFeed.$typeName,
         ...[],
-      ) as `${typeof PKG_V1}::price_feed::PriceFeed`,
+      ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::price_feed::PriceFeed",
       typeArgs: [] as [],
-      isPhantom: PriceFeed.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => PriceFeed.fromFields(fields),
       fromFieldsWithTypes: (item: FieldsWithTypes) =>
@@ -83,8 +82,6 @@ export class PriceFeed implements StructClass {
       fromJSON: (json: Record<string, any>) => PriceFeed.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         PriceFeed.fromSuiParsedData(content),
-      fromSuiObjectData: (content: SuiObjectData) =>
-        PriceFeed.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         PriceFeed.fetch(client, id),
       new: (fields: PriceFeedFields) => {
@@ -193,22 +190,6 @@ export class PriceFeed implements StructClass {
     return PriceFeed.fromFieldsWithTypes(content);
   }
 
-  static fromSuiObjectData(data: SuiObjectData): PriceFeed {
-    if (data.bcs) {
-      if (data.bcs.dataType !== "moveObject" || !isPriceFeed(data.bcs.type)) {
-        throw new Error(`object at is not a PriceFeed object`);
-      }
-
-      return PriceFeed.fromBcs(fromB64(data.bcs.bcsBytes));
-    }
-    if (data.content) {
-      return PriceFeed.fromSuiParsedData(data.content);
-    }
-    throw new Error(
-      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
-    );
-  }
-
   static async fetch(client: SuiClient, id: string): Promise<PriceFeed> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -222,7 +203,6 @@ export class PriceFeed implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a PriceFeed object`);
     }
-
-    return PriceFeed.fromSuiObjectData(res.data);
+    return PriceFeed.fromBcs(fromB64(res.data.bcs.bcsBytes));
   }
 }

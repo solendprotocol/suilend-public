@@ -7,6 +7,7 @@ import {
   ToTypeArgument,
   ToTypeStr,
   TypeArgument,
+  Vector,
   assertFieldsWithTypesArgsMatch,
   assertReifiedTypeArgsMatch,
   decodeFromFields,
@@ -21,19 +22,15 @@ import {
   FieldsWithTypes,
   composeSuiType,
   compressSuiType,
-  parseTypeName,
 } from "../../../../_framework/util";
-import { Vector } from "../../../../_framework/vector";
-import { PKG_V8 } from "../index";
-import { BcsType, bcs } from "@mysten/sui/bcs";
-import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
-import { fromB64 } from "@mysten/sui/utils";
+import { BcsType, bcs, fromB64 } from "@mysten/bcs";
+import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
 
 /* ============================== Option =============================== */
 
 export function isOption(type: string): boolean {
   type = compressSuiType(type);
-  return type.startsWith(`${PKG_V8}::option::Option` + "<");
+  return type.startsWith("0x1::option::Option<");
 }
 
 export interface OptionFields<Element extends TypeArgument> {
@@ -46,18 +43,16 @@ export type OptionReified<Element extends TypeArgument> = Reified<
 >;
 
 export class Option<Element extends TypeArgument> implements StructClass {
-  __StructClass = true as const;
-
-  static readonly $typeName = `${PKG_V8}::option::Option`;
+  static readonly $typeName = "0x1::option::Option";
   static readonly $numTypeParams = 1;
-  static readonly $isPhantom = [false] as const;
 
   __inner: Element = null as unknown as Element; // for type checking in reified.ts
 
   readonly $typeName = Option.$typeName;
-  readonly $fullTypeName: `${typeof PKG_V8}::option::Option<${ToTypeStr<Element>}>`;
+
+  readonly $fullTypeName: `0x1::option::Option<${ToTypeStr<Element>}>`;
+
   readonly $typeArgs: [ToTypeStr<Element>];
-  readonly $isPhantom = Option.$isPhantom;
 
   readonly vec: ToField<Vector<Element>>;
 
@@ -68,7 +63,7 @@ export class Option<Element extends TypeArgument> implements StructClass {
     this.$fullTypeName = composeSuiType(
       Option.$typeName,
       ...typeArgs,
-    ) as `${typeof PKG_V8}::option::Option<${ToTypeStr<Element>}>`;
+    ) as `0x1::option::Option<${ToTypeStr<Element>}>`;
     this.$typeArgs = typeArgs;
 
     this.vec = fields.vec;
@@ -82,9 +77,8 @@ export class Option<Element extends TypeArgument> implements StructClass {
       fullTypeName: composeSuiType(
         Option.$typeName,
         ...[extractType(Element)],
-      ) as `${typeof PKG_V8}::option::Option<${ToTypeStr<ToTypeArgument<Element>>}>`,
+      ) as `0x1::option::Option<${ToTypeStr<ToTypeArgument<Element>>}>`,
       typeArgs: [extractType(Element)] as [ToTypeStr<ToTypeArgument<Element>>],
-      isPhantom: Option.$isPhantom,
       reifiedTypeArgs: [Element],
       fromFields: (fields: Record<string, any>) =>
         Option.fromFields(Element, fields),
@@ -96,8 +90,6 @@ export class Option<Element extends TypeArgument> implements StructClass {
       fromJSON: (json: Record<string, any>) => Option.fromJSON(Element, json),
       fromSuiParsedData: (content: SuiParsedData) =>
         Option.fromSuiParsedData(Element, content),
-      fromSuiObjectData: (content: SuiObjectData) =>
-        Option.fromSuiObjectData(Element, content),
       fetch: async (client: SuiClient, id: string) =>
         Option.fetch(client, Element, id),
       new: (fields: OptionFields<ToTypeArgument<Element>>) => {
@@ -219,39 +211,6 @@ export class Option<Element extends TypeArgument> implements StructClass {
     return Option.fromFieldsWithTypes(typeArg, content);
   }
 
-  static fromSuiObjectData<Element extends Reified<TypeArgument, any>>(
-    typeArg: Element,
-    data: SuiObjectData,
-  ): Option<ToTypeArgument<Element>> {
-    if (data.bcs) {
-      if (data.bcs.dataType !== "moveObject" || !isOption(data.bcs.type)) {
-        throw new Error(`object at is not a Option object`);
-      }
-
-      const gotTypeArgs = parseTypeName(data.bcs.type).typeArgs;
-      if (gotTypeArgs.length !== 1) {
-        throw new Error(
-          `type argument mismatch: expected 1 type argument but got '${gotTypeArgs.length}'`,
-        );
-      }
-      const gotTypeArg = compressSuiType(gotTypeArgs[0]);
-      const expectedTypeArg = compressSuiType(extractType(typeArg));
-      if (gotTypeArg !== compressSuiType(extractType(typeArg))) {
-        throw new Error(
-          `type argument mismatch: expected '${expectedTypeArg}' but got '${gotTypeArg}'`,
-        );
-      }
-
-      return Option.fromBcs(typeArg, fromB64(data.bcs.bcsBytes));
-    }
-    if (data.content) {
-      return Option.fromSuiParsedData(typeArg, data.content);
-    }
-    throw new Error(
-      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
-    );
-  }
-
   static async fetch<Element extends Reified<TypeArgument, any>>(
     client: SuiClient,
     typeArg: Element,
@@ -269,7 +228,6 @@ export class Option<Element extends TypeArgument> implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a Option object`);
     }
-
-    return Option.fromSuiObjectData(typeArg, res.data);
+    return Option.fromBcs(typeArg, fromB64(res.data.bcs.bcsBytes));
   }
 }

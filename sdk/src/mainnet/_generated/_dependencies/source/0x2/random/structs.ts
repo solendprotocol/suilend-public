@@ -5,6 +5,7 @@ import {
   StructClass,
   ToField,
   ToTypeStr,
+  Vector,
   decodeFromFields,
   decodeFromFieldsWithTypes,
   decodeFromJSONField,
@@ -16,19 +17,16 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
-import { Vector } from "../../../../_framework/vector";
-import { PKG_V25 } from "../index";
 import { UID } from "../object/structs";
 import { Versioned } from "../versioned/structs";
-import { bcs } from "@mysten/sui/bcs";
-import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
-import { fromB64 } from "@mysten/sui/utils";
+import { bcs, fromB64 } from "@mysten/bcs";
+import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
 
 /* ============================== Random =============================== */
 
 export function isRandom(type: string): boolean {
   type = compressSuiType(type);
-  return type === `${PKG_V25}::random::Random`;
+  return type === "0x2::random::Random";
 }
 
 export interface RandomFields {
@@ -39,16 +37,14 @@ export interface RandomFields {
 export type RandomReified = Reified<Random, RandomFields>;
 
 export class Random implements StructClass {
-  __StructClass = true as const;
-
-  static readonly $typeName = `${PKG_V25}::random::Random`;
+  static readonly $typeName = "0x2::random::Random";
   static readonly $numTypeParams = 0;
-  static readonly $isPhantom = [] as const;
 
   readonly $typeName = Random.$typeName;
-  readonly $fullTypeName: `${typeof PKG_V25}::random::Random`;
+
+  readonly $fullTypeName: "0x2::random::Random";
+
   readonly $typeArgs: [];
-  readonly $isPhantom = Random.$isPhantom;
 
   readonly id: ToField<UID>;
   readonly inner: ToField<Versioned>;
@@ -57,7 +53,7 @@ export class Random implements StructClass {
     this.$fullTypeName = composeSuiType(
       Random.$typeName,
       ...typeArgs,
-    ) as `${typeof PKG_V25}::random::Random`;
+    ) as "0x2::random::Random";
     this.$typeArgs = typeArgs;
 
     this.id = fields.id;
@@ -70,9 +66,8 @@ export class Random implements StructClass {
       fullTypeName: composeSuiType(
         Random.$typeName,
         ...[],
-      ) as `${typeof PKG_V25}::random::Random`,
+      ) as "0x2::random::Random",
       typeArgs: [] as [],
-      isPhantom: Random.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => Random.fromFields(fields),
       fromFieldsWithTypes: (item: FieldsWithTypes) =>
@@ -83,8 +78,6 @@ export class Random implements StructClass {
       fromJSON: (json: Record<string, any>) => Random.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         Random.fromSuiParsedData(content),
-      fromSuiObjectData: (content: SuiObjectData) =>
-        Random.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) => Random.fetch(client, id),
       new: (fields: RandomFields) => {
         return new Random([], fields);
@@ -175,22 +168,6 @@ export class Random implements StructClass {
     return Random.fromFieldsWithTypes(content);
   }
 
-  static fromSuiObjectData(data: SuiObjectData): Random {
-    if (data.bcs) {
-      if (data.bcs.dataType !== "moveObject" || !isRandom(data.bcs.type)) {
-        throw new Error(`object at is not a Random object`);
-      }
-
-      return Random.fromBcs(fromB64(data.bcs.bcsBytes));
-    }
-    if (data.content) {
-      return Random.fromSuiParsedData(data.content);
-    }
-    throw new Error(
-      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
-    );
-  }
-
   static async fetch(client: SuiClient, id: string): Promise<Random> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -204,8 +181,7 @@ export class Random implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a Random object`);
     }
-
-    return Random.fromSuiObjectData(res.data);
+    return Random.fromBcs(fromB64(res.data.bcs.bcsBytes));
   }
 }
 
@@ -213,7 +189,7 @@ export class Random implements StructClass {
 
 export function isRandomGenerator(type: string): boolean {
   type = compressSuiType(type);
-  return type === `${PKG_V25}::random::RandomGenerator`;
+  return type === "0x2::random::RandomGenerator";
 }
 
 export interface RandomGeneratorFields {
@@ -228,16 +204,14 @@ export type RandomGeneratorReified = Reified<
 >;
 
 export class RandomGenerator implements StructClass {
-  __StructClass = true as const;
-
-  static readonly $typeName = `${PKG_V25}::random::RandomGenerator`;
+  static readonly $typeName = "0x2::random::RandomGenerator";
   static readonly $numTypeParams = 0;
-  static readonly $isPhantom = [] as const;
 
   readonly $typeName = RandomGenerator.$typeName;
-  readonly $fullTypeName: `${typeof PKG_V25}::random::RandomGenerator`;
+
+  readonly $fullTypeName: "0x2::random::RandomGenerator";
+
   readonly $typeArgs: [];
-  readonly $isPhantom = RandomGenerator.$isPhantom;
 
   readonly seed: ToField<Vector<"u8">>;
   readonly counter: ToField<"u16">;
@@ -247,7 +221,7 @@ export class RandomGenerator implements StructClass {
     this.$fullTypeName = composeSuiType(
       RandomGenerator.$typeName,
       ...typeArgs,
-    ) as `${typeof PKG_V25}::random::RandomGenerator`;
+    ) as "0x2::random::RandomGenerator";
     this.$typeArgs = typeArgs;
 
     this.seed = fields.seed;
@@ -261,9 +235,8 @@ export class RandomGenerator implements StructClass {
       fullTypeName: composeSuiType(
         RandomGenerator.$typeName,
         ...[],
-      ) as `${typeof PKG_V25}::random::RandomGenerator`,
+      ) as "0x2::random::RandomGenerator",
       typeArgs: [] as [],
-      isPhantom: RandomGenerator.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         RandomGenerator.fromFields(fields),
@@ -275,8 +248,6 @@ export class RandomGenerator implements StructClass {
       fromJSON: (json: Record<string, any>) => RandomGenerator.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         RandomGenerator.fromSuiParsedData(content),
-      fromSuiObjectData: (content: SuiObjectData) =>
-        RandomGenerator.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         RandomGenerator.fetch(client, id),
       new: (fields: RandomGeneratorFields) => {
@@ -376,25 +347,6 @@ export class RandomGenerator implements StructClass {
     return RandomGenerator.fromFieldsWithTypes(content);
   }
 
-  static fromSuiObjectData(data: SuiObjectData): RandomGenerator {
-    if (data.bcs) {
-      if (
-        data.bcs.dataType !== "moveObject" ||
-        !isRandomGenerator(data.bcs.type)
-      ) {
-        throw new Error(`object at is not a RandomGenerator object`);
-      }
-
-      return RandomGenerator.fromBcs(fromB64(data.bcs.bcsBytes));
-    }
-    if (data.content) {
-      return RandomGenerator.fromSuiParsedData(data.content);
-    }
-    throw new Error(
-      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
-    );
-  }
-
   static async fetch(client: SuiClient, id: string): Promise<RandomGenerator> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -408,8 +360,7 @@ export class RandomGenerator implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a RandomGenerator object`);
     }
-
-    return RandomGenerator.fromSuiObjectData(res.data);
+    return RandomGenerator.fromBcs(fromB64(res.data.bcs.bcsBytes));
   }
 }
 
@@ -417,7 +368,7 @@ export class RandomGenerator implements StructClass {
 
 export function isRandomInner(type: string): boolean {
   type = compressSuiType(type);
-  return type === `${PKG_V25}::random::RandomInner`;
+  return type === "0x2::random::RandomInner";
 }
 
 export interface RandomInnerFields {
@@ -430,16 +381,14 @@ export interface RandomInnerFields {
 export type RandomInnerReified = Reified<RandomInner, RandomInnerFields>;
 
 export class RandomInner implements StructClass {
-  __StructClass = true as const;
-
-  static readonly $typeName = `${PKG_V25}::random::RandomInner`;
+  static readonly $typeName = "0x2::random::RandomInner";
   static readonly $numTypeParams = 0;
-  static readonly $isPhantom = [] as const;
 
   readonly $typeName = RandomInner.$typeName;
-  readonly $fullTypeName: `${typeof PKG_V25}::random::RandomInner`;
+
+  readonly $fullTypeName: "0x2::random::RandomInner";
+
   readonly $typeArgs: [];
-  readonly $isPhantom = RandomInner.$isPhantom;
 
   readonly version: ToField<"u64">;
   readonly epoch: ToField<"u64">;
@@ -450,7 +399,7 @@ export class RandomInner implements StructClass {
     this.$fullTypeName = composeSuiType(
       RandomInner.$typeName,
       ...typeArgs,
-    ) as `${typeof PKG_V25}::random::RandomInner`;
+    ) as "0x2::random::RandomInner";
     this.$typeArgs = typeArgs;
 
     this.version = fields.version;
@@ -465,9 +414,8 @@ export class RandomInner implements StructClass {
       fullTypeName: composeSuiType(
         RandomInner.$typeName,
         ...[],
-      ) as `${typeof PKG_V25}::random::RandomInner`,
+      ) as "0x2::random::RandomInner",
       typeArgs: [] as [],
-      isPhantom: RandomInner.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         RandomInner.fromFields(fields),
@@ -479,8 +427,6 @@ export class RandomInner implements StructClass {
       fromJSON: (json: Record<string, any>) => RandomInner.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         RandomInner.fromSuiParsedData(content),
-      fromSuiObjectData: (content: SuiObjectData) =>
-        RandomInner.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         RandomInner.fetch(client, id),
       new: (fields: RandomInnerFields) => {
@@ -588,22 +534,6 @@ export class RandomInner implements StructClass {
     return RandomInner.fromFieldsWithTypes(content);
   }
 
-  static fromSuiObjectData(data: SuiObjectData): RandomInner {
-    if (data.bcs) {
-      if (data.bcs.dataType !== "moveObject" || !isRandomInner(data.bcs.type)) {
-        throw new Error(`object at is not a RandomInner object`);
-      }
-
-      return RandomInner.fromBcs(fromB64(data.bcs.bcsBytes));
-    }
-    if (data.content) {
-      return RandomInner.fromSuiParsedData(data.content);
-    }
-    throw new Error(
-      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
-    );
-  }
-
   static async fetch(client: SuiClient, id: string): Promise<RandomInner> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -617,7 +547,6 @@ export class RandomInner implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a RandomInner object`);
     }
-
-    return RandomInner.fromSuiObjectData(res.data);
+    return RandomInner.fromBcs(fromB64(res.data.bcs.bcsBytes));
   }
 }

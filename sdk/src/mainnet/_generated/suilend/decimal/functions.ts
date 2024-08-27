@@ -1,225 +1,230 @@
 import { PUBLISHED_AT } from "..";
-import { obj, pure } from "../../_framework/util";
+import { ObjectArg, obj, pure } from "../../_framework/util";
 import {
-  Transaction,
   TransactionArgument,
-  TransactionObjectInput,
-} from "@mysten/sui/transactions";
+  TransactionBlock,
+} from "@mysten/sui.js/transactions";
 
 export interface MaxArgs {
-  a: TransactionObjectInput;
-  b: TransactionObjectInput;
+  a: ObjectArg;
+  b: ObjectArg;
 }
 
-export function max(tx: Transaction, args: MaxArgs) {
-  return tx.moveCall({
+export function max(txb: TransactionBlock, args: MaxArgs) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::decimal::max`,
-    arguments: [obj(tx, args.a), obj(tx, args.b)],
+    arguments: [obj(txb, args.a), obj(txb, args.b)],
   });
 }
 
 export interface MinArgs {
-  a: TransactionObjectInput;
-  b: TransactionObjectInput;
+  a: ObjectArg;
+  b: ObjectArg;
 }
 
-export function min(tx: Transaction, args: MinArgs) {
-  return tx.moveCall({
+export function min(txb: TransactionBlock, args: MinArgs) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::decimal::min`,
-    arguments: [obj(tx, args.a), obj(tx, args.b)],
+    arguments: [obj(txb, args.a), obj(txb, args.b)],
   });
 }
 
 export interface PowArgs {
-  b: TransactionObjectInput;
+  b: ObjectArg;
   e: bigint | TransactionArgument;
 }
 
-export function pow(tx: Transaction, args: PowArgs) {
-  return tx.moveCall({
+export function pow(txb: TransactionBlock, args: PowArgs) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::decimal::pow`,
-    arguments: [obj(tx, args.b), pure(tx, args.e, `u64`)],
+    arguments: [obj(txb, args.b), pure(txb, args.e, `u64`)],
   });
 }
 
 export interface AddArgs {
-  a: TransactionObjectInput;
-  b: TransactionObjectInput;
+  a: ObjectArg;
+  b: ObjectArg;
 }
 
-export function add(tx: Transaction, args: AddArgs) {
-  return tx.moveCall({
+export function add(txb: TransactionBlock, args: AddArgs) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::decimal::add`,
-    arguments: [obj(tx, args.a), obj(tx, args.b)],
+    arguments: [obj(txb, args.a), obj(txb, args.b)],
   });
 }
 
 export interface DivArgs {
-  a: TransactionObjectInput;
-  b: TransactionObjectInput;
+  a: ObjectArg;
+  b: ObjectArg;
 }
 
-export function div(tx: Transaction, args: DivArgs) {
-  return tx.moveCall({
+export function div(txb: TransactionBlock, args: DivArgs) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::decimal::div`,
-    arguments: [obj(tx, args.a), obj(tx, args.b)],
+    arguments: [obj(txb, args.a), obj(txb, args.b)],
   });
 }
 
 export interface MulArgs {
-  a: TransactionObjectInput;
-  b: TransactionObjectInput;
+  a: ObjectArg;
+  b: ObjectArg;
 }
 
-export function mul(tx: Transaction, args: MulArgs) {
-  return tx.moveCall({
+export function mul(txb: TransactionBlock, args: MulArgs) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::decimal::mul`,
-    arguments: [obj(tx, args.a), obj(tx, args.b)],
+    arguments: [obj(txb, args.a), obj(txb, args.b)],
   });
 }
 
 export interface SubArgs {
-  a: TransactionObjectInput;
-  b: TransactionObjectInput;
+  a: ObjectArg;
+  b: ObjectArg;
 }
 
-export function sub(tx: Transaction, args: SubArgs) {
-  return tx.moveCall({
+export function sub(txb: TransactionBlock, args: SubArgs) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::decimal::sub`,
-    arguments: [obj(tx, args.a), obj(tx, args.b)],
+    arguments: [obj(txb, args.a), obj(txb, args.b)],
   });
 }
 
-export function from(tx: Transaction, v: bigint | TransactionArgument) {
-  return tx.moveCall({
+export function from(txb: TransactionBlock, v: bigint | TransactionArgument) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::decimal::from`,
-    arguments: [pure(tx, v, `u64`)],
+    arguments: [pure(txb, v, `u64`)],
   });
 }
 
-export function ceil(tx: Transaction, a: TransactionObjectInput) {
-  return tx.moveCall({
+export function ceil(txb: TransactionBlock, a: ObjectArg) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::decimal::ceil`,
-    arguments: [obj(tx, a)],
+    arguments: [obj(txb, a)],
   });
 }
 
 export interface EqArgs {
-  a: TransactionObjectInput;
-  b: TransactionObjectInput;
+  a: ObjectArg;
+  b: ObjectArg;
 }
 
-export function eq(tx: Transaction, args: EqArgs) {
-  return tx.moveCall({
+export function eq(txb: TransactionBlock, args: EqArgs) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::decimal::eq`,
-    arguments: [obj(tx, args.a), obj(tx, args.b)],
+    arguments: [obj(txb, args.a), obj(txb, args.b)],
   });
 }
 
-export function floor(tx: Transaction, a: TransactionObjectInput) {
-  return tx.moveCall({
+export function floor(txb: TransactionBlock, a: ObjectArg) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::decimal::floor`,
-    arguments: [obj(tx, a)],
+    arguments: [obj(txb, a)],
   });
 }
 
-export function fromBps(tx: Transaction, v: bigint | TransactionArgument) {
-  return tx.moveCall({
+export function fromBps(
+  txb: TransactionBlock,
+  v: bigint | TransactionArgument,
+) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::decimal::from_bps`,
-    arguments: [pure(tx, v, `u64`)],
+    arguments: [pure(txb, v, `u64`)],
   });
 }
 
-export function fromPercent(tx: Transaction, v: number | TransactionArgument) {
-  return tx.moveCall({
+export function fromPercent(
+  txb: TransactionBlock,
+  v: number | TransactionArgument,
+) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::decimal::from_percent`,
-    arguments: [pure(tx, v, `u8`)],
+    arguments: [pure(txb, v, `u8`)],
   });
 }
 
 export function fromPercentU64(
-  tx: Transaction,
+  txb: TransactionBlock,
   v: bigint | TransactionArgument,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::decimal::from_percent_u64`,
-    arguments: [pure(tx, v, `u64`)],
+    arguments: [pure(txb, v, `u64`)],
   });
 }
 
 export function fromScaledVal(
-  tx: Transaction,
+  txb: TransactionBlock,
   v: bigint | TransactionArgument,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::decimal::from_scaled_val`,
-    arguments: [pure(tx, v, `u256`)],
+    arguments: [pure(txb, v, `u256`)],
   });
 }
 
 export interface GeArgs {
-  a: TransactionObjectInput;
-  b: TransactionObjectInput;
+  a: ObjectArg;
+  b: ObjectArg;
 }
 
-export function ge(tx: Transaction, args: GeArgs) {
-  return tx.moveCall({
+export function ge(txb: TransactionBlock, args: GeArgs) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::decimal::ge`,
-    arguments: [obj(tx, args.a), obj(tx, args.b)],
+    arguments: [obj(txb, args.a), obj(txb, args.b)],
   });
 }
 
 export interface GtArgs {
-  a: TransactionObjectInput;
-  b: TransactionObjectInput;
+  a: ObjectArg;
+  b: ObjectArg;
 }
 
-export function gt(tx: Transaction, args: GtArgs) {
-  return tx.moveCall({
+export function gt(txb: TransactionBlock, args: GtArgs) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::decimal::gt`,
-    arguments: [obj(tx, args.a), obj(tx, args.b)],
+    arguments: [obj(txb, args.a), obj(txb, args.b)],
   });
 }
 
 export interface LeArgs {
-  a: TransactionObjectInput;
-  b: TransactionObjectInput;
+  a: ObjectArg;
+  b: ObjectArg;
 }
 
-export function le(tx: Transaction, args: LeArgs) {
-  return tx.moveCall({
+export function le(txb: TransactionBlock, args: LeArgs) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::decimal::le`,
-    arguments: [obj(tx, args.a), obj(tx, args.b)],
+    arguments: [obj(txb, args.a), obj(txb, args.b)],
   });
 }
 
 export interface LtArgs {
-  a: TransactionObjectInput;
-  b: TransactionObjectInput;
+  a: ObjectArg;
+  b: ObjectArg;
 }
 
-export function lt(tx: Transaction, args: LtArgs) {
-  return tx.moveCall({
+export function lt(txb: TransactionBlock, args: LtArgs) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::decimal::lt`,
-    arguments: [obj(tx, args.a), obj(tx, args.b)],
+    arguments: [obj(txb, args.a), obj(txb, args.b)],
   });
 }
 
 export interface SaturatingSubArgs {
-  a: TransactionObjectInput;
-  b: TransactionObjectInput;
+  a: ObjectArg;
+  b: ObjectArg;
 }
 
-export function saturatingSub(tx: Transaction, args: SaturatingSubArgs) {
-  return tx.moveCall({
+export function saturatingSub(txb: TransactionBlock, args: SaturatingSubArgs) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::decimal::saturating_sub`,
-    arguments: [obj(tx, args.a), obj(tx, args.b)],
+    arguments: [obj(txb, args.a), obj(txb, args.b)],
   });
 }
 
-export function toScaledVal(tx: Transaction, v: TransactionObjectInput) {
-  return tx.moveCall({
+export function toScaledVal(txb: TransactionBlock, v: ObjectArg) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::decimal::to_scaled_val`,
-    arguments: [obj(tx, v)],
+    arguments: [obj(txb, v)],
   });
 }

@@ -7,6 +7,7 @@ import {
   ToTypeArgument,
   ToTypeStr,
   TypeArgument,
+  Vector,
   assertFieldsWithTypesArgsMatch,
   assertReifiedTypeArgsMatch,
   decodeFromFields,
@@ -21,19 +22,15 @@ import {
   FieldsWithTypes,
   composeSuiType,
   compressSuiType,
-  parseTypeName,
 } from "../../../../_framework/util";
-import { Vector } from "../../../../_framework/vector";
-import { PKG_V25 } from "../index";
-import { BcsType, bcs } from "@mysten/sui/bcs";
-import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
-import { fromB64 } from "@mysten/sui/utils";
+import { BcsType, bcs, fromB64 } from "@mysten/bcs";
+import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
 
 /* ============================== Entry =============================== */
 
 export function isEntry(type: string): boolean {
   type = compressSuiType(type);
-  return type.startsWith(`${PKG_V25}::priority_queue::Entry` + "<");
+  return type.startsWith("0x2::priority_queue::Entry<");
 }
 
 export interface EntryFields<T extends TypeArgument> {
@@ -47,16 +44,14 @@ export type EntryReified<T extends TypeArgument> = Reified<
 >;
 
 export class Entry<T extends TypeArgument> implements StructClass {
-  __StructClass = true as const;
-
-  static readonly $typeName = `${PKG_V25}::priority_queue::Entry`;
+  static readonly $typeName = "0x2::priority_queue::Entry";
   static readonly $numTypeParams = 1;
-  static readonly $isPhantom = [false] as const;
 
   readonly $typeName = Entry.$typeName;
-  readonly $fullTypeName: `${typeof PKG_V25}::priority_queue::Entry<${ToTypeStr<T>}>`;
+
+  readonly $fullTypeName: `0x2::priority_queue::Entry<${ToTypeStr<T>}>`;
+
   readonly $typeArgs: [ToTypeStr<T>];
-  readonly $isPhantom = Entry.$isPhantom;
 
   readonly priority: ToField<"u64">;
   readonly value: ToField<T>;
@@ -65,7 +60,7 @@ export class Entry<T extends TypeArgument> implements StructClass {
     this.$fullTypeName = composeSuiType(
       Entry.$typeName,
       ...typeArgs,
-    ) as `${typeof PKG_V25}::priority_queue::Entry<${ToTypeStr<T>}>`;
+    ) as `0x2::priority_queue::Entry<${ToTypeStr<T>}>`;
     this.$typeArgs = typeArgs;
 
     this.priority = fields.priority;
@@ -80,9 +75,8 @@ export class Entry<T extends TypeArgument> implements StructClass {
       fullTypeName: composeSuiType(
         Entry.$typeName,
         ...[extractType(T)],
-      ) as `${typeof PKG_V25}::priority_queue::Entry<${ToTypeStr<ToTypeArgument<T>>}>`,
+      ) as `0x2::priority_queue::Entry<${ToTypeStr<ToTypeArgument<T>>}>`,
       typeArgs: [extractType(T)] as [ToTypeStr<ToTypeArgument<T>>],
-      isPhantom: Entry.$isPhantom,
       reifiedTypeArgs: [T],
       fromFields: (fields: Record<string, any>) => Entry.fromFields(T, fields),
       fromFieldsWithTypes: (item: FieldsWithTypes) =>
@@ -93,8 +87,6 @@ export class Entry<T extends TypeArgument> implements StructClass {
       fromJSON: (json: Record<string, any>) => Entry.fromJSON(T, json),
       fromSuiParsedData: (content: SuiParsedData) =>
         Entry.fromSuiParsedData(T, content),
-      fromSuiObjectData: (content: SuiObjectData) =>
-        Entry.fromSuiObjectData(T, content),
       fetch: async (client: SuiClient, id: string) =>
         Entry.fetch(client, T, id),
       new: (fields: EntryFields<ToTypeArgument<T>>) => {
@@ -215,39 +207,6 @@ export class Entry<T extends TypeArgument> implements StructClass {
     return Entry.fromFieldsWithTypes(typeArg, content);
   }
 
-  static fromSuiObjectData<T extends Reified<TypeArgument, any>>(
-    typeArg: T,
-    data: SuiObjectData,
-  ): Entry<ToTypeArgument<T>> {
-    if (data.bcs) {
-      if (data.bcs.dataType !== "moveObject" || !isEntry(data.bcs.type)) {
-        throw new Error(`object at is not a Entry object`);
-      }
-
-      const gotTypeArgs = parseTypeName(data.bcs.type).typeArgs;
-      if (gotTypeArgs.length !== 1) {
-        throw new Error(
-          `type argument mismatch: expected 1 type argument but got '${gotTypeArgs.length}'`,
-        );
-      }
-      const gotTypeArg = compressSuiType(gotTypeArgs[0]);
-      const expectedTypeArg = compressSuiType(extractType(typeArg));
-      if (gotTypeArg !== compressSuiType(extractType(typeArg))) {
-        throw new Error(
-          `type argument mismatch: expected '${expectedTypeArg}' but got '${gotTypeArg}'`,
-        );
-      }
-
-      return Entry.fromBcs(typeArg, fromB64(data.bcs.bcsBytes));
-    }
-    if (data.content) {
-      return Entry.fromSuiParsedData(typeArg, data.content);
-    }
-    throw new Error(
-      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
-    );
-  }
-
   static async fetch<T extends Reified<TypeArgument, any>>(
     client: SuiClient,
     typeArg: T,
@@ -265,8 +224,7 @@ export class Entry<T extends TypeArgument> implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a Entry object`);
     }
-
-    return Entry.fromSuiObjectData(typeArg, res.data);
+    return Entry.fromBcs(typeArg, fromB64(res.data.bcs.bcsBytes));
   }
 }
 
@@ -274,7 +232,7 @@ export class Entry<T extends TypeArgument> implements StructClass {
 
 export function isPriorityQueue(type: string): boolean {
   type = compressSuiType(type);
-  return type.startsWith(`${PKG_V25}::priority_queue::PriorityQueue` + "<");
+  return type.startsWith("0x2::priority_queue::PriorityQueue<");
 }
 
 export interface PriorityQueueFields<T extends TypeArgument> {
@@ -287,16 +245,14 @@ export type PriorityQueueReified<T extends TypeArgument> = Reified<
 >;
 
 export class PriorityQueue<T extends TypeArgument> implements StructClass {
-  __StructClass = true as const;
-
-  static readonly $typeName = `${PKG_V25}::priority_queue::PriorityQueue`;
+  static readonly $typeName = "0x2::priority_queue::PriorityQueue";
   static readonly $numTypeParams = 1;
-  static readonly $isPhantom = [false] as const;
 
   readonly $typeName = PriorityQueue.$typeName;
-  readonly $fullTypeName: `${typeof PKG_V25}::priority_queue::PriorityQueue<${ToTypeStr<T>}>`;
+
+  readonly $fullTypeName: `0x2::priority_queue::PriorityQueue<${ToTypeStr<T>}>`;
+
   readonly $typeArgs: [ToTypeStr<T>];
-  readonly $isPhantom = PriorityQueue.$isPhantom;
 
   readonly entries: ToField<Vector<Entry<T>>>;
 
@@ -307,7 +263,7 @@ export class PriorityQueue<T extends TypeArgument> implements StructClass {
     this.$fullTypeName = composeSuiType(
       PriorityQueue.$typeName,
       ...typeArgs,
-    ) as `${typeof PKG_V25}::priority_queue::PriorityQueue<${ToTypeStr<T>}>`;
+    ) as `0x2::priority_queue::PriorityQueue<${ToTypeStr<T>}>`;
     this.$typeArgs = typeArgs;
 
     this.entries = fields.entries;
@@ -321,9 +277,8 @@ export class PriorityQueue<T extends TypeArgument> implements StructClass {
       fullTypeName: composeSuiType(
         PriorityQueue.$typeName,
         ...[extractType(T)],
-      ) as `${typeof PKG_V25}::priority_queue::PriorityQueue<${ToTypeStr<ToTypeArgument<T>>}>`,
+      ) as `0x2::priority_queue::PriorityQueue<${ToTypeStr<ToTypeArgument<T>>}>`,
       typeArgs: [extractType(T)] as [ToTypeStr<ToTypeArgument<T>>],
-      isPhantom: PriorityQueue.$isPhantom,
       reifiedTypeArgs: [T],
       fromFields: (fields: Record<string, any>) =>
         PriorityQueue.fromFields(T, fields),
@@ -335,8 +290,6 @@ export class PriorityQueue<T extends TypeArgument> implements StructClass {
       fromJSON: (json: Record<string, any>) => PriorityQueue.fromJSON(T, json),
       fromSuiParsedData: (content: SuiParsedData) =>
         PriorityQueue.fromSuiParsedData(T, content),
-      fromSuiObjectData: (content: SuiObjectData) =>
-        PriorityQueue.fromSuiObjectData(T, content),
       fetch: async (client: SuiClient, id: string) =>
         PriorityQueue.fetch(client, T, id),
       new: (fields: PriorityQueueFields<ToTypeArgument<T>>) => {
@@ -410,7 +363,7 @@ export class PriorityQueue<T extends TypeArgument> implements StructClass {
   toJSONField() {
     return {
       entries: fieldToJSON<Vector<Entry<T>>>(
-        `vector<${Entry.$typeName}<${this.$typeArgs[0]}>>`,
+        `vector<0x2::priority_queue::Entry<${this.$typeArgs[0]}>>`,
         this.entries,
       ),
     };
@@ -467,42 +420,6 @@ export class PriorityQueue<T extends TypeArgument> implements StructClass {
     return PriorityQueue.fromFieldsWithTypes(typeArg, content);
   }
 
-  static fromSuiObjectData<T extends Reified<TypeArgument, any>>(
-    typeArg: T,
-    data: SuiObjectData,
-  ): PriorityQueue<ToTypeArgument<T>> {
-    if (data.bcs) {
-      if (
-        data.bcs.dataType !== "moveObject" ||
-        !isPriorityQueue(data.bcs.type)
-      ) {
-        throw new Error(`object at is not a PriorityQueue object`);
-      }
-
-      const gotTypeArgs = parseTypeName(data.bcs.type).typeArgs;
-      if (gotTypeArgs.length !== 1) {
-        throw new Error(
-          `type argument mismatch: expected 1 type argument but got '${gotTypeArgs.length}'`,
-        );
-      }
-      const gotTypeArg = compressSuiType(gotTypeArgs[0]);
-      const expectedTypeArg = compressSuiType(extractType(typeArg));
-      if (gotTypeArg !== compressSuiType(extractType(typeArg))) {
-        throw new Error(
-          `type argument mismatch: expected '${expectedTypeArg}' but got '${gotTypeArg}'`,
-        );
-      }
-
-      return PriorityQueue.fromBcs(typeArg, fromB64(data.bcs.bcsBytes));
-    }
-    if (data.content) {
-      return PriorityQueue.fromSuiParsedData(typeArg, data.content);
-    }
-    throw new Error(
-      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
-    );
-  }
-
   static async fetch<T extends Reified<TypeArgument, any>>(
     client: SuiClient,
     typeArg: T,
@@ -520,7 +437,6 @@ export class PriorityQueue<T extends TypeArgument> implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a PriorityQueue object`);
     }
-
-    return PriorityQueue.fromSuiObjectData(typeArg, res.data);
+    return PriorityQueue.fromBcs(typeArg, fromB64(res.data.bcs.bcsBytes));
   }
 }

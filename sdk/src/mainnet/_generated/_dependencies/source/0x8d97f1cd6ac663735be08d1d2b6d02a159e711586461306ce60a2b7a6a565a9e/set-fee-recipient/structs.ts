@@ -14,16 +14,17 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
-import { PKG_V1 } from "../index";
-import { bcs } from "@mysten/sui/bcs";
-import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
-import { fromB64, fromHEX, toHEX } from "@mysten/sui/utils";
+import { bcs, fromB64, fromHEX, toHEX } from "@mysten/bcs";
+import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
 
 /* ============================== PythFeeRecipient =============================== */
 
 export function isPythFeeRecipient(type: string): boolean {
   type = compressSuiType(type);
-  return type === `${PKG_V1}::set_fee_recipient::PythFeeRecipient`;
+  return (
+    type ===
+    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set_fee_recipient::PythFeeRecipient"
+  );
 }
 
 export interface PythFeeRecipientFields {
@@ -36,16 +37,15 @@ export type PythFeeRecipientReified = Reified<
 >;
 
 export class PythFeeRecipient implements StructClass {
-  __StructClass = true as const;
-
-  static readonly $typeName = `${PKG_V1}::set_fee_recipient::PythFeeRecipient`;
+  static readonly $typeName =
+    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set_fee_recipient::PythFeeRecipient";
   static readonly $numTypeParams = 0;
-  static readonly $isPhantom = [] as const;
 
   readonly $typeName = PythFeeRecipient.$typeName;
-  readonly $fullTypeName: `${typeof PKG_V1}::set_fee_recipient::PythFeeRecipient`;
+
+  readonly $fullTypeName: "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set_fee_recipient::PythFeeRecipient";
+
   readonly $typeArgs: [];
-  readonly $isPhantom = PythFeeRecipient.$isPhantom;
 
   readonly recipient: ToField<"address">;
 
@@ -53,7 +53,7 @@ export class PythFeeRecipient implements StructClass {
     this.$fullTypeName = composeSuiType(
       PythFeeRecipient.$typeName,
       ...typeArgs,
-    ) as `${typeof PKG_V1}::set_fee_recipient::PythFeeRecipient`;
+    ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set_fee_recipient::PythFeeRecipient";
     this.$typeArgs = typeArgs;
 
     this.recipient = fields.recipient;
@@ -65,9 +65,8 @@ export class PythFeeRecipient implements StructClass {
       fullTypeName: composeSuiType(
         PythFeeRecipient.$typeName,
         ...[],
-      ) as `${typeof PKG_V1}::set_fee_recipient::PythFeeRecipient`,
+      ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set_fee_recipient::PythFeeRecipient",
       typeArgs: [] as [],
-      isPhantom: PythFeeRecipient.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         PythFeeRecipient.fromFields(fields),
@@ -79,8 +78,6 @@ export class PythFeeRecipient implements StructClass {
       fromJSON: (json: Record<string, any>) => PythFeeRecipient.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         PythFeeRecipient.fromSuiParsedData(content),
-      fromSuiObjectData: (content: SuiObjectData) =>
-        PythFeeRecipient.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         PythFeeRecipient.fetch(client, id),
       new: (fields: PythFeeRecipientFields) => {
@@ -172,25 +169,6 @@ export class PythFeeRecipient implements StructClass {
     return PythFeeRecipient.fromFieldsWithTypes(content);
   }
 
-  static fromSuiObjectData(data: SuiObjectData): PythFeeRecipient {
-    if (data.bcs) {
-      if (
-        data.bcs.dataType !== "moveObject" ||
-        !isPythFeeRecipient(data.bcs.type)
-      ) {
-        throw new Error(`object at is not a PythFeeRecipient object`);
-      }
-
-      return PythFeeRecipient.fromBcs(fromB64(data.bcs.bcsBytes));
-    }
-    if (data.content) {
-      return PythFeeRecipient.fromSuiParsedData(data.content);
-    }
-    throw new Error(
-      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
-    );
-  }
-
   static async fetch(client: SuiClient, id: string): Promise<PythFeeRecipient> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -204,7 +182,6 @@ export class PythFeeRecipient implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a PythFeeRecipient object`);
     }
-
-    return PythFeeRecipient.fromSuiObjectData(res.data);
+    return PythFeeRecipient.fromBcs(fromB64(res.data.bcs.bcsBytes));
   }
 }

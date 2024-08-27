@@ -15,16 +15,17 @@ import {
   compressSuiType,
 } from "../../../../_framework/util";
 import { Bytes32 } from "../bytes32/structs";
-import { PKG_V1 } from "../index";
-import { bcs } from "@mysten/sui/bcs";
-import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
-import { fromB64 } from "@mysten/sui/utils";
+import { bcs, fromB64 } from "@mysten/bcs";
+import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
 
 /* ============================== ExternalAddress =============================== */
 
 export function isExternalAddress(type: string): boolean {
   type = compressSuiType(type);
-  return type === `${PKG_V1}::external_address::ExternalAddress`;
+  return (
+    type ===
+    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::external_address::ExternalAddress"
+  );
 }
 
 export interface ExternalAddressFields {
@@ -37,16 +38,15 @@ export type ExternalAddressReified = Reified<
 >;
 
 export class ExternalAddress implements StructClass {
-  __StructClass = true as const;
-
-  static readonly $typeName = `${PKG_V1}::external_address::ExternalAddress`;
+  static readonly $typeName =
+    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::external_address::ExternalAddress";
   static readonly $numTypeParams = 0;
-  static readonly $isPhantom = [] as const;
 
   readonly $typeName = ExternalAddress.$typeName;
-  readonly $fullTypeName: `${typeof PKG_V1}::external_address::ExternalAddress`;
+
+  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::external_address::ExternalAddress";
+
   readonly $typeArgs: [];
-  readonly $isPhantom = ExternalAddress.$isPhantom;
 
   readonly value: ToField<Bytes32>;
 
@@ -54,7 +54,7 @@ export class ExternalAddress implements StructClass {
     this.$fullTypeName = composeSuiType(
       ExternalAddress.$typeName,
       ...typeArgs,
-    ) as `${typeof PKG_V1}::external_address::ExternalAddress`;
+    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::external_address::ExternalAddress";
     this.$typeArgs = typeArgs;
 
     this.value = fields.value;
@@ -66,9 +66,8 @@ export class ExternalAddress implements StructClass {
       fullTypeName: composeSuiType(
         ExternalAddress.$typeName,
         ...[],
-      ) as `${typeof PKG_V1}::external_address::ExternalAddress`,
+      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::external_address::ExternalAddress",
       typeArgs: [] as [],
-      isPhantom: ExternalAddress.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         ExternalAddress.fromFields(fields),
@@ -80,8 +79,6 @@ export class ExternalAddress implements StructClass {
       fromJSON: (json: Record<string, any>) => ExternalAddress.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         ExternalAddress.fromSuiParsedData(content),
-      fromSuiObjectData: (content: SuiObjectData) =>
-        ExternalAddress.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         ExternalAddress.fetch(client, id),
       new: (fields: ExternalAddressFields) => {
@@ -168,25 +165,6 @@ export class ExternalAddress implements StructClass {
     return ExternalAddress.fromFieldsWithTypes(content);
   }
 
-  static fromSuiObjectData(data: SuiObjectData): ExternalAddress {
-    if (data.bcs) {
-      if (
-        data.bcs.dataType !== "moveObject" ||
-        !isExternalAddress(data.bcs.type)
-      ) {
-        throw new Error(`object at is not a ExternalAddress object`);
-      }
-
-      return ExternalAddress.fromBcs(fromB64(data.bcs.bcsBytes));
-    }
-    if (data.content) {
-      return ExternalAddress.fromSuiParsedData(data.content);
-    }
-    throw new Error(
-      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
-    );
-  }
-
   static async fetch(client: SuiClient, id: string): Promise<ExternalAddress> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -200,7 +178,6 @@ export class ExternalAddress implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a ExternalAddress object`);
     }
-
-    return ExternalAddress.fromSuiObjectData(res.data);
+    return ExternalAddress.fromBcs(fromB64(res.data.bcs.bcsBytes));
   }
 }

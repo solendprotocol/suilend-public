@@ -14,16 +14,17 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
-import { PKG_V1 } from "../index";
-import { bcs } from "@mysten/sui/bcs";
-import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
-import { fromB64 } from "@mysten/sui/utils";
+import { bcs, fromB64 } from "@mysten/bcs";
+import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
 
 /* ============================== I64 =============================== */
 
 export function isI64(type: string): boolean {
   type = compressSuiType(type);
-  return type === `${PKG_V1}::i64::I64`;
+  return (
+    type ===
+    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::i64::I64"
+  );
 }
 
 export interface I64Fields {
@@ -34,16 +35,15 @@ export interface I64Fields {
 export type I64Reified = Reified<I64, I64Fields>;
 
 export class I64 implements StructClass {
-  __StructClass = true as const;
-
-  static readonly $typeName = `${PKG_V1}::i64::I64`;
+  static readonly $typeName =
+    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::i64::I64";
   static readonly $numTypeParams = 0;
-  static readonly $isPhantom = [] as const;
 
   readonly $typeName = I64.$typeName;
-  readonly $fullTypeName: `${typeof PKG_V1}::i64::I64`;
+
+  readonly $fullTypeName: "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::i64::I64";
+
   readonly $typeArgs: [];
-  readonly $isPhantom = I64.$isPhantom;
 
   readonly negative: ToField<"bool">;
   readonly magnitude: ToField<"u64">;
@@ -52,7 +52,7 @@ export class I64 implements StructClass {
     this.$fullTypeName = composeSuiType(
       I64.$typeName,
       ...typeArgs,
-    ) as `${typeof PKG_V1}::i64::I64`;
+    ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::i64::I64";
     this.$typeArgs = typeArgs;
 
     this.negative = fields.negative;
@@ -65,9 +65,8 @@ export class I64 implements StructClass {
       fullTypeName: composeSuiType(
         I64.$typeName,
         ...[],
-      ) as `${typeof PKG_V1}::i64::I64`,
+      ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::i64::I64",
       typeArgs: [] as [],
-      isPhantom: I64.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => I64.fromFields(fields),
       fromFieldsWithTypes: (item: FieldsWithTypes) =>
@@ -78,8 +77,6 @@ export class I64 implements StructClass {
       fromJSON: (json: Record<string, any>) => I64.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         I64.fromSuiParsedData(content),
-      fromSuiObjectData: (content: SuiObjectData) =>
-        I64.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) => I64.fetch(client, id),
       new: (fields: I64Fields) => {
         return new I64([], fields);
@@ -170,22 +167,6 @@ export class I64 implements StructClass {
     return I64.fromFieldsWithTypes(content);
   }
 
-  static fromSuiObjectData(data: SuiObjectData): I64 {
-    if (data.bcs) {
-      if (data.bcs.dataType !== "moveObject" || !isI64(data.bcs.type)) {
-        throw new Error(`object at is not a I64 object`);
-      }
-
-      return I64.fromBcs(fromB64(data.bcs.bcsBytes));
-    }
-    if (data.content) {
-      return I64.fromSuiParsedData(data.content);
-    }
-    throw new Error(
-      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
-    );
-  }
-
   static async fetch(client: SuiClient, id: string): Promise<I64> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -196,7 +177,6 @@ export class I64 implements StructClass {
     if (res.data?.bcs?.dataType !== "moveObject" || !isI64(res.data.bcs.type)) {
       throw new Error(`object at id ${id} is not a I64 object`);
     }
-
-    return I64.fromSuiObjectData(res.data);
+    return I64.fromBcs(fromB64(res.data.bcs.bcsBytes));
   }
 }

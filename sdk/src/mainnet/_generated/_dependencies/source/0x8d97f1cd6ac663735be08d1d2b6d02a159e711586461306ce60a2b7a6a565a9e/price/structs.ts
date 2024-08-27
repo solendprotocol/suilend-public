@@ -15,16 +15,17 @@ import {
   compressSuiType,
 } from "../../../../_framework/util";
 import { I64 } from "../i64/structs";
-import { PKG_V1 } from "../index";
-import { bcs } from "@mysten/sui/bcs";
-import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
-import { fromB64 } from "@mysten/sui/utils";
+import { bcs, fromB64 } from "@mysten/bcs";
+import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
 
 /* ============================== Price =============================== */
 
 export function isPrice(type: string): boolean {
   type = compressSuiType(type);
-  return type === `${PKG_V1}::price::Price`;
+  return (
+    type ===
+    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::price::Price"
+  );
 }
 
 export interface PriceFields {
@@ -37,16 +38,15 @@ export interface PriceFields {
 export type PriceReified = Reified<Price, PriceFields>;
 
 export class Price implements StructClass {
-  __StructClass = true as const;
-
-  static readonly $typeName = `${PKG_V1}::price::Price`;
+  static readonly $typeName =
+    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::price::Price";
   static readonly $numTypeParams = 0;
-  static readonly $isPhantom = [] as const;
 
   readonly $typeName = Price.$typeName;
-  readonly $fullTypeName: `${typeof PKG_V1}::price::Price`;
+
+  readonly $fullTypeName: "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::price::Price";
+
   readonly $typeArgs: [];
-  readonly $isPhantom = Price.$isPhantom;
 
   readonly price: ToField<I64>;
   readonly conf: ToField<"u64">;
@@ -57,7 +57,7 @@ export class Price implements StructClass {
     this.$fullTypeName = composeSuiType(
       Price.$typeName,
       ...typeArgs,
-    ) as `${typeof PKG_V1}::price::Price`;
+    ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::price::Price";
     this.$typeArgs = typeArgs;
 
     this.price = fields.price;
@@ -72,9 +72,8 @@ export class Price implements StructClass {
       fullTypeName: composeSuiType(
         Price.$typeName,
         ...[],
-      ) as `${typeof PKG_V1}::price::Price`,
+      ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::price::Price",
       typeArgs: [] as [],
-      isPhantom: Price.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => Price.fromFields(fields),
       fromFieldsWithTypes: (item: FieldsWithTypes) =>
@@ -85,8 +84,6 @@ export class Price implements StructClass {
       fromJSON: (json: Record<string, any>) => Price.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         Price.fromSuiParsedData(content),
-      fromSuiObjectData: (content: SuiObjectData) =>
-        Price.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) => Price.fetch(client, id),
       new: (fields: PriceFields) => {
         return new Price([], fields);
@@ -187,22 +184,6 @@ export class Price implements StructClass {
     return Price.fromFieldsWithTypes(content);
   }
 
-  static fromSuiObjectData(data: SuiObjectData): Price {
-    if (data.bcs) {
-      if (data.bcs.dataType !== "moveObject" || !isPrice(data.bcs.type)) {
-        throw new Error(`object at is not a Price object`);
-      }
-
-      return Price.fromBcs(fromB64(data.bcs.bcsBytes));
-    }
-    if (data.content) {
-      return Price.fromSuiParsedData(data.content);
-    }
-    throw new Error(
-      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
-    );
-  }
-
   static async fetch(client: SuiClient, id: string): Promise<Price> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -216,7 +197,6 @@ export class Price implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a Price object`);
     }
-
-    return Price.fromSuiObjectData(res.data);
+    return Price.fromBcs(fromB64(res.data.bcs.bcsBytes));
   }
 }

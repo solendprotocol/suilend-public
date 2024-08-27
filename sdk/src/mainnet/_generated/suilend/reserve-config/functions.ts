@@ -1,121 +1,123 @@
 import { PUBLISHED_AT } from "..";
-import { GenericArg, generic, obj, pure } from "../../_framework/util";
 import {
-  Transaction,
+  GenericArg,
+  ObjectArg,
+  generic,
+  obj,
+  pure,
+} from "../../_framework/util";
+import {
   TransactionArgument,
-  TransactionObjectInput,
-} from "@mysten/sui/transactions";
+  TransactionBlock,
+} from "@mysten/sui.js/transactions";
 
 export interface SetArgs {
-  builder: TransactionObjectInput;
+  builder: ObjectArg;
   field: GenericArg;
   value: GenericArg;
 }
 
 export function set(
-  tx: Transaction,
+  txb: TransactionBlock,
   typeArgs: [string, string],
   args: SetArgs,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::reserve_config::set`,
     typeArguments: typeArgs,
     arguments: [
-      obj(tx, args.builder),
-      generic(tx, `${typeArgs[0]}`, args.field),
-      generic(tx, `${typeArgs[1]}`, args.value),
+      obj(txb, args.builder),
+      generic(txb, `${typeArgs[0]}`, args.field),
+      generic(txb, `${typeArgs[1]}`, args.value),
     ],
   });
 }
 
-export function destroy(tx: Transaction, config: TransactionObjectInput) {
-  return tx.moveCall({
+export function destroy(txb: TransactionBlock, config: ObjectArg) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::reserve_config::destroy`,
-    arguments: [obj(tx, config)],
+    arguments: [obj(txb, config)],
   });
 }
 
-export function from(tx: Transaction, config: TransactionObjectInput) {
-  return tx.moveCall({
+export function from(txb: TransactionBlock, config: ObjectArg) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::reserve_config::from`,
-    arguments: [obj(tx, config)],
+    arguments: [obj(txb, config)],
   });
 }
 
-export function borrowFee(tx: Transaction, config: TransactionObjectInput) {
-  return tx.moveCall({
+export function borrowFee(txb: TransactionBlock, config: ObjectArg) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::reserve_config::borrow_fee`,
-    arguments: [obj(tx, config)],
+    arguments: [obj(txb, config)],
   });
 }
 
-export function borrowLimit(tx: Transaction, config: TransactionObjectInput) {
-  return tx.moveCall({
+export function borrowLimit(txb: TransactionBlock, config: ObjectArg) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::reserve_config::borrow_limit`,
-    arguments: [obj(tx, config)],
+    arguments: [obj(txb, config)],
   });
 }
 
-export function borrowLimitUsd(
-  tx: Transaction,
-  config: TransactionObjectInput,
-) {
-  return tx.moveCall({
+export function borrowLimitUsd(txb: TransactionBlock, config: ObjectArg) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::reserve_config::borrow_limit_usd`,
-    arguments: [obj(tx, config)],
+    arguments: [obj(txb, config)],
   });
 }
 
-export function borrowWeight(tx: Transaction, config: TransactionObjectInput) {
-  return tx.moveCall({
+export function borrowWeight(txb: TransactionBlock, config: ObjectArg) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::reserve_config::borrow_weight`,
-    arguments: [obj(tx, config)],
+    arguments: [obj(txb, config)],
   });
 }
 
-export function build(tx: Transaction, builder: TransactionObjectInput) {
-  return tx.moveCall({
+export function build(txb: TransactionBlock, builder: ObjectArg) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::reserve_config::build`,
-    arguments: [obj(tx, builder)],
+    arguments: [obj(txb, builder)],
   });
 }
 
 export interface CalculateAprArgs {
-  config: TransactionObjectInput;
-  curUtil: TransactionObjectInput;
+  config: ObjectArg;
+  curUtil: ObjectArg;
 }
 
-export function calculateApr(tx: Transaction, args: CalculateAprArgs) {
-  return tx.moveCall({
+export function calculateApr(txb: TransactionBlock, args: CalculateAprArgs) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::reserve_config::calculate_apr`,
-    arguments: [obj(tx, args.config), obj(tx, args.curUtil)],
+    arguments: [obj(txb, args.config), obj(txb, args.curUtil)],
   });
 }
 
 export interface CalculateSupplyAprArgs {
-  config: TransactionObjectInput;
-  curUtil: TransactionObjectInput;
-  borrowApr: TransactionObjectInput;
+  config: ObjectArg;
+  curUtil: ObjectArg;
+  borrowApr: ObjectArg;
 }
 
 export function calculateSupplyApr(
-  tx: Transaction,
+  txb: TransactionBlock,
   args: CalculateSupplyAprArgs,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::reserve_config::calculate_supply_apr`,
     arguments: [
-      obj(tx, args.config),
-      obj(tx, args.curUtil),
-      obj(tx, args.borrowApr),
+      obj(txb, args.config),
+      obj(txb, args.curUtil),
+      obj(txb, args.borrowApr),
     ],
   });
 }
 
-export function closeLtv(tx: Transaction, config: TransactionObjectInput) {
-  return tx.moveCall({
+export function closeLtv(txb: TransactionBlock, config: ObjectArg) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::reserve_config::close_ltv`,
-    arguments: [obj(tx, config)],
+    arguments: [obj(txb, config)],
   });
 }
 
@@ -141,369 +143,378 @@ export interface CreateReserveConfigArgs {
 }
 
 export function createReserveConfig(
-  tx: Transaction,
+  txb: TransactionBlock,
   args: CreateReserveConfigArgs,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::reserve_config::create_reserve_config`,
     arguments: [
-      pure(tx, args.openLtvPct, `u8`),
-      pure(tx, args.closeLtvPct, `u8`),
-      pure(tx, args.maxCloseLtvPct, `u8`),
-      pure(tx, args.borrowWeightBps, `u64`),
-      pure(tx, args.depositLimit, `u64`),
-      pure(tx, args.borrowLimit, `u64`),
-      pure(tx, args.liquidationBonusBps, `u64`),
-      pure(tx, args.maxLiquidationBonusBps, `u64`),
-      pure(tx, args.depositLimitUsd, `u64`),
-      pure(tx, args.borrowLimitUsd, `u64`),
-      pure(tx, args.borrowFeeBps, `u64`),
-      pure(tx, args.spreadFeeBps, `u64`),
-      pure(tx, args.protocolLiquidationFeeBps, `u64`),
-      pure(tx, args.interestRateUtils, `vector<u8>`),
-      pure(tx, args.interestRateAprs, `vector<u64>`),
-      pure(tx, args.isolated, `bool`),
-      pure(tx, args.openAttributedBorrowLimitUsd, `u64`),
-      pure(tx, args.closeAttributedBorrowLimitUsd, `u64`),
+      pure(txb, args.openLtvPct, `u8`),
+      pure(txb, args.closeLtvPct, `u8`),
+      pure(txb, args.maxCloseLtvPct, `u8`),
+      pure(txb, args.borrowWeightBps, `u64`),
+      pure(txb, args.depositLimit, `u64`),
+      pure(txb, args.borrowLimit, `u64`),
+      pure(txb, args.liquidationBonusBps, `u64`),
+      pure(txb, args.maxLiquidationBonusBps, `u64`),
+      pure(txb, args.depositLimitUsd, `u64`),
+      pure(txb, args.borrowLimitUsd, `u64`),
+      pure(txb, args.borrowFeeBps, `u64`),
+      pure(txb, args.spreadFeeBps, `u64`),
+      pure(txb, args.protocolLiquidationFeeBps, `u64`),
+      pure(txb, args.interestRateUtils, `vector<u8>`),
+      pure(txb, args.interestRateAprs, `vector<u64>`),
+      pure(txb, args.isolated, `bool`),
+      pure(txb, args.openAttributedBorrowLimitUsd, `u64`),
+      pure(txb, args.closeAttributedBorrowLimitUsd, `u64`),
     ],
   });
 }
 
-export function depositLimit(tx: Transaction, config: TransactionObjectInput) {
-  return tx.moveCall({
+export function depositLimit(txb: TransactionBlock, config: ObjectArg) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::reserve_config::deposit_limit`,
-    arguments: [obj(tx, config)],
+    arguments: [obj(txb, config)],
   });
 }
 
-export function depositLimitUsd(
-  tx: Transaction,
-  config: TransactionObjectInput,
-) {
-  return tx.moveCall({
+export function depositLimitUsd(txb: TransactionBlock, config: ObjectArg) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::reserve_config::deposit_limit_usd`,
-    arguments: [obj(tx, config)],
+    arguments: [obj(txb, config)],
   });
 }
 
-export function isolated(tx: Transaction, config: TransactionObjectInput) {
-  return tx.moveCall({
+export function isolated(txb: TransactionBlock, config: ObjectArg) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::reserve_config::isolated`,
-    arguments: [obj(tx, config)],
+    arguments: [obj(txb, config)],
   });
 }
 
-export function liquidationBonus(
-  tx: Transaction,
-  config: TransactionObjectInput,
-) {
-  return tx.moveCall({
+export function liquidationBonus(txb: TransactionBlock, config: ObjectArg) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::reserve_config::liquidation_bonus`,
-    arguments: [obj(tx, config)],
+    arguments: [obj(txb, config)],
   });
 }
 
-export function openLtv(tx: Transaction, config: TransactionObjectInput) {
-  return tx.moveCall({
+export function openLtv(txb: TransactionBlock, config: ObjectArg) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::reserve_config::open_ltv`,
-    arguments: [obj(tx, config)],
+    arguments: [obj(txb, config)],
   });
 }
 
 export function protocolLiquidationFee(
-  tx: Transaction,
-  config: TransactionObjectInput,
+  txb: TransactionBlock,
+  config: ObjectArg,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::reserve_config::protocol_liquidation_fee`,
-    arguments: [obj(tx, config)],
+    arguments: [obj(txb, config)],
   });
 }
 
 export interface SetBorrowFeeBpsArgs {
-  builder: TransactionObjectInput;
+  builder: ObjectArg;
   borrowFeeBps: bigint | TransactionArgument;
 }
 
-export function setBorrowFeeBps(tx: Transaction, args: SetBorrowFeeBpsArgs) {
-  return tx.moveCall({
+export function setBorrowFeeBps(
+  txb: TransactionBlock,
+  args: SetBorrowFeeBpsArgs,
+) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::reserve_config::set_borrow_fee_bps`,
-    arguments: [obj(tx, args.builder), pure(tx, args.borrowFeeBps, `u64`)],
+    arguments: [obj(txb, args.builder), pure(txb, args.borrowFeeBps, `u64`)],
   });
 }
 
 export interface SetBorrowLimitArgs {
-  builder: TransactionObjectInput;
+  builder: ObjectArg;
   borrowLimit: bigint | TransactionArgument;
 }
 
-export function setBorrowLimit(tx: Transaction, args: SetBorrowLimitArgs) {
-  return tx.moveCall({
+export function setBorrowLimit(
+  txb: TransactionBlock,
+  args: SetBorrowLimitArgs,
+) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::reserve_config::set_borrow_limit`,
-    arguments: [obj(tx, args.builder), pure(tx, args.borrowLimit, `u64`)],
+    arguments: [obj(txb, args.builder), pure(txb, args.borrowLimit, `u64`)],
   });
 }
 
 export interface SetBorrowLimitUsdArgs {
-  builder: TransactionObjectInput;
+  builder: ObjectArg;
   borrowLimitUsd: bigint | TransactionArgument;
 }
 
 export function setBorrowLimitUsd(
-  tx: Transaction,
+  txb: TransactionBlock,
   args: SetBorrowLimitUsdArgs,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::reserve_config::set_borrow_limit_usd`,
-    arguments: [obj(tx, args.builder), pure(tx, args.borrowLimitUsd, `u64`)],
+    arguments: [obj(txb, args.builder), pure(txb, args.borrowLimitUsd, `u64`)],
   });
 }
 
 export interface SetBorrowWeightBpsArgs {
-  builder: TransactionObjectInput;
+  builder: ObjectArg;
   borrowWeightBps: bigint | TransactionArgument;
 }
 
 export function setBorrowWeightBps(
-  tx: Transaction,
+  txb: TransactionBlock,
   args: SetBorrowWeightBpsArgs,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::reserve_config::set_borrow_weight_bps`,
-    arguments: [obj(tx, args.builder), pure(tx, args.borrowWeightBps, `u64`)],
+    arguments: [obj(txb, args.builder), pure(txb, args.borrowWeightBps, `u64`)],
   });
 }
 
 export interface SetCloseAttributedBorrowLimitUsdArgs {
-  builder: TransactionObjectInput;
+  builder: ObjectArg;
   closeAttributedBorrowLimitUsd: bigint | TransactionArgument;
 }
 
 export function setCloseAttributedBorrowLimitUsd(
-  tx: Transaction,
+  txb: TransactionBlock,
   args: SetCloseAttributedBorrowLimitUsdArgs,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::reserve_config::set_close_attributed_borrow_limit_usd`,
     arguments: [
-      obj(tx, args.builder),
-      pure(tx, args.closeAttributedBorrowLimitUsd, `u64`),
+      obj(txb, args.builder),
+      pure(txb, args.closeAttributedBorrowLimitUsd, `u64`),
     ],
   });
 }
 
 export interface SetCloseLtvPctArgs {
-  builder: TransactionObjectInput;
+  builder: ObjectArg;
   closeLtvPct: number | TransactionArgument;
 }
 
-export function setCloseLtvPct(tx: Transaction, args: SetCloseLtvPctArgs) {
-  return tx.moveCall({
+export function setCloseLtvPct(
+  txb: TransactionBlock,
+  args: SetCloseLtvPctArgs,
+) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::reserve_config::set_close_ltv_pct`,
-    arguments: [obj(tx, args.builder), pure(tx, args.closeLtvPct, `u8`)],
+    arguments: [obj(txb, args.builder), pure(txb, args.closeLtvPct, `u8`)],
   });
 }
 
 export interface SetDepositLimitArgs {
-  builder: TransactionObjectInput;
+  builder: ObjectArg;
   depositLimit: bigint | TransactionArgument;
 }
 
-export function setDepositLimit(tx: Transaction, args: SetDepositLimitArgs) {
-  return tx.moveCall({
+export function setDepositLimit(
+  txb: TransactionBlock,
+  args: SetDepositLimitArgs,
+) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::reserve_config::set_deposit_limit`,
-    arguments: [obj(tx, args.builder), pure(tx, args.depositLimit, `u64`)],
+    arguments: [obj(txb, args.builder), pure(txb, args.depositLimit, `u64`)],
   });
 }
 
 export interface SetDepositLimitUsdArgs {
-  builder: TransactionObjectInput;
+  builder: ObjectArg;
   depositLimitUsd: bigint | TransactionArgument;
 }
 
 export function setDepositLimitUsd(
-  tx: Transaction,
+  txb: TransactionBlock,
   args: SetDepositLimitUsdArgs,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::reserve_config::set_deposit_limit_usd`,
-    arguments: [obj(tx, args.builder), pure(tx, args.depositLimitUsd, `u64`)],
+    arguments: [obj(txb, args.builder), pure(txb, args.depositLimitUsd, `u64`)],
   });
 }
 
 export interface SetInterestRateAprsArgs {
-  builder: TransactionObjectInput;
+  builder: ObjectArg;
   interestRateAprs: Array<bigint | TransactionArgument> | TransactionArgument;
 }
 
 export function setInterestRateAprs(
-  tx: Transaction,
+  txb: TransactionBlock,
   args: SetInterestRateAprsArgs,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::reserve_config::set_interest_rate_aprs`,
     arguments: [
-      obj(tx, args.builder),
-      pure(tx, args.interestRateAprs, `vector<u64>`),
+      obj(txb, args.builder),
+      pure(txb, args.interestRateAprs, `vector<u64>`),
     ],
   });
 }
 
 export interface SetInterestRateUtilsArgs {
-  builder: TransactionObjectInput;
+  builder: ObjectArg;
   interestRateUtils: Array<number | TransactionArgument> | TransactionArgument;
 }
 
 export function setInterestRateUtils(
-  tx: Transaction,
+  txb: TransactionBlock,
   args: SetInterestRateUtilsArgs,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::reserve_config::set_interest_rate_utils`,
     arguments: [
-      obj(tx, args.builder),
-      pure(tx, args.interestRateUtils, `vector<u8>`),
+      obj(txb, args.builder),
+      pure(txb, args.interestRateUtils, `vector<u8>`),
     ],
   });
 }
 
 export interface SetIsolatedArgs {
-  builder: TransactionObjectInput;
+  builder: ObjectArg;
   isolated: boolean | TransactionArgument;
 }
 
-export function setIsolated(tx: Transaction, args: SetIsolatedArgs) {
-  return tx.moveCall({
+export function setIsolated(txb: TransactionBlock, args: SetIsolatedArgs) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::reserve_config::set_isolated`,
-    arguments: [obj(tx, args.builder), pure(tx, args.isolated, `bool`)],
+    arguments: [obj(txb, args.builder), pure(txb, args.isolated, `bool`)],
   });
 }
 
 export interface SetLiquidationBonusBpsArgs {
-  builder: TransactionObjectInput;
+  builder: ObjectArg;
   liquidationBonusBps: bigint | TransactionArgument;
 }
 
 export function setLiquidationBonusBps(
-  tx: Transaction,
+  txb: TransactionBlock,
   args: SetLiquidationBonusBpsArgs,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::reserve_config::set_liquidation_bonus_bps`,
     arguments: [
-      obj(tx, args.builder),
-      pure(tx, args.liquidationBonusBps, `u64`),
+      obj(txb, args.builder),
+      pure(txb, args.liquidationBonusBps, `u64`),
     ],
   });
 }
 
 export interface SetMaxCloseLtvPctArgs {
-  builder: TransactionObjectInput;
+  builder: ObjectArg;
   maxCloseLtvPct: number | TransactionArgument;
 }
 
 export function setMaxCloseLtvPct(
-  tx: Transaction,
+  txb: TransactionBlock,
   args: SetMaxCloseLtvPctArgs,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::reserve_config::set_max_close_ltv_pct`,
-    arguments: [obj(tx, args.builder), pure(tx, args.maxCloseLtvPct, `u8`)],
+    arguments: [obj(txb, args.builder), pure(txb, args.maxCloseLtvPct, `u8`)],
   });
 }
 
 export interface SetMaxLiquidationBonusBpsArgs {
-  builder: TransactionObjectInput;
+  builder: ObjectArg;
   maxLiquidationBonusBps: bigint | TransactionArgument;
 }
 
 export function setMaxLiquidationBonusBps(
-  tx: Transaction,
+  txb: TransactionBlock,
   args: SetMaxLiquidationBonusBpsArgs,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::reserve_config::set_max_liquidation_bonus_bps`,
     arguments: [
-      obj(tx, args.builder),
-      pure(tx, args.maxLiquidationBonusBps, `u64`),
+      obj(txb, args.builder),
+      pure(txb, args.maxLiquidationBonusBps, `u64`),
     ],
   });
 }
 
 export interface SetOpenAttributedBorrowLimitUsdArgs {
-  builder: TransactionObjectInput;
+  builder: ObjectArg;
   openAttributedBorrowLimitUsd: bigint | TransactionArgument;
 }
 
 export function setOpenAttributedBorrowLimitUsd(
-  tx: Transaction,
+  txb: TransactionBlock,
   args: SetOpenAttributedBorrowLimitUsdArgs,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::reserve_config::set_open_attributed_borrow_limit_usd`,
     arguments: [
-      obj(tx, args.builder),
-      pure(tx, args.openAttributedBorrowLimitUsd, `u64`),
+      obj(txb, args.builder),
+      pure(txb, args.openAttributedBorrowLimitUsd, `u64`),
     ],
   });
 }
 
 export interface SetOpenLtvPctArgs {
-  builder: TransactionObjectInput;
+  builder: ObjectArg;
   openLtvPct: number | TransactionArgument;
 }
 
-export function setOpenLtvPct(tx: Transaction, args: SetOpenLtvPctArgs) {
-  return tx.moveCall({
+export function setOpenLtvPct(txb: TransactionBlock, args: SetOpenLtvPctArgs) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::reserve_config::set_open_ltv_pct`,
-    arguments: [obj(tx, args.builder), pure(tx, args.openLtvPct, `u8`)],
+    arguments: [obj(txb, args.builder), pure(txb, args.openLtvPct, `u8`)],
   });
 }
 
 export interface SetProtocolLiquidationFeeBpsArgs {
-  builder: TransactionObjectInput;
+  builder: ObjectArg;
   protocolLiquidationFeeBps: bigint | TransactionArgument;
 }
 
 export function setProtocolLiquidationFeeBps(
-  tx: Transaction,
+  txb: TransactionBlock,
   args: SetProtocolLiquidationFeeBpsArgs,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::reserve_config::set_protocol_liquidation_fee_bps`,
     arguments: [
-      obj(tx, args.builder),
-      pure(tx, args.protocolLiquidationFeeBps, `u64`),
+      obj(txb, args.builder),
+      pure(txb, args.protocolLiquidationFeeBps, `u64`),
     ],
   });
 }
 
 export interface SetSpreadFeeBpsArgs {
-  builder: TransactionObjectInput;
+  builder: ObjectArg;
   spreadFeeBps: bigint | TransactionArgument;
 }
 
-export function setSpreadFeeBps(tx: Transaction, args: SetSpreadFeeBpsArgs) {
-  return tx.moveCall({
+export function setSpreadFeeBps(
+  txb: TransactionBlock,
+  args: SetSpreadFeeBpsArgs,
+) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::reserve_config::set_spread_fee_bps`,
-    arguments: [obj(tx, args.builder), pure(tx, args.spreadFeeBps, `u64`)],
+    arguments: [obj(txb, args.builder), pure(txb, args.spreadFeeBps, `u64`)],
   });
 }
 
-export function spreadFee(tx: Transaction, config: TransactionObjectInput) {
-  return tx.moveCall({
+export function spreadFee(txb: TransactionBlock, config: ObjectArg) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::reserve_config::spread_fee`,
-    arguments: [obj(tx, config)],
+    arguments: [obj(txb, config)],
   });
 }
 
 export function validateReserveConfig(
-  tx: Transaction,
-  config: TransactionObjectInput,
+  txb: TransactionBlock,
+  config: ObjectArg,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::reserve_config::validate_reserve_config`,
-    arguments: [obj(tx, config)],
+    arguments: [obj(txb, config)],
   });
 }
 
@@ -513,14 +524,14 @@ export interface ValidateUtilsAndAprsArgs {
 }
 
 export function validateUtilsAndAprs(
-  tx: Transaction,
+  txb: TransactionBlock,
   args: ValidateUtilsAndAprsArgs,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::reserve_config::validate_utils_and_aprs`,
     arguments: [
-      pure(tx, args.utils, `vector<u8>`),
-      pure(tx, args.aprs, `vector<u64>`),
+      pure(txb, args.utils, `vector<u8>`),
+      pure(txb, args.aprs, `vector<u64>`),
     ],
   });
 }

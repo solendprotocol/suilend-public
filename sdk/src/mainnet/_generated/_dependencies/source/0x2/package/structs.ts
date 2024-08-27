@@ -5,6 +5,7 @@ import {
   StructClass,
   ToField,
   ToTypeStr,
+  Vector,
   decodeFromFields,
   decodeFromFieldsWithTypes,
   decodeFromJSONField,
@@ -16,19 +17,16 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
-import { Vector } from "../../../../_framework/vector";
 import { String } from "../../0x1/ascii/structs";
-import { PKG_V25 } from "../index";
 import { ID, UID } from "../object/structs";
-import { bcs } from "@mysten/sui/bcs";
-import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
-import { fromB64 } from "@mysten/sui/utils";
+import { bcs, fromB64 } from "@mysten/bcs";
+import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
 
 /* ============================== Publisher =============================== */
 
 export function isPublisher(type: string): boolean {
   type = compressSuiType(type);
-  return type === `${PKG_V25}::package::Publisher`;
+  return type === "0x2::package::Publisher";
 }
 
 export interface PublisherFields {
@@ -40,16 +38,14 @@ export interface PublisherFields {
 export type PublisherReified = Reified<Publisher, PublisherFields>;
 
 export class Publisher implements StructClass {
-  __StructClass = true as const;
-
-  static readonly $typeName = `${PKG_V25}::package::Publisher`;
+  static readonly $typeName = "0x2::package::Publisher";
   static readonly $numTypeParams = 0;
-  static readonly $isPhantom = [] as const;
 
   readonly $typeName = Publisher.$typeName;
-  readonly $fullTypeName: `${typeof PKG_V25}::package::Publisher`;
+
+  readonly $fullTypeName: "0x2::package::Publisher";
+
   readonly $typeArgs: [];
-  readonly $isPhantom = Publisher.$isPhantom;
 
   readonly id: ToField<UID>;
   readonly package: ToField<String>;
@@ -59,7 +55,7 @@ export class Publisher implements StructClass {
     this.$fullTypeName = composeSuiType(
       Publisher.$typeName,
       ...typeArgs,
-    ) as `${typeof PKG_V25}::package::Publisher`;
+    ) as "0x2::package::Publisher";
     this.$typeArgs = typeArgs;
 
     this.id = fields.id;
@@ -73,9 +69,8 @@ export class Publisher implements StructClass {
       fullTypeName: composeSuiType(
         Publisher.$typeName,
         ...[],
-      ) as `${typeof PKG_V25}::package::Publisher`,
+      ) as "0x2::package::Publisher",
       typeArgs: [] as [],
-      isPhantom: Publisher.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => Publisher.fromFields(fields),
       fromFieldsWithTypes: (item: FieldsWithTypes) =>
@@ -86,8 +81,6 @@ export class Publisher implements StructClass {
       fromJSON: (json: Record<string, any>) => Publisher.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         Publisher.fromSuiParsedData(content),
-      fromSuiObjectData: (content: SuiObjectData) =>
-        Publisher.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         Publisher.fetch(client, id),
       new: (fields: PublisherFields) => {
@@ -187,22 +180,6 @@ export class Publisher implements StructClass {
     return Publisher.fromFieldsWithTypes(content);
   }
 
-  static fromSuiObjectData(data: SuiObjectData): Publisher {
-    if (data.bcs) {
-      if (data.bcs.dataType !== "moveObject" || !isPublisher(data.bcs.type)) {
-        throw new Error(`object at is not a Publisher object`);
-      }
-
-      return Publisher.fromBcs(fromB64(data.bcs.bcsBytes));
-    }
-    if (data.content) {
-      return Publisher.fromSuiParsedData(data.content);
-    }
-    throw new Error(
-      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
-    );
-  }
-
   static async fetch(client: SuiClient, id: string): Promise<Publisher> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -216,8 +193,7 @@ export class Publisher implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a Publisher object`);
     }
-
-    return Publisher.fromSuiObjectData(res.data);
+    return Publisher.fromBcs(fromB64(res.data.bcs.bcsBytes));
   }
 }
 
@@ -225,7 +201,7 @@ export class Publisher implements StructClass {
 
 export function isUpgradeCap(type: string): boolean {
   type = compressSuiType(type);
-  return type === `${PKG_V25}::package::UpgradeCap`;
+  return type === "0x2::package::UpgradeCap";
 }
 
 export interface UpgradeCapFields {
@@ -238,16 +214,14 @@ export interface UpgradeCapFields {
 export type UpgradeCapReified = Reified<UpgradeCap, UpgradeCapFields>;
 
 export class UpgradeCap implements StructClass {
-  __StructClass = true as const;
-
-  static readonly $typeName = `${PKG_V25}::package::UpgradeCap`;
+  static readonly $typeName = "0x2::package::UpgradeCap";
   static readonly $numTypeParams = 0;
-  static readonly $isPhantom = [] as const;
 
   readonly $typeName = UpgradeCap.$typeName;
-  readonly $fullTypeName: `${typeof PKG_V25}::package::UpgradeCap`;
+
+  readonly $fullTypeName: "0x2::package::UpgradeCap";
+
   readonly $typeArgs: [];
-  readonly $isPhantom = UpgradeCap.$isPhantom;
 
   readonly id: ToField<UID>;
   readonly package: ToField<ID>;
@@ -258,7 +232,7 @@ export class UpgradeCap implements StructClass {
     this.$fullTypeName = composeSuiType(
       UpgradeCap.$typeName,
       ...typeArgs,
-    ) as `${typeof PKG_V25}::package::UpgradeCap`;
+    ) as "0x2::package::UpgradeCap";
     this.$typeArgs = typeArgs;
 
     this.id = fields.id;
@@ -273,9 +247,8 @@ export class UpgradeCap implements StructClass {
       fullTypeName: composeSuiType(
         UpgradeCap.$typeName,
         ...[],
-      ) as `${typeof PKG_V25}::package::UpgradeCap`,
+      ) as "0x2::package::UpgradeCap",
       typeArgs: [] as [],
-      isPhantom: UpgradeCap.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         UpgradeCap.fromFields(fields),
@@ -287,8 +260,6 @@ export class UpgradeCap implements StructClass {
       fromJSON: (json: Record<string, any>) => UpgradeCap.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         UpgradeCap.fromSuiParsedData(content),
-      fromSuiObjectData: (content: SuiObjectData) =>
-        UpgradeCap.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         UpgradeCap.fetch(client, id),
       new: (fields: UpgradeCapFields) => {
@@ -390,22 +361,6 @@ export class UpgradeCap implements StructClass {
     return UpgradeCap.fromFieldsWithTypes(content);
   }
 
-  static fromSuiObjectData(data: SuiObjectData): UpgradeCap {
-    if (data.bcs) {
-      if (data.bcs.dataType !== "moveObject" || !isUpgradeCap(data.bcs.type)) {
-        throw new Error(`object at is not a UpgradeCap object`);
-      }
-
-      return UpgradeCap.fromBcs(fromB64(data.bcs.bcsBytes));
-    }
-    if (data.content) {
-      return UpgradeCap.fromSuiParsedData(data.content);
-    }
-    throw new Error(
-      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
-    );
-  }
-
   static async fetch(client: SuiClient, id: string): Promise<UpgradeCap> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -419,8 +374,7 @@ export class UpgradeCap implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a UpgradeCap object`);
     }
-
-    return UpgradeCap.fromSuiObjectData(res.data);
+    return UpgradeCap.fromBcs(fromB64(res.data.bcs.bcsBytes));
   }
 }
 
@@ -428,7 +382,7 @@ export class UpgradeCap implements StructClass {
 
 export function isUpgradeReceipt(type: string): boolean {
   type = compressSuiType(type);
-  return type === `${PKG_V25}::package::UpgradeReceipt`;
+  return type === "0x2::package::UpgradeReceipt";
 }
 
 export interface UpgradeReceiptFields {
@@ -442,16 +396,14 @@ export type UpgradeReceiptReified = Reified<
 >;
 
 export class UpgradeReceipt implements StructClass {
-  __StructClass = true as const;
-
-  static readonly $typeName = `${PKG_V25}::package::UpgradeReceipt`;
+  static readonly $typeName = "0x2::package::UpgradeReceipt";
   static readonly $numTypeParams = 0;
-  static readonly $isPhantom = [] as const;
 
   readonly $typeName = UpgradeReceipt.$typeName;
-  readonly $fullTypeName: `${typeof PKG_V25}::package::UpgradeReceipt`;
+
+  readonly $fullTypeName: "0x2::package::UpgradeReceipt";
+
   readonly $typeArgs: [];
-  readonly $isPhantom = UpgradeReceipt.$isPhantom;
 
   readonly cap: ToField<ID>;
   readonly package: ToField<ID>;
@@ -460,7 +412,7 @@ export class UpgradeReceipt implements StructClass {
     this.$fullTypeName = composeSuiType(
       UpgradeReceipt.$typeName,
       ...typeArgs,
-    ) as `${typeof PKG_V25}::package::UpgradeReceipt`;
+    ) as "0x2::package::UpgradeReceipt";
     this.$typeArgs = typeArgs;
 
     this.cap = fields.cap;
@@ -473,9 +425,8 @@ export class UpgradeReceipt implements StructClass {
       fullTypeName: composeSuiType(
         UpgradeReceipt.$typeName,
         ...[],
-      ) as `${typeof PKG_V25}::package::UpgradeReceipt`,
+      ) as "0x2::package::UpgradeReceipt",
       typeArgs: [] as [],
-      isPhantom: UpgradeReceipt.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         UpgradeReceipt.fromFields(fields),
@@ -487,8 +438,6 @@ export class UpgradeReceipt implements StructClass {
       fromJSON: (json: Record<string, any>) => UpgradeReceipt.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         UpgradeReceipt.fromSuiParsedData(content),
-      fromSuiObjectData: (content: SuiObjectData) =>
-        UpgradeReceipt.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         UpgradeReceipt.fetch(client, id),
       new: (fields: UpgradeReceiptFields) => {
@@ -580,25 +529,6 @@ export class UpgradeReceipt implements StructClass {
     return UpgradeReceipt.fromFieldsWithTypes(content);
   }
 
-  static fromSuiObjectData(data: SuiObjectData): UpgradeReceipt {
-    if (data.bcs) {
-      if (
-        data.bcs.dataType !== "moveObject" ||
-        !isUpgradeReceipt(data.bcs.type)
-      ) {
-        throw new Error(`object at is not a UpgradeReceipt object`);
-      }
-
-      return UpgradeReceipt.fromBcs(fromB64(data.bcs.bcsBytes));
-    }
-    if (data.content) {
-      return UpgradeReceipt.fromSuiParsedData(data.content);
-    }
-    throw new Error(
-      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
-    );
-  }
-
   static async fetch(client: SuiClient, id: string): Promise<UpgradeReceipt> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -612,8 +542,7 @@ export class UpgradeReceipt implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a UpgradeReceipt object`);
     }
-
-    return UpgradeReceipt.fromSuiObjectData(res.data);
+    return UpgradeReceipt.fromBcs(fromB64(res.data.bcs.bcsBytes));
   }
 }
 
@@ -621,7 +550,7 @@ export class UpgradeReceipt implements StructClass {
 
 export function isUpgradeTicket(type: string): boolean {
   type = compressSuiType(type);
-  return type === `${PKG_V25}::package::UpgradeTicket`;
+  return type === "0x2::package::UpgradeTicket";
 }
 
 export interface UpgradeTicketFields {
@@ -634,16 +563,14 @@ export interface UpgradeTicketFields {
 export type UpgradeTicketReified = Reified<UpgradeTicket, UpgradeTicketFields>;
 
 export class UpgradeTicket implements StructClass {
-  __StructClass = true as const;
-
-  static readonly $typeName = `${PKG_V25}::package::UpgradeTicket`;
+  static readonly $typeName = "0x2::package::UpgradeTicket";
   static readonly $numTypeParams = 0;
-  static readonly $isPhantom = [] as const;
 
   readonly $typeName = UpgradeTicket.$typeName;
-  readonly $fullTypeName: `${typeof PKG_V25}::package::UpgradeTicket`;
+
+  readonly $fullTypeName: "0x2::package::UpgradeTicket";
+
   readonly $typeArgs: [];
-  readonly $isPhantom = UpgradeTicket.$isPhantom;
 
   readonly cap: ToField<ID>;
   readonly package: ToField<ID>;
@@ -654,7 +581,7 @@ export class UpgradeTicket implements StructClass {
     this.$fullTypeName = composeSuiType(
       UpgradeTicket.$typeName,
       ...typeArgs,
-    ) as `${typeof PKG_V25}::package::UpgradeTicket`;
+    ) as "0x2::package::UpgradeTicket";
     this.$typeArgs = typeArgs;
 
     this.cap = fields.cap;
@@ -669,9 +596,8 @@ export class UpgradeTicket implements StructClass {
       fullTypeName: composeSuiType(
         UpgradeTicket.$typeName,
         ...[],
-      ) as `${typeof PKG_V25}::package::UpgradeTicket`,
+      ) as "0x2::package::UpgradeTicket",
       typeArgs: [] as [],
-      isPhantom: UpgradeTicket.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         UpgradeTicket.fromFields(fields),
@@ -683,8 +609,6 @@ export class UpgradeTicket implements StructClass {
       fromJSON: (json: Record<string, any>) => UpgradeTicket.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         UpgradeTicket.fromSuiParsedData(content),
-      fromSuiObjectData: (content: SuiObjectData) =>
-        UpgradeTicket.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         UpgradeTicket.fetch(client, id),
       new: (fields: UpgradeTicketFields) => {
@@ -789,25 +713,6 @@ export class UpgradeTicket implements StructClass {
     return UpgradeTicket.fromFieldsWithTypes(content);
   }
 
-  static fromSuiObjectData(data: SuiObjectData): UpgradeTicket {
-    if (data.bcs) {
-      if (
-        data.bcs.dataType !== "moveObject" ||
-        !isUpgradeTicket(data.bcs.type)
-      ) {
-        throw new Error(`object at is not a UpgradeTicket object`);
-      }
-
-      return UpgradeTicket.fromBcs(fromB64(data.bcs.bcsBytes));
-    }
-    if (data.content) {
-      return UpgradeTicket.fromSuiParsedData(data.content);
-    }
-    throw new Error(
-      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
-    );
-  }
-
   static async fetch(client: SuiClient, id: string): Promise<UpgradeTicket> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -821,7 +726,6 @@ export class UpgradeTicket implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a UpgradeTicket object`);
     }
-
-    return UpgradeTicket.fromSuiObjectData(res.data);
+    return UpgradeTicket.fromBcs(fromB64(res.data.bcs.bcsBytes));
   }
 }

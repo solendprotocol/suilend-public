@@ -1,502 +1,503 @@
 import { PUBLISHED_AT } from "..";
-import { ID } from "../../_dependencies/source/0x2/object/structs";
-import { obj, option, pure } from "../../_framework/util";
-import { RateLimiterExemption } from "./structs";
+import { ObjectArg, obj, option, pure } from "../../_framework/util";
 import {
-  Transaction,
   TransactionArgument,
-  TransactionObjectInput,
-} from "@mysten/sui/transactions";
+  TransactionBlock,
+} from "@mysten/sui.js/transactions";
 
 export interface BorrowArgs {
-  lendingMarket: TransactionObjectInput;
+  lendingMarket: ObjectArg;
   reserveArrayIndex: bigint | TransactionArgument;
-  obligationOwnerCap: TransactionObjectInput;
-  clock: TransactionObjectInput;
+  obligationOwnerCap: ObjectArg;
+  clock: ObjectArg;
   amount: bigint | TransactionArgument;
 }
 
 export function borrow(
-  tx: Transaction,
+  txb: TransactionBlock,
   typeArgs: [string, string],
   args: BorrowArgs,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::lending_market::borrow`,
     typeArguments: typeArgs,
     arguments: [
-      obj(tx, args.lendingMarket),
-      pure(tx, args.reserveArrayIndex, `u64`),
-      obj(tx, args.obligationOwnerCap),
-      obj(tx, args.clock),
-      pure(tx, args.amount, `u64`),
+      obj(txb, args.lendingMarket),
+      pure(txb, args.reserveArrayIndex, `u64`),
+      obj(txb, args.obligationOwnerCap),
+      obj(txb, args.clock),
+      pure(txb, args.amount, `u64`),
     ],
   });
 }
 
 export interface MigrateArgs {
-  lendingMarketOwnerCap: TransactionObjectInput;
-  lendingMarket: TransactionObjectInput;
+  lendingMarketOwnerCap: ObjectArg;
+  lendingMarket: ObjectArg;
 }
 
-export function migrate(tx: Transaction, typeArg: string, args: MigrateArgs) {
-  return tx.moveCall({
+export function migrate(
+  txb: TransactionBlock,
+  typeArg: string,
+  args: MigrateArgs,
+) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::lending_market::migrate`,
     typeArguments: [typeArg],
     arguments: [
-      obj(tx, args.lendingMarketOwnerCap),
-      obj(tx, args.lendingMarket),
+      obj(txb, args.lendingMarketOwnerCap),
+      obj(txb, args.lendingMarket),
     ],
   });
 }
 
-export function init(tx: Transaction, otw: TransactionObjectInput) {
-  return tx.moveCall({
+export function init(txb: TransactionBlock, otw: ObjectArg) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::lending_market::init`,
-    arguments: [obj(tx, otw)],
+    arguments: [obj(txb, otw)],
   });
 }
 
 export interface AddPoolRewardArgs {
-  lendingMarketOwnerCap: TransactionObjectInput;
-  lendingMarket: TransactionObjectInput;
+  lendingMarketOwnerCap: ObjectArg;
+  lendingMarket: ObjectArg;
   reserveArrayIndex: bigint | TransactionArgument;
   isDepositReward: boolean | TransactionArgument;
-  rewards: TransactionObjectInput;
+  rewards: ObjectArg;
   startTimeMs: bigint | TransactionArgument;
   endTimeMs: bigint | TransactionArgument;
-  clock: TransactionObjectInput;
+  clock: ObjectArg;
 }
 
 export function addPoolReward(
-  tx: Transaction,
+  txb: TransactionBlock,
   typeArgs: [string, string],
   args: AddPoolRewardArgs,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::lending_market::add_pool_reward`,
     typeArguments: typeArgs,
     arguments: [
-      obj(tx, args.lendingMarketOwnerCap),
-      obj(tx, args.lendingMarket),
-      pure(tx, args.reserveArrayIndex, `u64`),
-      pure(tx, args.isDepositReward, `bool`),
-      obj(tx, args.rewards),
-      pure(tx, args.startTimeMs, `u64`),
-      pure(tx, args.endTimeMs, `u64`),
-      obj(tx, args.clock),
+      obj(txb, args.lendingMarketOwnerCap),
+      obj(txb, args.lendingMarket),
+      pure(txb, args.reserveArrayIndex, `u64`),
+      pure(txb, args.isDepositReward, `bool`),
+      obj(txb, args.rewards),
+      pure(txb, args.startTimeMs, `u64`),
+      pure(txb, args.endTimeMs, `u64`),
+      obj(txb, args.clock),
     ],
   });
 }
 
 export interface CancelPoolRewardArgs {
-  lendingMarketOwnerCap: TransactionObjectInput;
-  lendingMarket: TransactionObjectInput;
+  lendingMarketOwnerCap: ObjectArg;
+  lendingMarket: ObjectArg;
   reserveArrayIndex: bigint | TransactionArgument;
   isDepositReward: boolean | TransactionArgument;
   rewardIndex: bigint | TransactionArgument;
-  clock: TransactionObjectInput;
+  clock: ObjectArg;
 }
 
 export function cancelPoolReward(
-  tx: Transaction,
+  txb: TransactionBlock,
   typeArgs: [string, string],
   args: CancelPoolRewardArgs,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::lending_market::cancel_pool_reward`,
     typeArguments: typeArgs,
     arguments: [
-      obj(tx, args.lendingMarketOwnerCap),
-      obj(tx, args.lendingMarket),
-      pure(tx, args.reserveArrayIndex, `u64`),
-      pure(tx, args.isDepositReward, `bool`),
-      pure(tx, args.rewardIndex, `u64`),
-      obj(tx, args.clock),
+      obj(txb, args.lendingMarketOwnerCap),
+      obj(txb, args.lendingMarket),
+      pure(txb, args.reserveArrayIndex, `u64`),
+      pure(txb, args.isDepositReward, `bool`),
+      pure(txb, args.rewardIndex, `u64`),
+      obj(txb, args.clock),
     ],
   });
 }
 
 export interface ClaimRewardsArgs {
-  lendingMarket: TransactionObjectInput;
-  cap: TransactionObjectInput;
-  clock: TransactionObjectInput;
+  lendingMarket: ObjectArg;
+  cap: ObjectArg;
+  clock: ObjectArg;
   reserveId: bigint | TransactionArgument;
   rewardIndex: bigint | TransactionArgument;
   isDepositReward: boolean | TransactionArgument;
 }
 
 export function claimRewards(
-  tx: Transaction,
+  txb: TransactionBlock,
   typeArgs: [string, string],
   args: ClaimRewardsArgs,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::lending_market::claim_rewards`,
     typeArguments: typeArgs,
     arguments: [
-      obj(tx, args.lendingMarket),
-      obj(tx, args.cap),
-      obj(tx, args.clock),
-      pure(tx, args.reserveId, `u64`),
-      pure(tx, args.rewardIndex, `u64`),
-      pure(tx, args.isDepositReward, `bool`),
+      obj(txb, args.lendingMarket),
+      obj(txb, args.cap),
+      obj(txb, args.clock),
+      pure(txb, args.reserveId, `u64`),
+      pure(txb, args.rewardIndex, `u64`),
+      pure(txb, args.isDepositReward, `bool`),
     ],
   });
 }
 
 export interface ClosePoolRewardArgs {
-  lendingMarketOwnerCap: TransactionObjectInput;
-  lendingMarket: TransactionObjectInput;
+  lendingMarketOwnerCap: ObjectArg;
+  lendingMarket: ObjectArg;
   reserveArrayIndex: bigint | TransactionArgument;
   isDepositReward: boolean | TransactionArgument;
   rewardIndex: bigint | TransactionArgument;
-  clock: TransactionObjectInput;
+  clock: ObjectArg;
 }
 
 export function closePoolReward(
-  tx: Transaction,
+  txb: TransactionBlock,
   typeArgs: [string, string],
   args: ClosePoolRewardArgs,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::lending_market::close_pool_reward`,
     typeArguments: typeArgs,
     arguments: [
-      obj(tx, args.lendingMarketOwnerCap),
-      obj(tx, args.lendingMarket),
-      pure(tx, args.reserveArrayIndex, `u64`),
-      pure(tx, args.isDepositReward, `bool`),
-      pure(tx, args.rewardIndex, `u64`),
-      obj(tx, args.clock),
+      obj(txb, args.lendingMarketOwnerCap),
+      obj(txb, args.lendingMarket),
+      pure(txb, args.reserveArrayIndex, `u64`),
+      pure(txb, args.isDepositReward, `bool`),
+      pure(txb, args.rewardIndex, `u64`),
+      obj(txb, args.clock),
     ],
   });
 }
 
 export function reserve(
-  tx: Transaction,
+  txb: TransactionBlock,
   typeArgs: [string, string],
-  lendingMarket: TransactionObjectInput,
+  lendingMarket: ObjectArg,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::lending_market::reserve`,
     typeArguments: typeArgs,
-    arguments: [obj(tx, lendingMarket)],
+    arguments: [obj(txb, lendingMarket)],
   });
 }
 
 export interface ClaimFeesArgs {
-  lendingMarket: TransactionObjectInput;
+  lendingMarket: ObjectArg;
   reserveArrayIndex: bigint | TransactionArgument;
 }
 
 export function claimFees(
-  tx: Transaction,
+  txb: TransactionBlock,
   typeArgs: [string, string],
   args: ClaimFeesArgs,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::lending_market::claim_fees`,
     typeArguments: typeArgs,
     arguments: [
-      obj(tx, args.lendingMarket),
-      pure(tx, args.reserveArrayIndex, `u64`),
+      obj(txb, args.lendingMarket),
+      pure(txb, args.reserveArrayIndex, `u64`),
     ],
   });
 }
 
 export interface DepositLiquidityAndMintCtokensArgs {
-  lendingMarket: TransactionObjectInput;
+  lendingMarket: ObjectArg;
   reserveArrayIndex: bigint | TransactionArgument;
-  clock: TransactionObjectInput;
-  deposit: TransactionObjectInput;
+  clock: ObjectArg;
+  deposit: ObjectArg;
 }
 
 export function depositLiquidityAndMintCtokens(
-  tx: Transaction,
+  txb: TransactionBlock,
   typeArgs: [string, string],
   args: DepositLiquidityAndMintCtokensArgs,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::lending_market::deposit_liquidity_and_mint_ctokens`,
     typeArguments: typeArgs,
     arguments: [
-      obj(tx, args.lendingMarket),
-      pure(tx, args.reserveArrayIndex, `u64`),
-      obj(tx, args.clock),
-      obj(tx, args.deposit),
+      obj(txb, args.lendingMarket),
+      pure(txb, args.reserveArrayIndex, `u64`),
+      obj(txb, args.clock),
+      obj(txb, args.deposit),
     ],
   });
 }
 
 export interface MaxBorrowAmountArgs {
-  rateLimiter: TransactionObjectInput;
-  obligation: TransactionObjectInput;
-  reserve: TransactionObjectInput;
-  clock: TransactionObjectInput;
+  rateLimiter: ObjectArg;
+  obligation: ObjectArg;
+  reserve: ObjectArg;
+  clock: ObjectArg;
 }
 
 export function maxBorrowAmount(
-  tx: Transaction,
+  txb: TransactionBlock,
   typeArg: string,
   args: MaxBorrowAmountArgs,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::lending_market::max_borrow_amount`,
     typeArguments: [typeArg],
     arguments: [
-      obj(tx, args.rateLimiter),
-      obj(tx, args.obligation),
-      obj(tx, args.reserve),
-      obj(tx, args.clock),
+      obj(txb, args.rateLimiter),
+      obj(txb, args.obligation),
+      obj(txb, args.reserve),
+      obj(txb, args.clock),
     ],
   });
 }
 
 export interface UpdateReserveConfigArgs {
-  lendingMarketOwnerCap: TransactionObjectInput;
-  lendingMarket: TransactionObjectInput;
+  lendingMarketOwnerCap: ObjectArg;
+  lendingMarket: ObjectArg;
   reserveArrayIndex: bigint | TransactionArgument;
-  config: TransactionObjectInput;
+  config: ObjectArg;
 }
 
 export function updateReserveConfig(
-  tx: Transaction,
+  txb: TransactionBlock,
   typeArgs: [string, string],
   args: UpdateReserveConfigArgs,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::lending_market::update_reserve_config`,
     typeArguments: typeArgs,
     arguments: [
-      obj(tx, args.lendingMarketOwnerCap),
-      obj(tx, args.lendingMarket),
-      pure(tx, args.reserveArrayIndex, `u64`),
-      obj(tx, args.config),
+      obj(txb, args.lendingMarketOwnerCap),
+      obj(txb, args.lendingMarket),
+      pure(txb, args.reserveArrayIndex, `u64`),
+      obj(txb, args.config),
     ],
   });
 }
 
 export interface WithdrawCtokensArgs {
-  lendingMarket: TransactionObjectInput;
+  lendingMarket: ObjectArg;
   reserveArrayIndex: bigint | TransactionArgument;
-  obligationOwnerCap: TransactionObjectInput;
-  clock: TransactionObjectInput;
+  obligationOwnerCap: ObjectArg;
+  clock: ObjectArg;
   amount: bigint | TransactionArgument;
 }
 
 export function withdrawCtokens(
-  tx: Transaction,
+  txb: TransactionBlock,
   typeArgs: [string, string],
   args: WithdrawCtokensArgs,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::lending_market::withdraw_ctokens`,
     typeArguments: typeArgs,
     arguments: [
-      obj(tx, args.lendingMarket),
-      pure(tx, args.reserveArrayIndex, `u64`),
-      obj(tx, args.obligationOwnerCap),
-      obj(tx, args.clock),
-      pure(tx, args.amount, `u64`),
+      obj(txb, args.lendingMarket),
+      pure(txb, args.reserveArrayIndex, `u64`),
+      obj(txb, args.obligationOwnerCap),
+      obj(txb, args.clock),
+      pure(txb, args.amount, `u64`),
     ],
   });
 }
 
 export interface ObligationArgs {
-  lendingMarket: TransactionObjectInput;
+  lendingMarket: ObjectArg;
   obligationId: string | TransactionArgument;
 }
 
 export function obligation(
-  tx: Transaction,
+  txb: TransactionBlock,
   typeArg: string,
   args: ObligationArgs,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::lending_market::obligation`,
     typeArguments: [typeArg],
     arguments: [
-      obj(tx, args.lendingMarket),
-      pure(tx, args.obligationId, `${ID.$typeName}`),
+      obj(txb, args.lendingMarket),
+      pure(txb, args.obligationId, `0x2::object::ID`),
     ],
   });
 }
 
 export function createObligation(
-  tx: Transaction,
+  txb: TransactionBlock,
   typeArg: string,
-  lendingMarket: TransactionObjectInput,
+  lendingMarket: ObjectArg,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::lending_market::create_obligation`,
     typeArguments: [typeArg],
-    arguments: [obj(tx, lendingMarket)],
-  });
-}
-
-export function reserveArrayIndex(
-  tx: Transaction,
-  typeArgs: [string, string],
-  lendingMarket: TransactionObjectInput,
-) {
-  return tx.moveCall({
-    target: `${PUBLISHED_AT}::lending_market::reserve_array_index`,
-    typeArguments: typeArgs,
-    arguments: [obj(tx, lendingMarket)],
+    arguments: [obj(txb, lendingMarket)],
   });
 }
 
 export interface ForgiveArgs {
-  lendingMarketOwnerCap: TransactionObjectInput;
-  lendingMarket: TransactionObjectInput;
+  lendingMarketOwnerCap: ObjectArg;
+  lendingMarket: ObjectArg;
   reserveArrayIndex: bigint | TransactionArgument;
   obligationId: string | TransactionArgument;
-  clock: TransactionObjectInput;
+  clock: ObjectArg;
   maxForgiveAmount: bigint | TransactionArgument;
 }
 
 export function forgive(
-  tx: Transaction,
+  txb: TransactionBlock,
   typeArgs: [string, string],
   args: ForgiveArgs,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::lending_market::forgive`,
     typeArguments: typeArgs,
     arguments: [
-      obj(tx, args.lendingMarketOwnerCap),
-      obj(tx, args.lendingMarket),
-      pure(tx, args.reserveArrayIndex, `u64`),
-      pure(tx, args.obligationId, `${ID.$typeName}`),
-      obj(tx, args.clock),
-      pure(tx, args.maxForgiveAmount, `u64`),
+      obj(txb, args.lendingMarketOwnerCap),
+      obj(txb, args.lendingMarket),
+      pure(txb, args.reserveArrayIndex, `u64`),
+      pure(txb, args.obligationId, `0x2::object::ID`),
+      obj(txb, args.clock),
+      pure(txb, args.maxForgiveAmount, `u64`),
     ],
   });
 }
 
 export interface LiquidateArgs {
-  lendingMarket: TransactionObjectInput;
+  lendingMarket: ObjectArg;
   obligationId: string | TransactionArgument;
   repayReserveArrayIndex: bigint | TransactionArgument;
   withdrawReserveArrayIndex: bigint | TransactionArgument;
-  clock: TransactionObjectInput;
-  repayCoins: TransactionObjectInput;
+  clock: ObjectArg;
+  repayCoins: ObjectArg;
 }
 
 export function liquidate(
-  tx: Transaction,
+  txb: TransactionBlock,
   typeArgs: [string, string, string],
   args: LiquidateArgs,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::lending_market::liquidate`,
     typeArguments: typeArgs,
     arguments: [
-      obj(tx, args.lendingMarket),
-      pure(tx, args.obligationId, `${ID.$typeName}`),
-      pure(tx, args.repayReserveArrayIndex, `u64`),
-      pure(tx, args.withdrawReserveArrayIndex, `u64`),
-      obj(tx, args.clock),
-      obj(tx, args.repayCoins),
+      obj(txb, args.lendingMarket),
+      pure(txb, args.obligationId, `0x2::object::ID`),
+      pure(txb, args.repayReserveArrayIndex, `u64`),
+      pure(txb, args.withdrawReserveArrayIndex, `u64`),
+      obj(txb, args.clock),
+      obj(txb, args.repayCoins),
     ],
   });
 }
 
 export interface MaxWithdrawAmountArgs {
-  rateLimiter: TransactionObjectInput;
-  obligation: TransactionObjectInput;
-  reserve: TransactionObjectInput;
-  clock: TransactionObjectInput;
+  rateLimiter: ObjectArg;
+  obligation: ObjectArg;
+  reserve: ObjectArg;
+  clock: ObjectArg;
 }
 
 export function maxWithdrawAmount(
-  tx: Transaction,
+  txb: TransactionBlock,
   typeArg: string,
   args: MaxWithdrawAmountArgs,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::lending_market::max_withdraw_amount`,
     typeArguments: [typeArg],
     arguments: [
-      obj(tx, args.rateLimiter),
-      obj(tx, args.obligation),
-      obj(tx, args.reserve),
-      obj(tx, args.clock),
+      obj(txb, args.rateLimiter),
+      obj(txb, args.obligation),
+      obj(txb, args.reserve),
+      obj(txb, args.clock),
     ],
   });
 }
 
 export interface RepayArgs {
-  lendingMarket: TransactionObjectInput;
+  lendingMarket: ObjectArg;
   reserveArrayIndex: bigint | TransactionArgument;
   obligationId: string | TransactionArgument;
-  clock: TransactionObjectInput;
-  maxRepayCoins: TransactionObjectInput;
+  clock: ObjectArg;
+  maxRepayCoins: ObjectArg;
 }
 
 export function repay(
-  tx: Transaction,
+  txb: TransactionBlock,
   typeArgs: [string, string],
   args: RepayArgs,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::lending_market::repay`,
     typeArguments: typeArgs,
     arguments: [
-      obj(tx, args.lendingMarket),
-      pure(tx, args.reserveArrayIndex, `u64`),
-      pure(tx, args.obligationId, `${ID.$typeName}`),
-      obj(tx, args.clock),
-      obj(tx, args.maxRepayCoins),
+      obj(txb, args.lendingMarket),
+      pure(txb, args.reserveArrayIndex, `u64`),
+      pure(txb, args.obligationId, `0x2::object::ID`),
+      obj(txb, args.clock),
+      obj(txb, args.maxRepayCoins),
     ],
   });
 }
 
-export function obligationId(
-  tx: Transaction,
-  typeArg: string,
-  cap: TransactionObjectInput,
+export function reserveArrayIndex(
+  txb: TransactionBlock,
+  typeArgs: [string, string],
+  lendingMarket: ObjectArg,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
+    target: `${PUBLISHED_AT}::lending_market::reserve_array_index`,
+    typeArguments: typeArgs,
+    arguments: [obj(txb, lendingMarket)],
+  });
+}
+
+export function obligationId(
+  txb: TransactionBlock,
+  typeArg: string,
+  cap: ObjectArg,
+) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::lending_market::obligation_id`,
     typeArguments: [typeArg],
-    arguments: [obj(tx, cap)],
+    arguments: [obj(txb, cap)],
   });
 }
 
 export interface AddReserveArgs {
-  lendingMarketOwnerCap: TransactionObjectInput;
-  lendingMarket: TransactionObjectInput;
-  priceInfo: TransactionObjectInput;
-  config: TransactionObjectInput;
-  coinMetadata: TransactionObjectInput;
-  clock: TransactionObjectInput;
+  lendingMarketOwnerCap: ObjectArg;
+  lendingMarket: ObjectArg;
+  priceInfo: ObjectArg;
+  config: ObjectArg;
+  coinMetadata: ObjectArg;
+  clock: ObjectArg;
 }
 
 export function addReserve(
-  tx: Transaction,
+  txb: TransactionBlock,
   typeArgs: [string, string],
   args: AddReserveArgs,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::lending_market::add_reserve`,
     typeArguments: typeArgs,
     arguments: [
-      obj(tx, args.lendingMarketOwnerCap),
-      obj(tx, args.lendingMarket),
-      obj(tx, args.priceInfo),
-      obj(tx, args.config),
-      obj(tx, args.coinMetadata),
-      obj(tx, args.clock),
+      obj(txb, args.lendingMarketOwnerCap),
+      obj(txb, args.lendingMarket),
+      obj(txb, args.priceInfo),
+      obj(txb, args.config),
+      obj(txb, args.coinMetadata),
+      obj(txb, args.clock),
     ],
   });
 }
 
 export interface ClaimRewardsAndDepositArgs {
-  lendingMarket: TransactionObjectInput;
+  lendingMarket: ObjectArg;
   obligationId: string | TransactionArgument;
-  clock: TransactionObjectInput;
+  clock: ObjectArg;
   rewardReserveId: bigint | TransactionArgument;
   rewardIndex: bigint | TransactionArgument;
   isDepositReward: boolean | TransactionArgument;
@@ -504,29 +505,29 @@ export interface ClaimRewardsAndDepositArgs {
 }
 
 export function claimRewardsAndDeposit(
-  tx: Transaction,
+  txb: TransactionBlock,
   typeArgs: [string, string],
   args: ClaimRewardsAndDepositArgs,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::lending_market::claim_rewards_and_deposit`,
     typeArguments: typeArgs,
     arguments: [
-      obj(tx, args.lendingMarket),
-      pure(tx, args.obligationId, `${ID.$typeName}`),
-      obj(tx, args.clock),
-      pure(tx, args.rewardReserveId, `u64`),
-      pure(tx, args.rewardIndex, `u64`),
-      pure(tx, args.isDepositReward, `bool`),
-      pure(tx, args.depositReserveId, `u64`),
+      obj(txb, args.lendingMarket),
+      pure(txb, args.obligationId, `0x2::object::ID`),
+      obj(txb, args.clock),
+      pure(txb, args.rewardReserveId, `u64`),
+      pure(txb, args.rewardIndex, `u64`),
+      pure(txb, args.isDepositReward, `bool`),
+      pure(txb, args.depositReserveId, `u64`),
     ],
   });
 }
 
 export interface ClaimRewardsByObligationIdArgs {
-  lendingMarket: TransactionObjectInput;
+  lendingMarket: ObjectArg;
   obligationId: string | TransactionArgument;
-  clock: TransactionObjectInput;
+  clock: ObjectArg;
   reserveId: bigint | TransactionArgument;
   rewardIndex: bigint | TransactionArgument;
   isDepositReward: boolean | TransactionArgument;
@@ -534,27 +535,27 @@ export interface ClaimRewardsByObligationIdArgs {
 }
 
 export function claimRewardsByObligationId(
-  tx: Transaction,
+  txb: TransactionBlock,
   typeArgs: [string, string],
   args: ClaimRewardsByObligationIdArgs,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::lending_market::claim_rewards_by_obligation_id`,
     typeArguments: typeArgs,
     arguments: [
-      obj(tx, args.lendingMarket),
-      pure(tx, args.obligationId, `${ID.$typeName}`),
-      obj(tx, args.clock),
-      pure(tx, args.reserveId, `u64`),
-      pure(tx, args.rewardIndex, `u64`),
-      pure(tx, args.isDepositReward, `bool`),
-      pure(tx, args.failIfRewardPeriodNotOver, `bool`),
+      obj(txb, args.lendingMarket),
+      pure(txb, args.obligationId, `0x2::object::ID`),
+      obj(txb, args.clock),
+      pure(txb, args.reserveId, `u64`),
+      pure(txb, args.rewardIndex, `u64`),
+      pure(txb, args.isDepositReward, `bool`),
+      pure(txb, args.failIfRewardPeriodNotOver, `bool`),
     ],
   });
 }
 
-export function createLendingMarket(tx: Transaction, typeArg: string) {
-  return tx.moveCall({
+export function createLendingMarket(txb: TransactionBlock, typeArg: string) {
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::lending_market::create_lending_market`,
     typeArguments: [typeArg],
     arguments: [],
@@ -562,81 +563,81 @@ export function createLendingMarket(tx: Transaction, typeArg: string) {
 }
 
 export interface DepositCtokensIntoObligationArgs {
-  lendingMarket: TransactionObjectInput;
+  lendingMarket: ObjectArg;
   reserveArrayIndex: bigint | TransactionArgument;
-  obligationOwnerCap: TransactionObjectInput;
-  clock: TransactionObjectInput;
-  deposit: TransactionObjectInput;
+  obligationOwnerCap: ObjectArg;
+  clock: ObjectArg;
+  deposit: ObjectArg;
 }
 
 export function depositCtokensIntoObligation(
-  tx: Transaction,
+  txb: TransactionBlock,
   typeArgs: [string, string],
   args: DepositCtokensIntoObligationArgs,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::lending_market::deposit_ctokens_into_obligation`,
     typeArguments: typeArgs,
     arguments: [
-      obj(tx, args.lendingMarket),
-      pure(tx, args.reserveArrayIndex, `u64`),
-      obj(tx, args.obligationOwnerCap),
-      obj(tx, args.clock),
-      obj(tx, args.deposit),
+      obj(txb, args.lendingMarket),
+      pure(txb, args.reserveArrayIndex, `u64`),
+      obj(txb, args.obligationOwnerCap),
+      obj(txb, args.clock),
+      obj(txb, args.deposit),
     ],
   });
 }
 
 export interface DepositCtokensIntoObligationByIdArgs {
-  lendingMarket: TransactionObjectInput;
+  lendingMarket: ObjectArg;
   reserveArrayIndex: bigint | TransactionArgument;
   obligationId: string | TransactionArgument;
-  clock: TransactionObjectInput;
-  deposit: TransactionObjectInput;
+  clock: ObjectArg;
+  deposit: ObjectArg;
 }
 
 export function depositCtokensIntoObligationById(
-  tx: Transaction,
+  txb: TransactionBlock,
   typeArgs: [string, string],
   args: DepositCtokensIntoObligationByIdArgs,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::lending_market::deposit_ctokens_into_obligation_by_id`,
     typeArguments: typeArgs,
     arguments: [
-      obj(tx, args.lendingMarket),
-      pure(tx, args.reserveArrayIndex, `u64`),
-      pure(tx, args.obligationId, `${ID.$typeName}`),
-      obj(tx, args.clock),
-      obj(tx, args.deposit),
+      obj(txb, args.lendingMarket),
+      pure(txb, args.reserveArrayIndex, `u64`),
+      pure(txb, args.obligationId, `0x2::object::ID`),
+      obj(txb, args.clock),
+      obj(txb, args.deposit),
     ],
   });
 }
 
 export interface RedeemCtokensAndWithdrawLiquidityArgs {
-  lendingMarket: TransactionObjectInput;
+  lendingMarket: ObjectArg;
   reserveArrayIndex: bigint | TransactionArgument;
-  clock: TransactionObjectInput;
-  ctokens: TransactionObjectInput;
-  rateLimiterExemption: TransactionObjectInput | TransactionArgument | null;
+  clock: ObjectArg;
+  ctokens: ObjectArg;
+  rateLimiterExemption: ObjectArg | TransactionArgument | null;
 }
 
 export function redeemCtokensAndWithdrawLiquidity(
-  tx: Transaction,
+  txb: TransactionBlock,
   typeArgs: [string, string],
   args: RedeemCtokensAndWithdrawLiquidityArgs,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::lending_market::redeem_ctokens_and_withdraw_liquidity`,
     typeArguments: typeArgs,
     arguments: [
-      obj(tx, args.lendingMarket),
-      pure(tx, args.reserveArrayIndex, `u64`),
-      obj(tx, args.clock),
-      obj(tx, args.ctokens),
+      obj(txb, args.lendingMarket),
+      pure(txb, args.reserveArrayIndex, `u64`),
+      obj(txb, args.clock),
+      obj(txb, args.ctokens),
       option(
-        tx,
-        `${RateLimiterExemption.$typeName}<${typeArgs[0]}, ${typeArgs[1]}>`,
+        txb,
+        `0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::lending_market::RateLimiterExemption<${typeArgs[0]}, ${typeArgs[1]}>`,
         args.rateLimiterExemption,
       ),
     ],
@@ -644,49 +645,49 @@ export function redeemCtokensAndWithdrawLiquidity(
 }
 
 export interface RefreshReservePriceArgs {
-  lendingMarket: TransactionObjectInput;
+  lendingMarket: ObjectArg;
   reserveArrayIndex: bigint | TransactionArgument;
-  clock: TransactionObjectInput;
-  priceInfo: TransactionObjectInput;
+  clock: ObjectArg;
+  priceInfo: ObjectArg;
 }
 
 export function refreshReservePrice(
-  tx: Transaction,
+  txb: TransactionBlock,
   typeArg: string,
   args: RefreshReservePriceArgs,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::lending_market::refresh_reserve_price`,
     typeArguments: [typeArg],
     arguments: [
-      obj(tx, args.lendingMarket),
-      pure(tx, args.reserveArrayIndex, `u64`),
-      obj(tx, args.clock),
-      obj(tx, args.priceInfo),
+      obj(txb, args.lendingMarket),
+      pure(txb, args.reserveArrayIndex, `u64`),
+      obj(txb, args.clock),
+      obj(txb, args.priceInfo),
     ],
   });
 }
 
 export interface UpdateRateLimiterConfigArgs {
-  lendingMarketOwnerCap: TransactionObjectInput;
-  lendingMarket: TransactionObjectInput;
-  clock: TransactionObjectInput;
-  config: TransactionObjectInput;
+  lendingMarketOwnerCap: ObjectArg;
+  lendingMarket: ObjectArg;
+  clock: ObjectArg;
+  config: ObjectArg;
 }
 
 export function updateRateLimiterConfig(
-  tx: Transaction,
+  txb: TransactionBlock,
   typeArg: string,
   args: UpdateRateLimiterConfigArgs,
 ) {
-  return tx.moveCall({
+  return txb.moveCall({
     target: `${PUBLISHED_AT}::lending_market::update_rate_limiter_config`,
     typeArguments: [typeArg],
     arguments: [
-      obj(tx, args.lendingMarketOwnerCap),
-      obj(tx, args.lendingMarket),
-      obj(tx, args.clock),
-      obj(tx, args.config),
+      obj(txb, args.lendingMarketOwnerCap),
+      obj(txb, args.lendingMarket),
+      obj(txb, args.clock),
+      obj(txb, args.config),
     ],
   });
 }

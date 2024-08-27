@@ -14,16 +14,14 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
-import { PKG_V25 } from "../index";
-import { bcs } from "@mysten/sui/bcs";
-import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
-import { fromB64 } from "@mysten/sui/utils";
+import { bcs, fromB64 } from "@mysten/bcs";
+import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
 
 /* ============================== SUI =============================== */
 
 export function isSUI(type: string): boolean {
   type = compressSuiType(type);
-  return type === `${PKG_V25}::sui::SUI`;
+  return type === "0x2::sui::SUI";
 }
 
 export interface SUIFields {
@@ -33,16 +31,14 @@ export interface SUIFields {
 export type SUIReified = Reified<SUI, SUIFields>;
 
 export class SUI implements StructClass {
-  __StructClass = true as const;
-
-  static readonly $typeName = `${PKG_V25}::sui::SUI`;
+  static readonly $typeName = "0x2::sui::SUI";
   static readonly $numTypeParams = 0;
-  static readonly $isPhantom = [] as const;
 
   readonly $typeName = SUI.$typeName;
-  readonly $fullTypeName: `${typeof PKG_V25}::sui::SUI`;
+
+  readonly $fullTypeName: "0x2::sui::SUI";
+
   readonly $typeArgs: [];
-  readonly $isPhantom = SUI.$isPhantom;
 
   readonly dummyField: ToField<"bool">;
 
@@ -50,7 +46,7 @@ export class SUI implements StructClass {
     this.$fullTypeName = composeSuiType(
       SUI.$typeName,
       ...typeArgs,
-    ) as `${typeof PKG_V25}::sui::SUI`;
+    ) as "0x2::sui::SUI";
     this.$typeArgs = typeArgs;
 
     this.dummyField = fields.dummyField;
@@ -59,12 +55,8 @@ export class SUI implements StructClass {
   static reified(): SUIReified {
     return {
       typeName: SUI.$typeName,
-      fullTypeName: composeSuiType(
-        SUI.$typeName,
-        ...[],
-      ) as `${typeof PKG_V25}::sui::SUI`,
+      fullTypeName: composeSuiType(SUI.$typeName, ...[]) as "0x2::sui::SUI",
       typeArgs: [] as [],
-      isPhantom: SUI.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => SUI.fromFields(fields),
       fromFieldsWithTypes: (item: FieldsWithTypes) =>
@@ -75,8 +67,6 @@ export class SUI implements StructClass {
       fromJSON: (json: Record<string, any>) => SUI.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         SUI.fromSuiParsedData(content),
-      fromSuiObjectData: (content: SuiObjectData) =>
-        SUI.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) => SUI.fetch(client, id),
       new: (fields: SUIFields) => {
         return new SUI([], fields);
@@ -162,22 +152,6 @@ export class SUI implements StructClass {
     return SUI.fromFieldsWithTypes(content);
   }
 
-  static fromSuiObjectData(data: SuiObjectData): SUI {
-    if (data.bcs) {
-      if (data.bcs.dataType !== "moveObject" || !isSUI(data.bcs.type)) {
-        throw new Error(`object at is not a SUI object`);
-      }
-
-      return SUI.fromBcs(fromB64(data.bcs.bcsBytes));
-    }
-    if (data.content) {
-      return SUI.fromSuiParsedData(data.content);
-    }
-    throw new Error(
-      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
-    );
-  }
-
   static async fetch(client: SuiClient, id: string): Promise<SUI> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -188,7 +162,6 @@ export class SUI implements StructClass {
     if (res.data?.bcs?.dataType !== "moveObject" || !isSUI(res.data.bcs.type)) {
       throw new Error(`object at id ${id} is not a SUI object`);
     }
-
-    return SUI.fromSuiObjectData(res.data);
+    return SUI.fromBcs(fromB64(res.data.bcs.bcsBytes));
   }
 }

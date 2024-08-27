@@ -14,16 +14,17 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
-import { PKG_V1 } from "../index";
-import { bcs } from "@mysten/sui/bcs";
-import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
-import { fromB64 } from "@mysten/sui/utils";
+import { bcs, fromB64 } from "@mysten/bcs";
+import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
 
 /* ============================== UpdateFee =============================== */
 
 export function isUpdateFee(type: string): boolean {
   type = compressSuiType(type);
-  return type === `${PKG_V1}::set_update_fee::UpdateFee`;
+  return (
+    type ===
+    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set_update_fee::UpdateFee"
+  );
 }
 
 export interface UpdateFeeFields {
@@ -34,16 +35,15 @@ export interface UpdateFeeFields {
 export type UpdateFeeReified = Reified<UpdateFee, UpdateFeeFields>;
 
 export class UpdateFee implements StructClass {
-  __StructClass = true as const;
-
-  static readonly $typeName = `${PKG_V1}::set_update_fee::UpdateFee`;
+  static readonly $typeName =
+    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set_update_fee::UpdateFee";
   static readonly $numTypeParams = 0;
-  static readonly $isPhantom = [] as const;
 
   readonly $typeName = UpdateFee.$typeName;
-  readonly $fullTypeName: `${typeof PKG_V1}::set_update_fee::UpdateFee`;
+
+  readonly $fullTypeName: "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set_update_fee::UpdateFee";
+
   readonly $typeArgs: [];
-  readonly $isPhantom = UpdateFee.$isPhantom;
 
   readonly mantissa: ToField<"u64">;
   readonly exponent: ToField<"u64">;
@@ -52,7 +52,7 @@ export class UpdateFee implements StructClass {
     this.$fullTypeName = composeSuiType(
       UpdateFee.$typeName,
       ...typeArgs,
-    ) as `${typeof PKG_V1}::set_update_fee::UpdateFee`;
+    ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set_update_fee::UpdateFee";
     this.$typeArgs = typeArgs;
 
     this.mantissa = fields.mantissa;
@@ -65,9 +65,8 @@ export class UpdateFee implements StructClass {
       fullTypeName: composeSuiType(
         UpdateFee.$typeName,
         ...[],
-      ) as `${typeof PKG_V1}::set_update_fee::UpdateFee`,
+      ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::set_update_fee::UpdateFee",
       typeArgs: [] as [],
-      isPhantom: UpdateFee.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => UpdateFee.fromFields(fields),
       fromFieldsWithTypes: (item: FieldsWithTypes) =>
@@ -78,8 +77,6 @@ export class UpdateFee implements StructClass {
       fromJSON: (json: Record<string, any>) => UpdateFee.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         UpdateFee.fromSuiParsedData(content),
-      fromSuiObjectData: (content: SuiObjectData) =>
-        UpdateFee.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         UpdateFee.fetch(client, id),
       new: (fields: UpdateFeeFields) => {
@@ -171,22 +168,6 @@ export class UpdateFee implements StructClass {
     return UpdateFee.fromFieldsWithTypes(content);
   }
 
-  static fromSuiObjectData(data: SuiObjectData): UpdateFee {
-    if (data.bcs) {
-      if (data.bcs.dataType !== "moveObject" || !isUpdateFee(data.bcs.type)) {
-        throw new Error(`object at is not a UpdateFee object`);
-      }
-
-      return UpdateFee.fromBcs(fromB64(data.bcs.bcsBytes));
-    }
-    if (data.content) {
-      return UpdateFee.fromSuiParsedData(data.content);
-    }
-    throw new Error(
-      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
-    );
-  }
-
   static async fetch(client: SuiClient, id: string): Promise<UpdateFee> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -200,7 +181,6 @@ export class UpdateFee implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a UpdateFee object`);
     }
-
-    return UpdateFee.fromSuiObjectData(res.data);
+    return UpdateFee.fromBcs(fromB64(res.data.bcs.bcsBytes));
   }
 }
