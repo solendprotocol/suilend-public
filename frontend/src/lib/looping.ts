@@ -8,7 +8,7 @@ import {
 
 export const LOOPING_THRESHOLD = 0.01;
 export const LOOPING_MESSAGE =
-  "You are looping (depositing and borrowing the same asset or USDT-USDC). Soon, looped positions will no longer be eligible for LM rewards. Please unloop to remain eligible.";
+  "You are looping (depositing and borrowing the same asset or USDT-USDC). Looped positions are no longer eligible for LM rewards. Please unloop and redeposit to be eligible for rewards.";
 
 export const getLoopedAssetCoinTypes = (data: AppData) => {
   if (data.obligations === undefined || data.obligations.length === 0)
