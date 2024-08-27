@@ -53,11 +53,22 @@ type PerDayRewardSummary = Omit<RewardSummary, "stats"> & {
   };
 };
 
-export function formatRewards(
+export const getDepositShareUsd = (reserve: ParsedReserve, share: BigNumber) =>
+  share
+    .div(10 ** reserve.mintDecimals)
+    .times(reserve.cTokenExchangeRate)
+    .times(reserve.price);
+export const getBorrowShareUsd = (reserve: ParsedReserve, share: BigNumber) =>
+  share
+    .div(10 ** reserve.mintDecimals)
+    .times(reserve.cumulativeBorrowRate)
+    .times(reserve.price);
+
+export const formatRewards = (
   parsedReserveMap: Record<string, ParsedReserve>,
   coinMetadataMap: Record<string, CoinMetadata>,
   obligations?: ParsedObligation[],
-) {
+) => {
   const currentTime = new Date().getTime();
   const rewardMap: RewardMap = {};
 
@@ -83,14 +94,14 @@ export function formatRewards(
           )
           .div(
             side === Side.DEPOSIT
-              ? new BigNumber(reserve.depositsPoolRewardManager.totalShares)
-                  .div(10 ** reserve.mintDecimals)
-                  .times(reserve.cTokenExchangeRate)
-                  .times(reserve.price)
-              : new BigNumber(reserve.borrowsPoolRewardManager.totalShares)
-                  .div(10 ** reserve.mintDecimals)
-                  .times(reserve.cumulativeBorrowRate)
-                  .times(reserve.price),
+              ? getDepositShareUsd(
+                  reserve,
+                  new BigNumber(reserve.depositsPoolRewardManager.totalShares),
+                )
+              : getBorrowShareUsd(
+                  reserve,
+                  new BigNumber(reserve.borrowsPoolRewardManager.totalShares),
+                ),
           )
           .times(100)
       : undefined;
@@ -160,14 +171,14 @@ export function formatRewards(
   });
 
   return rewardMap;
-}
+};
 
-function getObligationClaims(
+const getObligationClaims = (
   obligation: ParsedObligation,
   poolReward: ParsedPoolReward,
   reservePoolManagerId: string,
   reserveArrayIndex: bigint,
-) {
+) => {
   const userRewardManager = obligation.original.userRewardManagers.find(
     (urm) => urm.poolRewardManagerId === reservePoolManagerId,
   );
@@ -186,7 +197,7 @@ function getObligationClaims(
       : new BigNumber(0),
     reserveArrayIndex,
   };
-}
+};
 
 export const getFilteredRewards = (rewards: RewardSummary[]): RewardSummary[] =>
   rewards.filter((r) => r.stats.isActive);

@@ -4,12 +4,8 @@ import { ParsedDownsampledApiReserveAssetDataEvent } from "@suilend/sdk/parsers/
 import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 import { Side } from "@suilend/sdk/types";
 
-import {
-  NORMALIZED_SUI_COINTYPE,
-  NORMALIZED_USDC_COINTYPE,
-  NORMALIZED_USDT_COINTYPE,
-} from "@/lib/coinType";
 import { msPerYear } from "@/lib/constants";
+import { getBorrowShareUsd, getDepositShareUsd } from "@/lib/liquidityMining";
 
 export enum EventType {
   INTEREST_UPDATE = "interestUpdate",
@@ -66,13 +62,6 @@ export const RESERVE_EVENT_SAMPLE_INTERVAL_S_MAP: Record<Days, number> = {
   30: 8 * 60 * 60,
 };
 
-type ReducedPoolReward = {
-  coinType: string;
-  totalRewards: BigNumber;
-  startTimeMs: number;
-  endTimeMs: number;
-};
-
 export const calculateRewardAprPercent = (
   side: Side,
   event: ParsedDownsampledApiReserveAssetDataEvent,
@@ -88,117 +77,40 @@ export const calculateRewardAprPercent = (
 
   const rewardCoinType = rewardEvent.coinType;
 
-  const historicalRewardsMap: Record<
-    Side,
-    Record<string, ReducedPoolReward[]>
-  > = {
-    [Side.DEPOSIT]: {
-      [NORMALIZED_SUI_COINTYPE]: [
-        {
-          coinType: NORMALIZED_SUI_COINTYPE,
-          totalRewards: new BigNumber(93613.13),
-          startTimeMs: 1713225600000,
-          endTimeMs: 1713830400000,
-        },
-        {
-          coinType: NORMALIZED_SUI_COINTYPE,
-          totalRewards: new BigNumber(177579),
-          startTimeMs: 1713830400000, // 2024-04-23 08:00:00
-          endTimeMs: 1715040000000, // 2024-05-07 08:00:00
-        },
-        {
-          coinType: NORMALIZED_SUI_COINTYPE,
-          totalRewards: new BigNumber(162386.57),
-          startTimeMs: 1715040000000, // 2024-05-07 08:00:00
-          endTimeMs: 1716249600000, //2024-05-21 08:00:00
-        },
-      ],
-      [NORMALIZED_USDC_COINTYPE]: [
-        {
-          coinType: NORMALIZED_SUI_COINTYPE,
-          totalRewards: new BigNumber(75915.32),
-          startTimeMs: 1713225600000,
-          endTimeMs: 1713830400000,
-        },
-        {
-          coinType: NORMALIZED_SUI_COINTYPE,
-          totalRewards: new BigNumber(168534),
-          startTimeMs: 1713830400000, // 2024-04-23 08:00:00
-          endTimeMs: 1715040000000, // 2024-05-07 08:00:00
-        },
-        {
-          coinType: NORMALIZED_SUI_COINTYPE,
-          totalRewards: new BigNumber(176679.79),
-          startTimeMs: 1715040000000, // 2024-05-07 08:00:00
-          endTimeMs: 1716249600000, //2024-05-21 08:00:00
-        },
-      ],
-      [NORMALIZED_USDT_COINTYPE]: [
-        {
-          coinType: NORMALIZED_SUI_COINTYPE,
-          totalRewards: new BigNumber(64602.32),
-          startTimeMs: 1713225600000,
-          endTimeMs: 1713830400000,
-        },
-        {
-          coinType: NORMALIZED_SUI_COINTYPE,
-          totalRewards: new BigNumber(128939),
-          startTimeMs: 1713830400000, // 2024-04-23 08:00:00
-          endTimeMs: 1715040000000, // 2024-05-07 08:00:00
-        },
-        {
-          coinType: NORMALIZED_SUI_COINTYPE,
-          totalRewards: new BigNumber(116534.73),
-          startTimeMs: 1715040000000, // 2024-05-07 08:00:00
-          endTimeMs: 1716249600000, //2024-05-21 08:00:00
-        },
-      ],
-    },
-    [Side.BORROW]: {},
-  };
-
-  const allPoolRewards: ReducedPoolReward[] = [
+  const allPoolRewards = [
     ...(side === Side.DEPOSIT
       ? reserve.depositsPoolRewardManager.poolRewards
       : reserve.borrowsPoolRewardManager.poolRewards),
   ];
-  (historicalRewardsMap[side][event.coinType] ?? []).forEach((hr) => {
-    if (
-      allPoolRewards.find(
-        (pr) =>
-          pr.coinType === hr.coinType &&
-          pr.startTimeMs === hr.startTimeMs &&
-          pr.endTimeMs === hr.endTimeMs,
-      )
-    )
-      return;
-
-    allPoolRewards.push({
-      coinType: hr.coinType,
-      totalRewards: hr.totalRewards,
-      startTimeMs: hr.startTimeMs,
-      endTimeMs: hr.endTimeMs,
-    });
-  });
 
   const poolRewards = allPoolRewards.filter(
-    (pr) =>
-      pr.coinType === rewardCoinType &&
-      event.timestampS >= pr.startTimeMs / 1000 &&
-      event.timestampS < pr.endTimeMs / 1000,
+    (poolReward) =>
+      poolReward.coinType === rewardCoinType &&
+      event.timestampS >= poolReward.startTimeMs / 1000 &&
+      event.timestampS < poolReward.endTimeMs / 1000,
   );
   if (poolRewards.length === 0) return 0;
 
   const rewardAprPercent = poolRewards.reduce(
-    (acc, pr) =>
+    (acc: BigNumber, poolReward) =>
       acc.plus(
-        pr.totalRewards
+        poolReward.totalRewards
           .times(rewardEvent.price)
-          .times(new BigNumber(msPerYear).div(pr.endTimeMs - pr.startTimeMs))
+          .times(
+            new BigNumber(msPerYear).div(
+              poolReward.endTimeMs - poolReward.startTimeMs,
+            ),
+          )
           .div(
             side === Side.DEPOSIT
-              ? event.depositedAmountUsd
-              : event.borrowedAmountUsd,
+              ? getDepositShareUsd(
+                  reserve,
+                  new BigNumber(reserve.depositsPoolRewardManager.totalShares),
+                )
+              : getBorrowShareUsd(
+                  reserve,
+                  new BigNumber(reserve.borrowsPoolRewardManager.totalShares),
+                ),
           )
           .times(100)
           .times(side === Side.DEPOSIT ? 1 : -1),
