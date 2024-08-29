@@ -4,17 +4,14 @@ import { usePointsContext } from "@/contexts/PointsContext";
 import { formatDuration } from "@/lib/format";
 
 export default function LeaderboardDataLastUpdated() {
-  const { refreshedObligationsUpdatedAt } = usePointsContext();
+  const { updatedAt } = usePointsContext();
 
-  if (!refreshedObligationsUpdatedAt) return null;
+  if (!updatedAt) return null;
   return (
     <>
       {"Last updated "}
       {formatDuration(
-        new BigNumber(
-          (new Date().getTime() - refreshedObligationsUpdatedAt.getTime()) /
-            1000,
-        ),
+        new BigNumber((new Date().getTime() - updatedAt.getTime()) / 1000),
       )}
       {" ago"}
     </>

@@ -53,16 +53,15 @@ type PerDayRewardSummary = Omit<RewardSummary, "stats"> & {
   };
 };
 
+export const getDepositShare = (reserve: ParsedReserve, share: BigNumber) =>
+  share.div(10 ** reserve.mintDecimals).times(reserve.cTokenExchangeRate);
 export const getDepositShareUsd = (reserve: ParsedReserve, share: BigNumber) =>
-  share
-    .div(10 ** reserve.mintDecimals)
-    .times(reserve.cTokenExchangeRate)
-    .times(reserve.price);
+  getDepositShare(reserve, share).times(reserve.price);
+
+export const getBorrowShare = (reserve: ParsedReserve, share: BigNumber) =>
+  share.div(10 ** reserve.mintDecimals).times(reserve.cumulativeBorrowRate);
 export const getBorrowShareUsd = (reserve: ParsedReserve, share: BigNumber) =>
-  share
-    .div(10 ** reserve.mintDecimals)
-    .times(reserve.cumulativeBorrowRate)
-    .times(reserve.price);
+  getBorrowShare(reserve, share).times(reserve.price);
 
 export const formatRewards = (
   parsedReserveMap: Record<string, ParsedReserve>,
@@ -116,8 +115,14 @@ export const formatRewards = (
           .div(365)
           .div(
             side === Side.DEPOSIT
-              ? reserve.depositedAmount
-              : reserve.borrowedAmount,
+              ? getDepositShare(
+                  reserve,
+                  new BigNumber(reserve.depositsPoolRewardManager.totalShares),
+                )
+              : getBorrowShare(
+                  reserve,
+                  new BigNumber(reserve.borrowsPoolRewardManager.totalShares),
+                ),
           );
 
     return {
