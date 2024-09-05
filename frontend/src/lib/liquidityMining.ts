@@ -124,12 +124,6 @@ export const formatRewards = (
                   new BigNumber(reserve.borrowsPoolRewardManager.totalShares),
                 ),
           );
-    console.log(
-      "XXX",
-      +poolReward.totalRewards,
-      aprPercent !== undefined ? +aprPercent : "--",
-      perDay !== undefined ? +perDay : "--",
-    );
 
     return {
       stats: {

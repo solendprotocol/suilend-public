@@ -555,6 +555,10 @@ export default function HistoryTabContent({
         case EventType.LIQUIDATE: {
           const liquidateEvent = row.event as ApiLiquidateEvent;
 
+          finalRows.push({ ...row, subRows: [row] });
+          break;
+
+          // TODO: Group consecutive liquidations for the same asset pair
           const lastRow = finalRows[finalRows.length - 1];
           if (!lastRow || lastRow.eventType !== EventType.LIQUIDATE)
             finalRows.push({ ...row, subRows: [row] });
