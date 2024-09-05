@@ -78,13 +78,13 @@ export default function ActionsModalContainer({ children }: PropsWithChildren) {
           onMouseUp={onDialogContentMouseUp}
         >
           <div
-            className="relative h-fit rounded-lg border bg-popover p-4"
+            className="relative h-fit rounded-lg bg-popover p-4"
             onMouseDown={onDialogInnerContentMouseDown}
             onMouseUp={onDialogInnerContentMouseUp}
           >
             {/* More parameters */}
             <div
-              className="absolute right-[-41px] top-1/2 -translate-y-2/4 rounded-r-md bg-popover"
+              className="absolute -right-[40px] top-1/2 -translate-y-2/4 rounded-r-md bg-popover"
               style={{ writingMode: "vertical-rl" }}
             >
               <Button
@@ -107,7 +107,7 @@ export default function ActionsModalContainer({ children }: PropsWithChildren) {
     <DrawerRoot open={isOpen} onRelease={(e, open) => !open && close()}>
       <DrawerContent
         className={cn(
-          "actions-modal-drawer-content mt-0 max-h-[calc(100dvh-0px)] rounded-t-lg bg-popover p-0",
+          "actions-modal-drawer-content mt-0 max-h-[calc(100dvh-0px)] rounded-t-lg border-none bg-popover p-0",
           isMoreParametersOpen ? "!h-[calc(100dvh-0px)]" : "!h-auto",
           visualViewportHeight < 400
             ? "!bottom-auto !top-0"

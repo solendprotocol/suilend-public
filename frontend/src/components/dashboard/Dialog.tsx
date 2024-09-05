@@ -89,7 +89,7 @@ export default function Dialog({
 
         <DialogContent
           className={cn(
-            "flex w-[calc(100dvw-var(--sm-mx)*2)] max-w-4xl flex-col gap-0 overflow-hidden bg-popover p-0",
+            "flex w-[calc(100dvw-var(--sm-mx)*2)] max-w-4xl flex-col gap-0 overflow-hidden border-none bg-popover p-0",
             !isDialogAutoHeight
               ? "h-[calc(100dvh-var(--sm-my)*2)] max-h-none"
               : "h-auto max-h-[calc(100dvh-var(--sm-my)*2)]",
@@ -134,7 +134,7 @@ export default function Dialog({
 
       <DrawerContent
         className={cn(
-          "mt-0 max-h-dvh rounded-t-lg bg-popover p-0",
+          "mt-0 max-h-dvh rounded-t-lg border-none bg-popover p-0",
           !isDrawerAutoHeight && "!bottom-0 !top-auto !h-dvh",
           drawerContentClassName,
         )}

@@ -7,6 +7,7 @@ import {
   useCallback,
   useContext,
   useMemo,
+  useState,
 } from "react";
 
 import { SuiTransactionBlockResponse } from "@mysten/sui.js/client";
@@ -20,14 +21,12 @@ import { SuilendClient } from "@suilend/sdk/client";
 import { ParametersPanelTab } from "@/components/dashboard/actions-modal/ParametersPanel";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { useWalletContext } from "@/contexts/WalletContext";
-import { shallowPushQuery, shallowReplaceQuery } from "@/lib/router";
+import { shallowPushQuery } from "@/lib/router";
 
-const QUERY_PARAMS_PREFIX = "assetActions";
 enum QueryParams {
-  ASSET_ACTIONS = QUERY_PARAMS_PREFIX,
-  RESERVE_INDEX = `${QUERY_PARAMS_PREFIX}-assetIndex`,
-  TAB = `${QUERY_PARAMS_PREFIX}-action`,
-  PARAMETERS_PANEL_TAB = `${QUERY_PARAMS_PREFIX}-parametersPanelTab`,
+  RESERVE_INDEX = "assetIndex",
+  TAB = "action",
+  PARAMETERS_PANEL_TAB = "parametersPanelTab",
 }
 
 export enum Tab {
@@ -106,9 +105,6 @@ export const useActionsModalContext = () => useContext(ActionsModalContext);
 export function ActionsModalContextProvider({ children }: PropsWithChildren) {
   const router = useRouter();
   const queryParams = {
-    [QueryParams.ASSET_ACTIONS]: router.query[QueryParams.ASSET_ACTIONS] as
-      | string
-      | undefined,
     [QueryParams.RESERVE_INDEX]: router.query[QueryParams.RESERVE_INDEX] as
       | string
       | undefined,
@@ -125,26 +121,28 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
   const data = restAppContext.data as AppData;
 
   // Open
-  const isOpen = queryParams[QueryParams.ASSET_ACTIONS] !== undefined;
+  const [isOpen, setIsOpen] = useState<boolean>(
+    queryParams[QueryParams.RESERVE_INDEX] !== undefined,
+  );
+
   const open = useCallback(
     (_reserveIndex: number) => {
+      setIsOpen(true);
+
       shallowPushQuery(router, {
         ...router.query,
-        [QueryParams.ASSET_ACTIONS]: true,
         [QueryParams.RESERVE_INDEX]: _reserveIndex,
       });
     },
     [router],
   );
   const close = useCallback(() => {
-    const restQuery = cloneDeep(router.query);
-    delete restQuery[QueryParams.ASSET_ACTIONS];
-    shallowPushQuery(router, restQuery);
+    setIsOpen(false);
 
     setTimeout(() => {
-      const restQuery2 = cloneDeep(restQuery);
-      delete restQuery2[QueryParams.RESERVE_INDEX];
-      shallowReplaceQuery(router, restQuery2);
+      const restQuery = cloneDeep(router.query);
+      delete restQuery[QueryParams.RESERVE_INDEX];
+      shallowPushQuery(router, restQuery);
     }, 250);
   }, [router]);
 

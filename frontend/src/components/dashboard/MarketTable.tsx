@@ -225,18 +225,18 @@ export default function MarketTable() {
                   : undefined;
 
           const borrowedAmountTooltip = exceedsBorrowLimit
-            ? getExceedsLimitTooltip(Side.DEPOSIT)
+            ? getExceedsLimitTooltip(Side.BORROW)
             : exceedsBorrowLimitUsd
-              ? getExceedsLimitUsdTooltip(Side.DEPOSIT)
+              ? getExceedsLimitUsdTooltip(Side.BORROW)
               : almostExceedsBorrowLimit
                 ? getAlmostExceedsLimitTooltip(
-                    Side.DEPOSIT,
+                    Side.BORROW,
                     reserve.config.borrowLimit.minus(borrowedAmount),
                     symbol,
                   )
                 : almostExceedsBorrowLimitUsd
                   ? getAlmostExceedsLimitUsd(
-                      Side.DEPOSIT,
+                      Side.BORROW,
                       reserve.config.borrowLimitUsd.minus(borrowedAmountUsd),
                     )
                   : undefined;
