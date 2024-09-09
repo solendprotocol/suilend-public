@@ -27,6 +27,23 @@ import { ParsedCoinBalance, parseCoinBalances } from "@/lib/coinBalance";
 import { COINTYPE_LOGO_MAP, COINTYPE_SYMBOL_MAP } from "@/lib/coinType";
 import { SWAP_URL } from "@/lib/navigation";
 
+import { Aftermath, Router, RouterProtocolName } from "aftermath-ts-sdk"
+
+export const AF_EXCHANGE_NAME_MAP: Record<RouterProtocolName, string> = {
+  Cetus: "Cetus",
+  FlowX: "FlowX Finance",
+  Turbos: "Turbos Finance",
+  Aftermath: "Aftermath Finance",
+  Kriya: "Kriya",
+  BlueMove: "BlueMove",
+  DeepBook: "DeepBook",
+  Suiswap: "Suiswap",
+  afSUI: "afSUI",
+  BaySwap: "BaySwap",
+  FlowXClmm: "FlowX Finance",
+  Interest: "Interest",
+};
+
 export const EXCHANGE_NAME_MAP: Record<SuiExchange, string> = {
   [SuiExchange.CETUS]: "Cetus",
   [SuiExchange.FLOWX]: "FlowX Finance",
@@ -55,6 +72,7 @@ export type Quote = GetQuoteResponse & {
 
 interface SwapContext {
   sdk?: HopApi;
+  afRouter?: Router;
   tokens?: VerifiedToken[];
   tokenIn?: VerifiedToken;
   tokenOut?: VerifiedToken;
@@ -65,6 +83,7 @@ interface SwapContext {
 
 const defaultContextValue: SwapContext = {
   sdk: undefined,
+  afRouter: undefined,
   tokens: undefined,
   tokenIn: undefined,
   tokenOut: undefined,
@@ -100,6 +119,13 @@ export function SwapContextProvider({ children }: PropsWithChildren) {
     return new HopApi(rpc.url, hop_api_options, true);
   }, [rpc.url]);
 
+  // Aftermath SDK
+  const afRouter = useMemo(() => {
+    const afSdk = new Aftermath("MAINNET");
+    afSdk.init(); // Initialize provider
+    return afSdk.Router();
+  }, []);
+  
   // Tokens
   const [tokens, setTokens] = useState<VerifiedToken[] | undefined>(undefined);
 
@@ -249,6 +275,7 @@ export function SwapContextProvider({ children }: PropsWithChildren) {
   const contextValue: SwapContext = useMemo(
     () => ({
       sdk,
+      afRouter,
       tokens,
       tokenIn,
       tokenOut,
@@ -258,6 +285,7 @@ export function SwapContextProvider({ children }: PropsWithChildren) {
     }),
     [
       sdk,
+      afRouter,
       tokens,
       tokenIn,
       tokenOut,
