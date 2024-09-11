@@ -147,25 +147,25 @@ function Page() {
   ).toFixed(tokenIn.decimals, BigNumber.ROUND_DOWN);
 
   // Slippage
-  const [slippage, setSlippage] = useLocalStorage<string>(
+  const [slippagePercent, setSlippagePercent] = useLocalStorage<string>(
     "swapSlippage",
     "1.0",
   );
 
-  const formatAndSetSlippage = useCallback(
+  const formatAndSetSlippagePercent = useCallback(
     (_value: string) => {
-      if (new BigNumber(_value || 0).lt(0)) setSlippage("0");
-      else if (new BigNumber(_value).gt(100)) setSlippage("100");
+      if (new BigNumber(_value || 0).lt(0)) setSlippagePercent("0");
+      else if (new BigNumber(_value).gt(100)) setSlippagePercent("100");
       else {
         if (_value.includes(".")) {
           const [whole, decimals] = _value.split(".");
-          setSlippage(
+          setSlippagePercent(
             `${whole}.${decimals.slice(0, Math.min(decimals.length, 1))}`,
           );
-        } else setSlippage(_value);
+        } else setSlippagePercent(_value);
       }
     },
-    [setSlippage],
+    [setSlippagePercent],
   );
 
   // State
@@ -591,7 +591,7 @@ function Page() {
 
   const getTransactionForUnifiedQuote = async (
     quote: UnifiedQuote,
-    slippage: number,
+    slippagePercent: number,
     address: string,
     isDepositing: boolean,
   ): Promise<{
@@ -603,7 +603,7 @@ function Page() {
         trade: (quote.quote as HopGetQuoteResponse).trade,
         sui_address: address,
         gas_budget: 0.25 * 10 ** 9, // Set to 0.25 SUI
-        max_slippage_bps: slippage * 100,
+        max_slippage_bps: slippagePercent * 100,
         return_output_coin_argument: isDepositing,
       });
       return {
@@ -617,7 +617,7 @@ function Page() {
           tx: tx as any,
           walletAddress: address,
           completeRoute: quote.quote as AftermathRouterCompleteTradeRoute,
-          slippage: slippage / 100,
+          slippage: slippagePercent / 100,
         });
         return {
           tx: res.tx as unknown as TransactionBlock,
@@ -627,16 +627,14 @@ function Page() {
         const tx = await aftermathSdk.getTransactionForCompleteTradeRouteV0({
           walletAddress: address,
           completeRoute: quote.quote as AftermathRouterCompleteTradeRoute,
-          slippage: slippage / 100,
+          slippage: slippagePercent / 100,
         });
         return {
           tx: tx as any,
           outputCoin: undefined,
         };
       }
-    } else {
-      throw new Error("Unknown quote type");
-    }
+    } else throw new Error("Unknown quote type");
   };
 
   const swap = async (deposit?: boolean) => {
@@ -651,7 +649,7 @@ function Page() {
     try {
       const tx = await getTransactionForUnifiedQuote(
         quote,
-        +slippage,
+        +slippagePercent,
         address,
         isDepositing,
       );
@@ -800,8 +798,8 @@ function Page() {
             </Button>
 
             <SwapSlippagePopover
-              slippage={slippage}
-              onSlippageChange={formatAndSetSlippage}
+              slippagePercent={slippagePercent}
+              onSlippagePercentChange={formatAndSetSlippagePercent}
             />
           </div>
 

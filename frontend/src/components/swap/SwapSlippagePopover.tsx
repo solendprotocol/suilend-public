@@ -14,19 +14,19 @@ import { cn } from "@/lib/utils";
 const PRESETS = ["0.3", "0.5", "1.0"];
 
 interface SwapSlippagePopoverProps {
-  slippage: string;
-  onSlippageChange: (value: string) => void;
+  slippagePercent: string;
+  onSlippagePercentChange: (value: string) => void;
 }
 
 export default function SwapSlippagePopover({
-  slippage,
-  onSlippageChange,
+  slippagePercent,
+  onSlippagePercentChange,
 }: SwapSlippagePopoverProps) {
   // State
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const onPresetClick = (value: string) => {
-    onSlippageChange(value);
+    onSlippagePercentChange(value);
     setIsOpen(false);
   };
 
@@ -46,7 +46,7 @@ export default function SwapSlippagePopover({
           size="sm"
           role="combobox"
         >
-          {formatPercent(new BigNumber(slippage || 0), { dp: 1 })}
+          {formatPercent(new BigNumber(slippagePercent || 0), { dp: 1 })}
         </Button>
       }
       contentProps={{
@@ -64,7 +64,8 @@ export default function SwapSlippagePopover({
                 key={preset}
                 className={cn(
                   "w-12 rounded-full border px-0 hover:border-transparent",
-                  slippage === preset && "border-transparent bg-muted/15",
+                  slippagePercent === preset &&
+                    "border-transparent bg-muted/15",
                 )}
                 labelClassName="text-xs"
                 variant="ghost"
@@ -83,8 +84,10 @@ export default function SwapSlippagePopover({
               <Input
                 id="custom-slippage"
                 type="number"
-                defaultValue={PRESETS.includes(slippage) ? "" : slippage}
-                onChange={onSlippageChange}
+                defaultValue={
+                  PRESETS.includes(slippagePercent) ? "" : slippagePercent
+                }
+                onChange={onSlippagePercentChange}
                 inputProps={{
                   className:
                     "text-xs w-12 px-0 bg-card rounded-full h-6 py-0 text-center focus:border-secondary",

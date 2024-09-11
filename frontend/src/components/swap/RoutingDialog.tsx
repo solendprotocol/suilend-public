@@ -132,7 +132,7 @@ function StartEndNode({ data }: StartEndNodeProps) {
             }}
           />
           <TBody>
-            {+amount} {token.ticker}
+            {+formatToken(amount, { dp: token.decimals })} {token.ticker}
           </TBody>
         </div>
       </div>
@@ -244,12 +244,8 @@ function NodeChart({ quote, quoteNodesWithTokens }: NodeChartProps) {
   // Layout
   const initialNodesEdges = (() => {
     // Nodes
-    const quoteAmountIn = BigNumber(quote.amount_in.toString()).div(
-      10 ** tokenIn.decimals,
-    );
-    const quoteAmountOut = BigNumber(quote.amount_out.toString()).div(
-      10 ** tokenOut.decimals,
-    );
+    const quoteAmountIn = BigNumber(quote.amount_in.toString());
+    const quoteAmountOut = BigNumber(quote.amount_out.toString());
 
     const initialNodes: Node[] = [];
     initialNodes.push({
@@ -292,32 +288,31 @@ function NodeChart({ quote, quoteNodesWithTokens }: NodeChartProps) {
     // Edges
     const initialEdges: Edge[] = [];
     quoteNodesWithTokens.forEach((node, nodeIndex) => {
-      if (
-        quote.type === UnifiedQuoteType.HOP
-          ? Object.values(quote.quote.trade.edges)
-              .flat()
-              .includes(node.object_id)
-          : !quote.quote.routes
-              .reduce(
-                (acc, route) => [
-                  ...acc,
-                  ...route.paths.map((path, index) => ({
-                    ...path,
-                    isFirst: index === 0,
-                  })),
-                ],
-                [] as (AftermathRouterTradePath & {
-                  isFirst: boolean;
-                })[],
-              )
-              .some(
-                (data, index) =>
-                  data.isFirst &&
-                  `${data.pool.pool_id}_${index}` ===
-                    `${node.object_id}_${nodeIndex}`,
-              )
-      )
-        return;
+      if (quote.type === UnifiedQuoteType.HOP) {
+        if (Object.keys(quote.quote.trade.edges).includes(node.object_id))
+          return;
+      } else {
+        if (
+          !quote.quote.routes
+            .reduce(
+              (acc, route) => [
+                ...acc,
+                ...route.paths.map((path, index) => ({
+                  ...path,
+                  isFirst: index === 0,
+                })),
+              ],
+              [] as (AftermathRouterTradePath & { isFirst: boolean })[],
+            )
+            .some(
+              (data, index) =>
+                data.isFirst &&
+                `${data.pool.pool_id}_${index}` ===
+                  `${node.object_id}_${nodeIndex}`,
+            )
+        )
+          return;
+      }
 
       initialEdges.push({
         id:
@@ -331,6 +326,7 @@ function NodeChart({ quote, quoteNodesWithTokens }: NodeChartProps) {
             : `${node.object_id}_${nodeIndex}`,
       });
     });
+
     if (quote.type === UnifiedQuoteType.HOP) {
       Object.entries(quote.quote.trade.edges).forEach(
         ([targetNodeObjectId, sourceNodeObjectIds]) => {
@@ -359,33 +355,37 @@ function NodeChart({ quote, quoteNodesWithTokens }: NodeChartProps) {
         });
       }
     }
+
     quoteNodesWithTokens.forEach((node, nodeIndex) => {
-      if (
-        quote.type === UnifiedQuoteType.HOP
-          ? Object.values(quote.quote.trade.edges)
-              .flat()
-              .includes(node.object_id)
-          : !quote.quote.routes
-              .reduce(
-                (acc, route) => [
-                  ...acc,
-                  ...route.paths.map((path, index) => ({
-                    ...path,
-                    isLast: index === route.paths.length - 1,
-                  })),
-                ],
-                [] as (AftermathRouterTradePath & {
-                  isLast: boolean;
-                })[],
-              )
-              .some(
-                (data, index) =>
-                  data.isLast &&
-                  `${data.pool.pool_id}_${index}` ===
-                    `${node.object_id}_${nodeIndex}`,
-              )
-      )
-        return;
+      if (quote.type === UnifiedQuoteType.HOP) {
+        if (
+          Object.values(quote.quote.trade.edges).flat().includes(node.object_id)
+        )
+          return;
+      } else {
+        if (
+          !quote.quote.routes
+            .reduce(
+              (acc, route) => [
+                ...acc,
+                ...route.paths.map((path, index) => ({
+                  ...path,
+                  isLast: index === route.paths.length - 1,
+                })),
+              ],
+              [] as (AftermathRouterTradePath & {
+                isLast: boolean;
+              })[],
+            )
+            .some(
+              (data, index) =>
+                data.isLast &&
+                `${data.pool.pool_id}_${index}` ===
+                  `${node.object_id}_${nodeIndex}`,
+            )
+        )
+          return;
+      }
 
       initialEdges.push({
         id:
@@ -445,17 +445,16 @@ export default function RoutingDialog({ quote }: RoutingDialogProps) {
 
   // Coin metadata
   const nodeTokenCoinTypes = useMemo(() => {
+    const coinTypes: string[] = [];
+
     if (quote.type === UnifiedQuoteType.HOP) {
-      const coinTypes: string[] = [];
       for (const node of Object.values(quote.quote.trade.nodes)) {
         for (const coinType of [node.amount_in.token, node.amount_out.token]) {
           if (!coinTypes.includes(coinType)) coinTypes.push(coinType);
         }
       }
-      return coinTypes;
     } else {
-      // aftermath
-      const coinTypes: string[] = [];
+      // Aftermath
       for (const path of quote.quote.routes.reduce(
         (acc, route) => [...acc, ...route.paths],
         [] as AftermathRouterTradePath[],
@@ -464,8 +463,9 @@ export default function RoutingDialog({ quote }: RoutingDialogProps) {
           if (!coinTypes.includes(coinType)) coinTypes.push(coinType);
         }
       }
-      return coinTypes;
     }
+
+    return coinTypes;
   }, [quote]);
 
   const coinMetadataMap = useGetCoinMetadataMap(nodeTokenCoinTypes);
@@ -492,7 +492,8 @@ export default function RoutingDialog({ quote }: RoutingDialogProps) {
               )
                 return undefined;
               return {
-                ...node,
+                object_id: node.pool.object_id,
+                sui_exchange: node.pool.sui_exchange,
                 amount_in: {
                   amount: node.amount_in.amount,
                   ...({
@@ -516,7 +517,7 @@ export default function RoutingDialog({ quote }: RoutingDialogProps) {
               };
             })
             .filter(Boolean) as unknown as QuoteNodeWithTokens[])
-        : // aftermath
+        : // Aftermath
           (quote.quote.routes
             .reduce(
               (acc, route) => [...acc, ...route.paths],
