@@ -1,8 +1,12 @@
 import { CSSProperties, useEffect, useMemo, useRef, useState } from "react";
 
 import Dagre from "@dagrejs/dagre";
-import { VerifiedToken } from "@hop.ag/sdk";
+import { SuiExchange as HopSuiExchange, VerifiedToken } from "@hop.ag/sdk";
 import { CoinMetadata, SuiClient } from "@mysten/sui.js/client";
+import {
+  RouterProtocolName as AftermathRouterProtocolName,
+  RouterTradePath as AftermathRouterTradePath,
+} from "aftermath-ts-sdk";
 import BigNumber from "bignumber.js";
 import { Route } from "lucide-react";
 import ReactFlow, { Edge, Handle, Node, Position } from "reactflow";
@@ -17,8 +21,10 @@ import Tooltip from "@/components/shared/Tooltip";
 import { TBody, TLabelSans } from "@/components/shared/Typography";
 import { useAppContext } from "@/contexts/AppContext";
 import {
-  EXCHANGE_NAME_MAP,
-  Quote,
+  AF_EXCHANGE_NAME_MAP,
+  HOP_EXCHANGE_NAME_MAP,
+  UnifiedQuote,
+  UnifiedQuoteType,
   useSwapContext,
 } from "@/contexts/SwapContext";
 import { getCoinMetadataMap } from "@/lib/coinMetadata";
@@ -79,11 +85,14 @@ const useGetCoinMetadataMap = (coinTypes: string[]) => {
   return coinMetadataMap;
 };
 
-type QuoteNode = Quote["trade"]["nodes"][0];
-type QuoteNodeWithTokens = QuoteNode & {
-  amount_in: QuoteNode["amount_in"] & VerifiedToken;
-  amount_out: QuoteNode["amount_out"] & VerifiedToken;
-};
+type QuoteNodeWithTokens = {
+  object_id: string;
+  amount_in: { amount: bigint } & VerifiedToken;
+  amount_out: { amount: bigint } & VerifiedToken;
+} & (
+  | { sui_exchange: HopSuiExchange }
+  | { protocol: AftermathRouterProtocolName }
+);
 
 const START_END_NODE_WIDTH = 200; // px
 const START_END_NODE_HEIGHT = 36; // px
@@ -123,7 +132,7 @@ function StartEndNode({ data }: StartEndNodeProps) {
             }}
           />
           <TBody>
-            {+amount} {token.ticker}
+            {+formatToken(amount, { dp: token.decimals })} {token.ticker}
           </TBody>
         </div>
       </div>
@@ -163,15 +172,16 @@ function ExchangeNode({ data }: ExchangeNodeProps) {
           content={
             <TextLink
               className="block font-mono text-xs"
-              href={explorer.buildObjectUrl(data.pool.object_id)}
+              href={explorer.buildObjectUrl(data.object_id)}
             >
-              {formatId(data.pool.object_id)}
+              {formatId(data.object_id)}
             </TextLink>
           }
         >
           <TLabelSans>
-            {EXCHANGE_NAME_MAP[data.pool.sui_exchange] ??
-              data.pool.sui_exchange}
+            {"sui_exchange" in data
+              ? HOP_EXCHANGE_NAME_MAP[data.sui_exchange] ?? data.sui_exchange
+              : AF_EXCHANGE_NAME_MAP[data.protocol] ?? data.protocol}
           </TLabelSans>
         </Tooltip>
 
@@ -222,7 +232,7 @@ function ExchangeNode({ data }: ExchangeNodeProps) {
 }
 
 interface NodeChartProps {
-  quote: Quote;
+  quote: UnifiedQuote;
   quoteNodesWithTokens: QuoteNodeWithTokens[];
 }
 
@@ -234,12 +244,8 @@ function NodeChart({ quote, quoteNodesWithTokens }: NodeChartProps) {
   // Layout
   const initialNodesEdges = (() => {
     // Nodes
-    const quoteAmountIn = BigNumber(
-      quote.trade.amount_in.amount.toString(),
-    ).div(10 ** tokenIn.decimals);
-    const quoteAmountOut = BigNumber(
-      quote.trade.amount_out.amount.toString(),
-    ).div(10 ** tokenOut.decimals);
+    const quoteAmountIn = BigNumber(quote.amount_in.toString());
+    const quoteAmountOut = BigNumber(quote.amount_out.toString());
 
     const initialNodes: Node[] = [];
     initialNodes.push({
@@ -254,9 +260,12 @@ function NodeChart({ quote, quoteNodesWithTokens }: NodeChartProps) {
         amount: quoteAmountIn,
       },
     });
-    quoteNodesWithTokens.forEach((node) => {
+    quoteNodesWithTokens.forEach((node, index) => {
       initialNodes.push({
-        id: node.pool.object_id,
+        id:
+          quote.type === UnifiedQuoteType.HOP
+            ? node.object_id
+            : `${node.object_id}_${index}`,
         type: "exchange",
         position: { x: 0, y: 0 },
         width: EXCHANGE_NODE_WIDTH,
@@ -278,33 +287,115 @@ function NodeChart({ quote, quoteNodesWithTokens }: NodeChartProps) {
 
     // Edges
     const initialEdges: Edge[] = [];
-    quoteNodesWithTokens.forEach((node) => {
-      if (Object.keys(quote.trade.edges).includes(node.pool.object_id)) return;
+    quoteNodesWithTokens.forEach((node, nodeIndex) => {
+      if (quote.type === UnifiedQuoteType.HOP) {
+        if (Object.keys(quote.quote.trade.edges).includes(node.object_id))
+          return;
+      } else {
+        if (
+          !quote.quote.routes
+            .reduce(
+              (acc, route) => [
+                ...acc,
+                ...route.paths.map((path, index) => ({
+                  ...path,
+                  isFirst: index === 0,
+                })),
+              ],
+              [] as (AftermathRouterTradePath & { isFirst: boolean })[],
+            )
+            .some(
+              (data, index) =>
+                data.isFirst &&
+                `${data.pool.pool_id}_${index}` ===
+                  `${node.object_id}_${nodeIndex}`,
+            )
+        )
+          return;
+      }
 
       initialEdges.push({
-        id: `start-${node.pool.object_id}`,
+        id:
+          quote.type === UnifiedQuoteType.HOP
+            ? `start-${node.object_id}`
+            : `start-${node.object_id}_${nodeIndex}`,
         source: "start",
-        target: node.pool.object_id,
+        target:
+          quote.type === UnifiedQuoteType.HOP
+            ? node.object_id
+            : `${node.object_id}_${nodeIndex}`,
       });
     });
-    Object.entries(quote.trade.edges).forEach(
-      ([targetNodeObjectId, sourceNodeObjectIds]) => {
-        sourceNodeObjectIds.forEach((sourceNodeObjectId) => {
-          initialEdges.push({
-            id: `${sourceNodeObjectId}-${targetNodeObjectId}`,
-            source: sourceNodeObjectId,
-            target: targetNodeObjectId,
+
+    if (quote.type === UnifiedQuoteType.HOP) {
+      Object.entries(quote.quote.trade.edges).forEach(
+        ([targetNodeObjectId, sourceNodeObjectIds]) => {
+          sourceNodeObjectIds.forEach((sourceNodeObjectId) => {
+            initialEdges.push({
+              id: `${sourceNodeObjectId}-${targetNodeObjectId}`,
+              source: sourceNodeObjectId,
+              target: targetNodeObjectId,
+            });
           });
+        },
+      );
+    } else {
+      let indexCount = 0;
+      for (const route of quote.quote.routes) {
+        route.paths.forEach((path, index) => {
+          if (index > 0) {
+            const sourcePath = route.paths[index - 1];
+            initialEdges.push({
+              id: `${sourcePath.pool.pool_id}_${indexCount - 1}-${path.pool.pool_id}_${indexCount}`,
+              source: `${sourcePath.pool.pool_id}_${indexCount - 1}`,
+              target: `${path.pool.pool_id}_${indexCount}`,
+            });
+          }
+          indexCount += 1;
         });
-      },
-    );
-    quoteNodesWithTokens.forEach((node) => {
-      if (Object.values(quote.trade.edges).flat().includes(node.pool.object_id))
-        return;
+      }
+    }
+
+    quoteNodesWithTokens.forEach((node, nodeIndex) => {
+      if (quote.type === UnifiedQuoteType.HOP) {
+        if (
+          Object.values(quote.quote.trade.edges).flat().includes(node.object_id)
+        )
+          return;
+      } else {
+        if (
+          !quote.quote.routes
+            .reduce(
+              (acc, route) => [
+                ...acc,
+                ...route.paths.map((path, index) => ({
+                  ...path,
+                  isLast: index === route.paths.length - 1,
+                })),
+              ],
+              [] as (AftermathRouterTradePath & {
+                isLast: boolean;
+              })[],
+            )
+            .some(
+              (data, index) =>
+                data.isLast &&
+                `${data.pool.pool_id}_${index}` ===
+                  `${node.object_id}_${nodeIndex}`,
+            )
+        )
+          return;
+      }
 
       initialEdges.push({
-        id: `end-${node.pool.object_id}`,
-        source: node.pool.object_id,
+        id:
+          quote.type === UnifiedQuoteType.HOP
+            ? `end-${node.object_id}`
+            : `end-${node.object_id}_${nodeIndex}`,
+        source:
+          quote.type === UnifiedQuoteType.HOP
+            ? node.object_id
+            : `${node.object_id}_${nodeIndex}`,
         target: "end",
       });
     });
@@ -339,7 +430,7 @@ function NodeChart({ quote, quoteNodesWithTokens }: NodeChartProps) {
 }
 
 interface RoutingDialogProps {
-  quote: Quote;
+  quote: UnifiedQuote;
 }
 
 export default function RoutingDialog({ quote }: RoutingDialogProps) {
@@ -355,9 +446,22 @@ export default function RoutingDialog({ quote }: RoutingDialogProps) {
   // Coin metadata
   const nodeTokenCoinTypes = useMemo(() => {
     const coinTypes: string[] = [];
-    for (const node of Object.values(quote.trade.nodes)) {
-      for (const coinType of [node.amount_in.token, node.amount_out.token]) {
-        if (!coinTypes.includes(coinType)) coinTypes.push(coinType);
+
+    if (quote.type === UnifiedQuoteType.HOP) {
+      for (const node of Object.values(quote.quote.trade.nodes)) {
+        for (const coinType of [node.amount_in.token, node.amount_out.token]) {
+          if (!coinTypes.includes(coinType)) coinTypes.push(coinType);
+        }
+      }
+    } else {
+      // Aftermath
+      for (const path of quote.quote.routes.reduce(
+        (acc, route) => [...acc, ...route.paths],
+        [] as AftermathRouterTradePath[],
+      )) {
+        for (const coinType of [path.coinIn.type, path.coinOut.type]) {
+          if (!coinTypes.includes(coinType)) coinTypes.push(coinType);
+        }
       }
     }
 
@@ -369,51 +473,106 @@ export default function RoutingDialog({ quote }: RoutingDialogProps) {
   // Quote
   const quoteNodesWithTokens = useMemo(
     () =>
-      Object.values(quote.trade.nodes)
-        .map((node) => {
-          const inToken = tokens.find(
-            (t) => t.coin_type === node.amount_in.token,
-          );
-          const outToken = tokens.find(
-            (t) => t.coin_type === node.amount_out.token,
-          );
+      quote.type === UnifiedQuoteType.HOP
+        ? (Object.values(quote.quote.trade.nodes)
+            .map((node) => {
+              const inToken = tokens.find(
+                (t) => t.coin_type === node.amount_in.token,
+              );
+              const outToken = tokens.find(
+                (t) => t.coin_type === node.amount_out.token,
+              );
 
-          const inCoinMetadata = coinMetadataMap[node.amount_in.token];
-          const outCoinMetadata = coinMetadataMap[node.amount_out.token];
+              const inCoinMetadata = coinMetadataMap[node.amount_in.token];
+              const outCoinMetadata = coinMetadataMap[node.amount_out.token];
 
-          if (!(inToken || inCoinMetadata) || !(outToken || outCoinMetadata))
-            return undefined;
-          return {
-            ...node,
-            amount_in: {
-              ...node.amount_in,
-              ...({
-                coin_type: node.amount_in.token,
-                name: inToken?.name ?? inCoinMetadata?.name,
-                ticker: inToken?.ticker ?? inCoinMetadata?.symbol,
-                icon_url: inToken?.icon_url ?? inCoinMetadata?.iconUrl,
-                decimals: inToken?.decimals ?? inCoinMetadata?.decimals,
-              } as VerifiedToken),
-            },
-            amount_out: {
-              ...node.amount_out,
-              ...({
-                coin_type: node.amount_out.token,
-                name: outToken?.name ?? outCoinMetadata?.name,
-                ticker: outToken?.ticker ?? outCoinMetadata?.symbol,
-                icon_url: outToken?.icon_url ?? outCoinMetadata?.iconUrl,
-                decimals: outToken?.decimals ?? outCoinMetadata?.decimals,
-              } as VerifiedToken),
-            },
-          };
-        })
-        .filter(Boolean) as QuoteNodeWithTokens[],
+              if (
+                !(inToken || inCoinMetadata) ||
+                !(outToken || outCoinMetadata)
+              )
+                return undefined;
+              return {
+                object_id: node.pool.object_id,
+                sui_exchange: node.pool.sui_exchange,
+                amount_in: {
+                  amount: node.amount_in.amount,
+                  ...({
+                    coin_type: node.amount_in.token,
+                    name: inToken?.name ?? inCoinMetadata?.name,
+                    ticker: inToken?.ticker ?? inCoinMetadata?.symbol,
+                    icon_url: inToken?.icon_url ?? inCoinMetadata?.iconUrl,
+                    decimals: inToken?.decimals ?? inCoinMetadata?.decimals,
+                  } as VerifiedToken),
+                },
+                amount_out: {
+                  amount: node.amount_out.amount,
+                  ...({
+                    coin_type: node.amount_out.token,
+                    name: outToken?.name ?? outCoinMetadata?.name,
+                    ticker: outToken?.ticker ?? outCoinMetadata?.symbol,
+                    icon_url: outToken?.icon_url ?? outCoinMetadata?.iconUrl,
+                    decimals: outToken?.decimals ?? outCoinMetadata?.decimals,
+                  } as VerifiedToken),
+                },
+              };
+            })
+            .filter(Boolean) as unknown as QuoteNodeWithTokens[])
+        : // Aftermath
+          (quote.quote.routes
+            .reduce(
+              (acc, route) => [...acc, ...route.paths],
+              [] as AftermathRouterTradePath[],
+            )
+            .map((path) => {
+              const inToken = tokens.find(
+                (t) => t.coin_type === path.coinIn.type,
+              );
+              const outToken = tokens.find(
+                (t) => t.coin_type === path.coinOut.type,
+              );
+
+              const inCoinMetadata = coinMetadataMap[path.coinIn.type];
+              const outCoinMetadata = coinMetadataMap[path.coinOut.type];
+
+              if (
+                !(inToken || inCoinMetadata) ||
+                !(outToken || outCoinMetadata)
+              )
+                return undefined;
+              return {
+                object_id: path.pool.pool_id,
+                protocol: path.protocolName,
+                amount_in: {
+                  amount: path.coinIn.amount,
+                  ...({
+                    coin_type: path.coinIn.type,
+                    name: inToken?.name ?? inCoinMetadata?.name,
+                    ticker: inToken?.ticker ?? inCoinMetadata?.symbol,
+                    icon_url: inToken?.icon_url ?? inCoinMetadata?.iconUrl,
+                    decimals: inToken?.decimals ?? inCoinMetadata?.decimals,
+                  } as VerifiedToken),
+                },
+                amount_out: {
+                  amount: path.coinOut.amount,
+                  ...({
+                    coin_type: path.coinOut.type,
+                    name: outToken?.name ?? outCoinMetadata?.name,
+                    ticker: outToken?.ticker ?? outCoinMetadata?.symbol,
+                    icon_url: outToken?.icon_url ?? outCoinMetadata?.iconUrl,
+                    decimals: outToken?.decimals ?? outCoinMetadata?.decimals,
+                  } as VerifiedToken),
+                },
+              };
+            })
+            .filter(Boolean) as QuoteNodeWithTokens[]),
     [quote, tokens, coinMetadataMap],
   );
 
-  const hopsCount = Object.values(quote.trade.nodes).length;
-  const isLoading =
-    quoteNodesWithTokens.length !== Object.values(quote.trade.nodes).length;
+  const hopsCount =
+    quote.type === UnifiedQuoteType.HOP
+      ? Object.values(quote.quote.trade.nodes).length
+      : quote.quote.routes.reduce((acc, route) => acc + route.paths.length, 0);
+  const isLoading = quoteNodesWithTokens.length !== hopsCount;
 
   return (
     <Dialog
@@ -434,11 +593,22 @@ export default function RoutingDialog({ quote }: RoutingDialogProps) {
             {formatList(
               Array.from(
                 new Set(
-                  Object.values(quote.trade.nodes).map(
-                    (node) =>
-                      EXCHANGE_NAME_MAP[node.pool.sui_exchange] ??
-                      node.pool.sui_exchange,
-                  ),
+                  quote.type === UnifiedQuoteType.HOP
+                    ? Object.values(quote.quote.trade.nodes).map(
+                        (node) =>
+                          HOP_EXCHANGE_NAME_MAP[node.pool.sui_exchange] ??
+                          node.pool.sui_exchange,
+                      )
+                    : quote.quote.routes
+                        .reduce(
+                          (acc, route) => [...acc, ...route.paths],
+                          [] as AftermathRouterTradePath[],
+                        )
+                        .map(
+                          (path) =>
+                            AF_EXCHANGE_NAME_MAP[path.protocolName] ??
+                            path.protocolName,
+                        ),
                 ),
               ),
             )}

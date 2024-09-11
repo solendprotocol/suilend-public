@@ -11,14 +11,21 @@ import {
 } from "react";
 
 import {
-  GetQuoteResponse,
   HopApi,
   HopApiOptions,
-  SuiExchange,
+  GetQuoteResponse as HopGetQuoteResponse,
+  SuiExchange as HopSuiExchange,
   VerifiedToken,
 } from "@hop.ag/sdk";
 import { CoinMetadata } from "@mysten/sui.js/client";
 import { normalizeStructTag } from "@mysten/sui.js/utils";
+import {
+  Aftermath,
+  Router as AftermathRouter,
+  RouterCompleteTradeRoute as AftermathRouterCompleteTradeRoute,
+  RouterProtocolName as AftermathRouterProtocolName,
+} from "aftermath-ts-sdk";
+import BigNumber from "bignumber.js";
 import { useLocalStorage } from "usehooks-ts";
 
 import FullPageSpinner from "@/components/shared/FullPageSpinner";
@@ -27,16 +34,50 @@ import { ParsedCoinBalance, parseCoinBalances } from "@/lib/coinBalance";
 import { COINTYPE_LOGO_MAP, COINTYPE_SYMBOL_MAP } from "@/lib/coinType";
 import { SWAP_URL } from "@/lib/navigation";
 
-export const EXCHANGE_NAME_MAP: Record<SuiExchange, string> = {
-  [SuiExchange.CETUS]: "Cetus",
-  [SuiExchange.FLOWX]: "FlowX Finance",
-  [SuiExchange.TURBOS]: "Turbos Finance",
-  [SuiExchange.AFTERMATH]: "Aftermath Finance",
-  [SuiExchange.KRIYA]: "Kriya",
-  [SuiExchange.BLUEMOVE]: "BlueMove",
-  [SuiExchange.DEEPBOOK]: "DeepBook",
-  [SuiExchange.SUISWAP]: "Suiswap",
+export enum UnifiedQuoteType {
+  HOP = "hop",
+  AFTERMATH = "aftermath",
+}
+
+export type UnifiedQuote = {
+  id: string;
+  amount_in: BigNumber;
+  amount_out: BigNumber;
+  coin_type_in: string;
+  coin_type_out: string;
+} & (
+  | { type: UnifiedQuoteType.HOP; quote: HopGetQuoteResponse }
+  | {
+      type: UnifiedQuoteType.AFTERMATH;
+      quote: AftermathRouterCompleteTradeRoute;
+    }
+);
+
+export const HOP_EXCHANGE_NAME_MAP: Record<HopSuiExchange, string> = {
+  [HopSuiExchange.CETUS]: "Cetus",
+  [HopSuiExchange.FLOWX]: "FlowX Finance",
+  [HopSuiExchange.TURBOS]: "Turbos Finance",
+  [HopSuiExchange.AFTERMATH]: "Aftermath Finance",
+  [HopSuiExchange.KRIYA]: "Kriya",
+  [HopSuiExchange.BLUEMOVE]: "BlueMove",
+  [HopSuiExchange.DEEPBOOK]: "DeepBook",
+  [HopSuiExchange.SUISWAP]: "Suiswap",
 };
+export const AF_EXCHANGE_NAME_MAP: Record<AftermathRouterProtocolName, string> =
+  {
+    Cetus: "Cetus",
+    FlowX: "FlowX Finance",
+    Turbos: "Turbos Finance",
+    Aftermath: "Aftermath Finance",
+    Kriya: "Kriya",
+    BlueMove: "BlueMove",
+    DeepBook: "DeepBook",
+    Suiswap: "Suiswap",
+    afSUI: "afSUI",
+    BaySwap: "BaySwap",
+    FlowXClmm: "FlowX Finance",
+    Interest: "Interest",
+  };
 
 const DEFAULT_TOKEN_IN_SYMBOL = "SUI";
 const DEFAULT_TOKEN_OUT_SYMBOL = "USDC";
@@ -49,12 +90,9 @@ enum TokenDirection {
   OUT = "out",
 }
 
-export type Quote = GetQuoteResponse & {
-  id: string;
-};
-
 interface SwapContext {
-  sdk?: HopApi;
+  hopSdk?: HopApi;
+  aftermathSdk?: AftermathRouter;
   tokens?: VerifiedToken[];
   tokenIn?: VerifiedToken;
   tokenOut?: VerifiedToken;
@@ -64,7 +102,8 @@ interface SwapContext {
 }
 
 const defaultContextValue: SwapContext = {
-  sdk: undefined,
+  hopSdk: undefined,
+  aftermathSdk: undefined,
   tokens: undefined,
   tokenIn: undefined,
   tokenOut: undefined,
@@ -88,8 +127,8 @@ export function SwapContextProvider({ children }: PropsWithChildren) {
   const { rpc, ...restAppContext } = useAppContext();
   const data = restAppContext.data as AppData;
 
-  // SDK
-  const sdk = useMemo(() => {
+  // Hop SDK
+  const hopSdk = useMemo(() => {
     const hop_api_options: HopApiOptions = {
       api_key: process.env.NEXT_PUBLIC_HOP_AG_API_KEY as string,
       fee_bps: 0,
@@ -99,6 +138,13 @@ export function SwapContextProvider({ children }: PropsWithChildren) {
 
     return new HopApi(rpc.url, hop_api_options, true);
   }, [rpc.url]);
+
+  // Aftermath SDK
+  const aftermathSdk = useMemo(() => {
+    const afSdk = new Aftermath("MAINNET");
+    afSdk.init();
+    return afSdk.Router();
+  }, []);
 
   // Tokens
   const [tokens, setTokens] = useState<VerifiedToken[] | undefined>(undefined);
@@ -110,7 +156,7 @@ export function SwapContextProvider({ children }: PropsWithChildren) {
 
       isFetchingVerifiedTokensRef.current = true;
       try {
-        const result = await sdk.fetchTokens();
+        const result = await hopSdk.fetchTokens();
         setTokens(
           result.tokens.map((token) => {
             const coinType = normalizeStructTag(token.coin_type);
@@ -127,7 +173,7 @@ export function SwapContextProvider({ children }: PropsWithChildren) {
         console.error(err);
       }
     })();
-  }, [sdk]);
+  }, [hopSdk]);
 
   // Selected tokens
   const [tokenInSymbol, tokenOutSymbol] =
@@ -248,7 +294,8 @@ export function SwapContextProvider({ children }: PropsWithChildren) {
   // Context
   const contextValue: SwapContext = useMemo(
     () => ({
-      sdk,
+      hopSdk,
+      aftermathSdk,
       tokens,
       tokenIn,
       tokenOut,
@@ -257,7 +304,8 @@ export function SwapContextProvider({ children }: PropsWithChildren) {
       coinBalancesMap,
     }),
     [
-      sdk,
+      hopSdk,
+      aftermathSdk,
       tokens,
       tokenIn,
       tokenOut,
@@ -269,7 +317,11 @@ export function SwapContextProvider({ children }: PropsWithChildren) {
 
   return (
     <SwapContext.Provider value={contextValue}>
-      {tokens && tokenIn && tokenOut ? children : <FullPageSpinner />}
+      {hopSdk && aftermathSdk && tokens && tokenIn && tokenOut ? (
+        children
+      ) : (
+        <FullPageSpinner />
+      )}
     </SwapContext.Provider>
   );
 }

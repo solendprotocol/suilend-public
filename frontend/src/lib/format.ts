@@ -42,8 +42,8 @@ export const formatList = (array: string[]) => {
   return `${array.slice(0, -1).join(", ")}, and ${array.slice(-1)}`;
 };
 
-export const formatInteger = (value: number) =>
-  Intl.NumberFormat().format(value);
+export const formatInteger = (value: number, useGrouping?: boolean) =>
+  Intl.NumberFormat(undefined, { useGrouping }).format(value);
 
 export const formatRank = (rank: number) => `#${formatInteger(rank)}`;
 
@@ -55,6 +55,7 @@ export const formatNumber = (
     minDp?: number;
     roundingMode?: BigNumber.RoundingMode;
     exact?: boolean;
+    useGrouping?: boolean;
   },
 ) => {
   const prefix = options?.prefix ?? "";
@@ -107,12 +108,18 @@ export const formatNumber = (
         .split(".");
     }
 
-    const integersFormatted = formatInteger(parseInt(integers));
+    const integersFormatted = formatInteger(
+      parseInt(integers),
+      options?.useGrouping,
+    );
     const decimalsFormatted = decimals !== undefined ? `.${decimals}` : "";
     return `${prefix}${integersFormatted}${decimalsFormatted}${suffix}`;
   } else {
     const [integers, decimals] = value.toFixed(dp, roundingMode).split(".");
-    const integersFormatted = formatInteger(parseInt(integers));
+    const integersFormatted = formatInteger(
+      parseInt(integers),
+      options?.useGrouping,
+    );
     const decimalsFormatted = decimals !== undefined ? `.${decimals}` : "";
     return `${prefix}${integersFormatted}${decimalsFormatted}`;
   }
@@ -182,15 +189,17 @@ export const formatDuration = (seconds: BigNumber) => {
 
 export const formatToken = (
   value: BigNumber,
-  options?: { dp?: number; exact?: boolean },
+  options?: { dp?: number; exact?: boolean; useGrouping?: boolean },
 ) => {
   const dp = options?.dp ?? 4;
   const exact = options?.exact ?? true;
+  const useGrouping = options?.useGrouping ?? true;
 
   return formatNumber(value, {
     dp,
     roundingMode: BigNumber.ROUND_DOWN,
     exact,
+    useGrouping,
   });
 };
 
