@@ -1,7 +1,0 @@
-.tableRow {
-  --bg-color: hsl(var(--background));
-
-  &:hover {
-    --bg-color: #0f1729; // background + 10% muted
-  }
-}
