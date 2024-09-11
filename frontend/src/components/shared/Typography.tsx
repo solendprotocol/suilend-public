@@ -14,6 +14,8 @@ import { cn } from "@/lib/utils";
 
 export const displayClassNames =
   "text-foreground font-mono text-lg font-normal";
+export const primaryTitleClassNames = 
+  "text-foreground font-mono text-lg font-normal";
 export const titleClassNames = "text-primary font-mono text-sm font-normal";
 export const bodyClassNames = "text-foreground font-mono text-sm font-normal";
 export const bodySansClassNames =
@@ -36,7 +38,23 @@ export const TDisplay = forwardRef<
 });
 TDisplay.displayName = "TDisplay";
 
-// Title
+// TODO : TTitle should accept an "as" attribute to define the component type
+// A quick poc is to create a new TPrimaryTitle component
+
+// Primary Title (h1)
+export const TPrimaryTitle = forwardRef<
+  HTMLHeadingElement,
+  React.HTMLAttributes<HTMLHeadingElement>
+>(({ className, children, ...props }, ref) => {
+  return (
+    <h1 ref={ref} className={cn(primaryTitleClassNames, className)} {...props}>
+      {children}
+    </h1>
+  );
+});
+TPrimaryTitle.displayName = "TPrimaryTitle";
+
+// Title (h2)
 export const TTitle = forwardRef<
   HTMLHeadingElement,
   React.HTMLAttributes<HTMLHeadingElement>
