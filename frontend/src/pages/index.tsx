@@ -13,7 +13,7 @@ import Lava from "@/components/public/Lava";
 import Button from "@/components/shared/Button";
 import Ticker from "@/components/shared/Ticker";
 import TokenLogo from "@/components/shared/TokenLogo";
-import { TBody, TDisplay, TTitle } from "@/components/shared/Typography";
+import { TBody, TPrimaryTitle, TTitle } from "@/components/shared/Typography";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAppContext } from "@/contexts/AppContext";
 import { formatPercent } from "@/lib/format";
@@ -68,9 +68,9 @@ export default function Home() {
                   height={64}
                 />
 
-                <TDisplay className="w-full max-w-[800px] text-[32px] uppercase md:text-[48px]">
+                <TPrimaryTitle className="w-full max-w-[800px] text-[32px] uppercase md:text-[48px]">
                   Lending and borrowing platform on Sui.
-                </TDisplay>
+                </TPrimaryTitle>
 
                 <NextLink href={DASHBOARD_URL} className="w-max max-md:hidden">
                   <Button labelClassName="uppercase" size="lg">
