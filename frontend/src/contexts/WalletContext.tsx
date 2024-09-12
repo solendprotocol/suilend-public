@@ -248,9 +248,14 @@ export function WalletContextProvider({ children }: PropsWithChildren) {
           },
         });
 
-        await suiClient.waitForTransactionBlock({
+        const res2 = await suiClient.waitForTransactionBlock({
           digest: res.digest,
         });
+        if (
+          res2?.effects?.status !== undefined &&
+          res2.effects.status.status === "failure"
+        )
+          throw new Error(res2.effects.status.error ?? "Transaction failed");
 
         return res;
       } catch (err) {
