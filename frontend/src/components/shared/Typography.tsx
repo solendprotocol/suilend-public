@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 
 export const displayClassNames =
   "text-foreground font-mono text-lg font-normal";
-export const primaryTitleClassNames = 
+export const primaryTitleClassNames =
   "text-foreground font-mono text-lg font-normal";
 export const titleClassNames = "text-primary font-mono text-sm font-normal";
 export const bodyClassNames = "text-foreground font-mono text-sm font-normal";
