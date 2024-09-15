@@ -1,5 +1,5 @@
-import { DynamicFieldInfo, SuiClient } from "@mysten/sui.js/client";
-import { fromB64 } from "@mysten/sui.js/utils";
+import { DynamicFieldInfo, SuiClient } from "@mysten/sui/client";
+import { fromB64 } from "@mysten/sui/utils";
 import pLimit from "p-limit";
 
 import { phantom } from "../_generated/_framework/reified";

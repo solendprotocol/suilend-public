@@ -1,6 +1,6 @@
 import { useRef } from "react";
 
-import { TransactionBlock } from "@mysten/sui.js/transactions";
+import { Transaction } from "@mysten/sui/transactions";
 import * as Sentry from "@sentry/nextjs";
 import { cloneDeep } from "lodash";
 import { Bolt, Undo2 } from "lucide-react";
@@ -72,7 +72,7 @@ export default function ReserveConfigDialog({
   const {
     refreshData,
     explorer,
-    signExecuteAndWaitTransactionBlock,
+    signExecuteAndWaitTransaction,
     ...restAppContext
   } = useAppContext();
   const suilendClient = restAppContext.suilendClient as SuilendClient<string>;
@@ -122,7 +122,7 @@ export default function ReserveConfigDialog({
     if (!data.lendingMarketOwnerCapId)
       throw new Error("Error: No lending market owner cap");
 
-    const txb = new TransactionBlock();
+    const transaction = new Transaction();
     const newConfig = parseConfigState(configState, reserve.mintDecimals);
 
     try {
@@ -130,7 +130,7 @@ export default function ReserveConfigDialog({
         await suilendClient.updateReserveConfig(
           address,
           data.lendingMarketOwnerCapId,
-          txb,
+          transaction,
           reserve.coinType,
           newConfig,
         );
@@ -140,7 +140,7 @@ export default function ReserveConfigDialog({
         throw err;
       }
 
-      await signExecuteAndWaitTransactionBlock(txb);
+      await signExecuteAndWaitTransaction(transaction);
 
       toast.success("Reserve config updated");
       initialConfigStateRef.current = cloneDeep(configState);

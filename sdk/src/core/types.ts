@@ -6,9 +6,9 @@ import {
   fromHEX,
   toHEX,
 } from "@mysten/bcs";
+import { SuiClient } from "@mysten/sui/client";
+import { TransactionArgument } from "@mysten/sui/transactions";
 import { ObjectArg as SuiObjectArg } from "@mysten/sui.js/bcs";
-import { SuiClient } from "@mysten/sui.js/client";
-import { TransactionArgument } from "@mysten/sui.js/transactions";
 
 export const ID = bcs.struct("ID", {
   bytes: bcs.bytes(32).transform({

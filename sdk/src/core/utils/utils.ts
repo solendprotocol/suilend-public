@@ -1,14 +1,14 @@
 import { SerializedBcs, isSerializedBcs } from "@mysten/bcs";
-import { SharedObjectRef, isPureArg } from "@mysten/sui.js/bcs";
-import { SuiObjectRef } from "@mysten/sui.js/client";
+import { SharedObjectRef, isPureArg } from "@mysten/sui/bcs";
+import { SuiObjectRef } from "@mysten/sui/client";
 import {
   Inputs,
+  Transaction,
   TransactionArgument,
-  TransactionBlock,
   TransactionObjectArgument,
-} from "@mysten/sui.js/transactions";
-import { isValidSuiObjectId, normalizeSuiObjectId } from "@mysten/sui.js/utils";
-//import { ObjectCallArg, PureCallArg } from "@mysten/sui.js/transactions";
+} from "@mysten/sui/transactions";
+import { isValidSuiObjectId, normalizeSuiObjectId } from "@mysten/sui/utils";
+//import { ObjectCallArg, PureCallArg } from "@mysten/sui/transactions";
 
 /**
  * These are the basics types that can be used in SUI
@@ -43,7 +43,7 @@ export type SuiVecTxArg =
   | SuiTxArg[];
 
 export function takeAmountFromCoins(
-  txBlock: TransactionBlock,
+  txBlock: Transaction,
   coins: SuiObjectArg[],
   amount: SuiTxArg,
 ) {
@@ -59,22 +59,19 @@ export function takeAmountFromCoins(
   return [sendCoin, mergedCoin];
 }
 
-export function splitSUIFromGas(
-  txBlock: TransactionBlock,
-  amounts: SuiTxArg[],
-) {
+export function splitSUIFromGas(txBlock: Transaction, amounts: SuiTxArg[]) {
   return txBlock.splitCoins(txBlock.gas, convertArgs(txBlock, amounts) as any);
 }
 
 /**
  * Convert any valid input into array of TransactionArgument.
  *
- * @param txb The Transaction Block
+ * @param transaction The Transaction Block
  * @param args The array of argument to convert.
  * @returns The converted array of TransactionArgument.
  */
 export function convertArgs(
-  txBlock: TransactionBlock,
+  txBlock: Transaction,
   args: (SuiTxArg | SuiVecTxArg)[],
 ) {
   return args.map((arg) => {
@@ -103,31 +100,35 @@ export function convertArgs(
 /**
  * Convert any valid object input into a TransactionArgument.
  *
- * @param txb The Transaction Block
+ * @param transaction The Transaction Block
  * @param arg The object argument to convert.
  * @returns The converted TransactionArgument.
  */
 export function convertObjArg(
-  txb: TransactionBlock,
+  transaction: Transaction,
   arg: SuiObjectArg,
 ): TransactionObjectArgument {
   if (typeof arg === "string") {
-    return txb.object(arg);
+    return transaction.object(arg);
   }
 
   if ("digest" in arg && "version" in arg && "objectId" in arg) {
-    return txb.objectRef(arg);
+    return transaction.objectRef(arg);
   }
 
   if ("objectId" in arg && "initialSharedVersion" in arg && "mutable" in arg) {
-    return txb.sharedObjectRef(arg);
+    return transaction.sharedObjectRef(arg);
   }
 
   if ("Object" in arg) {
     if ("ImmOrOwned" in (arg.Object as any)) {
-      return txb.object(Inputs.ObjectRef((arg.Object as any).ImmOrOwned));
+      return transaction.object(
+        Inputs.ObjectRef((arg.Object as any).ImmOrOwned),
+      );
     } else if ("Shared" in (arg.Object as any)) {
-      return txb.object(Inputs.SharedObjectRef((arg.Object as any).Shared));
+      return transaction.object(
+        Inputs.SharedObjectRef((arg.Object as any).Shared),
+      );
     } else {
       throw new Error("Invalid argument type");
     }
@@ -182,7 +183,7 @@ export const getDefaultSuiInputType = (
  * @param type 'address' | 'bool' | 'u8' | 'u16' | 'u32' | 'u64' | 'u128' | 'u256' | 'signer' | 'object' | string
  */
 export function makeVecParam(
-  txBlock: TransactionBlock,
+  txBlock: Transaction,
   args: SuiTxArg[],
   type?: SuiInputTypes,
 ): TransactionArgument {

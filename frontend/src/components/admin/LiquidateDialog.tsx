@@ -1,10 +1,7 @@
 import { useState } from "react";
 
-import { SuiClient } from "@mysten/sui.js/client";
-import {
-  TransactionBlock,
-  TransactionResult,
-} from "@mysten/sui.js/transactions";
+import { SuiClient } from "@mysten/sui/client";
+import { Transaction, TransactionResult } from "@mysten/sui/transactions";
 import * as Sentry from "@sentry/nextjs";
 import { ColumnDef } from "@tanstack/react-table";
 import BigNumber from "bignumber.js";
@@ -65,8 +62,7 @@ export default function LiquidateDialog({
   fixedObligation,
 }: LiquidateDialogProps) {
   const { address } = useWalletContext();
-  const { signExecuteAndWaitTransactionBlock, ...restAppContext } =
-    useAppContext();
+  const { signExecuteAndWaitTransaction, ...restAppContext } = useAppContext();
   const suiClient = restAppContext.suiClient as SuiClient;
   const suilendClient = restAppContext.suilendClient as SuilendClient<string>;
   const data = restAppContext.data as AppData;
@@ -109,7 +105,7 @@ export default function LiquidateDialog({
   const fetchObligationDetails = async (obligationId: string) => {
     await fetchObligationOwner(obligationId);
     const rawLendingMarket = await LendingMarket.fetch(
-      suiClient,
+      suiClient as any,
       phantom(LENDING_MARKET_TYPE),
       LENDING_MARKET_ID,
     );
@@ -156,7 +152,7 @@ export default function LiquidateDialog({
   ) {
     if (!address) throw new Error("Wallet not connected");
 
-    const txb = new TransactionBlock();
+    const transaction = new Transaction();
 
     try {
       try {
@@ -176,13 +172,13 @@ export default function LiquidateDialog({
         let repayCoinId: TransactionResult[0] | string = repayCoin.coinObjectId;
 
         if (isSui(repayCoinType)) {
-          const [splitSui] = txb.splitCoins(txb.gas, [
+          const [splitSui] = transaction.splitCoins(transaction.gas, [
             parseInt(repayCoin.balance) - 1000000000,
           ]);
           repayCoinId = splitSui;
         }
         const [withdrawn] = await suilendClient.liquidateAndRedeem(
-          txb,
+          transaction,
           obligation.original,
           repayCoinType,
           obligation.deposits.find(
@@ -190,9 +186,9 @@ export default function LiquidateDialog({
           )?.coinType as string,
           repayCoinId,
         );
-        txb.transferObjects([withdrawn], address);
+        transaction.transferObjects([withdrawn], address);
         if (isSui(repayCoinType)) {
-          txb.transferObjects([repayCoinId], address);
+          transaction.transferObjects([repayCoinId], address);
         }
       } catch (err) {
         Sentry.captureException(err);
@@ -200,7 +196,7 @@ export default function LiquidateDialog({
         throw err;
       }
 
-      await signExecuteAndWaitTransactionBlock(txb);
+      await signExecuteAndWaitTransaction(transaction);
 
       toast.success("Liquidated");
     } catch (err) {

@@ -1,11 +1,11 @@
 import { fromB64, toHEX } from "@mysten/bcs";
-import { SuiClient } from "@mysten/sui.js/client";
+import { SuiClient } from "@mysten/sui/client";
 import {
-  TransactionBlock,
+  Transaction,
   TransactionObjectArgument,
   TransactionResult,
-} from "@mysten/sui.js/transactions";
-import { SUI_CLOCK_OBJECT_ID, normalizeStructTag } from "@mysten/sui.js/utils";
+} from "@mysten/sui/transactions";
+import { SUI_CLOCK_OBJECT_ID, normalizeStructTag } from "@mysten/sui/utils";
 
 import {
   SuiPriceServiceConnection,
@@ -51,95 +51,95 @@ interface Deps {
   Obligation: any;
   ObligationOwnerCap: any;
   createLendingMarket: (
-    txb: TransactionBlock,
+    transaction: Transaction,
     typeArg: string,
     registry: ObjectArg,
   ) => TransactionResult;
   createReserveConfig: (
-    txb: TransactionBlock,
+    transaction: Transaction,
     args: CreateReserveConfigArgs,
   ) => TransactionResult;
   updateReserveConfig: (
-    txb: TransactionBlock,
+    transaction: Transaction,
     typeArgs: [string, string],
     args: UpdateReserveConfigArgs,
   ) => TransactionResult;
   addReserve: (
-    txb: TransactionBlock,
+    transaction: Transaction,
     typeArgs: [string, string],
     args: AddReserveArgs,
   ) => TransactionResult;
   addPoolReward: (
-    txb: TransactionBlock,
+    transaction: Transaction,
     typeArgs: [string, string],
     args: AddPoolRewardArgs,
   ) => TransactionResult;
   cancelPoolReward: (
-    txb: TransactionBlock,
+    transaction: Transaction,
     typeArgs: [string, string],
     args: CancelPoolRewardArgs,
   ) => TransactionResult;
   closePoolReward: (
-    txb: TransactionBlock,
+    transaction: Transaction,
     typeArgs: [string, string],
     args: ClosePoolRewardArgs,
   ) => TransactionResult;
   claimRewards: (
-    txb: TransactionBlock,
+    transaction: Transaction,
     typeArgs: [string, string],
     args: ClaimRewardsArgs,
   ) => TransactionResult;
   claimRewardsAndDeposit: (
-    txb: TransactionBlock,
+    transaction: Transaction,
     typeArgs: [string, string],
     args: ClaimRewardsAndDepositArgs,
   ) => TransactionResult;
   createRateLimiterConfig: (
-    txb: TransactionBlock,
+    transaction: Transaction,
     args: CreateRateLimiterConfigArgs,
   ) => TransactionResult;
   updateRateLimiterConfig: (
-    txb: TransactionBlock,
+    transaction: Transaction,
     typeArg: string,
     args: UpdateRateLimiterConfigArgs,
   ) => TransactionResult;
   refreshReservePrice: (
-    txb: TransactionBlock,
+    transaction: Transaction,
     typeArg: string,
     args: RefreshReservePriceArgs,
   ) => TransactionResult;
   depositLiquidityAndMintCtokens: (
-    txb: TransactionBlock,
+    transaction: Transaction,
     typeArgs: [string, string],
     args: DepositLiquidityAndMintCtokensArgs,
   ) => TransactionResult;
   depositCtokensIntoObligation: (
-    txb: TransactionBlock,
+    transaction: Transaction,
     typeArgs: [string, string],
     args: DepositCtokensIntoObligationArgs,
   ) => TransactionResult;
   withdrawCtokens: (
-    txb: TransactionBlock,
+    transaction: Transaction,
     typeArgs: [string, string],
     args: WithdrawCtokensArgs,
   ) => TransactionResult;
   borrow: (
-    txb: TransactionBlock,
+    transaction: Transaction,
     typeArgs: [string, string],
     args: BorrowArgs,
   ) => TransactionResult;
   repay: (
-    txb: TransactionBlock,
+    transaction: Transaction,
     typeArgs: [string, string],
     args: RepayArgs,
   ) => TransactionResult;
   liquidate: (
-    txb: TransactionBlock,
+    transaction: Transaction,
     typeArgs: [string, string, string],
     args: LiquidateArgs,
   ) => TransactionResult;
   migrate: (
-    txb: TransactionBlock,
+    transaction: Transaction,
     typeArg: string,
     args: MigrateArgs,
   ) => TransactionResult;
@@ -211,7 +211,7 @@ export class SuilendClient {
     this.lendingMarket = lendingMarket;
     this.client = client;
     this.pythClient = new SuiPythClient(
-      client,
+      client as any,
       PYTH_STATE_ID,
       WORMHOLE_STATE_ID,
     );
@@ -285,18 +285,18 @@ export class SuilendClient {
   static async createNewLendingMarket(
     registryId: string,
     lendingMarketType: string,
-    txb: TransactionBlock,
+    transaction: Transaction,
     {
       LendingMarket,
       createLendingMarket,
     }: Pick<Deps, "LendingMarket" | "createLendingMarket">,
   ) {
     const [ownerCap, lendingMarket] = createLendingMarket(
-      txb,
+      transaction,
       lendingMarketType,
-      txb.object(registryId),
+      transaction.object(registryId),
     );
-    txb.moveCall({
+    transaction.moveCall({
       target: `0x2::transfer::public_share_object`,
       typeArguments: [`${LendingMarket.$typeName}<${lendingMarketType}>}`],
       arguments: [lendingMarket],
@@ -411,13 +411,13 @@ export class SuilendClient {
 
   async createReserve(
     lendingMarketOwnerCapId: string,
-    txb: TransactionBlock,
+    transaction: Transaction,
     pythPriceId: string,
     coinType: string,
     createReserveConfigArgs: CreateReserveConfigArgs,
   ) {
     const [config] = this.createReserveConfigFunction(
-      txb,
+      transaction,
       createReserveConfigArgs,
     );
 
@@ -425,7 +425,7 @@ export class SuilendClient {
       pythPriceId,
     ]);
     const priceInfoObjectIds = await this.pythClient.updatePriceFeeds(
-      txb,
+      transaction as any,
       priceUpdateData,
       [pythPriceId],
     );
@@ -438,7 +438,7 @@ export class SuilendClient {
     }
 
     return this.addReserveFunction(
-      txb,
+      transaction,
       [this.lendingMarket.$typeArgs[0], coinType],
       {
         lendingMarketOwnerCap: lendingMarketOwnerCapId,
@@ -460,7 +460,7 @@ export class SuilendClient {
     rewardValue: string,
     startTimeMs: bigint,
     endTimeMs: bigint,
-    txb: TransactionBlock,
+    transaction: Transaction,
   ) {
     const isSui =
       normalizeStructTag(rewardCoinType) === normalizeStructTag(SUI_COINTYPE);
@@ -474,19 +474,19 @@ export class SuilendClient {
 
     const mergedCoin = coins[0];
     if (coins.length > 1 && !isSui) {
-      txb.mergeCoins(
-        txb.object(mergedCoin.coinObjectId),
-        coins.map((c) => txb.object(c.coinObjectId)).slice(1),
+      transaction.mergeCoins(
+        transaction.object(mergedCoin.coinObjectId),
+        coins.map((c) => transaction.object(c.coinObjectId)).slice(1),
       );
     }
 
-    const [rewardCoin] = txb.splitCoins(
-      isSui ? txb.gas : txb.object(mergedCoin.coinObjectId),
-      [txb.pure(rewardValue)],
+    const [rewardCoin] = transaction.splitCoins(
+      isSui ? transaction.gas : transaction.object(mergedCoin.coinObjectId),
+      [transaction.pure(rewardValue)],
     );
 
     return this.addPoolRewardFunction(
-      txb,
+      transaction,
       [this.lendingMarket.$typeArgs[0], rewardCoinType],
       {
         lendingMarketOwnerCap: lendingMarketOwnerCapId,
@@ -507,10 +507,10 @@ export class SuilendClient {
     isDepositReward: boolean,
     rewardIndex: bigint,
     rewardCoinType: string,
-    txb: TransactionBlock,
+    transaction: Transaction,
   ) {
     return this.cancelPoolRewardFunction(
-      txb,
+      transaction,
       [this.lendingMarket.$typeArgs[0], rewardCoinType],
       {
         lendingMarketOwnerCap: lendingMarketOwnerCapId,
@@ -529,10 +529,10 @@ export class SuilendClient {
     isDepositReward: boolean,
     rewardIndex: bigint,
     rewardCoinType: string,
-    txb: TransactionBlock,
+    transaction: Transaction,
   ) {
     return this.closePoolRewardFunction(
-      txb,
+      transaction,
       [this.lendingMarket.$typeArgs[0], rewardCoinType],
       {
         lendingMarketOwnerCap: lendingMarketOwnerCapId,
@@ -551,14 +551,14 @@ export class SuilendClient {
     rewardIndex: bigint,
     rewardType: string,
     side: Side,
-    txb: TransactionBlock,
+    transaction: Transaction,
   ) {
     return this.claimRewardsFunction(
-      txb,
+      transaction,
       [this.lendingMarket.$typeArgs[0], rewardType],
       {
-        lendingMarket: txb.object(this.lendingMarket.id),
-        cap: txb.object(obligationOwnerCapId),
+        lendingMarket: transaction.object(this.lendingMarket.id),
+        cap: transaction.object(obligationOwnerCapId),
         clock: SUI_CLOCK_OBJECT_ID,
         reserveId: reserveArrayIndex,
         rewardIndex,
@@ -574,15 +574,15 @@ export class SuilendClient {
     rewardType: string,
     side: Side,
     depositReserveArrayIndex: bigint,
-    txb: TransactionBlock,
+    transaction: Transaction,
   ) {
     return this.claimRewardsAndDepositFunction(
-      txb,
+      transaction,
       [this.lendingMarket.$typeArgs[0], rewardType],
       {
-        lendingMarket: txb.object(this.lendingMarket.id),
+        lendingMarket: transaction.object(this.lendingMarket.id),
         obligationId,
-        clock: txb.object(SUI_CLOCK_OBJECT_ID),
+        clock: transaction.object(SUI_CLOCK_OBJECT_ID),
         rewardReserveId: rewardReserveArrayIndex,
         rewardIndex,
         isDepositReward: side === Side.DEPOSIT,
@@ -600,7 +600,7 @@ export class SuilendClient {
       rewardType: string;
       side: Side;
     }>,
-    txb: TransactionBlock,
+    transaction: Transaction,
   ) {
     const claimedCoins = rewards.map((r) => {
       const [claimedCoin] = this.claimReward(
@@ -609,17 +609,17 @@ export class SuilendClient {
         r.rewardIndex,
         r.rewardType,
         r.side,
-        txb,
+        transaction,
       );
       return claimedCoin;
     });
 
     const mergedCoin = claimedCoins[0];
     if (claimedCoins.length > 1) {
-      txb.mergeCoins(mergedCoin, claimedCoins.slice(1));
+      transaction.mergeCoins(mergedCoin, claimedCoins.slice(1));
     }
 
-    txb.transferObjects([mergedCoin], txb.pure(ownerId));
+    transaction.transferObjects([mergedCoin], transaction.pure(ownerId));
   }
 
   findReserveArrayIndex(coinType: string): bigint {
@@ -634,17 +634,17 @@ export class SuilendClient {
   async updateReserveConfig(
     ownerId: string,
     lendingMarketOwnerCapId: string,
-    txb: TransactionBlock,
+    transaction: Transaction,
     coinType: string,
     createReserveConfigArgs: CreateReserveConfigArgs,
   ) {
     const [config] = this.createReserveConfigFunction(
-      txb,
+      transaction,
       createReserveConfigArgs,
     );
 
     return this.updateReserveConfigFunction(
-      txb,
+      transaction,
       [...this.lendingMarket.$typeArgs, coinType] as [string, string],
       {
         lendingMarketOwnerCap: lendingMarketOwnerCapId,
@@ -657,16 +657,16 @@ export class SuilendClient {
 
   async updateRateLimiterConfig(
     lendingMarketOwnerCapId: string,
-    txb: TransactionBlock,
+    transaction: Transaction,
     newRateLimiterConfigArgs: CreateRateLimiterConfigArgs,
   ) {
     const [config] = this.createRateLimiterConfigFunction(
-      txb,
+      transaction,
       newRateLimiterConfigArgs,
     );
 
     return this.updateRateLimiterConfigFunction(
-      txb,
+      transaction,
       this.lendingMarket.$typeArgs[0],
       {
         lendingMarketOwnerCap: lendingMarketOwnerCapId,
@@ -677,16 +677,16 @@ export class SuilendClient {
     );
   }
 
-  createObligation(txb: TransactionBlock) {
-    return txb.moveCall({
+  createObligation(transaction: Transaction) {
+    return transaction.moveCall({
       target: `${this.PUBLISHED_AT}::lending_market::create_obligation`,
-      arguments: [txb.object(this.lendingMarket.id)],
+      arguments: [transaction.object(this.lendingMarket.id)],
       typeArguments: this.lendingMarket.$typeArgs,
     });
   }
 
   async refreshAll(
-    txb: TransactionBlock,
+    transaction: Transaction,
     obligation: typeof this.Obligation,
     extraReserveArrayIndex?: bigint,
   ) {
@@ -734,18 +734,22 @@ export class SuilendClient {
     const priceUpdateData =
       await this.pythConnection.getPriceFeedsUpdateData(priceIds);
     const priceInfoObjectIds = await this.pythClient.updatePriceFeeds(
-      txb,
+      transaction as any,
       priceUpdateData,
       priceIds,
     );
 
     for (let i = 0; i < tuples.length; i++) {
-      this.refreshReservePrices(txb, priceInfoObjectIds[i], tuples[i][0]);
+      this.refreshReservePrices(
+        transaction,
+        priceInfoObjectIds[i],
+        tuples[i][0],
+      );
     }
   }
 
   async refreshReservePrices(
-    txb: TransactionBlock,
+    transaction: Transaction,
     priceInfoObjectId: string,
     reserveArrayIndex: bigint,
   ) {
@@ -753,22 +757,26 @@ export class SuilendClient {
       return;
     }
 
-    this.refreshReservePriceFunction(txb, this.lendingMarket.$typeArgs[0], {
-      lendingMarket: this.lendingMarket.id,
-      clock: SUI_CLOCK_OBJECT_ID,
-      priceInfo: priceInfoObjectId,
-      reserveArrayIndex,
-    });
+    this.refreshReservePriceFunction(
+      transaction,
+      this.lendingMarket.$typeArgs[0],
+      {
+        lendingMarket: this.lendingMarket.id,
+        clock: SUI_CLOCK_OBJECT_ID,
+        priceInfo: priceInfoObjectId,
+        reserveArrayIndex,
+      },
+    );
   }
 
   async deposit(
     sendCoin: ObjectArg,
     coinType: string,
     obligationOwnerCap: ObjectArg,
-    txb: TransactionBlock,
+    transaction: Transaction,
   ) {
     const [ctokens] = this.depositLiquidityAndMintCtokensFunction(
-      txb,
+      transaction,
       [this.lendingMarket.$typeArgs[0], coinType],
       {
         lendingMarket: this.lendingMarket.id,
@@ -779,7 +787,7 @@ export class SuilendClient {
     );
 
     this.depositCtokensIntoObligationFunction(
-      txb,
+      transaction,
       [this.lendingMarket.$typeArgs[0], coinType],
       {
         lendingMarket: this.lendingMarket.id,
@@ -795,23 +803,26 @@ export class SuilendClient {
     ownerId: string,
     sendCoin: ObjectArg,
     coinType: string,
-    txb: TransactionBlock,
+    transaction: Transaction,
     obligationOwnerCapId?: string,
   ) {
     let createdObligationOwnerCap;
     if (!obligationOwnerCapId) {
-      createdObligationOwnerCap = this.createObligation(txb)[0];
+      createdObligationOwnerCap = this.createObligation(transaction)[0];
     }
 
     this.deposit(
       sendCoin,
       coinType,
       (obligationOwnerCapId ?? createdObligationOwnerCap) as ObjectArg,
-      txb,
+      transaction,
     );
 
     if (createdObligationOwnerCap) {
-      txb.transferObjects([createdObligationOwnerCap], txb.pure(ownerId));
+      transaction.transferObjects(
+        [createdObligationOwnerCap],
+        transaction.pure(ownerId),
+      );
     }
   }
 
@@ -819,7 +830,7 @@ export class SuilendClient {
     ownerId: string,
     coinType: string,
     value: string,
-    txb: TransactionBlock,
+    transaction: Transaction,
     obligationOwnerCapId?: string,
   ) {
     const isSui =
@@ -834,18 +845,24 @@ export class SuilendClient {
 
     const mergedCoin = coins[0];
     if (coins.length > 1 && !isSui) {
-      txb.mergeCoins(
-        txb.object(mergedCoin.coinObjectId),
-        coins.map((c) => txb.object(c.coinObjectId)).slice(1),
+      transaction.mergeCoins(
+        transaction.object(mergedCoin.coinObjectId),
+        coins.map((c) => transaction.object(c.coinObjectId)).slice(1),
       );
     }
 
-    const [sendCoin] = txb.splitCoins(
-      isSui ? txb.gas : txb.object(mergedCoin.coinObjectId),
-      [txb.pure(value)],
+    const [sendCoin] = transaction.splitCoins(
+      isSui ? transaction.gas : transaction.object(mergedCoin.coinObjectId),
+      [transaction.pure(value)],
     );
 
-    this.depositCoin(ownerId, sendCoin, coinType, txb, obligationOwnerCapId);
+    this.depositCoin(
+      ownerId,
+      sendCoin,
+      coinType,
+      transaction,
+      obligationOwnerCapId,
+    );
   }
 
   async withdraw(
@@ -853,14 +870,14 @@ export class SuilendClient {
     obligationId: string,
     coinType: string,
     value: string,
-    txb: TransactionBlock,
+    transaction: Transaction,
   ) {
     const obligation = await this.getObligation(obligationId);
     if (!obligation) throw new Error("Error: no obligation");
 
-    await this.refreshAll(txb, obligation);
+    await this.refreshAll(transaction, obligation);
     const [ctokens] = this.withdrawCtokensFunction(
-      txb,
+      transaction,
       [this.lendingMarket.$typeArgs[0], coinType],
       {
         lendingMarket: this.lendingMarket.id,
@@ -871,7 +888,7 @@ export class SuilendClient {
       },
     );
 
-    const [exemption] = txb.moveCall({
+    const [exemption] = transaction.moveCall({
       target: `0x1::option::none`,
       typeArguments: [
         `${this.PACKAGE_ID}::lending_market::RateLimiterExemption<${this.lendingMarket.$typeArgs[0]}, ${coinType}>`,
@@ -879,13 +896,13 @@ export class SuilendClient {
       arguments: [],
     });
 
-    return txb.moveCall({
+    return transaction.moveCall({
       target: `${this.PUBLISHED_AT}::lending_market::redeem_ctokens_and_withdraw_liquidity`,
       typeArguments: [this.lendingMarket.$typeArgs[0], coinType],
       arguments: [
-        txb.object(this.lendingMarket.id),
-        txb.pure(this.findReserveArrayIndex(coinType)),
-        txb.object(SUI_CLOCK_OBJECT_ID),
+        transaction.object(this.lendingMarket.id),
+        transaction.pure(this.findReserveArrayIndex(coinType)),
+        transaction.object(SUI_CLOCK_OBJECT_ID),
         ctokens,
         exemption,
       ],
@@ -898,17 +915,17 @@ export class SuilendClient {
     obligationId: string,
     coinType: string,
     value: string,
-    txb: TransactionBlock,
+    transaction: Transaction,
   ) {
     const [withdrawCoin] = await this.withdraw(
       obligationOwnerCapId,
       obligationId,
       coinType,
       value,
-      txb,
+      transaction,
     );
 
-    txb.transferObjects([withdrawCoin], txb.pure(ownerId));
+    transaction.transferObjects([withdrawCoin], transaction.pure(ownerId));
   }
 
   async borrow(
@@ -916,18 +933,18 @@ export class SuilendClient {
     obligationId: string,
     coinType: string,
     value: string,
-    txb: TransactionBlock,
+    transaction: Transaction,
   ) {
     const obligation = await this.getObligation(obligationId);
     if (!obligation) throw new Error("Error: no obligation");
 
     await this.refreshAll(
-      txb,
+      transaction,
       obligation,
       this.findReserveArrayIndex(coinType),
     );
     const result = this.borrowFunction(
-      txb,
+      transaction,
       [this.lendingMarket.$typeArgs[0], coinType],
       {
         lendingMarket: this.lendingMarket.id,
@@ -947,27 +964,27 @@ export class SuilendClient {
     obligationId: string,
     coinType: string,
     value: string,
-    txb: TransactionBlock,
+    transaction: Transaction,
   ) {
     const [borrowCoin] = await this.borrow(
       obligationOwnerCapId,
       obligationId,
       coinType,
       value,
-      txb,
+      transaction,
     );
 
-    txb.transferObjects([borrowCoin], txb.pure(ownerId));
+    transaction.transferObjects([borrowCoin], transaction.pure(ownerId));
   }
 
   repay(
     obligationId: string,
     coinType: string,
     coin: TransactionObjectArgument,
-    txb: TransactionBlock,
+    transaction: Transaction,
   ) {
     return this.repayFunction(
-      txb,
+      transaction,
       [this.lendingMarket.$typeArgs[0], coinType],
       {
         lendingMarket: this.lendingMarket.id,
@@ -984,7 +1001,7 @@ export class SuilendClient {
     obligationId: string,
     coinType: string,
     value: string,
-    txb: TransactionBlock,
+    transaction: Transaction,
   ) {
     const isSui =
       normalizeStructTag(coinType) === normalizeStructTag(SUI_COINTYPE);
@@ -998,38 +1015,38 @@ export class SuilendClient {
 
     const mergedCoin = coins[0];
     if (coins.length > 1 && !isSui) {
-      txb.mergeCoins(
-        txb.object(mergedCoin.coinObjectId),
-        coins.map((c) => txb.object(c.coinObjectId)).slice(1),
+      transaction.mergeCoins(
+        transaction.object(mergedCoin.coinObjectId),
+        coins.map((c) => transaction.object(c.coinObjectId)).slice(1),
       );
     }
 
-    const [sendCoin] = txb.splitCoins(
-      isSui ? txb.gas : txb.object(mergedCoin.coinObjectId),
-      [txb.pure(value)],
+    const [sendCoin] = transaction.splitCoins(
+      isSui ? transaction.gas : transaction.object(mergedCoin.coinObjectId),
+      [transaction.pure(value)],
     );
 
-    const result = this.repay(obligationId, coinType, sendCoin, txb);
-    txb.transferObjects([sendCoin], ownerId);
+    const result = this.repay(obligationId, coinType, sendCoin, transaction);
+    transaction.transferObjects([sendCoin], ownerId);
     return result;
   }
 
   async liquidateAndRedeem(
-    txb: TransactionBlock,
+    transaction: Transaction,
     obligation: typeof this.Obligation,
     repayCoinType: string,
     withdrawCoinType: string,
     repayCoinId: any,
   ) {
     const [ctokens, exemption] = await this.liquidate(
-      txb,
+      transaction,
       obligation,
       repayCoinType,
       withdrawCoinType,
       repayCoinId,
     );
 
-    const [optionalExemption] = txb.moveCall({
+    const [optionalExemption] = transaction.moveCall({
       target: `0x1::option::some`,
       typeArguments: [
         `${this.PUBLISHED_AT}::lending_market::RateLimiterExemption<${this.lendingMarket.$typeArgs[0]}, ${withdrawCoinType}>`,
@@ -1037,13 +1054,13 @@ export class SuilendClient {
       arguments: [exemption],
     });
 
-    return txb.moveCall({
+    return transaction.moveCall({
       target: `${this.PUBLISHED_AT}::lending_market::redeem_ctokens_and_withdraw_liquidity`,
       typeArguments: [this.lendingMarket.$typeArgs[0], withdrawCoinType],
       arguments: [
-        txb.object(this.lendingMarket.id),
-        txb.pure(this.findReserveArrayIndex(withdrawCoinType)),
-        txb.object(SUI_CLOCK_OBJECT_ID),
+        transaction.object(this.lendingMarket.id),
+        transaction.pure(this.findReserveArrayIndex(withdrawCoinType)),
+        transaction.object(SUI_CLOCK_OBJECT_ID),
         ctokens,
         optionalExemption,
       ],
@@ -1051,15 +1068,15 @@ export class SuilendClient {
   }
 
   async liquidate(
-    txb: TransactionBlock,
+    transaction: Transaction,
     obligation: typeof this.Obligation,
     repayCoinType: string,
     withdrawCoinType: string,
     repayCoinId: any,
   ) {
-    await this.refreshAll(txb, obligation);
+    await this.refreshAll(transaction, obligation);
     return this.liquidateFunction(
-      txb,
+      transaction,
       [this.lendingMarket.$typeArgs[0], repayCoinType, withdrawCoinType],
       {
         lendingMarket: this.lendingMarket.id,
@@ -1072,8 +1089,8 @@ export class SuilendClient {
     );
   }
 
-  async migrate(txb: TransactionBlock, lendingMarketOwnerCapId: string) {
-    return this.migrateFunction(txb, this.lendingMarket.$typeArgs[0], {
+  async migrate(transaction: Transaction, lendingMarketOwnerCapId: string) {
+    return this.migrateFunction(transaction, this.lendingMarket.$typeArgs[0], {
       lendingMarket: this.lendingMarket.id,
       lendingMarketOwnerCap: lendingMarketOwnerCapId,
     });

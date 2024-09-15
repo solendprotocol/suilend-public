@@ -1,4 +1,4 @@
-import { normalizeStructTag } from "@mysten/sui.js/utils";
+import { normalizeStructTag } from "@mysten/sui/utils";
 
 export const SUI_COINTYPE = "0x2::sui::SUI";
 const USDC_COINTYPE =

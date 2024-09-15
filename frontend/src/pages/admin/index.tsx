@@ -1,7 +1,7 @@
 import Head from "next/head";
 import { useRouter } from "next/router";
 
-import { TransactionBlock } from "@mysten/sui.js/transactions";
+import { Transaction } from "@mysten/sui/transactions";
 import * as Sentry from "@sentry/nextjs";
 import { toast } from "sonner";
 
@@ -43,7 +43,7 @@ export default function Admin() {
   const {
     refreshData,
     explorer,
-    signExecuteAndWaitTransactionBlock,
+    signExecuteAndWaitTransaction,
     ...restAppContext
   } = useAppContext();
   const suilendClient = restAppContext.suilendClient as SuilendClient<string>;
@@ -86,18 +86,18 @@ export default function Admin() {
     if (!data.lendingMarketOwnerCapId)
       throw new Error("Error: No lending market owner cap");
 
-    const txb = new TransactionBlock();
+    const transaction = new Transaction();
 
     try {
       try {
-        suilendClient.migrate(txb, data.lendingMarketOwnerCapId);
+        suilendClient.migrate(transaction, data.lendingMarketOwnerCapId);
       } catch (err) {
         Sentry.captureException(err);
         console.error(err);
         throw err;
       }
 
-      await signExecuteAndWaitTransactionBlock(txb);
+      await signExecuteAndWaitTransaction(transaction);
 
       toast.success("Migrated");
     } catch (err) {

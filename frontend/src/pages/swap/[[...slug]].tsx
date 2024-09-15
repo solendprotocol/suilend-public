@@ -6,11 +6,8 @@ import {
   GetQuoteResponse as HopGetQuoteResponse,
   VerifiedToken,
 } from "@hop.ag/sdk";
-import {
-  TransactionBlock,
-  TransactionResult,
-} from "@mysten/sui.js/transactions";
-import { normalizeStructTag } from "@mysten/sui.js/utils";
+import { Transaction, TransactionResult } from "@mysten/sui/transactions";
+import { normalizeStructTag } from "@mysten/sui/utils";
 import * as Sentry from "@sentry/nextjs";
 import {
   Router as AftermathRouter,
@@ -76,7 +73,7 @@ function Page() {
     refreshData,
     explorer,
     obligation,
-    signExecuteAndWaitTransactionBlock,
+    signExecuteAndWaitTransaction,
     ...restAppContext
   } = useAppContext();
   const data = restAppContext.data as AppData;
@@ -595,7 +592,7 @@ function Page() {
     address: string,
     isDepositing: boolean,
   ): Promise<{
-    tx: TransactionBlock;
+    transaction: Transaction;
     outputCoin: TransactionResult | undefined;
   }> => {
     if (quote.type === UnifiedQuoteType.HOP) {
@@ -606,31 +603,34 @@ function Page() {
         max_slippage_bps: slippagePercent * 100,
         return_output_coin_argument: isDepositing,
       });
+
       return {
-        tx: res.transaction as unknown as TransactionBlock,
-        outputCoin: res.output_coin as unknown as TransactionResult | undefined,
+        transaction: res.transaction as unknown as Transaction,
+        outputCoin: res.output_coin,
       };
     } else if (quote.type === UnifiedQuoteType.AFTERMATH) {
       if (isDepositing) {
-        const tx = new TransactionBlock();
         const res = await aftermathSdk.addTransactionForCompleteTradeRouteV0({
-          tx: tx as any,
+          tx: new Transaction() as any,
           walletAddress: address,
           completeRoute: quote.quote as AftermathRouterCompleteTradeRoute,
           slippage: slippagePercent / 100,
         });
+
         return {
-          tx: res.tx as unknown as TransactionBlock,
-          outputCoin: res.coinOutId as unknown as TransactionResult | undefined,
+          transaction: res.tx as unknown as Transaction,
+          outputCoin: res.coinOutId as TransactionResult | undefined,
         };
       } else {
-        const tx = await aftermathSdk.getTransactionForCompleteTradeRouteV0({
-          walletAddress: address,
-          completeRoute: quote.quote as AftermathRouterCompleteTradeRoute,
-          slippage: slippagePercent / 100,
-        });
+        const transaction =
+          await aftermathSdk.getTransactionForCompleteTradeRouteV0({
+            walletAddress: address,
+            completeRoute: quote.quote as AftermathRouterCompleteTradeRoute,
+            slippage: slippagePercent / 100,
+          });
+
         return {
-          tx: tx as any,
+          transaction: transaction as unknown as Transaction,
           outputCoin: undefined,
         };
       }
@@ -645,20 +645,17 @@ function Page() {
 
     const isDepositing = !!(deposit && hasTokenOutReserve);
 
-    let txb = new TransactionBlock();
     try {
-      const tx = await getTransactionForUnifiedQuote(
+      const { transaction, outputCoin } = await getTransactionForUnifiedQuote(
         quote,
         +slippagePercent,
         address,
         isDepositing,
       );
-
-      txb = new TransactionBlock(tx.tx);
-      txb.setGasBudget("" as any); // Set to dynamic
+      transaction.setGasBudget("" as any); // Set to dynamic
 
       if (isDepositing) {
-        if (!tx.outputCoin) throw new Error("Missing coin to deposit");
+        if (!outputCoin) throw new Error("Missing coin to deposit");
 
         const obligationOwnerCap = data.obligationOwnerCaps?.find(
           (o) => o.obligationId === obligation?.id,
@@ -666,20 +663,20 @@ function Page() {
 
         await suilendClient.depositCoin(
           address,
-          tx.outputCoin as any,
+          outputCoin,
           tokenOutReserve.coinType,
-          txb,
+          transaction,
           obligationOwnerCap?.id,
         );
       }
+
+      const res = await signExecuteAndWaitTransaction(transaction);
+      return res;
     } catch (err) {
       Sentry.captureException(err);
       console.error(err);
       throw err;
     }
-
-    const res = await signExecuteAndWaitTransactionBlock(txb);
-    return res;
   };
 
   const onSwapClick = async (deposit?: boolean) => {

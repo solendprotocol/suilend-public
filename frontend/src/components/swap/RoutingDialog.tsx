@@ -2,7 +2,7 @@ import { CSSProperties, useEffect, useMemo, useRef, useState } from "react";
 
 import Dagre from "@dagrejs/dagre";
 import { SuiExchange as HopSuiExchange, VerifiedToken } from "@hop.ag/sdk";
-import { CoinMetadata, SuiClient } from "@mysten/sui.js/client";
+import { CoinMetadata, SuiClient } from "@mysten/sui/client";
 import {
   RouterProtocolName as AftermathRouterProtocolName,
   RouterTradePath as AftermathRouterTradePath,
@@ -516,7 +516,7 @@ export default function RoutingDialog({ quote }: RoutingDialogProps) {
                 },
               };
             })
-            .filter(Boolean) as unknown as QuoteNodeWithTokens[])
+            .filter(Boolean) as QuoteNodeWithTokens[])
         : // Aftermath
           (quote.quote.routes
             .reduce(
