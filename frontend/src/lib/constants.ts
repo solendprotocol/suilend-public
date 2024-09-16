@@ -5,6 +5,7 @@ export const TX_TOAST_DURATION = 10 * 1000;
 
 export const SUI_DEPOSIT_GAS_MIN = 0.025;
 export const SUI_REPAY_GAS_MIN = 0.01;
+export const SUI_SWAP_GAS_MIN = 0.025;
 
 export const FIRST_DEPOSIT_DIALOG_START_DATE = new Date("2024-07-02T13:15:00Z");
 

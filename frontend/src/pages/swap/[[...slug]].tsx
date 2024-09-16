@@ -52,7 +52,7 @@ import {
 } from "@/lib/actions";
 import { ParsedCoinBalance } from "@/lib/coinBalance";
 import { SUI_COINTYPE, isSui } from "@/lib/coinType";
-import { SUI_DEPOSIT_GAS_MIN, TX_TOAST_DURATION } from "@/lib/constants";
+import { SUI_SWAP_GAS_MIN, TX_TOAST_DURATION } from "@/lib/constants";
 import { formatPercent, formatToken } from "@/lib/format";
 import { getFilteredRewards, getTotalAprPercent } from "@/lib/liquidityMining";
 import track from "@/lib/track";
@@ -131,9 +131,9 @@ function Page() {
     ];
     if (isSui(tokenIn.coin_type))
       result.push({
-        reason: `${SUI_DEPOSIT_GAS_MIN} SUI should be saved for gas`,
+        reason: `${SUI_SWAP_GAS_MIN} SUI should be saved for gas`,
         isDisabled: true,
-        value: tokenInBalance.minus(SUI_DEPOSIT_GAS_MIN),
+        value: tokenInBalance.minus(SUI_SWAP_GAS_MIN),
       });
 
     return result;
@@ -655,7 +655,7 @@ function Page() {
       );
 
       txb = new TransactionBlock(tx.tx);
-      txb.setGasBudget("" as any); // Set to dynamic
+      txb.setGasBudget(SUI_SWAP_GAS_MIN * 10 ** 9);
 
       if (isDepositing) {
         if (!tx.outputCoin) throw new Error("Missing coin to deposit");
@@ -759,7 +759,7 @@ function Page() {
       Action.DEPOSIT,
       tokenOutReserve,
       quoteAmountOut.plus(
-        isSui(tokenOutReserve.coinType) ? SUI_DEPOSIT_GAS_MIN : 0,
+        isSui(tokenOutReserve.coinType) ? SUI_SWAP_GAS_MIN : 0,
       ),
       data,
       obligation,
