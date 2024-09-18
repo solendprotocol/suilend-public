@@ -732,9 +732,15 @@ function Page() {
         deposit: deposit ? "true" : "false",
       };
       if (tokenInUsdValue !== undefined)
-        properties.amountInUsd = tokenInUsdValue.toString();
+        properties.amountInUsd = formatToken(tokenInUsdValue, {
+          dp: 2,
+          useGrouping: false,
+        });
       if (tokenOutUsdValue !== undefined)
-        properties.amountOutUsd = tokenOutUsdValue.toString();
+        properties.amountOutUsd = formatToken(tokenOutUsdValue, {
+          dp: 2,
+          useGrouping: false,
+        });
 
       track("swap_success", properties);
     } catch (err) {
