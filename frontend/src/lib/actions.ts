@@ -4,13 +4,17 @@ import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
 import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 
 import { AppData } from "@/contexts/AppContext";
-import { isSui } from "@/lib/coinType";
+import {
+  NORMALIZED_STABLECOIN_COINTYPES,
+  isStablecoin,
+  isSui,
+} from "@/lib/coinType";
 import {
   SUI_DEPOSIT_GAS_MIN,
   SUI_REPAY_GAS_MIN,
   msPerYear,
 } from "@/lib/constants";
-import { LOOPING_THRESHOLD } from "@/lib/looping";
+import { LOOPING_THRESHOLD, LOOPING_WARNING_MESSAGE } from "@/lib/looping";
 import { Action } from "@/lib/types";
 
 const getMaxCalculations = (
@@ -217,19 +221,35 @@ export const getMaxValue =
     ).toFixed(reserve.mintDecimals, BigNumber.ROUND_DOWN);
   };
 
+const getDepositedAmountAcrossObligations = (
+  coinType: string,
+  obligations?: ParsedObligation[],
+) =>
+  (obligations ?? []).reduce(
+    (acc, obligation) =>
+      acc.plus(
+        obligation.deposits.find((d) => d.coinType === coinType)
+          ?.depositedAmount ?? new BigNumber(0),
+      ),
+    new BigNumber(0),
+  );
+const getBorrowedAmountAcrossObligations = (
+  coinType: string,
+  obligations?: ParsedObligation[],
+) =>
+  (obligations ?? []).reduce(
+    (acc, obligation) =>
+      acc.plus(
+        obligation.borrows.find((b) => b.coinType === coinType)
+          ?.borrowedAmount ?? new BigNumber(0),
+      ),
+    new BigNumber(0),
+  );
+
 export const getSubmitButtonNoValueState =
   (action: Action, reserve: ParsedReserve, obligations?: ParsedObligation[]) =>
   () => {
     if (action === Action.DEPOSIT) {
-      const borrowedAmountAcrossObligations = (obligations ?? []).reduce(
-        (acc, obligation) =>
-          acc.plus(
-            obligation.borrows.find((b) => b.coinType === reserve.coinType)
-              ?.borrowedAmount ?? new BigNumber(0),
-          ),
-        new BigNumber(0),
-      );
-
       if (reserve.depositedAmount.gte(reserve.config.depositLimit))
         return {
           isDisabled: true,
@@ -244,19 +264,14 @@ export const getSubmitButtonNoValueState =
           isDisabled: true,
           title: "Reserve USD deposit limit reached",
         };
-      if (borrowedAmountAcrossObligations.gt(LOOPING_THRESHOLD))
+      if (
+        getBorrowedAmountAcrossObligations(reserve.coinType, obligations).gt(
+          LOOPING_THRESHOLD,
+        )
+      )
         return { isDisabled: true, title: "Cannot deposit borrowed asset" };
       return undefined;
     } else if (action === Action.BORROW) {
-      const depositedAmountAcrossObligations = (obligations ?? []).reduce(
-        (acc, obligation) =>
-          acc.plus(
-            obligation.deposits.find((d) => d.coinType === reserve.coinType)
-              ?.depositedAmount ?? new BigNumber(0),
-          ),
-        new BigNumber(0),
-      );
-
       if (reserve.borrowedAmount.gte(reserve.config.borrowLimit))
         return {
           isDisabled: true,
@@ -271,7 +286,11 @@ export const getSubmitButtonNoValueState =
           isDisabled: true,
           title: "Reserve USD borrow limit reached",
         };
-      if (depositedAmountAcrossObligations.gt(LOOPING_THRESHOLD))
+      if (
+        getDepositedAmountAcrossObligations(reserve.coinType, obligations).gt(
+          LOOPING_THRESHOLD,
+        )
+      )
         return { isDisabled: true, title: "Cannot borrow deposited asset" };
       return undefined;
     }
@@ -298,5 +317,35 @@ export const getSubmitButtonState =
       if (new BigNumber(value).gt(calc.value))
         return { isDisabled: calc.isDisabled, title: calc.reason };
     }
+    return undefined;
+  };
+
+export const getLoopingWarningMessage =
+  (action: Action, reserve: ParsedReserve, obligations?: ParsedObligation[]) =>
+  () => {
+    if (!isStablecoin(reserve.coinType)) return undefined;
+
+    for (const stablecoinCoinType of NORMALIZED_STABLECOIN_COINTYPES) {
+      if (stablecoinCoinType === reserve.coinType) continue;
+
+      if (action === Action.DEPOSIT) {
+        if (
+          getBorrowedAmountAcrossObligations(
+            stablecoinCoinType,
+            obligations,
+          ).gt(LOOPING_THRESHOLD)
+        )
+          return LOOPING_WARNING_MESSAGE("depositing", reserve.symbol);
+      } else if (action === Action.BORROW) {
+        if (
+          getDepositedAmountAcrossObligations(
+            stablecoinCoinType,
+            obligations,
+          ).gt(LOOPING_THRESHOLD)
+        )
+          return LOOPING_WARNING_MESSAGE("borrowing", reserve.symbol);
+      }
+    }
+
     return undefined;
   };

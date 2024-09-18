@@ -24,6 +24,12 @@ export const NORMALIZED_SUILEND_POINTS_COINTYPE = normalizeStructTag(
   SUILEND_POINTS_COINTYPE,
 );
 
+export const NORMALIZED_STABLECOIN_COINTYPES = [
+  NORMALIZED_USDC_COINTYPE,
+  NORMALIZED_USDT_COINTYPE,
+  NORMALIZED_AUSD_COINTYPE,
+];
+
 // 128x128
 export const COINTYPE_LOGO_MAP = {
   [NORMALIZED_SUI_COINTYPE]:
@@ -74,3 +80,6 @@ export const isAusd = (coinType: string) =>
   normalizeStructTag(coinType) === NORMALIZED_AUSD_COINTYPE;
 export const isSuilendPoints = (coinType: string) =>
   normalizeStructTag(coinType) === NORMALIZED_SUILEND_POINTS_COINTYPE;
+
+export const isStablecoin = (coinType: string) =>
+  NORMALIZED_STABLECOIN_COINTYPES.includes(normalizeStructTag(coinType));

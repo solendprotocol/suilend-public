@@ -15,6 +15,7 @@ import Tabs from "@/components/shared/Tabs";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import useBreakpoint from "@/hooks/useBreakpoint";
 import {
+  getLoopingWarningMessage,
   getMaxValue,
   getSubmitButtonNoValueState,
   getSubmitButtonState,
@@ -117,6 +118,11 @@ export default function ActionsModal() {
           data,
           obligation,
         ),
+        getLoopingWarningMessage: getLoopingWarningMessage(
+          Action.DEPOSIT,
+          reserve,
+          data.obligations,
+        ),
         submit: deposit,
       };
     } else if (selectedTab === Tab.BORROW) {
@@ -174,6 +180,11 @@ export default function ActionsModal() {
           coinBalanceForReserve,
           data,
           obligation,
+        ),
+        getLoopingWarningMessage: getLoopingWarningMessage(
+          Action.BORROW,
+          reserve,
+          data.obligations,
         ),
         submit: borrow,
       };

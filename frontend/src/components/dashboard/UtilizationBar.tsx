@@ -212,8 +212,8 @@ export default function UtilizationBar({
       {passedBorrowLimit &&
         (!passedLiquidationThreshold ? (
           <>
-            <span className="mt-2 block rounded-md border border-warning/50 p-2">
-              <span className="mr-2 font-medium text-warning">
+            <span className="mt-2 block rounded-md border border-warning/50 p-2 text-warning">
+              <span className="mr-2 font-medium">
                 <AlertTriangle className="mb-0.5 mr-1 inline h-3 w-3" />
                 Warning
               </span>
@@ -223,8 +223,8 @@ export default function UtilizationBar({
           </>
         ) : (
           <>
-            <span className="mt-2 block rounded-md border border-destructive/50 p-2">
-              <span className="mr-2 font-medium text-destructive">
+            <span className="mt-2 block rounded-md border border-destructive/50 p-2 text-destructive">
+              <span className="mr-2 font-medium">
                 <AlertCircle className="mb-0.5 mr-1 inline h-3 w-3" />
                 Danger
               </span>

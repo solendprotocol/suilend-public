@@ -41,6 +41,7 @@ import {
   DEPOSITS_TOOLTIP,
   NET_APR_TOOLTIP,
 } from "@/lib/tooltips";
+import { cn } from "@/lib/utils";
 
 function AccountPositionCardContent() {
   const appContext = useAppContext();
@@ -167,7 +168,12 @@ function AccountPositionCardContent() {
               <AlertTriangle className="h-4 w-4 text-warning" />
             )}
 
-            <TBody className="w-max text-right">
+            <TBody
+              className={cn(
+                "w-max text-right",
+                loopedAssetCoinTypes.length > 0 && "text-warning",
+              )}
+            >
               {formatPercent(netAprPercent)}
             </TBody>
           </div>

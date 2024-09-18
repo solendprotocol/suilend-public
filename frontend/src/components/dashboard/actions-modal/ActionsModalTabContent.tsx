@@ -3,6 +3,7 @@ import { CSSProperties, useCallback, useEffect, useRef, useState } from "react";
 import { normalizeStructTag } from "@mysten/sui.js/utils";
 import BigNumber from "bignumber.js";
 import { capitalize } from "lodash";
+import { AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 
 import { maxU64 } from "@suilend/sdk/constants";
@@ -62,6 +63,7 @@ interface ActionsModalTabContentProps {
   };
   getSubmitButtonNoValueState?: () => SubmitButtonState | undefined;
   getSubmitButtonState: (value: string) => SubmitButtonState | undefined;
+  getLoopingWarningMessage?: () => string | undefined;
   submit: ActionSignature;
 }
 
@@ -74,6 +76,7 @@ export default function ActionsModalTabContent({
   getNewCalculations,
   getSubmitButtonNoValueState,
   getSubmitButtonState,
+  getLoopingWarningMessage,
   submit,
 }: ActionsModalTabContentProps) {
   const { address } = useWalletContext();
@@ -420,7 +423,7 @@ export default function ActionsModalTabContent({
         )}
 
         <Button
-          className="h-auto min-h-14 w-full py-2"
+          className="h-auto min-h-14 w-full rounded-md py-2"
           labelClassName="text-wrap uppercase"
           style={{ overflowWrap: "anywhere" }}
           disabled={submitButtonState.isDisabled}
@@ -432,6 +435,18 @@ export default function ActionsModalTabContent({
             submitButtonState.title
           )}
         </Button>
+
+        {getLoopingWarningMessage && getLoopingWarningMessage() && (
+          <div className="rounded-md border border-warning/50 p-2">
+            <TLabelSans className="text-warning">
+              <span className="mr-2 font-medium">
+                <AlertTriangle className="mb-0.5 mr-1 inline h-3 w-3" />
+                Warning
+              </span>
+              {getLoopingWarningMessage()}
+            </TLabelSans>
+          </div>
+        )}
       </div>
     </>
   );
