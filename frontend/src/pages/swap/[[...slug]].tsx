@@ -34,7 +34,9 @@ import TokenLogos from "@/components/shared/TokenLogos";
 import { TBody, TLabelSans } from "@/components/shared/Typography";
 import RoutingDialog from "@/components/swap/RoutingDialog";
 import SwapInput from "@/components/swap/SwapInput";
-import SwapSlippagePopover from "@/components/swap/SwapSlippagePopover";
+import SwapSlippagePopover, {
+  SLIPPAGE_PERCENT_DP,
+} from "@/components/swap/SwapSlippagePopover";
 import TokensRatioChart from "@/components/swap/TokensRatioChart";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -160,7 +162,7 @@ function Page() {
         if (_value.includes(".")) {
           const [whole, decimals] = _value.split(".");
           setSlippagePercent(
-            `${whole}.${decimals.slice(0, Math.min(decimals.length, 1))}`,
+            `${whole}.${decimals.slice(0, Math.min(decimals.length, SLIPPAGE_PERCENT_DP))}`,
           );
         } else setSlippagePercent(_value);
       }

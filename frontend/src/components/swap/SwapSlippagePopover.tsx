@@ -12,6 +12,7 @@ import { formatPercent } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 const PRESETS = ["0.3", "0.5", "1.0"];
+export const SLIPPAGE_PERCENT_DP = 2;
 
 interface SwapSlippagePopoverProps {
   slippagePercent: string;
@@ -46,7 +47,9 @@ export default function SwapSlippagePopover({
           size="sm"
           role="combobox"
         >
-          {formatPercent(new BigNumber(slippagePercent || 0), { dp: 1 })}
+          {formatPercent(new BigNumber(slippagePercent || 0), {
+            dp: SLIPPAGE_PERCENT_DP,
+          })}
         </Button>
       }
       contentProps={{
@@ -63,7 +66,7 @@ export default function SwapSlippagePopover({
               <Button
                 key={preset}
                 className={cn(
-                  "w-12 rounded-full border px-0 hover:border-transparent",
+                  "w-14 rounded-full border px-0 hover:border-transparent",
                   slippagePercent === preset &&
                     "border-transparent bg-muted/15",
                 )}
@@ -72,7 +75,9 @@ export default function SwapSlippagePopover({
                 size="sm"
                 onClick={() => onPresetClick(preset)}
               >
-                {formatPercent(new BigNumber(preset), { dp: 1 })}
+                {formatPercent(new BigNumber(preset), {
+                  dp: SLIPPAGE_PERCENT_DP,
+                })}
               </Button>
             ))}
           </div>
@@ -90,7 +95,7 @@ export default function SwapSlippagePopover({
                 onChange={onSlippagePercentChange}
                 inputProps={{
                   className:
-                    "text-xs w-12 px-0 bg-card rounded-full h-6 py-0 text-center focus:border-secondary",
+                    "text-xs w-14 px-0 bg-card rounded-full h-6 py-0 text-center focus:border-secondary",
                   min: 0,
                   max: 100,
                 }}
