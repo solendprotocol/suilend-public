@@ -116,7 +116,11 @@ export default function useFetchAppData(
               }),
             ),
           )
-        ).map((res) => +(res.data[0].timestampMs as string));
+        ).map((res) =>
+          res?.data?.[0]?.timestampMs
+            ? +(res.data[0].timestampMs as string)
+            : 0,
+        );
 
         const sortedObligationOwnerCaps = obligationOwnerCaps
           .map((ownerCap, index) => ({
