@@ -22,9 +22,7 @@ import {
 import { cn, hoverUnderlineClassName } from "@/lib/utils";
 
 const calculateUtilizationPercent = (reserve: ParsedReserve) => {
-  const depositedAmount = reserve.borrowedAmount
-    .plus(reserve.availableAmount)
-    .minus(reserve.unclaimedSpreadFees);
+  const depositedAmount = reserve.borrowedAmount.plus(reserve.availableAmount);
   const borrowedAmount = reserve.borrowedAmount;
 
   return depositedAmount.eq(0)
