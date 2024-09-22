@@ -12,7 +12,6 @@ export default function LoopedPosition({ coinTypes }: LoopedPositionProps) {
 
   return (
     <div className="flex flex-row flex-wrap items-center gap-x-1.5 gap-y-1">
-      <TBodySans className="text-xs text-muted-foreground">•</TBodySans>
       <TokenLogo
         className="h-4 w-4"
         token={{
@@ -21,7 +20,7 @@ export default function LoopedPosition({ coinTypes }: LoopedPositionProps) {
           iconUrl: data.coinMetadataMap[coinTypes[0]].iconUrl,
         }}
       />
-      <TBodySans className="text-xs text-muted-foreground">
+      <TBodySans className="text-xs text-foreground">
         {data.coinMetadataMap[coinTypes[0]].symbol} deposits{" "}
         {coinTypes[0] === coinTypes[1] ? "and borrows" : "and"}
       </TBodySans>
@@ -35,7 +34,7 @@ export default function LoopedPosition({ coinTypes }: LoopedPositionProps) {
               iconUrl: data.coinMetadataMap[coinTypes[1]].iconUrl,
             }}
           />
-          <TBodySans className="text-xs text-muted-foreground">
+          <TBodySans className="text-xs text-foreground">
             {data.coinMetadataMap[coinTypes[1]].symbol} borrows
           </TBodySans>
         </>

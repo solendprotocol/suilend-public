@@ -150,7 +150,7 @@ function AccountPositionCardContent() {
             loopedAssetCoinTypes.length > 0 && (
               <>
                 <TBodySans className="text-xs">{LOOPING_MESSAGE}</TBodySans>
-
+                <Separator />
                 <div className="flex flex-col gap-2">
                   {loopedAssetCoinTypes.map((coinTypes) => (
                     <LoopedPosition

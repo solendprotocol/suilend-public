@@ -5,6 +5,7 @@ import { AlertTriangle } from "lucide-react";
 import Dialog from "@/components/dashboard/Dialog";
 import LoopedPosition from "@/components/layout/LoopedPosition";
 import { TBodySans } from "@/components/shared/Typography";
+import { Separator } from "@/components/ui/separator";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { LOOPING_MESSAGE, getLoopedAssetCoinTypes } from "@/lib/looping";
 
@@ -37,7 +38,7 @@ export default function LoopingDialog() {
     >
       <div className="flex flex-col gap-4 p-4">
         <TBodySans className="text-xs">{LOOPING_MESSAGE}</TBodySans>
-
+        <Separator />
         <div className="flex flex-col gap-2">
           {loopedAssetCoinTypes.map((coinTypes) => (
             <LoopedPosition key={coinTypes.join(".")} coinTypes={coinTypes} />
