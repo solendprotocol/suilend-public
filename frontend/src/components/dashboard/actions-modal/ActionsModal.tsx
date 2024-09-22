@@ -319,7 +319,7 @@ export default function ActionsModal() {
           className="flex flex-col gap-4 md:!h-auto md:flex-row md:items-stretch"
           style={{
             height: isMoreParametersOpen
-              ? `calc(100dvh - ${0 /* Drawer margin-top */}px - ${1 /* Drawer border-top */}px - ${16 /* Drawer padding-top */}px - ${70 /* Tabs */}px - ${16 /* Drawer padding-bottom */}px - ${1 /* Drawer border-bottom */}px)`
+              ? `calc(100dvh - ${0 /* Drawer margin-top */}px - ${0 /* Drawer border-top */}px - ${16 /* Drawer padding-top */}px - ${62 /* Tabs */}px - ${16 /* Drawer padding-bottom */}px - ${0 /* Drawer border-bottom */}px)`
               : "auto",
           }}
         >

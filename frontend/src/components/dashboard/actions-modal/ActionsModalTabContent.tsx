@@ -414,10 +414,9 @@ export default function ActionsModalTabContent({
           <Collapsible
             open={isMoreParametersOpen}
             onOpenChange={setIsMoreParametersOpen}
-            title={`${isMoreParametersOpen ? "Less" : "More"} parameters`}
+            closedTitle="More parameters"
             openTitle="Less parameters"
-            buttonClassName="!bg-popover py-1"
-            buttonLabelClassName="text-xs"
+            buttonClassName="pb-2"
             hasSeparator
           />
         )}
@@ -437,7 +436,7 @@ export default function ActionsModalTabContent({
         </Button>
 
         {getLoopingWarningMessage && getLoopingWarningMessage() && (
-          <div className="rounded-md border border-warning/50 p-2">
+          <div className="rounded-md bg-warning/10 p-2">
             <TLabelSans className="text-warning">
               <span className="mr-2 font-medium">
                 <AlertTriangle className="mb-0.5 mr-1 inline h-3 w-3" />

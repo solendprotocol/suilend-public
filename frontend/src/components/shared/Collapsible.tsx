@@ -38,10 +38,11 @@ export default function Collapsible({
 
   return (
     <CollapsibleRoot open={open} onOpenChange={onOpenChange}>
-      <CollapsibleTrigger className="relative flex w-full flex-row justify-center">
+      <CollapsibleTrigger className="relative flex w-full flex-row items-center justify-center">
+        {hasSeparator && <Separator className="flex-1" />}
         <Button
           className={cn(
-            "relative z-[2] h-fit !bg-card uppercase text-muted-foreground",
+            "relative z-[2] h-fit !bg-transparent uppercase text-muted-foreground",
             buttonClassName,
           )}
           labelClassName={buttonLabelClassName}
@@ -52,9 +53,7 @@ export default function Collapsible({
         >
           {title || (!open ? closedTitle : openTitle)}
         </Button>
-        {hasSeparator && (
-          <Separator className="absolute left-0 right-0 top-1/2 z-[1] -translate-y-2/4" />
-        )}
+        {hasSeparator && <Separator className="flex-1" />}
       </CollapsibleTrigger>
 
       <CollapsibleContent>{children}</CollapsibleContent>

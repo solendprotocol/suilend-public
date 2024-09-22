@@ -25,8 +25,7 @@ export default function LoopingDialog() {
   return (
     <Dialog
       rootProps={{ open: isOpen, onOpenChange }}
-      dialogContentProps={{ className: "max-w-md border-warning/50" }}
-      drawerContentProps={{ className: "border-warning/50" }}
+      dialogContentProps={{ className: "max-w-md" }}
       headerProps={{
         className: "pb-0",
         titleClassName: "text-warning",
