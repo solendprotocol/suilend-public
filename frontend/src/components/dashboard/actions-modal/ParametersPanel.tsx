@@ -174,10 +174,10 @@ function RatesTabContent({ side, reserve }: TabContentProps) {
       </div>
 
       <LabelWithValue
-        label="Current utilization"
-        labelEndDecorator={
-          <div className="my-1.5 h-1 w-1 rounded-full bg-foreground" />
+        labelStartDecorator={
+          <div className="my-1 mr-0.5 h-2 w-2 rounded-full bg-foreground" />
         }
+        label="Current utilization"
         value={formatPercent(reserve.utilizationPercent)}
         horizontal
       />
