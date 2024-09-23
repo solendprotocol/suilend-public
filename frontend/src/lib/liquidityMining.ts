@@ -298,14 +298,12 @@ export const getNetAprPercent = (
       const rewardsAprPercentWeightedBorrowedAmountUsd = getRewardsAprPercent(
         Side.BORROW,
         getFilteredRewards(rewardMap[borrow.reserve.coinType].borrow),
-      )
-        .times(-1)
-        .times(
-          getBorrowShareUsd(
-            borrow.reserve,
-            new BigNumber(borrow.userRewardManager.share),
-          ),
-        );
+      ).times(
+        getBorrowShareUsd(
+          borrow.reserve,
+          new BigNumber(borrow.userRewardManager.share),
+        ),
+      );
 
       return acc
         .plus(baseAprPercentWeightedBorrowedAmountUsd)
