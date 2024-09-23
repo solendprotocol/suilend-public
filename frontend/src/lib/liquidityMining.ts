@@ -272,7 +272,9 @@ export const getNetAprPercent = (
 ) => {
   const aprPercentWeightedDepositedAmountUsd = obligation.deposits.reduce(
     (acc, deposit) => {
-      const rewardsAprPercent = getRewardsAprPercent(
+      const baseAprPercentWeightedDepositedAmountUsd =
+        deposit.reserve.depositAprPercent.times(deposit.depositedAmountUsd);
+      const rewardsAprPercentWeightedDepositedAmountUsd = getRewardsAprPercent(
         Side.DEPOSIT,
         getFilteredRewards(rewardMap[deposit.reserve.coinType].deposit),
       ).times(
@@ -282,32 +284,32 @@ export const getNetAprPercent = (
         ),
       );
 
-      return acc.plus(
-        new BigNumber(
-          deposit.reserve.depositAprPercent.plus(rewardsAprPercent),
-        ).times(deposit.depositedAmountUsd),
-      );
+      return acc
+        .plus(baseAprPercentWeightedDepositedAmountUsd)
+        .plus(rewardsAprPercentWeightedDepositedAmountUsd);
     },
     new BigNumber(0),
   );
 
   const aprPercentWeightedBorrowedAmountUsd = obligation.borrows.reduce(
     (acc, borrow) => {
-      const rewardsAprPercent = getRewardsAprPercent(
+      const baseAprPercentWeightedBorrowedAmountUsd =
+        borrow.reserve.borrowAprPercent.times(borrow.borrowedAmountUsd);
+      const rewardsAprPercentWeightedBorrowedAmountUsd = getRewardsAprPercent(
         Side.BORROW,
         getFilteredRewards(rewardMap[borrow.reserve.coinType].borrow),
-      ).times(
-        getBorrowShareUsd(
-          borrow.reserve,
-          new BigNumber(borrow.userRewardManager.share),
-        ),
-      );
+      )
+        .times(-1)
+        .times(
+          getBorrowShareUsd(
+            borrow.reserve,
+            new BigNumber(borrow.userRewardManager.share),
+          ),
+        );
 
-      return acc.plus(
-        new BigNumber(
-          borrow.reserve.borrowAprPercent.plus(rewardsAprPercent),
-        ).times(borrow.borrowedAmountUsd),
-      );
+      return acc
+        .plus(baseAprPercentWeightedBorrowedAmountUsd)
+        .plus(rewardsAprPercentWeightedBorrowedAmountUsd);
     },
     new BigNumber(0),
   );
