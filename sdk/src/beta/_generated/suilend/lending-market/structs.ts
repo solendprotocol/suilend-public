@@ -11,7 +11,6 @@ import {
   ToField,
   ToPhantomTypeArgument,
   ToTypeStr,
-  Vector,
   assertFieldsWithTypesArgsMatch,
   assertReifiedTypeArgsMatch,
   decodeFromFields,
@@ -26,22 +25,23 @@ import {
   FieldsWithTypes,
   composeSuiType,
   compressSuiType,
+  parseTypeName,
 } from "../../_framework/util";
+import { Vector } from "../../_framework/vector";
 import { Decimal } from "../decimal/structs";
+import { PKG_V1 } from "../index";
 import { Obligation } from "../obligation/structs";
 import { RateLimiter } from "../rate-limiter/structs";
 import { Reserve } from "../reserve/structs";
-import { bcs, fromB64, fromHEX, toHEX } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { bcs } from "@mysten/sui/bcs";
+import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
+import { fromB64, fromHEX, toHEX } from "@mysten/sui/utils";
 
 /* ============================== BorrowEvent =============================== */
 
 export function isBorrowEvent(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::BorrowEvent"
-  );
+  return type === `${PKG_V1}::lending_market::BorrowEvent`;
 }
 
 export interface BorrowEventFields {
@@ -56,15 +56,16 @@ export interface BorrowEventFields {
 export type BorrowEventReified = Reified<BorrowEvent, BorrowEventFields>;
 
 export class BorrowEvent implements StructClass {
-  static readonly $typeName =
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::BorrowEvent";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V1}::lending_market::BorrowEvent`;
   static readonly $numTypeParams = 0;
+  static readonly $isPhantom = [] as const;
 
   readonly $typeName = BorrowEvent.$typeName;
-
-  readonly $fullTypeName: "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::BorrowEvent";
-
+  readonly $fullTypeName: `${typeof PKG_V1}::lending_market::BorrowEvent`;
   readonly $typeArgs: [];
+  readonly $isPhantom = BorrowEvent.$isPhantom;
 
   readonly lendingMarketId: ToField<"address">;
   readonly coinType: ToField<TypeName>;
@@ -77,7 +78,7 @@ export class BorrowEvent implements StructClass {
     this.$fullTypeName = composeSuiType(
       BorrowEvent.$typeName,
       ...typeArgs,
-    ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::BorrowEvent";
+    ) as `${typeof PKG_V1}::lending_market::BorrowEvent`;
     this.$typeArgs = typeArgs;
 
     this.lendingMarketId = fields.lendingMarketId;
@@ -94,8 +95,9 @@ export class BorrowEvent implements StructClass {
       fullTypeName: composeSuiType(
         BorrowEvent.$typeName,
         ...[],
-      ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::BorrowEvent",
+      ) as `${typeof PKG_V1}::lending_market::BorrowEvent`,
       typeArgs: [] as [],
+      isPhantom: BorrowEvent.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         BorrowEvent.fromFields(fields),
@@ -107,6 +109,8 @@ export class BorrowEvent implements StructClass {
       fromJSON: (json: Record<string, any>) => BorrowEvent.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         BorrowEvent.fromSuiParsedData(content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        BorrowEvent.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         BorrowEvent.fetch(client, id),
       new: (fields: BorrowEventFields) => {
@@ -254,6 +258,22 @@ export class BorrowEvent implements StructClass {
     return BorrowEvent.fromFieldsWithTypes(content);
   }
 
+  static fromSuiObjectData(data: SuiObjectData): BorrowEvent {
+    if (data.bcs) {
+      if (data.bcs.dataType !== "moveObject" || !isBorrowEvent(data.bcs.type)) {
+        throw new Error(`object at is not a BorrowEvent object`);
+      }
+
+      return BorrowEvent.fromBcs(fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return BorrowEvent.fromSuiParsedData(data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch(client: SuiClient, id: string): Promise<BorrowEvent> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -267,7 +287,8 @@ export class BorrowEvent implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a BorrowEvent object`);
     }
-    return BorrowEvent.fromBcs(fromB64(res.data.bcs.bcsBytes));
+
+    return BorrowEvent.fromSuiObjectData(res.data);
   }
 }
 
@@ -275,10 +296,7 @@ export class BorrowEvent implements StructClass {
 
 export function isClaimRewardEvent(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::ClaimRewardEvent"
-  );
+  return type === `${PKG_V1}::lending_market::ClaimRewardEvent`;
 }
 
 export interface ClaimRewardEventFields {
@@ -297,15 +315,16 @@ export type ClaimRewardEventReified = Reified<
 >;
 
 export class ClaimRewardEvent implements StructClass {
-  static readonly $typeName =
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::ClaimRewardEvent";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V1}::lending_market::ClaimRewardEvent`;
   static readonly $numTypeParams = 0;
+  static readonly $isPhantom = [] as const;
 
   readonly $typeName = ClaimRewardEvent.$typeName;
-
-  readonly $fullTypeName: "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::ClaimRewardEvent";
-
+  readonly $fullTypeName: `${typeof PKG_V1}::lending_market::ClaimRewardEvent`;
   readonly $typeArgs: [];
+  readonly $isPhantom = ClaimRewardEvent.$isPhantom;
 
   readonly lendingMarketId: ToField<"address">;
   readonly reserveId: ToField<"address">;
@@ -319,7 +338,7 @@ export class ClaimRewardEvent implements StructClass {
     this.$fullTypeName = composeSuiType(
       ClaimRewardEvent.$typeName,
       ...typeArgs,
-    ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::ClaimRewardEvent";
+    ) as `${typeof PKG_V1}::lending_market::ClaimRewardEvent`;
     this.$typeArgs = typeArgs;
 
     this.lendingMarketId = fields.lendingMarketId;
@@ -337,8 +356,9 @@ export class ClaimRewardEvent implements StructClass {
       fullTypeName: composeSuiType(
         ClaimRewardEvent.$typeName,
         ...[],
-      ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::ClaimRewardEvent",
+      ) as `${typeof PKG_V1}::lending_market::ClaimRewardEvent`,
       typeArgs: [] as [],
+      isPhantom: ClaimRewardEvent.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         ClaimRewardEvent.fromFields(fields),
@@ -350,6 +370,8 @@ export class ClaimRewardEvent implements StructClass {
       fromJSON: (json: Record<string, any>) => ClaimRewardEvent.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         ClaimRewardEvent.fromSuiParsedData(content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        ClaimRewardEvent.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         ClaimRewardEvent.fetch(client, id),
       new: (fields: ClaimRewardEventFields) => {
@@ -504,6 +526,25 @@ export class ClaimRewardEvent implements StructClass {
     return ClaimRewardEvent.fromFieldsWithTypes(content);
   }
 
+  static fromSuiObjectData(data: SuiObjectData): ClaimRewardEvent {
+    if (data.bcs) {
+      if (
+        data.bcs.dataType !== "moveObject" ||
+        !isClaimRewardEvent(data.bcs.type)
+      ) {
+        throw new Error(`object at is not a ClaimRewardEvent object`);
+      }
+
+      return ClaimRewardEvent.fromBcs(fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return ClaimRewardEvent.fromSuiParsedData(data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch(client: SuiClient, id: string): Promise<ClaimRewardEvent> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -517,7 +558,8 @@ export class ClaimRewardEvent implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a ClaimRewardEvent object`);
     }
-    return ClaimRewardEvent.fromBcs(fromB64(res.data.bcs.bcsBytes));
+
+    return ClaimRewardEvent.fromSuiObjectData(res.data);
   }
 }
 
@@ -525,10 +567,7 @@ export class ClaimRewardEvent implements StructClass {
 
 export function isDepositEvent(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::DepositEvent"
-  );
+  return type === `${PKG_V1}::lending_market::DepositEvent`;
 }
 
 export interface DepositEventFields {
@@ -542,15 +581,16 @@ export interface DepositEventFields {
 export type DepositEventReified = Reified<DepositEvent, DepositEventFields>;
 
 export class DepositEvent implements StructClass {
-  static readonly $typeName =
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::DepositEvent";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V1}::lending_market::DepositEvent`;
   static readonly $numTypeParams = 0;
+  static readonly $isPhantom = [] as const;
 
   readonly $typeName = DepositEvent.$typeName;
-
-  readonly $fullTypeName: "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::DepositEvent";
-
+  readonly $fullTypeName: `${typeof PKG_V1}::lending_market::DepositEvent`;
   readonly $typeArgs: [];
+  readonly $isPhantom = DepositEvent.$isPhantom;
 
   readonly lendingMarketId: ToField<"address">;
   readonly coinType: ToField<TypeName>;
@@ -562,7 +602,7 @@ export class DepositEvent implements StructClass {
     this.$fullTypeName = composeSuiType(
       DepositEvent.$typeName,
       ...typeArgs,
-    ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::DepositEvent";
+    ) as `${typeof PKG_V1}::lending_market::DepositEvent`;
     this.$typeArgs = typeArgs;
 
     this.lendingMarketId = fields.lendingMarketId;
@@ -578,8 +618,9 @@ export class DepositEvent implements StructClass {
       fullTypeName: composeSuiType(
         DepositEvent.$typeName,
         ...[],
-      ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::DepositEvent",
+      ) as `${typeof PKG_V1}::lending_market::DepositEvent`,
       typeArgs: [] as [],
+      isPhantom: DepositEvent.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         DepositEvent.fromFields(fields),
@@ -591,6 +632,8 @@ export class DepositEvent implements StructClass {
       fromJSON: (json: Record<string, any>) => DepositEvent.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         DepositEvent.fromSuiParsedData(content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        DepositEvent.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         DepositEvent.fetch(client, id),
       new: (fields: DepositEventFields) => {
@@ -721,6 +764,25 @@ export class DepositEvent implements StructClass {
     return DepositEvent.fromFieldsWithTypes(content);
   }
 
+  static fromSuiObjectData(data: SuiObjectData): DepositEvent {
+    if (data.bcs) {
+      if (
+        data.bcs.dataType !== "moveObject" ||
+        !isDepositEvent(data.bcs.type)
+      ) {
+        throw new Error(`object at is not a DepositEvent object`);
+      }
+
+      return DepositEvent.fromBcs(fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return DepositEvent.fromSuiParsedData(data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch(client: SuiClient, id: string): Promise<DepositEvent> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -734,7 +796,8 @@ export class DepositEvent implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a DepositEvent object`);
     }
-    return DepositEvent.fromBcs(fromB64(res.data.bcs.bcsBytes));
+
+    return DepositEvent.fromSuiObjectData(res.data);
   }
 }
 
@@ -742,10 +805,7 @@ export class DepositEvent implements StructClass {
 
 export function isForgiveEvent(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::ForgiveEvent"
-  );
+  return type === `${PKG_V1}::lending_market::ForgiveEvent`;
 }
 
 export interface ForgiveEventFields {
@@ -759,15 +819,16 @@ export interface ForgiveEventFields {
 export type ForgiveEventReified = Reified<ForgiveEvent, ForgiveEventFields>;
 
 export class ForgiveEvent implements StructClass {
-  static readonly $typeName =
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::ForgiveEvent";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V1}::lending_market::ForgiveEvent`;
   static readonly $numTypeParams = 0;
+  static readonly $isPhantom = [] as const;
 
   readonly $typeName = ForgiveEvent.$typeName;
-
-  readonly $fullTypeName: "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::ForgiveEvent";
-
+  readonly $fullTypeName: `${typeof PKG_V1}::lending_market::ForgiveEvent`;
   readonly $typeArgs: [];
+  readonly $isPhantom = ForgiveEvent.$isPhantom;
 
   readonly lendingMarketId: ToField<"address">;
   readonly coinType: ToField<TypeName>;
@@ -779,7 +840,7 @@ export class ForgiveEvent implements StructClass {
     this.$fullTypeName = composeSuiType(
       ForgiveEvent.$typeName,
       ...typeArgs,
-    ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::ForgiveEvent";
+    ) as `${typeof PKG_V1}::lending_market::ForgiveEvent`;
     this.$typeArgs = typeArgs;
 
     this.lendingMarketId = fields.lendingMarketId;
@@ -795,8 +856,9 @@ export class ForgiveEvent implements StructClass {
       fullTypeName: composeSuiType(
         ForgiveEvent.$typeName,
         ...[],
-      ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::ForgiveEvent",
+      ) as `${typeof PKG_V1}::lending_market::ForgiveEvent`,
       typeArgs: [] as [],
+      isPhantom: ForgiveEvent.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         ForgiveEvent.fromFields(fields),
@@ -808,6 +870,8 @@ export class ForgiveEvent implements StructClass {
       fromJSON: (json: Record<string, any>) => ForgiveEvent.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         ForgiveEvent.fromSuiParsedData(content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        ForgiveEvent.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         ForgiveEvent.fetch(client, id),
       new: (fields: ForgiveEventFields) => {
@@ -941,6 +1005,25 @@ export class ForgiveEvent implements StructClass {
     return ForgiveEvent.fromFieldsWithTypes(content);
   }
 
+  static fromSuiObjectData(data: SuiObjectData): ForgiveEvent {
+    if (data.bcs) {
+      if (
+        data.bcs.dataType !== "moveObject" ||
+        !isForgiveEvent(data.bcs.type)
+      ) {
+        throw new Error(`object at is not a ForgiveEvent object`);
+      }
+
+      return ForgiveEvent.fromBcs(fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return ForgiveEvent.fromSuiParsedData(data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch(client: SuiClient, id: string): Promise<ForgiveEvent> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -954,7 +1037,8 @@ export class ForgiveEvent implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a ForgiveEvent object`);
     }
-    return ForgiveEvent.fromBcs(fromB64(res.data.bcs.bcsBytes));
+
+    return ForgiveEvent.fromSuiObjectData(res.data);
   }
 }
 
@@ -962,10 +1046,7 @@ export class ForgiveEvent implements StructClass {
 
 export function isLENDING_MARKET(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::LENDING_MARKET"
-  );
+  return type === `${PKG_V1}::lending_market::LENDING_MARKET`;
 }
 
 export interface LENDING_MARKETFields {
@@ -978,15 +1059,16 @@ export type LENDING_MARKETReified = Reified<
 >;
 
 export class LENDING_MARKET implements StructClass {
-  static readonly $typeName =
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::LENDING_MARKET";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V1}::lending_market::LENDING_MARKET`;
   static readonly $numTypeParams = 0;
+  static readonly $isPhantom = [] as const;
 
   readonly $typeName = LENDING_MARKET.$typeName;
-
-  readonly $fullTypeName: "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::LENDING_MARKET";
-
+  readonly $fullTypeName: `${typeof PKG_V1}::lending_market::LENDING_MARKET`;
   readonly $typeArgs: [];
+  readonly $isPhantom = LENDING_MARKET.$isPhantom;
 
   readonly dummyField: ToField<"bool">;
 
@@ -994,7 +1076,7 @@ export class LENDING_MARKET implements StructClass {
     this.$fullTypeName = composeSuiType(
       LENDING_MARKET.$typeName,
       ...typeArgs,
-    ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::LENDING_MARKET";
+    ) as `${typeof PKG_V1}::lending_market::LENDING_MARKET`;
     this.$typeArgs = typeArgs;
 
     this.dummyField = fields.dummyField;
@@ -1006,8 +1088,9 @@ export class LENDING_MARKET implements StructClass {
       fullTypeName: composeSuiType(
         LENDING_MARKET.$typeName,
         ...[],
-      ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::LENDING_MARKET",
+      ) as `${typeof PKG_V1}::lending_market::LENDING_MARKET`,
       typeArgs: [] as [],
+      isPhantom: LENDING_MARKET.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         LENDING_MARKET.fromFields(fields),
@@ -1019,6 +1102,8 @@ export class LENDING_MARKET implements StructClass {
       fromJSON: (json: Record<string, any>) => LENDING_MARKET.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         LENDING_MARKET.fromSuiParsedData(content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        LENDING_MARKET.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         LENDING_MARKET.fetch(client, id),
       new: (fields: LENDING_MARKETFields) => {
@@ -1105,6 +1190,25 @@ export class LENDING_MARKET implements StructClass {
     return LENDING_MARKET.fromFieldsWithTypes(content);
   }
 
+  static fromSuiObjectData(data: SuiObjectData): LENDING_MARKET {
+    if (data.bcs) {
+      if (
+        data.bcs.dataType !== "moveObject" ||
+        !isLENDING_MARKET(data.bcs.type)
+      ) {
+        throw new Error(`object at is not a LENDING_MARKET object`);
+      }
+
+      return LENDING_MARKET.fromBcs(fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return LENDING_MARKET.fromSuiParsedData(data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch(client: SuiClient, id: string): Promise<LENDING_MARKET> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -1118,7 +1222,8 @@ export class LENDING_MARKET implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a LENDING_MARKET object`);
     }
-    return LENDING_MARKET.fromBcs(fromB64(res.data.bcs.bcsBytes));
+
+    return LENDING_MARKET.fromSuiObjectData(res.data);
   }
 }
 
@@ -1126,9 +1231,7 @@ export class LENDING_MARKET implements StructClass {
 
 export function isLendingMarket(type: string): boolean {
   type = compressSuiType(type);
-  return type.startsWith(
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::LendingMarket<",
-  );
+  return type.startsWith(`${PKG_V1}::lending_market::LendingMarket` + "<");
 }
 
 export interface LendingMarketFields<P extends PhantomTypeArgument> {
@@ -1150,15 +1253,16 @@ export type LendingMarketReified<P extends PhantomTypeArgument> = Reified<
 export class LendingMarket<P extends PhantomTypeArgument>
   implements StructClass
 {
-  static readonly $typeName =
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::LendingMarket";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V1}::lending_market::LendingMarket`;
   static readonly $numTypeParams = 1;
+  static readonly $isPhantom = [true] as const;
 
   readonly $typeName = LendingMarket.$typeName;
-
-  readonly $fullTypeName: `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::LendingMarket<${PhantomToTypeStr<P>}>`;
-
+  readonly $fullTypeName: `${typeof PKG_V1}::lending_market::LendingMarket<${PhantomToTypeStr<P>}>`;
   readonly $typeArgs: [PhantomToTypeStr<P>];
+  readonly $isPhantom = LendingMarket.$isPhantom;
 
   readonly id: ToField<UID>;
   readonly version: ToField<"u64">;
@@ -1178,7 +1282,7 @@ export class LendingMarket<P extends PhantomTypeArgument>
     this.$fullTypeName = composeSuiType(
       LendingMarket.$typeName,
       ...typeArgs,
-    ) as `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::LendingMarket<${PhantomToTypeStr<P>}>`;
+    ) as `${typeof PKG_V1}::lending_market::LendingMarket<${PhantomToTypeStr<P>}>`;
     this.$typeArgs = typeArgs;
 
     this.id = fields.id;
@@ -1199,10 +1303,11 @@ export class LendingMarket<P extends PhantomTypeArgument>
       fullTypeName: composeSuiType(
         LendingMarket.$typeName,
         ...[extractType(P)],
-      ) as `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::LendingMarket<${PhantomToTypeStr<ToPhantomTypeArgument<P>>}>`,
+      ) as `${typeof PKG_V1}::lending_market::LendingMarket<${PhantomToTypeStr<ToPhantomTypeArgument<P>>}>`,
       typeArgs: [extractType(P)] as [
         PhantomToTypeStr<ToPhantomTypeArgument<P>>,
       ],
+      isPhantom: LendingMarket.$isPhantom,
       reifiedTypeArgs: [P],
       fromFields: (fields: Record<string, any>) =>
         LendingMarket.fromFields(P, fields),
@@ -1214,6 +1319,8 @@ export class LendingMarket<P extends PhantomTypeArgument>
       fromJSON: (json: Record<string, any>) => LendingMarket.fromJSON(P, json),
       fromSuiParsedData: (content: SuiParsedData) =>
         LendingMarket.fromSuiParsedData(P, content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        LendingMarket.fromSuiObjectData(P, content),
       fetch: async (client: SuiClient, id: string) =>
         LendingMarket.fetch(client, P, id),
       new: (fields: LendingMarketFields<ToPhantomTypeArgument<P>>) => {
@@ -1336,7 +1443,7 @@ export class LendingMarket<P extends PhantomTypeArgument>
       id: this.id,
       version: this.version.toString(),
       reserves: fieldToJSON<Vector<Reserve<P>>>(
-        `vector<0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::reserve::Reserve<${this.$typeArgs[0]}>>`,
+        `vector<${Reserve.$typeName}<${this.$typeArgs[0]}>>`,
         this.reserves,
       ),
       obligations: this.obligations.toJSONField(),
@@ -1417,6 +1524,42 @@ export class LendingMarket<P extends PhantomTypeArgument>
     return LendingMarket.fromFieldsWithTypes(typeArg, content);
   }
 
+  static fromSuiObjectData<P extends PhantomReified<PhantomTypeArgument>>(
+    typeArg: P,
+    data: SuiObjectData,
+  ): LendingMarket<ToPhantomTypeArgument<P>> {
+    if (data.bcs) {
+      if (
+        data.bcs.dataType !== "moveObject" ||
+        !isLendingMarket(data.bcs.type)
+      ) {
+        throw new Error(`object at is not a LendingMarket object`);
+      }
+
+      const gotTypeArgs = parseTypeName(data.bcs.type).typeArgs;
+      if (gotTypeArgs.length !== 1) {
+        throw new Error(
+          `type argument mismatch: expected 1 type argument but got '${gotTypeArgs.length}'`,
+        );
+      }
+      const gotTypeArg = compressSuiType(gotTypeArgs[0]);
+      const expectedTypeArg = compressSuiType(extractType(typeArg));
+      if (gotTypeArg !== compressSuiType(extractType(typeArg))) {
+        throw new Error(
+          `type argument mismatch: expected '${expectedTypeArg}' but got '${gotTypeArg}'`,
+        );
+      }
+
+      return LendingMarket.fromBcs(typeArg, fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return LendingMarket.fromSuiParsedData(typeArg, data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch<P extends PhantomReified<PhantomTypeArgument>>(
     client: SuiClient,
     typeArg: P,
@@ -1434,7 +1577,8 @@ export class LendingMarket<P extends PhantomTypeArgument>
     ) {
       throw new Error(`object at id ${id} is not a LendingMarket object`);
     }
-    return LendingMarket.fromBcs(typeArg, fromB64(res.data.bcs.bcsBytes));
+
+    return LendingMarket.fromSuiObjectData(typeArg, res.data);
   }
 }
 
@@ -1443,7 +1587,7 @@ export class LendingMarket<P extends PhantomTypeArgument>
 export function isLendingMarketOwnerCap(type: string): boolean {
   type = compressSuiType(type);
   return type.startsWith(
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::LendingMarketOwnerCap<",
+    `${PKG_V1}::lending_market::LendingMarketOwnerCap` + "<",
   );
 }
 
@@ -1458,15 +1602,16 @@ export type LendingMarketOwnerCapReified<P extends PhantomTypeArgument> =
 export class LendingMarketOwnerCap<P extends PhantomTypeArgument>
   implements StructClass
 {
-  static readonly $typeName =
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::LendingMarketOwnerCap";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V1}::lending_market::LendingMarketOwnerCap`;
   static readonly $numTypeParams = 1;
+  static readonly $isPhantom = [true] as const;
 
   readonly $typeName = LendingMarketOwnerCap.$typeName;
-
-  readonly $fullTypeName: `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::LendingMarketOwnerCap<${PhantomToTypeStr<P>}>`;
-
+  readonly $fullTypeName: `${typeof PKG_V1}::lending_market::LendingMarketOwnerCap<${PhantomToTypeStr<P>}>`;
   readonly $typeArgs: [PhantomToTypeStr<P>];
+  readonly $isPhantom = LendingMarketOwnerCap.$isPhantom;
 
   readonly id: ToField<UID>;
   readonly lendingMarketId: ToField<ID>;
@@ -1478,7 +1623,7 @@ export class LendingMarketOwnerCap<P extends PhantomTypeArgument>
     this.$fullTypeName = composeSuiType(
       LendingMarketOwnerCap.$typeName,
       ...typeArgs,
-    ) as `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::LendingMarketOwnerCap<${PhantomToTypeStr<P>}>`;
+    ) as `${typeof PKG_V1}::lending_market::LendingMarketOwnerCap<${PhantomToTypeStr<P>}>`;
     this.$typeArgs = typeArgs;
 
     this.id = fields.id;
@@ -1493,10 +1638,11 @@ export class LendingMarketOwnerCap<P extends PhantomTypeArgument>
       fullTypeName: composeSuiType(
         LendingMarketOwnerCap.$typeName,
         ...[extractType(P)],
-      ) as `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::LendingMarketOwnerCap<${PhantomToTypeStr<ToPhantomTypeArgument<P>>}>`,
+      ) as `${typeof PKG_V1}::lending_market::LendingMarketOwnerCap<${PhantomToTypeStr<ToPhantomTypeArgument<P>>}>`,
       typeArgs: [extractType(P)] as [
         PhantomToTypeStr<ToPhantomTypeArgument<P>>,
       ],
+      isPhantom: LendingMarketOwnerCap.$isPhantom,
       reifiedTypeArgs: [P],
       fromFields: (fields: Record<string, any>) =>
         LendingMarketOwnerCap.fromFields(P, fields),
@@ -1510,6 +1656,8 @@ export class LendingMarketOwnerCap<P extends PhantomTypeArgument>
         LendingMarketOwnerCap.fromJSON(P, json),
       fromSuiParsedData: (content: SuiParsedData) =>
         LendingMarketOwnerCap.fromSuiParsedData(P, content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        LendingMarketOwnerCap.fromSuiObjectData(P, content),
       fetch: async (client: SuiClient, id: string) =>
         LendingMarketOwnerCap.fetch(client, P, id),
       new: (fields: LendingMarketOwnerCapFields<ToPhantomTypeArgument<P>>) => {
@@ -1635,6 +1783,42 @@ export class LendingMarketOwnerCap<P extends PhantomTypeArgument>
     return LendingMarketOwnerCap.fromFieldsWithTypes(typeArg, content);
   }
 
+  static fromSuiObjectData<P extends PhantomReified<PhantomTypeArgument>>(
+    typeArg: P,
+    data: SuiObjectData,
+  ): LendingMarketOwnerCap<ToPhantomTypeArgument<P>> {
+    if (data.bcs) {
+      if (
+        data.bcs.dataType !== "moveObject" ||
+        !isLendingMarketOwnerCap(data.bcs.type)
+      ) {
+        throw new Error(`object at is not a LendingMarketOwnerCap object`);
+      }
+
+      const gotTypeArgs = parseTypeName(data.bcs.type).typeArgs;
+      if (gotTypeArgs.length !== 1) {
+        throw new Error(
+          `type argument mismatch: expected 1 type argument but got '${gotTypeArgs.length}'`,
+        );
+      }
+      const gotTypeArg = compressSuiType(gotTypeArgs[0]);
+      const expectedTypeArg = compressSuiType(extractType(typeArg));
+      if (gotTypeArg !== compressSuiType(extractType(typeArg))) {
+        throw new Error(
+          `type argument mismatch: expected '${expectedTypeArg}' but got '${gotTypeArg}'`,
+        );
+      }
+
+      return LendingMarketOwnerCap.fromBcs(typeArg, fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return LendingMarketOwnerCap.fromSuiParsedData(typeArg, data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch<P extends PhantomReified<PhantomTypeArgument>>(
     client: SuiClient,
     typeArg: P,
@@ -1654,10 +1838,8 @@ export class LendingMarketOwnerCap<P extends PhantomTypeArgument>
         `object at id ${id} is not a LendingMarketOwnerCap object`,
       );
     }
-    return LendingMarketOwnerCap.fromBcs(
-      typeArg,
-      fromB64(res.data.bcs.bcsBytes),
-    );
+
+    return LendingMarketOwnerCap.fromSuiObjectData(typeArg, res.data);
   }
 }
 
@@ -1665,10 +1847,7 @@ export class LendingMarketOwnerCap<P extends PhantomTypeArgument>
 
 export function isLiquidateEvent(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::LiquidateEvent"
-  );
+  return type === `${PKG_V1}::lending_market::LiquidateEvent`;
 }
 
 export interface LiquidateEventFields {
@@ -1690,15 +1869,16 @@ export type LiquidateEventReified = Reified<
 >;
 
 export class LiquidateEvent implements StructClass {
-  static readonly $typeName =
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::LiquidateEvent";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V1}::lending_market::LiquidateEvent`;
   static readonly $numTypeParams = 0;
+  static readonly $isPhantom = [] as const;
 
   readonly $typeName = LiquidateEvent.$typeName;
-
-  readonly $fullTypeName: "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::LiquidateEvent";
-
+  readonly $fullTypeName: `${typeof PKG_V1}::lending_market::LiquidateEvent`;
   readonly $typeArgs: [];
+  readonly $isPhantom = LiquidateEvent.$isPhantom;
 
   readonly lendingMarketId: ToField<"address">;
   readonly repayReserveId: ToField<"address">;
@@ -1715,7 +1895,7 @@ export class LiquidateEvent implements StructClass {
     this.$fullTypeName = composeSuiType(
       LiquidateEvent.$typeName,
       ...typeArgs,
-    ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::LiquidateEvent";
+    ) as `${typeof PKG_V1}::lending_market::LiquidateEvent`;
     this.$typeArgs = typeArgs;
 
     this.lendingMarketId = fields.lendingMarketId;
@@ -1736,8 +1916,9 @@ export class LiquidateEvent implements StructClass {
       fullTypeName: composeSuiType(
         LiquidateEvent.$typeName,
         ...[],
-      ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::LiquidateEvent",
+      ) as `${typeof PKG_V1}::lending_market::LiquidateEvent`,
       typeArgs: [] as [],
+      isPhantom: LiquidateEvent.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         LiquidateEvent.fromFields(fields),
@@ -1749,6 +1930,8 @@ export class LiquidateEvent implements StructClass {
       fromJSON: (json: Record<string, any>) => LiquidateEvent.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         LiquidateEvent.fromSuiParsedData(content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        LiquidateEvent.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         LiquidateEvent.fetch(client, id),
       new: (fields: LiquidateEventFields) => {
@@ -1951,6 +2134,25 @@ export class LiquidateEvent implements StructClass {
     return LiquidateEvent.fromFieldsWithTypes(content);
   }
 
+  static fromSuiObjectData(data: SuiObjectData): LiquidateEvent {
+    if (data.bcs) {
+      if (
+        data.bcs.dataType !== "moveObject" ||
+        !isLiquidateEvent(data.bcs.type)
+      ) {
+        throw new Error(`object at is not a LiquidateEvent object`);
+      }
+
+      return LiquidateEvent.fromBcs(fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return LiquidateEvent.fromSuiParsedData(data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch(client: SuiClient, id: string): Promise<LiquidateEvent> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -1964,7 +2166,8 @@ export class LiquidateEvent implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a LiquidateEvent object`);
     }
-    return LiquidateEvent.fromBcs(fromB64(res.data.bcs.bcsBytes));
+
+    return LiquidateEvent.fromSuiObjectData(res.data);
   }
 }
 
@@ -1972,10 +2175,7 @@ export class LiquidateEvent implements StructClass {
 
 export function isMintEvent(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::MintEvent"
-  );
+  return type === `${PKG_V1}::lending_market::MintEvent`;
 }
 
 export interface MintEventFields {
@@ -1989,15 +2189,16 @@ export interface MintEventFields {
 export type MintEventReified = Reified<MintEvent, MintEventFields>;
 
 export class MintEvent implements StructClass {
-  static readonly $typeName =
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::MintEvent";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V1}::lending_market::MintEvent`;
   static readonly $numTypeParams = 0;
+  static readonly $isPhantom = [] as const;
 
   readonly $typeName = MintEvent.$typeName;
-
-  readonly $fullTypeName: "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::MintEvent";
-
+  readonly $fullTypeName: `${typeof PKG_V1}::lending_market::MintEvent`;
   readonly $typeArgs: [];
+  readonly $isPhantom = MintEvent.$isPhantom;
 
   readonly lendingMarketId: ToField<"address">;
   readonly coinType: ToField<TypeName>;
@@ -2009,7 +2210,7 @@ export class MintEvent implements StructClass {
     this.$fullTypeName = composeSuiType(
       MintEvent.$typeName,
       ...typeArgs,
-    ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::MintEvent";
+    ) as `${typeof PKG_V1}::lending_market::MintEvent`;
     this.$typeArgs = typeArgs;
 
     this.lendingMarketId = fields.lendingMarketId;
@@ -2025,8 +2226,9 @@ export class MintEvent implements StructClass {
       fullTypeName: composeSuiType(
         MintEvent.$typeName,
         ...[],
-      ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::MintEvent",
+      ) as `${typeof PKG_V1}::lending_market::MintEvent`,
       typeArgs: [] as [],
+      isPhantom: MintEvent.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => MintEvent.fromFields(fields),
       fromFieldsWithTypes: (item: FieldsWithTypes) =>
@@ -2037,6 +2239,8 @@ export class MintEvent implements StructClass {
       fromJSON: (json: Record<string, any>) => MintEvent.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         MintEvent.fromSuiParsedData(content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        MintEvent.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         MintEvent.fetch(client, id),
       new: (fields: MintEventFields) => {
@@ -2162,6 +2366,22 @@ export class MintEvent implements StructClass {
     return MintEvent.fromFieldsWithTypes(content);
   }
 
+  static fromSuiObjectData(data: SuiObjectData): MintEvent {
+    if (data.bcs) {
+      if (data.bcs.dataType !== "moveObject" || !isMintEvent(data.bcs.type)) {
+        throw new Error(`object at is not a MintEvent object`);
+      }
+
+      return MintEvent.fromBcs(fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return MintEvent.fromSuiParsedData(data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch(client: SuiClient, id: string): Promise<MintEvent> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -2175,7 +2395,8 @@ export class MintEvent implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a MintEvent object`);
     }
-    return MintEvent.fromBcs(fromB64(res.data.bcs.bcsBytes));
+
+    return MintEvent.fromSuiObjectData(res.data);
   }
 }
 
@@ -2183,9 +2404,7 @@ export class MintEvent implements StructClass {
 
 export function isObligationOwnerCap(type: string): boolean {
   type = compressSuiType(type);
-  return type.startsWith(
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::ObligationOwnerCap<",
-  );
+  return type.startsWith(`${PKG_V1}::lending_market::ObligationOwnerCap` + "<");
 }
 
 export interface ObligationOwnerCapFields<P extends PhantomTypeArgument> {
@@ -2201,15 +2420,16 @@ export type ObligationOwnerCapReified<P extends PhantomTypeArgument> = Reified<
 export class ObligationOwnerCap<P extends PhantomTypeArgument>
   implements StructClass
 {
-  static readonly $typeName =
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::ObligationOwnerCap";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V1}::lending_market::ObligationOwnerCap`;
   static readonly $numTypeParams = 1;
+  static readonly $isPhantom = [true] as const;
 
   readonly $typeName = ObligationOwnerCap.$typeName;
-
-  readonly $fullTypeName: `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::ObligationOwnerCap<${PhantomToTypeStr<P>}>`;
-
+  readonly $fullTypeName: `${typeof PKG_V1}::lending_market::ObligationOwnerCap<${PhantomToTypeStr<P>}>`;
   readonly $typeArgs: [PhantomToTypeStr<P>];
+  readonly $isPhantom = ObligationOwnerCap.$isPhantom;
 
   readonly id: ToField<UID>;
   readonly obligationId: ToField<ID>;
@@ -2221,7 +2441,7 @@ export class ObligationOwnerCap<P extends PhantomTypeArgument>
     this.$fullTypeName = composeSuiType(
       ObligationOwnerCap.$typeName,
       ...typeArgs,
-    ) as `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::ObligationOwnerCap<${PhantomToTypeStr<P>}>`;
+    ) as `${typeof PKG_V1}::lending_market::ObligationOwnerCap<${PhantomToTypeStr<P>}>`;
     this.$typeArgs = typeArgs;
 
     this.id = fields.id;
@@ -2236,10 +2456,11 @@ export class ObligationOwnerCap<P extends PhantomTypeArgument>
       fullTypeName: composeSuiType(
         ObligationOwnerCap.$typeName,
         ...[extractType(P)],
-      ) as `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::ObligationOwnerCap<${PhantomToTypeStr<ToPhantomTypeArgument<P>>}>`,
+      ) as `${typeof PKG_V1}::lending_market::ObligationOwnerCap<${PhantomToTypeStr<ToPhantomTypeArgument<P>>}>`,
       typeArgs: [extractType(P)] as [
         PhantomToTypeStr<ToPhantomTypeArgument<P>>,
       ],
+      isPhantom: ObligationOwnerCap.$isPhantom,
       reifiedTypeArgs: [P],
       fromFields: (fields: Record<string, any>) =>
         ObligationOwnerCap.fromFields(P, fields),
@@ -2252,6 +2473,8 @@ export class ObligationOwnerCap<P extends PhantomTypeArgument>
         ObligationOwnerCap.fromJSON(P, json),
       fromSuiParsedData: (content: SuiParsedData) =>
         ObligationOwnerCap.fromSuiParsedData(P, content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        ObligationOwnerCap.fromSuiObjectData(P, content),
       fetch: async (client: SuiClient, id: string) =>
         ObligationOwnerCap.fetch(client, P, id),
       new: (fields: ObligationOwnerCapFields<ToPhantomTypeArgument<P>>) => {
@@ -2375,6 +2598,42 @@ export class ObligationOwnerCap<P extends PhantomTypeArgument>
     return ObligationOwnerCap.fromFieldsWithTypes(typeArg, content);
   }
 
+  static fromSuiObjectData<P extends PhantomReified<PhantomTypeArgument>>(
+    typeArg: P,
+    data: SuiObjectData,
+  ): ObligationOwnerCap<ToPhantomTypeArgument<P>> {
+    if (data.bcs) {
+      if (
+        data.bcs.dataType !== "moveObject" ||
+        !isObligationOwnerCap(data.bcs.type)
+      ) {
+        throw new Error(`object at is not a ObligationOwnerCap object`);
+      }
+
+      const gotTypeArgs = parseTypeName(data.bcs.type).typeArgs;
+      if (gotTypeArgs.length !== 1) {
+        throw new Error(
+          `type argument mismatch: expected 1 type argument but got '${gotTypeArgs.length}'`,
+        );
+      }
+      const gotTypeArg = compressSuiType(gotTypeArgs[0]);
+      const expectedTypeArg = compressSuiType(extractType(typeArg));
+      if (gotTypeArg !== compressSuiType(extractType(typeArg))) {
+        throw new Error(
+          `type argument mismatch: expected '${expectedTypeArg}' but got '${gotTypeArg}'`,
+        );
+      }
+
+      return ObligationOwnerCap.fromBcs(typeArg, fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return ObligationOwnerCap.fromSuiParsedData(typeArg, data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch<P extends PhantomReified<PhantomTypeArgument>>(
     client: SuiClient,
     typeArg: P,
@@ -2392,7 +2651,8 @@ export class ObligationOwnerCap<P extends PhantomTypeArgument>
     ) {
       throw new Error(`object at id ${id} is not a ObligationOwnerCap object`);
     }
-    return ObligationOwnerCap.fromBcs(typeArg, fromB64(res.data.bcs.bcsBytes));
+
+    return ObligationOwnerCap.fromSuiObjectData(typeArg, res.data);
   }
 }
 
@@ -2401,7 +2661,7 @@ export class ObligationOwnerCap<P extends PhantomTypeArgument>
 export function isRateLimiterExemption(type: string): boolean {
   type = compressSuiType(type);
   return type.startsWith(
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::RateLimiterExemption<",
+    `${PKG_V1}::lending_market::RateLimiterExemption` + "<",
   );
 }
 
@@ -2422,15 +2682,16 @@ export class RateLimiterExemption<
   T extends PhantomTypeArgument,
 > implements StructClass
 {
-  static readonly $typeName =
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::RateLimiterExemption";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V1}::lending_market::RateLimiterExemption`;
   static readonly $numTypeParams = 2;
+  static readonly $isPhantom = [true, true] as const;
 
   readonly $typeName = RateLimiterExemption.$typeName;
-
-  readonly $fullTypeName: `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::RateLimiterExemption<${PhantomToTypeStr<P>}, ${PhantomToTypeStr<T>}>`;
-
+  readonly $fullTypeName: `${typeof PKG_V1}::lending_market::RateLimiterExemption<${PhantomToTypeStr<P>}, ${PhantomToTypeStr<T>}>`;
   readonly $typeArgs: [PhantomToTypeStr<P>, PhantomToTypeStr<T>];
+  readonly $isPhantom = RateLimiterExemption.$isPhantom;
 
   readonly amount: ToField<"u64">;
 
@@ -2441,7 +2702,7 @@ export class RateLimiterExemption<
     this.$fullTypeName = composeSuiType(
       RateLimiterExemption.$typeName,
       ...typeArgs,
-    ) as `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::RateLimiterExemption<${PhantomToTypeStr<P>}, ${PhantomToTypeStr<T>}>`;
+    ) as `${typeof PKG_V1}::lending_market::RateLimiterExemption<${PhantomToTypeStr<P>}, ${PhantomToTypeStr<T>}>`;
     this.$typeArgs = typeArgs;
 
     this.amount = fields.amount;
@@ -2462,11 +2723,12 @@ export class RateLimiterExemption<
       fullTypeName: composeSuiType(
         RateLimiterExemption.$typeName,
         ...[extractType(P), extractType(T)],
-      ) as `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::RateLimiterExemption<${PhantomToTypeStr<ToPhantomTypeArgument<P>>}, ${PhantomToTypeStr<ToPhantomTypeArgument<T>>}>`,
+      ) as `${typeof PKG_V1}::lending_market::RateLimiterExemption<${PhantomToTypeStr<ToPhantomTypeArgument<P>>}, ${PhantomToTypeStr<ToPhantomTypeArgument<T>>}>`,
       typeArgs: [extractType(P), extractType(T)] as [
         PhantomToTypeStr<ToPhantomTypeArgument<P>>,
         PhantomToTypeStr<ToPhantomTypeArgument<T>>,
       ],
+      isPhantom: RateLimiterExemption.$isPhantom,
       reifiedTypeArgs: [P, T],
       fromFields: (fields: Record<string, any>) =>
         RateLimiterExemption.fromFields([P, T], fields),
@@ -2480,6 +2742,8 @@ export class RateLimiterExemption<
         RateLimiterExemption.fromJSON([P, T], json),
       fromSuiParsedData: (content: SuiParsedData) =>
         RateLimiterExemption.fromSuiParsedData([P, T], content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        RateLimiterExemption.fromSuiObjectData([P, T], content),
       fetch: async (client: SuiClient, id: string) =>
         RateLimiterExemption.fetch(client, [P, T], id),
       new: (
@@ -2632,6 +2896,47 @@ export class RateLimiterExemption<
     return RateLimiterExemption.fromFieldsWithTypes(typeArgs, content);
   }
 
+  static fromSuiObjectData<
+    P extends PhantomReified<PhantomTypeArgument>,
+    T extends PhantomReified<PhantomTypeArgument>,
+  >(
+    typeArgs: [P, T],
+    data: SuiObjectData,
+  ): RateLimiterExemption<ToPhantomTypeArgument<P>, ToPhantomTypeArgument<T>> {
+    if (data.bcs) {
+      if (
+        data.bcs.dataType !== "moveObject" ||
+        !isRateLimiterExemption(data.bcs.type)
+      ) {
+        throw new Error(`object at is not a RateLimiterExemption object`);
+      }
+
+      const gotTypeArgs = parseTypeName(data.bcs.type).typeArgs;
+      if (gotTypeArgs.length !== 2) {
+        throw new Error(
+          `type argument mismatch: expected 2 type arguments but got ${gotTypeArgs.length}`,
+        );
+      }
+      for (let i = 0; i < 2; i++) {
+        const gotTypeArg = compressSuiType(gotTypeArgs[i]);
+        const expectedTypeArg = compressSuiType(extractType(typeArgs[i]));
+        if (gotTypeArg !== expectedTypeArg) {
+          throw new Error(
+            `type argument mismatch at position ${i}: expected '${expectedTypeArg}' but got '${gotTypeArg}'`,
+          );
+        }
+      }
+
+      return RateLimiterExemption.fromBcs(typeArgs, fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return RateLimiterExemption.fromSuiParsedData(typeArgs, data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch<
     P extends PhantomReified<PhantomTypeArgument>,
     T extends PhantomReified<PhantomTypeArgument>,
@@ -2656,10 +2961,8 @@ export class RateLimiterExemption<
         `object at id ${id} is not a RateLimiterExemption object`,
       );
     }
-    return RateLimiterExemption.fromBcs(
-      typeArgs,
-      fromB64(res.data.bcs.bcsBytes),
-    );
+
+    return RateLimiterExemption.fromSuiObjectData(typeArgs, res.data);
   }
 }
 
@@ -2667,10 +2970,7 @@ export class RateLimiterExemption<
 
 export function isRedeemEvent(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::RedeemEvent"
-  );
+  return type === `${PKG_V1}::lending_market::RedeemEvent`;
 }
 
 export interface RedeemEventFields {
@@ -2684,15 +2984,16 @@ export interface RedeemEventFields {
 export type RedeemEventReified = Reified<RedeemEvent, RedeemEventFields>;
 
 export class RedeemEvent implements StructClass {
-  static readonly $typeName =
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::RedeemEvent";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V1}::lending_market::RedeemEvent`;
   static readonly $numTypeParams = 0;
+  static readonly $isPhantom = [] as const;
 
   readonly $typeName = RedeemEvent.$typeName;
-
-  readonly $fullTypeName: "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::RedeemEvent";
-
+  readonly $fullTypeName: `${typeof PKG_V1}::lending_market::RedeemEvent`;
   readonly $typeArgs: [];
+  readonly $isPhantom = RedeemEvent.$isPhantom;
 
   readonly lendingMarketId: ToField<"address">;
   readonly coinType: ToField<TypeName>;
@@ -2704,7 +3005,7 @@ export class RedeemEvent implements StructClass {
     this.$fullTypeName = composeSuiType(
       RedeemEvent.$typeName,
       ...typeArgs,
-    ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::RedeemEvent";
+    ) as `${typeof PKG_V1}::lending_market::RedeemEvent`;
     this.$typeArgs = typeArgs;
 
     this.lendingMarketId = fields.lendingMarketId;
@@ -2720,8 +3021,9 @@ export class RedeemEvent implements StructClass {
       fullTypeName: composeSuiType(
         RedeemEvent.$typeName,
         ...[],
-      ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::RedeemEvent",
+      ) as `${typeof PKG_V1}::lending_market::RedeemEvent`,
       typeArgs: [] as [],
+      isPhantom: RedeemEvent.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         RedeemEvent.fromFields(fields),
@@ -2733,6 +3035,8 @@ export class RedeemEvent implements StructClass {
       fromJSON: (json: Record<string, any>) => RedeemEvent.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         RedeemEvent.fromSuiParsedData(content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        RedeemEvent.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         RedeemEvent.fetch(client, id),
       new: (fields: RedeemEventFields) => {
@@ -2858,6 +3162,22 @@ export class RedeemEvent implements StructClass {
     return RedeemEvent.fromFieldsWithTypes(content);
   }
 
+  static fromSuiObjectData(data: SuiObjectData): RedeemEvent {
+    if (data.bcs) {
+      if (data.bcs.dataType !== "moveObject" || !isRedeemEvent(data.bcs.type)) {
+        throw new Error(`object at is not a RedeemEvent object`);
+      }
+
+      return RedeemEvent.fromBcs(fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return RedeemEvent.fromSuiParsedData(data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch(client: SuiClient, id: string): Promise<RedeemEvent> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -2871,7 +3191,8 @@ export class RedeemEvent implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a RedeemEvent object`);
     }
-    return RedeemEvent.fromBcs(fromB64(res.data.bcs.bcsBytes));
+
+    return RedeemEvent.fromSuiObjectData(res.data);
   }
 }
 
@@ -2879,10 +3200,7 @@ export class RedeemEvent implements StructClass {
 
 export function isRepayEvent(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::RepayEvent"
-  );
+  return type === `${PKG_V1}::lending_market::RepayEvent`;
 }
 
 export interface RepayEventFields {
@@ -2896,15 +3214,16 @@ export interface RepayEventFields {
 export type RepayEventReified = Reified<RepayEvent, RepayEventFields>;
 
 export class RepayEvent implements StructClass {
-  static readonly $typeName =
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::RepayEvent";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V1}::lending_market::RepayEvent`;
   static readonly $numTypeParams = 0;
+  static readonly $isPhantom = [] as const;
 
   readonly $typeName = RepayEvent.$typeName;
-
-  readonly $fullTypeName: "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::RepayEvent";
-
+  readonly $fullTypeName: `${typeof PKG_V1}::lending_market::RepayEvent`;
   readonly $typeArgs: [];
+  readonly $isPhantom = RepayEvent.$isPhantom;
 
   readonly lendingMarketId: ToField<"address">;
   readonly coinType: ToField<TypeName>;
@@ -2916,7 +3235,7 @@ export class RepayEvent implements StructClass {
     this.$fullTypeName = composeSuiType(
       RepayEvent.$typeName,
       ...typeArgs,
-    ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::RepayEvent";
+    ) as `${typeof PKG_V1}::lending_market::RepayEvent`;
     this.$typeArgs = typeArgs;
 
     this.lendingMarketId = fields.lendingMarketId;
@@ -2932,8 +3251,9 @@ export class RepayEvent implements StructClass {
       fullTypeName: composeSuiType(
         RepayEvent.$typeName,
         ...[],
-      ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::RepayEvent",
+      ) as `${typeof PKG_V1}::lending_market::RepayEvent`,
       typeArgs: [] as [],
+      isPhantom: RepayEvent.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         RepayEvent.fromFields(fields),
@@ -2945,6 +3265,8 @@ export class RepayEvent implements StructClass {
       fromJSON: (json: Record<string, any>) => RepayEvent.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         RepayEvent.fromSuiParsedData(content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        RepayEvent.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         RepayEvent.fetch(client, id),
       new: (fields: RepayEventFields) => {
@@ -3078,6 +3400,22 @@ export class RepayEvent implements StructClass {
     return RepayEvent.fromFieldsWithTypes(content);
   }
 
+  static fromSuiObjectData(data: SuiObjectData): RepayEvent {
+    if (data.bcs) {
+      if (data.bcs.dataType !== "moveObject" || !isRepayEvent(data.bcs.type)) {
+        throw new Error(`object at is not a RepayEvent object`);
+      }
+
+      return RepayEvent.fromBcs(fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return RepayEvent.fromSuiParsedData(data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch(client: SuiClient, id: string): Promise<RepayEvent> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -3091,7 +3429,8 @@ export class RepayEvent implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a RepayEvent object`);
     }
-    return RepayEvent.fromBcs(fromB64(res.data.bcs.bcsBytes));
+
+    return RepayEvent.fromSuiObjectData(res.data);
   }
 }
 
@@ -3099,10 +3438,7 @@ export class RepayEvent implements StructClass {
 
 export function isWithdrawEvent(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::WithdrawEvent"
-  );
+  return type === `${PKG_V1}::lending_market::WithdrawEvent`;
 }
 
 export interface WithdrawEventFields {
@@ -3116,15 +3452,16 @@ export interface WithdrawEventFields {
 export type WithdrawEventReified = Reified<WithdrawEvent, WithdrawEventFields>;
 
 export class WithdrawEvent implements StructClass {
-  static readonly $typeName =
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::WithdrawEvent";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V1}::lending_market::WithdrawEvent`;
   static readonly $numTypeParams = 0;
+  static readonly $isPhantom = [] as const;
 
   readonly $typeName = WithdrawEvent.$typeName;
-
-  readonly $fullTypeName: "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::WithdrawEvent";
-
+  readonly $fullTypeName: `${typeof PKG_V1}::lending_market::WithdrawEvent`;
   readonly $typeArgs: [];
+  readonly $isPhantom = WithdrawEvent.$isPhantom;
 
   readonly lendingMarketId: ToField<"address">;
   readonly coinType: ToField<TypeName>;
@@ -3136,7 +3473,7 @@ export class WithdrawEvent implements StructClass {
     this.$fullTypeName = composeSuiType(
       WithdrawEvent.$typeName,
       ...typeArgs,
-    ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::WithdrawEvent";
+    ) as `${typeof PKG_V1}::lending_market::WithdrawEvent`;
     this.$typeArgs = typeArgs;
 
     this.lendingMarketId = fields.lendingMarketId;
@@ -3152,8 +3489,9 @@ export class WithdrawEvent implements StructClass {
       fullTypeName: composeSuiType(
         WithdrawEvent.$typeName,
         ...[],
-      ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market::WithdrawEvent",
+      ) as `${typeof PKG_V1}::lending_market::WithdrawEvent`,
       typeArgs: [] as [],
+      isPhantom: WithdrawEvent.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         WithdrawEvent.fromFields(fields),
@@ -3165,6 +3503,8 @@ export class WithdrawEvent implements StructClass {
       fromJSON: (json: Record<string, any>) => WithdrawEvent.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         WithdrawEvent.fromSuiParsedData(content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        WithdrawEvent.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         WithdrawEvent.fetch(client, id),
       new: (fields: WithdrawEventFields) => {
@@ -3295,6 +3635,25 @@ export class WithdrawEvent implements StructClass {
     return WithdrawEvent.fromFieldsWithTypes(content);
   }
 
+  static fromSuiObjectData(data: SuiObjectData): WithdrawEvent {
+    if (data.bcs) {
+      if (
+        data.bcs.dataType !== "moveObject" ||
+        !isWithdrawEvent(data.bcs.type)
+      ) {
+        throw new Error(`object at is not a WithdrawEvent object`);
+      }
+
+      return WithdrawEvent.fromBcs(fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return WithdrawEvent.fromSuiParsedData(data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch(client: SuiClient, id: string): Promise<WithdrawEvent> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -3308,6 +3667,7 @@ export class WithdrawEvent implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a WithdrawEvent object`);
     }
-    return WithdrawEvent.fromBcs(fromB64(res.data.bcs.bcsBytes));
+
+    return WithdrawEvent.fromSuiObjectData(res.data);
   }
 }

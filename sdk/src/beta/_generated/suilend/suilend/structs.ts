@@ -14,17 +14,16 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../_framework/util";
-import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { PKG_V1 } from "../index";
+import { bcs } from "@mysten/sui/bcs";
+import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
+import { fromB64 } from "@mysten/sui/utils";
 
 /* ============================== MAIN_POOL =============================== */
 
 export function isMAIN_POOL(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::suilend::MAIN_POOL"
-  );
+  return type === `${PKG_V1}::suilend::MAIN_POOL`;
 }
 
 export interface MAIN_POOLFields {
@@ -34,15 +33,16 @@ export interface MAIN_POOLFields {
 export type MAIN_POOLReified = Reified<MAIN_POOL, MAIN_POOLFields>;
 
 export class MAIN_POOL implements StructClass {
-  static readonly $typeName =
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::suilend::MAIN_POOL";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V1}::suilend::MAIN_POOL`;
   static readonly $numTypeParams = 0;
+  static readonly $isPhantom = [] as const;
 
   readonly $typeName = MAIN_POOL.$typeName;
-
-  readonly $fullTypeName: "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::suilend::MAIN_POOL";
-
+  readonly $fullTypeName: `${typeof PKG_V1}::suilend::MAIN_POOL`;
   readonly $typeArgs: [];
+  readonly $isPhantom = MAIN_POOL.$isPhantom;
 
   readonly dummyField: ToField<"bool">;
 
@@ -50,7 +50,7 @@ export class MAIN_POOL implements StructClass {
     this.$fullTypeName = composeSuiType(
       MAIN_POOL.$typeName,
       ...typeArgs,
-    ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::suilend::MAIN_POOL";
+    ) as `${typeof PKG_V1}::suilend::MAIN_POOL`;
     this.$typeArgs = typeArgs;
 
     this.dummyField = fields.dummyField;
@@ -62,8 +62,9 @@ export class MAIN_POOL implements StructClass {
       fullTypeName: composeSuiType(
         MAIN_POOL.$typeName,
         ...[],
-      ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::suilend::MAIN_POOL",
+      ) as `${typeof PKG_V1}::suilend::MAIN_POOL`,
       typeArgs: [] as [],
+      isPhantom: MAIN_POOL.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => MAIN_POOL.fromFields(fields),
       fromFieldsWithTypes: (item: FieldsWithTypes) =>
@@ -74,6 +75,8 @@ export class MAIN_POOL implements StructClass {
       fromJSON: (json: Record<string, any>) => MAIN_POOL.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         MAIN_POOL.fromSuiParsedData(content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        MAIN_POOL.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         MAIN_POOL.fetch(client, id),
       new: (fields: MAIN_POOLFields) => {
@@ -160,6 +163,22 @@ export class MAIN_POOL implements StructClass {
     return MAIN_POOL.fromFieldsWithTypes(content);
   }
 
+  static fromSuiObjectData(data: SuiObjectData): MAIN_POOL {
+    if (data.bcs) {
+      if (data.bcs.dataType !== "moveObject" || !isMAIN_POOL(data.bcs.type)) {
+        throw new Error(`object at is not a MAIN_POOL object`);
+      }
+
+      return MAIN_POOL.fromBcs(fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return MAIN_POOL.fromSuiParsedData(data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch(client: SuiClient, id: string): Promise<MAIN_POOL> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -173,6 +192,7 @@ export class MAIN_POOL implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a MAIN_POOL object`);
     }
-    return MAIN_POOL.fromBcs(fromB64(res.data.bcs.bcsBytes));
+
+    return MAIN_POOL.fromSuiObjectData(res.data);
   }
 }

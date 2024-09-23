@@ -5,7 +5,6 @@ import {
   StructClass,
   ToField,
   ToTypeStr,
-  Vector,
   decodeFromFields,
   decodeFromFieldsWithTypes,
   decodeFromJSONField,
@@ -17,14 +16,17 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
-import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { Vector } from "../../../../_framework/vector";
+import { PKG_V27 } from "../index";
+import { bcs } from "@mysten/sui/bcs";
+import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
+import { fromB64 } from "@mysten/sui/utils";
 
 /* ============================== Curve =============================== */
 
 export function isCurve(type: string): boolean {
   type = compressSuiType(type);
-  return type === "0x2::groth16::Curve";
+  return type === `${PKG_V27}::groth16::Curve`;
 }
 
 export interface CurveFields {
@@ -34,14 +36,16 @@ export interface CurveFields {
 export type CurveReified = Reified<Curve, CurveFields>;
 
 export class Curve implements StructClass {
-  static readonly $typeName = "0x2::groth16::Curve";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V27}::groth16::Curve`;
   static readonly $numTypeParams = 0;
+  static readonly $isPhantom = [] as const;
 
   readonly $typeName = Curve.$typeName;
-
-  readonly $fullTypeName: "0x2::groth16::Curve";
-
+  readonly $fullTypeName: `${typeof PKG_V27}::groth16::Curve`;
   readonly $typeArgs: [];
+  readonly $isPhantom = Curve.$isPhantom;
 
   readonly id: ToField<"u8">;
 
@@ -49,7 +53,7 @@ export class Curve implements StructClass {
     this.$fullTypeName = composeSuiType(
       Curve.$typeName,
       ...typeArgs,
-    ) as "0x2::groth16::Curve";
+    ) as `${typeof PKG_V27}::groth16::Curve`;
     this.$typeArgs = typeArgs;
 
     this.id = fields.id;
@@ -61,8 +65,9 @@ export class Curve implements StructClass {
       fullTypeName: composeSuiType(
         Curve.$typeName,
         ...[],
-      ) as "0x2::groth16::Curve",
+      ) as `${typeof PKG_V27}::groth16::Curve`,
       typeArgs: [] as [],
+      isPhantom: Curve.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => Curve.fromFields(fields),
       fromFieldsWithTypes: (item: FieldsWithTypes) =>
@@ -73,6 +78,8 @@ export class Curve implements StructClass {
       fromJSON: (json: Record<string, any>) => Curve.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         Curve.fromSuiParsedData(content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        Curve.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) => Curve.fetch(client, id),
       new: (fields: CurveFields) => {
         return new Curve([], fields);
@@ -154,6 +161,22 @@ export class Curve implements StructClass {
     return Curve.fromFieldsWithTypes(content);
   }
 
+  static fromSuiObjectData(data: SuiObjectData): Curve {
+    if (data.bcs) {
+      if (data.bcs.dataType !== "moveObject" || !isCurve(data.bcs.type)) {
+        throw new Error(`object at is not a Curve object`);
+      }
+
+      return Curve.fromBcs(fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return Curve.fromSuiParsedData(data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch(client: SuiClient, id: string): Promise<Curve> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -167,7 +190,8 @@ export class Curve implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a Curve object`);
     }
-    return Curve.fromBcs(fromB64(res.data.bcs.bcsBytes));
+
+    return Curve.fromSuiObjectData(res.data);
   }
 }
 
@@ -175,7 +199,7 @@ export class Curve implements StructClass {
 
 export function isPreparedVerifyingKey(type: string): boolean {
   type = compressSuiType(type);
-  return type === "0x2::groth16::PreparedVerifyingKey";
+  return type === `${PKG_V27}::groth16::PreparedVerifyingKey`;
 }
 
 export interface PreparedVerifyingKeyFields {
@@ -191,14 +215,16 @@ export type PreparedVerifyingKeyReified = Reified<
 >;
 
 export class PreparedVerifyingKey implements StructClass {
-  static readonly $typeName = "0x2::groth16::PreparedVerifyingKey";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V27}::groth16::PreparedVerifyingKey`;
   static readonly $numTypeParams = 0;
+  static readonly $isPhantom = [] as const;
 
   readonly $typeName = PreparedVerifyingKey.$typeName;
-
-  readonly $fullTypeName: "0x2::groth16::PreparedVerifyingKey";
-
+  readonly $fullTypeName: `${typeof PKG_V27}::groth16::PreparedVerifyingKey`;
   readonly $typeArgs: [];
+  readonly $isPhantom = PreparedVerifyingKey.$isPhantom;
 
   readonly vkGammaAbcG1Bytes: ToField<Vector<"u8">>;
   readonly alphaG1BetaG2Bytes: ToField<Vector<"u8">>;
@@ -209,7 +235,7 @@ export class PreparedVerifyingKey implements StructClass {
     this.$fullTypeName = composeSuiType(
       PreparedVerifyingKey.$typeName,
       ...typeArgs,
-    ) as "0x2::groth16::PreparedVerifyingKey";
+    ) as `${typeof PKG_V27}::groth16::PreparedVerifyingKey`;
     this.$typeArgs = typeArgs;
 
     this.vkGammaAbcG1Bytes = fields.vkGammaAbcG1Bytes;
@@ -224,8 +250,9 @@ export class PreparedVerifyingKey implements StructClass {
       fullTypeName: composeSuiType(
         PreparedVerifyingKey.$typeName,
         ...[],
-      ) as "0x2::groth16::PreparedVerifyingKey",
+      ) as `${typeof PKG_V27}::groth16::PreparedVerifyingKey`,
       typeArgs: [] as [],
+      isPhantom: PreparedVerifyingKey.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         PreparedVerifyingKey.fromFields(fields),
@@ -238,6 +265,8 @@ export class PreparedVerifyingKey implements StructClass {
         PreparedVerifyingKey.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         PreparedVerifyingKey.fromSuiParsedData(content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        PreparedVerifyingKey.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         PreparedVerifyingKey.fetch(client, id),
       new: (fields: PreparedVerifyingKeyFields) => {
@@ -389,6 +418,25 @@ export class PreparedVerifyingKey implements StructClass {
     return PreparedVerifyingKey.fromFieldsWithTypes(content);
   }
 
+  static fromSuiObjectData(data: SuiObjectData): PreparedVerifyingKey {
+    if (data.bcs) {
+      if (
+        data.bcs.dataType !== "moveObject" ||
+        !isPreparedVerifyingKey(data.bcs.type)
+      ) {
+        throw new Error(`object at is not a PreparedVerifyingKey object`);
+      }
+
+      return PreparedVerifyingKey.fromBcs(fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return PreparedVerifyingKey.fromSuiParsedData(data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch(
     client: SuiClient,
     id: string,
@@ -407,7 +455,8 @@ export class PreparedVerifyingKey implements StructClass {
         `object at id ${id} is not a PreparedVerifyingKey object`,
       );
     }
-    return PreparedVerifyingKey.fromBcs(fromB64(res.data.bcs.bcsBytes));
+
+    return PreparedVerifyingKey.fromSuiObjectData(res.data);
   }
 }
 
@@ -415,7 +464,7 @@ export class PreparedVerifyingKey implements StructClass {
 
 export function isProofPoints(type: string): boolean {
   type = compressSuiType(type);
-  return type === "0x2::groth16::ProofPoints";
+  return type === `${PKG_V27}::groth16::ProofPoints`;
 }
 
 export interface ProofPointsFields {
@@ -425,14 +474,16 @@ export interface ProofPointsFields {
 export type ProofPointsReified = Reified<ProofPoints, ProofPointsFields>;
 
 export class ProofPoints implements StructClass {
-  static readonly $typeName = "0x2::groth16::ProofPoints";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V27}::groth16::ProofPoints`;
   static readonly $numTypeParams = 0;
+  static readonly $isPhantom = [] as const;
 
   readonly $typeName = ProofPoints.$typeName;
-
-  readonly $fullTypeName: "0x2::groth16::ProofPoints";
-
+  readonly $fullTypeName: `${typeof PKG_V27}::groth16::ProofPoints`;
   readonly $typeArgs: [];
+  readonly $isPhantom = ProofPoints.$isPhantom;
 
   readonly bytes: ToField<Vector<"u8">>;
 
@@ -440,7 +491,7 @@ export class ProofPoints implements StructClass {
     this.$fullTypeName = composeSuiType(
       ProofPoints.$typeName,
       ...typeArgs,
-    ) as "0x2::groth16::ProofPoints";
+    ) as `${typeof PKG_V27}::groth16::ProofPoints`;
     this.$typeArgs = typeArgs;
 
     this.bytes = fields.bytes;
@@ -452,8 +503,9 @@ export class ProofPoints implements StructClass {
       fullTypeName: composeSuiType(
         ProofPoints.$typeName,
         ...[],
-      ) as "0x2::groth16::ProofPoints",
+      ) as `${typeof PKG_V27}::groth16::ProofPoints`,
       typeArgs: [] as [],
+      isPhantom: ProofPoints.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         ProofPoints.fromFields(fields),
@@ -465,6 +517,8 @@ export class ProofPoints implements StructClass {
       fromJSON: (json: Record<string, any>) => ProofPoints.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         ProofPoints.fromSuiParsedData(content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        ProofPoints.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         ProofPoints.fetch(client, id),
       new: (fields: ProofPointsFields) => {
@@ -551,6 +605,22 @@ export class ProofPoints implements StructClass {
     return ProofPoints.fromFieldsWithTypes(content);
   }
 
+  static fromSuiObjectData(data: SuiObjectData): ProofPoints {
+    if (data.bcs) {
+      if (data.bcs.dataType !== "moveObject" || !isProofPoints(data.bcs.type)) {
+        throw new Error(`object at is not a ProofPoints object`);
+      }
+
+      return ProofPoints.fromBcs(fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return ProofPoints.fromSuiParsedData(data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch(client: SuiClient, id: string): Promise<ProofPoints> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -564,7 +634,8 @@ export class ProofPoints implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a ProofPoints object`);
     }
-    return ProofPoints.fromBcs(fromB64(res.data.bcs.bcsBytes));
+
+    return ProofPoints.fromSuiObjectData(res.data);
   }
 }
 
@@ -572,7 +643,7 @@ export class ProofPoints implements StructClass {
 
 export function isPublicProofInputs(type: string): boolean {
   type = compressSuiType(type);
-  return type === "0x2::groth16::PublicProofInputs";
+  return type === `${PKG_V27}::groth16::PublicProofInputs`;
 }
 
 export interface PublicProofInputsFields {
@@ -585,14 +656,16 @@ export type PublicProofInputsReified = Reified<
 >;
 
 export class PublicProofInputs implements StructClass {
-  static readonly $typeName = "0x2::groth16::PublicProofInputs";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V27}::groth16::PublicProofInputs`;
   static readonly $numTypeParams = 0;
+  static readonly $isPhantom = [] as const;
 
   readonly $typeName = PublicProofInputs.$typeName;
-
-  readonly $fullTypeName: "0x2::groth16::PublicProofInputs";
-
+  readonly $fullTypeName: `${typeof PKG_V27}::groth16::PublicProofInputs`;
   readonly $typeArgs: [];
+  readonly $isPhantom = PublicProofInputs.$isPhantom;
 
   readonly bytes: ToField<Vector<"u8">>;
 
@@ -600,7 +673,7 @@ export class PublicProofInputs implements StructClass {
     this.$fullTypeName = composeSuiType(
       PublicProofInputs.$typeName,
       ...typeArgs,
-    ) as "0x2::groth16::PublicProofInputs";
+    ) as `${typeof PKG_V27}::groth16::PublicProofInputs`;
     this.$typeArgs = typeArgs;
 
     this.bytes = fields.bytes;
@@ -612,8 +685,9 @@ export class PublicProofInputs implements StructClass {
       fullTypeName: composeSuiType(
         PublicProofInputs.$typeName,
         ...[],
-      ) as "0x2::groth16::PublicProofInputs",
+      ) as `${typeof PKG_V27}::groth16::PublicProofInputs`,
       typeArgs: [] as [],
+      isPhantom: PublicProofInputs.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         PublicProofInputs.fromFields(fields),
@@ -625,6 +699,8 @@ export class PublicProofInputs implements StructClass {
       fromJSON: (json: Record<string, any>) => PublicProofInputs.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         PublicProofInputs.fromSuiParsedData(content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        PublicProofInputs.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         PublicProofInputs.fetch(client, id),
       new: (fields: PublicProofInputsFields) => {
@@ -711,6 +787,25 @@ export class PublicProofInputs implements StructClass {
     return PublicProofInputs.fromFieldsWithTypes(content);
   }
 
+  static fromSuiObjectData(data: SuiObjectData): PublicProofInputs {
+    if (data.bcs) {
+      if (
+        data.bcs.dataType !== "moveObject" ||
+        !isPublicProofInputs(data.bcs.type)
+      ) {
+        throw new Error(`object at is not a PublicProofInputs object`);
+      }
+
+      return PublicProofInputs.fromBcs(fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return PublicProofInputs.fromSuiParsedData(data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch(
     client: SuiClient,
     id: string,
@@ -727,6 +822,7 @@ export class PublicProofInputs implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a PublicProofInputs object`);
     }
-    return PublicProofInputs.fromBcs(fromB64(res.data.bcs.bcsBytes));
+
+    return PublicProofInputs.fromSuiObjectData(res.data);
   }
 }

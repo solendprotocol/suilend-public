@@ -5,7 +5,6 @@ import {
   StructClass,
   ToField,
   ToTypeStr,
-  Vector,
   decodeFromFields,
   decodeFromFieldsWithTypes,
   decodeFromJSONField,
@@ -17,18 +16,18 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
+import { Vector } from "../../../../_framework/vector";
 import { Bytes32 } from "../../0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a/bytes32/structs";
-import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { PKG_V1 } from "../index";
+import { bcs } from "@mysten/sui/bcs";
+import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
+import { fromB64 } from "@mysten/sui/utils";
 
 /* ============================== WormholeVAAVerificationReceipt =============================== */
 
 export function isWormholeVAAVerificationReceipt(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::governance::WormholeVAAVerificationReceipt"
-  );
+  return type === `${PKG_V1}::governance::WormholeVAAVerificationReceipt`;
 }
 
 export interface WormholeVAAVerificationReceiptFields {
@@ -43,15 +42,16 @@ export type WormholeVAAVerificationReceiptReified = Reified<
 >;
 
 export class WormholeVAAVerificationReceipt implements StructClass {
-  static readonly $typeName =
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::governance::WormholeVAAVerificationReceipt";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V1}::governance::WormholeVAAVerificationReceipt`;
   static readonly $numTypeParams = 0;
+  static readonly $isPhantom = [] as const;
 
   readonly $typeName = WormholeVAAVerificationReceipt.$typeName;
-
-  readonly $fullTypeName: "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::governance::WormholeVAAVerificationReceipt";
-
+  readonly $fullTypeName: `${typeof PKG_V1}::governance::WormholeVAAVerificationReceipt`;
   readonly $typeArgs: [];
+  readonly $isPhantom = WormholeVAAVerificationReceipt.$isPhantom;
 
   readonly payload: ToField<Vector<"u8">>;
   readonly digest: ToField<Bytes32>;
@@ -64,7 +64,7 @@ export class WormholeVAAVerificationReceipt implements StructClass {
     this.$fullTypeName = composeSuiType(
       WormholeVAAVerificationReceipt.$typeName,
       ...typeArgs,
-    ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::governance::WormholeVAAVerificationReceipt";
+    ) as `${typeof PKG_V1}::governance::WormholeVAAVerificationReceipt`;
     this.$typeArgs = typeArgs;
 
     this.payload = fields.payload;
@@ -78,8 +78,9 @@ export class WormholeVAAVerificationReceipt implements StructClass {
       fullTypeName: composeSuiType(
         WormholeVAAVerificationReceipt.$typeName,
         ...[],
-      ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::governance::WormholeVAAVerificationReceipt",
+      ) as `${typeof PKG_V1}::governance::WormholeVAAVerificationReceipt`,
       typeArgs: [] as [],
+      isPhantom: WormholeVAAVerificationReceipt.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         WormholeVAAVerificationReceipt.fromFields(fields),
@@ -94,6 +95,8 @@ export class WormholeVAAVerificationReceipt implements StructClass {
         WormholeVAAVerificationReceipt.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         WormholeVAAVerificationReceipt.fromSuiParsedData(content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        WormholeVAAVerificationReceipt.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         WormholeVAAVerificationReceipt.fetch(client, id),
       new: (fields: WormholeVAAVerificationReceiptFields) => {
@@ -201,6 +204,29 @@ export class WormholeVAAVerificationReceipt implements StructClass {
     return WormholeVAAVerificationReceipt.fromFieldsWithTypes(content);
   }
 
+  static fromSuiObjectData(
+    data: SuiObjectData,
+  ): WormholeVAAVerificationReceipt {
+    if (data.bcs) {
+      if (
+        data.bcs.dataType !== "moveObject" ||
+        !isWormholeVAAVerificationReceipt(data.bcs.type)
+      ) {
+        throw new Error(
+          `object at is not a WormholeVAAVerificationReceipt object`,
+        );
+      }
+
+      return WormholeVAAVerificationReceipt.fromBcs(fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return WormholeVAAVerificationReceipt.fromSuiParsedData(data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch(
     client: SuiClient,
     id: string,
@@ -219,8 +245,7 @@ export class WormholeVAAVerificationReceipt implements StructClass {
         `object at id ${id} is not a WormholeVAAVerificationReceipt object`,
       );
     }
-    return WormholeVAAVerificationReceipt.fromBcs(
-      fromB64(res.data.bcs.bcsBytes),
-    );
+
+    return WormholeVAAVerificationReceipt.fromSuiObjectData(res.data);
   }
 }

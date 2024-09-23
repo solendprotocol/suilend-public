@@ -21,19 +21,19 @@ import {
   FieldsWithTypes,
   composeSuiType,
   compressSuiType,
+  parseTypeName,
 } from "../../../../_framework/util";
 import { Table } from "../../0x2/table/structs";
-import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { PKG_V1 } from "../index";
+import { bcs } from "@mysten/sui/bcs";
+import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
+import { fromB64 } from "@mysten/sui/utils";
 
 /* ============================== Empty =============================== */
 
 export function isEmpty(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::set::Empty"
-  );
+  return type === `${PKG_V1}::set::Empty`;
 }
 
 export interface EmptyFields {
@@ -43,15 +43,16 @@ export interface EmptyFields {
 export type EmptyReified = Reified<Empty, EmptyFields>;
 
 export class Empty implements StructClass {
-  static readonly $typeName =
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::set::Empty";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V1}::set::Empty`;
   static readonly $numTypeParams = 0;
+  static readonly $isPhantom = [] as const;
 
   readonly $typeName = Empty.$typeName;
-
-  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::set::Empty";
-
+  readonly $fullTypeName: `${typeof PKG_V1}::set::Empty`;
   readonly $typeArgs: [];
+  readonly $isPhantom = Empty.$isPhantom;
 
   readonly dummyField: ToField<"bool">;
 
@@ -59,7 +60,7 @@ export class Empty implements StructClass {
     this.$fullTypeName = composeSuiType(
       Empty.$typeName,
       ...typeArgs,
-    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::set::Empty";
+    ) as `${typeof PKG_V1}::set::Empty`;
     this.$typeArgs = typeArgs;
 
     this.dummyField = fields.dummyField;
@@ -71,8 +72,9 @@ export class Empty implements StructClass {
       fullTypeName: composeSuiType(
         Empty.$typeName,
         ...[],
-      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::set::Empty",
+      ) as `${typeof PKG_V1}::set::Empty`,
       typeArgs: [] as [],
+      isPhantom: Empty.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => Empty.fromFields(fields),
       fromFieldsWithTypes: (item: FieldsWithTypes) =>
@@ -83,6 +85,8 @@ export class Empty implements StructClass {
       fromJSON: (json: Record<string, any>) => Empty.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         Empty.fromSuiParsedData(content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        Empty.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) => Empty.fetch(client, id),
       new: (fields: EmptyFields) => {
         return new Empty([], fields);
@@ -168,6 +172,22 @@ export class Empty implements StructClass {
     return Empty.fromFieldsWithTypes(content);
   }
 
+  static fromSuiObjectData(data: SuiObjectData): Empty {
+    if (data.bcs) {
+      if (data.bcs.dataType !== "moveObject" || !isEmpty(data.bcs.type)) {
+        throw new Error(`object at is not a Empty object`);
+      }
+
+      return Empty.fromBcs(fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return Empty.fromSuiParsedData(data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch(client: SuiClient, id: string): Promise<Empty> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -181,7 +201,8 @@ export class Empty implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a Empty object`);
     }
-    return Empty.fromBcs(fromB64(res.data.bcs.bcsBytes));
+
+    return Empty.fromSuiObjectData(res.data);
   }
 }
 
@@ -189,9 +210,7 @@ export class Empty implements StructClass {
 
 export function isSet(type: string): boolean {
   type = compressSuiType(type);
-  return type.startsWith(
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::set::Set<",
-  );
+  return type.startsWith(`${PKG_V1}::set::Set` + "<");
 }
 
 export interface SetFields<T extends PhantomTypeArgument> {
@@ -204,15 +223,16 @@ export type SetReified<T extends PhantomTypeArgument> = Reified<
 >;
 
 export class Set<T extends PhantomTypeArgument> implements StructClass {
-  static readonly $typeName =
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::set::Set";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V1}::set::Set`;
   static readonly $numTypeParams = 1;
+  static readonly $isPhantom = [true] as const;
 
   readonly $typeName = Set.$typeName;
-
-  readonly $fullTypeName: `0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::set::Set<${PhantomToTypeStr<T>}>`;
-
+  readonly $fullTypeName: `${typeof PKG_V1}::set::Set<${PhantomToTypeStr<T>}>`;
   readonly $typeArgs: [PhantomToTypeStr<T>];
+  readonly $isPhantom = Set.$isPhantom;
 
   readonly items: ToField<Table<T, ToPhantom<Empty>>>;
 
@@ -220,7 +240,7 @@ export class Set<T extends PhantomTypeArgument> implements StructClass {
     this.$fullTypeName = composeSuiType(
       Set.$typeName,
       ...typeArgs,
-    ) as `0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::set::Set<${PhantomToTypeStr<T>}>`;
+    ) as `${typeof PKG_V1}::set::Set<${PhantomToTypeStr<T>}>`;
     this.$typeArgs = typeArgs;
 
     this.items = fields.items;
@@ -234,10 +254,11 @@ export class Set<T extends PhantomTypeArgument> implements StructClass {
       fullTypeName: composeSuiType(
         Set.$typeName,
         ...[extractType(T)],
-      ) as `0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::set::Set<${PhantomToTypeStr<ToPhantomTypeArgument<T>>}>`,
+      ) as `${typeof PKG_V1}::set::Set<${PhantomToTypeStr<ToPhantomTypeArgument<T>>}>`,
       typeArgs: [extractType(T)] as [
         PhantomToTypeStr<ToPhantomTypeArgument<T>>,
       ],
+      isPhantom: Set.$isPhantom,
       reifiedTypeArgs: [T],
       fromFields: (fields: Record<string, any>) => Set.fromFields(T, fields),
       fromFieldsWithTypes: (item: FieldsWithTypes) =>
@@ -248,6 +269,8 @@ export class Set<T extends PhantomTypeArgument> implements StructClass {
       fromJSON: (json: Record<string, any>) => Set.fromJSON(T, json),
       fromSuiParsedData: (content: SuiParsedData) =>
         Set.fromSuiParsedData(T, content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        Set.fromSuiObjectData(T, content),
       fetch: async (client: SuiClient, id: string) => Set.fetch(client, T, id),
       new: (fields: SetFields<ToPhantomTypeArgument<T>>) => {
         return new Set([extractType(T)], fields);
@@ -368,6 +391,39 @@ export class Set<T extends PhantomTypeArgument> implements StructClass {
     return Set.fromFieldsWithTypes(typeArg, content);
   }
 
+  static fromSuiObjectData<T extends PhantomReified<PhantomTypeArgument>>(
+    typeArg: T,
+    data: SuiObjectData,
+  ): Set<ToPhantomTypeArgument<T>> {
+    if (data.bcs) {
+      if (data.bcs.dataType !== "moveObject" || !isSet(data.bcs.type)) {
+        throw new Error(`object at is not a Set object`);
+      }
+
+      const gotTypeArgs = parseTypeName(data.bcs.type).typeArgs;
+      if (gotTypeArgs.length !== 1) {
+        throw new Error(
+          `type argument mismatch: expected 1 type argument but got '${gotTypeArgs.length}'`,
+        );
+      }
+      const gotTypeArg = compressSuiType(gotTypeArgs[0]);
+      const expectedTypeArg = compressSuiType(extractType(typeArg));
+      if (gotTypeArg !== compressSuiType(extractType(typeArg))) {
+        throw new Error(
+          `type argument mismatch: expected '${expectedTypeArg}' but got '${gotTypeArg}'`,
+        );
+      }
+
+      return Set.fromBcs(typeArg, fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return Set.fromSuiParsedData(typeArg, data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch<T extends PhantomReified<PhantomTypeArgument>>(
     client: SuiClient,
     typeArg: T,
@@ -382,6 +438,7 @@ export class Set<T extends PhantomTypeArgument> implements StructClass {
     if (res.data?.bcs?.dataType !== "moveObject" || !isSet(res.data.bcs.type)) {
       throw new Error(`object at id ${id} is not a Set object`);
     }
-    return Set.fromBcs(typeArg, fromB64(res.data.bcs.bcsBytes));
+
+    return Set.fromSuiObjectData(typeArg, res.data);
   }
 }

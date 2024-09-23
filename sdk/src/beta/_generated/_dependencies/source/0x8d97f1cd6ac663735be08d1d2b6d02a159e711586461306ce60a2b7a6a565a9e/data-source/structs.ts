@@ -15,17 +15,16 @@ import {
   compressSuiType,
 } from "../../../../_framework/util";
 import { ExternalAddress } from "../../0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a/external-address/structs";
-import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { PKG_V1 } from "../index";
+import { bcs } from "@mysten/sui/bcs";
+import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
+import { fromB64 } from "@mysten/sui/utils";
 
 /* ============================== DataSource =============================== */
 
 export function isDataSource(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::data_source::DataSource"
-  );
+  return type === `${PKG_V1}::data_source::DataSource`;
 }
 
 export interface DataSourceFields {
@@ -36,15 +35,16 @@ export interface DataSourceFields {
 export type DataSourceReified = Reified<DataSource, DataSourceFields>;
 
 export class DataSource implements StructClass {
-  static readonly $typeName =
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::data_source::DataSource";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V1}::data_source::DataSource`;
   static readonly $numTypeParams = 0;
+  static readonly $isPhantom = [] as const;
 
   readonly $typeName = DataSource.$typeName;
-
-  readonly $fullTypeName: "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::data_source::DataSource";
-
+  readonly $fullTypeName: `${typeof PKG_V1}::data_source::DataSource`;
   readonly $typeArgs: [];
+  readonly $isPhantom = DataSource.$isPhantom;
 
   readonly emitterChain: ToField<"u64">;
   readonly emitterAddress: ToField<ExternalAddress>;
@@ -53,7 +53,7 @@ export class DataSource implements StructClass {
     this.$fullTypeName = composeSuiType(
       DataSource.$typeName,
       ...typeArgs,
-    ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::data_source::DataSource";
+    ) as `${typeof PKG_V1}::data_source::DataSource`;
     this.$typeArgs = typeArgs;
 
     this.emitterChain = fields.emitterChain;
@@ -66,8 +66,9 @@ export class DataSource implements StructClass {
       fullTypeName: composeSuiType(
         DataSource.$typeName,
         ...[],
-      ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::data_source::DataSource",
+      ) as `${typeof PKG_V1}::data_source::DataSource`,
       typeArgs: [] as [],
+      isPhantom: DataSource.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         DataSource.fromFields(fields),
@@ -79,6 +80,8 @@ export class DataSource implements StructClass {
       fromJSON: (json: Record<string, any>) => DataSource.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         DataSource.fromSuiParsedData(content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        DataSource.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         DataSource.fetch(client, id),
       new: (fields: DataSourceFields) => {
@@ -179,6 +182,22 @@ export class DataSource implements StructClass {
     return DataSource.fromFieldsWithTypes(content);
   }
 
+  static fromSuiObjectData(data: SuiObjectData): DataSource {
+    if (data.bcs) {
+      if (data.bcs.dataType !== "moveObject" || !isDataSource(data.bcs.type)) {
+        throw new Error(`object at is not a DataSource object`);
+      }
+
+      return DataSource.fromBcs(fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return DataSource.fromSuiParsedData(data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch(client: SuiClient, id: string): Promise<DataSource> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -192,6 +211,7 @@ export class DataSource implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a DataSource object`);
     }
-    return DataSource.fromBcs(fromB64(res.data.bcs.bcsBytes));
+
+    return DataSource.fromSuiObjectData(res.data);
   }
 }
