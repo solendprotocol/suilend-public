@@ -121,19 +121,26 @@ function StartEndNode({ data }: StartEndNodeProps) {
           height: `${START_END_NODE_HEIGHT}px`,
         }}
       >
-        <div className="flex flex-row items-center gap-1.5 rounded-md bg-muted/10 px-3 py-2">
-          <TokenLogo
-            className="h-4 w-4"
-            imageProps={{ className: "rounded-full" }}
-            token={{
-              coinType: token.coin_type,
-              symbol: token.ticker,
-              iconUrl: token.icon_url,
-            }}
-          />
-          <TBody>
-            {+formatToken(amount, { dp: token.decimals })} {token.ticker}
-          </TBody>
+        <div className="w-max rounded-md bg-muted/10 px-3 py-2">
+          <Tooltip
+            title={`${formatToken(amount, { dp: token.decimals })} ${token.ticker}`}
+          >
+            <div className="flex flex-row items-center gap-1.5">
+              <TokenLogo
+                className="h-4 w-4"
+                imageProps={{ className: "rounded-full" }}
+                token={{
+                  coinType: token.coin_type,
+                  symbol: token.ticker,
+                  iconUrl: token.icon_url,
+                }}
+              />
+
+              <TBody>
+                {formatToken(amount, { exact: false })} {token.ticker}
+              </TBody>
+            </div>
+          </Tooltip>
         </div>
       </div>
       {isStart && <Handle type="source" position={Position.Right} />}
