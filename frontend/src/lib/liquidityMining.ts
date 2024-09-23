@@ -253,13 +253,18 @@ export const getDedupedPerDayRewards = (
   return result;
 };
 
-export const getTotalAprPercent = (
+export const getRewardsAprPercent = (
   side: Side,
-  aprPercent: BigNumber,
   filteredRewards: RewardSummary[],
 ) =>
   getDedupedAprRewards(filteredRewards).reduce(
     (acc, reward) =>
       acc.plus(reward.stats.aprPercent.times(side === Side.DEPOSIT ? 1 : -1)),
-    aprPercent,
+    new BigNumber(0),
   );
+
+export const getTotalAprPercent = (
+  side: Side,
+  aprPercent: BigNumber,
+  filteredRewards: RewardSummary[],
+) => aprPercent.plus(getRewardsAprPercent(side, filteredRewards));

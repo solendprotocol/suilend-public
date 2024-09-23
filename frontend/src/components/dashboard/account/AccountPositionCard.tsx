@@ -32,7 +32,7 @@ import {
   getBorrowShareUsd,
   getDepositShareUsd,
   getFilteredRewards,
-  getTotalAprPercent,
+  getRewardsAprPercent,
 } from "@/lib/liquidityMining";
 import { LOOPING_MESSAGE, getLoopedAssetCoinTypes } from "@/lib/looping";
 import { shallowPushQuery } from "@/lib/router";
@@ -51,42 +51,50 @@ function AccountPositionCardContent() {
   const loopedAssetCoinTypes = getLoopedAssetCoinTypes(data);
 
   // APR
-  const aprWeightedDepositsUsd = obligation.deposits.reduce((acc, deposit) => {
-    const totalAprPercent = getTotalAprPercent(
-      Side.DEPOSIT,
-      deposit.reserve.depositAprPercent,
-      getFilteredRewards(data.rewardMap[deposit.reserve.coinType].deposit),
-    );
-
-    return acc.plus(
-      totalAprPercent.times(
+  const aprPercentWeightedDepositsUsd = obligation.deposits.reduce(
+    (acc, deposit) => {
+      const rewardsAprPercent = getRewardsAprPercent(
+        Side.DEPOSIT,
+        getFilteredRewards(data.rewardMap[deposit.reserve.coinType].deposit),
+      ).times(
         getDepositShareUsd(
           deposit.reserve,
           new BigNumber(deposit.userRewardManager.share),
         ),
-      ),
-    );
-  }, new BigNumber(0));
+      );
 
-  const aprWeightedBorrowsUsd = obligation.borrows.reduce((acc, borrow) => {
-    const totalAprPercent = getTotalAprPercent(
-      Side.BORROW,
-      borrow.reserve.borrowAprPercent,
-      getFilteredRewards(data.rewardMap[borrow.reserve.coinType].borrow),
-    );
+      return acc.plus(
+        new BigNumber(
+          deposit.reserve.depositAprPercent.plus(rewardsAprPercent),
+        ).times(deposit.depositedAmountUsd),
+      );
+    },
+    new BigNumber(0),
+  );
 
-    return acc.plus(
-      totalAprPercent.times(
+  const aprPercentWeightedBorrowsUsd = obligation.borrows.reduce(
+    (acc, borrow) => {
+      const rewardsAprPercent = getRewardsAprPercent(
+        Side.BORROW,
+        getFilteredRewards(data.rewardMap[borrow.reserve.coinType].borrow),
+      ).times(
         getBorrowShareUsd(
           borrow.reserve,
           new BigNumber(borrow.userRewardManager.share),
         ),
-      ),
-    );
-  }, new BigNumber(0));
+      );
 
-  const aprWeightedNetValueUsd = aprWeightedDepositsUsd.minus(
-    aprWeightedBorrowsUsd,
+      return acc.plus(
+        new BigNumber(
+          borrow.reserve.borrowAprPercent.plus(rewardsAprPercent),
+        ).times(borrow.borrowedAmountUsd),
+      );
+    },
+    new BigNumber(0),
+  );
+
+  const aprWeightedNetValueUsd = aprPercentWeightedDepositsUsd.minus(
+    aprPercentWeightedBorrowsUsd,
   );
   const netAprPercent = !obligation.netValueUsd.eq(0)
     ? aprWeightedNetValueUsd.div(obligation.netValueUsd)
@@ -147,7 +155,7 @@ function AccountPositionCardContent() {
         <Tooltip
           contentProps={{ className: "flex-col flex gap-4" }}
           content={
-            loopedAssetCoinTypes.length > 0 && (
+            loopedAssetCoinTypes.length > 0 ? (
               <>
                 <TBodySans className="text-xs">{LOOPING_MESSAGE}</TBodySans>
                 <Separator />
@@ -160,7 +168,7 @@ function AccountPositionCardContent() {
                   ))}
                 </div>
               </>
-            )
+            ) : undefined
           }
         >
           <div className="flex w-max flex-row items-center justify-end gap-2">
