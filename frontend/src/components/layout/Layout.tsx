@@ -67,11 +67,11 @@ export default function Layout({ children }: PropsWithChildren) {
       <div
         className={cn(
           "relative z-[1] flex-1",
-          !isOnLandingPage && "py-4 md:py-6",
+          !isOnLandingPage && "flex flex-col justify-stretch py-4 md:py-6",
         )}
       >
         {!isOnLandingPage ? (
-          <Container>
+          <Container className="flex-1">
             {!isPageLoading && (
               <ReserveAssetDataEventsContextProvider>
                 {children}

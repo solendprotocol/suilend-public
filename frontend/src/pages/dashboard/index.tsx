@@ -47,14 +47,19 @@ export default function Dashboard() {
         </div>
       ) : (
         // Horizontal layout
-        <div className="flex w-full flex-row gap-10">
-          <div className="flex min-w-0 flex-1 flex-col gap-6">
+        <div className="relative w-full flex-1">
+          <div
+            className="flex w-full min-w-0 flex-col gap-6"
+            style={{ paddingRight: 360 + 10 * 4 }}
+          >
             <MarketOverview />
             <MarketTable />
             <RewardsCard />
           </div>
-          <div className="flex w-[360px] shrink-0 flex-col gap-4">
-            <Cards />
+          <div className="absolute bottom-0 right-0 top-0 w-[360px] overflow-y-auto">
+            <div className="flex w-full shrink-0 flex-col gap-4">
+              <Cards />
+            </div>
           </div>
         </div>
       )}
