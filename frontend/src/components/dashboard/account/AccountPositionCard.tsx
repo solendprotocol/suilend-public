@@ -1,10 +1,8 @@
 import { useRouter } from "next/router";
 
-import BigNumber from "bignumber.js";
 import { AlertTriangle, FileClock } from "lucide-react";
 
 import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
-import { Side } from "@suilend/sdk/types";
 
 import AccountBreakdown from "@/components/dashboard/account/AccountBreakdown";
 import BorrowLimitTitle from "@/components/dashboard/account/BorrowLimitTitle";
@@ -28,12 +26,7 @@ import { Separator } from "@/components/ui/separator";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 import { formatPercent, formatUsd } from "@/lib/format";
-import {
-  getBorrowShareUsd,
-  getDepositShareUsd,
-  getFilteredRewards,
-  getRewardsAprPercent,
-} from "@/lib/liquidityMining";
+import { getNetAprPercent } from "@/lib/liquidityMining";
 import { LOOPING_MESSAGE, getLoopedAssetCoinTypes } from "@/lib/looping";
 import { shallowPushQuery } from "@/lib/router";
 import {
@@ -51,54 +44,7 @@ function AccountPositionCardContent() {
   const loopedAssetCoinTypes = getLoopedAssetCoinTypes(data);
 
   // APR
-  const aprPercentWeightedDepositsUsd = obligation.deposits.reduce(
-    (acc, deposit) => {
-      const rewardsAprPercent = getRewardsAprPercent(
-        Side.DEPOSIT,
-        getFilteredRewards(data.rewardMap[deposit.reserve.coinType].deposit),
-      ).times(
-        getDepositShareUsd(
-          deposit.reserve,
-          new BigNumber(deposit.userRewardManager.share),
-        ),
-      );
-
-      return acc.plus(
-        new BigNumber(
-          deposit.reserve.depositAprPercent.plus(rewardsAprPercent),
-        ).times(deposit.depositedAmountUsd),
-      );
-    },
-    new BigNumber(0),
-  );
-
-  const aprPercentWeightedBorrowsUsd = obligation.borrows.reduce(
-    (acc, borrow) => {
-      const rewardsAprPercent = getRewardsAprPercent(
-        Side.BORROW,
-        getFilteredRewards(data.rewardMap[borrow.reserve.coinType].borrow),
-      ).times(
-        getBorrowShareUsd(
-          borrow.reserve,
-          new BigNumber(borrow.userRewardManager.share),
-        ),
-      );
-
-      return acc.plus(
-        new BigNumber(
-          borrow.reserve.borrowAprPercent.plus(rewardsAprPercent),
-        ).times(borrow.borrowedAmountUsd),
-      );
-    },
-    new BigNumber(0),
-  );
-
-  const aprWeightedNetValueUsd = aprPercentWeightedDepositsUsd.minus(
-    aprPercentWeightedBorrowsUsd,
-  );
-  const netAprPercent = !obligation.netValueUsd.eq(0)
-    ? aprWeightedNetValueUsd.div(obligation.netValueUsd)
-    : new BigNumber(0);
+  const netAprPercent = getNetAprPercent(obligation, data.rewardMap);
 
   return (
     <div className="flex flex-col gap-4">
