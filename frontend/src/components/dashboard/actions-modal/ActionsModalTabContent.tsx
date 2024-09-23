@@ -23,7 +23,6 @@ import LabelWithValue from "@/components/shared/LabelWithValue";
 import Spinner from "@/components/shared/Spinner";
 import TextLink from "@/components/shared/TextLink";
 import { TBody, TLabelSans } from "@/components/shared/Typography";
-import { Separator } from "@/components/ui/separator";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { useDashboardContext } from "@/contexts/DashboardContext";
 import { useWalletContext } from "@/contexts/WalletContext";
@@ -396,31 +395,27 @@ export default function ActionsModalTabContent({
               value={`${formatToken(borrowFee, { dp: 4 })} ${reserve.symbol}`}
               horizontal
             />
-          ) : (
-            <div className="h-5 w-full" />
-          )}
+          ) : null}
         </div>
 
-        {!md && isMoreParametersOpen && (
+        {!md && (
           <>
-            <Separator />
-            <ParametersPanel side={side} reserve={reserve} />
+            <Collapsible
+              open={isMoreParametersOpen}
+              onOpenChange={setIsMoreParametersOpen}
+              closedTitle="More parameters"
+              openTitle="Less parameters"
+              hasSeparator
+            />
+
+            {isMoreParametersOpen && (
+              <ParametersPanel side={side} reserve={reserve} />
+            )}
           </>
         )}
       </div>
 
       <div className="flex w-full flex-col gap-2">
-        {!md && (
-          <Collapsible
-            open={isMoreParametersOpen}
-            onOpenChange={setIsMoreParametersOpen}
-            closedTitle="More parameters"
-            openTitle="Less parameters"
-            buttonClassName="pb-2"
-            hasSeparator
-          />
-        )}
-
         <Button
           className="h-auto min-h-14 w-full rounded-md py-2"
           labelClassName="text-wrap uppercase"

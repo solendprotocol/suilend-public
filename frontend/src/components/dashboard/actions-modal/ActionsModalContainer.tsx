@@ -13,7 +13,6 @@ import Button from "@/components/shared/Button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { DrawerContent, Drawer as DrawerRoot } from "@/components/ui/drawer";
 import useBreakpoint from "@/hooks/useBreakpoint";
-import { cn } from "@/lib/utils";
 
 export default function ActionsModalContainer({ children }: PropsWithChildren) {
   const { isOpen, close, isMoreParametersOpen, setIsMoreParametersOpen } =
@@ -106,13 +105,7 @@ export default function ActionsModalContainer({ children }: PropsWithChildren) {
   return (
     <DrawerRoot open={isOpen} onRelease={(e, open) => !open && close()}>
       <DrawerContent
-        className={cn(
-          "actions-modal-drawer-content mt-0 max-h-[calc(100dvh-0px)] rounded-t-lg border-none bg-popover p-0",
-          isMoreParametersOpen ? "!h-[calc(100dvh-0px)]" : "!h-auto",
-          visualViewportHeight < 400
-            ? "!bottom-auto !top-0"
-            : "!bottom-0 !top-auto",
-        )}
+        className="actions-modal-drawer-content !bottom-auto !top-0 mt-16 !h-[calc(100dvh-64px)] !max-h-[calc(100dvh-64px)] rounded-t-lg border-none bg-popover p-0"
         thumbClassName="hidden"
         onEscapeKeyDown={() => close()}
         overlay={{
