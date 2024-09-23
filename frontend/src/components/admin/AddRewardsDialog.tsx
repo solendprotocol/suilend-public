@@ -132,6 +132,8 @@ export default function AddRewardsDialog() {
 
     const rewardCoinType = coin.coinType;
 
+    const txb = new TransactionBlock();
+
     for (const side of Object.values(Side)) {
       for (const reserve of data.lendingMarket.reserves) {
         const reserveArrayIndex = reserve.arrayIndex;
@@ -143,44 +145,40 @@ export default function AddRewardsDialog() {
           .toString();
 
         if (rewardValue !== "0") {
-          const txb = new TransactionBlock();
-
           try {
-            try {
-              await suilendClient.addReward(
-                address,
-                data.lendingMarketOwnerCapId,
-                reserveArrayIndex,
-                side === Side.DEPOSIT,
-                rewardCoinType,
-                rewardValue,
-                BigInt(startTimeMs),
-                BigInt(endTimeMs),
-                txb,
-              );
-            } catch (err) {
-              Sentry.captureException(err);
-              console.error(err);
-              throw err;
-            }
-
-            await signExecuteAndWaitTransactionBlock(txb);
-
-            toast.success(`Added ${reserve.symbol} reward`);
+            await suilendClient.addReward(
+              address,
+              data.lendingMarketOwnerCapId,
+              reserveArrayIndex,
+              side === Side.DEPOSIT,
+              rewardCoinType,
+              rewardValue,
+              BigInt(startTimeMs),
+              BigInt(endTimeMs),
+              txb,
+            );
           } catch (err) {
-            toast.error(`Failed to add ${reserve.symbol} reward`, {
-              description: ((err as Error)?.message || err) as string,
-            });
-          } finally {
-            await refreshData();
+            Sentry.captureException(err);
+            console.error(err);
+            throw err;
           }
         }
       }
     }
 
-    setIsDialogOpen(false);
-    reset();
-    toast.info("Finished adding rewards");
+    try {
+      await signExecuteAndWaitTransactionBlock(txb);
+
+      toast.success("Added rewards");
+      setIsDialogOpen(false);
+      reset();
+    } catch (err) {
+      toast.error("Failed to add rewards", {
+        description: ((err as Error)?.message || err) as string,
+      });
+    } finally {
+      await refreshData();
+    }
   };
 
   return (
