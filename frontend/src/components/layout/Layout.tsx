@@ -4,7 +4,7 @@ import { CSSProperties, PropsWithChildren, useRef, useState } from "react";
 import { useResizeObserver } from "usehooks-ts";
 
 import WormholeConnect from "@/components/bridge/WormholeConnect";
-import AccountDetailsDialog from "@/components/dashboard/account-details/AccountDetailsDialog";
+import AccountOverviewDialog from "@/components/dashboard/account-overview/AccountOverviewDialog";
 import AppHeader from "@/components/layout/AppHeader";
 import Footer from "@/components/layout/Footer";
 import LaunchDarklyBanner from "@/components/layout/LaunchDarklyBanner";
@@ -76,7 +76,7 @@ export default function Layout({ children }: PropsWithChildren) {
               <ReserveAssetDataEventsContextProvider>
                 {children}
 
-                <AccountDetailsDialog />
+                <AccountOverviewDialog />
                 <LoopingDialog />
               </ReserveAssetDataEventsContextProvider>
             )}

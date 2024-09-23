@@ -20,10 +20,10 @@ import {
   EventsData,
   TokenAmount,
   getCtokenExchangeRate,
-} from "@/components/dashboard/account-details/AccountDetailsDialog";
+} from "@/components/dashboard/account-overview/AccountOverviewDialog";
 import EarningsChart, {
   ChartData,
-} from "@/components/dashboard/account-details/EarningsChart";
+} from "@/components/dashboard/account-overview/EarningsChart";
 import DataTable, { tableHeader } from "@/components/dashboard/DataTable";
 import TitleWithIcon from "@/components/shared/TitleWithIcon";
 import TokenLogo from "@/components/shared/TokenLogo";

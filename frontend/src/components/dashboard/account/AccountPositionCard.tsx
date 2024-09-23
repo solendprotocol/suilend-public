@@ -1,7 +1,7 @@
 import { useRouter } from "next/router";
 
 import BigNumber from "bignumber.js";
-import { AlertTriangle, FileClock, TrendingUp } from "lucide-react";
+import { AlertTriangle, FileClock } from "lucide-react";
 
 import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
 import { Side } from "@suilend/sdk/types";
@@ -11,9 +11,9 @@ import BorrowLimitTitle from "@/components/dashboard/account/BorrowLimitTitle";
 import LiquidationThresholdTitle from "@/components/dashboard/account/LiquidationThresholdTitle";
 import WeightedBorrowsTitle from "@/components/dashboard/account/WeightedBorrowsTitle";
 import {
-  QueryParams as AccountDetailsQueryParams,
-  Tab as AccountDetailsTab,
-} from "@/components/dashboard/account-details/AccountDetailsDialog";
+  QueryParams as AccountOverviewQueryParams,
+  Tab as AccountOverviewTab,
+} from "@/components/dashboard/account-overview/AccountOverviewDialog";
 import Card from "@/components/dashboard/Card";
 import UtilizationBar, {
   getWeightedBorrowsUsd,
@@ -239,11 +239,10 @@ export default function AccountPositionCard() {
   const { address } = useWalletContext();
   const { obligation } = useAppContext();
 
-  const openAccountDetailsTab = (tab: AccountDetailsTab) => {
+  const openAccountOverviewTab = (tab: AccountOverviewTab) => {
     shallowPushQuery(router, {
       ...router.query,
-      [AccountDetailsQueryParams.ACCOUNT_DETAILS]: true,
-      [AccountDetailsQueryParams.TAB]: tab,
+      [AccountOverviewQueryParams.TAB]: tab,
     });
   };
 
@@ -255,22 +254,14 @@ export default function AccountPositionCard() {
         endContent: address && obligation && (
           <>
             <Button
-              className="text-muted-foreground"
-              icon={<TrendingUp />}
-              variant="ghost"
-              size="icon"
-              onClick={() => openAccountDetailsTab(AccountDetailsTab.EARNINGS)}
+              labelClassName="uppercase text-xs"
+              startIcon={<FileClock />}
+              variant="secondaryOutline"
+              onClick={() =>
+                openAccountOverviewTab(AccountOverviewTab.EARNINGS)
+              }
             >
-              Earnings
-            </Button>
-            <Button
-              className="text-muted-foreground"
-              icon={<FileClock />}
-              variant="ghost"
-              size="icon"
-              onClick={() => openAccountDetailsTab(AccountDetailsTab.HISTORY)}
-            >
-              History
+              Overview
             </Button>
           </>
         ),

@@ -20,7 +20,7 @@ import {
   EventsData,
   TokenAmount,
   getCtokenExchangeRate,
-} from "@/components/dashboard/account-details/AccountDetailsDialog";
+} from "@/components/dashboard/account-overview/AccountOverviewDialog";
 import DataTable, { tableHeader } from "@/components/dashboard/DataTable";
 import Button from "@/components/shared/Button";
 import OpenOnExplorerButton from "@/components/shared/OpenOnExplorerButton";

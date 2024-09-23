@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { normalizeStructTag } from "@mysten/sui.js/utils";
 import BigNumber from "bignumber.js";
 import { cloneDeep } from "lodash";
-import { RotateCw } from "lucide-react";
+import { FileClock, RotateCw } from "lucide-react";
 
 import { WAD } from "@suilend/sdk/constants";
 import {
@@ -18,8 +18,8 @@ import {
   ApiWithdrawEvent,
 } from "@suilend/sdk/types";
 
-import EarningsTabContent from "@/components/dashboard/account-details/EarningsTabContent";
-import HistoryTabContent from "@/components/dashboard/account-details/HistoryTabContent";
+import EarningsTabContent from "@/components/dashboard/account-overview/EarningsTabContent";
+import HistoryTabContent from "@/components/dashboard/account-overview/HistoryTabContent";
 import Dialog from "@/components/dashboard/Dialog";
 import Button from "@/components/shared/Button";
 import Tabs from "@/components/shared/Tabs";
@@ -31,13 +31,11 @@ import { isSuilendPoints } from "@/lib/coinType";
 import { EventType, eventSortAsc } from "@/lib/events";
 import { formatPoints, formatToken } from "@/lib/format";
 import { API_URL } from "@/lib/navigation";
-import { shallowPushQuery, shallowReplaceQuery } from "@/lib/router";
+import { shallowPushQuery } from "@/lib/router";
 import { Token } from "@/lib/types";
 
-const QUERY_PARAMS_PREFIX = "accountDetails";
 export enum QueryParams {
-  ACCOUNT_DETAILS = QUERY_PARAMS_PREFIX,
-  TAB = `${QUERY_PARAMS_PREFIX}-tab`,
+  TAB = "accountOverviewTab",
 }
 
 export enum Tab {
@@ -94,16 +92,24 @@ export function TokenAmount({ amount, token, decimals }: TokenAmountProps) {
   );
 }
 
-export default function AccountDetailsDialog() {
+export default function AccountOverviewDialog() {
   const router = useRouter();
   const queryParams = {
-    [QueryParams.ACCOUNT_DETAILS]: router.query[QueryParams.ACCOUNT_DETAILS] as
-      | string
-      | undefined,
     [QueryParams.TAB]: router.query[QueryParams.TAB] as Tab | undefined,
   };
 
   const { refreshData, obligation } = useAppContext();
+
+  // Open
+  const isOpen = queryParams[QueryParams.TAB] !== undefined;
+
+  const onOpenChange = (_isOpen: boolean) => {
+    if (_isOpen) return;
+
+    const restQuery = cloneDeep(router.query);
+    delete restQuery[QueryParams.TAB];
+    shallowPushQuery(router, restQuery);
+  };
 
   // Tabs
   const tabs = [
@@ -196,6 +202,18 @@ export default function AccountDetailsDialog() {
     [clearEventsData],
   );
 
+  const fetchedDataObligationIdRef = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    if (!obligation?.id) return;
+
+    if (isOpen) {
+      if (fetchedDataObligationIdRef.current === obligation.id) return;
+
+      fetchEventsData(obligation.id);
+      fetchedDataObligationIdRef.current = obligation.id;
+    }
+  }, [obligation?.id, isOpen, fetchEventsData]);
+
   // Refresh
   const getNowS = () => Math.floor(new Date().getTime() / 1000);
   const [nowS, setNowS] = useState<number>(getNowS);
@@ -208,38 +226,6 @@ export default function AccountDetailsDialog() {
     setNowS(getNowS());
   };
 
-  // State
-  const isOpen = queryParams[QueryParams.ACCOUNT_DETAILS] !== undefined;
-  const fetchedDataObligationIdRef = useRef<string | undefined>(undefined);
-
-  useEffect(() => {
-    if (!obligation?.id) return;
-
-    if (isOpen) {
-      if (fetchedDataObligationIdRef.current === obligation.id) return;
-
-      fetchEventsData(obligation.id);
-      fetchedDataObligationIdRef.current = obligation.id;
-    }
-  }, [obligation?.id, isOpen, fetchEventsData]);
-
-  const onOpenChange = (_isOpen: boolean) => {
-    if (_isOpen) return;
-
-    const restQuery = cloneDeep(router.query);
-    delete restQuery[QueryParams.ACCOUNT_DETAILS];
-    shallowPushQuery(router, restQuery);
-
-    setTimeout(() => {
-      const restQuery2 = cloneDeep(restQuery);
-      delete restQuery2[QueryParams.TAB];
-      shallowReplaceQuery(router, restQuery2);
-
-      clearEventsData();
-      fetchedDataObligationIdRef.current = undefined;
-    }, 250);
-  };
-
   if (!obligation) return null;
   return (
     <Dialog
@@ -247,7 +233,8 @@ export default function AccountDetailsDialog() {
       dialogContentProps={{ className: "max-w-6xl" }}
       headerProps={{
         className: "border-b-0",
-        title: "Account",
+        titleIcon: <FileClock />,
+        title: "Account overview",
         endContent: (
           <Button
             className="text-muted-foreground"
