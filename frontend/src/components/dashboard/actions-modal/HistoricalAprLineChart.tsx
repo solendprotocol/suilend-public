@@ -170,8 +170,8 @@ function Chart({ side, data }: ChartProps) {
   const fields = fieldsMap[side];
 
   // Min/max
-  const minX = Math.min(...data.map((d) => d.timestampS));
-  const maxX = Math.max(...data.map((d) => d.timestampS));
+  const minX = data.length > 0 ? Math.min(...data.map((d) => d.timestampS)) : 0;
+  const maxX = data.length > 0 ? Math.max(...data.map((d) => d.timestampS)) : 0;
 
   let minY = Math.min(
     0,
@@ -206,20 +206,29 @@ function Chart({ side, data }: ChartProps) {
   if (maxY > 0) maxY += 1;
 
   // Ticks
-  const ticksX = data
-    .filter((d) => {
-      if (days === 1) return d.timestampS % ((sm ? 4 : 8) * 60 * 60) === 0;
-      if (days === 7) return d.timestampS % ((sm ? 1 : 2) * DAY_S) === 0;
-      if (days === 30) return d.timestampS % ((sm ? 5 : 10) * DAY_S) === 0;
-      return false;
-    })
-    .map((d) => {
-      if (days === 1) return d.timestampS;
-      return d.timestampS + new Date().getTimezoneOffset() * 60;
-    });
-  const ticksY = Array.from({ length: 4 }).map(
-    (_, index, array) => minY + ((maxY - minY) / (array.length - 1)) * index,
-  );
+  const ticksX =
+    data.length > 0
+      ? data
+          .filter((d) => {
+            if (days === 1)
+              return d.timestampS % ((sm ? 4 : 8) * 60 * 60) === 0;
+            if (days === 7) return d.timestampS % ((sm ? 1 : 2) * DAY_S) === 0;
+            if (days === 30)
+              return d.timestampS % ((sm ? 5 : 10) * DAY_S) === 0;
+            return false;
+          })
+          .map((d) => {
+            if (days === 1) return d.timestampS;
+            return d.timestampS + new Date().getTimezoneOffset() * 60;
+          })
+      : [];
+  const ticksY =
+    data.length > 0
+      ? Array.from({ length: 4 }).map(
+          (_, index, array) =>
+            minY + ((maxY - minY) / (array.length - 1)) * index,
+        )
+      : [];
 
   const tickFormatterX = (timestampS: number) => {
     if (days === 1) return format(new Date(timestampS * 1000), "HH:mm");
@@ -229,8 +238,8 @@ function Chart({ side, data }: ChartProps) {
     formatPercent(new BigNumber(value), { dp: 1 });
 
   // Domain
-  const domainX = [minX, maxX];
-  const domainY = [minY, maxY];
+  const domainX = data.length > 0 ? [minX, maxX] : undefined;
+  const domainY = data.length > 0 ? [minY, maxY] : undefined;
 
   return (
     <Recharts.ResponsiveContainer width="100%" height="100%">
