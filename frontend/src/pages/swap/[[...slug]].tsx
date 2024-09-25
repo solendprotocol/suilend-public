@@ -17,7 +17,13 @@ import {
   RouterCompleteTradeRoute as AftermathRouterCompleteTradeRoute,
 } from "aftermath-ts-sdk";
 import BigNumber from "bignumber.js";
-import { ArrowRightLeft, ArrowUpDown, RotateCw } from "lucide-react";
+import {
+  AlertCircle,
+  AlertTriangle,
+  ArrowRightLeft,
+  ArrowUpDown,
+  RotateCw,
+} from "lucide-react";
 import { ReactFlowProvider } from "reactflow";
 import { toast } from "sonner";
 import useSWR from "swr";
@@ -71,6 +77,9 @@ type SubmitButtonState = {
   isDisabled?: boolean;
   title?: string;
 };
+
+const PRICE_IMPACT_PERCENT_WARNING_THRESHOLD = 2;
+const PRICE_IMPACT_PERCENT_DESTRUCTIVE_THRESHOLD = 10;
 
 function Page() {
   const { address } = useWalletContext();
@@ -198,6 +207,11 @@ function Page() {
   const quoteAmountOut = quote
     ? BigNumber(quote.amount_out.toString())
     : undefined;
+
+  const quoteRatio =
+    quoteAmountOut !== undefined && quoteAmountIn !== undefined
+      ? quoteAmountOut.div(quoteAmountIn)
+      : undefined;
 
   const [isQuoteRatioInverted, setIsQuoteRatioInverted] =
     useState<boolean>(false);
@@ -515,6 +529,17 @@ function Page() {
     fetchTokenHistoricalUsdPrice(tokenOut);
     fetchedInitialTokenHistoricalUsdPricesRef.current = true;
   }, [fetchTokenHistoricalUsdPrice, tokenIn, tokenOut]);
+
+  // Price impact
+  const priceImpactPercent =
+    quoteRatio !== undefined && tokensCurrentRatio !== undefined
+      ? new BigNumber(100).minus(quoteRatio.div(tokensCurrentRatio).times(100))
+      : undefined;
+  const PriceImpactIcon =
+    priceImpactPercent !== undefined &&
+    priceImpactPercent.lt(PRICE_IMPACT_PERCENT_DESTRUCTIVE_THRESHOLD)
+      ? AlertTriangle
+      : AlertCircle;
 
   // Reverse tokens
   const reverseTokens = () => {
@@ -881,55 +906,95 @@ function Page() {
             )}
           </div>
 
-          {/* Quote */}
           {new BigNumber(value || 0).gt(0) && (
-            <div className="mb-2 w-full">
-              {quoteAmountIn && quoteAmountOut ? (
-                <div
-                  className="group flex w-max cursor-pointer flex-row items-center gap-2"
-                  onClick={() => setIsQuoteRatioInverted((is) => !is)}
-                >
-                  <TLabelSans className="transition-colors group-hover:text-foreground">
-                    {"1 "}
-                    {(!isQuoteRatioInverted ? tokenIn : tokenOut).ticker}
-                    {" ≈ "}
-                    {formatToken(
-                      (!isQuoteRatioInverted
-                        ? quoteAmountOut
-                        : quoteAmountIn
-                      ).div(
-                        !isQuoteRatioInverted ? quoteAmountIn : quoteAmountOut,
-                      ),
-                      {
-                        dp: (!isQuoteRatioInverted ? tokenOut : tokenIn)
-                          .decimals,
-                      },
-                    )}{" "}
-                    {(!isQuoteRatioInverted ? tokenOut : tokenIn).ticker}
-                  </TLabelSans>
-                  <ArrowRightLeft className="h-3 w-3 text-muted-foreground transition-colors group-hover:text-foreground" />
-                </div>
-              ) : (
-                <Skeleton className="h-4 w-40" />
-              )}
-            </div>
-          )}
+            <div className="mb-4 flex w-full flex-col gap-2">
+              {/* Routing */}
+              <div className="w-full">
+                {quote ? (
+                  <ReactFlowProvider>
+                    <RoutingDialog quote={quote} />
+                  </ReactFlowProvider>
+                ) : (
+                  <Skeleton className="h-4 w-60" />
+                )}
+              </div>
 
-          {/* Routing */}
-          {new BigNumber(value || 0).gt(0) && (
-            <div className="mb-4 w-full">
-              {quote ? (
-                <ReactFlowProvider>
-                  <RoutingDialog quote={quote} />
-                </ReactFlowProvider>
-              ) : (
-                <Skeleton className="h-5 w-60" />
-              )}
+              {/* Quote */}
+              <div className="w-full">
+                {quoteAmountIn && quoteAmountOut ? (
+                  <div
+                    className="group flex w-max cursor-pointer flex-row items-center gap-2"
+                    onClick={() => setIsQuoteRatioInverted((is) => !is)}
+                  >
+                    <TLabelSans className="transition-colors group-hover:text-foreground">
+                      {"1 "}
+                      {(!isQuoteRatioInverted ? tokenIn : tokenOut).ticker}
+                      {" ≈ "}
+                      {formatToken(
+                        (!isQuoteRatioInverted
+                          ? quoteAmountOut
+                          : quoteAmountIn
+                        ).div(
+                          !isQuoteRatioInverted
+                            ? quoteAmountIn
+                            : quoteAmountOut,
+                        ),
+                        {
+                          dp: (!isQuoteRatioInverted ? tokenOut : tokenIn)
+                            .decimals,
+                        },
+                      )}{" "}
+                      {(!isQuoteRatioInverted ? tokenOut : tokenIn).ticker}
+                    </TLabelSans>
+                    <ArrowRightLeft className="h-3 w-3 text-muted-foreground transition-colors group-hover:text-foreground" />
+                  </div>
+                ) : (
+                  <Skeleton className="h-4 w-40" />
+                )}
+              </div>
+
+              {/* Price impact */}
+              {priceImpactPercent !== undefined &&
+                priceImpactPercent.gte(
+                  PRICE_IMPACT_PERCENT_WARNING_THRESHOLD,
+                ) && (
+                  <div className="max-w-max rounded-md">
+                    <TLabelSans
+                      className={cn(
+                        "font-medium",
+                        priceImpactPercent.lt(
+                          PRICE_IMPACT_PERCENT_DESTRUCTIVE_THRESHOLD,
+                        )
+                          ? "text-warning"
+                          : "text-destructive",
+                      )}
+                    >
+                      <PriceImpactIcon className="mb-0.5 mr-1 inline h-3 w-3" />
+                      {formatPercent(priceImpactPercent)} Price impact
+                    </TLabelSans>
+                  </div>
+                )}
             </div>
           )}
 
           {/* Swap */}
-          <div className="flex w-full flex-col gap-[1px]">
+          <div
+            className={cn(
+              "flex w-full flex-col gap-[1px] rounded-sm",
+              priceImpactPercent !== undefined &&
+                priceImpactPercent.gte(
+                  PRICE_IMPACT_PERCENT_WARNING_THRESHOLD,
+                ) &&
+                cn(
+                  "outline outline-[2px] outline-offset-[1px]",
+                  priceImpactPercent.lt(
+                    PRICE_IMPACT_PERCENT_DESTRUCTIVE_THRESHOLD,
+                  )
+                    ? "outline-warning"
+                    : "outline-destructive",
+                ),
+            )}
+          >
             <Button
               className={cn(
                 "h-auto min-h-14 w-full py-2",

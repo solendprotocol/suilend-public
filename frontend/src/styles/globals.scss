@@ -15,10 +15,10 @@
     --popover-foreground: 221 100% 57%;
 
     --primary: 221 100% 57%;
-    --primary-foreground: 194 82% 76%; /* Same as --secondary */
+    --primary-foreground: var(--secondary);
 
     --secondary: 194 82% 76%;
-    --secondary-foreground: 221 65% 9%; /* Same as --card */
+    --secondary-foreground: var(--card);
 
     --muted: 221 34% 65%;
     --muted-foreground: 221 34% 65%;
@@ -33,7 +33,7 @@
     --warning-foreground: 0 0% 0%; /* Not used */
 
     --destructive: 0 86% 60%;
-    --destructive-foreground: 210 40% 98%; /* Not used */
+    --destructive-foreground: var(--foreground);
 
     --border: 221 44% 15%;
     --input: 214.3 31.8% 91.4%;
