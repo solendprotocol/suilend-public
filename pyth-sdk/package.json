@@ -53,6 +53,7 @@
     "yargs": "^17.0.20"
   },
   "dependencies": {
+    "@mysten/bcs": "0.11.1",
     "@mysten/sui.js": "0.51.2",
     "@pythnetwork/price-service-client": "*",
     "buffer": "^6.0.3"

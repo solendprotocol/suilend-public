@@ -7,6 +7,7 @@
   "plugins": ["prettier", "unused-imports"],
   "rules": {
     "no-unused-vars": "off",
+    "@typescript-eslint/ban-types": "off",
     "unused-imports/no-unused-imports": "error",
     "unused-imports/no-unused-vars": [
       "warn",
