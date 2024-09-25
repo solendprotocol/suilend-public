@@ -36,17 +36,17 @@ import {
   calculateRewardAprPercent,
 } from "@/lib/events";
 import { formatPercent } from "@/lib/format";
-import {
-  getDedupedAprRewards,
-  getFilteredRewards,
-} from "@/lib/liquidityMining";
+import { getDedupedAprRewards } from "@/lib/liquidityMining";
 import { cn } from "@/lib/utils";
 
-const getFieldCoinType = (field: string) =>
-  field.includes("_") ? field.split("_")[1] : undefined;
+const isBase = (field: string) => field.endsWith("_base");
+const isReward = (field: string) => !isBase(field);
+
+const getFieldCoinType = (field: string) => field.split("_")[1];
 const getFieldColor = (field: string) => {
-  const coinType = getFieldCoinType(field);
-  return coinType ? COINTYPE_COLOR_MAP[coinType] : "hsl(var(--success))";
+  if (isBase(field)) return "hsl(var(--success))";
+  if (isReward(field)) return COINTYPE_COLOR_MAP[getFieldCoinType(field)];
+  return "";
 };
 
 type ChartData = {
@@ -69,13 +69,10 @@ function TooltipContent({ side, fields, d, viewBox, x }: TooltipContentProps) {
   if (fields.every((field) => d[field] === undefined)) return null;
   if (viewBox === undefined || x === undefined) return null;
 
-  const interestField = `${side}InterestAprPercent`;
-  const rewardFields = fields.filter((field) => field !== interestField);
-
-  const aprPercent = new BigNumber(d[interestField] as number);
-  const totalAprPercent = rewardFields.reduce(
+  const definedFields = fields.filter((field) => d[field] !== undefined);
+  const totalAprPercent = definedFields.reduce(
     (acc, field) => acc.plus(new BigNumber(d[field] as number)),
-    new BigNumber(aprPercent),
+    new BigNumber(0),
   );
 
   return (
@@ -96,24 +93,23 @@ function TooltipContent({ side, fields, d, viewBox, x }: TooltipContentProps) {
           </TBody>
         </div>
 
-        {fields.map((field, index) => {
+        {definedFields.map((field, index) => {
           const coinType = getFieldCoinType(field);
           const color = getFieldColor(field);
 
           return (
             <AprRewardsBreakdownRow
               key={field}
-              isLast={index === fields.length - 1}
+              isLast={index === definedFields.length - 1}
               value={
                 <span style={{ color }}>
-                  {formatPercent(
-                    !coinType ? aprPercent : new BigNumber(d[field] as number),
-                    { useAccountingSign: true },
-                  )}
+                  {formatPercent(new BigNumber(d[field] as number), {
+                    useAccountingSign: true,
+                  })}
                 </span>
               }
             >
-              {!coinType ? (
+              {isBase(field) ? (
                 <TLabelSans>Interest</TLabelSans>
               ) : (
                 <>
@@ -156,8 +152,15 @@ function Chart({ side, data }: ChartProps) {
   // Data
   const allFields =
     data.length > 0
-      ? Object.keys(data[0]).filter((key) => key !== "timestampS")
+      ? Array.from(
+          new Set(
+            data
+              .map((d) => Object.keys(d).filter((key) => key !== "timestampS"))
+              .flat(),
+          ),
+        )
       : [];
+  console.log("XXX", allFields);
 
   const fieldsMap = {
     [Side.DEPOSIT]: allFields.filter((field) =>
@@ -179,8 +182,8 @@ function Chart({ side, data }: ChartProps) {
       (d) =>
         d[
           side === Side.DEPOSIT
-            ? "depositInterestAprPercent"
-            : "borrowInterestAprPercent"
+            ? "depositInterestAprPercent_base"
+            : "borrowInterestAprPercent_base"
         ] ?? 0,
     ),
     ...data.map((d) =>
@@ -195,8 +198,8 @@ function Chart({ side, data }: ChartProps) {
       (d) =>
         d[
           side === Side.DEPOSIT
-            ? "depositInterestAprPercent"
-            : "borrowInterestAprPercent"
+            ? "depositInterestAprPercent_base"
+            : "borrowInterestAprPercent_base"
         ] ?? 0,
     ),
     ...data.map((d) =>
@@ -349,8 +352,7 @@ export default function HistoricalAprLineChart({
 
   const aprRewardReserves = useMemo(() => {
     const rewards = data.rewardMap[reserve.coinType]?.[side] ?? [];
-    const filteredRewards = getFilteredRewards(rewards);
-    const aprRewards = getDedupedAprRewards(filteredRewards);
+    const aprRewards = getDedupedAprRewards(rewards);
 
     return aprRewards.map(
       (aprReward) => data.reserveMap[aprReward.stats.rewardCoinType],
@@ -439,25 +441,32 @@ export default function HistoricalAprLineChart({
       const event = events.findLast((e) => e.sampleTimestampS <= timestampS);
 
       const d = aprRewardReserves.reduce(
-        (acc, rewardReserve) => ({
-          ...acc,
-          [`${side}InterestAprPercent_${rewardReserve.coinType}`]: event
-            ? calculateRewardAprPercent(
-                side,
-                event,
-                reserveAssetDataEventsMap?.[rewardReserve.id]?.[
-                  days
-                ] as ParsedDownsampledApiReserveAssetDataEvent[],
-                reserve,
-              )
-            : undefined,
-        }),
+        (acc, rewardReserve) => {
+          if (!event) return acc;
+
+          const rewardAprPercent = calculateRewardAprPercent(
+            side,
+            event,
+            reserveAssetDataEventsMap?.[rewardReserve.id]?.[
+              days
+            ] as ParsedDownsampledApiReserveAssetDataEvent[],
+            reserve,
+          );
+          if (rewardAprPercent === 0) return acc;
+
+          return {
+            ...acc,
+            [`${side}InterestAprPercent_${rewardReserve.coinType}`]:
+              rewardAprPercent,
+          };
+        },
         {
           timestampS,
-          depositInterestAprPercent: event
-            ? +event.depositAprPercent
+          [`${side}InterestAprPercent_base`]: event
+            ? side === Side.DEPOSIT
+              ? +event.depositAprPercent
+              : +event.borrowAprPercent
             : undefined,
-          borrowInterestAprPercent: event ? +event.borrowAprPercent : undefined,
         },
       );
       result.push(d);
