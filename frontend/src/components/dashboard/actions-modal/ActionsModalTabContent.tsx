@@ -31,7 +31,7 @@ import useBreakpoint from "@/hooks/useBreakpoint";
 import { isSui } from "@/lib/coinType";
 import {
   FIRST_DEPOSIT_DIALOG_START_DATE,
-  SUI_REPAY_GAS_MIN,
+  SUI_GAS_MIN,
   TX_TOAST_DURATION,
 } from "@/lib/constants";
 import { EventType } from "@/lib/events";
@@ -246,7 +246,7 @@ export default function ActionsModalTabContent({
         if (useMaxAmount) {
           if (isSui(reserve.coinType)) {
             submitAmount = balance
-              .minus(new BigNumber(SUI_REPAY_GAS_MIN))
+              .minus(new BigNumber(SUI_GAS_MIN))
               .times(10 ** reserve.mintDecimals)
               .toString();
           } else {

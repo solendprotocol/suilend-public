@@ -9,11 +9,7 @@ import {
   isStablecoin,
   isSui,
 } from "@/lib/coinType";
-import {
-  SUI_DEPOSIT_GAS_MIN,
-  SUI_REPAY_GAS_MIN,
-  msPerYear,
-} from "@/lib/constants";
+import { SUI_GAS_MIN, msPerYear } from "@/lib/constants";
 import { LOOPING_THRESHOLD, LOOPING_WARNING_MESSAGE } from "@/lib/looping";
 import { Action } from "@/lib/types";
 
@@ -66,9 +62,9 @@ const getMaxCalculations = (
     ];
     if (isSui(reserve.coinType))
       result.push({
-        reason: `${SUI_DEPOSIT_GAS_MIN} SUI should be saved for gas`,
+        reason: `${SUI_GAS_MIN} SUI should be saved for gas`,
         isDisabled: true,
-        value: balance.minus(SUI_DEPOSIT_GAS_MIN),
+        value: balance.minus(SUI_GAS_MIN),
       });
 
     return result;
@@ -185,9 +181,9 @@ const getMaxCalculations = (
     ];
     if (isSui(reserve.coinType))
       result.push({
-        reason: `${SUI_REPAY_GAS_MIN} SUI should be saved for gas`,
+        reason: `${SUI_GAS_MIN} SUI should be saved for gas`,
         isDisabled: true,
-        value: balance.minus(SUI_REPAY_GAS_MIN),
+        value: balance.minus(SUI_GAS_MIN),
       });
 
     return result;
