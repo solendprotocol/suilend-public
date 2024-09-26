@@ -21,6 +21,7 @@ interface RowData {
   price: BigNumber;
   symbol: string;
   iconUrl?: string | null;
+  isIsolated: boolean;
   amount: BigNumber;
   amountUsd: BigNumber;
   reserve: ParsedReserve;
@@ -47,7 +48,7 @@ export default function AccountAssetTable({
         sortingFn: "text",
         header: ({ column }) => tableHeader(column, "Asset name"),
         cell: ({ row }) => {
-          const { coinType, price, symbol, iconUrl } = row.original;
+          const { coinType, price, symbol, iconUrl, isIsolated } = row.original;
 
           return (
             <AssetCell
@@ -55,6 +56,7 @@ export default function AccountAssetTable({
               price={price}
               symbol={symbol}
               iconUrl={iconUrl}
+              isIsolated={isIsolated}
             />
           );
         },
