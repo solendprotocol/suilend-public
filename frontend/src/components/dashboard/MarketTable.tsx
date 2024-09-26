@@ -35,6 +35,7 @@ export interface ReservesRowData {
   price: BigNumber;
   symbol: string;
   iconUrl?: string | null;
+  isIsolated: boolean;
   openLtvPercent: BigNumber;
   borrowWeight: BigNumber;
   depositedAmount: BigNumber;
@@ -129,6 +130,7 @@ export default function MarketTable() {
           const price = reserve.price;
           const symbol = reserve.symbol;
           const iconUrl = reserve.iconUrl;
+          const isIsolated: boolean = reserve.config.isolated;
           const openLtvPercent = new BigNumber(reserve.config.openLtvPct);
           const borrowWeight = new BigNumber(
             reserve.config.borrowWeightBps,
@@ -246,6 +248,7 @@ export default function MarketTable() {
             price,
             symbol,
             iconUrl,
+            isIsolated,
             openLtvPercent,
             borrowWeight,
             depositedAmount,

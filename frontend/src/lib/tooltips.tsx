@@ -4,6 +4,9 @@ import TextLink from "@/components/shared/TextLink";
 import "katex/dist/katex.min.css";
 import { Separator } from "@/components/ui/separator";
 
+export const ISOLATED_TOOLTIP =
+  "An isolated asset must be the only asset borrowed in an account.";
+
 export const OPEN_LTV_TOOLTIP =
   "Open LTV is a ratio that determines the borrowing power provided by a deposited asset when opening a new borrow position.";
 
