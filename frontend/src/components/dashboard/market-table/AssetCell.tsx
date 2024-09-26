@@ -5,6 +5,7 @@ import { TBody, TLabel } from "@/components/shared/Typography";
 import { isFud } from "@/lib/coinType";
 import { formatPrice } from "@/lib/format";
 import { ISOLATED_TOOLTIP } from "@/lib/tooltips";
+import { cn, hoverUnderlineClassName } from "@/lib/utils";
 
 type AssetCellProps = Pick<
   ReservesRowData,
@@ -28,9 +29,14 @@ export default function AssetCell({
 
           {isIsolated && (
             <Tooltip title={ISOLATED_TOOLTIP}>
-              <TLabel className="rounded-md bg-secondary px-1 py-0.5 font-medium uppercase text-secondary-foreground">
+              <TBody
+                className={cn(
+                  "uppercase text-secondary decoration-secondary/50",
+                  hoverUnderlineClassName,
+                )}
+              >
                 Isolated
-              </TLabel>
+              </TBody>
             </Tooltip>
           )}
         </div>

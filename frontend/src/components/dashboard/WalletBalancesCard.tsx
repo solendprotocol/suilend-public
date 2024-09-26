@@ -47,6 +47,7 @@ export default function WalletBalancesCard() {
               price: cb.price as BigNumber,
               symbol: cb.symbol,
               iconUrl: cb.iconUrl,
+              isIsolated: false,
               amount: cb.balance,
               amountUsd: cb.balance.times(cb.price as BigNumber),
               reserve: data.lendingMarket.reserves.find(

@@ -130,7 +130,7 @@ export default function MarketTable() {
           const price = reserve.price;
           const symbol = reserve.symbol;
           const iconUrl = reserve.iconUrl;
-          const isIsolated: boolean = reserve.config.isolated;
+          const isIsolated = reserve.config.isolated;
           const openLtvPercent = new BigNumber(reserve.config.openLtvPct);
           const borrowWeight = new BigNumber(
             reserve.config.borrowWeightBps,

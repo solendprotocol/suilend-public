@@ -171,7 +171,7 @@ export const parseReserveConfig = (
   const protocolLiquidationFeeBps = Number(
     config.protocolLiquidationFeeBps.toString(),
   );
-  const isolated = config.isolated;
+  const isolated = config.isolated as boolean;
   const openAttributedBorrowLimitUsd = Number(
     config.openAttributedBorrowLimitUsd.toString(),
   );

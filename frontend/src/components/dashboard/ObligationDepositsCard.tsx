@@ -23,6 +23,7 @@ export default function ObligationDepositsCard() {
             price: d.reserve.price,
             symbol: d.reserve.symbol,
             iconUrl: d.reserve.iconUrl,
+            isIsolated: d.reserve.config.isolated,
             amount: d.depositedAmount,
             amountUsd: d.depositedAmountUsd,
             reserve: d.reserve,

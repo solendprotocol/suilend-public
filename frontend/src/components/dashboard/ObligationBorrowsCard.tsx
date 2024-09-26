@@ -23,6 +23,7 @@ export default function ObligationBorrowsCard() {
             price: b.reserve.price,
             symbol: b.reserve.symbol,
             iconUrl: b.reserve.iconUrl,
+            isIsolated: b.reserve.config.isolated,
             amount: b.borrowedAmount,
             amountUsd: b.borrowedAmountUsd,
             reserve: b.reserve,
