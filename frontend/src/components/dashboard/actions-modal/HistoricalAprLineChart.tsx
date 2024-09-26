@@ -160,7 +160,6 @@ function Chart({ side, data }: ChartProps) {
           ),
         )
       : [];
-  console.log("XXX", allFields);
 
   const fieldsMap = {
     [Side.DEPOSIT]: allFields.filter((field) =>

@@ -6,7 +6,7 @@ import { capitalize } from "lodash";
 import { AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 
-import { maxU64 } from "@suilend/sdk/constants";
+import { WAD, maxU64 } from "@suilend/sdk/constants";
 import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 import { ApiDepositEvent, Side } from "@suilend/sdk/types";
 
@@ -230,7 +230,24 @@ export default function ActionsModalTabContent({
         break;
       }
       case Action.WITHDRAW: {
-        if (useMaxAmount) submitAmount = maxU64.toString();
+        if (useMaxAmount)
+          submitAmount = !reserve.config.isolated
+            ? maxU64.toString()
+            : BigNumber.min(
+                new BigNumber(
+                  new BigNumber(
+                    new BigNumber(
+                      obligation!.original.allowedBorrowValueUsd.value.toString(),
+                    ).div(WAD),
+                  ).minus(obligation!.borrowedAmountUsd),
+                )
+                  .div(reserve.price)
+                  .div(reserve.cTokenExchangeRate),
+                depositPosition!.depositedCtokenAmount,
+              )
+                .times(10 ** reserve.mintDecimals)
+                .integerValue(BigNumber.ROUND_DOWN)
+                .toString();
         else
           submitAmount = new BigNumber(submitAmount)
             .div(reserve.cTokenExchangeRate)
