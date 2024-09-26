@@ -22,6 +22,7 @@ import Collapsible from "@/components/shared/Collapsible";
 import LabelWithValue from "@/components/shared/LabelWithValue";
 import Spinner from "@/components/shared/Spinner";
 import TextLink from "@/components/shared/TextLink";
+import Tooltip from "@/components/shared/Tooltip";
 import { TBody, TLabelSans } from "@/components/shared/Typography";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { useDashboardContext } from "@/contexts/DashboardContext";
@@ -321,18 +322,26 @@ export default function ActionsModalTabContent({
             }
           >
             <TLabelSans>Balance</TLabelSans>
-            <TBody className="text-xs">
-              {formatToken(balance, { exact: false })} {reserve.symbol}
-            </TBody>
+            <Tooltip
+              title={`${formatToken(balance, { dp: reserve.mintDecimals })} ${reserve.symbol}`}
+            >
+              <TBody className="text-xs">
+                {formatToken(balance, { exact: false })} {reserve.symbol}
+              </TBody>
+            </Tooltip>
           </div>
 
           <div className="flex flex-row items-center gap-2">
             <TLabelSans>
               {side === Side.DEPOSIT ? "Deposited" : "Borrowed"}
             </TLabelSans>
-            <TBody className="text-xs">
-              {formatToken(positionAmount, { exact: false })} {reserve.symbol}
-            </TBody>
+            <Tooltip
+              title={`${formatToken(positionAmount, { dp: reserve.mintDecimals })} ${reserve.symbol}`}
+            >
+              <TBody className="text-xs">
+                {formatToken(positionAmount, { exact: false })} {reserve.symbol}
+              </TBody>
+            </Tooltip>
           </div>
         </div>
       </div>
