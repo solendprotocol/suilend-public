@@ -28,11 +28,12 @@ export type RewardSummary = {
     rewardIndex: number;
     reserveCoinType: string;
     rewardCoinType: string;
+    mintDecimals: number;
+    price?: BigNumber;
+    symbol: string;
+    iconUrl?: string | null;
     aprPercent?: BigNumber;
     perDay?: BigNumber;
-    price?: BigNumber;
-    iconUrl?: string | null;
-    rewardSymbol: string;
     side: Side;
   };
   obligationClaims: {
@@ -132,11 +133,12 @@ export const formatRewards = (
         rewardIndex: poolReward.rewardIndex,
         reserveCoinType: reserve.coinType,
         rewardCoinType: poolReward.coinType,
+        mintDecimals: poolReward.mintDecimals,
+        price: rewardReserve?.price,
+        symbol: rewardCoinMetadata.symbol,
+        iconUrl: rewardCoinMetadata.iconUrl,
         aprPercent,
         perDay,
-        price: rewardReserve?.price,
-        iconUrl: rewardCoinMetadata.iconUrl,
-        rewardSymbol: rewardCoinMetadata.symbol,
         side,
       },
       obligationClaims: Object.fromEntries(

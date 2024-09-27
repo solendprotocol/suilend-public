@@ -25,7 +25,7 @@ interface DashboardContext {
   setIsFirstDepositDialogOpen: Dispatch<SetStateAction<boolean>>;
 
   claimRewards: (
-    rewards: RewardSummary[],
+    rewardsMap: Record<string, RewardSummary[]>,
   ) => Promise<SuiTransactionBlockResponse>;
 }
 
@@ -61,7 +61,7 @@ export function DashboardContextProvider({ children }: PropsWithChildren) {
   );
 
   const claimRewards = useCallback(
-    async (rewards: RewardSummary[]) => {
+    async (rewardsMap: Record<string, RewardSummary[]>) => {
       if (!address) throw Error("Wallet not connected");
       if (!obligationOwnerCap || !obligation)
         throw Error("Obligation not found");
@@ -70,17 +70,19 @@ export function DashboardContextProvider({ children }: PropsWithChildren) {
       try {
         await suilendClient.claimRewardsToObligation(
           address,
-          rewards.map((r) => {
-            const obligationClaim = r.obligationClaims[obligation.id];
+          Object.values(rewardsMap)
+            .flat()
+            .map((r) => {
+              const obligationClaim = r.obligationClaims[obligation.id];
 
-            return {
-              obligationOwnerCapId: obligationOwnerCap.id,
-              reserveArrayIndex: obligationClaim.reserveArrayIndex,
-              rewardIndex: BigInt(r.stats.rewardIndex),
-              rewardType: r.stats.rewardCoinType,
-              side: r.stats.side,
-            };
-          }),
+              return {
+                obligationOwnerCapId: obligationOwnerCap.id,
+                reserveArrayIndex: obligationClaim.reserveArrayIndex,
+                rewardIndex: BigInt(r.stats.rewardIndex),
+                rewardType: r.stats.rewardCoinType,
+                side: r.stats.side,
+              };
+            }),
           txb,
         );
       } catch (err) {

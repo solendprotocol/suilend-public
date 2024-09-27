@@ -472,16 +472,16 @@ export class SuilendClient {
       })
     ).data;
 
-    const mergedCoin = coins[0];
+    const mergeCoin = coins[0];
     if (coins.length > 1 && !isSui) {
       txb.mergeCoins(
-        txb.object(mergedCoin.coinObjectId),
+        txb.object(mergeCoin.coinObjectId),
         coins.map((c) => txb.object(c.coinObjectId)).slice(1),
       );
     }
 
     const [rewardCoin] = txb.splitCoins(
-      isSui ? txb.gas : txb.object(mergedCoin.coinObjectId),
+      isSui ? txb.gas : txb.object(mergeCoin.coinObjectId),
       [txb.pure(rewardValue)],
     );
 
@@ -602,24 +602,30 @@ export class SuilendClient {
     }>,
     txb: TransactionBlock,
   ) {
-    const claimedCoins = rewards.map((r) => {
+    const mergeCoinsMap: Record<string, any[]> = {};
+    for (const reward of rewards) {
       const [claimedCoin] = this.claimReward(
-        r.obligationOwnerCapId,
-        r.reserveArrayIndex,
-        r.rewardIndex,
-        r.rewardType,
-        r.side,
+        reward.obligationOwnerCapId,
+        reward.reserveArrayIndex,
+        reward.rewardIndex,
+        reward.rewardType,
+        reward.side,
         txb,
       );
-      return claimedCoin;
-    });
 
-    const mergedCoin = claimedCoins[0];
-    if (claimedCoins.length > 1) {
-      txb.mergeCoins(mergedCoin, claimedCoins.slice(1));
+      if (mergeCoinsMap[reward.rewardType] === undefined)
+        mergeCoinsMap[reward.rewardType] = [];
+      mergeCoinsMap[reward.rewardType].push(claimedCoin);
     }
 
-    txb.transferObjects([mergedCoin], txb.pure(ownerId));
+    for (const mergeCoins of Object.values(mergeCoinsMap)) {
+      const mergeCoin = mergeCoins[0];
+      if (mergeCoins.length > 1) {
+        txb.mergeCoins(mergeCoin, mergeCoins.slice(1));
+      }
+
+      txb.transferObjects([mergeCoin], txb.pure(ownerId));
+    }
   }
 
   findReserveArrayIndex(coinType: string): bigint {
@@ -832,16 +838,16 @@ export class SuilendClient {
       })
     ).data;
 
-    const mergedCoin = coins[0];
+    const mergeCoin = coins[0];
     if (coins.length > 1 && !isSui) {
       txb.mergeCoins(
-        txb.object(mergedCoin.coinObjectId),
+        txb.object(mergeCoin.coinObjectId),
         coins.map((c) => txb.object(c.coinObjectId)).slice(1),
       );
     }
 
     const [sendCoin] = txb.splitCoins(
-      isSui ? txb.gas : txb.object(mergedCoin.coinObjectId),
+      isSui ? txb.gas : txb.object(mergeCoin.coinObjectId),
       [txb.pure(value)],
     );
 
@@ -996,16 +1002,16 @@ export class SuilendClient {
       })
     ).data;
 
-    const mergedCoin = coins[0];
+    const mergeCoin = coins[0];
     if (coins.length > 1 && !isSui) {
       txb.mergeCoins(
-        txb.object(mergedCoin.coinObjectId),
+        txb.object(mergeCoin.coinObjectId),
         coins.map((c) => txb.object(c.coinObjectId)).slice(1),
       );
     }
 
     const [sendCoin] = txb.splitCoins(
-      isSui ? txb.gas : txb.object(mergedCoin.coinObjectId),
+      isSui ? txb.gas : txb.object(mergeCoin.coinObjectId),
       [txb.pure(value)],
     );
 
