@@ -10,6 +10,7 @@ import {
   isSui,
 } from "@/lib/coinType";
 import { SUI_GAS_MIN, msPerYear } from "@/lib/constants";
+import { formatList } from "@/lib/format";
 import { LOOPING_THRESHOLD, LOOPING_WARNING_MESSAGE } from "@/lib/looping";
 import { Action } from "@/lib/types";
 
@@ -243,7 +244,13 @@ const getBorrowedAmountAcrossObligations = (
   );
 
 export const getSubmitButtonNoValueState =
-  (action: Action, reserve: ParsedReserve, obligations?: ParsedObligation[]) =>
+  (
+    action: Action,
+    reserves: ParsedReserve[],
+    reserve: ParsedReserve,
+    obligations: ParsedObligation[] | undefined,
+    obligation: ParsedObligation | null,
+  ) =>
   () => {
     if (action === Action.DEPOSIT) {
       if (reserve.depositedAmount.gte(reserve.config.depositLimit))
@@ -288,6 +295,22 @@ export const getSubmitButtonNoValueState =
         )
       )
         return { isDisabled: true, title: "Cannot borrow deposited asset" };
+
+      // Isolated
+      if (!reserve.config.isolated) {
+        const isolatedReservesWithBorrows = reserves
+          .filter((r) => r.config.isolated)
+          .filter((r) => hasReserveBorrows(r, obligation));
+        if (isolatedReservesWithBorrows.length > 0)
+          return { isDisabled: true, title: `Cannot borrow ${reserve.symbol}` };
+      } else {
+        const otherReservesWithBorrows = reserves
+          .filter((r) => r.coinType !== reserve.coinType)
+          .filter((r) => hasReserveBorrows(r, obligation));
+        if (otherReservesWithBorrows.length > 0)
+          return { isDisabled: true, title: `Cannot borrow ${reserve.symbol}` };
+      }
+
       return undefined;
     }
   };
@@ -316,32 +339,77 @@ export const getSubmitButtonState =
     return undefined;
   };
 
-export const getLoopingWarningMessage =
-  (action: Action, reserve: ParsedReserve, obligations?: ParsedObligation[]) =>
+const hasReserveBorrows = (
+  reserve: ParsedReserve,
+  obligation: ParsedObligation | null,
+) =>
+  (
+    obligation?.borrows.find((b) => b.coinType === reserve.coinType)
+      ?.borrowedAmount ?? new BigNumber(0)
+  ).gt(0);
+
+export const getSubmitWarningMessages =
+  (
+    action: Action,
+    reserves: ParsedReserve[],
+    reserve: ParsedReserve,
+    obligations: ParsedObligation[] | undefined,
+    obligation: ParsedObligation | null,
+  ) =>
   () => {
-    if (!isStablecoin(reserve.coinType)) return undefined;
+    const result = [];
 
-    for (const stablecoinCoinType of NORMALIZED_STABLECOIN_COINTYPES) {
-      if (stablecoinCoinType === reserve.coinType) continue;
+    if (action === Action.DEPOSIT) {
+      if (isStablecoin(reserve.coinType)) {
+        for (const stablecoinCoinType of NORMALIZED_STABLECOIN_COINTYPES) {
+          if (stablecoinCoinType === reserve.coinType) continue;
 
-      if (action === Action.DEPOSIT) {
-        if (
-          getBorrowedAmountAcrossObligations(
-            stablecoinCoinType,
-            obligations,
-          ).gt(LOOPING_THRESHOLD)
-        )
-          return LOOPING_WARNING_MESSAGE("depositing", reserve.symbol);
-      } else if (action === Action.BORROW) {
-        if (
-          getDepositedAmountAcrossObligations(
-            stablecoinCoinType,
-            obligations,
-          ).gt(LOOPING_THRESHOLD)
-        )
-          return LOOPING_WARNING_MESSAGE("borrowing", reserve.symbol);
+          if (
+            getBorrowedAmountAcrossObligations(
+              stablecoinCoinType,
+              obligations,
+            ).gt(LOOPING_THRESHOLD)
+          ) {
+            result.push(LOOPING_WARNING_MESSAGE("depositing", reserve.symbol));
+            break;
+          }
+        }
+      }
+    } else if (action === Action.BORROW) {
+      if (isStablecoin(reserve.coinType)) {
+        for (const stablecoinCoinType of NORMALIZED_STABLECOIN_COINTYPES) {
+          if (stablecoinCoinType === reserve.coinType) continue;
+
+          if (
+            getDepositedAmountAcrossObligations(
+              stablecoinCoinType,
+              obligations,
+            ).gt(LOOPING_THRESHOLD)
+          ) {
+            result.push(LOOPING_WARNING_MESSAGE("borrowing", reserve.symbol));
+            break;
+          }
+        }
+      }
+
+      if (!reserve.config.isolated) {
+        const isolatedReservesWithBorrows = reserves
+          .filter((r) => r.config.isolated)
+          .filter((r) => hasReserveBorrows(r, obligation));
+        if (isolatedReservesWithBorrows.length > 0)
+          result.push(
+            `You cannot borrow ${reserve.symbol} as you're already borrowing ${isolatedReservesWithBorrows[0].symbol}, which is an isolated asset.`,
+          );
+      } else {
+        const otherReservesWithBorrows = reserves
+          .filter((r) => r.coinType !== reserve.coinType)
+          .filter((r) => hasReserveBorrows(r, obligation));
+        if (otherReservesWithBorrows.length > 0)
+          result.push(
+            `You cannot borrow ${reserve.symbol} (an isolated asset) as you're already borrowing ${formatList(otherReservesWithBorrows.map((r) => r.symbol))}.`,
+          );
       }
     }
 
-    return undefined;
+    return result;
   };

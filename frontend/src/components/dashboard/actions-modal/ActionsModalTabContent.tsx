@@ -63,7 +63,7 @@ interface ActionsModalTabContentProps {
   };
   getSubmitButtonNoValueState?: () => SubmitButtonState | undefined;
   getSubmitButtonState: (value: string) => SubmitButtonState | undefined;
-  getLoopingWarningMessage?: () => string | undefined;
+  getSubmitWarningMessages?: () => string[];
   submit: ActionSignature;
 }
 
@@ -76,7 +76,7 @@ export default function ActionsModalTabContent({
   getNewCalculations,
   getSubmitButtonNoValueState,
   getSubmitButtonState,
-  getLoopingWarningMessage,
+  getSubmitWarningMessages,
   submit,
 }: ActionsModalTabContentProps) {
   const { address } = useWalletContext();
@@ -461,18 +461,22 @@ export default function ActionsModalTabContent({
           )}
         </Button>
 
-        {getLoopingWarningMessage && getLoopingWarningMessage() && (
-          <div className="rounded-md bg-warning/10 p-2">
-            <TLabelSans className="text-warning">
-              <span className="mr-2 font-medium">
-                <AlertTriangle className="mb-0.5 mr-1 inline h-3 w-3" />
-                Warning
-              </span>
-              {getLoopingWarningMessage()}
-            </TLabelSans>
-          </div>
-        )}
+        {getSubmitWarningMessages &&
+          getSubmitWarningMessages().length > 0 &&
+          getSubmitWarningMessages().map((warningMessage) => (
+            <div key={warningMessage} className="rounded-md bg-warning/10 p-2">
+              <TLabelSans className="text-warning">
+                <span className="mr-2 font-medium">
+                  <AlertTriangle className="mb-0.5 mr-1 inline h-3 w-3" />
+                  Warning
+                </span>
+                {warningMessage}
+              </TLabelSans>
+            </div>
+          ))}
       </div>
     </>
   );
 }
+
+// Note you cannot borrow other assets in this account when borrowing MEW.

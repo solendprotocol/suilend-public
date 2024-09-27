@@ -15,10 +15,10 @@ import Tabs from "@/components/shared/Tabs";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import useBreakpoint from "@/hooks/useBreakpoint";
 import {
-  getLoopingWarningMessage,
   getMaxValue,
   getSubmitButtonNoValueState,
   getSubmitButtonState,
+  getSubmitWarningMessages,
 } from "@/lib/actions";
 import { Action } from "@/lib/types";
 
@@ -108,8 +108,10 @@ export default function ActionsModal() {
         getNewCalculations,
         getSubmitButtonNoValueState: getSubmitButtonNoValueState(
           Action.DEPOSIT,
+          data.lendingMarket.reserves,
           reserve,
           data.obligations,
+          obligation,
         ),
         getSubmitButtonState: getSubmitButtonState(
           Action.DEPOSIT,
@@ -118,10 +120,12 @@ export default function ActionsModal() {
           data,
           obligation,
         ),
-        getLoopingWarningMessage: getLoopingWarningMessage(
+        getSubmitWarningMessages: getSubmitWarningMessages(
           Action.DEPOSIT,
+          data.lendingMarket.reserves,
           reserve,
           data.obligations,
+          obligation,
         ),
         submit: deposit,
       };
@@ -171,8 +175,10 @@ export default function ActionsModal() {
         getNewCalculations,
         getSubmitButtonNoValueState: getSubmitButtonNoValueState(
           Action.BORROW,
+          data.lendingMarket.reserves,
           reserve,
           data.obligations,
+          obligation,
         ),
         getSubmitButtonState: getSubmitButtonState(
           Action.BORROW,
@@ -181,10 +187,12 @@ export default function ActionsModal() {
           data,
           obligation,
         ),
-        getLoopingWarningMessage: getLoopingWarningMessage(
+        getSubmitWarningMessages: getSubmitWarningMessages(
           Action.BORROW,
+          data.lendingMarket.reserves,
           reserve,
           data.obligations,
+          obligation,
         ),
         submit: borrow,
       };
