@@ -6,7 +6,6 @@ import {
   ArrowDownAz,
   ArrowDownZa,
   ChevronsUpDown,
-  X,
 } from "lucide-react";
 
 import { useActionsModalContext } from "@/components/dashboard/actions-modal/ActionsModalContext";
@@ -19,14 +18,14 @@ import TotalBorrowsCell from "@/components/dashboard/market-table/TotalBorrowsCe
 import TotalDepositsCell from "@/components/dashboard/market-table/TotalDepositsCell";
 import styles from "@/components/dashboard/MarketCardList.module.scss";
 import { ReservesRowData } from "@/components/dashboard/MarketTable";
-import Button from "@/components/shared/Button";
 import LabelWithTooltip from "@/components/shared/LabelWithTooltip";
-import Select from "@/components/shared/Select";
+import Tooltip from "@/components/shared/Tooltip";
 import { TBody, TLabelSans } from "@/components/shared/Typography";
-import { SelectTrigger } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { OPEN_LTV_BORROW_WEIGHT_TOOLTIP } from "@/lib/tooltips";
-import { cn } from "@/lib/utils";
+import {
+  ISOLATED_TOOLTIP,
+  OPEN_LTV_BORROW_WEIGHT_TOOLTIP,
+} from "@/lib/tooltips";
+import { cn, hoverUnderlineClassName } from "@/lib/utils";
 
 interface MarketCardProps {
   rowData: ReservesRowData;
@@ -83,13 +82,9 @@ function MarketCard({ rowData, onClick }: MarketCardProps) {
 
 interface MarketCardListProps {
   data: ReservesRowData[];
-  noDataMessage: string;
 }
 
-export default function MarketCardList({
-  data,
-  noDataMessage,
-}: MarketCardListProps) {
+export default function MarketCardList({ data }: MarketCardListProps) {
   const { open: openActionsModal } = useActionsModalContext();
 
   // Sort
@@ -194,8 +189,10 @@ export default function MarketCardList({
       });
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-row items-center justify-between gap-2">
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-4">
+        <TBody className="uppercase">Main assets</TBody>
+        {/* <div className="flex flex-row items-center justify-between gap-2">
         <TBody className="uppercase text-foreground">All assets</TBody>
 
         <div className="flex h-5 flex-row items-center gap-1">
@@ -238,25 +235,48 @@ export default function MarketCardList({
             </Button>
           )}
         </div>
+      </div> */}
+
+        <div className="flex w-full flex-col gap-2">
+          {sortedData
+            .filter((rowData) => !rowData.isIsolated)
+            .map((rowData) => (
+              <MarketCard
+                key={rowData.coinType}
+                rowData={rowData}
+                onClick={() =>
+                  openActionsModal(Number(rowData.reserve.arrayIndex))
+                }
+              />
+            ))}
+        </div>
       </div>
 
-      <Separator />
-
-      {sortedData.length > 0 ? (
+      <div className="flex flex-col gap-4">
+        <Tooltip title={ISOLATED_TOOLTIP}>
+          <TBody
+            className={cn(
+              "w-max uppercase decoration-foreground/50",
+              hoverUnderlineClassName,
+            )}
+          >
+            Isolated assets
+          </TBody>
+        </Tooltip>
         <div className="flex w-full flex-col gap-2">
-          {sortedData.map((rowData) => (
-            <MarketCard
-              key={rowData.coinType}
-              rowData={rowData}
-              onClick={() =>
-                openActionsModal(Number(rowData.reserve.arrayIndex))
-              }
-            />
-          ))}
+          {sortedData
+            .filter((rowData) => rowData.isIsolated)
+            .map((rowData) => (
+              <MarketCard
+                key={rowData.coinType}
+                rowData={rowData}
+                onClick={() =>
+                  openActionsModal(Number(rowData.reserve.arrayIndex))
+                }
+              />
+            ))}
         </div>
-      ) : (
-        <TLabelSans text-center>{noDataMessage}</TLabelSans>
-      )}
+      </div>
     </div>
   );
 }

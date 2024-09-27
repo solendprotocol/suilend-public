@@ -20,6 +20,8 @@ import TotalBorrowsCell from "@/components/dashboard/market-table/TotalBorrowsCe
 import TotalDepositsCell from "@/components/dashboard/market-table/TotalDepositsCell";
 import MarketCardList from "@/components/dashboard/MarketCardList";
 import styles from "@/components/dashboard/MarketTable.module.scss";
+import Tooltip from "@/components/shared/Tooltip";
+import { TBody } from "@/components/shared/Typography";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { formatToken, formatUsd } from "@/lib/format";
 import {
@@ -27,8 +29,11 @@ import {
   getFilteredRewards,
   getTotalAprPercent,
 } from "@/lib/liquidityMining";
-import { OPEN_LTV_BORROW_WEIGHT_TOOLTIP } from "@/lib/tooltips";
-import { cn } from "@/lib/utils";
+import {
+  ISOLATED_TOOLTIP,
+  OPEN_LTV_BORROW_WEIGHT_TOOLTIP,
+} from "@/lib/tooltips";
+import { cn, hoverUnderlineClassName } from "@/lib/utils";
 
 export interface ReservesRowData {
   coinType: string;
@@ -71,14 +76,14 @@ export default function MarketTable() {
       },
       {
         accessorKey: "depositedAmount",
-        sortingFn: decimalSortingFn("depositedAmount"),
+        sortingFn: decimalSortingFn("depositedAmountUsd"),
         header: ({ column }) =>
           tableHeader(column, "Deposits", { isNumerical: true }),
         cell: ({ row }) => <TotalDepositsCell {...row.original} />,
       },
       {
         accessorKey: "borrowedAmount",
-        sortingFn: decimalSortingFn("borrowedAmount"),
+        sortingFn: decimalSortingFn("borrowedAmountUsd"),
         header: ({ column }) =>
           tableHeader(column, "Borrows", { isNumerical: true }),
         cell: ({ row }) => <TotalBorrowsCell {...row.original} />,
@@ -270,19 +275,44 @@ export default function MarketTable() {
 
   return (
     <div className="w-full">
-      <div className="hidden w-full md:block">
-        <DataTable<ReservesRowData>
-          columns={columns}
-          data={rows}
-          noDataMessage="No assets"
-          onRowClick={(row) => () =>
-            openActionsModal(Number(row.original.reserve.arrayIndex))
-          }
-          tableRowClassName={() => cn("border-0", styles.tableRow)}
-        />
+      <div className="hidden w-full flex-col gap-6 md:flex">
+        <div className="flex w-full flex-col gap-4">
+          <TBody className="w-max uppercase">Main assets</TBody>
+          <DataTable<ReservesRowData>
+            columns={columns}
+            data={rows.filter((row) => !row.isIsolated)}
+            container={{ className: "border rounded-sm" }}
+            tableRowClassName={() => cn("border-0", styles.tableRow)}
+            onRowClick={(row) => () =>
+              openActionsModal(Number(row.original.reserve.arrayIndex))
+            }
+          />
+        </div>
+
+        <div className="flex w-full flex-col gap-4">
+          <Tooltip title={ISOLATED_TOOLTIP}>
+            <TBody
+              className={cn(
+                "w-max uppercase decoration-foreground/50",
+                hoverUnderlineClassName,
+              )}
+            >
+              Isolated assets
+            </TBody>
+          </Tooltip>
+          <DataTable<ReservesRowData>
+            columns={columns}
+            data={rows.filter((row) => row.isIsolated)}
+            container={{ className: "border rounded-sm" }}
+            tableRowClassName={() => cn("border-0", styles.tableRow)}
+            onRowClick={(row) => () =>
+              openActionsModal(Number(row.original.reserve.arrayIndex))
+            }
+          />
+        </div>
       </div>
       <div className="w-full md:hidden">
-        <MarketCardList data={rows} noDataMessage="No assets" />
+        <MarketCardList data={rows} />
       </div>
     </div>
   );

@@ -173,7 +173,7 @@ export function tableHeader<T>(
 interface DataTableProps<T> {
   columns: ColumnDef<T>[];
   data?: T[];
-  noDataMessage: string;
+  noDataMessage?: string;
   columnFilters?: ColumnFiltersState;
   skeletonRows?: number;
   maxRows?: number;
