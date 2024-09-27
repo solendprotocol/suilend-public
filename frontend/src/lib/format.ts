@@ -142,15 +142,10 @@ export const formatUsd = (
   });
 };
 
-export const formatPrice = (
-  value: BigNumber,
-  options?: { dp?: number; exact?: boolean },
-) => {
-  const dp = options?.dp ?? 2;
-
+export const formatPrice = (value: BigNumber) => {
   return formatNumber(value, {
     prefix: "$",
-    dp,
+    dp: Math.max(0, -Math.floor(Math.log10(+value)) - 1) + 2, // 2sf
     roundingMode: BigNumber.ROUND_HALF_UP,
     exact: true,
   });

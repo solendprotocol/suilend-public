@@ -2,7 +2,6 @@ import { ReservesRowData } from "@/components/dashboard/MarketTable";
 import TokenLogo from "@/components/shared/TokenLogo";
 import Tooltip from "@/components/shared/Tooltip";
 import { TBody, TLabel } from "@/components/shared/Typography";
-import { isFud } from "@/lib/coinType";
 import { formatPrice } from "@/lib/format";
 import { ISOLATED_TOOLTIP } from "@/lib/tooltips";
 import { cn, hoverUnderlineClassName } from "@/lib/utils";
@@ -41,9 +40,7 @@ export default function AssetCell({
           )}
         </div>
 
-        <TLabel>
-          {formatPrice(price, { dp: isFud(coinType) ? 8 : undefined })}
-        </TLabel>
+        <TLabel>{formatPrice(price)}</TLabel>
       </div>
     </div>
   );
