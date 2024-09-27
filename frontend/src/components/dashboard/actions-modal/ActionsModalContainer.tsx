@@ -77,13 +77,13 @@ export default function ActionsModalContainer({ children }: PropsWithChildren) {
           onMouseUp={onDialogContentMouseUp}
         >
           <div
-            className="relative h-fit rounded-lg bg-popover p-4"
+            className="relative h-fit rounded-lg border bg-popover p-4"
             onMouseDown={onDialogInnerContentMouseDown}
             onMouseUp={onDialogInnerContentMouseUp}
           >
             {/* More parameters */}
             <div
-              className="absolute -right-[40px] top-1/2 -translate-y-2/4 rounded-r-md bg-popover"
+              className="absolute -right-[41px] top-1/2 -translate-y-2/4 rounded-r-md bg-popover"
               style={{ writingMode: "vertical-rl" }}
             >
               <Button
@@ -105,7 +105,7 @@ export default function ActionsModalContainer({ children }: PropsWithChildren) {
   return (
     <DrawerRoot open={isOpen} onRelease={(e, open) => !open && close()}>
       <DrawerContent
-        className="actions-modal-drawer-content !bottom-auto !top-0 mt-16 !h-[calc(100dvh-64px)] !max-h-[calc(100dvh-64px)] rounded-t-lg border-none bg-popover p-0"
+        className="actions-modal-drawer-content !bottom-auto !top-0 mt-16 !h-[calc(100dvh-64px)] !max-h-[calc(100dvh-64px)] rounded-t-lg bg-popover p-0"
         thumbClassName="hidden"
         onEscapeKeyDown={() => close()}
         overlay={{
