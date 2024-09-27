@@ -56,7 +56,7 @@ interface ActionsModalTabContentProps {
   reserve: ParsedReserve;
   action: Action;
   actionPastTense: string;
-  getMaxValue: () => string;
+  getMaxValue: () => BigNumber;
   getNewCalculations: (value: string) => {
     newBorrowLimitUsd: BigNumber | null;
     newBorrowUtilization: BigNumber | null;
@@ -170,14 +170,19 @@ export default function ActionsModalTabContent({
 
   const useMaxValueWrapper = () => {
     setUseMaxAmount(true);
-    formatAndSetValue(maxAmount);
+    formatAndSetValue(
+      maxAmount.toFixed(reserve.mintDecimals, BigNumber.ROUND_DOWN),
+    );
   };
 
   useEffect(() => {
     // If user has specified intent to use max amount, we continue this intent
     // even if the max value updates
-    if (useMaxAmount) formatAndSetValue(maxAmount);
-  }, [useMaxAmount, maxAmount, formatAndSetValue]);
+    if (useMaxAmount)
+      formatAndSetValue(
+        maxAmount.toFixed(reserve.mintDecimals, BigNumber.ROUND_DOWN),
+      );
+  }, [useMaxAmount, maxAmount, formatAndSetValue, reserve.mintDecimals]);
 
   const { newBorrowLimitUsd, newBorrowUtilization } = getNewCalculations(value);
 
@@ -204,7 +209,7 @@ export default function ActionsModalTabContent({
     if (value === "") return { isDisabled: true, title: "Enter an amount" };
     if (new BigNumber(value).lt(0))
       return { isDisabled: true, title: "Enter a +ve amount" };
-    if (new BigNumber(value).eq(0))
+    if (new BigNumber(value).eq(0) && !(useMaxAmount && maxAmount.gt(0)))
       return { isDisabled: true, title: "Enter a non-zero amount" };
 
     if (getSubmitButtonState(value) !== undefined)

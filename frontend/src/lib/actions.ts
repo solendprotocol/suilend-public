@@ -214,7 +214,7 @@ export const getMaxValue =
       BigNumber.min(
         ...Object.values(maxCalculations).map((calc) => calc.value),
       ),
-    ).toFixed(reserve.mintDecimals, BigNumber.ROUND_DOWN);
+    );
   };
 
 const getDepositedAmountAcrossObligations = (
