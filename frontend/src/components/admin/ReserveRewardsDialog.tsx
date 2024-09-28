@@ -160,7 +160,7 @@ export default function ReserveRewardsDialog({
     <Dialog
       trigger={
         <Button
-          labelClassName="text-xs"
+          labelClassName="uppercase text-xs"
           startIcon={<Sparkle />}
           variant="secondaryOutline"
         >

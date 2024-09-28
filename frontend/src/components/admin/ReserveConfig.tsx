@@ -342,6 +342,7 @@ export default function ReserveConfig({
 
           <Button
             className="w-full"
+            labelClassName="uppercase"
             startIcon={<Plus />}
             variant="secondary"
             size="lg"

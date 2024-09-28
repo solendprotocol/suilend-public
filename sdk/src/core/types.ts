@@ -308,6 +308,11 @@ export interface MigrateArgs {
   lendingMarket: ObjectArg;
 }
 
+export interface ClaimFeesArgs {
+  lendingMarket: ObjectArg;
+  reserveArrayIndex: bigint | TransactionArgument;
+}
+
 // Events
 export type ApiInterestUpdateEvent = {
   id: number;

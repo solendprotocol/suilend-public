@@ -17,7 +17,7 @@ export default function RateLimiterPropertiesDialog() {
     <Dialog
       trigger={
         <Button
-          labelClassName="text-xs"
+          labelClassName="uppercase text-xs"
           startIcon={<TableProperties />}
           variant="secondaryOutline"
         >

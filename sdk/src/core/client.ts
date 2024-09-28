@@ -17,6 +17,7 @@ import {
   AddReserveArgs,
   BorrowArgs,
   CancelPoolRewardArgs,
+  ClaimFeesArgs,
   ClaimRewardsAndDepositArgs,
   ClaimRewardsArgs,
   ClosePoolRewardArgs,
@@ -143,6 +144,11 @@ interface Deps {
     typeArg: string,
     args: MigrateArgs,
   ) => TransactionResult;
+  claimFees: (
+    txb: TransactionBlock,
+    typeArgs: [string, string],
+    args: ClaimFeesArgs,
+  ) => TransactionResult;
 }
 
 export class SuilendClient {
@@ -176,6 +182,7 @@ export class SuilendClient {
   repayFunction: Deps["repay"];
   liquidateFunction: Deps["liquidate"];
   migrateFunction: Deps["migrate"];
+  claimFeesFunction: Deps["claimFees"];
 
   constructor(
     lendingMarket: any,
@@ -206,6 +213,7 @@ export class SuilendClient {
       repay,
       liquidate,
       migrate,
+      claimFees,
     }: Deps,
   ) {
     this.lendingMarket = lendingMarket;
@@ -245,6 +253,7 @@ export class SuilendClient {
     this.repayFunction = repay;
     this.liquidateFunction = liquidate;
     this.migrateFunction = migrate;
+    this.claimFeesFunction = claimFees;
   }
 
   static async initialize(
@@ -1078,10 +1087,17 @@ export class SuilendClient {
     );
   }
 
-  async migrate(txb: TransactionBlock, lendingMarketOwnerCapId: string) {
+  migrate(txb: TransactionBlock, lendingMarketOwnerCapId: string) {
     return this.migrateFunction(txb, this.lendingMarket.$typeArgs[0], {
       lendingMarket: this.lendingMarket.id,
       lendingMarketOwnerCap: lendingMarketOwnerCapId,
+    });
+  }
+
+  claimFees(txb: TransactionBlock, coinType: string) {
+    return this.claimFeesFunction(txb, this.lendingMarket.$typeArgs[0], {
+      lendingMarket: this.lendingMarket.id,
+      reserveArrayIndex: this.findReserveArrayIndex(coinType),
     });
   }
 }

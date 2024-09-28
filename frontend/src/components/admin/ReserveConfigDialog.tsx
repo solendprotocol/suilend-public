@@ -157,7 +157,7 @@ export default function ReserveConfigDialog({
     <Dialog
       trigger={
         <Button
-          labelClassName="text-xs"
+          labelClassName="uppercase text-xs"
           startIcon={<Bolt />}
           variant="secondaryOutline"
         >
@@ -191,6 +191,7 @@ export default function ReserveConfigDialog({
           </Button>
           <Button
             className="flex-1"
+            labelClassName="uppercase"
             size="lg"
             onClick={saveChanges}
             disabled={!isEditable}

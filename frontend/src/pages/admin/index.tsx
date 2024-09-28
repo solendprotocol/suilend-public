@@ -3,12 +3,14 @@ import { useRouter } from "next/router";
 
 import { TransactionBlock } from "@mysten/sui.js/transactions";
 import * as Sentry from "@sentry/nextjs";
+import { Package } from "lucide-react";
 import { toast } from "sonner";
 
 import { SuilendClient } from "@suilend/sdk/client";
 
 import AddReserveDialog from "@/components/admin/AddReserveDialog";
 import AddRewardsDialog from "@/components/admin/AddRewardsDialog";
+import ClaimFeesDialog from "@/components/admin/ClaimFeesDialog";
 import LiquidateDialog from "@/components/admin/LiquidateDialog";
 import ObligationsDialog from "@/components/admin/ObligationsDialog";
 import RateLimiterConfigDialog from "@/components/admin/RateLimiterConfigDialog";
@@ -154,6 +156,7 @@ export default function Admin() {
                       <ReserveConfigDialog reserve={reserve} />
                       <ReservePropertiesDialog reserve={reserve} />
                       <ReserveRewardsDialog reserve={reserve} />
+                      <ClaimFeesDialog reserve={reserve} />
                     </CardContent>
                   </Card>
                 );
@@ -162,6 +165,7 @@ export default function Admin() {
               <div className="flex flex-row flex-wrap gap-2">
                 <AddReserveDialog />
                 <AddRewardsDialog />
+                <ClaimFeesDialog />
               </div>
             </div>
           )}
@@ -184,7 +188,13 @@ export default function Admin() {
                 <TTitle className="uppercase">Lending market</TTitle>
               </CardHeader>
               <CardContent className="flex flex-row flex-wrap gap-2">
-                <Button onClick={onMigrate} disabled={!isEditable}>
+                <Button
+                  labelClassName="uppercase text-xs"
+                  startIcon={<Package />}
+                  variant="secondaryOutline"
+                  onClick={onMigrate}
+                  disabled={!isEditable}
+                >
                   Migrate
                 </Button>
               </CardContent>

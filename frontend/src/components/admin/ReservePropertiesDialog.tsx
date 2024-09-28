@@ -24,7 +24,7 @@ export default function ReservePropertiesDialog({
     <Dialog
       trigger={
         <Button
-          labelClassName="text-xs"
+          labelClassName="uppercase text-xs"
           startIcon={<TableProperties />}
           variant="secondaryOutline"
         >

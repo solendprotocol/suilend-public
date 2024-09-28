@@ -105,7 +105,7 @@ export default function RateLimiterConfigDialog() {
     <Dialog
       trigger={
         <Button
-          labelClassName="text-xs"
+          labelClassName="uppercase text-xs"
           startIcon={<Bolt />}
           variant="secondaryOutline"
         >
@@ -127,6 +127,7 @@ export default function RateLimiterConfigDialog() {
           </Button>
           <Button
             className="flex-1"
+            labelClassName="uppercase"
             size="lg"
             onClick={saveChanges}
             disabled={!isEditable}

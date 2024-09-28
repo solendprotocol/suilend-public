@@ -10,6 +10,7 @@ import {
   addReserve,
   borrow,
   cancelPoolReward,
+  claimFees,
   claimRewards,
   claimRewardsAndDeposit,
   closePoolReward,
@@ -62,6 +63,7 @@ const deps = {
   repay,
   liquidate,
   migrate,
+  claimFees,
 };
 
 export class SuilendClient<T extends string> extends BaseSuilendClient {
