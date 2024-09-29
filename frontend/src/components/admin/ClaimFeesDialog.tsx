@@ -55,29 +55,35 @@ export default function ClaimFeesDialog({ reserve }: ClaimFeesDialogProps) {
   >({});
   useEffect(() => {
     const fetchFeesForReserve = async (_reserve: ParsedReserve) => {
-      const res1 = await suiClient.getDynamicFields({
-        parentId: _reserve.id,
-      });
-      const res2 = await suiClient.getDynamicFieldObject({
-        parentId: _reserve.id,
-        name: res1.data[0].name,
-      });
-      const fields = (res2?.data?.content as any)?.fields.value.fields;
+      try {
+        const res1 = await suiClient.getDynamicFields({
+          parentId: _reserve.id,
+        });
+        const res2 = await suiClient.getDynamicFieldObject({
+          parentId: _reserve.id,
+          name: res1.data[0].name,
+        });
+        const fields = (res2?.data?.content as any)?.fields.value.fields;
 
-      const fees = new BigNumber(fields.fees).div(10 ** _reserve.mintDecimals);
-      const ctokenFees = new BigNumber(fields.ctoken_fees)
-        .div(10 ** _reserve.mintDecimals)
-        .times(_reserve.cTokenExchangeRate);
-      const unclaimedSpreadFees = new BigNumber(_reserve.unclaimedSpreadFees);
+        const fees = new BigNumber(fields.fees).div(
+          10 ** _reserve.mintDecimals,
+        );
+        const ctokenFees = new BigNumber(fields.ctoken_fees)
+          .div(10 ** _reserve.mintDecimals)
+          .times(_reserve.cTokenExchangeRate);
+        const unclaimedSpreadFees = new BigNumber(_reserve.unclaimedSpreadFees);
 
-      setFeesMap((prev) => ({
-        ...prev,
-        [_reserve.coinType]: {
-          fees,
-          ctokenFees,
-          unclaimedSpreadFees,
-        },
-      }));
+        setFeesMap((prev) => ({
+          ...prev,
+          [_reserve.coinType]: {
+            fees,
+            ctokenFees,
+            unclaimedSpreadFees,
+          },
+        }));
+      } catch (err) {
+        console.error(err);
+      }
     };
     for (const _reserve of reserves) fetchFeesForReserve(_reserve);
   }, [reserves, suiClient]);
@@ -157,38 +163,39 @@ export default function ClaimFeesDialog({ reserve }: ClaimFeesDialogProps) {
 
               <div className="flex flex-col justify-between gap-2">
                 {feesMap[r.coinType] ? (
-                  Object.entries(feesMap[r.coinType]).map(([key, value]) => (
-                    <div
-                      key={key}
-                      className="flex flex-row justify-between gap-2"
-                    >
-                      <TLabelSans className="my-0.5">{key}</TLabelSans>
-                      <div className="flex flex-col items-end gap-1">
-                        <TBody className="text-right">
-                          {formatToken(value, { dp: r.mintDecimals })}{" "}
-                          {r.symbol}
-                        </TBody>
-                        <TLabel className="text-right">
-                          {formatUsd(value.times(r.price))}
-                        </TLabel>
+                  <>
+                    {Object.entries(feesMap[r.coinType]).map(([key, value]) => (
+                      <div
+                        key={key}
+                        className="flex flex-row justify-between gap-2"
+                      >
+                        <TLabelSans className="my-0.5">{key}</TLabelSans>
+                        <div className="flex flex-col items-end gap-1">
+                          <TBody className="text-right">
+                            {formatToken(value, { dp: r.mintDecimals })}{" "}
+                            {r.symbol}
+                          </TBody>
+                          <TLabel className="text-right">
+                            {formatUsd(value.times(r.price))}
+                          </TLabel>
+                        </div>
                       </div>
+                    ))}
+                    <div className="flex flex-row justify-end">
+                      <TBody className="text-primary">
+                        {formatUsd(
+                          new BigNumber(
+                            feesMap[r.coinType].fees
+                              .plus(feesMap[r.coinType].ctokenFees)
+                              .plus(feesMap[r.coinType].unclaimedSpreadFees),
+                          ).times(r.price),
+                        )}
+                      </TBody>
                     </div>
-                  ))
+                  </>
                 ) : (
                   <Spinner size="md" />
                 )}
-              </div>
-
-              <div className="flex flex-row justify-end">
-                <TBody className="text-primary">
-                  {formatUsd(
-                    new BigNumber(
-                      feesMap[r.coinType].fees
-                        .plus(feesMap[r.coinType].ctokenFees)
-                        .plus(feesMap[r.coinType].unclaimedSpreadFees),
-                    ).times(r.price),
-                  )}
-                </TBody>
               </div>
             </div>
             {index !== reserves.length - 1 && <Separator />}
