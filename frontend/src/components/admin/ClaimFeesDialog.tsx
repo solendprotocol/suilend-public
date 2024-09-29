@@ -131,7 +131,30 @@ export default function ClaimFeesDialog({ reserve }: ClaimFeesDialogProps) {
         </Button>
       }
       titleIcon={<Grab />}
-      title="Claim fees"
+      title={
+        <>
+          Claim fees
+          {!reserve && (
+            <span className="text-primary">
+              {formatUsd(
+                reserves.reduce(
+                  (acc, r) =>
+                    acc.plus(
+                      feesMap[r.coinType]
+                        ? new BigNumber(
+                            feesMap[r.coinType].fees
+                              .plus(feesMap[r.coinType].ctokenFees)
+                              .plus(feesMap[r.coinType].unclaimedSpreadFees),
+                          ).times(r.price)
+                        : new BigNumber(0),
+                    ),
+                  new BigNumber(0),
+                ),
+              )}
+            </span>
+          )}
+        </>
+      }
       footer={
         <div className="flex w-full flex-row items-center gap-2">
           <Button

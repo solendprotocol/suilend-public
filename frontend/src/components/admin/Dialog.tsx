@@ -26,7 +26,7 @@ interface DialogProps extends PropsWithChildren {
   trigger: ReactNode;
   contentProps?: DialogContentProps;
   titleIcon?: ReactElement;
-  title?: string;
+  title?: string | ReactNode;
   description?: ReactNode;
   descriptionAsChild?: boolean;
   noSeparator?: boolean;
