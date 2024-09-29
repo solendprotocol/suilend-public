@@ -18,6 +18,7 @@ import DepositAprCell from "@/components/dashboard/market-table/DepositAprCell";
 import OpenLtvBwCell from "@/components/dashboard/market-table/OpenLtvBwCell";
 import TotalBorrowsCell from "@/components/dashboard/market-table/TotalBorrowsCell";
 import TotalDepositsCell from "@/components/dashboard/market-table/TotalDepositsCell";
+import MarketCardList from "@/components/dashboard/MarketCardList";
 import styles from "@/components/dashboard/MarketTable.module.scss";
 import Tooltip from "@/components/shared/Tooltip";
 import { TTitle } from "@/components/shared/Typography";
@@ -274,42 +275,47 @@ export default function MarketTable() {
 
   return (
     <div className="w-full">
-      <div className="flex w-full flex-col justify-center rounded-t-sm border border-b-0 bg-card px-4 py-2">
-        <TTitle className="uppercase">Main assets</TTitle>
-      </div>
-      <DataTable<ReservesRowData>
-        columns={columns}
-        data={rows.filter((row) => !row.isIsolated)}
-        container={{ className: "border border-b-0" }}
-        tableRowClassName={() => cn("border-0", styles.tableRow)}
-        onRowClick={(row) => () =>
-          openActionsModal(Number(row.original.reserve.arrayIndex))
-        }
-      />
+      <div className="hidden w-full md:block">
+        <div className="flex w-full flex-col justify-center rounded-t-sm border border-b-0 bg-card px-4 py-2">
+          <TTitle className="uppercase">Main assets</TTitle>
+        </div>
+        <DataTable<ReservesRowData>
+          columns={columns}
+          data={rows.filter((row) => !row.isIsolated)}
+          container={{ className: "border border-b-0" }}
+          tableRowClassName={() => cn("border-0", styles.tableRow)}
+          onRowClick={(row) => () =>
+            openActionsModal(Number(row.original.reserve.arrayIndex))
+          }
+        />
 
-      <div className="flex w-full flex-col justify-center border border-b-0 bg-card px-4 py-2">
-        <Tooltip title={ISOLATED_TOOLTIP}>
-          <TTitle
-            className={cn(
-              "w-max uppercase decoration-primary/50",
-              hoverUnderlineClassName,
-            )}
-          >
-            Isolated assets
-          </TTitle>
-        </Tooltip>
+        <div className="flex w-full flex-col justify-center border border-b-0 bg-card px-4 py-2">
+          <Tooltip title={ISOLATED_TOOLTIP}>
+            <TTitle
+              className={cn(
+                "w-max uppercase decoration-primary/50",
+                hoverUnderlineClassName,
+              )}
+            >
+              Isolated assets
+            </TTitle>
+          </Tooltip>
+        </div>
+        <DataTable<ReservesRowData>
+          columns={columns}
+          data={rows.filter((row) => row.isIsolated)}
+          container={{
+            className: "border rounded-b-sm",
+          }}
+          tableRowClassName={() => cn("border-0", styles.tableRow)}
+          onRowClick={(row) => () =>
+            openActionsModal(Number(row.original.reserve.arrayIndex))
+          }
+        />
       </div>
-      <DataTable<ReservesRowData>
-        columns={columns}
-        data={rows.filter((row) => row.isIsolated)}
-        container={{
-          className: "border rounded-b-sm",
-        }}
-        tableRowClassName={() => cn("border-0", styles.tableRow)}
-        onRowClick={(row) => () =>
-          openActionsModal(Number(row.original.reserve.arrayIndex))
-        }
-      />
+      <div className="w-full md:hidden">
+        <MarketCardList data={rows} />
+      </div>
     </div>
   );
 }
