@@ -26,7 +26,8 @@ import Tabs from "@/components/shared/Tabs";
 import TokenLogo from "@/components/shared/TokenLogo";
 import Tooltip from "@/components/shared/Tooltip";
 import { TBody } from "@/components/shared/Typography";
-import { useAppContext } from "@/contexts/AppContext";
+import { AppData, useAppContext } from "@/contexts/AppContext";
+import { useReserveAssetDataEventsContext } from "@/contexts/ReserveAssetDataEventsContext";
 import { isSuilendPoints } from "@/lib/coinType";
 import { EventType, eventSortAsc } from "@/lib/events";
 import { formatPoints, formatToken } from "@/lib/format";
@@ -98,7 +99,9 @@ export default function AccountOverviewDialog() {
     [QueryParams.TAB]: router.query[QueryParams.TAB] as Tab | undefined,
   };
 
-  const { refreshData, obligation } = useAppContext();
+  const { refreshData, obligation, ...restAppContext } = useAppContext();
+  const data = restAppContext.data as AppData;
+  const { fetchReserveAssetDataEvents } = useReserveAssetDataEventsContext();
 
   // Open
   const isOpen = queryParams[QueryParams.TAB] !== undefined;
@@ -214,6 +217,21 @@ export default function AccountOverviewDialog() {
     }
   }, [obligation?.id, isOpen, fetchEventsData]);
 
+  // Downsampled events
+  const fetchDownsampledEvents = useCallback(() => {
+    for (const reserve of data.lendingMarket.reserves) {
+      fetchReserveAssetDataEvents(reserve, 30);
+    }
+  }, [data.lendingMarket.reserves, fetchReserveAssetDataEvents]);
+
+  const fetchedDownsampledEvents = useRef<boolean>(false);
+  useEffect(() => {
+    if (!fetchedDownsampledEvents.current) {
+      fetchDownsampledEvents();
+      fetchedDownsampledEvents.current = true;
+    }
+  }, [fetchDownsampledEvents]);
+
   // Refresh
   const getNowS = () => Math.floor(new Date().getTime() / 1000);
   const [nowS, setNowS] = useState<number>(getNowS);
@@ -221,7 +239,10 @@ export default function AccountOverviewDialog() {
   const refresh = () => {
     if (!obligation?.id) return;
 
-    if (selectedTab === Tab.EARNINGS) refreshData();
+    if (selectedTab === Tab.EARNINGS) {
+      refreshData();
+      fetchDownsampledEvents();
+    }
     fetchEventsData(obligation.id);
     setNowS(getNowS());
   };
