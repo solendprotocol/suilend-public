@@ -301,7 +301,7 @@ export default function ActionsModalTabContent({
         setTimeout(() => setJustDeposited(true), 1000);
     } catch (err) {
       toast.error(`Failed to ${action.toLowerCase()} ${formattedValue}`, {
-        description: ((err as Error)?.message || err) as string,
+        description: (err as Error)?.message || "An unknown error occurred",
         duration: TX_TOAST_DURATION,
       });
     } finally {

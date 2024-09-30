@@ -104,7 +104,7 @@ export default function Admin() {
       toast.success("Migrated");
     } catch (err) {
       toast.error("Failed to migrate", {
-        description: ((err as Error)?.message || err) as string,
+        description: (err as Error)?.message || "An unknown error occurred",
       });
     } finally {
       await refreshData();

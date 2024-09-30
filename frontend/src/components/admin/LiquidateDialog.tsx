@@ -205,7 +205,7 @@ export default function LiquidateDialog({
       toast.success("Liquidated");
     } catch (err) {
       toast.error("Failed to liquidate", {
-        description: ((err as Error)?.message || err) as string,
+        description: (err as Error)?.message || "An unknown error occurred",
       });
     }
   }

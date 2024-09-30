@@ -195,7 +195,9 @@ export default function useFetchAppData(
       onError: (err) => {
         toast.error(
           "Failed to refresh app data. Please check your internet connection or change RPC providers in Settings.",
-          { description: ((err as Error)?.message || err) as string },
+          {
+            description: (err as Error)?.message || "An unknown error occured",
+          },
         );
         Sentry.captureException(err);
         console.error(err);

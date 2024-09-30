@@ -174,7 +174,7 @@ export default function AddRewardsDialog() {
       reset();
     } catch (err) {
       toast.error("Failed to add rewards", {
-        description: ((err as Error)?.message || err) as string,
+        description: (err as Error)?.message || "An unknown error occurred",
       });
     } finally {
       await refreshData();

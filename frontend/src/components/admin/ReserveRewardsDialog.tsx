@@ -108,7 +108,7 @@ export default function ReserveRewardsDialog({
       toast.success("Canceled reward");
     } catch (err) {
       toast.error("Failed to cancel reward", {
-        description: ((err as Error)?.message || err) as string,
+        description: (err as Error)?.message || "An unknown error occurred",
       });
     } finally {
       await refreshData();
@@ -149,7 +149,7 @@ export default function ReserveRewardsDialog({
       toast.success("Closed reward");
     } catch (err) {
       toast.error("Failed to close reward", {
-        description: ((err as Error)?.message || err) as string,
+        description: (err as Error)?.message || "An unknown error occurred",
       });
     } finally {
       await refreshData();

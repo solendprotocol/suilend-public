@@ -146,7 +146,7 @@ export default function ReserveConfigDialog({
       initialConfigStateRef.current = cloneDeep(configState);
     } catch (err) {
       toast.error("Failed to update reserve config", {
-        description: ((err as Error)?.message || err) as string,
+        description: (err as Error)?.message || "An unknown error occurred",
       });
     } finally {
       await refreshData();

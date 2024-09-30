@@ -109,7 +109,7 @@ export default function ClaimFeesDialog({ reserve }: ClaimFeesDialogProps) {
       toast.success("Claimed fees");
     } catch (err) {
       toast.error("Failed to claim fees", {
-        description: ((err as Error)?.message || err) as string,
+        description: (err as Error)?.message || "An unknown error occurred",
       });
     } finally {
       await refreshData();

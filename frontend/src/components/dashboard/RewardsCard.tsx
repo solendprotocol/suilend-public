@@ -202,7 +202,7 @@ export default function RewardsCard() {
       });
     } catch (err) {
       toast.error("Failed to claim rewards", {
-        description: ((err as Error)?.message || err) as string,
+        description: (err as Error)?.message || "An unknown error occurred",
         duration: TX_TOAST_DURATION,
       });
     } finally {

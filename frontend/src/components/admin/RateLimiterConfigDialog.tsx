@@ -94,7 +94,7 @@ export default function RateLimiterConfigDialog() {
       initialConfigStateRef.current = cloneDeep(configState);
     } catch (err) {
       toast.error("Failed to update rate limiter config", {
-        description: ((err as Error)?.message || err) as string,
+        description: (err as Error)?.message || "An unknown error occurred",
       });
     } finally {
       await refreshData();

@@ -346,7 +346,7 @@ function Page() {
         return unifiedQuote;
       } catch (err) {
         toast.error("Failed to get quote", {
-          description: ((err as Error)?.message || err) as string,
+          description: (err as Error)?.message || "An unknown error occurred",
         });
         console.error(err);
 
@@ -770,7 +770,7 @@ function Page() {
       track("swap_success", properties);
     } catch (err) {
       toast.error("Failed to swap", {
-        description: ((err as Error)?.message || err) as string,
+        description: (err as Error)?.message || "An unknown error occurred",
         duration: TX_TOAST_DURATION,
       });
     } finally {
