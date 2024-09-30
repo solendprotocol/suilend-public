@@ -429,24 +429,23 @@ export default function ActionsModalTabContent({
           ) : null}
         </div>
 
-        {!md && (
-          <>
-            <Collapsible
-              open={isMoreParametersOpen}
-              onOpenChange={setIsMoreParametersOpen}
-              closedTitle="More parameters"
-              openTitle="Less parameters"
-              hasSeparator
-            />
-
-            {isMoreParametersOpen && (
-              <ParametersPanel side={side} reserve={reserve} />
-            )}
-          </>
+        {!md && isMoreParametersOpen && (
+          <ParametersPanel side={side} reserve={reserve} />
         )}
       </div>
 
       <div className="flex w-full flex-col gap-2">
+        {!md && (
+          <Collapsible
+            open={isMoreParametersOpen}
+            onOpenChange={setIsMoreParametersOpen}
+            closedTitle="More parameters"
+            openTitle="Less parameters"
+            buttonClassName="py-1"
+            hasSeparator
+          />
+        )}
+
         <Button
           className="h-auto min-h-14 w-full rounded-md py-2"
           labelClassName="text-wrap uppercase"
