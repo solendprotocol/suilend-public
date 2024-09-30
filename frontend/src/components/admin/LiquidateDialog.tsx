@@ -49,11 +49,12 @@ import { AppData, useAppContext } from "@/contexts/AppContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 import { getAllCoins } from "@/lib/coinBalance";
 import { isSui } from "@/lib/coinType";
+import { formatToken, formatUsd } from "@/lib/format";
 
 interface RowData {
   symbol: string;
   quantity: BigNumber;
-  value: BigNumber;
+  amountUsd: BigNumber;
   selected: boolean;
 }
 
@@ -285,8 +286,8 @@ export default function LiquidateDialog({
               data={parsedObligation.deposits.map((deposit) => {
                 return {
                   symbol: deposit.reserve.symbol,
-                  value: deposit.depositedAmountUsd,
                   quantity: deposit.depositedAmount,
+                  amountUsd: deposit.depositedAmountUsd,
                   selected: deposit.reserve.symbol === selectedWithdrawAsset,
                 };
               })}
@@ -306,8 +307,8 @@ export default function LiquidateDialog({
               data={parsedObligation.borrows.map((borrow) => {
                 return {
                   symbol: borrow.reserve.symbol,
-                  value: borrow.borrowedAmountUsd,
                   quantity: borrow.borrowedAmount,
+                  amountUsd: borrow.borrowedAmountUsd,
                   selected: borrow.reserve.symbol === selectedRepayAsset,
                 };
               })}
@@ -383,17 +384,17 @@ function getColumnDefinition(isBorrow: boolean) {
       sortingFn: decimalSortingFn("quantity"),
       header: ({ column }) => tableHeader(column, "Quantity"),
       cell: ({ row }) => {
-        const { value } = row.original;
-        return <TBody>{value.toFormat(4).toString()}</TBody>;
+        const { quantity } = row.original;
+        return <TBody>{formatToken(quantity, { dp: 4 })}</TBody>;
       },
     },
     {
-      accessorKey: "value",
-      sortingFn: decimalSortingFn("value"),
-      header: ({ column }) => tableHeader(column, "Value"),
+      accessorKey: "amountUsd",
+      sortingFn: decimalSortingFn("amountUsd"),
+      header: ({ column }) => tableHeader(column, "Value ($)"),
       cell: ({ row }) => {
-        const { value } = row.original;
-        return <TBody>${value.toFormat(4).toString()}</TBody>;
+        const { amountUsd } = row.original;
+        return <TBody>{formatUsd(amountUsd)}</TBody>;
       },
     },
     {
