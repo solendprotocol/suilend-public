@@ -50,6 +50,7 @@ export function decimalSortingFn<T>(key: string) {
     const a = rowA.original as { [key: string]: BigNumber };
     const b = rowB.original as { [key: string]: BigNumber };
 
+    if (a[key] === undefined) return 0;
     return a[key].lt(b[key]) ? -1 : 1;
   };
 }
@@ -182,8 +183,9 @@ interface DataTableProps<T> {
   tableClassName?: ClassValue;
   tableHeaderRowClassName?: ClassValue;
   tableHeadClassName?: (header: Header<T, unknown>) => ClassValue;
-  tableRowClassName?: (row?: Row<T>) => ClassValue;
+  tableRowClassName?: (row?: Row<T>, isSorting?: boolean) => ClassValue;
   tableCellClassName?: (cell?: Cell<T, unknown>) => ClassValue;
+  tableCellColSpan?: (cell: Cell<T, unknown>) => number | undefined;
   RowModal?: FunctionComponent<{
     row: T;
     children: ReactNode;
@@ -205,6 +207,7 @@ export default function DataTable<T>({
   tableHeadClassName,
   tableRowClassName,
   tableCellClassName,
+  tableCellColSpan,
   RowModal,
   onRowClick,
 }: DataTableProps<T>) {
@@ -315,7 +318,8 @@ export default function DataTable<T>({
                   key={index}
                   className={cn(
                     "hover:bg-transparent",
-                    tableRowClassName && tableRowClassName(),
+                    tableRowClassName &&
+                      tableRowClassName(undefined, sorting.length > 0),
                   )}
                 >
                   <TableCell
@@ -345,7 +349,8 @@ export default function DataTable<T>({
                             (onRowClick &&
                               onRowClick(row, index) !== undefined)) &&
                             "cursor-pointer hover:bg-muted/10",
-                          tableRowClassName && tableRowClassName(row),
+                          tableRowClassName &&
+                            tableRowClassName(row, sorting.length > 0),
                         )}
                         style={{ appearance: "inherit" }}
                         onClick={
@@ -361,6 +366,7 @@ export default function DataTable<T>({
                               "h-16",
                               tableCellClassName && tableCellClassName(cell),
                             )}
+                            colSpan={tableCellColSpan && tableCellColSpan(cell)}
                           >
                             {flexRender(
                               cell.column.columnDef.cell,
@@ -385,7 +391,8 @@ export default function DataTable<T>({
                 <TableRow
                   className={cn(
                     "hover:bg-transparent",
-                    tableRowClassName && tableRowClassName(),
+                    tableRowClassName &&
+                      tableRowClassName(undefined, sorting.length > 0),
                   )}
                 >
                   <TableCell

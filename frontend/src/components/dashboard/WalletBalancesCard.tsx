@@ -22,7 +22,7 @@ export default function WalletBalancesCard() {
         title: (
           <>
             Wallet balances
-            <span className="ml-1 text-xs text-muted-foreground">
+            <span className="text-xs text-muted-foreground">
               {formatUsd(
                 Object.values(data.coinBalancesMap).reduce(
                   (acc, cb) =>

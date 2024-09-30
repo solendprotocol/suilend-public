@@ -21,7 +21,7 @@ import TotalDepositsCell from "@/components/dashboard/market-table/TotalDeposits
 import MarketCardList from "@/components/dashboard/MarketCardList";
 import styles from "@/components/dashboard/MarketTable.module.scss";
 import Tooltip from "@/components/shared/Tooltip";
-import { TTitle } from "@/components/shared/Typography";
+import { TLabel, TTitle } from "@/components/shared/Typography";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { formatToken, formatUsd } from "@/lib/format";
 import {
@@ -60,33 +60,69 @@ export interface ReservesRowData {
   reserve: ParsedReserve;
 }
 
+interface HeaderRowData {
+  isHeader: boolean;
+  isIsolated: boolean;
+  count: number;
+}
+
+type RowData = ReservesRowData | HeaderRowData;
+
 export default function MarketTable() {
   const appContext = useAppContext();
   const data = appContext.data as AppData;
   const { open: openActionsModal } = useActionsModalContext();
 
   // Columns
-  const columns: ColumnDef<ReservesRowData>[] = useMemo(
+  const columns: ColumnDef<RowData>[] = useMemo(
     () => [
       {
         accessorKey: "symbol",
         sortingFn: "text",
         header: ({ column }) => tableHeader(column, "Asset name"),
-        cell: ({ row }) => <AssetCell {...row.original} />,
+        cell: ({ row }) => {
+          if ((row.original as HeaderRowData).isHeader) {
+            const { isIsolated, count } = row.original as HeaderRowData;
+
+            return (
+              <div className="flex flex-row items-center gap-2">
+                <Tooltip title={isIsolated ? ISOLATED_TOOLTIP : undefined}>
+                  <TTitle
+                    className={cn(
+                      "w-max uppercase",
+                      isIsolated &&
+                        cn("decoration-primary/50", hoverUnderlineClassName),
+                    )}
+                  >
+                    {isIsolated ? "Isolated" : "Main"} assets
+                  </TTitle>
+                </Tooltip>
+                <TLabel>{count}</TLabel>
+              </div>
+            );
+          }
+          return <AssetCell {...(row.original as ReservesRowData)} />;
+        },
       },
       {
         accessorKey: "depositedAmount",
         sortingFn: decimalSortingFn("depositedAmountUsd"),
         header: ({ column }) =>
           tableHeader(column, "Deposits", { isNumerical: true }),
-        cell: ({ row }) => <TotalDepositsCell {...row.original} />,
+        cell: ({ row }) =>
+          (row.original as HeaderRowData).isHeader ? null : (
+            <TotalDepositsCell {...(row.original as ReservesRowData)} />
+          ),
       },
       {
         accessorKey: "borrowedAmount",
         sortingFn: decimalSortingFn("borrowedAmountUsd"),
         header: ({ column }) =>
           tableHeader(column, "Borrows", { isNumerical: true }),
-        cell: ({ row }) => <TotalBorrowsCell {...row.original} />,
+        cell: ({ row }) =>
+          (row.original as HeaderRowData).isHeader ? null : (
+            <TotalBorrowsCell {...(row.original as ReservesRowData)} />
+          ),
       },
       {
         accessorKey: "openLtvBw",
@@ -96,29 +132,34 @@ export default function MarketTable() {
             isRightAligned: true,
             tooltip: OPEN_LTV_BORROW_WEIGHT_TOOLTIP,
           }),
-        cell: ({ row }) => <OpenLtvBwCell {...row.original} />,
+        cell: ({ row }) =>
+          (row.original as HeaderRowData).isHeader ? null : (
+            <OpenLtvBwCell {...(row.original as ReservesRowData)} />
+          ),
       },
       {
         accessorKey: "depositAprPercent",
         sortingFn: decimalSortingFn("totalDepositAprPercent"),
         header: ({ column }) =>
           tableHeader(column, "Deposit APR", { isNumerical: true }),
-        cell: ({ row }) => (
-          <div className="flex flex-row justify-end">
-            <DepositAprCell {...row.original} />
-          </div>
-        ),
+        cell: ({ row }) =>
+          (row.original as HeaderRowData).isHeader ? null : (
+            <div className="flex flex-row justify-end">
+              <DepositAprCell {...(row.original as ReservesRowData)} />
+            </div>
+          ),
       },
       {
         accessorKey: "borrowAprPercent",
         sortingFn: decimalSortingFn("totalBorrowAprPercent"),
         header: ({ column }) =>
           tableHeader(column, "Borrow APR", { isNumerical: true }),
-        cell: ({ row }) => (
-          <div className="flex flex-row justify-end">
-            <BorrowAprCell {...row.original} />
-          </div>
-        ),
+        cell: ({ row }) =>
+          (row.original as HeaderRowData).isHeader ? null : (
+            <div className="flex flex-row justify-end">
+              <BorrowAprCell {...(row.original as ReservesRowData)} />
+            </div>
+          ),
       },
     ],
     [],
@@ -272,44 +313,63 @@ export default function MarketTable() {
         }),
     [data.lendingMarket.reserves, data.rewardMap],
   );
+  const mainRows = useMemo(() => rows.filter((row) => !row.isIsolated), [rows]);
+  const isolatedRows = useMemo(
+    () => rows.filter((row) => row.isIsolated),
+    [rows],
+  );
+
+  const finalRows = useMemo(
+    () => [
+      { isHeader: true, isIsolated: false, count: mainRows.length },
+      ...mainRows,
+      { isHeader: true, isIsolated: true, count: isolatedRows.length },
+      ...isolatedRows,
+    ],
+    [mainRows, isolatedRows],
+  );
 
   return (
     <div className="w-full">
       <div className="hidden w-full md:block">
-        <div className="flex w-full flex-col justify-center rounded-t-sm border border-b-0 bg-card px-4 py-2">
-          <TTitle className="uppercase">Main assets</TTitle>
-        </div>
-        <DataTable<ReservesRowData>
+        <DataTable<RowData>
           columns={columns}
-          data={rows.filter((row) => !row.isIsolated)}
-          container={{ className: "border border-b-0" }}
-          tableRowClassName={() => cn("border-0", styles.tableRow)}
-          onRowClick={(row) => () =>
-            openActionsModal(Number(row.original.reserve.arrayIndex))
+          data={finalRows}
+          container={{ className: "border rounded-sm" }}
+          tableRowClassName={(row, isSorting) =>
+            cn(
+              "border-0",
+              styles.tableRow,
+              row &&
+                (row.original as HeaderRowData).isHeader &&
+                isSorting &&
+                "hidden", // Hide header rows when sorting
+            )
           }
-        />
-
-        <div className="flex w-full flex-col justify-center border border-b-0 bg-card px-4 py-2">
-          <Tooltip title={ISOLATED_TOOLTIP}>
-            <TTitle
-              className={cn(
-                "w-max uppercase decoration-primary/50",
-                hoverUnderlineClassName,
-              )}
-            >
-              Isolated assets
-            </TTitle>
-          </Tooltip>
-        </div>
-        <DataTable<ReservesRowData>
-          columns={columns}
-          data={rows.filter((row) => row.isIsolated)}
-          container={{
-            className: "border rounded-b-sm",
-          }}
-          tableRowClassName={() => cn("border-0", styles.tableRow)}
-          onRowClick={(row) => () =>
-            openActionsModal(Number(row.original.reserve.arrayIndex))
+          tableCellClassName={(cell) =>
+            cell &&
+            (cell.row.original as HeaderRowData).isHeader &&
+            cn(
+              cell.column.getIsFirstColumn()
+                ? "bg-card border-y h-auto py-2"
+                : "p-0 h-0",
+            )
+          }
+          tableCellColSpan={(cell) =>
+            (cell.row.original as HeaderRowData).isHeader &&
+            cell.column.getIsFirstColumn()
+              ? columns.length
+              : undefined
+          }
+          onRowClick={(row) =>
+            (row.original as HeaderRowData).isHeader
+              ? undefined
+              : () =>
+                  openActionsModal(
+                    Number(
+                      (row.original as ReservesRowData).reserve.arrayIndex,
+                    ),
+                  )
           }
         />
       </div>
