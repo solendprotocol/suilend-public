@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useMemo } from "react";
+import { useCallback, useMemo } from "react";
 
 import { normalizeStructTag } from "@mysten/sui.js/utils";
 import { ColumnDef } from "@tanstack/react-table";
@@ -14,27 +14,22 @@ import {
   ApiWithdrawEvent,
   Side,
 } from "@suilend/sdk/types";
-import { linearlyInterpolate, reserveSort } from "@suilend/sdk/utils";
+import { reserveSort } from "@suilend/sdk/utils";
 
 import {
   EventsData,
   TokenAmount,
   getCtokenExchangeRate,
 } from "@/components/dashboard/account-overview/AccountOverviewDialog";
-import EarningsChart, {
-  ChartData,
-} from "@/components/dashboard/account-overview/EarningsChart";
 import DataTable, { tableHeader } from "@/components/dashboard/DataTable";
 import TitleWithIcon from "@/components/shared/TitleWithIcon";
 import TokenLogo from "@/components/shared/TokenLogo";
 import Tooltip from "@/components/shared/Tooltip";
 import { TBody, TLabelSans } from "@/components/shared/Typography";
-import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AppData, useAppContext } from "@/contexts/AppContext";
-import { useReserveAssetDataEventsContext } from "@/contexts/ReserveAssetDataEventsContext";
 import { msPerYear } from "@/lib/constants";
-import { DAY_S, Days, EventType, eventSortAsc } from "@/lib/events";
+import { EventType, eventSortAsc } from "@/lib/events";
 import { formatToken, formatUsd } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -60,7 +55,6 @@ export default function EarningsTabContent({
   const appContext = useAppContext();
   const data = appContext.data as AppData;
   const obligation = appContext.obligation as ParsedObligation;
-  const { reserveAssetDataEventsMap } = useReserveAssetDataEventsContext();
 
   type CumInterestMap = {
     [coinType: string]: {
@@ -213,51 +207,6 @@ export default function EarningsTabContent({
           ),
         ),
       });
-
-      // Increase resolution
-      const days: Days = 30;
-      const reserveAssetDataEvents =
-        reserveAssetDataEventsMap?.[reserve.id]?.[days];
-      if (reserveAssetDataEvents === undefined) return undefined;
-
-      for (let i = 0; i < reserveAssetDataEvents.length; i++) {
-        const r = reserveAssetDataEvents[i];
-
-        const timestampS = r.timestampS;
-        const ctokenExchangeRate = new BigNumber(r.ctokenSupply).eq(0)
-          ? new BigNumber(1)
-          : new BigNumber(r.depositedAmount).div(r.ctokenSupply);
-
-        if (
-          timestampS <= resultMap[coinType][0].timestampS ||
-          timestampS >=
-            resultMap[coinType][resultMap[coinType].length - 1].timestampS
-        )
-          continue;
-
-        const prev = resultMap[coinType].findLast(
-          (d) => d.timestampS < timestampS,
-        );
-        if (!prev) continue;
-
-        const interestEarned = getInterestEarned(
-          timestampS,
-          ctokenExchangeRate,
-          prev.timestampS,
-          prev.ctokenExchangeRate,
-          prev.depositedCtokenAmount,
-        );
-
-        resultMap[coinType].push({
-          timestampS,
-          ctokenExchangeRate,
-          depositedCtokenAmount: prev.depositedCtokenAmount.plus(
-            interestEarned.div(prev.ctokenExchangeRate),
-          ),
-          cumInterest: +new BigNumber(prev.cumInterest).plus(interestEarned),
-        });
-        resultMap[coinType].sort((a, b) => a.timestampS - b.timestampS);
-      }
     }
 
     return resultMap;
@@ -268,7 +217,6 @@ export default function EarningsTabContent({
     getInterestEarned,
     data.reserveMap,
     nowS,
-    reserveAssetDataEventsMap,
   ]);
 
   // Interest paid
@@ -413,47 +361,6 @@ export default function EarningsTabContent({
           ),
         ),
       });
-
-      // Increase resolution
-      const days: Days = 30;
-      const reserveAssetDataEvents =
-        reserveAssetDataEventsMap?.[reserve.id]?.[days];
-      if (reserveAssetDataEvents === undefined) return undefined;
-
-      for (let i = 0; i < reserveAssetDataEvents.length; i++) {
-        const r = reserveAssetDataEvents[i];
-
-        const timestampS = r.timestampS;
-        const cumulativeBorrowRate = r.cumulativeBorrowRate;
-
-        if (
-          timestampS <= resultMap[coinType][0].timestampS ||
-          timestampS >=
-            resultMap[coinType][resultMap[coinType].length - 1].timestampS
-        )
-          continue;
-
-        const prev = resultMap[coinType].findLast(
-          (d) => d.timestampS < timestampS,
-        );
-        if (!prev) continue;
-
-        const interestPaid = getInterestPaid(
-          timestampS,
-          cumulativeBorrowRate,
-          prev.timestampS,
-          prev.cumulativeBorrowRate,
-          prev.borrowedAmount,
-        );
-
-        resultMap[coinType].push({
-          timestampS,
-          cumulativeBorrowRate,
-          borrowedAmount: prev.borrowedAmount.plus(interestPaid),
-          cumInterest: +new BigNumber(prev.cumInterest).plus(interestPaid),
-        });
-        resultMap[coinType].sort((a, b) => a.timestampS - b.timestampS);
-      }
     }
 
     return resultMap;
@@ -464,7 +371,6 @@ export default function EarningsTabContent({
     getInterestPaid,
     data.reserveMap,
     nowS,
-    reserveAssetDataEventsMap,
   ]);
 
   // Rewards
@@ -548,109 +454,6 @@ export default function EarningsTabContent({
     data.rewardMap,
     obligation.id,
   ]);
-
-  // Chart
-  const getInterpolatedCumInterestData = useCallback(
-    (cumInterestMap?: CumInterestMap) => {
-      if (cumInterestMap === undefined) return undefined;
-
-      const sortedCoinTypes = Object.keys(cumInterestMap).sort((a, b) =>
-        reserveSort(data.reserveMap[a], data.reserveMap[b]),
-      );
-      const sortedTimestampsS = Array.from(
-        new Set(
-          Object.values(cumInterestMap)
-            .map((chartData) => chartData.map((d) => d.timestampS).flat())
-            .flat(),
-        ),
-      ).sort((a, b) => a - b);
-
-      const minTimestampS = Math.min(...sortedTimestampsS);
-      const maxTimestampS = Math.max(...sortedTimestampsS);
-      const diffS = maxTimestampS - minTimestampS;
-
-      let sampledTimestampsS: number[] = [];
-
-      const minSampleIntervalS = 1 * 60;
-      if (diffS < minSampleIntervalS) sampledTimestampsS = sortedTimestampsS;
-      else {
-        const days = diffS / DAY_S;
-
-        let sampleIntervalS;
-        if (days <= 1 / 4)
-          sampleIntervalS = minSampleIntervalS; // 360
-        else if (days <= 1 / 2)
-          sampleIntervalS = 2 * 60; // 360
-        else if (days <= 1)
-          sampleIntervalS = 5 * 60; // 288
-        else if (days <= 2)
-          sampleIntervalS = 10 * 60; // 288
-        else if (days <= 3)
-          sampleIntervalS = 15 * 60; // 288
-        else if (days <= 7)
-          sampleIntervalS = 30 * 60; // 336
-        else if (days <= 14)
-          sampleIntervalS = 60 * 60; // 336
-        else if (days <= 30)
-          sampleIntervalS = 2 * 60 * 60; // 360
-        else if (days <= 60)
-          sampleIntervalS = 4 * 60 * 60; // 360
-        else if (days <= 90)
-          sampleIntervalS = 6 * 60 * 60; // 360
-        else if (days <= 180)
-          sampleIntervalS = 12 * 60 * 60; // 360
-        else if (days <= 360)
-          sampleIntervalS = DAY_S; // 360
-        else sampleIntervalS = DAY_S;
-
-        const startTimestampS =
-          minTimestampS - (minTimestampS % sampleIntervalS);
-        const endTimestampS = maxTimestampS;
-
-        const n =
-          Math.floor((endTimestampS - startTimestampS) / sampleIntervalS) + 1;
-        for (let i = 0; i < n; i++) {
-          const tS = startTimestampS + sampleIntervalS * i;
-
-          if (tS >= maxTimestampS) break;
-          sampledTimestampsS.push(tS);
-        }
-        sampledTimestampsS.push(maxTimestampS);
-      }
-
-      const result: ChartData[] = [];
-      for (const timestampS of sampledTimestampsS) {
-        const d: ChartData = sortedCoinTypes.reduce(
-          (acc, coinType) => {
-            return {
-              ...acc,
-              [coinType]: +linearlyInterpolate(
-                cumInterestMap[coinType],
-                "timestampS",
-                "cumInterest",
-                timestampS,
-              ),
-            };
-          },
-          { timestampS },
-        );
-        result.push(d);
-      }
-
-      return result;
-    },
-    [data.reserveMap],
-  );
-
-  const interpolatedCumInterestEarnedData = useMemo(
-    () => getInterpolatedCumInterestData(cumInterestEarnedMap),
-    [getInterpolatedCumInterestData, cumInterestEarnedMap],
-  );
-
-  const interpolatedCumInterestPaidData = useMemo(
-    () => getInterpolatedCumInterestData(cumInterestPaidMap),
-    [getInterpolatedCumInterestData, cumInterestPaidMap],
-  );
 
   // Usd
   const getCumInterestUsd = useCallback(
@@ -869,7 +672,7 @@ export default function EarningsTabContent({
   ]);
 
   return (
-    <div className="flex flex-1 flex-col gap-6 overflow-y-auto overflow-x-hidden py-4">
+    <div className="flex flex-1 flex-col gap-6 overflow-y-auto overflow-x-hidden pt-4">
       <div className="flex flex-col gap-2 px-4">
         <div className="relative w-full">
           <div className="absolute bottom-0 left-0 right-3/4 top-0 z-[1] rounded-l-sm bg-gradient-to-r from-primary/20 to-transparent" />
@@ -966,63 +769,38 @@ export default function EarningsTabContent({
           data: rows?.borrow,
           noDataMessage: "No borrows",
         },
-      ].map((table, index, array) => {
-        const chartData =
-          table.side === Side.DEPOSIT
-            ? interpolatedCumInterestEarnedData
-            : interpolatedCumInterestPaidData;
+      ].map((table, index, array) => (
+        <div key={table.title} className="flex flex-col gap-4">
+          <TitleWithIcon className="px-4">{table.title}</TitleWithIcon>
 
-        return (
-          <Fragment key={table.title}>
-            <div className="flex flex-col gap-4">
-              <TitleWithIcon className="px-4">{table.title}</TitleWithIcon>
-
-              <div
-                key={table.title}
-                className="flex flex-col max-lg:gap-4 lg:flex-row"
-              >
-                <div className="max-lg:w-full lg:min-w-0 lg:flex-1">
-                  <DataTable<RowData>
-                    columns={table.columns}
-                    data={table.data}
-                    noDataMessage={table.noDataMessage}
-                    skeletonRows={data.lendingMarket.reserves.length}
-                    container={{
-                      className: "overflow-y-visible overflow-x-auto",
-                    }}
-                    tableCellClassName={(cell) =>
-                      cn(
-                        cell &&
-                          Object.entries(cell.row.original.rewards).length > 1
-                          ? "py-2 h-auto"
-                          : "py-0 h-12",
-                      )
-                    }
-                  />
-                </div>
-
-                {(chartData === undefined || chartData.length > 0) && (
-                  <>
-                    <Separator
-                      orientation="vertical"
-                      className="max-lg:hidden lg:mr-2"
-                    />
-
-                    <div className="max-lg:w-full lg:min-w-0 lg:flex-1">
-                      <EarningsChart
-                        side={table.side}
-                        isLoading={chartData === undefined}
-                        data={chartData ?? []}
-                      />
-                    </div>
-                  </>
-                )}
-              </div>
+          <div
+            key={table.title}
+            className="flex flex-col max-lg:gap-4 lg:flex-row"
+          >
+            <div className="max-lg:w-full lg:min-w-0 lg:flex-1">
+              <DataTable<RowData>
+                columns={table.columns}
+                data={table.data}
+                noDataMessage={table.noDataMessage}
+                skeletonRows={data.lendingMarket.reserves.length}
+                container={{
+                  className: cn(
+                    "overflow-y-visible overflow-x-auto",
+                    index !== array.length - 1 && "border-b",
+                  ),
+                }}
+                tableCellClassName={(cell) =>
+                  cn(
+                    cell && Object.entries(cell.row.original.rewards).length > 1
+                      ? "py-2 h-auto"
+                      : "py-0 h-12",
+                  )
+                }
+              />
             </div>
-            {index !== array.length - 1 && <Separator />}
-          </Fragment>
-        );
-      })}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
