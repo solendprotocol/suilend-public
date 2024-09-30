@@ -434,14 +434,13 @@ export default function ActionsModalTabContent({
         )}
       </div>
 
-      <div className="flex w-full flex-col gap-2">
+      <div className="flex w-full flex-col gap-3">
         {!md && (
           <Collapsible
             open={isMoreParametersOpen}
             onOpenChange={setIsMoreParametersOpen}
             closedTitle="More parameters"
             openTitle="Less parameters"
-            buttonClassName="py-1"
             hasSeparator
           />
         )}
