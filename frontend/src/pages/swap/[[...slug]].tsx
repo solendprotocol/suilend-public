@@ -98,6 +98,7 @@ function Page() {
   const hopSdk = restSwapContext.hopSdk as HopApi;
   const aftermathSdk = restSwapContext.aftermathSdk as AftermathRouter;
   const tokens = restSwapContext.tokens as VerifiedToken[];
+  const verifiedTokens = restSwapContext.verifiedTokens as VerifiedToken[];
   const tokenIn = restSwapContext.tokenIn as VerifiedToken;
   const tokenOut = restSwapContext.tokenOut as VerifiedToken;
   const coinBalancesMap = restSwapContext.coinBalancesMap as Record<
@@ -565,7 +566,13 @@ function Page() {
     )
       reverseTokens();
     else {
-      setTokenSymbol(_token.ticker, direction);
+      const isVerifiedToken = verifiedTokens.find(
+        (t) => t.coin_type === coinType,
+      );
+      setTokenSymbol(
+        isVerifiedToken ? _token.ticker : _token.coin_type,
+        direction,
+      );
 
       fetchQuote(
         direction === TokenDirection.IN ? _token : tokenIn,
@@ -847,7 +854,6 @@ function Page() {
               value={value}
               onChange={onValueChange}
               usdValue={tokenInUsdValue}
-              tokens={tokens}
               token={tokenIn}
               onSelectToken={(t: VerifiedToken) =>
                 onTokenCoinTypeChange(t.coin_type, TokenDirection.IN)
@@ -885,7 +891,6 @@ function Page() {
                 }
                 isValueLoading={isFetchingQuote}
                 usdValue={tokenOutUsdValue}
-                tokens={tokens}
                 token={tokenOut}
                 onSelectToken={(t: VerifiedToken) =>
                   onTokenCoinTypeChange(t.coin_type, TokenDirection.OUT)

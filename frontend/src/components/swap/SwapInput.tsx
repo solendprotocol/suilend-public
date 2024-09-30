@@ -5,6 +5,7 @@ import BigNumber from "bignumber.js";
 import { Wallet } from "lucide-react";
 import { mergeRefs } from "react-merge-refs";
 
+import Tooltip from "@/components/shared/Tooltip";
 import { TLabel, TLabelSans } from "@/components/shared/Typography";
 import TokenSelectionDialog from "@/components/swap/TokenSelectionDialog";
 import { Input as InputComponent } from "@/components/ui/input";
@@ -24,7 +25,6 @@ interface SwapInputProps {
   isValueLoading?: boolean;
   onChange?: (value: string) => void;
   usdValue?: BigNumber;
-  tokens: VerifiedToken[];
   token: VerifiedToken;
   onSelectToken: (token: VerifiedToken) => void;
   onBalanceClick?: () => void;
@@ -39,7 +39,6 @@ const SwapInput = forwardRef<HTMLInputElement, SwapInputProps>(
       isValueLoading,
       onChange,
       usdValue,
-      tokens,
       token,
       onSelectToken,
       onBalanceClick,
@@ -117,7 +116,6 @@ const SwapInput = forwardRef<HTMLInputElement, SwapInputProps>(
               style={{ top: `${INPUT_PADDING_Y}px` }}
             >
               <TokenSelectionDialog
-                tokens={tokens}
                 token={token}
                 onSelectToken={onSelectToken}
               />
@@ -130,9 +128,17 @@ const SwapInput = forwardRef<HTMLInputElement, SwapInputProps>(
                 onClick={onBalanceClick}
               >
                 <Wallet className="h-3 w-3 text-muted-foreground" />
-                <TLabel>
-                  {formatToken(tokenBalance)} {token.ticker}
-                </TLabel>
+                <Tooltip
+                  title={
+                    tokenBalance.gt(0)
+                      ? `${formatToken(tokenBalance, { dp: token.decimals })} ${token.ticker}`
+                      : undefined
+                  }
+                >
+                  <TLabel>
+                    {formatToken(tokenBalance)} {token.ticker}
+                  </TLabel>
+                </Tooltip>
               </div>
             </div>
           </div>

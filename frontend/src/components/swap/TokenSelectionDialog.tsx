@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { VerifiedToken } from "@hop.ag/sdk";
+import { normalizeStructTag } from "@mysten/sui.js/utils";
 import BigNumber from "bignumber.js";
 import { Check, ChevronDown, Search, Wallet } from "lucide-react";
 
@@ -9,30 +10,30 @@ import Button from "@/components/shared/Button";
 import Input from "@/components/shared/Input";
 import TextLink from "@/components/shared/TextLink";
 import TokenLogo from "@/components/shared/TokenLogo";
+import Tooltip from "@/components/shared/Tooltip";
 import { TBody, TLabelSans } from "@/components/shared/Typography";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { useSwapContext } from "@/contexts/SwapContext";
 import { ParsedCoinBalance } from "@/lib/coinBalance";
-import { SUI_COINTYPE, isSui } from "@/lib/coinType";
+import { SUI_COINTYPE, isCoinType, isSui } from "@/lib/coinType";
 import { formatId, formatToken } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 interface TokenSelectionDialogProps {
-  tokens: VerifiedToken[];
   token: VerifiedToken;
   onSelectToken: (token: VerifiedToken) => void;
 }
 
 export default function TokenSelectionDialog({
-  tokens,
   token,
   onSelectToken,
 }: TokenSelectionDialogProps) {
   const { explorer, ...appContext } = useAppContext();
   const data = appContext.data as AppData;
 
-  const swapContext = useSwapContext();
-  const coinBalancesMap = swapContext.coinBalancesMap as Record<
+  const { fetchTokensMetadata, ...restSwapContext } = useSwapContext();
+  const tokens = restSwapContext.tokens as VerifiedToken[];
+  const coinBalancesMap = restSwapContext.coinBalancesMap as Record<
     string,
     ParsedCoinBalance
   >;
@@ -45,6 +46,18 @@ export default function TokenSelectionDialog({
 
   // Filter
   const [filter, setFilter] = useState<string>("");
+
+  useEffect(() => {
+    if (
+      !tokens.find((t) =>
+        `${t.coin_type}${t.ticker}${t.name}`
+          .toLowerCase()
+          .includes(filter.toLowerCase()),
+      ) &&
+      isCoinType(filter)
+    )
+      fetchTokensMetadata([normalizeStructTag(filter)]);
+  }, [tokens, filter, fetchTokensMetadata]);
 
   // Token list
   const PRIORITY_TOKEN_SYMBOLS = data.lendingMarket.reserves.map(
@@ -210,10 +223,18 @@ export default function TokenSelectionDialog({
 
                       <div className="flex flex-row items-center gap-1.5">
                         <Wallet className="h-3 w-3 text-foreground" />
-                        <TBody className="w-max">
-                          {formatToken(tokenBalance, { exact: false })}{" "}
-                          {t.ticker}
-                        </TBody>
+                        <Tooltip
+                          title={
+                            tokenBalance.gt(0)
+                              ? `${formatToken(tokenBalance, { dp: token.decimals })} ${t.ticker}`
+                              : undefined
+                          }
+                        >
+                          <TBody className="w-max">
+                            {formatToken(tokenBalance, { exact: false })}{" "}
+                            {t.ticker}
+                          </TBody>
+                        </Tooltip>
                       </div>
                     </div>
 
@@ -238,7 +259,9 @@ export default function TokenSelectionDialog({
           <TLabelSans className="py-4 text-center">
             {tokenList.length === 0
               ? "No tokens"
-              : `No tokens matching "${filter}"`}
+              : isCoinType(filter)
+                ? "Fetching token metadata..."
+                : `No tokens matching "${filter}"`}
           </TLabelSans>
         )}
       </div>

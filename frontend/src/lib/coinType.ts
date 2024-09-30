@@ -100,3 +100,14 @@ export const isSuilendPoints = (coinType: string) =>
 
 export const isStablecoin = (coinType: string) =>
   NORMALIZED_STABLECOIN_COINTYPES.includes(normalizeStructTag(coinType));
+
+export const isCoinType = (text: string) => {
+  if (text.includes("-")) return false;
+  try {
+    normalizeStructTag(text);
+    return true;
+  } catch (err) {
+    console.error(err);
+  }
+  return false;
+};
