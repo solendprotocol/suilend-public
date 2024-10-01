@@ -16,7 +16,7 @@ import { AppData, useAppContext } from "@/contexts/AppContext";
 import { useSwapContext } from "@/contexts/SwapContext";
 import { ParsedCoinBalance } from "@/lib/coinBalance";
 import { SUI_COINTYPE, isCoinType, isSui } from "@/lib/coinType";
-import { formatId, formatToken } from "@/lib/format";
+import { formatId, formatToken, replace0x } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 interface TokenSelectionDialogProps {
@@ -246,7 +246,7 @@ export default function TokenSelectionDialog({
                         href={explorer.buildCoinUrl(t.coin_type)}
                       >
                         {isSui(t.coin_type)
-                          ? SUI_COINTYPE
+                          ? replace0x(SUI_COINTYPE)
                           : formatId(t.coin_type)}
                       </TextLink>
                     </div>
