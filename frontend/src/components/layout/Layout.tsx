@@ -71,7 +71,7 @@ export default function Layout({ children }: PropsWithChildren) {
         )}
       >
         {!isOnLandingPage ? (
-          <Container className="flex-1">
+          <Container className={cn(!isOnBridgePage && "flex-1")}>
             {!isPageLoading && (
               <ReserveAssetDataEventsContextProvider>
                 {children}
