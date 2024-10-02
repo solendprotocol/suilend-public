@@ -1095,9 +1095,13 @@ export class SuilendClient {
   }
 
   claimFees(txb: TransactionBlock, coinType: string) {
-    return this.claimFeesFunction(txb, this.lendingMarket.$typeArgs[0], {
-      lendingMarket: this.lendingMarket.id,
-      reserveArrayIndex: this.findReserveArrayIndex(coinType),
-    });
+    return this.claimFeesFunction(
+      txb,
+      [this.lendingMarket.$typeArgs[0], coinType],
+      {
+        lendingMarket: this.lendingMarket.id,
+        reserveArrayIndex: this.findReserveArrayIndex(coinType),
+      },
+    );
   }
 }
