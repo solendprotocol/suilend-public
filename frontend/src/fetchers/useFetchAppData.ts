@@ -189,6 +189,7 @@ export default function useFetchAppData(
     `appData-${address}`,
     dataFetcher,
     {
+      refreshInterval: 30 * 1000,
       onSuccess: (data) => {
         console.log("Refreshed app data", data);
       },
