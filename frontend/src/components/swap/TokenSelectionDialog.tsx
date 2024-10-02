@@ -204,6 +204,7 @@ export default function TokenSelectionDialog({
                 <div className="flex w-full flex-row items-center gap-3">
                   <TokenLogo
                     showTooltip
+                    className="shrink-0"
                     imageProps={{ className: "rounded-full" }}
                     token={{
                       coinType: t.coin_type,
@@ -212,16 +213,18 @@ export default function TokenSelectionDialog({
                     }}
                   />
 
-                  <div className="flex flex-1 flex-col gap-1">
-                    <div className="flex w-full flex-row items-center justify-between">
-                      <div className="flex flex-row items-center gap-2">
-                        <TBody className="w-max">{t.ticker}</TBody>
+                  <div className="flex min-w-0 flex-1 flex-col gap-1">
+                    <div className="flex w-full flex-row items-center justify-between gap-4">
+                      <div className="flex min-w-0 flex-row items-center gap-2">
+                        <TBody className="overflow-hidden text-ellipsis text-nowrap">
+                          {t.ticker}
+                        </TBody>
                         {isSelected && (
                           <Check className="h-4 w-4 text-foreground" />
                         )}
                       </div>
 
-                      <div className="flex flex-row items-center gap-1.5">
+                      <div className="flex shrink-0 flex-row items-center gap-1.5">
                         <Wallet className="h-3 w-3 text-foreground" />
                         <Tooltip
                           title={
@@ -238,11 +241,13 @@ export default function TokenSelectionDialog({
                       </div>
                     </div>
 
-                    <div className="flex flex-row items-center gap-2">
-                      <TLabelSans className="w-max">{t.name}</TLabelSans>
+                    <div className="flex flex-row items-center gap-4">
+                      <TLabelSans className="overflow-hidden text-ellipsis text-nowrap">
+                        {t.name}
+                      </TLabelSans>
 
                       <TextLink
-                        className="block w-max text-xs text-muted-foreground no-underline hover:text-foreground"
+                        className="block w-max shrink-0 text-xs text-muted-foreground no-underline hover:text-foreground"
                         href={explorer.buildCoinUrl(t.coin_type)}
                       >
                         {isSui(t.coin_type)
