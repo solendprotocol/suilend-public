@@ -58,7 +58,6 @@ import { useWalletContext } from "@/contexts/WalletContext";
 import {
   getSubmitButtonNoValueState,
   getSubmitButtonState,
-  getSubmitWarningMessages,
 } from "@/lib/actions";
 import { ParsedCoinBalance } from "@/lib/coinBalance";
 import { SUI_COINTYPE, isSui } from "@/lib/coinType";
@@ -81,7 +80,7 @@ type SubmitButtonState = {
 };
 
 const PRICE_IMPACT_PERCENT_WARNING_THRESHOLD = 2;
-const PRICE_IMPACT_PERCENT_DESTRUCTIVE_THRESHOLD = 10;
+const PRICE_IMPACT_PERCENT_DESTRUCTIVE_THRESHOLD = 25;
 
 function Page() {
   const { address } = useWalletContext();
@@ -646,16 +645,6 @@ function Page() {
       return depositSubmitButtonState.title;
   })();
 
-  const getDepositWarningMessages = tokenOutReserve
-    ? getSubmitWarningMessages(
-        Action.DEPOSIT,
-        data.lendingMarket.reserves,
-        tokenOutReserve,
-        data.obligations,
-        obligation,
-      )
-    : undefined;
-
   const swapAndDepositButtonState: SubmitButtonState = (() => {
     if (!hasTokenOutReserve)
       return { isDisabled: true, title: "Cannot deposit this token" };
@@ -997,23 +986,7 @@ function Page() {
 
           {/* Swap */}
           <div className="flex w-full flex-col gap-2">
-            <div
-              className={cn(
-                "flex w-full flex-col gap-[1px] rounded-sm",
-                priceImpactPercent !== undefined &&
-                  priceImpactPercent.gte(
-                    PRICE_IMPACT_PERCENT_WARNING_THRESHOLD,
-                  ) &&
-                  cn(
-                    "outline outline-[2px] outline-offset-[1px]",
-                    priceImpactPercent.lt(
-                      PRICE_IMPACT_PERCENT_DESTRUCTIVE_THRESHOLD,
-                    )
-                      ? "outline-warning"
-                      : "outline-destructive",
-                  ),
-              )}
-            >
+            <div className="flex w-full flex-col gap-[1px] rounded-sm">
               <Button
                 className={cn(
                   "h-auto min-h-14 w-full py-2",
@@ -1057,24 +1030,6 @@ function Page() {
                 </Tooltip>
               )}
             </div>
-
-            {hasTokenOutReserve &&
-              getDepositWarningMessages &&
-              getDepositWarningMessages().length > 0 &&
-              getDepositWarningMessages().map((warningMessage) => (
-                <div
-                  key={warningMessage}
-                  className="rounded-md bg-warning/10 p-2"
-                >
-                  <TLabelSans className="text-warning">
-                    <span className="mr-2 font-medium">
-                      <AlertTriangle className="mb-0.5 mr-1 inline h-3 w-3" />
-                      Warning
-                    </span>
-                    {warningMessage}
-                  </TLabelSans>
-                </div>
-              ))}
           </div>
 
           {/* Tokens */}
