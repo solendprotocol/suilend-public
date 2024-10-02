@@ -37,6 +37,7 @@ import Button from "@/components/shared/Button";
 import Spinner from "@/components/shared/Spinner";
 import TextLink from "@/components/shared/TextLink";
 import TokenLogos from "@/components/shared/TokenLogos";
+import Tooltip from "@/components/shared/Tooltip";
 import { TBody, TLabelSans } from "@/components/shared/Typography";
 import RoutingDialog from "@/components/swap/RoutingDialog";
 import SwapInput from "@/components/swap/SwapInput";
@@ -57,6 +58,7 @@ import { useWalletContext } from "@/contexts/WalletContext";
 import {
   getSubmitButtonNoValueState,
   getSubmitButtonState,
+  getSubmitWarningMessages,
 } from "@/lib/actions";
 import { ParsedCoinBalance } from "@/lib/coinBalance";
 import { SUI_COINTYPE, isSui } from "@/lib/coinType";
@@ -612,6 +614,48 @@ function Page() {
     };
   })();
 
+  const swapAndDepositButtonDisabledTooltip = (() => {
+    if (!hasTokenOutReserve || quoteAmountOut === undefined) return;
+
+    const depositSubmitButtonNoValueState = getSubmitButtonNoValueState(
+      Action.DEPOSIT,
+      data.lendingMarket.reserves,
+      tokenOutReserve,
+      data.obligations,
+      obligation,
+    )();
+    const depositSubmitButtonState = getSubmitButtonState(
+      Action.DEPOSIT,
+      tokenOutReserve,
+      quoteAmountOut.plus(
+        isSui(tokenOutReserve.coinType) ? SUI_SWAP_GAS_MIN : 0,
+      ),
+      data,
+      obligation,
+    )(quoteAmountOut.toString());
+
+    if (
+      depositSubmitButtonNoValueState !== undefined &&
+      depositSubmitButtonNoValueState.isDisabled
+    )
+      return depositSubmitButtonNoValueState.title;
+    if (
+      depositSubmitButtonState !== undefined &&
+      depositSubmitButtonState.isDisabled
+    )
+      return depositSubmitButtonState.title;
+  })();
+
+  const getDepositWarningMessages = tokenOutReserve
+    ? getSubmitWarningMessages(
+        Action.DEPOSIT,
+        data.lendingMarket.reserves,
+        tokenOutReserve,
+        data.obligations,
+        obligation,
+      )
+    : undefined;
+
   const swapAndDepositButtonState: SubmitButtonState = (() => {
     if (!hasTokenOutReserve)
       return { isDisabled: true, title: "Cannot deposit this token" };
@@ -619,7 +663,10 @@ function Page() {
 
     return {
       title: `Swap and deposit for ${formatPercent(tokenOutReserveDepositAprPercent)} APR`,
-      isDisabled: swapButtonState.isDisabled || isSwapping,
+      isDisabled:
+        !!swapAndDepositButtonDisabledTooltip ||
+        swapButtonState.isDisabled ||
+        isSwapping,
     };
   })();
 
@@ -718,11 +765,7 @@ function Page() {
 
   const onSwapClick = async (deposit?: boolean) => {
     if (deposit) {
-      if (
-        swapAndDepositButtonState.isDisabled ||
-        swapAndDepositButtonDisabledTooltip !== undefined
-      )
-        return;
+      if (swapAndDepositButtonState.isDisabled) return;
     } else {
       if (swapButtonState.isDisabled) return;
     }
@@ -786,38 +829,6 @@ function Page() {
       await refreshData();
     }
   };
-
-  const swapAndDepositButtonDisabledTooltip = (() => {
-    if (!hasTokenOutReserve || quoteAmountOut === undefined) return;
-
-    const depositSubmitButtonNoValueState = getSubmitButtonNoValueState(
-      Action.DEPOSIT,
-      data.lendingMarket.reserves,
-      tokenOutReserve,
-      data.obligations,
-      obligation,
-    )();
-    const depositSubmitButtonState = getSubmitButtonState(
-      Action.DEPOSIT,
-      tokenOutReserve,
-      quoteAmountOut.plus(
-        isSui(tokenOutReserve.coinType) ? SUI_SWAP_GAS_MIN : 0,
-      ),
-      data,
-      obligation,
-    )(quoteAmountOut.toString());
-
-    if (
-      depositSubmitButtonNoValueState !== undefined &&
-      depositSubmitButtonNoValueState.isDisabled
-    )
-      return depositSubmitButtonNoValueState.title;
-    if (
-      depositSubmitButtonState !== undefined &&
-      depositSubmitButtonState.isDisabled
-    )
-      return depositSubmitButtonState.title;
-  })();
 
   return (
     <>
@@ -985,64 +996,85 @@ function Page() {
           )}
 
           {/* Swap */}
-          <div
-            className={cn(
-              "flex w-full flex-col gap-[1px] rounded-sm",
-              priceImpactPercent !== undefined &&
-                priceImpactPercent.gte(
-                  PRICE_IMPACT_PERCENT_WARNING_THRESHOLD,
-                ) &&
-                cn(
-                  "outline outline-[2px] outline-offset-[1px]",
-                  priceImpactPercent.lt(
-                    PRICE_IMPACT_PERCENT_DESTRUCTIVE_THRESHOLD,
-                  )
-                    ? "outline-warning"
-                    : "outline-destructive",
-                ),
-            )}
-          >
-            <Button
+          <div className="flex w-full flex-col gap-2">
+            <div
               className={cn(
-                "h-auto min-h-14 w-full py-2",
-                hasTokenOutReserve && "rounded-b-none",
+                "flex w-full flex-col gap-[1px] rounded-sm",
+                priceImpactPercent !== undefined &&
+                  priceImpactPercent.gte(
+                    PRICE_IMPACT_PERCENT_WARNING_THRESHOLD,
+                  ) &&
+                  cn(
+                    "outline outline-[2px] outline-offset-[1px]",
+                    priceImpactPercent.lt(
+                      PRICE_IMPACT_PERCENT_DESTRUCTIVE_THRESHOLD,
+                    )
+                      ? "outline-warning"
+                      : "outline-destructive",
+                  ),
               )}
-              labelClassName="text-wrap uppercase"
-              style={{ overflowWrap: "anywhere" }}
-              disabled={swapButtonState.isDisabled}
-              onClick={() => onSwapClick()}
             >
-              {swapButtonState.isLoading ? (
-                <Spinner size="md" />
-              ) : (
-                swapButtonState.title
-              )}
-            </Button>
-
-            {/* Swap and deposit */}
-            {hasTokenOutReserve && (
               <Button
-                tooltip={
-                  !swapAndDepositButtonState.isDisabled
-                    ? swapAndDepositButtonDisabledTooltip
-                    : undefined
-                }
-                className="rounded-t-none disabled:pointer-events-auto disabled:bg-secondary"
-                labelClassName="uppercase text-xs"
-                variant="secondary"
-                disabled={
-                  swapAndDepositButtonState.isDisabled ||
-                  swapAndDepositButtonDisabledTooltip !== undefined
-                }
-                onClick={() => onSwapClick(true)}
+                className={cn(
+                  "h-auto min-h-14 w-full py-2",
+                  hasTokenOutReserve && "rounded-b-none",
+                )}
+                labelClassName="text-wrap uppercase"
+                style={{ overflowWrap: "anywhere" }}
+                disabled={swapButtonState.isDisabled}
+                onClick={() => onSwapClick()}
               >
-                {swapAndDepositButtonState.isLoading ? (
-                  <Spinner size="sm" />
+                {swapButtonState.isLoading ? (
+                  <Spinner size="md" />
                 ) : (
-                  swapAndDepositButtonState.title
+                  swapButtonState.title
                 )}
               </Button>
-            )}
+
+              {/* Swap and deposit */}
+              {hasTokenOutReserve && (
+                <Tooltip title={swapAndDepositButtonDisabledTooltip}>
+                  <Button
+                    className={cn(
+                      "rounded-t-none",
+                      swapAndDepositButtonState.isDisabled &&
+                        "!cursor-default !bg-secondary opacity-50",
+                    )}
+                    labelClassName="uppercase text-xs"
+                    variant="secondary"
+                    onClick={
+                      swapAndDepositButtonState.isDisabled
+                        ? undefined
+                        : () => onSwapClick(true)
+                    }
+                  >
+                    {swapAndDepositButtonState.isLoading ? (
+                      <Spinner size="sm" />
+                    ) : (
+                      swapAndDepositButtonState.title
+                    )}
+                  </Button>
+                </Tooltip>
+              )}
+            </div>
+
+            {hasTokenOutReserve &&
+              getDepositWarningMessages &&
+              getDepositWarningMessages().length > 0 &&
+              getDepositWarningMessages().map((warningMessage) => (
+                <div
+                  key={warningMessage}
+                  className="rounded-md bg-warning/10 p-2"
+                >
+                  <TLabelSans className="text-warning">
+                    <span className="mr-2 font-medium">
+                      <AlertTriangle className="mb-0.5 mr-1 inline h-3 w-3" />
+                      Warning
+                    </span>
+                    {warningMessage}
+                  </TLabelSans>
+                </div>
+              ))}
           </div>
 
           {/* Tokens */}
