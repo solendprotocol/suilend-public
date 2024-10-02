@@ -346,6 +346,7 @@ export default function ActionsModalTabContent({
             <TLabelSans>Balance</TLabelSans>
             <Tooltip
               title={`${formatToken(balance, { dp: reserve.mintDecimals })} ${reserve.symbol}`}
+              isClickable={[Action.DEPOSIT].includes(action)}
             >
               <TBody className="text-xs">
                 {formatToken(balance, { exact: false })} {reserve.symbol}
