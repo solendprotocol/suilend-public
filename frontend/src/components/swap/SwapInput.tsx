@@ -134,6 +134,7 @@ const SwapInput = forwardRef<HTMLInputElement, SwapInputProps>(
                       ? `${formatToken(tokenBalance, { dp: token.decimals })} ${token.ticker}`
                       : undefined
                   }
+                  isClickable
                 >
                   <TLabel>
                     {formatToken(tokenBalance)} {token.ticker}
