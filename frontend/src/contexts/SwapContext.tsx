@@ -86,8 +86,10 @@ export const AF_EXCHANGE_NAME_MAP: Record<AftermathRouterProtocolName, string> =
 const DEFAULT_TOKEN_IN_SYMBOL = "SUI";
 const DEFAULT_TOKEN_OUT_SYMBOL = "wUSDC";
 
-const getUrl = (inSymbol: string, outSymbol: string) =>
-  `${SWAP_URL}/${inSymbol}-${outSymbol}`;
+export const getSwapUrl = (
+  inSymbol: string = DEFAULT_TOKEN_IN_SYMBOL,
+  outSymbol: string = DEFAULT_TOKEN_OUT_SYMBOL,
+) => `${SWAP_URL}/${inSymbol}-${outSymbol}`;
 
 enum TokenDirection {
   IN = "in",
@@ -277,7 +279,7 @@ export function SwapContextProvider({ children }: PropsWithChildren) {
     )
       router.replace(
         {
-          pathname: getUrl(DEFAULT_TOKEN_IN_SYMBOL, DEFAULT_TOKEN_OUT_SYMBOL),
+          pathname: getSwapUrl(),
         },
         undefined,
         { shallow: true },
@@ -290,7 +292,7 @@ export function SwapContextProvider({ children }: PropsWithChildren) {
 
       router.push(
         {
-          pathname: getUrl(
+          pathname: getSwapUrl(
             direction === TokenDirection.IN ? newTokenSymbol : tokenInSymbol,
             direction === TokenDirection.IN ? tokenOutSymbol : newTokenSymbol,
           ),
@@ -306,7 +308,7 @@ export function SwapContextProvider({ children }: PropsWithChildren) {
     if (!tokenInSymbol || !tokenOutSymbol) return;
 
     router.push(
-      { pathname: getUrl(tokenOutSymbol, tokenInSymbol) },
+      { pathname: getSwapUrl(tokenOutSymbol, tokenInSymbol) },
       undefined,
       { shallow: true },
     );

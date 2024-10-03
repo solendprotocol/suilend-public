@@ -102,6 +102,15 @@ export const isSuilendPoints = (coinType: string) =>
 export const isStablecoin = (coinType: string) =>
   NORMALIZED_STABLECOIN_COINTYPES.includes(normalizeStructTag(coinType));
 
+export const isEthNative = (coinType: string) =>
+  [
+    NORMALIZED_USDC_COINTYPE,
+    NORMALIZED_USDT_COINTYPE,
+    NORMALIZED_ETH_COINTYPE,
+  ].includes(coinType);
+export const isSolNative = (coinType: string) =>
+  [NORMALIZED_SOL_COINTYPE].includes(coinType);
+
 export const isCoinType = (text: string) => {
   if (text.includes("-")) return false;
   try {
