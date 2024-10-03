@@ -44,7 +44,6 @@ import SwapSlippagePopover, {
   SLIPPAGE_PERCENT_DP,
 } from "@/components/swap/SwapSlippagePopover";
 import TokensRatioChart from "@/components/swap/TokensRatioChart";
-import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import {
@@ -1078,8 +1077,6 @@ function Page() {
             </div>
           </div>
         </div>
-
-        <Separator />
 
         <TLabelSans className="opacity-50">
           {"Powered by "}
