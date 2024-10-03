@@ -26,7 +26,6 @@ import {
   RouterProtocolName as AftermathRouterProtocolName,
 } from "aftermath-ts-sdk";
 import BigNumber from "bignumber.js";
-import { useLocalStorage } from "usehooks-ts";
 
 import FullPageSpinner from "@/components/shared/FullPageSpinner";
 import { AppData, useAppContext } from "@/contexts/AppContext";
@@ -85,7 +84,7 @@ export const AF_EXCHANGE_NAME_MAP: Record<AftermathRouterProtocolName, string> =
   };
 
 const DEFAULT_TOKEN_IN_SYMBOL = "SUI";
-const DEFAULT_TOKEN_OUT_SYMBOL = "USDC";
+const DEFAULT_TOKEN_OUT_SYMBOL = "wUSDC";
 
 const getUrl = (inSymbol: string, outSymbol: string) =>
   `${SWAP_URL}/${inSymbol}-${outSymbol}`;
@@ -270,15 +269,6 @@ export function SwapContextProvider({ children }: PropsWithChildren) {
     [tokens, tokenOutSymbol],
   );
 
-  const [lastTokenInSymbol, setLastTokenInSymbol] = useLocalStorage<string>(
-    "swapLastTokenInSymbol",
-    DEFAULT_TOKEN_IN_SYMBOL,
-  );
-  const [lastTokenOutSymbol, setLastTokenOutSymbol] = useLocalStorage<string>(
-    "swapLastTokenOutSymbol",
-    DEFAULT_TOKEN_OUT_SYMBOL,
-  );
-
   useEffect(() => {
     if (
       slug === undefined ||
@@ -287,23 +277,12 @@ export function SwapContextProvider({ children }: PropsWithChildren) {
     )
       router.replace(
         {
-          pathname:
-            lastTokenInSymbol === lastTokenOutSymbol
-              ? getUrl(DEFAULT_TOKEN_IN_SYMBOL, DEFAULT_TOKEN_OUT_SYMBOL)
-              : getUrl(lastTokenInSymbol, lastTokenOutSymbol),
+          pathname: getUrl(DEFAULT_TOKEN_IN_SYMBOL, DEFAULT_TOKEN_OUT_SYMBOL),
         },
         undefined,
         { shallow: true },
       );
-  }, [
-    slug,
-    tokens,
-    tokenIn,
-    tokenOut,
-    router,
-    lastTokenInSymbol,
-    lastTokenOutSymbol,
-  ]);
+  }, [slug, tokens, tokenIn, tokenOut, router]);
 
   const setTokenSymbol = useCallback(
     (newTokenSymbol: string, direction: TokenDirection) => {
@@ -319,17 +298,8 @@ export function SwapContextProvider({ children }: PropsWithChildren) {
         undefined,
         { shallow: true },
       );
-
-      if (direction === TokenDirection.IN) setLastTokenInSymbol(newTokenSymbol);
-      else setLastTokenOutSymbol(newTokenSymbol);
     },
-    [
-      tokenInSymbol,
-      tokenOutSymbol,
-      router,
-      setLastTokenInSymbol,
-      setLastTokenOutSymbol,
-    ],
+    [tokenInSymbol, tokenOutSymbol, router],
   );
 
   const reverseTokenSymbols = useCallback(() => {
@@ -340,16 +310,7 @@ export function SwapContextProvider({ children }: PropsWithChildren) {
       undefined,
       { shallow: true },
     );
-
-    setLastTokenInSymbol(tokenOutSymbol as string);
-    setLastTokenOutSymbol(tokenInSymbol as string);
-  }, [
-    tokenInSymbol,
-    tokenOutSymbol,
-    router,
-    setLastTokenInSymbol,
-    setLastTokenOutSymbol,
-  ]);
+  }, [tokenInSymbol, tokenOutSymbol, router]);
 
   // Balances
   const coinBalancesMap = useMemo(() => {
