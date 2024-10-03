@@ -219,6 +219,7 @@ export default function AccountOverviewDialog() {
 
   // Downsampled events
   const fetchDownsampledEvents = useCallback(() => {
+    console.log("XXXX");
     for (const reserve of data.lendingMarket.reserves) {
       fetchReserveAssetDataEvents(reserve, 30);
     }
@@ -226,11 +227,13 @@ export default function AccountOverviewDialog() {
 
   const fetchedDownsampledEvents = useRef<boolean>(false);
   useEffect(() => {
+    if (!isOpen) return;
+
     if (!fetchedDownsampledEvents.current) {
       fetchDownsampledEvents();
       fetchedDownsampledEvents.current = true;
     }
-  }, [fetchDownsampledEvents]);
+  }, [isOpen, fetchDownsampledEvents]);
 
   // Refresh
   const getNowS = () => Math.floor(new Date().getTime() / 1000);
