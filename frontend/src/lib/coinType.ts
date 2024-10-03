@@ -60,6 +60,7 @@ export const COINTYPE_LOGO_MAP = {
 };
 
 export const COINTYPE_SYMBOL_MAP: Record<string, string> = {
+  [NORMALIZED_USDC_COINTYPE]: "wUSDC",
   [NORMALIZED_ETH_COINTYPE]: "ETH",
   [NORMALIZED_SOL_COINTYPE]: "SOL",
   [NORMALIZED_SUILEND_POINTS_COINTYPE]: "Suilend Points",
