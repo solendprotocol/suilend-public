@@ -93,7 +93,7 @@ const SwapInput = forwardRef<HTMLInputElement, SwapInputProps>(
               style={{
                 height: `${INPUT_HEIGHT}px`,
                 paddingLeft: `${3 * 4}px`,
-                paddingRight: `${3 * 4 + (5 * 4 + 2 * 4 + token.ticker.length * 14.4 + 1 * 4 + 4 * 4) + 3 * 4}px`,
+                paddingRight: `${3 * 4 + (5 * 4 + 2 * 4 + token.ticker.slice(0, 10).length * 14.4 + 1 * 4 + 4 * 4) + 3 * 4}px`,
                 paddingTop: `${INPUT_PADDING_Y}px`,
                 paddingBottom: `${INPUT_PADDING_Y + USD_LABEL_HEIGHT}px`,
               }}
@@ -136,7 +136,7 @@ const SwapInput = forwardRef<HTMLInputElement, SwapInputProps>(
                   }
                   isClickable
                 >
-                  <TLabel>
+                  <TLabel className="max-w-[200px] overflow-hidden text-ellipsis text-nowrap">
                     {formatToken(tokenBalance)} {token.ticker}
                   </TLabel>
                 </Tooltip>

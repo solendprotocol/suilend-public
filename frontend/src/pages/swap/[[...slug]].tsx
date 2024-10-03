@@ -18,7 +18,6 @@ import {
 } from "aftermath-ts-sdk";
 import BigNumber from "bignumber.js";
 import {
-  AlertCircle,
   AlertTriangle,
   ArrowRightLeft,
   ArrowUpDown,
@@ -38,7 +37,7 @@ import Spinner from "@/components/shared/Spinner";
 import TextLink from "@/components/shared/TextLink";
 import TokenLogos from "@/components/shared/TokenLogos";
 import Tooltip from "@/components/shared/Tooltip";
-import { TBody, TLabelSans } from "@/components/shared/Typography";
+import { TBody, TLabel, TLabelSans } from "@/components/shared/Typography";
 import RoutingDialog from "@/components/swap/RoutingDialog";
 import SwapInput from "@/components/swap/SwapInput";
 import SwapSlippagePopover, {
@@ -537,11 +536,6 @@ function Page() {
     quoteRatio !== undefined && tokensCurrentRatio !== undefined
       ? new BigNumber(100).minus(quoteRatio.div(tokensCurrentRatio).times(100))
       : undefined;
-  const PriceImpactIcon =
-    priceImpactPercent !== undefined &&
-    priceImpactPercent.lt(PRICE_IMPACT_PERCENT_DESTRUCTIVE_THRESHOLD)
-      ? AlertTriangle
-      : AlertCircle;
 
   // Reverse tokens
   const reverseTokens = () => {
@@ -933,10 +927,10 @@ function Page() {
                     className="group flex w-max cursor-pointer flex-row items-center gap-2"
                     onClick={() => setIsQuoteRatioInverted((is) => !is)}
                   >
-                    <TLabelSans className="transition-colors group-hover:text-foreground">
+                    <TLabel className="transition-colors group-hover:text-foreground">
                       {"1 "}
-                      {(!isQuoteRatioInverted ? tokenIn : tokenOut).ticker}
-                      {" ≈ "}
+                      {(!isQuoteRatioInverted ? tokenIn : tokenOut).ticker}{" "}
+                      <span className="font-sans">≈</span>{" "}
                       {formatToken(
                         (!isQuoteRatioInverted
                           ? quoteAmountOut
@@ -952,7 +946,7 @@ function Page() {
                         },
                       )}{" "}
                       {(!isQuoteRatioInverted ? tokenOut : tokenIn).ticker}
-                    </TLabelSans>
+                    </TLabel>
                     <ArrowRightLeft className="h-3 w-3 text-muted-foreground transition-colors group-hover:text-foreground" />
                   </div>
                 ) : (
@@ -965,7 +959,7 @@ function Page() {
                 priceImpactPercent.gte(
                   PRICE_IMPACT_PERCENT_WARNING_THRESHOLD,
                 ) && (
-                  <div className="max-w-max rounded-md">
+                  <div className="w-max">
                     <TLabelSans
                       className={cn(
                         "font-medium",
@@ -976,7 +970,7 @@ function Page() {
                           : "text-destructive",
                       )}
                     >
-                      <PriceImpactIcon className="mb-0.5 mr-1 inline h-3 w-3" />
+                      <AlertTriangle className="mb-0.5 mr-1 inline h-3 w-3" />
                       {formatPercent(priceImpactPercent)} Price impact
                     </TLabelSans>
                   </div>

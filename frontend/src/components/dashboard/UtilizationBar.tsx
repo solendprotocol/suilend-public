@@ -2,7 +2,7 @@ import React, { CSSProperties } from "react";
 
 import BigNumber from "bignumber.js";
 import { ClassValue } from "clsx";
-import { AlertCircle, AlertTriangle } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 
 import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
 
@@ -225,7 +225,7 @@ export default function UtilizationBar({
           <>
             <span className="mt-2 block rounded-md bg-destructive/10 p-2 text-destructive">
               <span className="mr-2 font-medium">
-                <AlertCircle className="mb-0.5 mr-1 inline h-3 w-3" />
+                <AlertTriangle className="mb-0.5 mr-1 inline h-3 w-3" />
                 Danger
               </span>
               Your weighted borrows exceed your liquidation threshold, putting

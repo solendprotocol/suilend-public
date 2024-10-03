@@ -122,7 +122,7 @@ export default function TokenSelectionDialog({
           endIcon={<ChevronDown className="h-4 w-4 opacity-50" />}
           variant="ghost"
         >
-          {token.ticker}
+          {token.ticker.slice(0, 10)}
         </Button>
       }
       dialogContentProps={{ className: "max-w-lg" }}
@@ -177,6 +177,7 @@ export default function TokenSelectionDialog({
               variant="ghost"
               onClick={() => onTokenClick(t)}
             >
+              {/* TODO: Truncate symbol once the list of priority tokens includes non-reserves */}
               {t.ticker}
             </Button>
           );
@@ -224,8 +225,8 @@ export default function TokenSelectionDialog({
                         )}
                       </div>
 
-                      <div className="flex shrink-0 flex-row items-center gap-1.5">
-                        <Wallet className="h-3 w-3 text-foreground" />
+                      <div className="flex min-w-0 flex-row items-center gap-1.5">
+                        <Wallet className="h-3 w-3 shrink-0 text-foreground" />
                         <Tooltip
                           title={
                             tokenBalance.gt(0)
@@ -233,7 +234,7 @@ export default function TokenSelectionDialog({
                               : undefined
                           }
                         >
-                          <TBody className="w-max">
+                          <TBody className="overflow-hidden text-ellipsis text-nowrap">
                             {formatToken(tokenBalance, { exact: false })}{" "}
                             {t.ticker}
                           </TBody>
