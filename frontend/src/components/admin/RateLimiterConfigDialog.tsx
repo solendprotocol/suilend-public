@@ -1,7 +1,6 @@
 import { useRef } from "react";
 
 import { TransactionBlock } from "@mysten/sui.js/transactions";
-import * as Sentry from "@sentry/nextjs";
 import { cloneDeep } from "lodash";
 import { Bolt, Undo2 } from "lucide-react";
 import { toast } from "sonner";
@@ -76,17 +75,11 @@ export default function RateLimiterConfigDialog() {
     const newConfig = parseConfigState(configState);
 
     try {
-      try {
-        await suilendClient.updateRateLimiterConfig(
-          data.lendingMarketOwnerCapId,
-          txb,
-          newConfig,
-        );
-      } catch (err) {
-        Sentry.captureException(err);
-        console.error(err);
-        throw err;
-      }
+      await suilendClient.updateRateLimiterConfig(
+        data.lendingMarketOwnerCapId,
+        txb,
+        newConfig,
+      );
 
       await signExecuteAndWaitTransactionBlock(txb);
 

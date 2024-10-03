@@ -1,7 +1,6 @@
 import { useRef } from "react";
 
 import { TransactionBlock } from "@mysten/sui.js/transactions";
-import * as Sentry from "@sentry/nextjs";
 import { cloneDeep } from "lodash";
 import { Bolt, Undo2 } from "lucide-react";
 import { toast } from "sonner";
@@ -126,19 +125,13 @@ export default function ReserveConfigDialog({
     const newConfig = parseConfigState(configState, reserve.mintDecimals);
 
     try {
-      try {
-        await suilendClient.updateReserveConfig(
-          address,
-          data.lendingMarketOwnerCapId,
-          txb,
-          reserve.coinType,
-          newConfig,
-        );
-      } catch (err) {
-        Sentry.captureException(err);
-        console.error(err);
-        throw err;
-      }
+      await suilendClient.updateReserveConfig(
+        address,
+        data.lendingMarketOwnerCapId,
+        txb,
+        reserve.coinType,
+        newConfig,
+      );
 
       await signExecuteAndWaitTransactionBlock(txb);
 

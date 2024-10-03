@@ -2,7 +2,6 @@ import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 
 import { CoinMetadata, SuiClient } from "@mysten/sui.js/client";
 import { TransactionBlock } from "@mysten/sui.js/transactions";
-import * as Sentry from "@sentry/nextjs";
 import BigNumber from "bignumber.js";
 import { isEqual } from "lodash";
 import { Eraser, Sparkle } from "lucide-react";
@@ -145,23 +144,17 @@ export default function AddRewardsDialog() {
           .toString();
 
         if (rewardValue !== "0") {
-          try {
-            await suilendClient.addReward(
-              address,
-              data.lendingMarketOwnerCapId,
-              reserveArrayIndex,
-              side === Side.DEPOSIT,
-              rewardCoinType,
-              rewardValue,
-              BigInt(startTimeMs),
-              BigInt(endTimeMs),
-              txb,
-            );
-          } catch (err) {
-            Sentry.captureException(err);
-            console.error(err);
-            throw err;
-          }
+          await suilendClient.addReward(
+            address,
+            data.lendingMarketOwnerCapId,
+            reserveArrayIndex,
+            side === Side.DEPOSIT,
+            rewardCoinType,
+            rewardValue,
+            BigInt(startTimeMs),
+            BigInt(endTimeMs),
+            txb,
+          );
         }
       }
     }
@@ -214,7 +207,7 @@ export default function AddRewardsDialog() {
             onClick={submit}
             disabled={!isEditable}
           >
-            Submit
+            Add
           </Button>
         </div>
       }

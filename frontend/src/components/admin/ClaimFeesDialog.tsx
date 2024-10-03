@@ -2,7 +2,6 @@ import { Fragment, useEffect, useMemo, useState } from "react";
 
 import { SuiClient } from "@mysten/sui.js/client";
 import { TransactionBlock } from "@mysten/sui.js/transactions";
-import * as Sentry from "@sentry/nextjs";
 import BigNumber from "bignumber.js";
 import { Grab } from "lucide-react";
 import { toast } from "sonner";
@@ -95,14 +94,8 @@ export default function ClaimFeesDialog({ reserve }: ClaimFeesDialogProps) {
     const txb = new TransactionBlock();
 
     try {
-      try {
-        for (const _reserve of reserves)
-          suilendClient.claimFees(txb, _reserve.coinType);
-      } catch (err) {
-        Sentry.captureException(err);
-        console.error(err);
-        throw err;
-      }
+      for (const _reserve of reserves)
+        suilendClient.claimFees(txb, _reserve.coinType);
 
       await signExecuteAndWaitTransactionBlock(txb);
 
@@ -163,7 +156,7 @@ export default function ClaimFeesDialog({ reserve }: ClaimFeesDialogProps) {
             size="lg"
             onClick={submit}
           >
-            Submit
+            Claim
           </Button>
         </div>
       }

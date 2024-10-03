@@ -1,7 +1,6 @@
 import { useRouter } from "next/router";
 
 import { TransactionBlock } from "@mysten/sui.js/transactions";
-import * as Sentry from "@sentry/nextjs";
 import { formatISO } from "date-fns";
 import { Sparkle } from "lucide-react";
 import { toast } from "sonner";
@@ -87,21 +86,15 @@ export default function ReserveRewardsDialog({
     const rewardCoinType = poolReward.coinType;
 
     try {
-      try {
-        const [unclaimedRewards] = suilendClient.cancelReward(
-          data.lendingMarketOwnerCapId,
-          reserveArrayIndex,
-          isDepositReward,
-          rewardIndex,
-          rewardCoinType,
-          txb,
-        );
-        txb.transferObjects([unclaimedRewards], address);
-      } catch (err) {
-        Sentry.captureException(err);
-        console.error(err);
-        throw err;
-      }
+      const [unclaimedRewards] = suilendClient.cancelReward(
+        data.lendingMarketOwnerCapId,
+        reserveArrayIndex,
+        isDepositReward,
+        rewardIndex,
+        rewardCoinType,
+        txb,
+      );
+      txb.transferObjects([unclaimedRewards], address);
 
       await signExecuteAndWaitTransactionBlock(txb);
 
@@ -128,21 +121,15 @@ export default function ReserveRewardsDialog({
     const rewardCoinType = poolReward.coinType;
 
     try {
-      try {
-        const [unclaimedRewards] = suilendClient.closeReward(
-          data.lendingMarketOwnerCapId,
-          reserveArrayIndex,
-          isDepositReward,
-          rewardIndex,
-          rewardCoinType,
-          txb,
-        );
-        txb.transferObjects([unclaimedRewards], address);
-      } catch (err) {
-        Sentry.captureException(err);
-        console.error(err);
-        throw err;
-      }
+      const [unclaimedRewards] = suilendClient.closeReward(
+        data.lendingMarketOwnerCapId,
+        reserveArrayIndex,
+        isDepositReward,
+        rewardIndex,
+        rewardCoinType,
+        txb,
+      );
+      txb.transferObjects([unclaimedRewards], address);
 
       await signExecuteAndWaitTransactionBlock(txb);
 

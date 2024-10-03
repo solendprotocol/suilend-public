@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { CoinMetadata, SuiClient } from "@mysten/sui.js/client";
 import { TransactionBlock } from "@mysten/sui.js/transactions";
-import * as Sentry from "@sentry/nextjs";
 import { isEqual } from "lodash";
 import { Eraser, Plus } from "lucide-react";
 import { toast } from "sonner";
@@ -164,19 +163,13 @@ export default function AddReserveDialog() {
     const newConfig = parseConfigState(configState, coin.mintDecimals);
 
     try {
-      try {
-        await suilendClient.createReserve(
-          data.lendingMarketOwnerCapId,
-          txb,
-          pythPriceId,
-          coin.coinType,
-          newConfig,
-        );
-      } catch (err) {
-        Sentry.captureException(err);
-        console.error(err);
-        throw err;
-      }
+      await suilendClient.createReserve(
+        data.lendingMarketOwnerCapId,
+        txb,
+        pythPriceId,
+        coin.coinType,
+        newConfig,
+      );
 
       await signExecuteAndWaitTransactionBlock(txb);
 
@@ -225,7 +218,7 @@ export default function AddReserveDialog() {
             onClick={submit}
             disabled={!isEditable}
           >
-            Submit
+            Add
           </Button>
         </div>
       }

@@ -5,7 +5,6 @@ import {
   TransactionBlock,
   TransactionResult,
 } from "@mysten/sui.js/transactions";
-import * as Sentry from "@sentry/nextjs";
 import { ColumnDef } from "@tanstack/react-table";
 import BigNumber from "bignumber.js";
 import { CheckIcon } from "lucide-react";
@@ -160,45 +159,39 @@ export default function LiquidateDialog({
     const txb = new TransactionBlock();
 
     try {
-      try {
-        const repayCoinType = obligation.borrows.find(
-          (b) => b.reserve.symbol === repayAssetSymbol,
-        )?.coinType as string;
-        const repayCoin = (await getAllCoins(suiClient, address))
-          .filter((coin) => {
-            return (
-              coin.coinType === repayCoinType ||
-              (isSui(coin.coinType) && isSui(repayCoinType))
-            );
-          })
-          .sort((a, b) => {
-            return parseInt(b.balance) - parseInt(a.balance);
-          })[0];
-        let repayCoinId: TransactionResult[0] | string = repayCoin.coinObjectId;
+      const repayCoinType = obligation.borrows.find(
+        (b) => b.reserve.symbol === repayAssetSymbol,
+      )?.coinType as string;
+      const repayCoin = (await getAllCoins(suiClient, address))
+        .filter((coin) => {
+          return (
+            coin.coinType === repayCoinType ||
+            (isSui(coin.coinType) && isSui(repayCoinType))
+          );
+        })
+        .sort((a, b) => {
+          return parseInt(b.balance) - parseInt(a.balance);
+        })[0];
+      let repayCoinId: TransactionResult[0] | string = repayCoin.coinObjectId;
 
-        if (isSui(repayCoinType)) {
-          const [splitSui] = txb.splitCoins(txb.gas, [
-            parseInt(repayCoin.balance) - 1000000000,
-          ]);
-          repayCoinId = splitSui;
-        }
-        const [withdrawn] = await suilendClient.liquidateAndRedeem(
-          txb,
-          obligation.original,
-          repayCoinType,
-          obligation.deposits.find(
-            (d) => d.reserve.symbol === withdrawAssetSymbol,
-          )?.coinType as string,
-          repayCoinId,
-        );
-        txb.transferObjects([withdrawn], address);
-        if (isSui(repayCoinType)) {
-          txb.transferObjects([repayCoinId], address);
-        }
-      } catch (err) {
-        Sentry.captureException(err);
-        console.error(err);
-        throw err;
+      if (isSui(repayCoinType)) {
+        const [splitSui] = txb.splitCoins(txb.gas, [
+          parseInt(repayCoin.balance) - 1000000000,
+        ]);
+        repayCoinId = splitSui;
+      }
+      const [withdrawn] = await suilendClient.liquidateAndRedeem(
+        txb,
+        obligation.original,
+        repayCoinType,
+        obligation.deposits.find(
+          (d) => d.reserve.symbol === withdrawAssetSymbol,
+        )?.coinType as string,
+        repayCoinId,
+      );
+      txb.transferObjects([withdrawn], address);
+      if (isSui(repayCoinType)) {
+        txb.transferObjects([repayCoinId], address);
       }
 
       await signExecuteAndWaitTransactionBlock(txb);
