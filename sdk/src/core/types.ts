@@ -313,6 +313,14 @@ export interface ClaimFeesArgs {
   reserveArrayIndex: bigint | TransactionArgument;
 }
 
+export interface RedeemCtokensAndWithdrawLiquidityArgs {
+  lendingMarket: ObjectArg;
+  reserveArrayIndex: bigint | TransactionArgument;
+  clock: ObjectArg;
+  ctokens: ObjectArg;
+  rateLimiterExemption: ObjectArg | TransactionArgument | null;
+}
+
 // Events
 export type ApiInterestUpdateEvent = {
   id: number;

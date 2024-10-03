@@ -2,7 +2,6 @@ import Head from "next/head";
 import { useRouter } from "next/router";
 
 import { TransactionBlock } from "@mysten/sui.js/transactions";
-import * as Sentry from "@sentry/nextjs";
 import { Package } from "lucide-react";
 import { toast } from "sonner";
 
@@ -15,6 +14,7 @@ import LiquidateDialog from "@/components/admin/LiquidateDialog";
 import ObligationsDialog from "@/components/admin/ObligationsDialog";
 import RateLimiterConfigDialog from "@/components/admin/RateLimiterConfigDialog";
 import RateLimiterPropertiesDialog from "@/components/admin/RateLimiterPropertiesDialog";
+import RedeemCTokensDialog from "@/components/admin/RedeemCTokensDialog";
 import ReserveConfigDialog from "@/components/admin/ReserveConfigDialog";
 import ReservePropertiesDialog from "@/components/admin/ReservePropertiesDialog";
 import ReserveRewardsDialog from "@/components/admin/ReserveRewardsDialog";
@@ -60,6 +60,7 @@ export default function Admin() {
     LENDING_MARKET = "lendingMarket",
     LIQUIDATE = "liquidate",
     OBLIGATIONS = "obligations",
+    CTOKENS = "ctokens",
   }
 
   const tabs = [
@@ -71,6 +72,7 @@ export default function Admin() {
     [
       { id: Tab.LIQUIDATE, title: "Liquidate" },
       { id: Tab.OBLIGATIONS, title: "Obligations" },
+      { id: Tab.CTOKENS, title: "CTokens" },
     ],
   ];
 
@@ -91,13 +93,7 @@ export default function Admin() {
     const txb = new TransactionBlock();
 
     try {
-      try {
-        suilendClient.migrate(txb, data.lendingMarketOwnerCapId);
-      } catch (err) {
-        Sentry.captureException(err);
-        console.error(err);
-        throw err;
-      }
+      suilendClient.migrate(txb, data.lendingMarketOwnerCapId);
 
       await signExecuteAndWaitTransactionBlock(txb);
 
@@ -219,6 +215,17 @@ export default function Admin() {
               </CardHeader>
               <CardContent className="flex flex-row flex-wrap gap-2">
                 <ObligationsDialog />
+              </CardContent>
+            </Card>
+          )}
+
+          {selectedTab === Tab.CTOKENS && (
+            <Card>
+              <CardHeader>
+                <TTitle className="uppercase">CTokens</TTitle>
+              </CardHeader>
+              <CardContent className="flex flex-row flex-wrap gap-2">
+                <RedeemCTokensDialog />
               </CardContent>
             </Card>
           )}

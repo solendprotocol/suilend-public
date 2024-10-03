@@ -1,5 +1,5 @@
 import { fromB64, toHEX } from "@mysten/bcs";
-import { SuiClient } from "@mysten/sui.js/client";
+import { CoinStruct, SuiClient } from "@mysten/sui.js/client";
 import {
   TransactionBlock,
   TransactionObjectArgument,
@@ -29,6 +29,7 @@ import {
   MigrateArgs,
   ObjectArg,
   PhantomReified,
+  RedeemCtokensAndWithdrawLiquidityArgs,
   RefreshReservePriceArgs,
   RepayArgs,
   Side,
@@ -36,6 +37,7 @@ import {
   UpdateReserveConfigArgs,
   WithdrawCtokensArgs,
 } from "./types";
+import { extractCTokenCoinType } from "./utils";
 
 const WORMHOLE_STATE_ID =
   "0xaeab97f96cf9877fee2883315d459552b2b921edc16d7ceac6eab944dd88919c";
@@ -149,6 +151,11 @@ interface Deps {
     typeArgs: [string, string],
     args: ClaimFeesArgs,
   ) => TransactionResult;
+  redeemCtokensAndWithdrawLiquidity: (
+    txb: TransactionBlock,
+    typeArgs: [string, string],
+    args: RedeemCtokensAndWithdrawLiquidityArgs,
+  ) => TransactionResult;
 }
 
 export class SuilendClient {
@@ -183,6 +190,7 @@ export class SuilendClient {
   liquidateFunction: Deps["liquidate"];
   migrateFunction: Deps["migrate"];
   claimFeesFunction: Deps["claimFees"];
+  redeemCtokensAndWithdrawLiquidityFunction: Deps["redeemCtokensAndWithdrawLiquidity"];
 
   constructor(
     lendingMarket: any,
@@ -214,6 +222,7 @@ export class SuilendClient {
       liquidate,
       migrate,
       claimFees,
+      redeemCtokensAndWithdrawLiquidity,
     }: Deps,
   ) {
     this.lendingMarket = lendingMarket;
@@ -254,6 +263,8 @@ export class SuilendClient {
     this.liquidateFunction = liquidate;
     this.migrateFunction = migrate;
     this.claimFeesFunction = claimFees;
+    this.redeemCtokensAndWithdrawLiquidityFunction =
+      redeemCtokensAndWithdrawLiquidity;
   }
 
   static async initialize(
@@ -863,6 +874,49 @@ export class SuilendClient {
     this.depositCoin(ownerId, sendCoin, coinType, txb, obligationOwnerCapId);
   }
 
+  async depositLiquidityAndGetCTokens(
+    ownerId: string,
+    coinType: string,
+    value: string,
+    txb: TransactionBlock,
+  ) {
+    const isSui =
+      normalizeStructTag(coinType) === normalizeStructTag(SUI_COINTYPE);
+
+    const coins = (
+      await this.client.getCoins({
+        owner: ownerId,
+        coinType,
+      })
+    ).data;
+
+    const mergeCoin = coins[0];
+    if (coins.length > 1 && !isSui) {
+      txb.mergeCoins(
+        txb.object(mergeCoin.coinObjectId),
+        coins.map((c) => txb.object(c.coinObjectId)).slice(1),
+      );
+    }
+
+    const [sendCoin] = txb.splitCoins(
+      isSui ? txb.gas : txb.object(mergeCoin.coinObjectId),
+      [txb.pure(value)],
+    );
+
+    const [ctokens] = this.depositLiquidityAndMintCtokensFunction(
+      txb,
+      [this.lendingMarket.$typeArgs[0], coinType],
+      {
+        lendingMarket: this.lendingMarket.id,
+        clock: SUI_CLOCK_OBJECT_ID,
+        deposit: sendCoin,
+        reserveArrayIndex: this.findReserveArrayIndex(coinType),
+      },
+    );
+
+    txb.transferObjects([ctokens], txb.pure(ownerId));
+  }
+
   async withdraw(
     obligationOwnerCapId: string,
     obligationId: string,
@@ -1103,5 +1157,52 @@ export class SuilendClient {
         reserveArrayIndex: this.findReserveArrayIndex(coinType),
       },
     );
+  }
+
+  async redeemCtokensAndWithdrawLiquidity(
+    ownerId: string,
+    ctokenCoinTypes: string[],
+    txb: TransactionBlock,
+  ) {
+    const mergeCoinsMap: Record<string, CoinStruct[]> = {};
+    for (const ctokenCoinType of ctokenCoinTypes) {
+      const coins = (
+        await this.client.getCoins({
+          owner: ownerId,
+          coinType: ctokenCoinType,
+        })
+      ).data;
+      if (coins.length === 0) continue;
+
+      if (mergeCoinsMap[ctokenCoinType] === undefined)
+        mergeCoinsMap[ctokenCoinType] = [];
+      mergeCoinsMap[ctokenCoinType].push(...coins);
+    }
+
+    for (const [ctokenCoinType, mergeCoins] of Object.entries(mergeCoinsMap)) {
+      const mergeCoin = mergeCoins[0];
+      if (mergeCoins.length > 1) {
+        txb.mergeCoins(
+          txb.object(mergeCoin.coinObjectId),
+          mergeCoins.map((mc) => txb.object(mc.coinObjectId)).slice(1),
+        );
+      }
+
+      const coinType = extractCTokenCoinType(ctokenCoinType);
+
+      const [redeemCoin] = this.redeemCtokensAndWithdrawLiquidityFunction(
+        txb,
+        [this.lendingMarket.$typeArgs[0], coinType],
+        {
+          lendingMarket: this.lendingMarket.id,
+          reserveArrayIndex: this.findReserveArrayIndex(coinType),
+          clock: SUI_CLOCK_OBJECT_ID,
+          ctokens: txb.object(mergeCoin.coinObjectId),
+          rateLimiterExemption: null,
+        },
+      );
+
+      txb.transferObjects([redeemCoin], txb.pure(ownerId));
+    }
   }
 }
