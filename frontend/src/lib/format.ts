@@ -193,7 +193,7 @@ export const formatToken = (
   value: BigNumber,
   options?: { dp?: number; exact?: boolean; useGrouping?: boolean },
 ) => {
-  const dp = options?.dp ?? 4;
+  const dp = options?.dp ?? 3;
   const exact = options?.exact ?? true;
   const useGrouping = options?.useGrouping ?? true;
 

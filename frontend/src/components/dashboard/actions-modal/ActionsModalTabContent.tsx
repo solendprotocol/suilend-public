@@ -424,7 +424,7 @@ export default function ActionsModalTabContent({
           {action === Action.BORROW ? (
             <LabelWithValue
               label="Borrow fee"
-              value={`${formatToken(borrowFee, { dp: 4 })} ${reserve.symbol}`}
+              value={`${formatToken(borrowFee)} ${reserve.symbol}`}
               horizontal
             />
           ) : null}

@@ -378,7 +378,7 @@ function getColumnDefinition(isBorrow: boolean) {
       header: ({ column }) => tableHeader(column, "Quantity"),
       cell: ({ row }) => {
         const { quantity } = row.original;
-        return <TBody>{formatToken(quantity, { dp: 4 })}</TBody>;
+        return <TBody>{formatToken(quantity)}</TBody>;
       },
     },
     {

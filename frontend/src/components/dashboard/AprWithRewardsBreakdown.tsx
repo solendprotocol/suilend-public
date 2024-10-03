@@ -62,7 +62,7 @@ const formatPerDay = (
 ) => {
   const formatter = (_value: BigNumber) =>
     isSuilendPoints(coinType)
-      ? formatPoints(_value, { dp: 4 })
+      ? formatPoints(_value, { dp: 3 })
       : formatToken(_value, { exact: false });
 
   return showChange && !newValue.eq(value)
