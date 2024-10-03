@@ -28,6 +28,7 @@ import { AppData, useAppContext } from "@/contexts/AppContext";
 import { useDashboardContext } from "@/contexts/DashboardContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 import useBreakpoint from "@/hooks/useBreakpoint";
+import useIsTouchscreen from "@/hooks/useIsTouchscreen";
 import { isSui } from "@/lib/coinType";
 import {
   FIRST_DEPOSIT_DIALOG_START_DATE,
@@ -88,6 +89,7 @@ export default function ActionsModalTabContent({
     useActionsModalContext();
 
   const { md } = useBreakpoint();
+  const isTouchscreen = useIsTouchscreen();
 
   // First deposit
   const [justDeposited, setJustDeposited] = useState<boolean>(false);
@@ -345,8 +347,11 @@ export default function ActionsModalTabContent({
           >
             <TLabelSans>Balance</TLabelSans>
             <Tooltip
-              title={`${formatToken(balance, { dp: reserve.mintDecimals })} ${reserve.symbol}`}
-              isClickable={[Action.DEPOSIT].includes(action)}
+              title={
+                !isTouchscreen && balance.gt(0)
+                  ? `${formatToken(balance, { dp: reserve.mintDecimals })} ${reserve.symbol}`
+                  : undefined
+              }
             >
               <TBody className="text-xs">
                 {formatToken(balance, { exact: false })} {reserve.symbol}
@@ -359,7 +364,11 @@ export default function ActionsModalTabContent({
               {side === Side.DEPOSIT ? "Deposited" : "Borrowed"}
             </TLabelSans>
             <Tooltip
-              title={`${formatToken(positionAmount, { dp: reserve.mintDecimals })} ${reserve.symbol}`}
+              title={
+                !isTouchscreen && positionAmount.gt(0)
+                  ? `${formatToken(positionAmount, { dp: reserve.mintDecimals })} ${reserve.symbol}`
+                  : undefined
+              }
             >
               <TBody className="text-xs">
                 {formatToken(positionAmount, { exact: false })} {reserve.symbol}
