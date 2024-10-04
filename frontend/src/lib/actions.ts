@@ -127,7 +127,7 @@ const getMaxCalculations = (
     const depositedAmount =
       depositPosition?.depositedAmount ?? new BigNumber(0);
 
-    const result = [
+    return [
       {
         reason: "Withdraws cannot exceed deposits",
         isDisabled: true,
@@ -147,9 +147,7 @@ const getMaxCalculations = (
           reserve.maxPrice,
         ),
       },
-    ];
-    if (reserve.config.openLtvPct > 0)
-      result.push({
+      {
         reason: "Withdraw is unhealthy",
         isDisabled: true,
         value:
@@ -158,13 +156,14 @@ const getMaxCalculations = (
             obligation.minPriceBorrowLimitUsd,
           )
             ? new BigNumber(0)
-            : obligation.minPriceBorrowLimitUsd
-                .minus(obligation.maxPriceWeightedBorrowsUsd)
-                .div(reserve.minPrice)
-                .div(reserve.config.openLtvPct / 100),
-      });
-
-    return result;
+            : reserve.config.openLtvPct > 0
+              ? obligation.minPriceBorrowLimitUsd
+                  .minus(obligation.maxPriceWeightedBorrowsUsd)
+                  .div(reserve.minPrice)
+                  .div(reserve.config.openLtvPct / 100)
+              : Infinity,
+      },
+    ];
   } else if (action === Action.REPAY) {
     const borrowPosition = obligation?.borrows.find(
       (borrow) => borrow.coinType === reserve.coinType,
