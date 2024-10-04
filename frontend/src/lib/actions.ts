@@ -127,7 +127,7 @@ const getMaxCalculations = (
     const depositedAmount =
       depositPosition?.depositedAmount ?? new BigNumber(0);
 
-    return [
+    const result = [
       {
         reason: "Withdraws cannot exceed deposits",
         isDisabled: true,
@@ -141,6 +141,15 @@ const getMaxCalculations = (
         ),
       },
       {
+        reason: "Pool outflow rate limit surpassed",
+        isDisabled: true,
+        value: data.lendingMarket.rateLimiter.remainingOutflow.div(
+          reserve.maxPrice,
+        ),
+      },
+    ];
+    if (reserve.config.openLtvPct > 0)
+      result.push({
         reason: "Withdraw is unhealthy",
         isDisabled: true,
         value:
@@ -153,15 +162,9 @@ const getMaxCalculations = (
                 .minus(obligation.maxPriceWeightedBorrowsUsd)
                 .div(reserve.minPrice)
                 .div(reserve.config.openLtvPct / 100),
-      },
-      {
-        reason: "Pool outflow rate limit surpassed",
-        isDisabled: true,
-        value: data.lendingMarket.rateLimiter.remainingOutflow.div(
-          reserve.maxPrice,
-        ),
-      },
-    ];
+      });
+
+    return result;
   } else if (action === Action.REPAY) {
     const borrowPosition = obligation?.borrows.find(
       (borrow) => borrow.coinType === reserve.coinType,
