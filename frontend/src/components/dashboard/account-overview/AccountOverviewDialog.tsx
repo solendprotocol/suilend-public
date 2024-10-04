@@ -219,7 +219,6 @@ export default function AccountOverviewDialog() {
 
   // Downsampled events
   const fetchDownsampledEvents = useCallback(() => {
-    console.log("XXXX");
     for (const reserve of data.lendingMarket.reserves) {
       fetchReserveAssetDataEvents(reserve, 30);
     }
