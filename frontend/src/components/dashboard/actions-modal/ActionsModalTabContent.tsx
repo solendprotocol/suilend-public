@@ -246,9 +246,7 @@ export default function ActionsModalTabContent({
             : BigNumber.min(
                 new BigNumber(
                   obligation.original.allowedBorrowValueUsd.value.toString(),
-                )
-                  .div(WAD)
-                  .gt(0)
+                ).gt(0)
                   ? new BigNumber(
                       new BigNumber(
                         new BigNumber(
