@@ -277,14 +277,21 @@ export function SwapContextProvider({ children }: PropsWithChildren) {
       slug[0].split("-").length !== 2 ||
       slug[0].split("-")[0] === slug[0].split("-")[1]
     )
-      router.replace(
-        {
-          pathname: getSwapUrl(),
-        },
-        undefined,
-        { shallow: true },
-      );
-  }, [slug, tokens, tokenIn, tokenOut, router]);
+      router.replace({ pathname: getSwapUrl() }, undefined, { shallow: true });
+    else {
+      if (!tokens) return;
+
+      const [t1, t2] = slug[0].split("-");
+      if (
+        (!isCoinType(t1) && !tokens.find((t) => t.ticker === t1)) ||
+        (!isCoinType(t2) && !tokens.find((t) => t.ticker === t2))
+      ) {
+        router.replace({ pathname: getSwapUrl() }, undefined, {
+          shallow: true,
+        });
+      }
+    }
+  }, [slug, router, tokens]);
 
   const setTokenSymbol = useCallback(
     (newTokenSymbol: string, direction: TokenDirection) => {
