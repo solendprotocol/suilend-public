@@ -14,7 +14,12 @@ import AprRewardsBreakdownRow from "@/components/dashboard/AprRewardsBreakdownRo
 import Button from "@/components/shared/Button";
 import CartesianGridVerticalLine from "@/components/shared/CartesianGridVerticalLine";
 import TokenLogo from "@/components/shared/TokenLogo";
-import { TBody, TBodySans, TLabelSans } from "@/components/shared/Typography";
+import {
+  TBody,
+  TBodySans,
+  TLabel,
+  TLabelSans,
+} from "@/components/shared/Typography";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { useReserveAssetDataEventsContext } from "@/contexts/ReserveAssetDataEventsContext";
 import useBreakpoint from "@/hooks/useBreakpoint";
@@ -122,9 +127,7 @@ function TooltipContent({ side, fields, d, viewBox, x }: TooltipContentProps) {
                       iconUrl: data.coinMetadataMap[coinType].iconUrl,
                     }}
                   />
-                  <TLabelSans>
-                    {data.coinMetadataMap[coinType].symbol}
-                  </TLabelSans>
+                  <TLabel>{data.coinMetadataMap[coinType].symbol}</TLabel>
                 </>
               )}
             </AprRewardsBreakdownRow>
@@ -483,14 +486,16 @@ export default function HistoricalAprLineChart({
             key={_days}
             className="px-2"
             labelClassName={cn(
-              "text-muted-foreground text-xs font-sans uppercase",
+              "text-muted-foreground text-xs font-sans",
               days === _days && "text-primary-foreground",
             )}
             variant="ghost"
             size="sm"
             onClick={() => onDaysClick(_days)}
           >
-            {_days}d
+            {_days === 1 && "1D"}
+            {_days === 7 && "1W"}
+            {_days === 30 && "1M"}
           </Button>
         ))}
       </div>

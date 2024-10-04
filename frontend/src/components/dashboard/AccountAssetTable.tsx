@@ -92,7 +92,6 @@ export default function AccountAssetTable({
         columns={columns}
         data={sortedAssets}
         noDataMessage={noAssetsMessage}
-        tableRowClassName={() => "border-b-0"}
         onRowClick={(row) => () =>
           openActionsModal(Number(row.original.reserve.arrayIndex))
         }

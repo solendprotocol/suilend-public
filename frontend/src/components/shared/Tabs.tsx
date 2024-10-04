@@ -29,7 +29,7 @@ export default function Tabs({
     <TabsRoot value={selectedTab as string} onValueChange={onTabChange}>
       <TabsList
         className={cn(
-          "mb-4 flex h-fit w-full flex-row rounded-md bg-card p-[2px]",
+          "mb-4 flex h-fit w-full flex-row rounded-[5px] bg-card p-[1px]",
           listClassName,
         )}
       >

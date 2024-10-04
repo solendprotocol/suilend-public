@@ -436,7 +436,10 @@ export default function ActionsModalTabContent({
               value={`${formatToken(borrowFee)} ${reserve.symbol}`}
               horizontal
             />
-          ) : null}
+          ) : (
+            // Placeholder so the UI doesn't move when switching tabs
+            <div className="h-5" />
+          )}
         </div>
 
         {!md && isMoreParametersOpen && (

@@ -961,10 +961,7 @@ export default function EarningsTabContent({
                   noDataMessage={table.noDataMessage}
                   skeletonRows={data.lendingMarket.reserves.length}
                   container={{
-                    className: cn(
-                      "overflow-y-visible overflow-x-auto",
-                      index !== array.length - 1 && "border-b",
-                    ),
+                    className: "overflow-y-visible overflow-x-auto",
                   }}
                   tableCellClassName={(cell) =>
                     cn(
@@ -978,7 +975,9 @@ export default function EarningsTabContent({
               </div>
 
               {(chartData === undefined || chartData.length > 0) && (
-                <div className="w-full">
+                <div
+                  className={cn("w-full", index === array.length - 1 && "pb-4")}
+                >
                   <EarningsChart
                     side={table.side}
                     isLoading={chartData === undefined}

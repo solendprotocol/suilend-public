@@ -62,34 +62,37 @@ function TooltipContent({
             {side === Side.DEPOSIT ? "Interest earned" : "Interest paid"}
           </TBodySans>
 
-          {coinTypes.map((coinType) => {
-            const coinMetadata = data.coinMetadataMap[coinType];
+          {coinTypes
+            .slice()
+            .sort((a, b) => d[b] - d[a])
+            .map((coinType) => {
+              const coinMetadata = data.coinMetadataMap[coinType];
 
-            return (
-              <div
-                key={coinType}
-                className="flex w-full flex-row items-center justify-between gap-4"
-              >
-                <div className="flex flex-row items-center gap-1.5">
-                  <TokenLogo
-                    className="h-4 w-4"
-                    token={{
-                      coinType,
-                      symbol: coinMetadata.symbol,
-                      iconUrl: coinMetadata.iconUrl,
-                    }}
-                  />
-                  <TLabelSans>{coinMetadata.symbol}</TLabelSans>
+              return (
+                <div
+                  key={coinType}
+                  className="flex w-full flex-row items-center justify-between gap-4"
+                >
+                  <div className="flex flex-row items-center gap-1.5">
+                    <TokenLogo
+                      className="h-4 w-4"
+                      token={{
+                        coinType,
+                        symbol: coinMetadata.symbol,
+                        iconUrl: coinMetadata.iconUrl,
+                      }}
+                    />
+                    <TLabelSans>{coinMetadata.symbol}</TLabelSans>
+                  </div>
+
+                  <TBody style={{ color: COINTYPE_COLOR_MAP[coinType] }}>
+                    {formatToken(new BigNumber(d[coinType] as number), {
+                      exact: false,
+                    })}
+                  </TBody>
                 </div>
-
-                <TBody style={{ color: COINTYPE_COLOR_MAP[coinType] }}>
-                  {formatToken(new BigNumber(d[coinType] as number), {
-                    exact: false,
-                  })}
-                </TBody>
-              </div>
-            );
-          })}
+              );
+            })}
         </div>
       </div>
     </div>

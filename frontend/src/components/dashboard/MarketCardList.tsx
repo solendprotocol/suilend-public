@@ -21,11 +21,13 @@ import { ReservesRowData } from "@/components/dashboard/MarketTable";
 import LabelWithTooltip from "@/components/shared/LabelWithTooltip";
 import Tooltip from "@/components/shared/Tooltip";
 import { TLabelSans, TTitle } from "@/components/shared/Typography";
+import { Separator } from "@/components/ui/separator";
 import {
   ISOLATED_TOOLTIP,
   OPEN_LTV_BORROW_WEIGHT_TOOLTIP,
 } from "@/lib/tooltips";
 import { cn, hoverUnderlineClassName } from "@/lib/utils";
+
 interface MarketCardProps {
   rowData: ReservesRowData;
   onClick: () => void;
@@ -39,33 +41,39 @@ function MarketCard({ rowData, onClick }: MarketCardProps) {
       )}
       onClick={onClick}
     >
-      <div className="flex w-full flex-col items-center gap-2 p-4">
-        <div className="mb-2 flex w-full flex-row justify-center">
+      <div className="flex w-full flex-col gap-4 p-4">
+        <div className="flex w-full flex-row justify-between">
           <AssetCell {...rowData} />
-        </div>
-        <div className="mb-2 flex w-full flex-row justify-around">
-          <div className="flex w-fit flex-col items-center gap-1">
-            <TLabelSans>Deposit APR</TLabelSans>
-            <DepositAprCell {...rowData} />
+
+          <div className="flex flex-row justify-end gap-6">
+            <div className="flex w-fit flex-col items-end gap-1">
+              <TLabelSans>Deposit APR</TLabelSans>
+              <DepositAprCell {...rowData} />
+            </div>
+            <div className="flex w-fit flex-col items-end gap-1">
+              <TLabelSans>Borrow APR</TLabelSans>
+              <BorrowAprCell {...rowData} />
+            </div>
           </div>
-          <div className="flex w-fit flex-col items-center gap-1">
-            <TLabelSans>Borrow APR</TLabelSans>
-            <BorrowAprCell {...rowData} />
+        </div>
+
+        <Separator />
+
+        <div className="flex w-full flex-col gap-3">
+          <div className="flex w-full flex-row items-center justify-between">
+            <LabelWithTooltip tooltip={OPEN_LTV_BORROW_WEIGHT_TOOLTIP}>
+              LTV / BW
+            </LabelWithTooltip>
+            <OpenLtvBwCell {...rowData} />
           </div>
-        </div>
-        <div className="flex w-full flex-row items-center justify-between">
-          <LabelWithTooltip tooltip={OPEN_LTV_BORROW_WEIGHT_TOOLTIP}>
-            LTV / BW
-          </LabelWithTooltip>
-          <OpenLtvBwCell {...rowData} />
-        </div>
-        <div className="flex w-full flex-row items-center justify-between">
-          <TLabelSans>Deposits</TLabelSans>
-          <TotalDepositsCell {...rowData} horizontal />
-        </div>
-        <div className="flex w-full flex-row items-center justify-between">
-          <TLabelSans>Borrows</TLabelSans>
-          <TotalBorrowsCell {...rowData} horizontal />
+          <div className="flex w-full flex-row items-center justify-between">
+            <TLabelSans>Deposits</TLabelSans>
+            <TotalDepositsCell {...rowData} horizontal />
+          </div>
+          <div className="flex w-full flex-row items-center justify-between">
+            <TLabelSans>Borrows</TLabelSans>
+            <TotalBorrowsCell {...rowData} horizontal />
+          </div>
         </div>
       </div>
     </Card>

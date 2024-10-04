@@ -9,7 +9,12 @@ import AprRewardsBreakdownRow from "@/components/dashboard/AprRewardsBreakdownRo
 import TokenLogo from "@/components/shared/TokenLogo";
 import TokenLogos from "@/components/shared/TokenLogos";
 import Tooltip from "@/components/shared/Tooltip";
-import { TBody, TBodySans, TLabelSans } from "@/components/shared/Typography";
+import {
+  TBody,
+  TBodySans,
+  TLabel,
+  TLabelSans,
+} from "@/components/shared/Typography";
 import { isSuilendPoints } from "@/lib/coinType";
 import { formatPercent, formatPoints, formatToken } from "@/lib/format";
 import {
@@ -280,7 +285,7 @@ export default function AprWithRewardsBreakdown({
                       iconUrl: reward.stats.iconUrl,
                     }}
                   />
-                  <TLabelSans>{reward.stats.symbol}</TLabelSans>
+                  <TLabel>{reward.stats.symbol}</TLabel>
                 </AprRewardsBreakdownRow>
               ))}
             </div>

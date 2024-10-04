@@ -338,7 +338,6 @@ export default function MarketTable() {
           container={{ className: "border rounded-sm" }}
           tableRowClassName={(row, isSorting) =>
             cn(
-              "border-0",
               styles.tableRow,
               row &&
                 (row.original as HeaderRowData).isHeader &&
@@ -351,7 +350,7 @@ export default function MarketTable() {
             (cell.row.original as HeaderRowData).isHeader &&
             cn(
               cell.column.getIsFirstColumn()
-                ? "bg-card border-y h-auto py-2"
+                ? "bg-card h-auto py-2"
                 : "p-0 h-0",
             )
           }
