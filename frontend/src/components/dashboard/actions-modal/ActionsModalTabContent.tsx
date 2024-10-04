@@ -237,20 +237,29 @@ export default function ActionsModalTabContent({
         break;
       }
       case Action.WITHDRAW: {
+        // TODO: Revert once fixed
+        if (!obligation || !depositPosition) return;
+
         if (useMaxAmount)
           submitAmount = !reserve.config.isolated
             ? maxU64.toString()
             : BigNumber.min(
                 new BigNumber(
-                  new BigNumber(
-                    new BigNumber(
-                      obligation!.original.allowedBorrowValueUsd.value.toString(),
-                    ).div(WAD),
-                  ).minus(obligation!.borrowedAmountUsd),
+                  obligation.original.allowedBorrowValueUsd.value.toString(),
                 )
-                  .div(reserve.price)
-                  .div(reserve.cTokenExchangeRate),
-                depositPosition!.depositedCtokenAmount,
+                  .div(WAD)
+                  .gt(0)
+                  ? new BigNumber(
+                      new BigNumber(
+                        new BigNumber(
+                          obligation.original.allowedBorrowValueUsd.value.toString(),
+                        ).div(WAD),
+                      ).minus(obligation.borrowedAmountUsd),
+                    )
+                      .div(reserve.price)
+                      .div(reserve.cTokenExchangeRate)
+                  : Infinity,
+                depositPosition.depositedCtokenAmount,
               )
                 .times(10 ** reserve.mintDecimals)
                 .integerValue(BigNumber.ROUND_DOWN)
