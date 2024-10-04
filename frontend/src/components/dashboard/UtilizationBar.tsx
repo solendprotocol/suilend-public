@@ -31,6 +31,7 @@ const getPassedBorrowLimit = (obligation: ParsedObligation) => {
   const weightedBorrowsUsd = getWeightedBorrowsUsd(obligation);
   const borrowLimitUsd = getBorrowLimitUsd(obligation);
 
+  if (weightedBorrowsUsd.eq(0) && borrowLimitUsd.eq(0)) return false;
   return weightedBorrowsUsd.gte(borrowLimitUsd);
 };
 
@@ -38,6 +39,7 @@ const getPassedLiquidationThreshold = (obligation: ParsedObligation) => {
   const weightedBorrowsUsd = getWeightedBorrowsUsd(obligation);
   const liquidationThreshold = obligation.unhealthyBorrowValueUsd;
 
+  if (weightedBorrowsUsd.eq(0) && liquidationThreshold.eq(0)) return false;
   return weightedBorrowsUsd.gte(liquidationThreshold);
 };
 
@@ -192,14 +194,20 @@ export default function UtilizationBar({
       <br />
       {"• "}
       <span className="">
-        {formatPercent(weightedBorrowsUsd.div(borrowLimitUsd).times(100))}
+        {formatPercent(
+          !borrowLimitUsd.eq(0)
+            ? weightedBorrowsUsd.div(borrowLimitUsd).times(100)
+            : new BigNumber(0),
+        )}
       </span>
       {" of your borrow limit"}
       <br />
       {"• "}
       <span className="">
         {formatPercent(
-          weightedBorrowsUsd.div(liquidationThresholdUsd).times(100),
+          !liquidationThresholdUsd.eq(0)
+            ? weightedBorrowsUsd.div(liquidationThresholdUsd).times(100)
+            : new BigNumber(0),
         )}
       </span>
       {" of your liquidation threshold"}
