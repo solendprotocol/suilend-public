@@ -141,18 +141,26 @@ async function mergeAllSuiCoins() {
     }`
   });
 
-  const suiCoins = await client.getCoins({
+  const coins = await client.getCoins({
     owner: keypair.getPublicKey().toSuiAddress(),
     coinType: "0x2::sui::SUI",
     limit: 1000,
   });
 
-  const firstCoin = suiCoins.data[0].coinObjectId;
-  const remainingCoinIds = suiCoins.data.slice(1).map((coin) => coin.coinObjectId);
+  const gasCoinId = "0x00dc194382e75ee6d880cbd2198fc440c4db8aaad42fac495833367d13d2d9f9";
+  const gasCoin = coins.data.find((coin) => coin.coinObjectId == gasCoinId);
 
-  console.log(suiCoins);
+  const suiCoins = coins.data.filter((coin) => coin.coinObjectId != gasCoinId);
+  const firstCoin = suiCoins[0].coinObjectId;
+  const remainingCoinIds = suiCoins.slice(1).map((coin) => coin.coinObjectId);
 
   let txb = new TransactionBlock();
+  txb.setGasPayment([{
+    objectId: gasCoinId,
+    digest: gasCoin.digest,
+    version: gasCoin.version,
+  }]);
+
   txb.mergeCoins(firstCoin, remainingCoinIds);
 
   const res = await client.signAndExecuteTransactionBlock({
@@ -199,5 +207,5 @@ async function main() {
   }
 }
 
-// main();
-mergeAllSuiCoins();
+main();
+// mergeAllSuiCoins();
