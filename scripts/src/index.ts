@@ -9,7 +9,7 @@ import { fetchAllObligationsForMarket } from "../../sdk/src/mainnet/utils/obliga
 import { phantom } from "../../sdk/src/mainnet/_generated/_framework/reified";
 import { Reserve } from "../../sdk/src/mainnet/_generated/suilend/reserve/structs";
 import * as simulate from "../../sdk/src/mainnet/utils/simulate";
-import { SuiPriceServiceConnection } from "../../pyth-sdk/src";
+import { SuiPriceServiceConnection } from "../../pyth-sdk/src/SuiPriceServiceConnection";
 import { TransactionBlock } from "@mysten/sui.js/transactions";
 import { Side } from "../../sdk/src/core/types";
 import { fromB64, fromHEX } from "@mysten/sui.js/utils";
@@ -63,6 +63,12 @@ async function crankRewards(
   }
 
   const poolReward = poolManager?.poolRewards[rewardIndex];
+  if (poolReward == null) {
+    console.log("Pool reward is empty");
+    return;
+  }
+
+  // const a = poolReward.endTimeMs;
   const endTimeMs = poolReward?.endTimeMs;
 
   // console.log("Pool reward: ", poolReward);
@@ -91,7 +97,12 @@ async function crankRewards(
   console.log("Crankable obligations length: ", refreshedObligations.length);
 
   // console.log(poolManager.id);
-  console.log(poolManager);
+  if(poolReward?.coinType.name == '34fe4f3c9e450fed4d0a3c587ed842eec5313c30c3cc3c0841247c49425e246b::suilend_point::SUILEND_POINT') {
+    console.log('Skipping SUILEND_POINT rewards');
+    return;
+  }
+
+  console.log(poolReward.coinType.name);
 
   let i = 0;
   while (i < refreshedObligations.length) {
@@ -119,8 +130,37 @@ async function crankRewards(
     console.log(res);
 
     // sleep for 50ms
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await new Promise((resolve) => setTimeout(resolve, 250));
   }
+}
+
+async function mergeAllSuiCoins() {
+  const client = new SuiClient({
+    url: `https://solendf-suishar-0c55.mainnet.sui.rpcpool.com/${
+      process.env.NEXT_PUBLIC_SUI_TRITON_ONE_DEV_API_KEY ?? ""
+    }`
+  });
+
+  const suiCoins = await client.getCoins({
+    owner: keypair.getPublicKey().toSuiAddress(),
+    coinType: "0x2::sui::SUI",
+    limit: 1000,
+  });
+
+  const firstCoin = suiCoins.data[0].coinObjectId;
+  const remainingCoinIds = suiCoins.data.slice(1).map((coin) => coin.coinObjectId);
+
+  console.log(suiCoins);
+
+  let txb = new TransactionBlock();
+  txb.mergeCoins(firstCoin, remainingCoinIds);
+
+  const res = await client.signAndExecuteTransactionBlock({
+    transactionBlock: txb,
+    signer: keypair,
+  });
+
+  console.log(res);
 }
 
 async function main() {
@@ -136,27 +176,28 @@ async function main() {
   );
   console.log("Fetched obligations");
 
-  for (let rewardIndex = 0; rewardIndex < 5; rewardIndex++) {
-    for (
-      let rewardReserveIndex = 0;
-      rewardReserveIndex < 3;
-      rewardReserveIndex++
-    ) {
-      try {
-        console.log(
-          `Cranking rewards for reserve ${rewardReserveIndex} and reward ${rewardIndex}`
-        );
-        await crankRewards(
-          client,
-          obligations,
-          rewardReserveIndex,
-          rewardIndex
-        );
-      } catch (e) {
-        console.error(e);
+  for (
+    let rewardReserveIndex = 0;
+    rewardReserveIndex < 3;
+    rewardReserveIndex++
+  ) {
+    for (let rewardIndex = 0; rewardIndex < 30; rewardIndex++) {
+        try {
+          console.log(
+            `Cranking rewards for reserve ${rewardReserveIndex} and reward ${rewardIndex}`
+          );
+          await crankRewards(
+            client,
+            obligations,
+            rewardReserveIndex,
+            rewardIndex
+          );
+        } catch (e) {
+          console.error(e);
+        }
       }
-    }
   }
 }
 
-main();
+// main();
+mergeAllSuiCoins();
