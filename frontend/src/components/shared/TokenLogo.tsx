@@ -9,8 +9,8 @@ import { AspectRatio } from "@/components/ui/aspect-ratio";
 import {
   NORMALIZED_ETH_COINTYPE,
   NORMALIZED_SOL_COINTYPE,
-  NORMALIZED_USDC_COINTYPE,
   NORMALIZED_USDT_COINTYPE,
+  NORMALIZED_wUSDC_COINTYPE,
 } from "@/lib/coinType";
 import { DOCS_BRIDGE_LEARN_MORE_URL } from "@/lib/navigation";
 import { Token } from "@/lib/types";
@@ -35,7 +35,7 @@ export default function TokenLogo({
   const { className: imageClassName, ...restImageProps } = imageProps || {};
 
   const nativeAssetMap: Record<string, string> = {
-    [NORMALIZED_USDC_COINTYPE]: "Wormhole Wrapped Ethereum-native USDC",
+    [NORMALIZED_wUSDC_COINTYPE]: "Wormhole Wrapped Ethereum-native USDC",
     [NORMALIZED_USDT_COINTYPE]: "Wormhole Wrapped Ethereum-native USDT",
     [NORMALIZED_ETH_COINTYPE]: "Wormhole Wrapped Ethereum-native Ethereum",
     [NORMALIZED_SOL_COINTYPE]: "Wormhole Wrapped Solana-native Solana",

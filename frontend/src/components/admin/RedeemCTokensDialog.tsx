@@ -38,7 +38,7 @@ export default function RedeemCTokensDialog() {
 
     // await suilendClient.depositLiquidityAndGetCTokens(
     //   address,
-    //   NORMALIZED_USDC_COINTYPE,
+    //   NORMALIZED_wUSDC_COINTYPE,
     //   `${0.01 * 10 ** 6}`,
     //   txb,
     // );

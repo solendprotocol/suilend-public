@@ -221,9 +221,7 @@ export default function MarketCardList({ data }: MarketCardListProps) {
               <MarketCard
                 key={rowData.coinType}
                 rowData={rowData}
-                onClick={() =>
-                  openActionsModal(Number(rowData.reserve.arrayIndex))
-                }
+                onClick={() => openActionsModal(rowData.reserve.symbol)}
               />
             ))}
         </div>
@@ -246,9 +244,7 @@ export default function MarketCardList({ data }: MarketCardListProps) {
               <MarketCard
                 key={rowData.coinType}
                 rowData={rowData}
-                onClick={() =>
-                  openActionsModal(Number(rowData.reserve.arrayIndex))
-                }
+                onClick={() => openActionsModal(rowData.reserve.symbol)}
               />
             ))}
         </div>

@@ -13,6 +13,7 @@ import DataTable, {
 } from "@/components/dashboard/DataTable";
 import AssetCell from "@/components/dashboard/market-table/AssetCell";
 import { TBody, TLabel } from "@/components/shared/Typography";
+import { AppData, useAppContext } from "@/contexts/AppContext";
 import { formatToken, formatUsd } from "@/lib/format";
 
 interface RowData {
@@ -37,6 +38,8 @@ export default function AccountAssetTable({
   assets,
   noAssetsMessage,
 }: AccountAssetTableProps) {
+  const appContext = useAppContext();
+  const data = appContext.data as AppData;
   const { open: openActionsModal } = useActionsModalContext();
 
   // Columns
@@ -84,7 +87,13 @@ export default function AccountAssetTable({
   // Sort
   const sortedAssets = assets
     .slice()
-    .sort((a, b) => reserveSort(a.reserve, b.reserve));
+    .sort((a, b) =>
+      reserveSort(
+        data.lendingMarket.reserves,
+        a.reserve.coinType,
+        b.reserve.coinType,
+      ),
+    );
 
   return (
     <div className="w-full">
@@ -93,7 +102,7 @@ export default function AccountAssetTable({
         data={sortedAssets}
         noDataMessage={noAssetsMessage}
         onRowClick={(row) => () =>
-          openActionsModal(Number(row.original.reserve.arrayIndex))
+          openActionsModal(row.original.reserve.symbol)
         }
       />
     </div>
