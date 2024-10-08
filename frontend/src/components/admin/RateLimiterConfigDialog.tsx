@@ -1,6 +1,6 @@
 import { useRef } from "react";
 
-import { TransactionBlock } from "@mysten/sui.js/transactions";
+import { Transaction } from "@mysten/sui/transactions";
 import { cloneDeep } from "lodash";
 import { Bolt, Undo2 } from "lucide-react";
 import { toast } from "sonner";
@@ -44,7 +44,7 @@ function Diff({ initialState, currentState }: DiffProps) {
 }
 
 export default function RateLimiterConfigDialog() {
-  const { refreshData, signExecuteAndWaitTransactionBlock, ...restAppContext } =
+  const { refreshData, signExecuteAndWaitForTransaction, ...restAppContext } =
     useAppContext();
   const suilendClient = restAppContext.suilendClient as SuilendClient<string>;
   const data = restAppContext.data as AppData;
@@ -71,17 +71,17 @@ export default function RateLimiterConfigDialog() {
     if (!data.lendingMarketOwnerCapId)
       throw new Error("Error: No lending market owner cap");
 
-    const txb = new TransactionBlock();
+    const transaction = new Transaction();
     const newConfig = parseConfigState(configState);
 
     try {
       await suilendClient.updateRateLimiterConfig(
         data.lendingMarketOwnerCapId,
-        txb,
+        transaction,
         newConfig,
       );
 
-      await signExecuteAndWaitTransactionBlock(txb);
+      await signExecuteAndWaitForTransaction(transaction);
 
       toast.success("Rate limiter config updated");
       initialConfigStateRef.current = cloneDeep(configState);

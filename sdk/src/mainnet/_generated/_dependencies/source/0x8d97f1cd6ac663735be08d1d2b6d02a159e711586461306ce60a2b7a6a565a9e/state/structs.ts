@@ -18,17 +18,16 @@ import { UID } from "../../0x2/object/structs";
 import { UpgradeCap } from "../../0x2/package/structs";
 import { ConsumedVAAs } from "../../0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a/consumed-vaas/structs";
 import { DataSource } from "../data-source/structs";
-import { bcs, fromB64, fromHEX, toHEX } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { PKG_V1 } from "../index";
+import { bcs } from "@mysten/sui/bcs";
+import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
+import { fromB64, fromHEX, toHEX } from "@mysten/sui/utils";
 
 /* ============================== LatestOnly =============================== */
 
 export function isLatestOnly(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::state::LatestOnly"
-  );
+  return type === `${PKG_V1}::state::LatestOnly`;
 }
 
 export interface LatestOnlyFields {
@@ -38,15 +37,16 @@ export interface LatestOnlyFields {
 export type LatestOnlyReified = Reified<LatestOnly, LatestOnlyFields>;
 
 export class LatestOnly implements StructClass {
-  static readonly $typeName =
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::state::LatestOnly";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V1}::state::LatestOnly`;
   static readonly $numTypeParams = 0;
+  static readonly $isPhantom = [] as const;
 
   readonly $typeName = LatestOnly.$typeName;
-
-  readonly $fullTypeName: "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::state::LatestOnly";
-
+  readonly $fullTypeName: `${typeof PKG_V1}::state::LatestOnly`;
   readonly $typeArgs: [];
+  readonly $isPhantom = LatestOnly.$isPhantom;
 
   readonly dummyField: ToField<"bool">;
 
@@ -54,7 +54,7 @@ export class LatestOnly implements StructClass {
     this.$fullTypeName = composeSuiType(
       LatestOnly.$typeName,
       ...typeArgs,
-    ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::state::LatestOnly";
+    ) as `${typeof PKG_V1}::state::LatestOnly`;
     this.$typeArgs = typeArgs;
 
     this.dummyField = fields.dummyField;
@@ -66,8 +66,9 @@ export class LatestOnly implements StructClass {
       fullTypeName: composeSuiType(
         LatestOnly.$typeName,
         ...[],
-      ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::state::LatestOnly",
+      ) as `${typeof PKG_V1}::state::LatestOnly`,
       typeArgs: [] as [],
+      isPhantom: LatestOnly.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         LatestOnly.fromFields(fields),
@@ -79,6 +80,8 @@ export class LatestOnly implements StructClass {
       fromJSON: (json: Record<string, any>) => LatestOnly.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         LatestOnly.fromSuiParsedData(content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        LatestOnly.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         LatestOnly.fetch(client, id),
       new: (fields: LatestOnlyFields) => {
@@ -165,6 +168,22 @@ export class LatestOnly implements StructClass {
     return LatestOnly.fromFieldsWithTypes(content);
   }
 
+  static fromSuiObjectData(data: SuiObjectData): LatestOnly {
+    if (data.bcs) {
+      if (data.bcs.dataType !== "moveObject" || !isLatestOnly(data.bcs.type)) {
+        throw new Error(`object at is not a LatestOnly object`);
+      }
+
+      return LatestOnly.fromBcs(fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return LatestOnly.fromSuiParsedData(data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch(client: SuiClient, id: string): Promise<LatestOnly> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -178,7 +197,8 @@ export class LatestOnly implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a LatestOnly object`);
     }
-    return LatestOnly.fromBcs(fromB64(res.data.bcs.bcsBytes));
+
+    return LatestOnly.fromSuiObjectData(res.data);
   }
 }
 
@@ -186,10 +206,7 @@ export class LatestOnly implements StructClass {
 
 export function isState(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::state::State"
-  );
+  return type === `${PKG_V1}::state::State`;
 }
 
 export interface StateFields {
@@ -206,15 +223,16 @@ export interface StateFields {
 export type StateReified = Reified<State, StateFields>;
 
 export class State implements StructClass {
-  static readonly $typeName =
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::state::State";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V1}::state::State`;
   static readonly $numTypeParams = 0;
+  static readonly $isPhantom = [] as const;
 
   readonly $typeName = State.$typeName;
-
-  readonly $fullTypeName: "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::state::State";
-
+  readonly $fullTypeName: `${typeof PKG_V1}::state::State`;
   readonly $typeArgs: [];
+  readonly $isPhantom = State.$isPhantom;
 
   readonly id: ToField<UID>;
   readonly governanceDataSource: ToField<DataSource>;
@@ -229,7 +247,7 @@ export class State implements StructClass {
     this.$fullTypeName = composeSuiType(
       State.$typeName,
       ...typeArgs,
-    ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::state::State";
+    ) as `${typeof PKG_V1}::state::State`;
     this.$typeArgs = typeArgs;
 
     this.id = fields.id;
@@ -248,8 +266,9 @@ export class State implements StructClass {
       fullTypeName: composeSuiType(
         State.$typeName,
         ...[],
-      ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::state::State",
+      ) as `${typeof PKG_V1}::state::State`,
       typeArgs: [] as [],
+      isPhantom: State.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => State.fromFields(fields),
       fromFieldsWithTypes: (item: FieldsWithTypes) =>
@@ -260,6 +279,8 @@ export class State implements StructClass {
       fromJSON: (json: Record<string, any>) => State.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         State.fromSuiParsedData(content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        State.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) => State.fetch(client, id),
       new: (fields: StateFields) => {
         return new State([], fields);
@@ -437,6 +458,22 @@ export class State implements StructClass {
     return State.fromFieldsWithTypes(content);
   }
 
+  static fromSuiObjectData(data: SuiObjectData): State {
+    if (data.bcs) {
+      if (data.bcs.dataType !== "moveObject" || !isState(data.bcs.type)) {
+        throw new Error(`object at is not a State object`);
+      }
+
+      return State.fromBcs(fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return State.fromSuiParsedData(data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch(client: SuiClient, id: string): Promise<State> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -450,7 +487,8 @@ export class State implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a State object`);
     }
-    return State.fromBcs(fromB64(res.data.bcs.bcsBytes));
+
+    return State.fromSuiObjectData(res.data);
   }
 }
 
@@ -458,10 +496,7 @@ export class State implements StructClass {
 
 export function isCurrentDigest(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::state::CurrentDigest"
-  );
+  return type === `${PKG_V1}::state::CurrentDigest`;
 }
 
 export interface CurrentDigestFields {
@@ -471,15 +506,16 @@ export interface CurrentDigestFields {
 export type CurrentDigestReified = Reified<CurrentDigest, CurrentDigestFields>;
 
 export class CurrentDigest implements StructClass {
-  static readonly $typeName =
-    "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::state::CurrentDigest";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V1}::state::CurrentDigest`;
   static readonly $numTypeParams = 0;
+  static readonly $isPhantom = [] as const;
 
   readonly $typeName = CurrentDigest.$typeName;
-
-  readonly $fullTypeName: "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::state::CurrentDigest";
-
+  readonly $fullTypeName: `${typeof PKG_V1}::state::CurrentDigest`;
   readonly $typeArgs: [];
+  readonly $isPhantom = CurrentDigest.$isPhantom;
 
   readonly dummyField: ToField<"bool">;
 
@@ -487,7 +523,7 @@ export class CurrentDigest implements StructClass {
     this.$fullTypeName = composeSuiType(
       CurrentDigest.$typeName,
       ...typeArgs,
-    ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::state::CurrentDigest";
+    ) as `${typeof PKG_V1}::state::CurrentDigest`;
     this.$typeArgs = typeArgs;
 
     this.dummyField = fields.dummyField;
@@ -499,8 +535,9 @@ export class CurrentDigest implements StructClass {
       fullTypeName: composeSuiType(
         CurrentDigest.$typeName,
         ...[],
-      ) as "0x8d97f1cd6ac663735be08d1d2b6d02a159e711586461306ce60a2b7a6a565a9e::state::CurrentDigest",
+      ) as `${typeof PKG_V1}::state::CurrentDigest`,
       typeArgs: [] as [],
+      isPhantom: CurrentDigest.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         CurrentDigest.fromFields(fields),
@@ -512,6 +549,8 @@ export class CurrentDigest implements StructClass {
       fromJSON: (json: Record<string, any>) => CurrentDigest.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         CurrentDigest.fromSuiParsedData(content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        CurrentDigest.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         CurrentDigest.fetch(client, id),
       new: (fields: CurrentDigestFields) => {
@@ -598,6 +637,25 @@ export class CurrentDigest implements StructClass {
     return CurrentDigest.fromFieldsWithTypes(content);
   }
 
+  static fromSuiObjectData(data: SuiObjectData): CurrentDigest {
+    if (data.bcs) {
+      if (
+        data.bcs.dataType !== "moveObject" ||
+        !isCurrentDigest(data.bcs.type)
+      ) {
+        throw new Error(`object at is not a CurrentDigest object`);
+      }
+
+      return CurrentDigest.fromBcs(fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return CurrentDigest.fromSuiParsedData(data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch(client: SuiClient, id: string): Promise<CurrentDigest> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -611,6 +669,7 @@ export class CurrentDigest implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a CurrentDigest object`);
     }
-    return CurrentDigest.fromBcs(fromB64(res.data.bcs.bcsBytes));
+
+    return CurrentDigest.fromSuiObjectData(res.data);
   }
 }

@@ -5,7 +5,6 @@ import {
   StructClass,
   ToField,
   ToTypeStr,
-  Vector,
   decodeFromFields,
   decodeFromFieldsWithTypes,
   decodeFromJSONField,
@@ -17,14 +16,17 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
-import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { Vector } from "../../../../_framework/vector";
+import { PKG_V27 } from "../index";
+import { bcs } from "@mysten/sui/bcs";
+import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
+import { fromB64 } from "@mysten/sui/utils";
 
 /* ============================== BCS =============================== */
 
 export function isBCS(type: string): boolean {
   type = compressSuiType(type);
-  return type === "0x2::bcs::BCS";
+  return type === `${PKG_V27}::bcs::BCS`;
 }
 
 export interface BCSFields {
@@ -34,14 +36,16 @@ export interface BCSFields {
 export type BCSReified = Reified<BCS, BCSFields>;
 
 export class BCS implements StructClass {
-  static readonly $typeName = "0x2::bcs::BCS";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V27}::bcs::BCS`;
   static readonly $numTypeParams = 0;
+  static readonly $isPhantom = [] as const;
 
   readonly $typeName = BCS.$typeName;
-
-  readonly $fullTypeName: "0x2::bcs::BCS";
-
+  readonly $fullTypeName: `${typeof PKG_V27}::bcs::BCS`;
   readonly $typeArgs: [];
+  readonly $isPhantom = BCS.$isPhantom;
 
   readonly bytes: ToField<Vector<"u8">>;
 
@@ -49,7 +53,7 @@ export class BCS implements StructClass {
     this.$fullTypeName = composeSuiType(
       BCS.$typeName,
       ...typeArgs,
-    ) as "0x2::bcs::BCS";
+    ) as `${typeof PKG_V27}::bcs::BCS`;
     this.$typeArgs = typeArgs;
 
     this.bytes = fields.bytes;
@@ -58,8 +62,12 @@ export class BCS implements StructClass {
   static reified(): BCSReified {
     return {
       typeName: BCS.$typeName,
-      fullTypeName: composeSuiType(BCS.$typeName, ...[]) as "0x2::bcs::BCS",
+      fullTypeName: composeSuiType(
+        BCS.$typeName,
+        ...[],
+      ) as `${typeof PKG_V27}::bcs::BCS`,
       typeArgs: [] as [],
+      isPhantom: BCS.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => BCS.fromFields(fields),
       fromFieldsWithTypes: (item: FieldsWithTypes) =>
@@ -70,6 +78,8 @@ export class BCS implements StructClass {
       fromJSON: (json: Record<string, any>) => BCS.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         BCS.fromSuiParsedData(content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        BCS.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) => BCS.fetch(client, id),
       new: (fields: BCSFields) => {
         return new BCS([], fields);
@@ -155,6 +165,22 @@ export class BCS implements StructClass {
     return BCS.fromFieldsWithTypes(content);
   }
 
+  static fromSuiObjectData(data: SuiObjectData): BCS {
+    if (data.bcs) {
+      if (data.bcs.dataType !== "moveObject" || !isBCS(data.bcs.type)) {
+        throw new Error(`object at is not a BCS object`);
+      }
+
+      return BCS.fromBcs(fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return BCS.fromSuiParsedData(data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch(client: SuiClient, id: string): Promise<BCS> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -165,6 +191,7 @@ export class BCS implements StructClass {
     if (res.data?.bcs?.dataType !== "moveObject" || !isBCS(res.data.bcs.type)) {
       throw new Error(`object at id ${id} is not a BCS object`);
     }
-    return BCS.fromBcs(fromB64(res.data.bcs.bcsBytes));
+
+    return BCS.fromSuiObjectData(res.data);
   }
 }

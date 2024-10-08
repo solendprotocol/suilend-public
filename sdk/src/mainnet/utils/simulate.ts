@@ -1,6 +1,6 @@
+import { SuiPriceServiceConnection } from "@pythnetwork/pyth-sui-js";
 import BigNumber from "bignumber.js";
 
-import { SuiPriceServiceConnection } from "../../../../pyth-sdk/src";
 import { Simulate } from "../../core/utils/simulate";
 import { Decimal } from "../_generated/suilend/decimal/structs";
 import {

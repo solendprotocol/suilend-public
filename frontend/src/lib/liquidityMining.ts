@@ -1,4 +1,4 @@
-import { CoinMetadata } from "@mysten/sui.js/client";
+import { CoinMetadata } from "@mysten/sui/client";
 import BigNumber from "bignumber.js";
 import { cloneDeep } from "lodash";
 

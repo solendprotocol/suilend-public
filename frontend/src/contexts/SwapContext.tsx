@@ -17,8 +17,8 @@ import {
   SuiExchange as HopSuiExchange,
   VerifiedToken,
 } from "@hop.ag/sdk";
-import { CoinMetadata, SuiClient } from "@mysten/sui.js/client";
-import { normalizeStructTag } from "@mysten/sui.js/utils";
+import { CoinMetadata, SuiClient } from "@mysten/sui/client";
+import { normalizeStructTag } from "@mysten/sui/utils";
 import {
   Aftermath,
   Router as AftermathRouter,

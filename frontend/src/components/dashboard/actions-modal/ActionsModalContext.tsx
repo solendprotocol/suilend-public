@@ -10,8 +10,8 @@ import {
   useState,
 } from "react";
 
-import { SuiTransactionBlockResponse } from "@mysten/sui.js/client";
-import { TransactionBlock } from "@mysten/sui.js/transactions";
+import { SuiTransactionBlockResponse } from "@mysten/sui/client";
+import { Transaction } from "@mysten/sui/transactions";
 import * as Sentry from "@sentry/nextjs";
 import { cloneDeep } from "lodash";
 import { useLocalStorage } from "usehooks-ts";
@@ -122,7 +122,7 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
   );
 
   const { address } = useWalletContext();
-  const { obligation, signExecuteAndWaitTransactionBlock, ...restAppContext } =
+  const { obligation, signExecuteAndWaitForTransaction, ...restAppContext } =
     useAppContext();
   const suilendClient = restAppContext.suilendClient as SuilendClient<string>;
   const data = restAppContext.data as AppData;
@@ -225,13 +225,13 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
     async (coinType: string, value: string) => {
       if (!address) throw Error("Wallet not connected");
 
-      const txb = new TransactionBlock();
+      const transaction = new Transaction();
       try {
         await suilendClient.depositIntoObligation(
           address,
           coinType,
           value,
-          txb,
+          transaction,
           obligationOwnerCap?.id,
         );
       } catch (err) {
@@ -240,13 +240,13 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
         throw err;
       }
 
-      const res = await signExecuteAndWaitTransactionBlock(txb);
+      const res = await signExecuteAndWaitForTransaction(transaction);
       return res;
     },
     [
       address,
       suilendClient,
-      signExecuteAndWaitTransactionBlock,
+      signExecuteAndWaitForTransaction,
       obligationOwnerCap,
     ],
   );
@@ -257,7 +257,7 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
       if (!obligationOwnerCap || !obligation)
         throw Error("Obligation not found");
 
-      const txb = new TransactionBlock();
+      const transaction = new Transaction();
       try {
         await suilendClient.borrowFromObligation(
           address,
@@ -265,7 +265,7 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
           obligation.id,
           coinType,
           value,
-          txb,
+          transaction,
         );
       } catch (err) {
         Sentry.captureException(err);
@@ -273,13 +273,13 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
         throw err;
       }
 
-      const res = await signExecuteAndWaitTransactionBlock(txb);
+      const res = await signExecuteAndWaitForTransaction(transaction);
       return res;
     },
     [
       address,
       suilendClient,
-      signExecuteAndWaitTransactionBlock,
+      signExecuteAndWaitForTransaction,
       obligationOwnerCap,
       obligation,
     ],
@@ -291,7 +291,7 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
       if (!obligationOwnerCap || !obligation)
         throw Error("Obligation not found");
 
-      const txb = new TransactionBlock();
+      const transaction = new Transaction();
       try {
         await suilendClient.withdrawFromObligation(
           address,
@@ -299,7 +299,7 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
           obligation.id,
           coinType,
           value,
-          txb,
+          transaction,
         );
       } catch (err) {
         Sentry.captureException(err);
@@ -307,13 +307,13 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
         throw err;
       }
 
-      const res = await signExecuteAndWaitTransactionBlock(txb);
+      const res = await signExecuteAndWaitForTransaction(transaction);
       return res;
     },
     [
       address,
       suilendClient,
-      signExecuteAndWaitTransactionBlock,
+      signExecuteAndWaitForTransaction,
       obligationOwnerCap,
       obligation,
     ],
@@ -324,14 +324,14 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
       if (!address) throw Error("Wallet not connected");
       if (!obligation) throw Error("Obligation not found");
 
-      const txb = new TransactionBlock();
+      const transaction = new Transaction();
       try {
         await suilendClient.repayIntoObligation(
           address,
           obligation.id,
           coinType,
           value,
-          txb,
+          transaction,
         );
       } catch (err) {
         Sentry.captureException(err);
@@ -339,10 +339,10 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
         throw err;
       }
 
-      const res = await signExecuteAndWaitTransactionBlock(txb);
+      const res = await signExecuteAndWaitForTransaction(transaction);
       return res;
     },
-    [address, suilendClient, signExecuteAndWaitTransactionBlock, obligation],
+    [address, suilendClient, signExecuteAndWaitForTransaction, obligation],
   );
 
   // Context

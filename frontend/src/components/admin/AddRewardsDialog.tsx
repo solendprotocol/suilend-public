@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 
-import { CoinMetadata, SuiClient } from "@mysten/sui.js/client";
-import { TransactionBlock } from "@mysten/sui.js/transactions";
+import { CoinMetadata, SuiClient } from "@mysten/sui/client";
+import { Transaction } from "@mysten/sui/transactions";
 import BigNumber from "bignumber.js";
 import { isEqual } from "lodash";
 import { Eraser, Sparkle } from "lucide-react";
@@ -24,7 +24,7 @@ import { cn } from "@/lib/utils";
 
 export default function AddRewardsDialog() {
   const { address } = useWalletContext();
-  const { refreshData, signExecuteAndWaitTransactionBlock, ...restAppContext } =
+  const { refreshData, signExecuteAndWaitForTransaction, ...restAppContext } =
     useAppContext();
   const suiClient = restAppContext.suiClient as SuiClient;
   const suilendClient = restAppContext.suilendClient as SuilendClient<string>;
@@ -131,7 +131,7 @@ export default function AddRewardsDialog() {
 
     const rewardCoinType = coin.coinType;
 
-    const txb = new TransactionBlock();
+    const transaction = new Transaction();
 
     for (const side of Object.values(Side)) {
       for (const reserve of data.lendingMarket.reserves) {
@@ -153,14 +153,14 @@ export default function AddRewardsDialog() {
             rewardValue,
             BigInt(startTimeMs),
             BigInt(endTimeMs),
-            txb,
+            transaction,
           );
         }
       }
     }
 
     try {
-      await signExecuteAndWaitTransactionBlock(txb);
+      await signExecuteAndWaitForTransaction(transaction);
 
       toast.success("Added rewards");
       setIsDialogOpen(false);

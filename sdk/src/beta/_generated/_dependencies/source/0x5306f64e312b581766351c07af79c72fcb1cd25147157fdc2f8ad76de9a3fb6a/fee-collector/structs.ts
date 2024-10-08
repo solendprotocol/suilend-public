@@ -18,17 +18,16 @@ import {
 } from "../../../../_framework/util";
 import { Balance } from "../../0x2/balance/structs";
 import { SUI } from "../../0x2/sui/structs";
-import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { PKG_V1 } from "../index";
+import { bcs } from "@mysten/sui/bcs";
+import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
+import { fromB64 } from "@mysten/sui/utils";
 
 /* ============================== FeeCollector =============================== */
 
 export function isFeeCollector(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::fee_collector::FeeCollector"
-  );
+  return type === `${PKG_V1}::fee_collector::FeeCollector`;
 }
 
 export interface FeeCollectorFields {
@@ -39,15 +38,16 @@ export interface FeeCollectorFields {
 export type FeeCollectorReified = Reified<FeeCollector, FeeCollectorFields>;
 
 export class FeeCollector implements StructClass {
-  static readonly $typeName =
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::fee_collector::FeeCollector";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V1}::fee_collector::FeeCollector`;
   static readonly $numTypeParams = 0;
+  static readonly $isPhantom = [] as const;
 
   readonly $typeName = FeeCollector.$typeName;
-
-  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::fee_collector::FeeCollector";
-
+  readonly $fullTypeName: `${typeof PKG_V1}::fee_collector::FeeCollector`;
   readonly $typeArgs: [];
+  readonly $isPhantom = FeeCollector.$isPhantom;
 
   readonly feeAmount: ToField<"u64">;
   readonly balance: ToField<Balance<ToPhantom<SUI>>>;
@@ -56,7 +56,7 @@ export class FeeCollector implements StructClass {
     this.$fullTypeName = composeSuiType(
       FeeCollector.$typeName,
       ...typeArgs,
-    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::fee_collector::FeeCollector";
+    ) as `${typeof PKG_V1}::fee_collector::FeeCollector`;
     this.$typeArgs = typeArgs;
 
     this.feeAmount = fields.feeAmount;
@@ -69,8 +69,9 @@ export class FeeCollector implements StructClass {
       fullTypeName: composeSuiType(
         FeeCollector.$typeName,
         ...[],
-      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::fee_collector::FeeCollector",
+      ) as `${typeof PKG_V1}::fee_collector::FeeCollector`,
       typeArgs: [] as [],
+      isPhantom: FeeCollector.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         FeeCollector.fromFields(fields),
@@ -82,6 +83,8 @@ export class FeeCollector implements StructClass {
       fromJSON: (json: Record<string, any>) => FeeCollector.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         FeeCollector.fromSuiParsedData(content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        FeeCollector.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         FeeCollector.fetch(client, id),
       new: (fields: FeeCollectorFields) => {
@@ -182,6 +185,25 @@ export class FeeCollector implements StructClass {
     return FeeCollector.fromFieldsWithTypes(content);
   }
 
+  static fromSuiObjectData(data: SuiObjectData): FeeCollector {
+    if (data.bcs) {
+      if (
+        data.bcs.dataType !== "moveObject" ||
+        !isFeeCollector(data.bcs.type)
+      ) {
+        throw new Error(`object at is not a FeeCollector object`);
+      }
+
+      return FeeCollector.fromBcs(fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return FeeCollector.fromSuiParsedData(data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch(client: SuiClient, id: string): Promise<FeeCollector> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -195,6 +217,7 @@ export class FeeCollector implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a FeeCollector object`);
     }
-    return FeeCollector.fromBcs(fromB64(res.data.bcs.bcsBytes));
+
+    return FeeCollector.fromSuiObjectData(res.data);
   }
 }

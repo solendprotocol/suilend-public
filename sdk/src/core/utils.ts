@@ -1,4 +1,4 @@
-import { normalizeStructTag } from "@mysten/sui.js/utils";
+import { normalizeStructTag } from "@mysten/sui/utils";
 import BigNumber from "bignumber.js";
 
 import { ParsedReserve } from "./parsers/reserve";

@@ -1,5 +1,5 @@
-import { SuiClient } from "@mysten/sui.js/client";
-import { TransactionBlock } from "@mysten/sui.js/transactions";
+import { SuiClient } from "@mysten/sui/client";
+import { Transaction } from "@mysten/sui/transactions";
 
 import { SuilendClient as BaseSuilendClient } from "../core/client";
 
@@ -92,12 +92,14 @@ export class SuilendClient<T extends string> extends BaseSuilendClient {
   static async createNewLendingMarket(
     registryId: string,
     lendingMarketType: string,
-    txb: TransactionBlock,
+    transaction: Transaction,
   ) {
-    return super.createNewLendingMarket(registryId, lendingMarketType, txb, {
-      LendingMarket,
-      createLendingMarket,
-    });
+    return super.createNewLendingMarket(
+      registryId,
+      lendingMarketType,
+      transaction,
+      { LendingMarket, createLendingMarket: createLendingMarket },
+    );
   }
 
   static async getObligationOwnerCaps(

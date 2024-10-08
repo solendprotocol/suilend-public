@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { VerifiedToken } from "@hop.ag/sdk";
-import { normalizeStructTag } from "@mysten/sui.js/utils";
+import { normalizeStructTag } from "@mysten/sui/utils";
 import BigNumber from "bignumber.js";
 import { Check, ChevronDown, Search, Wallet } from "lucide-react";
 

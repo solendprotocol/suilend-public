@@ -6,11 +6,8 @@ import {
   GetQuoteResponse as HopGetQuoteResponse,
   VerifiedToken,
 } from "@hop.ag/sdk";
-import {
-  TransactionBlock,
-  TransactionResult,
-} from "@mysten/sui.js/transactions";
-import { normalizeStructTag } from "@mysten/sui.js/utils";
+import { Transaction, TransactionResult } from "@mysten/sui/transactions";
+import { normalizeStructTag } from "@mysten/sui/utils";
 import * as Sentry from "@sentry/nextjs";
 import {
   Router as AftermathRouter,
@@ -58,8 +55,8 @@ import {
   getSubmitButtonState,
 } from "@/lib/actions";
 import { ParsedCoinBalance } from "@/lib/coinBalance";
-import { SUI_COINTYPE, isSui } from "@/lib/coinType";
-import { SUI_SWAP_GAS_MIN, TX_TOAST_DURATION } from "@/lib/constants";
+import { NORMALIZED_SUI_COINTYPE, SUI_COINTYPE, isSui } from "@/lib/coinType";
+import { SUI_GAS_MIN, TX_TOAST_DURATION } from "@/lib/constants";
 import { formatPercent, formatToken } from "@/lib/format";
 import { getFilteredRewards, getTotalAprPercent } from "@/lib/liquidityMining";
 import track from "@/lib/track";
@@ -86,7 +83,7 @@ function Page() {
     refreshData,
     explorer,
     obligation,
-    signExecuteAndWaitTransactionBlock,
+    signExecuteAndWaitForTransaction,
     ...restAppContext
   } = useAppContext();
   const data = restAppContext.data as AppData;
@@ -106,6 +103,8 @@ function Page() {
   >;
 
   // Balances
+  const suiBalance =
+    coinBalancesMap[NORMALIZED_SUI_COINTYPE]?.balance ?? new BigNumber(0);
   const tokenInBalance =
     coinBalancesMap[tokenIn.coin_type]?.balance ?? new BigNumber(0);
 
@@ -142,9 +141,9 @@ function Page() {
     ];
     if (isSui(tokenIn.coin_type))
       result.push({
-        reason: `${SUI_SWAP_GAS_MIN} SUI should be saved for gas`,
+        reason: `${SUI_GAS_MIN} SUI should be saved for gas`,
         isDisabled: true,
-        value: tokenInBalance.minus(SUI_SWAP_GAS_MIN),
+        value: tokenInBalance.minus(SUI_GAS_MIN),
       });
 
     return result;
@@ -237,7 +236,10 @@ function Page() {
           token_in: _tokenIn.coin_type,
           token_out: _tokenOut.coin_type,
           amount_in: BigInt(
-            new BigNumber(_value).times(10 ** _tokenIn.decimals).toString(),
+            new BigNumber(_value)
+              .times(10 ** _tokenIn.decimals)
+              .integerValue(BigNumber.ROUND_DOWN)
+              .toString(),
           ),
         };
 
@@ -538,6 +540,7 @@ function Page() {
 
   // Reverse tokens
   const reverseTokens = () => {
+    formatAndSetValue(value, tokenOut);
     reverseTokenSymbols();
 
     fetchQuote(tokenOut, tokenIn, value);
@@ -595,6 +598,12 @@ function Page() {
     if (new BigNumber(value).eq(0))
       return { isDisabled: true, title: "Enter a non-zero amount" };
 
+    if (suiBalance.lt(SUI_GAS_MIN))
+      return {
+        isDisabled: true,
+        title: `${SUI_GAS_MIN} SUI should be saved for gas`,
+      };
+
     for (const calc of tokenInMaxCalculations) {
       if (new BigNumber(value).gt(calc.value))
         return { isDisabled: calc.isDisabled, title: calc.reason };
@@ -619,9 +628,7 @@ function Page() {
     const depositSubmitButtonState = getSubmitButtonState(
       Action.DEPOSIT,
       tokenOutReserve,
-      quoteAmountOut.plus(
-        isSui(tokenOutReserve.coinType) ? SUI_SWAP_GAS_MIN : 0,
-      ),
+      quoteAmountOut.plus(isSui(tokenOutReserve.coinType) ? SUI_GAS_MIN : 0),
       data,
       obligation,
     )(quoteAmountOut.toString());
@@ -658,7 +665,7 @@ function Page() {
     address: string,
     isDepositing: boolean,
   ): Promise<{
-    tx: TransactionBlock;
+    transaction: Transaction;
     outputCoin: TransactionResult | undefined;
   }> => {
     if (quote.type === UnifiedQuoteType.HOP) {
@@ -669,31 +676,34 @@ function Page() {
         max_slippage_bps: slippagePercent * 100,
         return_output_coin_argument: isDepositing,
       });
+
       return {
-        tx: res.transaction as unknown as TransactionBlock,
-        outputCoin: res.output_coin as unknown as TransactionResult | undefined,
+        transaction: res.transaction,
+        outputCoin: res.output_coin,
       };
     } else if (quote.type === UnifiedQuoteType.AFTERMATH) {
       if (isDepositing) {
-        const tx = new TransactionBlock();
         const res = await aftermathSdk.addTransactionForCompleteTradeRouteV0({
-          tx: tx as any,
+          tx: new Transaction() as any,
           walletAddress: address,
           completeRoute: quote.quote as AftermathRouterCompleteTradeRoute,
           slippage: slippagePercent / 100,
         });
+
         return {
-          tx: res.tx as unknown as TransactionBlock,
-          outputCoin: res.coinOutId as unknown as TransactionResult | undefined,
+          transaction: res.tx as unknown as Transaction,
+          outputCoin: res.coinOutId as TransactionResult | undefined,
         };
       } else {
-        const tx = await aftermathSdk.getTransactionForCompleteTradeRouteV0({
-          walletAddress: address,
-          completeRoute: quote.quote as AftermathRouterCompleteTradeRoute,
-          slippage: slippagePercent / 100,
-        });
+        const transaction =
+          await aftermathSdk.getTransactionForCompleteTradeRouteV0({
+            walletAddress: address,
+            completeRoute: quote.quote as AftermathRouterCompleteTradeRoute,
+            slippage: slippagePercent / 100,
+          });
+
         return {
-          tx: tx as any,
+          transaction: transaction as unknown as Transaction,
           outputCoin: undefined,
         };
       }
@@ -708,20 +718,17 @@ function Page() {
 
     const isDepositing = !!(deposit && hasTokenOutReserve);
 
-    let txb = new TransactionBlock();
     try {
-      const tx = await getTransactionForUnifiedQuote(
+      const { transaction, outputCoin } = await getTransactionForUnifiedQuote(
         quote,
         +slippagePercent,
         address,
         isDepositing,
       );
-
-      txb = new TransactionBlock(tx.tx);
-      txb.setGasBudget(SUI_SWAP_GAS_MIN * 10 ** 9);
+      transaction.setGasBudget(SUI_GAS_MIN * 10 ** 9);
 
       if (isDepositing) {
-        if (!tx.outputCoin) throw new Error("Missing coin to deposit");
+        if (!outputCoin) throw new Error("Missing coin to deposit");
 
         const obligationOwnerCap = data.obligationOwnerCaps?.find(
           (o) => o.obligationId === obligation?.id,
@@ -729,20 +736,20 @@ function Page() {
 
         await suilendClient.depositCoin(
           address,
-          tx.outputCoin as any,
+          outputCoin,
           tokenOutReserve.coinType,
-          txb,
+          transaction,
           obligationOwnerCap?.id,
         );
       }
+
+      const res = await signExecuteAndWaitForTransaction(transaction);
+      return res;
     } catch (err) {
       Sentry.captureException(err);
       console.error(err);
       throw err;
     }
-
-    const res = await signExecuteAndWaitTransactionBlock(txb);
-    return res;
   };
 
   const onSwapClick = async (deposit?: boolean) => {
@@ -906,8 +913,40 @@ function Page() {
             )}
           </div>
 
+          {/* Parameters */}
           {new BigNumber(value || 0).gt(0) && (
-            <div className="mb-4 flex w-full flex-col gap-2">
+            <div className="mb-4 flex w-full flex-col gap-2 rounded-md bg-border/50 p-3">
+              {/* Price impact */}
+              {priceImpactPercent !== undefined ? (
+                <div className="w-max">
+                  <TLabelSans
+                    className={cn(
+                      priceImpactPercent.gte(
+                        PRICE_IMPACT_PERCENT_WARNING_THRESHOLD,
+                      ) &&
+                        cn(
+                          "font-medium",
+                          priceImpactPercent.lt(
+                            PRICE_IMPACT_PERCENT_DESTRUCTIVE_THRESHOLD,
+                          )
+                            ? "text-warning"
+                            : "text-destructive",
+                        ),
+                    )}
+                  >
+                    {priceImpactPercent.gte(
+                      PRICE_IMPACT_PERCENT_WARNING_THRESHOLD,
+                    ) && (
+                      <AlertTriangle className="mb-0.5 mr-1 inline h-3 w-3" />
+                    )}
+                    {formatPercent(BigNumber.max(0, priceImpactPercent))} Price
+                    impact
+                  </TLabelSans>
+                </div>
+              ) : (
+                <Skeleton className="h-4 w-40" />
+              )}
+
               {/* Routing */}
               <div className="w-full">
                 {quote ? (
@@ -915,7 +954,7 @@ function Page() {
                     <RoutingDialog quote={quote} />
                   </ReactFlowProvider>
                 ) : (
-                  <Skeleton className="h-4 w-60" />
+                  <Skeleton className="h-4 w-40" />
                 )}
               </div>
 
@@ -952,28 +991,6 @@ function Page() {
                   <Skeleton className="h-4 w-40" />
                 )}
               </div>
-
-              {/* Price impact */}
-              {priceImpactPercent !== undefined &&
-                priceImpactPercent.gte(
-                  PRICE_IMPACT_PERCENT_WARNING_THRESHOLD,
-                ) && (
-                  <div className="w-max">
-                    <TLabelSans
-                      className={cn(
-                        "font-medium",
-                        priceImpactPercent.lt(
-                          PRICE_IMPACT_PERCENT_DESTRUCTIVE_THRESHOLD,
-                        )
-                          ? "text-warning"
-                          : "text-destructive",
-                      )}
-                    >
-                      <AlertTriangle className="mb-0.5 mr-1 inline h-3 w-3" />
-                      {formatPercent(priceImpactPercent)} Price impact
-                    </TLabelSans>
-                  </div>
-                )}
             </div>
           )}
 

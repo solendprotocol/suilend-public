@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from "react";
 
-import { normalizeStructTag } from "@mysten/sui.js/utils";
+import { normalizeStructTag } from "@mysten/sui/utils";
 import { ColumnDef } from "@tanstack/react-table";
 import BigNumber from "bignumber.js";
 

@@ -14,14 +14,16 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
-import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { PKG_V9 } from "../index";
+import { bcs } from "@mysten/sui/bcs";
+import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
+import { fromB64 } from "@mysten/sui/utils";
 
 /* ============================== FixedPoint32 =============================== */
 
 export function isFixedPoint32(type: string): boolean {
   type = compressSuiType(type);
-  return type === "0x1::fixed_point32::FixedPoint32";
+  return type === `${PKG_V9}::fixed_point32::FixedPoint32`;
 }
 
 export interface FixedPoint32Fields {
@@ -31,14 +33,16 @@ export interface FixedPoint32Fields {
 export type FixedPoint32Reified = Reified<FixedPoint32, FixedPoint32Fields>;
 
 export class FixedPoint32 implements StructClass {
-  static readonly $typeName = "0x1::fixed_point32::FixedPoint32";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V9}::fixed_point32::FixedPoint32`;
   static readonly $numTypeParams = 0;
+  static readonly $isPhantom = [] as const;
 
   readonly $typeName = FixedPoint32.$typeName;
-
-  readonly $fullTypeName: "0x1::fixed_point32::FixedPoint32";
-
+  readonly $fullTypeName: `${typeof PKG_V9}::fixed_point32::FixedPoint32`;
   readonly $typeArgs: [];
+  readonly $isPhantom = FixedPoint32.$isPhantom;
 
   readonly value: ToField<"u64">;
 
@@ -46,7 +50,7 @@ export class FixedPoint32 implements StructClass {
     this.$fullTypeName = composeSuiType(
       FixedPoint32.$typeName,
       ...typeArgs,
-    ) as "0x1::fixed_point32::FixedPoint32";
+    ) as `${typeof PKG_V9}::fixed_point32::FixedPoint32`;
     this.$typeArgs = typeArgs;
 
     this.value = fields.value;
@@ -58,8 +62,9 @@ export class FixedPoint32 implements StructClass {
       fullTypeName: composeSuiType(
         FixedPoint32.$typeName,
         ...[],
-      ) as "0x1::fixed_point32::FixedPoint32",
+      ) as `${typeof PKG_V9}::fixed_point32::FixedPoint32`,
       typeArgs: [] as [],
+      isPhantom: FixedPoint32.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         FixedPoint32.fromFields(fields),
@@ -71,6 +76,8 @@ export class FixedPoint32 implements StructClass {
       fromJSON: (json: Record<string, any>) => FixedPoint32.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         FixedPoint32.fromSuiParsedData(content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        FixedPoint32.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         FixedPoint32.fetch(client, id),
       new: (fields: FixedPoint32Fields) => {
@@ -157,6 +164,25 @@ export class FixedPoint32 implements StructClass {
     return FixedPoint32.fromFieldsWithTypes(content);
   }
 
+  static fromSuiObjectData(data: SuiObjectData): FixedPoint32 {
+    if (data.bcs) {
+      if (
+        data.bcs.dataType !== "moveObject" ||
+        !isFixedPoint32(data.bcs.type)
+      ) {
+        throw new Error(`object at is not a FixedPoint32 object`);
+      }
+
+      return FixedPoint32.fromBcs(fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return FixedPoint32.fromSuiParsedData(data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch(client: SuiClient, id: string): Promise<FixedPoint32> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -170,6 +196,7 @@ export class FixedPoint32 implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a FixedPoint32 object`);
     }
-    return FixedPoint32.fromBcs(fromB64(res.data.bcs.bcsBytes));
+
+    return FixedPoint32.fromSuiObjectData(res.data);
   }
 }
