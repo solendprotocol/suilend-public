@@ -45,7 +45,7 @@ export default function Admin() {
   const {
     refreshData,
     explorer,
-    signExecuteAndWaitTransaction,
+    signExecuteAndWaitForTransaction,
     ...restAppContext
   } = useAppContext();
   const suilendClient = restAppContext.suilendClient as SuilendClient<string>;
@@ -95,7 +95,7 @@ export default function Admin() {
     try {
       suilendClient.migrate(transaction, data.lendingMarketOwnerCapId);
 
-      await signExecuteAndWaitTransaction(transaction);
+      await signExecuteAndWaitForTransaction(transaction);
 
       toast.success("Migrated");
     } catch (err) {

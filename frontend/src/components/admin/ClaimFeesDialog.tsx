@@ -26,7 +26,7 @@ interface ClaimFeesDialogProps {
 
 export default function ClaimFeesDialog({ reserve }: ClaimFeesDialogProps) {
   const { address } = useWalletContext();
-  const { refreshData, signExecuteAndWaitTransaction, ...restAppContext } =
+  const { refreshData, signExecuteAndWaitForTransaction, ...restAppContext } =
     useAppContext();
   const suiClient = restAppContext.suiClient as SuiClient;
   const suilendClient = restAppContext.suilendClient as SuilendClient<string>;
@@ -97,7 +97,7 @@ export default function ClaimFeesDialog({ reserve }: ClaimFeesDialogProps) {
       for (const _reserve of reserves)
         suilendClient.claimFees(transaction, _reserve.coinType);
 
-      await signExecuteAndWaitTransaction(transaction);
+      await signExecuteAndWaitForTransaction(transaction);
 
       toast.success("Claimed fees");
     } catch (err) {

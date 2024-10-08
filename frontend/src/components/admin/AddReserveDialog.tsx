@@ -24,7 +24,7 @@ import { parseCoinBalances } from "@/lib/coinBalance";
 import { getCoinMetadataMap } from "@/lib/coinMetadata";
 
 export default function AddReserveDialog() {
-  const { refreshData, signExecuteAndWaitTransaction, ...restAppContext } =
+  const { refreshData, signExecuteAndWaitForTransaction, ...restAppContext } =
     useAppContext();
   const suiClient = restAppContext.suiClient as SuiClient;
   const suilendClient = restAppContext.suilendClient as SuilendClient<string>;
@@ -171,7 +171,7 @@ export default function AddReserveDialog() {
         newConfig,
       );
 
-      await signExecuteAndWaitTransaction(transaction);
+      await signExecuteAndWaitForTransaction(transaction);
 
       toast.success("Reserve added");
       setIsDialogOpen(false);

@@ -41,7 +41,7 @@ export default function ReserveRewardsDialog({
   const {
     refreshData,
     explorer,
-    signExecuteAndWaitTransaction,
+    signExecuteAndWaitForTransaction,
     ...restAppContext
   } = useAppContext();
   const suilendClient = restAppContext.suilendClient as SuilendClient<string>;
@@ -96,7 +96,7 @@ export default function ReserveRewardsDialog({
       );
       transaction.transferObjects([unclaimedRewards], address);
 
-      await signExecuteAndWaitTransaction(transaction);
+      await signExecuteAndWaitForTransaction(transaction);
 
       toast.success("Canceled reward");
     } catch (err) {
@@ -131,7 +131,7 @@ export default function ReserveRewardsDialog({
       );
       transaction.transferObjects([unclaimedRewards], address);
 
-      await signExecuteAndWaitTransaction(transaction);
+      await signExecuteAndWaitForTransaction(transaction);
 
       toast.success("Closed reward");
     } catch (err) {

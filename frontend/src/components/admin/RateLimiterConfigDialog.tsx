@@ -44,7 +44,7 @@ function Diff({ initialState, currentState }: DiffProps) {
 }
 
 export default function RateLimiterConfigDialog() {
-  const { refreshData, signExecuteAndWaitTransaction, ...restAppContext } =
+  const { refreshData, signExecuteAndWaitForTransaction, ...restAppContext } =
     useAppContext();
   const suilendClient = restAppContext.suilendClient as SuilendClient<string>;
   const data = restAppContext.data as AppData;
@@ -81,7 +81,7 @@ export default function RateLimiterConfigDialog() {
         newConfig,
       );
 
-      await signExecuteAndWaitTransaction(transaction);
+      await signExecuteAndWaitForTransaction(transaction);
 
       toast.success("Rate limiter config updated");
       initialConfigStateRef.current = cloneDeep(configState);

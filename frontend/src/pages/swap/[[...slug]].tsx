@@ -83,7 +83,7 @@ function Page() {
     refreshData,
     explorer,
     obligation,
-    signExecuteAndWaitTransaction,
+    signExecuteAndWaitForTransaction,
     ...restAppContext
   } = useAppContext();
   const data = restAppContext.data as AppData;
@@ -733,7 +733,7 @@ function Page() {
         );
       }
 
-      const res = await signExecuteAndWaitTransaction(transaction);
+      const res = await signExecuteAndWaitForTransaction(transaction);
       return res;
     } catch (err) {
       Sentry.captureException(err);

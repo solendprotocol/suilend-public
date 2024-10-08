@@ -56,7 +56,7 @@ export interface AppContext {
   setExplorerId: (id: Explorer) => void;
   obligation: ParsedObligation | null;
   setObligationId: Dispatch<SetStateAction<string | null>>;
-  signExecuteAndWaitTransaction: (
+  signExecuteAndWaitForTransaction: (
     transaction: Transaction,
   ) => Promise<SuiTransactionBlockResponse>;
 }
@@ -81,7 +81,7 @@ const defaultContextValue: AppContext = {
   setObligationId: () => {
     throw Error("AppContextProvider not initialized");
   },
-  signExecuteAndWaitTransaction: () => {
+  signExecuteAndWaitForTransaction: () => {
     throw Error("AppContextProvider not initialized");
   },
 };
@@ -91,7 +91,7 @@ const AppContext = createContext<AppContext>(defaultContextValue);
 export const useAppContext = () => useContext(AppContext);
 
 export function AppContextProvider({ children }: PropsWithChildren) {
-  const { address, signExecuteAndWaitTransaction } = useWalletContext();
+  const { address, signExecuteAndWaitForTransaction } = useWalletContext();
 
   // RPC
   const [rpcId, setRpcId] = useLocalStorage<string>(
@@ -215,8 +215,8 @@ export function AppContextProvider({ children }: PropsWithChildren) {
         data?.obligations?.[0] ??
         null,
       setObligationId,
-      signExecuteAndWaitTransaction: (transaction: Transaction) =>
-        signExecuteAndWaitTransaction(suiClient, transaction),
+      signExecuteAndWaitForTransaction: (transaction: Transaction) =>
+        signExecuteAndWaitForTransaction(suiClient, transaction),
     }),
     [
       suiClient,
@@ -231,7 +231,7 @@ export function AppContextProvider({ children }: PropsWithChildren) {
       setExplorerId,
       obligationId,
       setObligationId,
-      signExecuteAndWaitTransaction,
+      signExecuteAndWaitForTransaction,
     ],
   );
 

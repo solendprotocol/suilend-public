@@ -46,7 +46,7 @@ export const useDashboardContext = () => useContext(DashboardContext);
 
 export function DashboardContextProvider({ children }: PropsWithChildren) {
   const { address } = useWalletContext();
-  const { obligation, signExecuteAndWaitTransaction, ...restAppContext } =
+  const { obligation, signExecuteAndWaitForTransaction, ...restAppContext } =
     useAppContext();
   const suilendClient = restAppContext.suilendClient as SuilendClient<string>;
   const data = restAppContext.data as AppData;
@@ -91,13 +91,13 @@ export function DashboardContextProvider({ children }: PropsWithChildren) {
         throw err;
       }
 
-      const res = await signExecuteAndWaitTransaction(transaction);
+      const res = await signExecuteAndWaitForTransaction(transaction);
       return res;
     },
     [
       address,
       suilendClient,
-      signExecuteAndWaitTransaction,
+      signExecuteAndWaitForTransaction,
       obligationOwnerCap,
       obligation,
     ],

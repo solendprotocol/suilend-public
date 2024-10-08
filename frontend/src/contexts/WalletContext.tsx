@@ -12,11 +12,7 @@ import {
   useState,
 } from "react";
 
-import {
-  DevInspectTransactionBlockParams,
-  SuiClient,
-  SuiTransactionBlockResponse,
-} from "@mysten/sui/client";
+import { SuiClient, SuiTransactionBlockResponse } from "@mysten/sui/client";
 import { Transaction } from "@mysten/sui/transactions";
 import { IdentifierString, WalletAccount } from "@mysten/wallet-standard";
 import * as Sentry from "@sentry/nextjs";
@@ -42,7 +38,7 @@ interface WalletContext {
   isImpersonatingAddress?: boolean;
   selectWallet: (name: string) => Promise<void>;
   disconnectWallet: () => Promise<void>;
-  signExecuteAndWaitTransaction: (
+  signExecuteAndWaitForTransaction: (
     suiClient: SuiClient,
     transaction: Transaction,
   ) => Promise<SuiTransactionBlockResponse>;
@@ -66,7 +62,7 @@ const WalletContext = createContext<WalletContext>({
   disconnectWallet: async () => {
     throw new Error("WalletContextProvider not initialized");
   },
-  signExecuteAndWaitTransaction: async () => {
+  signExecuteAndWaitForTransaction: async () => {
     throw new Error("WalletContextProvider not initialized");
   },
 });
@@ -199,9 +195,9 @@ export function WalletContextProvider({ children }: PropsWithChildren) {
   }, [ldClient, impersonatedAddress, account?.address]);
 
   // Tx
-  // Note: Do NOT import and use this function directly. Instead, use signExecuteAndWaitTransaction
+  // Note: Do NOT import and use this function directly. Instead, use signExecuteAndWaitForTransaction
   // from AppContext.
-  const signExecuteAndWaitTransaction = useCallback(
+  const signExecuteAndWaitForTransaction = useCallback(
     async (suiClient: SuiClient, transaction: Transaction) => {
       const _address = impersonatedAddress ?? account?.address;
       if (_address) {
@@ -209,8 +205,7 @@ export function WalletContextProvider({ children }: PropsWithChildren) {
           try {
             const simResult = await suiClient.devInspectTransactionBlock({
               sender: _address,
-              transactionBlock:
-                transaction as DevInspectTransactionBlockParams["transactionBlock"],
+              transactionBlock: transaction,
             });
 
             if (simResult.error) {
@@ -295,7 +290,7 @@ export function WalletContextProvider({ children }: PropsWithChildren) {
         await disconnectWallet();
         toast.info("Disconnected wallet");
       },
-      signExecuteAndWaitTransaction,
+      signExecuteAndWaitForTransaction,
     }),
     [
       isConnectWalletDropdownOpen,
@@ -305,7 +300,7 @@ export function WalletContextProvider({ children }: PropsWithChildren) {
       impersonatedAddress,
       selectWallet,
       disconnectWallet,
-      signExecuteAndWaitTransaction,
+      signExecuteAndWaitForTransaction,
     ],
   );
 

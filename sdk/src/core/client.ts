@@ -2,7 +2,7 @@ import { fromB64, toHEX } from "@mysten/bcs";
 import { CoinStruct, SuiClient } from "@mysten/sui/client";
 import {
   Transaction,
-  TransactionObjectArgument,
+  TransactionObjectInput,
   TransactionResult,
 } from "@mysten/sui/transactions";
 import { SUI_CLOCK_OBJECT_ID, normalizeStructTag } from "@mysten/sui/utils";
@@ -27,7 +27,6 @@ import {
   DepositLiquidityAndMintCtokensArgs,
   LiquidateArgs,
   MigrateArgs,
-  ObjectArg,
   PhantomReified,
   RedeemCtokensAndWithdrawLiquidityArgs,
   RefreshReservePriceArgs,
@@ -56,7 +55,7 @@ interface Deps {
   createLendingMarket: (
     transaction: Transaction,
     typeArg: string,
-    registry: ObjectArg,
+    registry: TransactionObjectInput,
   ) => TransactionResult;
   createReserveConfig: (
     transaction: Transaction,
@@ -502,7 +501,7 @@ export class SuilendClient {
 
     const [rewardCoin] = transaction.splitCoins(
       isSui ? transaction.gas : transaction.object(mergeCoin.coinObjectId),
-      [transaction.pure(rewardValue)],
+      [rewardValue],
     );
 
     return this.addPoolRewardFunction(
@@ -644,7 +643,10 @@ export class SuilendClient {
         transaction.mergeCoins(mergeCoin, mergeCoins.slice(1));
       }
 
-      transaction.transferObjects([mergeCoin], transaction.pure(ownerId));
+      transaction.transferObjects(
+        [mergeCoin],
+        transaction.pure.address(ownerId),
+      );
     }
   }
 
@@ -675,8 +677,8 @@ export class SuilendClient {
       {
         lendingMarketOwnerCap: lendingMarketOwnerCapId,
         lendingMarket: this.lendingMarket.id,
-        config,
         reserveArrayIndex: this.findReserveArrayIndex(coinType),
+        config,
       },
     );
   }
@@ -788,17 +790,17 @@ export class SuilendClient {
       this.lendingMarket.$typeArgs[0],
       {
         lendingMarket: this.lendingMarket.id,
+        reserveArrayIndex,
         clock: SUI_CLOCK_OBJECT_ID,
         priceInfo: priceInfoObjectId,
-        reserveArrayIndex,
       },
     );
   }
 
   async deposit(
-    sendCoin: ObjectArg,
+    sendCoin: TransactionObjectInput,
     coinType: string,
-    obligationOwnerCap: ObjectArg,
+    obligationOwnerCap: TransactionObjectInput,
     transaction: Transaction,
   ) {
     const [ctokens] = this.depositLiquidityAndMintCtokensFunction(
@@ -806,9 +808,9 @@ export class SuilendClient {
       [this.lendingMarket.$typeArgs[0], coinType],
       {
         lendingMarket: this.lendingMarket.id,
+        reserveArrayIndex: this.findReserveArrayIndex(coinType),
         clock: SUI_CLOCK_OBJECT_ID,
         deposit: sendCoin,
-        reserveArrayIndex: this.findReserveArrayIndex(coinType),
       },
     );
 
@@ -817,17 +819,17 @@ export class SuilendClient {
       [this.lendingMarket.$typeArgs[0], coinType],
       {
         lendingMarket: this.lendingMarket.id,
-        obligationOwnerCap,
-        deposit: ctokens,
-        clock: SUI_CLOCK_OBJECT_ID,
         reserveArrayIndex: this.findReserveArrayIndex(coinType),
+        obligationOwnerCap,
+        clock: SUI_CLOCK_OBJECT_ID,
+        deposit: ctokens,
       },
     );
   }
 
   async depositCoin(
     ownerId: string,
-    sendCoin: ObjectArg,
+    sendCoin: TransactionObjectInput,
     coinType: string,
     transaction: Transaction,
     obligationOwnerCapId?: string,
@@ -840,14 +842,15 @@ export class SuilendClient {
     this.deposit(
       sendCoin,
       coinType,
-      (obligationOwnerCapId ?? createdObligationOwnerCap) as ObjectArg,
+      (obligationOwnerCapId ??
+        createdObligationOwnerCap) as TransactionObjectInput,
       transaction,
     );
 
     if (createdObligationOwnerCap) {
       transaction.transferObjects(
         [createdObligationOwnerCap],
-        transaction.pure(ownerId),
+        transaction.pure.address(ownerId),
       );
     }
   }
@@ -879,7 +882,7 @@ export class SuilendClient {
 
     const [sendCoin] = transaction.splitCoins(
       isSui ? transaction.gas : transaction.object(mergeCoin.coinObjectId),
-      [transaction.pure(value)],
+      [value],
     );
 
     this.depositCoin(
@@ -917,7 +920,7 @@ export class SuilendClient {
 
     const [sendCoin] = transaction.splitCoins(
       isSui ? transaction.gas : transaction.object(mergeCoin.coinObjectId),
-      [transaction.pure(value)],
+      [value],
     );
 
     const [ctokens] = this.depositLiquidityAndMintCtokensFunction(
@@ -925,13 +928,13 @@ export class SuilendClient {
       [this.lendingMarket.$typeArgs[0], coinType],
       {
         lendingMarket: this.lendingMarket.id,
+        reserveArrayIndex: this.findReserveArrayIndex(coinType),
         clock: SUI_CLOCK_OBJECT_ID,
         deposit: sendCoin,
-        reserveArrayIndex: this.findReserveArrayIndex(coinType),
       },
     );
 
-    transaction.transferObjects([ctokens], transaction.pure(ownerId));
+    transaction.transferObjects([ctokens], transaction.pure.address(ownerId));
   }
 
   async withdraw(
@@ -950,10 +953,10 @@ export class SuilendClient {
       [this.lendingMarket.$typeArgs[0], coinType],
       {
         lendingMarket: this.lendingMarket.id,
+        reserveArrayIndex: this.findReserveArrayIndex(coinType),
         obligationOwnerCap: obligationOwnerCapId,
         clock: SUI_CLOCK_OBJECT_ID,
         amount: BigInt(value),
-        reserveArrayIndex: this.findReserveArrayIndex(coinType),
       },
     );
 
@@ -970,7 +973,7 @@ export class SuilendClient {
       typeArguments: [this.lendingMarket.$typeArgs[0], coinType],
       arguments: [
         transaction.object(this.lendingMarket.id),
-        transaction.pure(this.findReserveArrayIndex(coinType)),
+        transaction.pure.u64(this.findReserveArrayIndex(coinType)),
         transaction.object(SUI_CLOCK_OBJECT_ID),
         ctokens,
         exemption,
@@ -994,7 +997,10 @@ export class SuilendClient {
       transaction,
     );
 
-    transaction.transferObjects([withdrawCoin], transaction.pure(ownerId));
+    transaction.transferObjects(
+      [withdrawCoin],
+      transaction.pure.address(ownerId),
+    );
   }
 
   async borrow(
@@ -1017,10 +1023,10 @@ export class SuilendClient {
       [this.lendingMarket.$typeArgs[0], coinType],
       {
         lendingMarket: this.lendingMarket.id,
+        reserveArrayIndex: this.findReserveArrayIndex(coinType),
         obligationOwnerCap: obligationOwnerCapId,
         clock: SUI_CLOCK_OBJECT_ID,
         amount: BigInt(value),
-        reserveArrayIndex: this.findReserveArrayIndex(coinType),
       },
     );
 
@@ -1043,13 +1049,16 @@ export class SuilendClient {
       transaction,
     );
 
-    transaction.transferObjects([borrowCoin], transaction.pure(ownerId));
+    transaction.transferObjects(
+      [borrowCoin],
+      transaction.pure.address(ownerId),
+    );
   }
 
   repay(
     obligationId: string,
     coinType: string,
-    coin: TransactionObjectArgument,
+    coin: TransactionObjectInput,
     transaction: Transaction,
   ) {
     return this.repayFunction(
@@ -1057,10 +1066,10 @@ export class SuilendClient {
       [this.lendingMarket.$typeArgs[0], coinType],
       {
         lendingMarket: this.lendingMarket.id,
+        reserveArrayIndex: this.findReserveArrayIndex(coinType),
         obligationId: obligationId,
         clock: SUI_CLOCK_OBJECT_ID,
         maxRepayCoins: coin,
-        reserveArrayIndex: this.findReserveArrayIndex(coinType),
       },
     );
   }
@@ -1092,7 +1101,7 @@ export class SuilendClient {
 
     const [sendCoin] = transaction.splitCoins(
       isSui ? transaction.gas : transaction.object(mergeCoin.coinObjectId),
-      [transaction.pure(value)],
+      [value],
     );
 
     const result = this.repay(obligationId, coinType, sendCoin, transaction);
@@ -1128,7 +1137,7 @@ export class SuilendClient {
       typeArguments: [this.lendingMarket.$typeArgs[0], withdrawCoinType],
       arguments: [
         transaction.object(this.lendingMarket.id),
-        transaction.pure(this.findReserveArrayIndex(withdrawCoinType)),
+        transaction.pure.u64(this.findReserveArrayIndex(withdrawCoinType)),
         transaction.object(SUI_CLOCK_OBJECT_ID),
         ctokens,
         optionalExemption,
@@ -1150,18 +1159,18 @@ export class SuilendClient {
       {
         lendingMarket: this.lendingMarket.id,
         obligationId: obligation.id,
-        clock: SUI_CLOCK_OBJECT_ID,
-        repayCoins: repayCoinId,
         repayReserveArrayIndex: this.findReserveArrayIndex(repayCoinType),
         withdrawReserveArrayIndex: this.findReserveArrayIndex(withdrawCoinType),
+        clock: SUI_CLOCK_OBJECT_ID,
+        repayCoins: repayCoinId,
       },
     );
   }
 
   migrate(transaction: Transaction, lendingMarketOwnerCapId: string) {
     return this.migrateFunction(transaction, this.lendingMarket.$typeArgs[0], {
-      lendingMarket: this.lendingMarket.id,
       lendingMarketOwnerCap: lendingMarketOwnerCapId,
+      lendingMarket: this.lendingMarket.id,
     });
   }
 
@@ -1219,7 +1228,10 @@ export class SuilendClient {
         },
       );
 
-      transaction.transferObjects([redeemCoin], transaction.pure(ownerId));
+      transaction.transferObjects(
+        [redeemCoin],
+        transaction.pure.address(ownerId),
+      );
     }
   }
 }

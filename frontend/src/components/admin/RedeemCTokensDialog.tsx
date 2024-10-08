@@ -18,7 +18,7 @@ import { formatToken } from "@/lib/format";
 
 export default function RedeemCTokensDialog() {
   const { address } = useWalletContext();
-  const { refreshData, signExecuteAndWaitTransaction, ...restAppContext } =
+  const { refreshData, signExecuteAndWaitForTransaction, ...restAppContext } =
     useAppContext();
   const suilendClient = restAppContext.suilendClient as SuilendClient<string>;
   const data = restAppContext.data as AppData;
@@ -42,7 +42,7 @@ export default function RedeemCTokensDialog() {
     //   `${0.01 * 10 ** 6}`,
     //   transaction,
     // );
-    // await signExecuteAndWaitTransaction(transaction);
+    // await signExecuteAndWaitForTransaction(transaction);
 
     try {
       await suilendClient.redeemCtokensAndWithdrawLiquidity(
@@ -51,7 +51,7 @@ export default function RedeemCTokensDialog() {
         transaction,
       );
 
-      await signExecuteAndWaitTransaction(transaction);
+      await signExecuteAndWaitForTransaction(transaction);
 
       toast.success("Redeemed CTokens");
     } catch (err) {

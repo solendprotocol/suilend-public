@@ -71,7 +71,7 @@ export default function ReserveConfigDialog({
   const {
     refreshData,
     explorer,
-    signExecuteAndWaitTransaction,
+    signExecuteAndWaitForTransaction,
     ...restAppContext
   } = useAppContext();
   const suilendClient = restAppContext.suilendClient as SuilendClient<string>;
@@ -133,7 +133,7 @@ export default function ReserveConfigDialog({
         newConfig,
       );
 
-      await signExecuteAndWaitTransaction(transaction);
+      await signExecuteAndWaitForTransaction(transaction);
 
       toast.success("Reserve config updated");
       initialConfigStateRef.current = cloneDeep(configState);

@@ -24,7 +24,7 @@ import { cn } from "@/lib/utils";
 
 export default function AddRewardsDialog() {
   const { address } = useWalletContext();
-  const { refreshData, signExecuteAndWaitTransaction, ...restAppContext } =
+  const { refreshData, signExecuteAndWaitForTransaction, ...restAppContext } =
     useAppContext();
   const suiClient = restAppContext.suiClient as SuiClient;
   const suilendClient = restAppContext.suilendClient as SuilendClient<string>;
@@ -160,7 +160,7 @@ export default function AddRewardsDialog() {
     }
 
     try {
-      await signExecuteAndWaitTransaction(transaction);
+      await signExecuteAndWaitForTransaction(transaction);
 
       toast.success("Added rewards");
       setIsDialogOpen(false);

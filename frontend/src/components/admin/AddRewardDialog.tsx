@@ -31,7 +31,7 @@ export default function AddRewardDialog({
   isDepositReward,
 }: AddRewardDialogProps) {
   const { address } = useWalletContext();
-  const { refreshData, signExecuteAndWaitTransaction, ...restAppContext } =
+  const { refreshData, signExecuteAndWaitForTransaction, ...restAppContext } =
     useAppContext();
   const suiClient = restAppContext.suiClient as SuiClient;
   const suilendClient = restAppContext.suilendClient as SuilendClient<string>;
@@ -150,7 +150,7 @@ export default function AddRewardDialog({
         transaction,
       );
 
-      await signExecuteAndWaitTransaction(transaction);
+      await signExecuteAndWaitForTransaction(transaction);
 
       toast.success("Added reward");
       setIsDialogOpen(false);

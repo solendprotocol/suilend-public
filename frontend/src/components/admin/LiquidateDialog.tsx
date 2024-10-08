@@ -62,7 +62,8 @@ export default function LiquidateDialog({
   fixedObligation,
 }: LiquidateDialogProps) {
   const { address } = useWalletContext();
-  const { signExecuteAndWaitTransaction, ...restAppContext } = useAppContext();
+  const { signExecuteAndWaitForTransaction, ...restAppContext } =
+    useAppContext();
   const suiClient = restAppContext.suiClient as SuiClient;
   const suilendClient = restAppContext.suilendClient as SuilendClient<string>;
   const data = restAppContext.data as AppData;
@@ -190,7 +191,7 @@ export default function LiquidateDialog({
         transaction.transferObjects([repayCoinId], address);
       }
 
-      await signExecuteAndWaitTransaction(transaction);
+      await signExecuteAndWaitForTransaction(transaction);
 
       toast.success("Liquidated");
     } catch (err) {
