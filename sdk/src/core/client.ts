@@ -760,7 +760,7 @@ export class SuilendClient {
     }
 
     const tuples = Array.from(reserveArrayIndexToPriceId.entries()).sort();
-    const priceIds = Array.from(new Set(tuples.map((tuple) => tuple[1])));
+    const priceIds = Array.from(tuples.map((tuple) => tuple[1]));
 
     const priceUpdateData =
       await this.pythConnection.getPriceFeedsUpdateData(priceIds);
