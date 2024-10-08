@@ -195,8 +195,7 @@ export function WalletContextProvider({ children }: PropsWithChildren) {
   }, [ldClient, impersonatedAddress, account?.address]);
 
   // Tx
-  // Note: Do NOT import and use this function directly. Instead, use signExecuteAndWaitForTransaction
-  // from AppContext.
+  // Note: Do NOT import and use this function directly. Instead, use signExecuteAndWaitForTransaction from AppContext.
   const signExecuteAndWaitForTransaction = useCallback(
     async (suiClient: SuiClient, transaction: Transaction) => {
       const _address = impersonatedAddress ?? account?.address;
