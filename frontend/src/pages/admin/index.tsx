@@ -137,7 +137,7 @@ export default function Admin() {
                 return (
                   <Card key={reserve.id}>
                     <CardHeader>
-                      <TTitle className="uppercase">{reserve.symbol}</TTitle>
+                      <TTitle>{reserve.symbol}</TTitle>
                       <CardDescription>
                         <Value
                           value={reserve.id}
