@@ -18,6 +18,7 @@ import {
   getMaxValue,
   getSubmitButtonNoValueState,
   getSubmitButtonState,
+  getSubmitWarningMessages,
 } from "@/lib/actions";
 import { Action } from "@/lib/types";
 
@@ -25,7 +26,7 @@ export default function ActionsModal() {
   const { obligation, ...restAppContext } = useAppContext();
   const data = restAppContext.data as AppData;
   const {
-    reserveIndex,
+    reserveSymbol,
     selectedTab,
     onSelectedTabChange,
     isMoreParametersOpen,
@@ -39,8 +40,8 @@ export default function ActionsModal() {
 
   // Reserve
   const reserve =
-    reserveIndex !== undefined
-      ? data.lendingMarket.reserves[reserveIndex]
+    reserveSymbol !== undefined
+      ? data.lendingMarket.reserves.find((r) => r.symbol === reserveSymbol)
       : undefined;
 
   // Tabs
@@ -107,14 +108,23 @@ export default function ActionsModal() {
         getNewCalculations,
         getSubmitButtonNoValueState: getSubmitButtonNoValueState(
           Action.DEPOSIT,
+          data.lendingMarket.reserves,
           reserve,
           data.obligations,
+          obligation,
         ),
         getSubmitButtonState: getSubmitButtonState(
           Action.DEPOSIT,
           reserve,
           coinBalanceForReserve,
           data,
+          obligation,
+        ),
+        getSubmitWarningMessages: getSubmitWarningMessages(
+          Action.DEPOSIT,
+          data.lendingMarket.reserves,
+          reserve,
+          data.obligations,
           obligation,
         ),
         submit: deposit,
@@ -165,14 +175,23 @@ export default function ActionsModal() {
         getNewCalculations,
         getSubmitButtonNoValueState: getSubmitButtonNoValueState(
           Action.BORROW,
+          data.lendingMarket.reserves,
           reserve,
           data.obligations,
+          obligation,
         ),
         getSubmitButtonState: getSubmitButtonState(
           Action.BORROW,
           reserve,
           coinBalanceForReserve,
           data,
+          obligation,
+        ),
+        getSubmitWarningMessages: getSubmitWarningMessages(
+          Action.BORROW,
+          data.lendingMarket.reserves,
+          reserve,
+          data.obligations,
           obligation,
         ),
         submit: borrow,
@@ -307,9 +326,7 @@ export default function ActionsModal() {
         <div
           className="flex flex-col gap-4 md:!h-auto md:flex-row md:items-stretch"
           style={{
-            height: isMoreParametersOpen
-              ? `calc(100dvh - ${0 /* Drawer margin-top */}px - ${1 /* Drawer border-top */}px - ${16 /* Drawer padding-top */}px - ${70 /* Tabs */}px - ${16 /* Drawer padding-bottom */}px - ${1 /* Drawer border-bottom */}px)`
-              : "auto",
+            height: `calc(100dvh - ${64 /* Drawer margin-top */}px - ${0 /* Drawer border-top */}px - ${16 /* Drawer padding-top */}px - ${62 /* Tabs */}px - ${16 /* Drawer padding-bottom */}px - ${0 /* Drawer border-bottom */}px`,
           }}
         >
           {reserve && tabConfig && (

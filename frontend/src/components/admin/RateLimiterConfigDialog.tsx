@@ -1,7 +1,6 @@
 import { useRef } from "react";
 
 import { Transaction } from "@mysten/sui/transactions";
-import * as Sentry from "@sentry/nextjs";
 import { cloneDeep } from "lodash";
 import { Bolt, Undo2 } from "lucide-react";
 import { toast } from "sonner";
@@ -76,17 +75,11 @@ export default function RateLimiterConfigDialog() {
     const newConfig = parseConfigState(configState);
 
     try {
-      try {
-        await suilendClient.updateRateLimiterConfig(
-          data.lendingMarketOwnerCapId,
-          transaction,
-          newConfig,
-        );
-      } catch (err) {
-        Sentry.captureException(err);
-        console.error(err);
-        throw err;
-      }
+      await suilendClient.updateRateLimiterConfig(
+        data.lendingMarketOwnerCapId,
+        transaction,
+        newConfig,
+      );
 
       await signExecuteAndWaitTransaction(transaction);
 
@@ -94,7 +87,7 @@ export default function RateLimiterConfigDialog() {
       initialConfigStateRef.current = cloneDeep(configState);
     } catch (err) {
       toast.error("Failed to update rate limiter config", {
-        description: ((err as Error)?.message || err) as string,
+        description: (err as Error)?.message || "An unknown error occurred",
       });
     } finally {
       await refreshData();
@@ -105,7 +98,7 @@ export default function RateLimiterConfigDialog() {
     <Dialog
       trigger={
         <Button
-          labelClassName="text-xs"
+          labelClassName="uppercase text-xs"
           startIcon={<Bolt />}
           variant="secondaryOutline"
         >
@@ -127,6 +120,7 @@ export default function RateLimiterConfigDialog() {
           </Button>
           <Button
             className="flex-1"
+            labelClassName="uppercase"
             size="lg"
             onClick={saveChanges}
             disabled={!isEditable}

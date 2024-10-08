@@ -74,6 +74,7 @@ export const parseObligation = (
       userRewardManager,
       depositedAmount,
       depositedAmountUsd,
+      depositedCtokenAmount,
       reserve,
       original: obligation,
     };

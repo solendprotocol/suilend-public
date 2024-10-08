@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { VerifiedToken } from "@hop.ag/sdk";
+import { normalizeStructTag } from "@mysten/sui.js/utils";
 import BigNumber from "bignumber.js";
 import { Check, ChevronDown, Search, Wallet } from "lucide-react";
 
@@ -9,30 +10,30 @@ import Button from "@/components/shared/Button";
 import Input from "@/components/shared/Input";
 import TextLink from "@/components/shared/TextLink";
 import TokenLogo from "@/components/shared/TokenLogo";
+import Tooltip from "@/components/shared/Tooltip";
 import { TBody, TLabelSans } from "@/components/shared/Typography";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { useSwapContext } from "@/contexts/SwapContext";
 import { ParsedCoinBalance } from "@/lib/coinBalance";
-import { SUI_COINTYPE, isSui } from "@/lib/coinType";
-import { formatId, formatToken } from "@/lib/format";
+import { SUI_COINTYPE, isCoinType, isSui } from "@/lib/coinType";
+import { formatId, formatToken, replace0x } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 interface TokenSelectionDialogProps {
-  tokens: VerifiedToken[];
   token: VerifiedToken;
   onSelectToken: (token: VerifiedToken) => void;
 }
 
 export default function TokenSelectionDialog({
-  tokens,
   token,
   onSelectToken,
 }: TokenSelectionDialogProps) {
   const { explorer, ...appContext } = useAppContext();
   const data = appContext.data as AppData;
 
-  const swapContext = useSwapContext();
-  const coinBalancesMap = swapContext.coinBalancesMap as Record<
+  const { fetchTokensMetadata, ...restSwapContext } = useSwapContext();
+  const tokens = restSwapContext.tokens as VerifiedToken[];
+  const coinBalancesMap = restSwapContext.coinBalancesMap as Record<
     string,
     ParsedCoinBalance
   >;
@@ -45,6 +46,18 @@ export default function TokenSelectionDialog({
 
   // Filter
   const [filter, setFilter] = useState<string>("");
+
+  useEffect(() => {
+    if (
+      !tokens.find((t) =>
+        `${t.coin_type}${t.ticker}${t.name}`
+          .toLowerCase()
+          .includes(filter.toLowerCase()),
+      ) &&
+      isCoinType(filter)
+    )
+      fetchTokensMetadata([normalizeStructTag(filter)]);
+  }, [tokens, filter, fetchTokensMetadata]);
 
   // Token list
   const PRIORITY_TOKEN_SYMBOLS = data.lendingMarket.reserves.map(
@@ -109,7 +122,7 @@ export default function TokenSelectionDialog({
           endIcon={<ChevronDown className="h-4 w-4 opacity-50" />}
           variant="ghost"
         >
-          {token.ticker}
+          {token.ticker.slice(0, 10)}
         </Button>
       }
       dialogContentProps={{ className: "max-w-lg" }}
@@ -164,6 +177,7 @@ export default function TokenSelectionDialog({
               variant="ghost"
               onClick={() => onTokenClick(t)}
             >
+              {/* TODO: Truncate symbol once the list of priority tokens includes non-reserves */}
               {t.ticker}
             </Button>
           );
@@ -191,6 +205,7 @@ export default function TokenSelectionDialog({
                 <div className="flex w-full flex-row items-center gap-3">
                   <TokenLogo
                     showTooltip
+                    className="shrink-0"
                     imageProps={{ className: "rounded-full" }}
                     token={{
                       coinType: t.coin_type,
@@ -199,33 +214,45 @@ export default function TokenSelectionDialog({
                     }}
                   />
 
-                  <div className="flex flex-1 flex-col gap-1">
-                    <div className="flex w-full flex-row items-center justify-between">
-                      <div className="flex flex-row items-center gap-2">
-                        <TBody className="w-max">{t.ticker}</TBody>
+                  <div className="flex min-w-0 flex-1 flex-col gap-1">
+                    <div className="flex w-full flex-row items-center justify-between gap-4">
+                      <div className="flex min-w-0 flex-row items-center gap-2">
+                        <TBody className="overflow-hidden text-ellipsis text-nowrap">
+                          {t.ticker}
+                        </TBody>
                         {isSelected && (
                           <Check className="h-4 w-4 text-foreground" />
                         )}
                       </div>
 
-                      <div className="flex flex-row items-center gap-1.5">
-                        <Wallet className="h-3 w-3 text-foreground" />
-                        <TBody className="w-max">
-                          {formatToken(tokenBalance, { exact: false })}{" "}
-                          {t.ticker}
-                        </TBody>
+                      <div className="flex min-w-0 flex-row items-center gap-1.5">
+                        <Wallet className="h-3 w-3 shrink-0 text-foreground" />
+                        <Tooltip
+                          title={
+                            tokenBalance.gt(0)
+                              ? `${formatToken(tokenBalance, { dp: token.decimals })} ${t.ticker}`
+                              : undefined
+                          }
+                        >
+                          <TBody className="overflow-hidden text-ellipsis text-nowrap">
+                            {formatToken(tokenBalance, { exact: false })}{" "}
+                            {t.ticker}
+                          </TBody>
+                        </Tooltip>
                       </div>
                     </div>
 
-                    <div className="flex flex-row items-center gap-2">
-                      <TLabelSans className="w-max">{t.name}</TLabelSans>
+                    <div className="flex flex-row items-center gap-4">
+                      <TLabelSans className="overflow-hidden text-ellipsis text-nowrap">
+                        {t.name}
+                      </TLabelSans>
 
                       <TextLink
-                        className="block w-max text-xs text-muted-foreground no-underline hover:text-foreground"
+                        className="block w-max shrink-0 text-xs text-muted-foreground no-underline hover:text-foreground"
                         href={explorer.buildCoinUrl(t.coin_type)}
                       >
                         {isSui(t.coin_type)
-                          ? SUI_COINTYPE
+                          ? replace0x(SUI_COINTYPE)
                           : formatId(t.coin_type)}
                       </TextLink>
                     </div>
@@ -238,7 +265,9 @@ export default function TokenSelectionDialog({
           <TLabelSans className="py-4 text-center">
             {tokenList.length === 0
               ? "No tokens"
-              : `No tokens matching "${filter}"`}
+              : isCoinType(filter)
+                ? "Fetching token metadata..."
+                : `No tokens matching "${filter}"`}
           </TLabelSans>
         )}
       </div>

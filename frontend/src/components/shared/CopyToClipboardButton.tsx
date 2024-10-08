@@ -44,7 +44,7 @@ export default function CopyToClipboardButton({
       }, 2500);
     } catch (err) {
       toast.error(`Failed to copy ${value} to clipboard`, {
-        description: ((err as Error)?.message || err) as string,
+        description: (err as Error)?.message || "An unknown error occurred",
       });
       Sentry.captureException(err);
       console.error(err);

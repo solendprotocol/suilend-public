@@ -1,3 +1,4 @@
+import { normalizeStructTag } from "@mysten/sui.js/utils";
 import BigNumber from "bignumber.js";
 
 import { ParsedReserve } from "./parsers/reserve";
@@ -7,8 +8,13 @@ export const toHexString = (bytes: number[]) =>
     return ("0" + (byte & 0xff).toString(16)).slice(-2);
   }).join("");
 
-export const reserveSort = (a: ParsedReserve, b: ParsedReserve) =>
-  Number(a?.arrayIndex ?? 0) - Number(b?.arrayIndex ?? 0);
+export const reserveSort = (
+  reserves: ParsedReserve[],
+  aCoinType: string,
+  bCoinType: string,
+) =>
+  reserves.findIndex((r) => r.coinType === aCoinType) -
+  reserves.findIndex((r) => r.coinType === bCoinType);
 
 export const linearlyInterpolate = (
   array: any[],
@@ -38,4 +44,15 @@ export const linearlyInterpolate = (
 
   // Should never reach here
   return new BigNumber(0);
+};
+
+export const isCTokenCoinType = (coinType: string) =>
+  coinType.includes("::reserve::CToken<") && coinType.endsWith(">");
+
+export const extractCTokenCoinType = (coinType: string) => {
+  if (!isCTokenCoinType(coinType)) throw new Error("Not a CToken ");
+
+  return normalizeStructTag(
+    coinType.split("::reserve::CToken")[1].split(",")[1].slice(0, -1),
+  );
 };

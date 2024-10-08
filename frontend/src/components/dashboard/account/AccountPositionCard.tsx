@@ -1,19 +1,17 @@
 import { useRouter } from "next/router";
 
-import BigNumber from "bignumber.js";
-import { AlertTriangle, FileClock, TrendingUp } from "lucide-react";
+import { AlertTriangle, FileClock } from "lucide-react";
 
 import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
-import { Side } from "@suilend/sdk/types";
 
 import AccountBreakdown from "@/components/dashboard/account/AccountBreakdown";
 import BorrowLimitTitle from "@/components/dashboard/account/BorrowLimitTitle";
 import LiquidationThresholdTitle from "@/components/dashboard/account/LiquidationThresholdTitle";
 import WeightedBorrowsTitle from "@/components/dashboard/account/WeightedBorrowsTitle";
 import {
-  QueryParams as AccountDetailsQueryParams,
-  Tab as AccountDetailsTab,
-} from "@/components/dashboard/account-details/AccountDetailsDialog";
+  QueryParams as AccountOverviewQueryParams,
+  Tab as AccountOverviewTab,
+} from "@/components/dashboard/account-overview/AccountOverviewDialog";
 import Card from "@/components/dashboard/Card";
 import UtilizationBar, {
   getWeightedBorrowsUsd,
@@ -28,12 +26,7 @@ import { Separator } from "@/components/ui/separator";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 import { formatPercent, formatUsd } from "@/lib/format";
-import {
-  getBorrowShareUsd,
-  getDepositShareUsd,
-  getFilteredRewards,
-  getTotalAprPercent,
-} from "@/lib/liquidityMining";
+import { getNetAprPercent } from "@/lib/liquidityMining";
 import { LOOPING_MESSAGE, getLoopedAssetCoinTypes } from "@/lib/looping";
 import { shallowPushQuery } from "@/lib/router";
 import {
@@ -41,6 +34,7 @@ import {
   DEPOSITS_TOOLTIP,
   NET_APR_TOOLTIP,
 } from "@/lib/tooltips";
+import { cn } from "@/lib/utils";
 
 function AccountPositionCardContent() {
   const appContext = useAppContext();
@@ -50,46 +44,7 @@ function AccountPositionCardContent() {
   const loopedAssetCoinTypes = getLoopedAssetCoinTypes(data);
 
   // APR
-  const aprWeightedDepositsUsd = obligation.deposits.reduce((acc, deposit) => {
-    const totalAprPercent = getTotalAprPercent(
-      Side.DEPOSIT,
-      deposit.reserve.depositAprPercent,
-      getFilteredRewards(data.rewardMap[deposit.reserve.coinType].deposit),
-    );
-
-    return acc.plus(
-      totalAprPercent.times(
-        getDepositShareUsd(
-          deposit.reserve,
-          new BigNumber(deposit.userRewardManager.share),
-        ),
-      ),
-    );
-  }, new BigNumber(0));
-
-  const aprWeightedBorrowsUsd = obligation.borrows.reduce((acc, borrow) => {
-    const totalAprPercent = getTotalAprPercent(
-      Side.BORROW,
-      borrow.reserve.borrowAprPercent,
-      getFilteredRewards(data.rewardMap[borrow.reserve.coinType].borrow),
-    );
-
-    return acc.plus(
-      totalAprPercent.times(
-        getBorrowShareUsd(
-          borrow.reserve,
-          new BigNumber(borrow.userRewardManager.share),
-        ),
-      ),
-    );
-  }, new BigNumber(0));
-
-  const aprWeightedNetValueUsd = aprWeightedDepositsUsd.minus(
-    aprWeightedBorrowsUsd,
-  );
-  const netAprPercent = !obligation.netValueUsd.eq(0)
-    ? aprWeightedNetValueUsd.div(obligation.netValueUsd)
-    : new BigNumber(0);
+  const netAprPercent = getNetAprPercent(obligation, data.rewardMap);
 
   return (
     <div className="flex flex-col gap-4">
@@ -146,10 +101,10 @@ function AccountPositionCardContent() {
         <Tooltip
           contentProps={{ className: "flex-col flex gap-4" }}
           content={
-            loopedAssetCoinTypes.length > 0 && (
+            loopedAssetCoinTypes.length > 0 ? (
               <>
                 <TBodySans className="text-xs">{LOOPING_MESSAGE}</TBodySans>
-
+                <Separator />
                 <div className="flex flex-col gap-2">
                   {loopedAssetCoinTypes.map((coinTypes) => (
                     <LoopedPosition
@@ -159,7 +114,7 @@ function AccountPositionCardContent() {
                   ))}
                 </div>
               </>
-            )
+            ) : undefined
           }
         >
           <div className="flex w-max flex-row items-center justify-end gap-2">
@@ -167,7 +122,12 @@ function AccountPositionCardContent() {
               <AlertTriangle className="h-4 w-4 text-warning" />
             )}
 
-            <TBody className="w-max text-right">
+            <TBody
+              className={cn(
+                "w-max text-right",
+                loopedAssetCoinTypes.length > 0 && "text-warning",
+              )}
+            >
               {formatPercent(netAprPercent)}
             </TBody>
           </div>
@@ -233,11 +193,10 @@ export default function AccountPositionCard() {
   const { address } = useWalletContext();
   const { obligation } = useAppContext();
 
-  const openAccountDetailsTab = (tab: AccountDetailsTab) => {
+  const openAccountOverviewTab = (tab: AccountOverviewTab) => {
     shallowPushQuery(router, {
       ...router.query,
-      [AccountDetailsQueryParams.ACCOUNT_DETAILS]: true,
-      [AccountDetailsQueryParams.TAB]: tab,
+      [AccountOverviewQueryParams.TAB]: tab,
     });
   };
 
@@ -249,22 +208,14 @@ export default function AccountPositionCard() {
         endContent: address && obligation && (
           <>
             <Button
-              className="text-muted-foreground"
-              icon={<TrendingUp />}
-              variant="ghost"
-              size="icon"
-              onClick={() => openAccountDetailsTab(AccountDetailsTab.EARNINGS)}
+              labelClassName="uppercase text-xs"
+              startIcon={<FileClock />}
+              variant="secondaryOutline"
+              onClick={() =>
+                openAccountOverviewTab(AccountOverviewTab.EARNINGS)
+              }
             >
-              Earnings
-            </Button>
-            <Button
-              className="text-muted-foreground"
-              icon={<FileClock />}
-              variant="ghost"
-              size="icon"
-              onClick={() => openAccountDetailsTab(AccountDetailsTab.HISTORY)}
-            >
-              History
+              Overview
             </Button>
           </>
         ),

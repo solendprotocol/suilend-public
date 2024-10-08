@@ -2,7 +2,7 @@ import React, { CSSProperties } from "react";
 
 import BigNumber from "bignumber.js";
 import { ClassValue } from "clsx";
-import { AlertCircle, AlertTriangle } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 
 import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
 
@@ -31,6 +31,7 @@ const getPassedBorrowLimit = (obligation: ParsedObligation) => {
   const weightedBorrowsUsd = getWeightedBorrowsUsd(obligation);
   const borrowLimitUsd = getBorrowLimitUsd(obligation);
 
+  if (weightedBorrowsUsd.eq(0) && borrowLimitUsd.eq(0)) return false;
   return weightedBorrowsUsd.gte(borrowLimitUsd);
 };
 
@@ -38,6 +39,7 @@ const getPassedLiquidationThreshold = (obligation: ParsedObligation) => {
   const weightedBorrowsUsd = getWeightedBorrowsUsd(obligation);
   const liquidationThreshold = obligation.unhealthyBorrowValueUsd;
 
+  if (weightedBorrowsUsd.eq(0) && liquidationThreshold.eq(0)) return false;
   return weightedBorrowsUsd.gte(liquidationThreshold);
 };
 
@@ -192,14 +194,20 @@ export default function UtilizationBar({
       <br />
       {"• "}
       <span className="">
-        {formatPercent(weightedBorrowsUsd.div(borrowLimitUsd).times(100))}
+        {formatPercent(
+          !borrowLimitUsd.eq(0)
+            ? weightedBorrowsUsd.div(borrowLimitUsd).times(100)
+            : new BigNumber(0),
+        )}
       </span>
       {" of your borrow limit"}
       <br />
       {"• "}
       <span className="">
         {formatPercent(
-          weightedBorrowsUsd.div(liquidationThresholdUsd).times(100),
+          !liquidationThresholdUsd.eq(0)
+            ? weightedBorrowsUsd.div(liquidationThresholdUsd).times(100)
+            : new BigNumber(0),
         )}
       </span>
       {" of your liquidation threshold"}
@@ -212,8 +220,8 @@ export default function UtilizationBar({
       {passedBorrowLimit &&
         (!passedLiquidationThreshold ? (
           <>
-            <span className="mt-2 block rounded-md border border-warning/50 p-2">
-              <span className="mr-2 font-medium text-warning">
+            <span className="mt-2 block rounded-md bg-warning/10 p-2 text-warning">
+              <span className="mr-2 font-medium">
                 <AlertTriangle className="mb-0.5 mr-1 inline h-3 w-3" />
                 Warning
               </span>
@@ -223,9 +231,9 @@ export default function UtilizationBar({
           </>
         ) : (
           <>
-            <span className="mt-2 block rounded-md border border-destructive/50 p-2">
-              <span className="mr-2 font-medium text-destructive">
-                <AlertCircle className="mb-0.5 mr-1 inline h-3 w-3" />
+            <span className="mt-2 block rounded-md bg-destructive/10 p-2 text-destructive">
+              <span className="mr-2 font-medium">
+                <AlertTriangle className="mb-0.5 mr-1 inline h-3 w-3" />
                 Danger
               </span>
               Your weighted borrows exceed your liquidation threshold, putting

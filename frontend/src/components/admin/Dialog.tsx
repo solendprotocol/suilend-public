@@ -26,7 +26,7 @@ interface DialogProps extends PropsWithChildren {
   trigger: ReactNode;
   contentProps?: DialogContentProps;
   titleIcon?: ReactElement;
-  title?: string;
+  title?: string | ReactNode;
   description?: ReactNode;
   descriptionAsChild?: boolean;
   noSeparator?: boolean;
@@ -56,7 +56,7 @@ export default function Dialog({
 
       <DialogContent
         className={cn(
-          "max-h-dvh max-w-none gap-4 overflow-y-auto bg-popover sm:max-h-[calc(100dvh-var(--sm-my)*2)] sm:w-[calc(100dvw-var(--sm-mx)*2)] sm:max-w-4xl",
+          "max-h-dvh max-w-none gap-4 overflow-y-auto bg-popover p-4 sm:max-h-[calc(100dvh-var(--sm-my)*2)] sm:w-[calc(100dvw-var(--sm-mx)*2)] sm:max-w-4xl",
           contentClassName,
         )}
         style={{ "--sm-mx": "2rem", "--sm-my": "2rem" } as CSSProperties}

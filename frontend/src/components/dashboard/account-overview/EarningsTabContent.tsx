@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useMemo } from "react";
+import { useCallback, useMemo } from "react";
 
 import { normalizeStructTag } from "@mysten/sui/utils";
 import { ColumnDef } from "@tanstack/react-table";
@@ -20,21 +20,20 @@ import {
   EventsData,
   TokenAmount,
   getCtokenExchangeRate,
-} from "@/components/dashboard/account-details/AccountDetailsDialog";
+} from "@/components/dashboard/account-overview/AccountOverviewDialog";
 import EarningsChart, {
   ChartData,
-} from "@/components/dashboard/account-details/EarningsChart";
+} from "@/components/dashboard/account-overview/EarningsChart";
 import DataTable, { tableHeader } from "@/components/dashboard/DataTable";
 import TitleWithIcon from "@/components/shared/TitleWithIcon";
 import TokenLogo from "@/components/shared/TokenLogo";
 import Tooltip from "@/components/shared/Tooltip";
 import { TBody, TLabelSans } from "@/components/shared/Typography";
-import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { useReserveAssetDataEventsContext } from "@/contexts/ReserveAssetDataEventsContext";
 import { msPerYear } from "@/lib/constants";
-import { DAY_S, Days, EventType, eventSortAsc } from "@/lib/events";
+import { DAY_S, EventType, eventSortAsc } from "@/lib/events";
 import { formatToken, formatUsd } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -215,31 +214,26 @@ export default function EarningsTabContent({
       });
 
       // Increase resolution
-      const days: Days = 30;
       const reserveAssetDataEvents =
-        reserveAssetDataEventsMap?.[reserve.id]?.[days];
+        reserveAssetDataEventsMap?.[reserve.id]?.[30]; // The last 30 days will be higher resolution
       if (reserveAssetDataEvents === undefined) return undefined;
 
       for (let i = 0; i < reserveAssetDataEvents.length; i++) {
         const r = reserveAssetDataEvents[i];
-
         const timestampS = r.timestampS;
         const ctokenExchangeRate = new BigNumber(r.ctokenSupply).eq(0)
           ? new BigNumber(1)
           : new BigNumber(r.depositedAmount).div(r.ctokenSupply);
-
         if (
           timestampS <= resultMap[coinType][0].timestampS ||
           timestampS >=
             resultMap[coinType][resultMap[coinType].length - 1].timestampS
         )
           continue;
-
         const prev = resultMap[coinType].findLast(
           (d) => d.timestampS < timestampS,
         );
         if (!prev) continue;
-
         const interestEarned = getInterestEarned(
           timestampS,
           ctokenExchangeRate,
@@ -247,7 +241,6 @@ export default function EarningsTabContent({
           prev.ctokenExchangeRate,
           prev.depositedCtokenAmount,
         );
-
         resultMap[coinType].push({
           timestampS,
           ctokenExchangeRate,
@@ -283,10 +276,12 @@ export default function EarningsTabContent({
       const proportionOfYear = new BigNumber(timestampS - prevTimestampS).div(
         msPerYear / 1000,
       );
-      const annualizedInterestRate = new BigNumber(cumulativeBorrowRate)
-        .div(prevCumulativeBorrowRate)
-        .minus(1)
-        .div(proportionOfYear);
+      const annualizedInterestRate = proportionOfYear.gt(0)
+        ? new BigNumber(cumulativeBorrowRate)
+            .div(prevCumulativeBorrowRate)
+            .minus(1)
+            .div(proportionOfYear)
+        : new BigNumber(0);
 
       const interestPaid = prevBorrowedAmount
         .times(annualizedInterestRate)
@@ -415,29 +410,24 @@ export default function EarningsTabContent({
       });
 
       // Increase resolution
-      const days: Days = 30;
       const reserveAssetDataEvents =
-        reserveAssetDataEventsMap?.[reserve.id]?.[days];
+        reserveAssetDataEventsMap?.[reserve.id]?.[30]; // The last 30 days will be higher resolution
       if (reserveAssetDataEvents === undefined) return undefined;
 
       for (let i = 0; i < reserveAssetDataEvents.length; i++) {
         const r = reserveAssetDataEvents[i];
-
         const timestampS = r.timestampS;
         const cumulativeBorrowRate = r.cumulativeBorrowRate;
-
         if (
           timestampS <= resultMap[coinType][0].timestampS ||
           timestampS >=
             resultMap[coinType][resultMap[coinType].length - 1].timestampS
         )
           continue;
-
         const prev = resultMap[coinType].findLast(
           (d) => d.timestampS < timestampS,
         );
         if (!prev) continue;
-
         const interestPaid = getInterestPaid(
           timestampS,
           cumulativeBorrowRate,
@@ -445,7 +435,6 @@ export default function EarningsTabContent({
           prev.cumulativeBorrowRate,
           prev.borrowedAmount,
         );
-
         resultMap[coinType].push({
           timestampS,
           cumulativeBorrowRate,
@@ -553,9 +542,8 @@ export default function EarningsTabContent({
   const getInterpolatedCumInterestData = useCallback(
     (cumInterestMap?: CumInterestMap) => {
       if (cumInterestMap === undefined) return undefined;
-
       const sortedCoinTypes = Object.keys(cumInterestMap).sort((a, b) =>
-        reserveSort(data.reserveMap[a], data.reserveMap[b]),
+        reserveSort(data.lendingMarket.reserves, a, b),
       );
       const sortedTimestampsS = Array.from(
         new Set(
@@ -564,18 +552,14 @@ export default function EarningsTabContent({
             .flat(),
         ),
       ).sort((a, b) => a - b);
-
       const minTimestampS = Math.min(...sortedTimestampsS);
       const maxTimestampS = Math.max(...sortedTimestampsS);
       const diffS = maxTimestampS - minTimestampS;
-
       let sampledTimestampsS: number[] = [];
-
       const minSampleIntervalS = 1 * 60;
       if (diffS < minSampleIntervalS) sampledTimestampsS = sortedTimestampsS;
       else {
         const days = diffS / DAY_S;
-
         let sampleIntervalS;
         if (days <= 1 / 4)
           sampleIntervalS = minSampleIntervalS; // 360
@@ -602,22 +586,18 @@ export default function EarningsTabContent({
         else if (days <= 360)
           sampleIntervalS = DAY_S; // 360
         else sampleIntervalS = DAY_S;
-
         const startTimestampS =
           minTimestampS - (minTimestampS % sampleIntervalS);
         const endTimestampS = maxTimestampS;
-
         const n =
           Math.floor((endTimestampS - startTimestampS) / sampleIntervalS) + 1;
         for (let i = 0; i < n; i++) {
           const tS = startTimestampS + sampleIntervalS * i;
-
           if (tS >= maxTimestampS) break;
           sampledTimestampsS.push(tS);
         }
         sampledTimestampsS.push(maxTimestampS);
       }
-
       const result: ChartData[] = [];
       for (const timestampS of sampledTimestampsS) {
         const d: ChartData = sortedCoinTypes.reduce(
@@ -636,17 +616,14 @@ export default function EarningsTabContent({
         );
         result.push(d);
       }
-
       return result;
     },
-    [data.reserveMap],
+    [data.lendingMarket.reserves],
   );
-
   const interpolatedCumInterestEarnedData = useMemo(
     () => getInterpolatedCumInterestData(cumInterestEarnedMap),
     [getInterpolatedCumInterestData, cumInterestEarnedMap],
   );
-
   const interpolatedCumInterestPaidData = useMemo(
     () => getInterpolatedCumInterestData(cumInterestPaidMap),
     [getInterpolatedCumInterestData, cumInterestPaidMap],
@@ -837,7 +814,7 @@ export default function EarningsTabContent({
         [],
       )
       .sort((a, b) =>
-        reserveSort(data.reserveMap[a.coinType], data.reserveMap[b.coinType]),
+        reserveSort(data.lendingMarket.reserves, a.coinType, b.coinType),
       );
 
     const borrowRows = borrowKeys
@@ -856,7 +833,7 @@ export default function EarningsTabContent({
         [],
       )
       .sort((a, b) =>
-        reserveSort(data.reserveMap[a.coinType], data.reserveMap[b.coinType]),
+        reserveSort(data.lendingMarket.reserves, a.coinType, b.coinType),
       );
 
     return { deposit: depositRows, borrow: borrowRows };
@@ -865,11 +842,11 @@ export default function EarningsTabContent({
     cumInterestPaidMap,
     rewardsMap,
     nowS,
-    data.reserveMap,
+    data.lendingMarket.reserves,
   ]);
 
   return (
-    <div className="flex flex-1 flex-col gap-6 overflow-y-auto overflow-x-hidden py-4">
+    <div className="flex flex-1 flex-col gap-6 overflow-y-auto overflow-x-hidden pt-4">
       <div className="flex flex-col gap-2 px-4">
         <div className="relative w-full">
           <div className="absolute bottom-0 left-0 right-3/4 top-0 z-[1] rounded-l-sm bg-gradient-to-r from-primary/20 to-transparent" />
@@ -973,54 +950,43 @@ export default function EarningsTabContent({
             : interpolatedCumInterestPaidData;
 
         return (
-          <Fragment key={table.title}>
-            <div className="flex flex-col gap-4">
-              <TitleWithIcon className="px-4">{table.title}</TitleWithIcon>
+          <div key={table.title} className="flex flex-col gap-4">
+            <TitleWithIcon className="px-4">{table.title}</TitleWithIcon>
 
-              <div
-                key={table.title}
-                className="flex flex-col max-lg:gap-4 lg:flex-row"
-              >
-                <div className="max-lg:w-full lg:min-w-0 lg:flex-1">
-                  <DataTable<RowData>
-                    columns={table.columns}
-                    data={table.data}
-                    noDataMessage={table.noDataMessage}
-                    skeletonRows={data.lendingMarket.reserves.length}
-                    container={{
-                      className: "overflow-y-visible overflow-x-auto",
-                    }}
-                    tableCellClassName={(cell) =>
-                      cn(
-                        cell &&
-                          Object.entries(cell.row.original.rewards).length > 1
-                          ? "py-2 h-auto"
-                          : "py-0 h-12",
-                      )
-                    }
+            <div key={table.title} className="flex flex-col gap-4">
+              <div className="w-full">
+                <DataTable<RowData>
+                  columns={table.columns}
+                  data={table.data}
+                  noDataMessage={table.noDataMessage}
+                  skeletonRows={data.lendingMarket.reserves.length}
+                  container={{
+                    className: "overflow-y-visible overflow-x-auto",
+                  }}
+                  tableCellClassName={(cell) =>
+                    cn(
+                      cell &&
+                        Object.entries(cell.row.original.rewards).length > 1
+                        ? "py-2 h-auto"
+                        : "py-0 h-12",
+                    )
+                  }
+                />
+              </div>
+
+              {(chartData === undefined || chartData.length > 0) && (
+                <div
+                  className={cn("w-full", index === array.length - 1 && "pb-4")}
+                >
+                  <EarningsChart
+                    side={table.side}
+                    isLoading={chartData === undefined}
+                    data={chartData ?? []}
                   />
                 </div>
-
-                {(chartData === undefined || chartData.length > 0) && (
-                  <>
-                    <Separator
-                      orientation="vertical"
-                      className="max-lg:hidden lg:mr-2"
-                    />
-
-                    <div className="max-lg:w-full lg:min-w-0 lg:flex-1">
-                      <EarningsChart
-                        side={table.side}
-                        isLoading={chartData === undefined}
-                        data={chartData ?? []}
-                      />
-                    </div>
-                  </>
-                )}
-              </div>
+              )}
             </div>
-            {index !== array.length - 1 && <Separator />}
-          </Fragment>
+          </div>
         );
       })}
     </div>

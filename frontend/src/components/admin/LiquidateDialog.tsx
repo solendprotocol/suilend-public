@@ -2,7 +2,6 @@ import { useState } from "react";
 
 import { SuiClient } from "@mysten/sui/client";
 import { Transaction, TransactionResult } from "@mysten/sui/transactions";
-import * as Sentry from "@sentry/nextjs";
 import { ColumnDef } from "@tanstack/react-table";
 import BigNumber from "bignumber.js";
 import { CheckIcon } from "lucide-react";
@@ -46,11 +45,12 @@ import { AppData, useAppContext } from "@/contexts/AppContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 import { getAllCoins } from "@/lib/coinBalance";
 import { isSui } from "@/lib/coinType";
+import { formatToken, formatUsd } from "@/lib/format";
 
 interface RowData {
   symbol: string;
   quantity: BigNumber;
-  value: BigNumber;
+  amountUsd: BigNumber;
   selected: boolean;
 }
 
@@ -155,45 +155,39 @@ export default function LiquidateDialog({
     const transaction = new Transaction();
 
     try {
-      try {
-        const repayCoinType = obligation.borrows.find(
-          (b) => b.reserve.symbol === repayAssetSymbol,
-        )?.coinType as string;
-        const repayCoin = (await getAllCoins(suiClient, address))
-          .filter((coin) => {
-            return (
-              coin.coinType === repayCoinType ||
-              (isSui(coin.coinType) && isSui(repayCoinType))
-            );
-          })
-          .sort((a, b) => {
-            return parseInt(b.balance) - parseInt(a.balance);
-          })[0];
-        let repayCoinId: TransactionResult[0] | string = repayCoin.coinObjectId;
+      const repayCoinType = obligation.borrows.find(
+        (b) => b.reserve.symbol === repayAssetSymbol,
+      )?.coinType as string;
+      const repayCoin = (await getAllCoins(suiClient, address))
+        .filter((coin) => {
+          return (
+            coin.coinType === repayCoinType ||
+            (isSui(coin.coinType) && isSui(repayCoinType))
+          );
+        })
+        .sort((a, b) => {
+          return parseInt(b.balance) - parseInt(a.balance);
+        })[0];
+      let repayCoinId: TransactionResult[0] | string = repayCoin.coinObjectId;
 
-        if (isSui(repayCoinType)) {
-          const [splitSui] = transaction.splitCoins(transaction.gas, [
-            parseInt(repayCoin.balance) - 1000000000,
-          ]);
-          repayCoinId = splitSui;
-        }
-        const [withdrawn] = await suilendClient.liquidateAndRedeem(
-          transaction,
-          obligation.original,
-          repayCoinType,
-          obligation.deposits.find(
-            (d) => d.reserve.symbol === withdrawAssetSymbol,
-          )?.coinType as string,
-          repayCoinId,
-        );
-        transaction.transferObjects([withdrawn], address);
-        if (isSui(repayCoinType)) {
-          transaction.transferObjects([repayCoinId], address);
-        }
-      } catch (err) {
-        Sentry.captureException(err);
-        console.error(err);
-        throw err;
+      if (isSui(repayCoinType)) {
+        const [splitSui] = transaction.splitCoins(transaction.gas, [
+          parseInt(repayCoin.balance) - 1000000000,
+        ]);
+        repayCoinId = splitSui;
+      }
+      const [withdrawn] = await suilendClient.liquidateAndRedeem(
+        transaction,
+        obligation.original,
+        repayCoinType,
+        obligation.deposits.find(
+          (d) => d.reserve.symbol === withdrawAssetSymbol,
+        )?.coinType as string,
+        repayCoinId,
+      );
+      transaction.transferObjects([withdrawn], address);
+      if (isSui(repayCoinType)) {
+        transaction.transferObjects([repayCoinId], address);
       }
 
       await signExecuteAndWaitTransaction(transaction);
@@ -201,7 +195,7 @@ export default function LiquidateDialog({
       toast.success("Liquidated");
     } catch (err) {
       toast.error("Failed to liquidate", {
-        description: ((err as Error)?.message || err) as string,
+        description: (err as Error)?.message || "An unknown error occurred",
       });
     }
   }
@@ -281,8 +275,8 @@ export default function LiquidateDialog({
               data={parsedObligation.deposits.map((deposit) => {
                 return {
                   symbol: deposit.reserve.symbol,
-                  value: deposit.depositedAmountUsd,
                   quantity: deposit.depositedAmount,
+                  amountUsd: deposit.depositedAmountUsd,
                   selected: deposit.reserve.symbol === selectedWithdrawAsset,
                 };
               })}
@@ -302,8 +296,8 @@ export default function LiquidateDialog({
               data={parsedObligation.borrows.map((borrow) => {
                 return {
                   symbol: borrow.reserve.symbol,
-                  value: borrow.borrowedAmountUsd,
                   quantity: borrow.borrowedAmount,
+                  amountUsd: borrow.borrowedAmountUsd,
                   selected: borrow.reserve.symbol === selectedRepayAsset,
                 };
               })}
@@ -379,17 +373,17 @@ function getColumnDefinition(isBorrow: boolean) {
       sortingFn: decimalSortingFn("quantity"),
       header: ({ column }) => tableHeader(column, "Quantity"),
       cell: ({ row }) => {
-        const { value } = row.original;
-        return <TBody>{value.toFormat(4).toString()}</TBody>;
+        const { quantity } = row.original;
+        return <TBody>{formatToken(quantity)}</TBody>;
       },
     },
     {
-      accessorKey: "value",
-      sortingFn: decimalSortingFn("value"),
-      header: ({ column }) => tableHeader(column, "Value"),
+      accessorKey: "amountUsd",
+      sortingFn: decimalSortingFn("amountUsd"),
+      header: ({ column }) => tableHeader(column, "Value ($)"),
       cell: ({ row }) => {
-        const { value } = row.original;
-        return <TBody>${value.toFormat(4).toString()}</TBody>;
+        const { amountUsd } = row.original;
+        return <TBody>{formatUsd(amountUsd)}</TBody>;
       },
     },
     {

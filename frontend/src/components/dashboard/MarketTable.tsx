@@ -5,7 +5,6 @@ import BigNumber from "bignumber.js";
 
 import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 import { Side } from "@suilend/sdk/types";
-import { reserveSort } from "@suilend/sdk/utils";
 
 import { useActionsModalContext } from "@/components/dashboard/actions-modal/ActionsModalContext";
 import DataTable, {
@@ -20,6 +19,8 @@ import TotalBorrowsCell from "@/components/dashboard/market-table/TotalBorrowsCe
 import TotalDepositsCell from "@/components/dashboard/market-table/TotalDepositsCell";
 import MarketCardList from "@/components/dashboard/MarketCardList";
 import styles from "@/components/dashboard/MarketTable.module.scss";
+import Tooltip from "@/components/shared/Tooltip";
+import { TLabel, TTitle } from "@/components/shared/Typography";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { formatToken, formatUsd } from "@/lib/format";
 import {
@@ -27,14 +28,18 @@ import {
   getFilteredRewards,
   getTotalAprPercent,
 } from "@/lib/liquidityMining";
-import { OPEN_LTV_BORROW_WEIGHT_TOOLTIP } from "@/lib/tooltips";
-import { cn } from "@/lib/utils";
+import {
+  ISOLATED_TOOLTIP,
+  OPEN_LTV_BORROW_WEIGHT_TOOLTIP,
+} from "@/lib/tooltips";
+import { cn, hoverUnderlineClassName } from "@/lib/utils";
 
 export interface ReservesRowData {
   coinType: string;
   price: BigNumber;
   symbol: string;
   iconUrl?: string | null;
+  isIsolated: boolean;
   openLtvPercent: BigNumber;
   borrowWeight: BigNumber;
   depositedAmount: BigNumber;
@@ -54,33 +59,69 @@ export interface ReservesRowData {
   reserve: ParsedReserve;
 }
 
+interface HeaderRowData {
+  isHeader: boolean;
+  isIsolated: boolean;
+  count: number;
+}
+
+type RowData = ReservesRowData | HeaderRowData;
+
 export default function MarketTable() {
   const appContext = useAppContext();
   const data = appContext.data as AppData;
   const { open: openActionsModal } = useActionsModalContext();
 
   // Columns
-  const columns: ColumnDef<ReservesRowData>[] = useMemo(
+  const columns: ColumnDef<RowData>[] = useMemo(
     () => [
       {
         accessorKey: "symbol",
         sortingFn: "text",
         header: ({ column }) => tableHeader(column, "Asset name"),
-        cell: ({ row }) => <AssetCell {...row.original} />,
+        cell: ({ row }) => {
+          if ((row.original as HeaderRowData).isHeader) {
+            const { isIsolated, count } = row.original as HeaderRowData;
+
+            return (
+              <div className="flex flex-row items-center gap-2">
+                <Tooltip title={isIsolated ? ISOLATED_TOOLTIP : undefined}>
+                  <TTitle
+                    className={cn(
+                      "w-max uppercase",
+                      isIsolated &&
+                        cn("decoration-primary/50", hoverUnderlineClassName),
+                    )}
+                  >
+                    {isIsolated ? "Isolated" : "Main"} assets
+                  </TTitle>
+                </Tooltip>
+                <TLabel>{count}</TLabel>
+              </div>
+            );
+          }
+          return <AssetCell {...(row.original as ReservesRowData)} />;
+        },
       },
       {
         accessorKey: "depositedAmount",
-        sortingFn: decimalSortingFn("depositedAmount"),
+        sortingFn: decimalSortingFn("depositedAmountUsd"),
         header: ({ column }) =>
           tableHeader(column, "Deposits", { isNumerical: true }),
-        cell: ({ row }) => <TotalDepositsCell {...row.original} />,
+        cell: ({ row }) =>
+          (row.original as HeaderRowData).isHeader ? null : (
+            <TotalDepositsCell {...(row.original as ReservesRowData)} />
+          ),
       },
       {
         accessorKey: "borrowedAmount",
-        sortingFn: decimalSortingFn("borrowedAmount"),
+        sortingFn: decimalSortingFn("borrowedAmountUsd"),
         header: ({ column }) =>
           tableHeader(column, "Borrows", { isNumerical: true }),
-        cell: ({ row }) => <TotalBorrowsCell {...row.original} />,
+        cell: ({ row }) =>
+          (row.original as HeaderRowData).isHeader ? null : (
+            <TotalBorrowsCell {...(row.original as ReservesRowData)} />
+          ),
       },
       {
         accessorKey: "openLtvBw",
@@ -90,29 +131,34 @@ export default function MarketTable() {
             isRightAligned: true,
             tooltip: OPEN_LTV_BORROW_WEIGHT_TOOLTIP,
           }),
-        cell: ({ row }) => <OpenLtvBwCell {...row.original} />,
+        cell: ({ row }) =>
+          (row.original as HeaderRowData).isHeader ? null : (
+            <OpenLtvBwCell {...(row.original as ReservesRowData)} />
+          ),
       },
       {
         accessorKey: "depositAprPercent",
         sortingFn: decimalSortingFn("totalDepositAprPercent"),
         header: ({ column }) =>
           tableHeader(column, "Deposit APR", { isNumerical: true }),
-        cell: ({ row }) => (
-          <div className="flex flex-row justify-end">
-            <DepositAprCell {...row.original} />
-          </div>
-        ),
+        cell: ({ row }) =>
+          (row.original as HeaderRowData).isHeader ? null : (
+            <div className="flex flex-row justify-end">
+              <DepositAprCell {...(row.original as ReservesRowData)} />
+            </div>
+          ),
       },
       {
         accessorKey: "borrowAprPercent",
         sortingFn: decimalSortingFn("totalBorrowAprPercent"),
         header: ({ column }) =>
           tableHeader(column, "Borrow APR", { isNumerical: true }),
-        cell: ({ row }) => (
-          <div className="flex flex-row justify-end">
-            <BorrowAprCell {...row.original} />
-          </div>
-        ),
+        cell: ({ row }) =>
+          (row.original as HeaderRowData).isHeader ? null : (
+            <div className="flex flex-row justify-end">
+              <BorrowAprCell {...(row.original as ReservesRowData)} />
+            </div>
+          ),
       },
     ],
     [],
@@ -123,12 +169,12 @@ export default function MarketTable() {
     () =>
       data.lendingMarket.reserves
         .filter((reserve) => reserve.config.depositLimit.gt(0))
-        .sort(reserveSort)
         .map((reserve) => {
           const coinType = reserve.coinType;
           const price = reserve.price;
           const symbol = reserve.symbol;
           const iconUrl = reserve.iconUrl;
+          const isIsolated = reserve.config.isolated;
           const openLtvPercent = new BigNumber(reserve.config.openLtvPct);
           const borrowWeight = new BigNumber(
             reserve.config.borrowWeightBps,
@@ -246,6 +292,7 @@ export default function MarketTable() {
             price,
             symbol,
             iconUrl,
+            isIsolated,
             openLtvPercent,
             borrowWeight,
             depositedAmount,
@@ -264,22 +311,65 @@ export default function MarketTable() {
         }),
     [data.lendingMarket.reserves, data.rewardMap],
   );
+  const mainRows = useMemo(() => rows.filter((row) => !row.isIsolated), [rows]);
+  const isolatedRows = useMemo(
+    () => rows.filter((row) => row.isIsolated),
+    [rows],
+  );
+
+  const finalRows = useMemo(
+    () => [
+      { isHeader: true, isIsolated: false, count: mainRows.length },
+      ...mainRows,
+      { isHeader: true, isIsolated: true, count: isolatedRows.length },
+      ...isolatedRows,
+    ],
+    [mainRows, isolatedRows],
+  );
 
   return (
     <div className="w-full">
       <div className="hidden w-full md:block">
-        <DataTable<ReservesRowData>
+        <DataTable<RowData>
           columns={columns}
-          data={rows}
-          noDataMessage="No assets"
-          onRowClick={(row) => () =>
-            openActionsModal(Number(row.original.reserve.arrayIndex))
+          data={finalRows}
+          container={{ className: "border rounded-sm" }}
+          tableRowClassName={(row, isSorting) =>
+            cn(
+              styles.tableRow,
+              row &&
+                (row.original as HeaderRowData).isHeader &&
+                isSorting &&
+                "hidden", // Hide header rows when sorting
+            )
           }
-          tableRowClassName={() => cn("border-0", styles.tableRow)}
+          tableCellClassName={(cell) =>
+            cell &&
+            (cell.row.original as HeaderRowData).isHeader &&
+            cn(
+              cell.column.getIsFirstColumn()
+                ? "bg-card h-auto py-2"
+                : "p-0 h-0",
+            )
+          }
+          tableCellColSpan={(cell) =>
+            (cell.row.original as HeaderRowData).isHeader &&
+            cell.column.getIsFirstColumn()
+              ? columns.length
+              : undefined
+          }
+          onRowClick={(row) =>
+            (row.original as HeaderRowData).isHeader
+              ? undefined
+              : () =>
+                  openActionsModal(
+                    (row.original as ReservesRowData).reserve.symbol,
+                  )
+          }
         />
       </div>
       <div className="w-full md:hidden">
-        <MarketCardList data={rows} noDataMessage="No assets" />
+        <MarketCardList data={rows} />
       </div>
     </div>
   );

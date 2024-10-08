@@ -241,9 +241,8 @@ export const useListWallets = () => {
 
     if (wAPriorityIndex > -1 && wBPriorityIndex > -1)
       return wAPriorityIndex - wBPriorityIndex;
-    if (wAPriorityIndex === -1 && wBPriorityIndex === -1) return 0;
-    if (wAPriorityIndex > -1) return -1;
-    return 1;
+    else if (wAPriorityIndex === -1 && wBPriorityIndex === -1) return 0;
+    else return wAPriorityIndex > -1 ? -1 : 1;
   });
   const notInstalledPriorityWallets = priorityWallets.filter(
     (w) => !sortedInstalledWallets.find((iw) => iw.id === w.id),

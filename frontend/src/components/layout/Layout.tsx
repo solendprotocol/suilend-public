@@ -4,7 +4,7 @@ import { CSSProperties, PropsWithChildren, useRef, useState } from "react";
 import { useResizeObserver } from "usehooks-ts";
 
 import WormholeConnect from "@/components/bridge/WormholeConnect";
-import AccountDetailsDialog from "@/components/dashboard/account-details/AccountDetailsDialog";
+import AccountOverviewDialog from "@/components/dashboard/account-overview/AccountOverviewDialog";
 import AppHeader from "@/components/layout/AppHeader";
 import Footer from "@/components/layout/Footer";
 import LaunchDarklyBanner from "@/components/layout/LaunchDarklyBanner";
@@ -67,16 +67,16 @@ export default function Layout({ children }: PropsWithChildren) {
       <div
         className={cn(
           "relative z-[1] flex-1",
-          !isOnLandingPage && "py-4 md:py-6",
+          !isOnLandingPage && "flex flex-col justify-stretch py-4 md:py-6",
         )}
       >
         {!isOnLandingPage ? (
-          <Container>
+          <Container className={cn(!isOnBridgePage && "flex-1")}>
             {!isPageLoading && (
               <ReserveAssetDataEventsContextProvider>
                 {children}
 
-                <AccountDetailsDialog />
+                <AccountOverviewDialog />
                 <LoopingDialog />
               </ReserveAssetDataEventsContextProvider>
             )}

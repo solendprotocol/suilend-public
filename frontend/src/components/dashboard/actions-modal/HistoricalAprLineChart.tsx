@@ -14,7 +14,12 @@ import AprRewardsBreakdownRow from "@/components/dashboard/AprRewardsBreakdownRo
 import Button from "@/components/shared/Button";
 import CartesianGridVerticalLine from "@/components/shared/CartesianGridVerticalLine";
 import TokenLogo from "@/components/shared/TokenLogo";
-import { TBody, TBodySans, TLabelSans } from "@/components/shared/Typography";
+import {
+  TBody,
+  TBodySans,
+  TLabel,
+  TLabelSans,
+} from "@/components/shared/Typography";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { useReserveAssetDataEventsContext } from "@/contexts/ReserveAssetDataEventsContext";
 import useBreakpoint from "@/hooks/useBreakpoint";
@@ -36,17 +41,17 @@ import {
   calculateRewardAprPercent,
 } from "@/lib/events";
 import { formatPercent } from "@/lib/format";
-import {
-  getDedupedAprRewards,
-  getFilteredRewards,
-} from "@/lib/liquidityMining";
+import { getDedupedAprRewards } from "@/lib/liquidityMining";
 import { cn } from "@/lib/utils";
 
-const getFieldCoinType = (field: string) =>
-  field.includes("_") ? field.split("_")[1] : undefined;
+const isBase = (field: string) => field.endsWith("_base");
+const isReward = (field: string) => !isBase(field);
+
+const getFieldCoinType = (field: string) => field.split("_")[1];
 const getFieldColor = (field: string) => {
-  const coinType = getFieldCoinType(field);
-  return coinType ? COINTYPE_COLOR_MAP[coinType] : "hsl(var(--success))";
+  if (isBase(field)) return "hsl(var(--success))";
+  if (isReward(field)) return COINTYPE_COLOR_MAP[getFieldCoinType(field)];
+  return "";
 };
 
 type ChartData = {
@@ -69,13 +74,10 @@ function TooltipContent({ side, fields, d, viewBox, x }: TooltipContentProps) {
   if (fields.every((field) => d[field] === undefined)) return null;
   if (viewBox === undefined || x === undefined) return null;
 
-  const interestField = `${side}InterestAprPercent`;
-  const rewardFields = fields.filter((field) => field !== interestField);
-
-  const aprPercent = new BigNumber(d[interestField] as number);
-  const totalAprPercent = rewardFields.reduce(
+  const definedFields = fields.filter((field) => d[field] !== undefined);
+  const totalAprPercent = definedFields.reduce(
     (acc, field) => acc.plus(new BigNumber(d[field] as number)),
-    new BigNumber(aprPercent),
+    new BigNumber(0),
   );
 
   return (
@@ -96,24 +98,23 @@ function TooltipContent({ side, fields, d, viewBox, x }: TooltipContentProps) {
           </TBody>
         </div>
 
-        {fields.map((field, index) => {
+        {definedFields.map((field, index) => {
           const coinType = getFieldCoinType(field);
           const color = getFieldColor(field);
 
           return (
             <AprRewardsBreakdownRow
               key={field}
-              isLast={index === fields.length - 1}
+              isLast={index === definedFields.length - 1}
               value={
                 <span style={{ color }}>
-                  {formatPercent(
-                    !coinType ? aprPercent : new BigNumber(d[field] as number),
-                    { useAccountingSign: true },
-                  )}
+                  {formatPercent(new BigNumber(d[field] as number), {
+                    useAccountingSign: true,
+                  })}
                 </span>
               }
             >
-              {!coinType ? (
+              {isBase(field) ? (
                 <TLabelSans>Interest</TLabelSans>
               ) : (
                 <>
@@ -126,9 +127,7 @@ function TooltipContent({ side, fields, d, viewBox, x }: TooltipContentProps) {
                       iconUrl: data.coinMetadataMap[coinType].iconUrl,
                     }}
                   />
-                  <TLabelSans>
-                    {data.coinMetadataMap[coinType].symbol}
-                  </TLabelSans>
+                  <TLabel>{data.coinMetadataMap[coinType].symbol}</TLabel>
                 </>
               )}
             </AprRewardsBreakdownRow>
@@ -156,7 +155,13 @@ function Chart({ side, data }: ChartProps) {
   // Data
   const allFields =
     data.length > 0
-      ? Object.keys(data[0]).filter((key) => key !== "timestampS")
+      ? Array.from(
+          new Set(
+            data
+              .map((d) => Object.keys(d).filter((key) => key !== "timestampS"))
+              .flat(),
+          ),
+        )
       : [];
 
   const fieldsMap = {
@@ -170,8 +175,8 @@ function Chart({ side, data }: ChartProps) {
   const fields = fieldsMap[side];
 
   // Min/max
-  const minX = Math.min(...data.map((d) => d.timestampS));
-  const maxX = Math.max(...data.map((d) => d.timestampS));
+  const minX = data.length > 0 ? Math.min(...data.map((d) => d.timestampS)) : 0;
+  const maxX = data.length > 0 ? Math.max(...data.map((d) => d.timestampS)) : 0;
 
   let minY = Math.min(
     0,
@@ -179,8 +184,8 @@ function Chart({ side, data }: ChartProps) {
       (d) =>
         d[
           side === Side.DEPOSIT
-            ? "depositInterestAprPercent"
-            : "borrowInterestAprPercent"
+            ? "depositInterestAprPercent_base"
+            : "borrowInterestAprPercent_base"
         ] ?? 0,
     ),
     ...data.map((d) =>
@@ -195,8 +200,8 @@ function Chart({ side, data }: ChartProps) {
       (d) =>
         d[
           side === Side.DEPOSIT
-            ? "depositInterestAprPercent"
-            : "borrowInterestAprPercent"
+            ? "depositInterestAprPercent_base"
+            : "borrowInterestAprPercent_base"
         ] ?? 0,
     ),
     ...data.map((d) =>
@@ -206,20 +211,29 @@ function Chart({ side, data }: ChartProps) {
   if (maxY > 0) maxY += 1;
 
   // Ticks
-  const ticksX = data
-    .filter((d) => {
-      if (days === 1) return d.timestampS % ((sm ? 4 : 8) * 60 * 60) === 0;
-      if (days === 7) return d.timestampS % ((sm ? 1 : 2) * DAY_S) === 0;
-      if (days === 30) return d.timestampS % ((sm ? 5 : 10) * DAY_S) === 0;
-      return false;
-    })
-    .map((d) => {
-      if (days === 1) return d.timestampS;
-      return d.timestampS + new Date().getTimezoneOffset() * 60;
-    });
-  const ticksY = Array.from({ length: 4 }).map(
-    (_, index, array) => minY + ((maxY - minY) / (array.length - 1)) * index,
-  );
+  const ticksX =
+    data.length > 0
+      ? data
+          .filter((d) => {
+            if (days === 1)
+              return d.timestampS % ((sm ? 4 : 8) * 60 * 60) === 0;
+            if (days === 7) return d.timestampS % ((sm ? 1 : 2) * DAY_S) === 0;
+            if (days === 30)
+              return d.timestampS % ((sm ? 5 : 10) * DAY_S) === 0;
+            return false;
+          })
+          .map((d) => {
+            if (days === 1) return d.timestampS;
+            return d.timestampS + new Date().getTimezoneOffset() * 60;
+          })
+      : [];
+  const ticksY =
+    data.length > 0
+      ? Array.from({ length: 4 }).map(
+          (_, index, array) =>
+            minY + ((maxY - minY) / (array.length - 1)) * index,
+        )
+      : [];
 
   const tickFormatterX = (timestampS: number) => {
     if (days === 1) return format(new Date(timestampS * 1000), "HH:mm");
@@ -229,8 +243,8 @@ function Chart({ side, data }: ChartProps) {
     formatPercent(new BigNumber(value), { dp: 1 });
 
   // Domain
-  const domainX = [minX, maxX];
-  const domainY = [minY, maxY];
+  const domainX = data.length > 0 ? [minX, maxX] : undefined;
+  const domainY = data.length > 0 ? [minY, maxY] : undefined;
 
   return (
     <Recharts.ResponsiveContainer width="100%" height="100%">
@@ -340,8 +354,7 @@ export default function HistoricalAprLineChart({
 
   const aprRewardReserves = useMemo(() => {
     const rewards = data.rewardMap[reserve.coinType]?.[side] ?? [];
-    const filteredRewards = getFilteredRewards(rewards);
-    const aprRewards = getDedupedAprRewards(filteredRewards);
+    const aprRewards = getDedupedAprRewards(rewards);
 
     return aprRewards.map(
       (aprReward) => data.reserveMap[aprReward.stats.rewardCoinType],
@@ -430,25 +443,32 @@ export default function HistoricalAprLineChart({
       const event = events.findLast((e) => e.sampleTimestampS <= timestampS);
 
       const d = aprRewardReserves.reduce(
-        (acc, rewardReserve) => ({
-          ...acc,
-          [`${side}InterestAprPercent_${rewardReserve.coinType}`]: event
-            ? calculateRewardAprPercent(
-                side,
-                event,
-                reserveAssetDataEventsMap?.[rewardReserve.id]?.[
-                  days
-                ] as ParsedDownsampledApiReserveAssetDataEvent[],
-                reserve,
-              )
-            : undefined,
-        }),
+        (acc, rewardReserve) => {
+          if (!event) return acc;
+
+          const rewardAprPercent = calculateRewardAprPercent(
+            side,
+            event,
+            reserveAssetDataEventsMap?.[rewardReserve.id]?.[
+              days
+            ] as ParsedDownsampledApiReserveAssetDataEvent[],
+            reserve,
+          );
+          if (rewardAprPercent === 0) return acc;
+
+          return {
+            ...acc,
+            [`${side}InterestAprPercent_${rewardReserve.coinType}`]:
+              rewardAprPercent,
+          };
+        },
         {
           timestampS,
-          depositInterestAprPercent: event
-            ? +event.depositAprPercent
+          [`${side}InterestAprPercent_base`]: event
+            ? side === Side.DEPOSIT
+              ? +event.depositAprPercent
+              : +event.borrowAprPercent
             : undefined,
-          borrowInterestAprPercent: event ? +event.borrowAprPercent : undefined,
         },
       );
       result.push(d);
@@ -466,14 +486,16 @@ export default function HistoricalAprLineChart({
             key={_days}
             className="px-2"
             labelClassName={cn(
-              "text-muted-foreground text-xs font-sans uppercase",
+              "text-muted-foreground text-xs font-sans",
               days === _days && "text-primary-foreground",
             )}
             variant="ghost"
             size="sm"
             onClick={() => onDaysClick(_days)}
           >
-            {_days}d
+            {_days === 1 && "1D"}
+            {_days === 7 && "1W"}
+            {_days === 30 && "1M"}
           </Button>
         ))}
       </div>

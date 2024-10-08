@@ -105,29 +105,35 @@ export default function useFetchAppData(
       );
 
       if (obligationOwnerCaps.length > 0) {
-        const obligationOwnerCapTimestampsMs = (
-          await Promise.all(
-            obligationOwnerCaps.map((ownerCap) =>
-              suiClient.queryTransactionBlocks({
-                limit: 1,
-                order: "ascending",
-                filter: { ChangedObject: ownerCap.id },
-                options: { showRawInput: true },
-              }),
-            ),
-          )
-        ).map((res) => +(res.data[0].timestampMs as string));
+        if (obligationOwnerCaps.length > 1) {
+          const obligationOwnerCapTimestampsMs = (
+            await Promise.all(
+              obligationOwnerCaps.map((ownerCap) =>
+                suiClient.queryTransactionBlocks({
+                  limit: 1,
+                  order: "ascending",
+                  filter: { ChangedObject: ownerCap.id },
+                  options: { showRawInput: true },
+                }),
+              ),
+            )
+          ).map((res) =>
+            res?.data?.[0]?.timestampMs
+              ? +(res.data[0].timestampMs as string)
+              : 0,
+          );
 
-        const sortedObligationOwnerCaps = obligationOwnerCaps
-          .map((ownerCap, index) => ({
-            ...ownerCap,
-            timestampMs: obligationOwnerCapTimestampsMs[index],
-          }))
-          .slice()
-          .sort((a, b) => a.timestampMs - b.timestampMs);
+          obligationOwnerCaps = obligationOwnerCaps
+            .map((ownerCap, index) => ({
+              ...ownerCap,
+              timestampMs: obligationOwnerCapTimestampsMs[index],
+            }))
+            .slice()
+            .sort((a, b) => a.timestampMs - b.timestampMs);
+        }
 
         const rawObligations = await Promise.all(
-          sortedObligationOwnerCaps.map((ownerCap) =>
+          obligationOwnerCaps.map((ownerCap) =>
             SuilendClient.getObligation(
               ownerCap.obligationId,
               rawLendingMarket.$typeArgs,
@@ -150,7 +156,9 @@ export default function useFetchAppData(
         await suiClient.getAllBalances({
           owner: address,
         })
-      ).map((cb) => ({ ...cb, coinType: normalizeStructTag(cb.coinType) }));
+      )
+        .map((cb) => ({ ...cb, coinType: normalizeStructTag(cb.coinType) }))
+        .sort((a, b) => (a.coinType < b.coinType ? -1 : 1));
 
       const reserveCoinTypes = lendingMarket.reserves.map(
         (reserve) => reserve.coinType,
@@ -183,13 +191,17 @@ export default function useFetchAppData(
     `appData-${address}`,
     dataFetcher,
     {
+      refreshInterval: 30 * 1000,
       onSuccess: (data) => {
         console.log("Refreshed app data", data);
       },
       onError: (err) => {
-        toast.error("Failed to refresh app data. Try changing RPC providers.", {
-          description: ((err as Error)?.message || err) as string,
-        });
+        toast.error(
+          "Failed to refresh app data. Please check your internet connection or change RPC providers in Settings.",
+          {
+            description: (err as Error)?.message || "An unknown error occured",
+          },
+        );
         Sentry.captureException(err);
         console.error(err);
       },

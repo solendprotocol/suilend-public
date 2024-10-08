@@ -30,10 +30,12 @@ import useIsTouchscreen from "@/hooks/useIsTouchscreen";
 import { cn } from "@/lib/utils";
 
 interface TooltipTriggerContext {
+  isOpen: boolean;
   onOpenChange: Dispatch<SetStateAction<boolean>>;
 }
 
 const TooltipTriggerContext = createContext<TooltipTriggerContext>({
+  isOpen: false,
   onOpenChange: () => {
     throw Error("TooltipTriggerContextProvider not initialized");
   },
@@ -45,19 +47,20 @@ function CustomTooltipRoot({
   ...props
 }: TooltipRootProps) {
   const isTouchscreen = useIsTouchscreen();
-  const [open, setOpen] = useState<boolean>(props.defaultOpen ?? false);
+  const [isOpen, setIsOpen] = useState<boolean>(props.defaultOpen ?? false);
 
   const contextValue: TooltipTriggerContext = useMemo(
     () => ({
-      onOpenChange: setOpen,
+      isOpen,
+      onOpenChange: setIsOpen,
     }),
-    [],
+    [isOpen],
   );
 
   return (
     <TooltipRoot
-      open={props.open || open}
-      onOpenChange={setOpen}
+      open={props.open || isOpen}
+      onOpenChange={setIsOpen}
       delayDuration={isTouchscreen ? 0 : delayDuration ?? 0}
       {...props}
     >
@@ -68,22 +71,28 @@ function CustomTooltipRoot({
   );
 }
 
+interface CustomTooltipTriggerProps extends TooltipTriggerProps {
+  isClickable?: boolean;
+}
+
 const CustomTooltipTrigger = forwardRef<
   ElementRef<typeof TooltipTrigger>,
-  TooltipTriggerProps
->(({ children, ...props }, ref) => {
+  CustomTooltipTriggerProps
+>(({ isClickable, children, ...props }, ref) => {
   const isTouchscreen = useIsTouchscreen();
-  const { onOpenChange } = useContext(TooltipTriggerContext);
+  const { isOpen, onOpenChange } = useContext(TooltipTriggerContext);
 
   return (
     <TooltipTrigger
       ref={ref}
       onClick={(e) => {
         if (!isTouchscreen) return;
-        e.preventDefault();
-        e.stopPropagation();
+        if (!isClickable || !isOpen) {
+          e.preventDefault();
+          e.stopPropagation();
 
-        onOpenChange((_isOpen) => !_isOpen);
+          onOpenChange((_isOpen) => !_isOpen);
+        }
       }}
       {...props}
     >
@@ -99,6 +108,7 @@ export interface TooltipProps extends PropsWithChildren {
   contentProps?: TooltipContentProps;
   title?: string | ReactNode;
   content?: ReactNode;
+  isClickable?: boolean;
 }
 
 export default function Tooltip({
@@ -107,6 +117,7 @@ export default function Tooltip({
   contentProps,
   title,
   content,
+  isClickable,
   children,
 }: TooltipProps) {
   const {
@@ -118,7 +129,9 @@ export default function Tooltip({
   if (title === undefined && content === undefined) return children;
   return (
     <CustomTooltipRoot delayDuration={250} {...rootProps}>
-      <CustomTooltipTrigger asChild>{children}</CustomTooltipTrigger>
+      <CustomTooltipTrigger isClickable={isClickable} asChild>
+        {children}
+      </CustomTooltipTrigger>
 
       {/* The font classes are loaded on the main tag in _app.tsx so tooltips must be nested */}
       <TooltipPortal

@@ -1,7 +1,6 @@
 import { useRef } from "react";
 
 import { Transaction } from "@mysten/sui/transactions";
-import * as Sentry from "@sentry/nextjs";
 import { cloneDeep } from "lodash";
 import { Bolt, Undo2 } from "lucide-react";
 import { toast } from "sonner";
@@ -126,19 +125,13 @@ export default function ReserveConfigDialog({
     const newConfig = parseConfigState(configState, reserve.mintDecimals);
 
     try {
-      try {
-        await suilendClient.updateReserveConfig(
-          address,
-          data.lendingMarketOwnerCapId,
-          transaction,
-          reserve.coinType,
-          newConfig,
-        );
-      } catch (err) {
-        Sentry.captureException(err);
-        console.error(err);
-        throw err;
-      }
+      await suilendClient.updateReserveConfig(
+        address,
+        data.lendingMarketOwnerCapId,
+        transaction,
+        reserve.coinType,
+        newConfig,
+      );
 
       await signExecuteAndWaitTransaction(transaction);
 
@@ -146,7 +139,7 @@ export default function ReserveConfigDialog({
       initialConfigStateRef.current = cloneDeep(configState);
     } catch (err) {
       toast.error("Failed to update reserve config", {
-        description: ((err as Error)?.message || err) as string,
+        description: (err as Error)?.message || "An unknown error occurred",
       });
     } finally {
       await refreshData();
@@ -157,7 +150,7 @@ export default function ReserveConfigDialog({
     <Dialog
       trigger={
         <Button
-          labelClassName="text-xs"
+          labelClassName="uppercase text-xs"
           startIcon={<Bolt />}
           variant="secondaryOutline"
         >
@@ -191,6 +184,7 @@ export default function ReserveConfigDialog({
           </Button>
           <Button
             className="flex-1"
+            labelClassName="uppercase"
             size="lg"
             onClick={saveChanges}
             disabled={!isEditable}

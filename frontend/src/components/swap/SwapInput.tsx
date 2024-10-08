@@ -5,10 +5,12 @@ import BigNumber from "bignumber.js";
 import { Wallet } from "lucide-react";
 import { mergeRefs } from "react-merge-refs";
 
+import Tooltip from "@/components/shared/Tooltip";
 import { TLabel, TLabelSans } from "@/components/shared/Typography";
 import TokenSelectionDialog from "@/components/swap/TokenSelectionDialog";
 import { Input as InputComponent } from "@/components/ui/input";
 import { useSwapContext } from "@/contexts/SwapContext";
+import useIsTouchscreen from "@/hooks/useIsTouchscreen";
 import { ParsedCoinBalance } from "@/lib/coinBalance";
 import { formatToken, formatUsd } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -24,7 +26,6 @@ interface SwapInputProps {
   isValueLoading?: boolean;
   onChange?: (value: string) => void;
   usdValue?: BigNumber;
-  tokens: VerifiedToken[];
   token: VerifiedToken;
   onSelectToken: (token: VerifiedToken) => void;
   onBalanceClick?: () => void;
@@ -39,13 +40,14 @@ const SwapInput = forwardRef<HTMLInputElement, SwapInputProps>(
       isValueLoading,
       onChange,
       usdValue,
-      tokens,
       token,
       onSelectToken,
       onBalanceClick,
     },
     ref,
   ) => {
+    const isTouchscreen = useIsTouchscreen();
+
     const swapContext = useSwapContext();
     const coinBalancesMap = swapContext.coinBalancesMap as Record<
       string,
@@ -94,7 +96,7 @@ const SwapInput = forwardRef<HTMLInputElement, SwapInputProps>(
               style={{
                 height: `${INPUT_HEIGHT}px`,
                 paddingLeft: `${3 * 4}px`,
-                paddingRight: `${3 * 4 + (5 * 4 + 2 * 4 + token.ticker.length * 14.4 + 1 * 4 + 4 * 4) + 3 * 4}px`,
+                paddingRight: `${3 * 4 + (5 * 4 + 2 * 4 + token.ticker.slice(0, 10).length * 14.4 + 1 * 4 + 4 * 4) + 3 * 4}px`,
                 paddingTop: `${INPUT_PADDING_Y}px`,
                 paddingBottom: `${INPUT_PADDING_Y + USD_LABEL_HEIGHT}px`,
               }}
@@ -117,7 +119,6 @@ const SwapInput = forwardRef<HTMLInputElement, SwapInputProps>(
               style={{ top: `${INPUT_PADDING_Y}px` }}
             >
               <TokenSelectionDialog
-                tokens={tokens}
                 token={token}
                 onSelectToken={onSelectToken}
               />
@@ -130,9 +131,17 @@ const SwapInput = forwardRef<HTMLInputElement, SwapInputProps>(
                 onClick={onBalanceClick}
               >
                 <Wallet className="h-3 w-3 text-muted-foreground" />
-                <TLabel>
-                  {formatToken(tokenBalance)} {token.ticker}
-                </TLabel>
+                <Tooltip
+                  title={
+                    !isTouchscreen && tokenBalance.gt(0)
+                      ? `${formatToken(tokenBalance, { dp: token.decimals })} ${token.ticker}`
+                      : undefined
+                  }
+                >
+                  <TLabel className="max-w-[200px] overflow-hidden text-ellipsis text-nowrap">
+                    {formatToken(tokenBalance)} {token.ticker}
+                  </TLabel>
+                </Tooltip>
               </div>
             </div>
           </div>

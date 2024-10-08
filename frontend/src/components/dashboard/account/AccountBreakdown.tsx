@@ -15,7 +15,7 @@ import Collapsible from "@/components/shared/Collapsible";
 import LabelWithTooltip from "@/components/shared/LabelWithTooltip";
 import { TBody } from "@/components/shared/Typography";
 import { Separator } from "@/components/ui/separator";
-import { useAppContext } from "@/contexts/AppContext";
+import { AppData, useAppContext } from "@/contexts/AppContext";
 import {
   formatBorrowWeight,
   formatLtvPercent,
@@ -143,14 +143,27 @@ function BreakdownTable({
 
 export default function AccountBreakdown() {
   const appContext = useAppContext();
+  const data = appContext.data as AppData;
   const obligation = appContext.obligation as ParsedObligation;
 
   const sortedDeposits = obligation.deposits
     .slice()
-    .sort((a, b) => reserveSort(a.reserve, b.reserve));
+    .sort((a, b) =>
+      reserveSort(
+        data.lendingMarket.reserves,
+        a.reserve.coinType,
+        b.reserve.coinType,
+      ),
+    );
   const sortedBorrows = obligation.borrows
     .slice()
-    .sort((a, b) => reserveSort(a.reserve, b.reserve));
+    .sort((a, b) =>
+      reserveSort(
+        data.lendingMarket.reserves,
+        a.reserve.coinType,
+        b.reserve.coinType,
+      ),
+    );
 
   // State
   const [isOpen, setIsOpen] = useLocalStorage<boolean>(

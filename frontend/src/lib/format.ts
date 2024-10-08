@@ -60,7 +60,7 @@ export const formatNumber = (
 ) => {
   const prefix = options?.prefix ?? "";
   const dp = options?.dp ?? 2;
-  const minDp = options?.minDp ?? 0;
+  let minDp = options?.minDp ?? 0;
   const roundingMode = options?.roundingMode ?? BigNumber.ROUND_HALF_UP;
   const exact = options?.exact ?? false;
 
@@ -77,24 +77,26 @@ export const formatNumber = (
   if (!exact) {
     let _value = value;
     let suffix = "";
-    if (_value.lt(1000 ** 1)) {
-      _value = _value.div(1000 ** 0);
-      suffix = "";
+    if (_value.lt(1000 * 10)) {
     } else if (_value.lt(1000 ** 2)) {
       _value = _value.div(1000 ** 1);
-      suffix = "k";
+      suffix = "K";
+      minDp = 0;
     } else if (_value.lt(1000 ** 3)) {
       _value = _value.div(1000 ** 2);
-      suffix = "m";
+      suffix = "M";
+      minDp = 0;
     } else if (_value.lt(1000 ** 4)) {
       _value = _value.div(1000 ** 3);
-      suffix = "b";
+      suffix = "B";
+      minDp = 0;
     } else {
       _value = _value.div(1000 ** 4);
-      suffix = "t";
+      suffix = "T";
+      minDp = 0;
     }
 
-    const maxDigits = 4;
+    const maxDigits = 3;
     const digitsCount = _value
       .integerValue(BigNumber.ROUND_DOWN)
       .toString().length; // 1 <= _value < 1000, so digitsCount is in {1,2,3}
@@ -145,7 +147,7 @@ export const formatUsd = (
 export const formatPrice = (value: BigNumber) => {
   return formatNumber(value, {
     prefix: "$",
-    dp: 2,
+    dp: Math.max(0, -Math.floor(Math.log10(+value)) - 1) + 2, // 2sf
     roundingMode: BigNumber.ROUND_HALF_UP,
     exact: true,
   });
@@ -191,7 +193,7 @@ export const formatToken = (
   value: BigNumber,
   options?: { dp?: number; exact?: boolean; useGrouping?: boolean },
 ) => {
-  const dp = options?.dp ?? 4;
+  const dp = options?.dp ?? 3;
   const exact = options?.exact ?? true;
   const useGrouping = options?.useGrouping ?? true;
 

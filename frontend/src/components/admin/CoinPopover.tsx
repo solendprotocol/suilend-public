@@ -53,6 +53,7 @@ export default function CoinPopover({
         className: "p-0",
         style: {
           width: "var(--radix-popover-trigger-width)",
+          minWidth: 400,
         },
       }}
     >

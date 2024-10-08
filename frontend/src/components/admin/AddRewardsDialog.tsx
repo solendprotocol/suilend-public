@@ -2,7 +2,6 @@ import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 
 import { CoinMetadata, SuiClient } from "@mysten/sui/client";
 import { Transaction } from "@mysten/sui/transactions";
-import * as Sentry from "@sentry/nextjs";
 import BigNumber from "bignumber.js";
 import { isEqual } from "lodash";
 import { Eraser, Sparkle } from "lucide-react";
@@ -132,6 +131,8 @@ export default function AddRewardsDialog() {
 
     const rewardCoinType = coin.coinType;
 
+    const transaction = new Transaction();
+
     for (const side of Object.values(Side)) {
       for (const reserve of data.lendingMarket.reserves) {
         const reserveArrayIndex = reserve.arrayIndex;
@@ -143,44 +144,34 @@ export default function AddRewardsDialog() {
           .toString();
 
         if (rewardValue !== "0") {
-          const transaction = new Transaction();
-
-          try {
-            try {
-              await suilendClient.addReward(
-                address,
-                data.lendingMarketOwnerCapId,
-                reserveArrayIndex,
-                side === Side.DEPOSIT,
-                rewardCoinType,
-                rewardValue,
-                BigInt(startTimeMs),
-                BigInt(endTimeMs),
-                transaction,
-              );
-            } catch (err) {
-              Sentry.captureException(err);
-              console.error(err);
-              throw err;
-            }
-
-            await signExecuteAndWaitTransaction(transaction);
-
-            toast.success(`Added ${reserve.symbol} reward`);
-          } catch (err) {
-            toast.error(`Failed to add ${reserve.symbol} reward`, {
-              description: ((err as Error)?.message || err) as string,
-            });
-          } finally {
-            await refreshData();
-          }
+          await suilendClient.addReward(
+            address,
+            data.lendingMarketOwnerCapId,
+            reserveArrayIndex,
+            side === Side.DEPOSIT,
+            rewardCoinType,
+            rewardValue,
+            BigInt(startTimeMs),
+            BigInt(endTimeMs),
+            transaction,
+          );
         }
       }
     }
 
-    setIsDialogOpen(false);
-    reset();
-    toast.info("Finished adding rewards");
+    try {
+      await signExecuteAndWaitTransaction(transaction);
+
+      toast.success("Added rewards");
+      setIsDialogOpen(false);
+      reset();
+    } catch (err) {
+      toast.error("Failed to add rewards", {
+        description: (err as Error)?.message || "An unknown error occurred",
+      });
+    } finally {
+      await refreshData();
+    }
   };
 
   return (
@@ -216,7 +207,7 @@ export default function AddRewardsDialog() {
             onClick={submit}
             disabled={!isEditable}
           >
-            Submit
+            Add
           </Button>
         </div>
       }

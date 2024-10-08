@@ -28,11 +28,12 @@ export type RewardSummary = {
     rewardIndex: number;
     reserveCoinType: string;
     rewardCoinType: string;
+    mintDecimals: number;
+    price?: BigNumber;
+    symbol: string;
+    iconUrl?: string | null;
     aprPercent?: BigNumber;
     perDay?: BigNumber;
-    price?: BigNumber;
-    iconUrl?: string | null;
-    rewardSymbol: string;
     side: Side;
   };
   obligationClaims: {
@@ -53,14 +54,14 @@ type PerDayRewardSummary = Omit<RewardSummary, "stats"> & {
   };
 };
 
-export const getDepositShare = (reserve: ParsedReserve, share: BigNumber) =>
+const getDepositShare = (reserve: ParsedReserve, share: BigNumber) =>
   share.div(10 ** reserve.mintDecimals).times(reserve.cTokenExchangeRate);
-export const getDepositShareUsd = (reserve: ParsedReserve, share: BigNumber) =>
+const getDepositShareUsd = (reserve: ParsedReserve, share: BigNumber) =>
   getDepositShare(reserve, share).times(reserve.price);
 
-export const getBorrowShare = (reserve: ParsedReserve, share: BigNumber) =>
+const getBorrowShare = (reserve: ParsedReserve, share: BigNumber) =>
   share.div(10 ** reserve.mintDecimals).times(reserve.cumulativeBorrowRate);
-export const getBorrowShareUsd = (reserve: ParsedReserve, share: BigNumber) =>
+const getBorrowShareUsd = (reserve: ParsedReserve, share: BigNumber) =>
   getBorrowShare(reserve, share).times(reserve.price);
 
 export const formatRewards = (
@@ -132,11 +133,12 @@ export const formatRewards = (
         rewardIndex: poolReward.rewardIndex,
         reserveCoinType: reserve.coinType,
         rewardCoinType: poolReward.coinType,
+        mintDecimals: poolReward.mintDecimals,
+        price: rewardReserve?.price,
+        symbol: rewardCoinMetadata.symbol,
+        iconUrl: rewardCoinMetadata.iconUrl,
         aprPercent,
         perDay,
-        price: rewardReserve?.price,
-        iconUrl: rewardCoinMetadata.iconUrl,
-        rewardSymbol: rewardCoinMetadata.symbol,
         side,
       },
       obligationClaims: Object.fromEntries(
@@ -253,13 +255,70 @@ export const getDedupedPerDayRewards = (
   return result;
 };
 
+const getRewardsAprPercent = (side: Side, filteredRewards: RewardSummary[]) =>
+  getDedupedAprRewards(filteredRewards).reduce(
+    (acc, reward) =>
+      acc.plus(reward.stats.aprPercent.times(side === Side.DEPOSIT ? 1 : -1)),
+    new BigNumber(0),
+  );
+
 export const getTotalAprPercent = (
   side: Side,
   aprPercent: BigNumber,
   filteredRewards: RewardSummary[],
-) =>
-  getDedupedAprRewards(filteredRewards).reduce(
-    (acc, reward) =>
-      acc.plus(reward.stats.aprPercent.times(side === Side.DEPOSIT ? 1 : -1)),
-    aprPercent,
+) => aprPercent.plus(getRewardsAprPercent(side, filteredRewards));
+
+export const getNetAprPercent = (
+  obligation: ParsedObligation,
+  rewardMap: RewardMap,
+) => {
+  const aprPercentWeightedDepositedAmountUsd = obligation.deposits.reduce(
+    (acc, deposit) => {
+      const baseAprPercentWeightedDepositedAmountUsd =
+        deposit.reserve.depositAprPercent.times(deposit.depositedAmountUsd);
+      const rewardsAprPercentWeightedDepositedAmountUsd = getRewardsAprPercent(
+        Side.DEPOSIT,
+        getFilteredRewards(rewardMap[deposit.reserve.coinType].deposit),
+      ).times(
+        getDepositShareUsd(
+          deposit.reserve,
+          new BigNumber(deposit.userRewardManager.share),
+        ),
+      );
+
+      return acc
+        .plus(baseAprPercentWeightedDepositedAmountUsd)
+        .plus(rewardsAprPercentWeightedDepositedAmountUsd);
+    },
+    new BigNumber(0),
   );
+
+  const aprPercentWeightedBorrowedAmountUsd = obligation.borrows.reduce(
+    (acc, borrow) => {
+      const baseAprPercentWeightedBorrowedAmountUsd =
+        borrow.reserve.borrowAprPercent.times(borrow.borrowedAmountUsd);
+      const rewardsAprPercentWeightedBorrowedAmountUsd = getRewardsAprPercent(
+        Side.BORROW,
+        getFilteredRewards(rewardMap[borrow.reserve.coinType].borrow),
+      ).times(
+        getBorrowShareUsd(
+          borrow.reserve,
+          new BigNumber(borrow.userRewardManager.share),
+        ),
+      );
+
+      return acc
+        .plus(baseAprPercentWeightedBorrowedAmountUsd)
+        .plus(rewardsAprPercentWeightedBorrowedAmountUsd);
+    },
+    new BigNumber(0),
+  );
+
+  const aprPercentWeightedNetValueUsd =
+    aprPercentWeightedDepositedAmountUsd.minus(
+      aprPercentWeightedBorrowedAmountUsd,
+    );
+  return !obligation.netValueUsd.eq(0)
+    ? aprPercentWeightedNetValueUsd.div(obligation.netValueUsd)
+    : new BigNumber(0);
+};

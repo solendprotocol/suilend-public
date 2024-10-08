@@ -1,7 +1,6 @@
 import { useRouter } from "next/router";
 
 import { Transaction } from "@mysten/sui/transactions";
-import * as Sentry from "@sentry/nextjs";
 import { formatISO } from "date-fns";
 import { Sparkle } from "lucide-react";
 import { toast } from "sonner";
@@ -87,28 +86,22 @@ export default function ReserveRewardsDialog({
     const rewardCoinType = poolReward.coinType;
 
     try {
-      try {
-        const [unclaimedRewards] = suilendClient.cancelReward(
-          data.lendingMarketOwnerCapId,
-          reserveArrayIndex,
-          isDepositReward,
-          rewardIndex,
-          rewardCoinType,
-          transaction,
-        );
-        transaction.transferObjects([unclaimedRewards], address);
-      } catch (err) {
-        Sentry.captureException(err);
-        console.error(err);
-        throw err;
-      }
+      const [unclaimedRewards] = suilendClient.cancelReward(
+        data.lendingMarketOwnerCapId,
+        reserveArrayIndex,
+        isDepositReward,
+        rewardIndex,
+        rewardCoinType,
+        transaction,
+      );
+      transaction.transferObjects([unclaimedRewards], address);
 
       await signExecuteAndWaitTransaction(transaction);
 
       toast.success("Canceled reward");
     } catch (err) {
       toast.error("Failed to cancel reward", {
-        description: ((err as Error)?.message || err) as string,
+        description: (err as Error)?.message || "An unknown error occurred",
       });
     } finally {
       await refreshData();
@@ -128,28 +121,22 @@ export default function ReserveRewardsDialog({
     const rewardCoinType = poolReward.coinType;
 
     try {
-      try {
-        const [unclaimedRewards] = suilendClient.closeReward(
-          data.lendingMarketOwnerCapId,
-          reserveArrayIndex,
-          isDepositReward,
-          rewardIndex,
-          rewardCoinType,
-          transaction,
-        );
-        transaction.transferObjects([unclaimedRewards], address);
-      } catch (err) {
-        Sentry.captureException(err);
-        console.error(err);
-        throw err;
-      }
+      const [unclaimedRewards] = suilendClient.closeReward(
+        data.lendingMarketOwnerCapId,
+        reserveArrayIndex,
+        isDepositReward,
+        rewardIndex,
+        rewardCoinType,
+        transaction,
+      );
+      transaction.transferObjects([unclaimedRewards], address);
 
       await signExecuteAndWaitTransaction(transaction);
 
       toast.success("Closed reward");
     } catch (err) {
       toast.error("Failed to close reward", {
-        description: ((err as Error)?.message || err) as string,
+        description: (err as Error)?.message || "An unknown error occurred",
       });
     } finally {
       await refreshData();
@@ -160,7 +147,7 @@ export default function ReserveRewardsDialog({
     <Dialog
       trigger={
         <Button
-          labelClassName="text-xs"
+          labelClassName="uppercase text-xs"
           startIcon={<Sparkle />}
           variant="secondaryOutline"
         >

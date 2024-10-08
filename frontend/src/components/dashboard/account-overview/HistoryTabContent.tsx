@@ -15,12 +15,13 @@ import {
   ApiRepayEvent,
   ApiWithdrawEvent,
 } from "@suilend/sdk/types";
+import { reserveSort } from "@suilend/sdk/utils";
 
 import {
   EventsData,
   TokenAmount,
   getCtokenExchangeRate,
-} from "@/components/dashboard/account-details/AccountDetailsDialog";
+} from "@/components/dashboard/account-overview/AccountOverviewDialog";
 import DataTable, { tableHeader } from "@/components/dashboard/DataTable";
 import Button from "@/components/shared/Button";
 import OpenOnExplorerButton from "@/components/shared/OpenOnExplorerButton";
@@ -482,7 +483,7 @@ export default function HistoryTabContent({
                 })
                 .flat(),
             ]),
-          ),
+          ).sort((a, b) => reserveSort(data.lendingMarket.reserves, a, b)),
     [eventsData, data.lendingMarket.reserves],
   );
   const isNotFilteredOutCoinType = (coinType: string) =>

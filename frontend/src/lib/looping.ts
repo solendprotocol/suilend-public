@@ -1,14 +1,15 @@
 import BigNumber from "bignumber.js";
 
 import { AppData } from "@/contexts/AppContext";
-import {
-  NORMALIZED_USDC_COINTYPE,
-  NORMALIZED_USDT_COINTYPE,
-} from "@/lib/coinType";
+import { NORMALIZED_STABLECOIN_COINTYPES, isStablecoin } from "@/lib/coinType";
 
-export const LOOPING_THRESHOLD = 0.01;
-export const LOOPING_MESSAGE =
-  "You are looping (depositing and borrowing the same asset or USDT-USDC). Looped positions are no longer eligible for LM rewards. Please unloop and redeposit to be eligible for rewards.";
+export const LOOPING_THRESHOLD = 0;
+
+const LOOPING_DEFINITION =
+  "depositing and borrowing the same non-stablecoin asset, or the same/different stablecoin assets";
+export const LOOPING_MESSAGE = `You are looping (defined as ${LOOPING_DEFINITION}). Looped positions are no longer eligible for LM rewards. Please unloop and redeposit to be eligible for rewards.`;
+export const LOOPING_WARNING_MESSAGE = (action: string, symbol: string) =>
+  `Note that by ${action} ${symbol} you will be looping (defined as ${LOOPING_DEFINITION}) and no longer eligible for LM rewards.`;
 
 export const getLoopedAssetCoinTypes = (data: AppData) => {
   if (data.obligations === undefined || data.obligations.length === 0)
@@ -16,12 +17,9 @@ export const getLoopedAssetCoinTypes = (data: AppData) => {
 
   let result: string[][] = [];
   data.lendingMarket.reserves.forEach((reserve) => {
-    const outCoinTypes =
-      reserve.coinType === NORMALIZED_USDC_COINTYPE
-        ? [reserve.coinType, NORMALIZED_USDT_COINTYPE]
-        : reserve.coinType === NORMALIZED_USDT_COINTYPE
-          ? [reserve.coinType, NORMALIZED_USDC_COINTYPE]
-          : [reserve.coinType];
+    const outCoinTypes = isStablecoin(reserve.coinType)
+      ? NORMALIZED_STABLECOIN_COINTYPES
+      : [reserve.coinType];
 
     outCoinTypes.forEach((outCoinType) => {
       const amountsAcrossObligations = (data.obligations ?? []).reduce(
@@ -49,30 +47,28 @@ export const getLoopedAssetCoinTypes = (data: AppData) => {
     });
   });
 
-  if (
-    result.find(
-      (coinTypes) =>
-        coinTypes[0] === NORMALIZED_USDT_COINTYPE &&
-        coinTypes[1] === NORMALIZED_USDT_COINTYPE,
-    ) &&
-    result.find(
-      (coinTypes) =>
-        coinTypes[0] === NORMALIZED_USDC_COINTYPE &&
-        coinTypes[1] === NORMALIZED_USDC_COINTYPE,
-    )
-  ) {
-    result = result.filter(
-      (coinTypes) =>
-        !(
-          coinTypes[0] === NORMALIZED_USDT_COINTYPE &&
-          coinTypes[1] === NORMALIZED_USDC_COINTYPE
+  NORMALIZED_STABLECOIN_COINTYPES.forEach((coinType1) => {
+    NORMALIZED_STABLECOIN_COINTYPES.filter(
+      (coinType) => coinType !== coinType1,
+    ).forEach((coinType2) => {
+      if (
+        result.find(
+          (coinTypes) =>
+            coinTypes[0] === coinType1 && coinTypes[1] === coinType1,
         ) &&
-        !(
-          coinTypes[0] === NORMALIZED_USDC_COINTYPE &&
-          coinTypes[1] === NORMALIZED_USDT_COINTYPE
-        ),
-    );
-  }
+        result.find(
+          (coinTypes) =>
+            coinTypes[0] === coinType2 && coinTypes[1] === coinType2,
+        )
+      ) {
+        result = result.filter(
+          (coinTypes) =>
+            !(coinTypes[0] === coinType1 && coinTypes[1] === coinType2) &&
+            !(coinTypes[0] === coinType2 && coinTypes[1] === coinType1),
+        );
+      }
+    });
+  });
 
   return result;
 };

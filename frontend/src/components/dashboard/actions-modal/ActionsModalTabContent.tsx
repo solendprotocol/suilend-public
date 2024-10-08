@@ -3,9 +3,10 @@ import { CSSProperties, useCallback, useEffect, useRef, useState } from "react";
 import { normalizeStructTag } from "@mysten/sui/utils";
 import BigNumber from "bignumber.js";
 import { capitalize } from "lodash";
+import { AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 
-import { maxU64 } from "@suilend/sdk/constants";
+import { WAD, maxU64 } from "@suilend/sdk/constants";
 import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 import { ApiDepositEvent, Side } from "@suilend/sdk/types";
 
@@ -21,16 +22,17 @@ import Collapsible from "@/components/shared/Collapsible";
 import LabelWithValue from "@/components/shared/LabelWithValue";
 import Spinner from "@/components/shared/Spinner";
 import TextLink from "@/components/shared/TextLink";
+import Tooltip from "@/components/shared/Tooltip";
 import { TBody, TLabelSans } from "@/components/shared/Typography";
-import { Separator } from "@/components/ui/separator";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { useDashboardContext } from "@/contexts/DashboardContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 import useBreakpoint from "@/hooks/useBreakpoint";
+import useIsTouchscreen from "@/hooks/useIsTouchscreen";
 import { isSui } from "@/lib/coinType";
 import {
   FIRST_DEPOSIT_DIALOG_START_DATE,
-  SUI_REPAY_GAS_MIN,
+  SUI_GAS_MIN,
   TX_TOAST_DURATION,
 } from "@/lib/constants";
 import { EventType } from "@/lib/events";
@@ -55,13 +57,14 @@ interface ActionsModalTabContentProps {
   reserve: ParsedReserve;
   action: Action;
   actionPastTense: string;
-  getMaxValue: () => string;
+  getMaxValue: () => BigNumber;
   getNewCalculations: (value: string) => {
     newBorrowLimitUsd: BigNumber | null;
     newBorrowUtilization: BigNumber | null;
   };
   getSubmitButtonNoValueState?: () => SubmitButtonState | undefined;
   getSubmitButtonState: (value: string) => SubmitButtonState | undefined;
+  getSubmitWarningMessages?: () => string[];
   submit: ActionSignature;
 }
 
@@ -74,9 +77,10 @@ export default function ActionsModalTabContent({
   getNewCalculations,
   getSubmitButtonNoValueState,
   getSubmitButtonState,
+  getSubmitWarningMessages,
   submit,
 }: ActionsModalTabContentProps) {
-  const { address } = useWalletContext();
+  const { address, isImpersonatingAddress } = useWalletContext();
   const { refreshData, explorer, obligation, ...restAppContext } =
     useAppContext();
   const data = restAppContext.data as AppData;
@@ -85,6 +89,7 @@ export default function ActionsModalTabContent({
     useActionsModalContext();
 
   const { md } = useBreakpoint();
+  const isTouchscreen = useIsTouchscreen();
 
   // First deposit
   const [justDeposited, setJustDeposited] = useState<boolean>(false);
@@ -167,14 +172,19 @@ export default function ActionsModalTabContent({
 
   const useMaxValueWrapper = () => {
     setUseMaxAmount(true);
-    formatAndSetValue(maxAmount);
+    formatAndSetValue(
+      maxAmount.toFixed(reserve.mintDecimals, BigNumber.ROUND_DOWN),
+    );
   };
 
   useEffect(() => {
     // If user has specified intent to use max amount, we continue this intent
     // even if the max value updates
-    if (useMaxAmount) formatAndSetValue(maxAmount);
-  }, [useMaxAmount, maxAmount, formatAndSetValue]);
+    if (useMaxAmount)
+      formatAndSetValue(
+        maxAmount.toFixed(reserve.mintDecimals, BigNumber.ROUND_DOWN),
+      );
+  }, [useMaxAmount, maxAmount, formatAndSetValue, reserve.mintDecimals]);
 
   const { newBorrowLimitUsd, newBorrowUtilization } = getNewCalculations(value);
 
@@ -201,7 +211,7 @@ export default function ActionsModalTabContent({
     if (value === "") return { isDisabled: true, title: "Enter an amount" };
     if (new BigNumber(value).lt(0))
       return { isDisabled: true, title: "Enter a +ve amount" };
-    if (new BigNumber(value).eq(0))
+    if (new BigNumber(value).eq(0) && !(useMaxAmount && maxAmount.gt(0)))
       return { isDisabled: true, title: "Enter a non-zero amount" };
 
     if (getSubmitButtonState(value) !== undefined)
@@ -227,7 +237,31 @@ export default function ActionsModalTabContent({
         break;
       }
       case Action.WITHDRAW: {
-        if (useMaxAmount) submitAmount = maxU64.toString();
+        // TODO: Revert once fixed
+        if (!obligation || !depositPosition) return;
+
+        if (useMaxAmount)
+          submitAmount = !reserve.config.isolated
+            ? maxU64.toString()
+            : BigNumber.min(
+                new BigNumber(
+                  obligation.original.allowedBorrowValueUsd.value.toString(),
+                ).gt(0)
+                  ? new BigNumber(
+                      new BigNumber(
+                        new BigNumber(
+                          obligation.original.allowedBorrowValueUsd.value.toString(),
+                        ).div(WAD),
+                      ).minus(obligation.borrowedAmountUsd),
+                    )
+                      .div(reserve.price)
+                      .div(reserve.cTokenExchangeRate)
+                  : Infinity,
+                depositPosition.depositedCtokenAmount,
+              )
+                .times(10 ** reserve.mintDecimals)
+                .integerValue(BigNumber.ROUND_DOWN)
+                .toString();
         else
           submitAmount = new BigNumber(submitAmount)
             .div(reserve.cTokenExchangeRate)
@@ -243,7 +277,7 @@ export default function ActionsModalTabContent({
         if (useMaxAmount) {
           if (isSui(reserve.coinType)) {
             submitAmount = balance
-              .minus(new BigNumber(SUI_REPAY_GAS_MIN))
+              .minus(new BigNumber(SUI_GAS_MIN))
               .times(10 ** reserve.mintDecimals)
               .toString();
           } else {
@@ -276,7 +310,7 @@ export default function ActionsModalTabContent({
         setTimeout(() => setJustDeposited(true), 1000);
     } catch (err) {
       toast.error(`Failed to ${action.toLowerCase()} ${formattedValue}`, {
-        description: ((err as Error)?.message || err) as string,
+        description: (err as Error)?.message || "An unknown error occurred",
         duration: TX_TOAST_DURATION,
       });
     } finally {
@@ -319,18 +353,34 @@ export default function ActionsModalTabContent({
             }
           >
             <TLabelSans>Balance</TLabelSans>
-            <TBody className="text-xs">
-              {formatToken(balance, { exact: false })} {reserve.symbol}
-            </TBody>
+            <Tooltip
+              title={
+                !isTouchscreen && balance.gt(0)
+                  ? `${formatToken(balance, { dp: reserve.mintDecimals })} ${reserve.symbol}`
+                  : undefined
+              }
+            >
+              <TBody className="text-xs">
+                {formatToken(balance, { exact: false })} {reserve.symbol}
+              </TBody>
+            </Tooltip>
           </div>
 
           <div className="flex flex-row items-center gap-2">
             <TLabelSans>
               {side === Side.DEPOSIT ? "Deposited" : "Borrowed"}
             </TLabelSans>
-            <TBody className="text-xs">
-              {formatToken(positionAmount, { exact: false })} {reserve.symbol}
-            </TBody>
+            <Tooltip
+              title={
+                !isTouchscreen && positionAmount.gt(0)
+                  ? `${formatToken(positionAmount, { dp: reserve.mintDecimals })} ${reserve.symbol}`
+                  : undefined
+              }
+            >
+              <TBody className="text-xs">
+                {formatToken(positionAmount, { exact: false })} {reserve.symbol}
+              </TBody>
+            </Tooltip>
           </div>
         </div>
       </div>
@@ -390,40 +440,36 @@ export default function ActionsModalTabContent({
           {action === Action.BORROW ? (
             <LabelWithValue
               label="Borrow fee"
-              value={`${formatToken(borrowFee, { dp: 4 })} ${reserve.symbol}`}
+              value={`${formatToken(borrowFee)} ${reserve.symbol}`}
               horizontal
             />
           ) : (
-            <div className="h-5 w-full" />
+            // Placeholder so the UI doesn't move when switching tabs
+            <div className="h-5" />
           )}
         </div>
 
         {!md && isMoreParametersOpen && (
-          <>
-            <Separator />
-            <ParametersPanel side={side} reserve={reserve} />
-          </>
+          <ParametersPanel side={side} reserve={reserve} />
         )}
       </div>
 
-      <div className="flex w-full flex-col gap-2">
+      <div className="flex w-full flex-col gap-3">
         {!md && (
           <Collapsible
             open={isMoreParametersOpen}
             onOpenChange={setIsMoreParametersOpen}
-            title={`${isMoreParametersOpen ? "Less" : "More"} parameters`}
+            closedTitle="More parameters"
             openTitle="Less parameters"
-            buttonClassName="!bg-popover py-1"
-            buttonLabelClassName="text-xs"
             hasSeparator
           />
         )}
 
         <Button
-          className="h-auto min-h-14 w-full py-2"
+          className="h-auto min-h-14 w-full rounded-md py-2"
           labelClassName="text-wrap uppercase"
           style={{ overflowWrap: "anywhere" }}
-          disabled={submitButtonState.isDisabled}
+          disabled={submitButtonState.isDisabled || isImpersonatingAddress}
           onClick={onSubmitClick}
         >
           {submitButtonState.isLoading ? (
@@ -432,7 +478,23 @@ export default function ActionsModalTabContent({
             submitButtonState.title
           )}
         </Button>
+
+        {getSubmitWarningMessages &&
+          getSubmitWarningMessages().length > 0 &&
+          getSubmitWarningMessages().map((warningMessage) => (
+            <div key={warningMessage} className="rounded-md bg-warning/10 p-2">
+              <TLabelSans className="text-warning">
+                <span className="mr-2 font-medium">
+                  <AlertTriangle className="mb-0.5 mr-1 inline h-3 w-3" />
+                  Warning
+                </span>
+                {warningMessage}
+              </TLabelSans>
+            </div>
+          ))}
       </div>
     </>
   );
 }
+
+// Note you cannot borrow other assets in this account when borrowing MEW.

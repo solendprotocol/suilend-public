@@ -1,13 +1,13 @@
 import HeaderPointsPopover from "@/components/points/HeaderPointsPopover";
 import Link from "@/components/shared/Link";
 import { useAppContext } from "@/contexts/AppContext";
+import { getSwapUrl } from "@/contexts/SwapContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 import {
   ADMIN_URL,
   BRIDGE_URL,
   DASHBOARD_URL,
   POINTS_URL,
-  SWAP_URL,
 } from "@/lib/navigation";
 
 export default function NavigationLinks() {
@@ -28,7 +28,7 @@ export default function NavigationLinks() {
           </div>
         )}
       </div>
-      <Link href={SWAP_URL}>Swap</Link>
+      <Link href={getSwapUrl()}>Swap</Link>
       <Link href={BRIDGE_URL}>Bridge</Link>
       {data?.lendingMarketOwnerCapId && <Link href={ADMIN_URL}>Admin</Link>}
     </>

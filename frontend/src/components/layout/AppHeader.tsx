@@ -2,23 +2,24 @@ import NextLink from "next/link";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
 
-import { Menu, X } from "lucide-react";
+import { Menu, RotateCw, X } from "lucide-react";
 
 import ConnectWalletButton from "@/components/layout/ConnectWalletButton";
 import HeaderBase from "@/components/layout/HeaderBase";
 import HeaderMenu from "@/components/layout/HeaderMenu";
 import Logo from "@/components/layout/Logo";
 import NavigationLinks from "@/components/layout/NavigationLinks";
-import RefreshDataButton from "@/components/layout/RefreshDataButton";
 import SettingsDialog from "@/components/layout/SettingsDialog";
 import HeaderPointsPopover from "@/components/points/HeaderPointsPopover";
 import Button from "@/components/shared/Button";
+import { useAppContext } from "@/contexts/AppContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 import { ROOT_URL } from "@/lib/navigation";
 
 export default function AppHeader() {
   const router = useRouter();
   const { address } = useWalletContext();
+  const { refreshData } = useAppContext();
 
   // Menu
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
@@ -57,33 +58,39 @@ export default function AppHeader() {
       </div>
 
       {/* End */}
-      <div className="flex min-w-0 flex-row items-center gap-4">
-        <RefreshDataButton />
+      <div className="flex min-w-0 flex-row items-center gap-2">
+        <Button
+          className="shrink-0 text-muted-foreground"
+          icon={<RotateCw />}
+          variant="ghost"
+          size="icon"
+          onClick={refreshData}
+        >
+          Refresh
+        </Button>
 
-        <div className="flex min-w-0 flex-row items-center gap-2">
-          {address && (
-            <div className="hidden shrink-0 sm:flex">
-              <HeaderPointsPopover />
-            </div>
-          )}
-
-          <ConnectWalletButton />
-
-          <div className="-mr-1 shrink-0">
-            <SettingsDialog />
+        {address && (
+          <div className="hidden shrink-0 sm:flex">
+            <HeaderPointsPopover />
           </div>
+        )}
 
-          <Button
-            className="shrink-0 lg:hidden"
-            icon={!isMenuOpen ? <Menu /> : <X />}
-            variant="ghost"
-            size="icon"
-            onClick={onMenuToggle}
-          >
-            Menu
-          </Button>
-          {isMenuOpen && <HeaderMenu />}
+        <ConnectWalletButton />
+
+        <div className="-mr-1 shrink-0">
+          <SettingsDialog />
         </div>
+
+        <Button
+          className="shrink-0 lg:hidden"
+          icon={!isMenuOpen ? <Menu /> : <X />}
+          variant="ghost"
+          size="icon"
+          onClick={onMenuToggle}
+        >
+          Menu
+        </Button>
+        {isMenuOpen && <HeaderMenu />}
       </div>
     </HeaderBase>
   );

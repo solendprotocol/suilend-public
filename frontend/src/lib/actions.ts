@@ -4,13 +4,14 @@ import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
 import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 
 import { AppData } from "@/contexts/AppContext";
-import { isSui } from "@/lib/coinType";
 import {
-  SUI_DEPOSIT_GAS_MIN,
-  SUI_REPAY_GAS_MIN,
-  msPerYear,
-} from "@/lib/constants";
-import { LOOPING_THRESHOLD } from "@/lib/looping";
+  NORMALIZED_STABLECOIN_COINTYPES,
+  isStablecoin,
+  isSui,
+} from "@/lib/coinType";
+import { SUI_GAS_MIN, msPerYear } from "@/lib/constants";
+import { formatList } from "@/lib/format";
+import { LOOPING_THRESHOLD, LOOPING_WARNING_MESSAGE } from "@/lib/looping";
 import { Action } from "@/lib/types";
 
 const getMaxCalculations = (
@@ -62,9 +63,9 @@ const getMaxCalculations = (
     ];
     if (isSui(reserve.coinType))
       result.push({
-        reason: `${SUI_DEPOSIT_GAS_MIN} SUI should be saved for gas`,
+        reason: `${SUI_GAS_MIN} SUI should be saved for gas`,
         isDisabled: true,
-        value: balance.minus(SUI_DEPOSIT_GAS_MIN),
+        value: balance.minus(SUI_GAS_MIN),
       });
 
     return result;
@@ -140,6 +141,13 @@ const getMaxCalculations = (
         ),
       },
       {
+        reason: "Pool outflow rate limit surpassed",
+        isDisabled: true,
+        value: data.lendingMarket.rateLimiter.remainingOutflow.div(
+          reserve.maxPrice,
+        ),
+      },
+      {
         reason: "Withdraw is unhealthy",
         isDisabled: true,
         value:
@@ -148,17 +156,12 @@ const getMaxCalculations = (
             obligation.minPriceBorrowLimitUsd,
           )
             ? new BigNumber(0)
-            : obligation.minPriceBorrowLimitUsd
-                .minus(obligation.maxPriceWeightedBorrowsUsd)
-                .div(reserve.minPrice)
-                .div(reserve.config.openLtvPct / 100),
-      },
-      {
-        reason: "Pool outflow rate limit surpassed",
-        isDisabled: true,
-        value: data.lendingMarket.rateLimiter.remainingOutflow.div(
-          reserve.maxPrice,
-        ),
+            : reserve.config.openLtvPct > 0
+              ? obligation.minPriceBorrowLimitUsd
+                  .minus(obligation.maxPriceWeightedBorrowsUsd)
+                  .div(reserve.minPrice)
+                  .div(reserve.config.openLtvPct / 100)
+              : Infinity,
       },
     ];
   } else if (action === Action.REPAY) {
@@ -181,9 +184,9 @@ const getMaxCalculations = (
     ];
     if (isSui(reserve.coinType))
       result.push({
-        reason: `${SUI_REPAY_GAS_MIN} SUI should be saved for gas`,
+        reason: `${SUI_GAS_MIN} SUI should be saved for gas`,
         isDisabled: true,
-        value: balance.minus(SUI_REPAY_GAS_MIN),
+        value: balance.minus(SUI_GAS_MIN),
       });
 
     return result;
@@ -214,22 +217,44 @@ export const getMaxValue =
       BigNumber.min(
         ...Object.values(maxCalculations).map((calc) => calc.value),
       ),
-    ).toFixed(reserve.mintDecimals, BigNumber.ROUND_DOWN);
+    );
   };
 
+const getDepositedAmountAcrossObligations = (
+  coinType: string,
+  obligations?: ParsedObligation[],
+) =>
+  (obligations ?? []).reduce(
+    (acc, obligation) =>
+      acc.plus(
+        obligation.deposits.find((d) => d.coinType === coinType)
+          ?.depositedAmount ?? new BigNumber(0),
+      ),
+    new BigNumber(0),
+  );
+const getBorrowedAmountAcrossObligations = (
+  coinType: string,
+  obligations?: ParsedObligation[],
+) =>
+  (obligations ?? []).reduce(
+    (acc, obligation) =>
+      acc.plus(
+        obligation.borrows.find((b) => b.coinType === coinType)
+          ?.borrowedAmount ?? new BigNumber(0),
+      ),
+    new BigNumber(0),
+  );
+
 export const getSubmitButtonNoValueState =
-  (action: Action, reserve: ParsedReserve, obligations?: ParsedObligation[]) =>
+  (
+    action: Action,
+    reserves: ParsedReserve[],
+    reserve: ParsedReserve,
+    obligations: ParsedObligation[] | undefined,
+    obligation: ParsedObligation | null,
+  ) =>
   () => {
     if (action === Action.DEPOSIT) {
-      const borrowedAmountAcrossObligations = (obligations ?? []).reduce(
-        (acc, obligation) =>
-          acc.plus(
-            obligation.borrows.find((b) => b.coinType === reserve.coinType)
-              ?.borrowedAmount ?? new BigNumber(0),
-          ),
-        new BigNumber(0),
-      );
-
       if (reserve.depositedAmount.gte(reserve.config.depositLimit))
         return {
           isDisabled: true,
@@ -244,19 +269,14 @@ export const getSubmitButtonNoValueState =
           isDisabled: true,
           title: "Reserve USD deposit limit reached",
         };
-      if (borrowedAmountAcrossObligations.gt(LOOPING_THRESHOLD))
+      if (
+        getBorrowedAmountAcrossObligations(reserve.coinType, obligations).gt(
+          LOOPING_THRESHOLD,
+        )
+      )
         return { isDisabled: true, title: "Cannot deposit borrowed asset" };
       return undefined;
     } else if (action === Action.BORROW) {
-      const depositedAmountAcrossObligations = (obligations ?? []).reduce(
-        (acc, obligation) =>
-          acc.plus(
-            obligation.deposits.find((d) => d.coinType === reserve.coinType)
-              ?.depositedAmount ?? new BigNumber(0),
-          ),
-        new BigNumber(0),
-      );
-
       if (reserve.borrowedAmount.gte(reserve.config.borrowLimit))
         return {
           isDisabled: true,
@@ -271,8 +291,28 @@ export const getSubmitButtonNoValueState =
           isDisabled: true,
           title: "Reserve USD borrow limit reached",
         };
-      if (depositedAmountAcrossObligations.gt(LOOPING_THRESHOLD))
+      if (
+        getDepositedAmountAcrossObligations(reserve.coinType, obligations).gt(
+          LOOPING_THRESHOLD,
+        )
+      )
         return { isDisabled: true, title: "Cannot borrow deposited asset" };
+
+      // Isolated
+      if (!reserve.config.isolated) {
+        const isolatedReservesWithBorrows = reserves
+          .filter((r) => r.config.isolated)
+          .filter((r) => hasReserveBorrows(r, obligation));
+        if (isolatedReservesWithBorrows.length > 0)
+          return { isDisabled: true, title: `Cannot borrow ${reserve.symbol}` };
+      } else {
+        const otherReservesWithBorrows = reserves
+          .filter((r) => r.coinType !== reserve.coinType)
+          .filter((r) => hasReserveBorrows(r, obligation));
+        if (otherReservesWithBorrows.length > 0)
+          return { isDisabled: true, title: `Cannot borrow ${reserve.symbol}` };
+      }
+
       return undefined;
     }
   };
@@ -299,4 +339,79 @@ export const getSubmitButtonState =
         return { isDisabled: calc.isDisabled, title: calc.reason };
     }
     return undefined;
+  };
+
+const hasReserveBorrows = (
+  reserve: ParsedReserve,
+  obligation: ParsedObligation | null,
+) =>
+  (
+    obligation?.borrows.find((b) => b.coinType === reserve.coinType)
+      ?.borrowedAmount ?? new BigNumber(0)
+  ).gt(0);
+
+export const getSubmitWarningMessages =
+  (
+    action: Action,
+    reserves: ParsedReserve[],
+    reserve: ParsedReserve,
+    obligations: ParsedObligation[] | undefined,
+    obligation: ParsedObligation | null,
+  ) =>
+  () => {
+    const result = [];
+
+    if (action === Action.DEPOSIT) {
+      if (isStablecoin(reserve.coinType)) {
+        for (const stablecoinCoinType of NORMALIZED_STABLECOIN_COINTYPES) {
+          if (stablecoinCoinType === reserve.coinType) continue;
+
+          if (
+            getBorrowedAmountAcrossObligations(
+              stablecoinCoinType,
+              obligations,
+            ).gt(LOOPING_THRESHOLD)
+          ) {
+            result.push(LOOPING_WARNING_MESSAGE("depositing", reserve.symbol));
+            break;
+          }
+        }
+      }
+    } else if (action === Action.BORROW) {
+      if (isStablecoin(reserve.coinType)) {
+        for (const stablecoinCoinType of NORMALIZED_STABLECOIN_COINTYPES) {
+          if (stablecoinCoinType === reserve.coinType) continue;
+
+          if (
+            getDepositedAmountAcrossObligations(
+              stablecoinCoinType,
+              obligations,
+            ).gt(LOOPING_THRESHOLD)
+          ) {
+            result.push(LOOPING_WARNING_MESSAGE("borrowing", reserve.symbol));
+            break;
+          }
+        }
+      }
+
+      if (!reserve.config.isolated) {
+        const isolatedReservesWithBorrows = reserves
+          .filter((r) => r.config.isolated)
+          .filter((r) => hasReserveBorrows(r, obligation));
+        if (isolatedReservesWithBorrows.length > 0)
+          result.push(
+            `You cannot borrow ${reserve.symbol} as you're already borrowing ${isolatedReservesWithBorrows[0].symbol}, which is an isolated asset.`,
+          );
+      } else {
+        const otherReservesWithBorrows = reserves
+          .filter((r) => r.coinType !== reserve.coinType)
+          .filter((r) => hasReserveBorrows(r, obligation));
+        if (otherReservesWithBorrows.length > 0)
+          result.push(
+            `You cannot borrow ${reserve.symbol} (an isolated asset) as you're already borrowing ${formatList(otherReservesWithBorrows.map((r) => r.symbol))}.`,
+          );
+      }
+    }
+
+    return result;
   };

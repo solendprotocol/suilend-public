@@ -12,7 +12,6 @@ import { Route } from "lucide-react";
 import ReactFlow, { Edge, Handle, Node, Position } from "reactflow";
 
 import Dialog from "@/components/dashboard/Dialog";
-import Button from "@/components/shared/Button";
 import Spinner from "@/components/shared/Spinner";
 import TextLink from "@/components/shared/TextLink";
 import TokenLogo from "@/components/shared/TokenLogo";
@@ -121,19 +120,26 @@ function StartEndNode({ data }: StartEndNodeProps) {
           height: `${START_END_NODE_HEIGHT}px`,
         }}
       >
-        <div className="flex flex-row items-center gap-1.5 rounded-md bg-muted/10 px-3 py-2">
-          <TokenLogo
-            className="h-4 w-4"
-            imageProps={{ className: "rounded-full" }}
-            token={{
-              coinType: token.coin_type,
-              symbol: token.ticker,
-              iconUrl: token.icon_url,
-            }}
-          />
-          <TBody>
-            {+formatToken(amount, { dp: token.decimals })} {token.ticker}
-          </TBody>
+        <div className="w-max rounded-md bg-muted/10 px-3 py-2">
+          <Tooltip
+            title={`${formatToken(amount, { dp: token.decimals })} ${token.ticker}`}
+          >
+            <div className="flex flex-row items-center gap-1.5">
+              <TokenLogo
+                className="h-4 w-4"
+                imageProps={{ className: "rounded-full" }}
+                token={{
+                  coinType: token.coin_type,
+                  symbol: token.ticker,
+                  iconUrl: token.icon_url,
+                }}
+              />
+
+              <TBody>
+                {formatToken(amount, { exact: false })} {token.ticker}
+              </TBody>
+            </div>
+          </Tooltip>
         </div>
       </div>
       {isStart && <Handle type="source" position={Position.Right} />}
@@ -578,42 +584,34 @@ export default function RoutingDialog({ quote }: RoutingDialogProps) {
     <Dialog
       rootProps={{ open: isOpen, onOpenChange }}
       trigger={
-        <div className="flex h-5 w-max max-w-full cursor-pointer flex-row items-center gap-2">
-          <Button
-            className="rounded-full"
-            labelClassName="font-sans text-xs"
-            startIcon={<Route />}
-            variant="secondaryOutline"
-            size="sm"
-          >
+        <TLabelSans className="max-w-max cursor-pointer overflow-hidden text-ellipsis text-nowrap transition-colors hover:text-foreground">
+          <span className="font-medium">
             {hopsCount} hop{hopsCount !== 1 && "s"}
-          </Button>
-          <TLabelSans className="flex-1 overflow-hidden text-ellipsis text-nowrap">
-            {"via "}
-            {formatList(
-              Array.from(
-                new Set(
-                  quote.type === UnifiedQuoteType.HOP
-                    ? Object.values(quote.quote.trade.nodes).map(
-                        (node) =>
-                          HOP_EXCHANGE_NAME_MAP[node.pool.sui_exchange] ??
-                          node.pool.sui_exchange,
+          </span>
+          {" via "}
+          {formatList(
+            Array.from(
+              new Set(
+                quote.type === UnifiedQuoteType.HOP
+                  ? Object.values(quote.quote.trade.nodes).map(
+                      (node) =>
+                        HOP_EXCHANGE_NAME_MAP[node.pool.sui_exchange] ??
+                        node.pool.sui_exchange,
+                    )
+                  : quote.quote.routes
+                      .reduce(
+                        (acc, route) => [...acc, ...route.paths],
+                        [] as AftermathRouterTradePath[],
                       )
-                    : quote.quote.routes
-                        .reduce(
-                          (acc, route) => [...acc, ...route.paths],
-                          [] as AftermathRouterTradePath[],
-                        )
-                        .map(
-                          (path) =>
-                            AF_EXCHANGE_NAME_MAP[path.protocolName] ??
-                            path.protocolName,
-                        ),
-                ),
+                      .map(
+                        (path) =>
+                          AF_EXCHANGE_NAME_MAP[path.protocolName] ??
+                          path.protocolName,
+                      ),
               ),
-            )}
-          </TLabelSans>
-        </div>
+            ),
+          )}
+        </TLabelSans>
       }
       dialogContentProps={{ className: "h-[600px]" }}
       headerProps={{

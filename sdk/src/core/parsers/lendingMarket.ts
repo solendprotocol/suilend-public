@@ -32,13 +32,25 @@ export const parseLendingMarket = (
   const id = lendingMarket.id;
   const version = lendingMarket.version;
 
-  const parsedReserves = reserves.map((reserve) =>
-    parseReserve(
-      { Reserve, PoolRewardManager, PoolReward, simulate },
-      reserve,
-      coinMetadataMap,
-    ),
-  );
+  const parsedReserves = reserves
+    .map((reserve) =>
+      parseReserve(
+        { Reserve, PoolRewardManager, PoolReward, simulate },
+        reserve,
+        coinMetadataMap,
+      ),
+    )
+    .sort((a, b) => {
+      const customOrder = ["SUI", "wUSDC", "USDC"];
+
+      const aCustomOrderIndex = customOrder.indexOf(a.symbol);
+      const bCustomOrderIndex = customOrder.indexOf(b.symbol);
+
+      if (aCustomOrderIndex > -1 && bCustomOrderIndex > -1)
+        return aCustomOrderIndex - bCustomOrderIndex;
+      else if (aCustomOrderIndex === -1 && bCustomOrderIndex === -1) return 0;
+      else return aCustomOrderIndex > -1 ? -1 : 1;
+    });
 
   const obligations = lendingMarket.obligations;
 

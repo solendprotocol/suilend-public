@@ -10,6 +10,7 @@ import {
   addReserve,
   borrow,
   cancelPoolReward,
+  claimFees,
   claimRewards,
   claimRewardsAndDeposit,
   closePoolReward,
@@ -17,6 +18,7 @@ import {
   depositLiquidityAndMintCtokens,
   liquidate,
   migrate,
+  redeemCtokensAndWithdrawLiquidity,
   refreshReservePrice,
   repay,
   updateRateLimiterConfig as updateRateLimiterConfigFunction,
@@ -63,6 +65,8 @@ const deps = {
   repay,
   liquidate,
   migrate,
+  claimFees,
+  redeemCtokensAndWithdrawLiquidity,
 };
 
 export class SuilendClient<T extends string> extends BaseSuilendClient {

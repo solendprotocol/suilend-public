@@ -19,11 +19,7 @@ import { useDashboardContext } from "@/contexts/DashboardContext";
 import { usePointsContext } from "@/contexts/PointsContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 import useBreakpoint from "@/hooks/useBreakpoint";
-import {
-  COINTYPE_LOGO_MAP,
-  NORMALIZED_SUI_COINTYPE,
-  isSui,
-} from "@/lib/coinType";
+import { isSuilendPoints } from "@/lib/coinType";
 import { TX_TOAST_DURATION } from "@/lib/constants";
 import { formatToken } from "@/lib/format";
 import { RewardSummary } from "@/lib/liquidityMining";
@@ -31,30 +27,59 @@ import { POINTS_URL } from "@/lib/navigation";
 import { getPointsStats } from "@/lib/points";
 import { cn } from "@/lib/utils";
 
-interface PendingRewardsProps {
-  totalSuiRewards: BigNumber;
+interface ClaimableRewardsProps {
+  claimableRewardsMap: Record<string, BigNumber>;
   isCentered?: boolean;
 }
 
-function PendingRewards({ totalSuiRewards, isCentered }: PendingRewardsProps) {
+function ClaimableRewards({
+  claimableRewardsMap,
+  isCentered,
+}: ClaimableRewardsProps) {
+  const appContext = useAppContext();
+  const data = appContext.data as AppData;
+
   return (
     <div className={cn("flex flex-col gap-1", isCentered && "items-center")}>
       <TLabelSans className={cn(isCentered && "text-center")}>
-        Pending rewards
+        Claimable rewards
       </TLabelSans>
 
-      <div className="flex flex-row items-center gap-1.5">
-        <TokenLogo
-          className="h-4 w-4"
-          token={{
-            coinType: NORMALIZED_SUI_COINTYPE,
-            symbol: "SUI",
-            iconUrl: COINTYPE_LOGO_MAP[NORMALIZED_SUI_COINTYPE],
-          }}
-        />
-        <Tooltip title={formatToken(totalSuiRewards, { dp: 9 })}>
-          <TBody>{formatToken(totalSuiRewards)}</TBody>
-        </Tooltip>
+      <div className="flex flex-col gap-1">
+        {Object.entries(claimableRewardsMap).map(
+          ([coinType, claimableRewards]) => {
+            const reserve = data.lendingMarket.reserves.find(
+              (r) => r.coinType === coinType,
+            );
+
+            if (!reserve) return null;
+            return (
+              <div
+                key={coinType}
+                className="flex flex-row items-center gap-1.5"
+              >
+                <TokenLogo
+                  className="h-4 w-4"
+                  token={{
+                    coinType,
+                    symbol: reserve.symbol,
+                    iconUrl: reserve.iconUrl,
+                  }}
+                />
+                <Tooltip
+                  title={`${formatToken(claimableRewards, {
+                    dp: reserve.mintDecimals,
+                  })} ${reserve.symbol}`}
+                >
+                  <TBody>
+                    {formatToken(claimableRewards, { exact: false })}{" "}
+                    {reserve.symbol}
+                  </TBody>
+                </Tooltip>
+              </div>
+            );
+          },
+        )}
       </div>
     </div>
   );
@@ -118,22 +143,43 @@ export default function RewardsCard() {
   const { md } = useBreakpoint();
 
   // Rewards
-  let totalSuiRewards = new BigNumber(0);
-  let suiRewards: RewardSummary[] = [];
+  const rewardsMap: Record<string, RewardSummary[]> = {};
+  const claimableRewardsMap: Record<string, BigNumber> = {};
   if (obligation) {
-    suiRewards = Object.values(data.rewardMap).flatMap((rewards) =>
-      [...rewards.deposit, ...rewards.borrow].filter(
-        (r) =>
-          isSui(r.stats.rewardCoinType) && r.obligationClaims[obligation.id],
-      ),
+    Object.values(data.rewardMap).flatMap((rewards) =>
+      [...rewards.deposit, ...rewards.borrow].forEach((r) => {
+        if (isSuilendPoints(r.stats.rewardCoinType)) return;
+        if (!r.obligationClaims[obligation.id]) return;
+
+        const claimableRewards = Object.values(r.obligationClaims).reduce(
+          (acc, claim) => acc.plus(claim.claimableAmount),
+          new BigNumber(0),
+        );
+        if (claimableRewards.eq(0)) return;
+
+        const minAmount = 10 ** (-1 * r.stats.mintDecimals);
+        if (claimableRewards.lt(minAmount)) return;
+
+        if (!rewardsMap[r.stats.rewardCoinType])
+          rewardsMap[r.stats.rewardCoinType] = [];
+        rewardsMap[r.stats.rewardCoinType].push(r);
+      }),
     );
 
-    suiRewards.forEach((reward) => {
-      totalSuiRewards = totalSuiRewards.plus(
-        reward.obligationClaims[obligation.id].claimableAmount,
+    Object.entries(rewardsMap).forEach(([coinType, rewards]) => {
+      claimableRewardsMap[coinType] = rewards.reduce(
+        (acc, reward) =>
+          acc.plus(reward.obligationClaims[obligation.id].claimableAmount),
+        new BigNumber(0),
       );
     });
   }
+
+  const hasClaimableRewards =
+    Object.values(claimableRewardsMap).length > 0 &&
+    Object.values(claimableRewardsMap).some((claimableRewards) =>
+      claimableRewards.gt(0),
+    );
 
   const [isClaiming, setIsClaiming] = useState<boolean>(false);
 
@@ -143,7 +189,7 @@ export default function RewardsCard() {
     setIsClaiming(true);
 
     try {
-      const res = await claimRewards(suiRewards);
+      const res = await claimRewards(rewardsMap);
       const txUrl = explorer.buildTxUrl(res.digest);
 
       toast.success("Claimed rewards", {
@@ -156,7 +202,7 @@ export default function RewardsCard() {
       });
     } catch (err) {
       toast.error("Failed to claim rewards", {
-        description: ((err as Error)?.message || err) as string,
+        description: (err as Error)?.message || "An unknown error occurred",
         duration: TX_TOAST_DURATION,
       });
     } finally {
@@ -227,16 +273,18 @@ export default function RewardsCard() {
                 </NextLink>
               </div>
 
-              <div className="flex-1 sm:flex-initial">
-                <Button
-                  className="w-full sm:w-[134px]"
-                  labelClassName="uppercase"
-                  disabled={totalSuiRewards.eq(0) || isImpersonatingAddress}
-                  onClick={onClaimRewardsClick}
-                >
-                  {isClaiming ? <Spinner size="sm" /> : "Claim rewards"}
-                </Button>
-              </div>
+              {hasClaimableRewards && (
+                <div className="flex-1 sm:flex-initial">
+                  <Button
+                    className="w-full sm:w-[134px]"
+                    labelClassName="uppercase"
+                    disabled={isImpersonatingAddress}
+                    onClick={onClaimRewardsClick}
+                  >
+                    {isClaiming ? <Spinner size="sm" /> : "Claim rewards"}
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
 
@@ -244,14 +292,21 @@ export default function RewardsCard() {
 
           {md ? (
             <div className="flex flex-row items-center justify-between gap-4">
-              <PendingRewards totalSuiRewards={totalSuiRewards} />
+              {hasClaimableRewards && (
+                <ClaimableRewards claimableRewardsMap={claimableRewardsMap} />
+              )}
               <TotalPointsStat totalPoints={pointsStats.totalPoints.total} />
               <PointsPerDayStat pointsPerDay={pointsStats.pointsPerDay.total} />
               <RankStat rank={rank} />
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-4">
-              <PendingRewards totalSuiRewards={totalSuiRewards} isCentered />
+              {hasClaimableRewards && (
+                <ClaimableRewards
+                  claimableRewardsMap={claimableRewardsMap}
+                  isCentered
+                />
+              )}
               <TotalPointsStat
                 totalPoints={pointsStats.totalPoints.total}
                 isCentered

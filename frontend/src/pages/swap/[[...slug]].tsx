@@ -14,7 +14,12 @@ import {
   RouterCompleteTradeRoute as AftermathRouterCompleteTradeRoute,
 } from "aftermath-ts-sdk";
 import BigNumber from "bignumber.js";
-import { ArrowRightLeft, ArrowUpDown, RotateCw } from "lucide-react";
+import {
+  AlertTriangle,
+  ArrowRightLeft,
+  ArrowUpDown,
+  RotateCw,
+} from "lucide-react";
 import { ReactFlowProvider } from "reactflow";
 import { toast } from "sonner";
 import useSWR from "swr";
@@ -28,12 +33,14 @@ import Button from "@/components/shared/Button";
 import Spinner from "@/components/shared/Spinner";
 import TextLink from "@/components/shared/TextLink";
 import TokenLogos from "@/components/shared/TokenLogos";
-import { TBody, TLabelSans } from "@/components/shared/Typography";
+import Tooltip from "@/components/shared/Tooltip";
+import { TBody, TLabel, TLabelSans } from "@/components/shared/Typography";
 import RoutingDialog from "@/components/swap/RoutingDialog";
 import SwapInput from "@/components/swap/SwapInput";
-import SwapSlippagePopover from "@/components/swap/SwapSlippagePopover";
+import SwapSlippagePopover, {
+  SLIPPAGE_PERCENT_DP,
+} from "@/components/swap/SwapSlippagePopover";
 import TokensRatioChart from "@/components/swap/TokensRatioChart";
-import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import {
@@ -49,7 +56,7 @@ import {
 } from "@/lib/actions";
 import { ParsedCoinBalance } from "@/lib/coinBalance";
 import { SUI_COINTYPE, isSui } from "@/lib/coinType";
-import { SUI_DEPOSIT_GAS_MIN, TX_TOAST_DURATION } from "@/lib/constants";
+import { SUI_SWAP_GAS_MIN, TX_TOAST_DURATION } from "@/lib/constants";
 import { formatPercent, formatToken } from "@/lib/format";
 import { getFilteredRewards, getTotalAprPercent } from "@/lib/liquidityMining";
 import track from "@/lib/track";
@@ -66,6 +73,9 @@ type SubmitButtonState = {
   isDisabled?: boolean;
   title?: string;
 };
+
+const PRICE_IMPACT_PERCENT_WARNING_THRESHOLD = 2;
+const PRICE_IMPACT_PERCENT_DESTRUCTIVE_THRESHOLD = 25;
 
 function Page() {
   const { address } = useWalletContext();
@@ -84,6 +94,7 @@ function Page() {
   const hopSdk = restSwapContext.hopSdk as HopApi;
   const aftermathSdk = restSwapContext.aftermathSdk as AftermathRouter;
   const tokens = restSwapContext.tokens as VerifiedToken[];
+  const verifiedTokens = restSwapContext.verifiedTokens as VerifiedToken[];
   const tokenIn = restSwapContext.tokenIn as VerifiedToken;
   const tokenOut = restSwapContext.tokenOut as VerifiedToken;
   const coinBalancesMap = restSwapContext.coinBalancesMap as Record<
@@ -128,9 +139,9 @@ function Page() {
     ];
     if (isSui(tokenIn.coin_type))
       result.push({
-        reason: `${SUI_DEPOSIT_GAS_MIN} SUI should be saved for gas`,
+        reason: `${SUI_SWAP_GAS_MIN} SUI should be saved for gas`,
         isDisabled: true,
-        value: tokenInBalance.minus(SUI_DEPOSIT_GAS_MIN),
+        value: tokenInBalance.minus(SUI_SWAP_GAS_MIN),
       });
 
     return result;
@@ -157,7 +168,7 @@ function Page() {
         if (_value.includes(".")) {
           const [whole, decimals] = _value.split(".");
           setSlippagePercent(
-            `${whole}.${decimals.slice(0, Math.min(decimals.length, 1))}`,
+            `${whole}.${decimals.slice(0, Math.min(decimals.length, SLIPPAGE_PERCENT_DP))}`,
           );
         } else setSlippagePercent(_value);
       }
@@ -193,6 +204,11 @@ function Page() {
   const quoteAmountOut = quote
     ? BigNumber(quote.amount_out.toString())
     : undefined;
+
+  const quoteRatio =
+    quoteAmountOut !== undefined && quoteAmountIn !== undefined
+      ? quoteAmountOut.div(quoteAmountIn)
+      : undefined;
 
   const [isQuoteRatioInverted, setIsQuoteRatioInverted] =
     useState<boolean>(false);
@@ -327,7 +343,7 @@ function Page() {
         return unifiedQuote;
       } catch (err) {
         toast.error("Failed to get quote", {
-          description: ((err as Error)?.message || err) as string,
+          description: (err as Error)?.message || "An unknown error occurred",
         });
         console.error(err);
 
@@ -511,6 +527,12 @@ function Page() {
     fetchedInitialTokenHistoricalUsdPricesRef.current = true;
   }, [fetchTokenHistoricalUsdPrice, tokenIn, tokenOut]);
 
+  // Price impact
+  const priceImpactPercent =
+    quoteRatio !== undefined && tokensCurrentRatio !== undefined
+      ? new BigNumber(100).minus(quoteRatio.div(tokensCurrentRatio).times(100))
+      : undefined;
+
   // Reverse tokens
   const reverseTokens = () => {
     reverseTokenSymbols();
@@ -535,7 +557,13 @@ function Page() {
     )
       reverseTokens();
     else {
-      setTokenSymbol(_token.ticker, direction);
+      const isVerifiedToken = verifiedTokens.find(
+        (t) => t.coin_type === coinType,
+      );
+      setTokenSymbol(
+        isVerifiedToken ? _token.ticker : _token.coin_type,
+        direction,
+      );
 
       fetchQuote(
         direction === TokenDirection.IN ? _token : tokenIn,
@@ -575,6 +603,38 @@ function Page() {
     };
   })();
 
+  const swapAndDepositButtonDisabledTooltip = (() => {
+    if (!hasTokenOutReserve || quoteAmountOut === undefined) return;
+
+    const depositSubmitButtonNoValueState = getSubmitButtonNoValueState(
+      Action.DEPOSIT,
+      data.lendingMarket.reserves,
+      tokenOutReserve,
+      data.obligations,
+      obligation,
+    )();
+    const depositSubmitButtonState = getSubmitButtonState(
+      Action.DEPOSIT,
+      tokenOutReserve,
+      quoteAmountOut.plus(
+        isSui(tokenOutReserve.coinType) ? SUI_SWAP_GAS_MIN : 0,
+      ),
+      data,
+      obligation,
+    )(quoteAmountOut.toString());
+
+    if (
+      depositSubmitButtonNoValueState !== undefined &&
+      depositSubmitButtonNoValueState.isDisabled
+    )
+      return depositSubmitButtonNoValueState.title;
+    if (
+      depositSubmitButtonState !== undefined &&
+      depositSubmitButtonState.isDisabled
+    )
+      return depositSubmitButtonState.title;
+  })();
+
   const swapAndDepositButtonState: SubmitButtonState = (() => {
     if (!hasTokenOutReserve)
       return { isDisabled: true, title: "Cannot deposit this token" };
@@ -582,7 +642,10 @@ function Page() {
 
     return {
       title: `Swap and deposit for ${formatPercent(tokenOutReserveDepositAprPercent)} APR`,
-      isDisabled: swapButtonState.isDisabled || isSwapping,
+      isDisabled:
+        !!swapAndDepositButtonDisabledTooltip ||
+        swapButtonState.isDisabled ||
+        isSwapping,
     };
   })();
 
@@ -652,7 +715,7 @@ function Page() {
         address,
         isDepositing,
       );
-      transaction.setGasBudget("" as any); // Set to dynamic
+      transaction.setGasBudget(SUI_SWAP_GAS_MIN * 10 ** 9);
 
       if (isDepositing) {
         if (!outputCoin) throw new Error("Missing coin to deposit");
@@ -681,11 +744,7 @@ function Page() {
 
   const onSwapClick = async (deposit?: boolean) => {
     if (deposit) {
-      if (
-        swapAndDepositButtonState.isDisabled ||
-        swapAndDepositButtonDisabledTooltip !== undefined
-      )
-        return;
+      if (swapAndDepositButtonState.isDisabled) return;
     } else {
       if (swapButtonState.isDisabled) return;
     }
@@ -727,14 +786,20 @@ function Page() {
         deposit: deposit ? "true" : "false",
       };
       if (tokenInUsdValue !== undefined)
-        properties.amountInUsd = tokenInUsdValue.toString();
+        properties.amountInUsd = formatToken(tokenInUsdValue, {
+          dp: 2,
+          useGrouping: false,
+        });
       if (tokenOutUsdValue !== undefined)
-        properties.amountOutUsd = tokenOutUsdValue.toString();
+        properties.amountOutUsd = formatToken(tokenOutUsdValue, {
+          dp: 2,
+          useGrouping: false,
+        });
 
       track("swap_success", properties);
     } catch (err) {
       toast.error("Failed to swap", {
-        description: ((err as Error)?.message || err) as string,
+        description: (err as Error)?.message || "An unknown error occurred",
         duration: TX_TOAST_DURATION,
       });
     } finally {
@@ -743,36 +808,6 @@ function Page() {
       await refreshData();
     }
   };
-
-  const swapAndDepositButtonDisabledTooltip = (() => {
-    if (!hasTokenOutReserve || quoteAmountOut === undefined) return;
-
-    const depositSubmitButtonNoValueState = getSubmitButtonNoValueState(
-      Action.DEPOSIT,
-      tokenOutReserve,
-      data.obligations,
-    )();
-    const depositSubmitButtonState = getSubmitButtonState(
-      Action.DEPOSIT,
-      tokenOutReserve,
-      quoteAmountOut.plus(
-        isSui(tokenOutReserve.coinType) ? SUI_DEPOSIT_GAS_MIN : 0,
-      ),
-      data,
-      obligation,
-    )(quoteAmountOut.toString());
-
-    if (
-      depositSubmitButtonNoValueState !== undefined &&
-      depositSubmitButtonNoValueState.isDisabled
-    )
-      return depositSubmitButtonNoValueState.title;
-    if (
-      depositSubmitButtonState !== undefined &&
-      depositSubmitButtonState.isDisabled
-    )
-      return depositSubmitButtonState.title;
-  })();
 
   return (
     <>
@@ -809,7 +844,6 @@ function Page() {
               value={value}
               onChange={onValueChange}
               usdValue={tokenInUsdValue}
-              tokens={tokens}
               token={tokenIn}
               onSelectToken={(t: VerifiedToken) =>
                 onTokenCoinTypeChange(t.coin_type, TokenDirection.IN)
@@ -847,7 +881,6 @@ function Page() {
                 }
                 isValueLoading={isFetchingQuote}
                 usdValue={tokenOutUsdValue}
-                tokens={tokens}
                 token={tokenOut}
                 onSelectToken={(t: VerifiedToken) =>
                   onTokenCoinTypeChange(t.coin_type, TokenDirection.OUT)
@@ -870,96 +903,123 @@ function Page() {
             )}
           </div>
 
-          {/* Quote */}
           {new BigNumber(value || 0).gt(0) && (
-            <div className="mb-2 w-full">
-              {quoteAmountIn && quoteAmountOut ? (
-                <div
-                  className="group flex w-max cursor-pointer flex-row items-center gap-2"
-                  onClick={() => setIsQuoteRatioInverted((is) => !is)}
-                >
-                  <TLabelSans className="transition-colors group-hover:text-foreground">
-                    {"1 "}
-                    {(!isQuoteRatioInverted ? tokenIn : tokenOut).ticker}
-                    {" ≈ "}
-                    {formatToken(
-                      (!isQuoteRatioInverted
-                        ? quoteAmountOut
-                        : quoteAmountIn
-                      ).div(
-                        !isQuoteRatioInverted ? quoteAmountIn : quoteAmountOut,
-                      ),
-                      {
-                        dp: (!isQuoteRatioInverted ? tokenOut : tokenIn)
-                          .decimals,
-                      },
-                    )}{" "}
-                    {(!isQuoteRatioInverted ? tokenOut : tokenIn).ticker}
-                  </TLabelSans>
-                  <ArrowRightLeft className="h-3 w-3 text-muted-foreground transition-colors group-hover:text-foreground" />
-                </div>
-              ) : (
-                <Skeleton className="h-4 w-40" />
-              )}
-            </div>
-          )}
+            <div className="mb-4 flex w-full flex-col gap-2">
+              {/* Routing */}
+              <div className="w-full">
+                {quote ? (
+                  <ReactFlowProvider>
+                    <RoutingDialog quote={quote} />
+                  </ReactFlowProvider>
+                ) : (
+                  <Skeleton className="h-4 w-60" />
+                )}
+              </div>
 
-          {/* Routing */}
-          {new BigNumber(value || 0).gt(0) && (
-            <div className="mb-4 w-full">
-              {quote ? (
-                <ReactFlowProvider>
-                  <RoutingDialog quote={quote} />
-                </ReactFlowProvider>
-              ) : (
-                <Skeleton className="h-5 w-60" />
-              )}
+              {/* Quote */}
+              <div className="w-full">
+                {quoteAmountIn && quoteAmountOut ? (
+                  <div
+                    className="group flex w-max cursor-pointer flex-row items-center gap-2"
+                    onClick={() => setIsQuoteRatioInverted((is) => !is)}
+                  >
+                    <TLabel className="transition-colors group-hover:text-foreground">
+                      {"1 "}
+                      {(!isQuoteRatioInverted ? tokenIn : tokenOut).ticker}{" "}
+                      <span className="font-sans">≈</span>{" "}
+                      {formatToken(
+                        (!isQuoteRatioInverted
+                          ? quoteAmountOut
+                          : quoteAmountIn
+                        ).div(
+                          !isQuoteRatioInverted
+                            ? quoteAmountIn
+                            : quoteAmountOut,
+                        ),
+                        {
+                          dp: (!isQuoteRatioInverted ? tokenOut : tokenIn)
+                            .decimals,
+                        },
+                      )}{" "}
+                      {(!isQuoteRatioInverted ? tokenOut : tokenIn).ticker}
+                    </TLabel>
+                    <ArrowRightLeft className="h-3 w-3 text-muted-foreground transition-colors group-hover:text-foreground" />
+                  </div>
+                ) : (
+                  <Skeleton className="h-4 w-40" />
+                )}
+              </div>
+
+              {/* Price impact */}
+              {priceImpactPercent !== undefined &&
+                priceImpactPercent.gte(
+                  PRICE_IMPACT_PERCENT_WARNING_THRESHOLD,
+                ) && (
+                  <div className="w-max">
+                    <TLabelSans
+                      className={cn(
+                        "font-medium",
+                        priceImpactPercent.lt(
+                          PRICE_IMPACT_PERCENT_DESTRUCTIVE_THRESHOLD,
+                        )
+                          ? "text-warning"
+                          : "text-destructive",
+                      )}
+                    >
+                      <AlertTriangle className="mb-0.5 mr-1 inline h-3 w-3" />
+                      {formatPercent(priceImpactPercent)} Price impact
+                    </TLabelSans>
+                  </div>
+                )}
             </div>
           )}
 
           {/* Swap */}
-          <div className="flex w-full flex-col gap-[1px]">
-            <Button
-              className={cn(
-                "h-auto min-h-14 w-full py-2",
-                hasTokenOutReserve && "rounded-b-none",
-              )}
-              labelClassName="text-wrap uppercase"
-              style={{ overflowWrap: "anywhere" }}
-              disabled={swapButtonState.isDisabled}
-              onClick={() => onSwapClick()}
-            >
-              {swapButtonState.isLoading ? (
-                <Spinner size="md" />
-              ) : (
-                swapButtonState.title
-              )}
-            </Button>
-
-            {/* Swap and deposit */}
-            {hasTokenOutReserve && (
+          <div className="flex w-full flex-col gap-2">
+            <div className="flex w-full flex-col gap-[1px] rounded-sm">
               <Button
-                tooltip={
-                  !swapAndDepositButtonState.isDisabled
-                    ? swapAndDepositButtonDisabledTooltip
-                    : undefined
-                }
-                className="rounded-t-none disabled:pointer-events-auto disabled:bg-secondary"
-                labelClassName="uppercase text-xs"
-                variant="secondary"
-                disabled={
-                  swapAndDepositButtonState.isDisabled ||
-                  swapAndDepositButtonDisabledTooltip !== undefined
-                }
-                onClick={() => onSwapClick(true)}
+                className={cn(
+                  "h-auto min-h-14 w-full py-2",
+                  hasTokenOutReserve && "rounded-b-none",
+                )}
+                labelClassName="text-wrap uppercase"
+                style={{ overflowWrap: "anywhere" }}
+                disabled={swapButtonState.isDisabled}
+                onClick={() => onSwapClick()}
               >
-                {swapAndDepositButtonState.isLoading ? (
-                  <Spinner size="sm" />
+                {swapButtonState.isLoading ? (
+                  <Spinner size="md" />
                 ) : (
-                  swapAndDepositButtonState.title
+                  swapButtonState.title
                 )}
               </Button>
-            )}
+
+              {/* Swap and deposit */}
+              {hasTokenOutReserve && (
+                <Tooltip title={swapAndDepositButtonDisabledTooltip}>
+                  <Button
+                    className={cn(
+                      "rounded-t-none",
+                      swapAndDepositButtonState.isDisabled &&
+                        "!cursor-default !bg-secondary opacity-50",
+                    )}
+                    labelClassName="uppercase text-xs"
+                    variant="secondary"
+                    onClick={
+                      swapAndDepositButtonState.isDisabled
+                        ? undefined
+                        : () => onSwapClick(true)
+                    }
+                  >
+                    {swapAndDepositButtonState.isLoading ? (
+                      <Spinner size="sm" />
+                    ) : (
+                      swapAndDepositButtonState.title
+                    )}
+                  </Button>
+                </Tooltip>
+              )}
+            </div>
           </div>
 
           {/* Tokens */}
@@ -1014,8 +1074,6 @@ function Page() {
             </div>
           </div>
         </div>
-
-        <Separator />
 
         <TLabelSans className="opacity-50">
           {"Powered by "}

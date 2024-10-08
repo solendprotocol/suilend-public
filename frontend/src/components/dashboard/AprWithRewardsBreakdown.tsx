@@ -9,7 +9,12 @@ import AprRewardsBreakdownRow from "@/components/dashboard/AprRewardsBreakdownRo
 import TokenLogo from "@/components/shared/TokenLogo";
 import TokenLogos from "@/components/shared/TokenLogos";
 import Tooltip from "@/components/shared/Tooltip";
-import { TBody, TBodySans, TLabelSans } from "@/components/shared/Typography";
+import {
+  TBody,
+  TBodySans,
+  TLabel,
+  TLabelSans,
+} from "@/components/shared/Typography";
 import { isSuilendPoints } from "@/lib/coinType";
 import { formatPercent, formatPoints, formatToken } from "@/lib/format";
 import {
@@ -22,9 +27,7 @@ import {
 import { cn, hoverUnderlineClassName } from "@/lib/utils";
 
 const calculateUtilizationPercent = (reserve: ParsedReserve) => {
-  const depositedAmount = reserve.borrowedAmount
-    .plus(reserve.availableAmount)
-    .minus(reserve.unclaimedSpreadFees);
+  const depositedAmount = reserve.borrowedAmount.plus(reserve.availableAmount);
   const borrowedAmount = reserve.borrowedAmount;
 
   return depositedAmount.eq(0)
@@ -64,7 +67,7 @@ const formatPerDay = (
 ) => {
   const formatter = (_value: BigNumber) =>
     isSuilendPoints(coinType)
-      ? formatPoints(_value, { dp: 4 })
+      ? formatPoints(_value, { dp: 3 })
       : formatToken(_value, { exact: false });
 
   return showChange && !newValue.eq(value)
@@ -189,8 +192,9 @@ export default function AprWithRewardsBreakdown({
             <TLabelSans>
               {capitalize(side)} {reserve.symbol}
               {" and earn "}
-              {perDayRewards.length > 0 && "points"}
-              {perDayRewards.length > 0 && aprRewards.length > 0 && " & "}
+              {perDayRewards.length > 0 && (
+                <>points{aprRewards.length > 0 && " & "}</>
+              )}
               {aprRewards.length > 0 && "rewards"}
             </TLabelSans>
 
@@ -222,11 +226,11 @@ export default function AprWithRewardsBreakdown({
                       className="h-4 w-4"
                       token={{
                         coinType: reward.stats.rewardCoinType,
-                        symbol: reward.stats.rewardSymbol,
+                        symbol: reward.stats.symbol,
                         iconUrl: reward.stats.iconUrl,
                       }}
                     />
-                    <TLabelSans>{reward.stats.rewardSymbol}</TLabelSans>
+                    <TLabelSans>{reward.stats.symbol}</TLabelSans>
                   </AprRewardsBreakdownRow>
                 ))}
               </div>
@@ -277,11 +281,11 @@ export default function AprWithRewardsBreakdown({
                     className="h-4 w-4"
                     token={{
                       coinType: reward.stats.rewardCoinType,
-                      symbol: reward.stats.rewardSymbol,
+                      symbol: reward.stats.symbol,
                       iconUrl: reward.stats.iconUrl,
                     }}
                   />
-                  <TLabelSans>{reward.stats.rewardSymbol}</TLabelSans>
+                  <TLabel>{reward.stats.symbol}</TLabel>
                 </AprRewardsBreakdownRow>
               ))}
             </div>
@@ -293,7 +297,7 @@ export default function AprWithRewardsBreakdown({
             className="h-4 w-4"
             tokens={[...perDayRewards, ...aprRewards].map((reward) => ({
               coinType: reward.stats.rewardCoinType,
-              symbol: reward.stats.rewardSymbol,
+              symbol: reward.stats.symbol,
               iconUrl: reward.stats.iconUrl,
             }))}
           />

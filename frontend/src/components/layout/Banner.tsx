@@ -82,7 +82,7 @@ const Banner = forwardRef<HTMLDivElement, BannerProps>(
                 </div>
 
                 {link && (
-                  <TBody className="uppercase text-secondary-foreground underline decoration-secondary-foreground hover:no-underline">
+                  <TBody className="shrink-0 uppercase text-secondary-foreground underline decoration-secondary-foreground hover:no-underline">
                     {linkTitle ?? "View"}
                   </TBody>
                 )}
