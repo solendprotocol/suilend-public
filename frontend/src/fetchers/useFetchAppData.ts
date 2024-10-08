@@ -156,7 +156,9 @@ export default function useFetchAppData(
         await suiClient.getAllBalances({
           owner: address,
         })
-      ).map((cb) => ({ ...cb, coinType: normalizeStructTag(cb.coinType) }));
+      )
+        .map((cb) => ({ ...cb, coinType: normalizeStructTag(cb.coinType) }))
+        .sort((a, b) => (a.coinType < b.coinType ? -1 : 1));
 
       const reserveCoinTypes = lendingMarket.reserves.map(
         (reserve) => reserve.coinType,
