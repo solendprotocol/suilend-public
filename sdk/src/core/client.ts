@@ -1,11 +1,15 @@
-import { fromB64, toHEX } from "@mysten/bcs";
 import { CoinStruct, SuiClient } from "@mysten/sui/client";
 import {
   Transaction,
   TransactionObjectInput,
   TransactionResult,
 } from "@mysten/sui/transactions";
-import { SUI_CLOCK_OBJECT_ID, normalizeStructTag } from "@mysten/sui/utils";
+import {
+  SUI_CLOCK_OBJECT_ID,
+  fromBase64,
+  normalizeStructTag,
+  toHex,
+} from "@mysten/sui/utils";
 
 import {
   SuiPriceServiceConnection,
@@ -359,7 +363,7 @@ export class SuilendClient {
         obligationOwnerCaps.push(
           ObligationOwnerCap.fromBcs(
             phantom(lendingMarketTypeArgs[0]),
-            fromB64(obj.data?.bcs?.bcsBytes),
+            fromBase64(obj.data?.bcs?.bcsBytes),
           ),
         );
       });
@@ -387,7 +391,7 @@ export class SuilendClient {
 
     const obligation = Obligation.fromBcs(
       phantom(lendingMarketTypeArgs[0]),
-      fromB64(obligationData.data.bcs.bcsBytes),
+      fromBase64(obligationData.data.bcs.bcsBytes),
     );
 
     return obligation;
@@ -726,7 +730,7 @@ export class SuilendClient {
         ];
       reserveArrayIndexToPriceId.set(
         deposit.reserveArrayIndex,
-        toHEX(new Uint8Array(reserve.priceIdentifier.bytes)),
+        toHex(new Uint8Array(reserve.priceIdentifier.bytes)),
       );
     });
 
@@ -737,7 +741,7 @@ export class SuilendClient {
         ];
       reserveArrayIndexToPriceId.set(
         borrow.reserveArrayIndex,
-        toHEX(new Uint8Array(reserve.priceIdentifier.bytes)),
+        toHex(new Uint8Array(reserve.priceIdentifier.bytes)),
       );
     });
 
@@ -752,7 +756,7 @@ export class SuilendClient {
         ];
       reserveArrayIndexToPriceId.set(
         extraReserveArrayIndex,
-        toHEX(new Uint8Array(reserve.priceIdentifier.bytes)),
+        toHex(new Uint8Array(reserve.priceIdentifier.bytes)),
       );
     }
 

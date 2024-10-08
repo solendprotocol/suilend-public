@@ -106,7 +106,7 @@ export default function LiquidateDialog({
   const fetchObligationDetails = async (obligationId: string) => {
     await fetchObligationOwner(obligationId);
     const rawLendingMarket = await LendingMarket.fetch(
-      suiClient as any,
+      suiClient,
       phantom(LENDING_MARKET_TYPE),
       LENDING_MARKET_ID,
     );

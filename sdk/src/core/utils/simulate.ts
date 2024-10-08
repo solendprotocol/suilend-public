@@ -1,5 +1,5 @@
 import { bcs } from "@mysten/sui/bcs";
-import { toHEX } from "@mysten/sui/utils";
+import { toHex } from "@mysten/sui/utils";
 import BigNumber from "bignumber.js";
 import { v4 as uuidv4 } from "uuid";
 
@@ -259,7 +259,7 @@ export class Simulate {
     pythConnection: SuiPriceServiceConnection,
   ): Promise<(typeof this.Reserve)[]> {
     const priceIdentifiers = reserves.map((r) =>
-      toHEX(new Uint8Array(r.priceIdentifier.bytes)),
+      toHex(new Uint8Array(r.priceIdentifier.bytes)),
     );
     const priceData =
       await pythConnection.getLatestPriceFeeds(priceIdentifiers);

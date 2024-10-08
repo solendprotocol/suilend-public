@@ -1,21 +1,15 @@
-import {
-  BcsType,
-  InferBcsType,
-  bcs,
-  fromB64,
-  fromHEX,
-  toHEX,
-} from "@mysten/bcs";
+import { BcsType, InferBcsType, bcs } from "@mysten/bcs";
 import { SuiClient } from "@mysten/sui/client";
 import {
   TransactionArgument,
   TransactionObjectInput,
 } from "@mysten/sui/transactions";
+import { fromBase64, fromHex, toHex } from "@mysten/sui/utils";
 
 export const ID = bcs.struct("ID", {
   bytes: bcs.bytes(32).transform({
-    input: (val: string) => fromHEX(val),
-    output: (val: Uint8Array) => toHEX(val),
+    input: (val: string) => fromHex(val),
+    output: (val: Uint8Array) => toHex(val),
   }),
 });
 
@@ -53,8 +47,8 @@ export const Bag = bcs.struct("Bag", {
 export const Obligation = bcs.struct("Obligation", {
   id: UID,
   owner: bcs.bytes(32).transform({
-    input: (val: string) => fromHEX(val),
-    output: (val: Uint8Array) => toHEX(val),
+    input: (val: string) => fromHex(val),
+    output: (val: Uint8Array) => toHex(val),
   }),
   deposits: bcs.vector(Deposit),
   borrows: bcs.vector(Borrow),
@@ -134,7 +128,7 @@ export async function load<T>(
   if (data.data?.bcs?.dataType !== "moveObject") {
     throw new Error("Error: invalid data type");
   }
-  return type.parse(fromB64(data.data.bcs.bcsBytes));
+  return type.parse(fromBase64(data.data.bcs.bcsBytes));
 }
 
 //

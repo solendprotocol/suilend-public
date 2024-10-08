@@ -36,7 +36,7 @@ export default function useFetchAppData(
   const dataFetcher = async () => {
     const now = Math.floor(Date.now() / 1000);
     const rawLendingMarket = await LendingMarket.fetch(
-      suiClient as any,
+      suiClient,
       phantom(LENDING_MARKET_TYPE),
       LENDING_MARKET_ID,
     );

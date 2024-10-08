@@ -1,5 +1,5 @@
 import { DynamicFieldInfo, SuiClient } from "@mysten/sui/client";
-import { fromB64 } from "@mysten/sui/utils";
+import { fromBase64 } from "@mysten/sui/utils";
 import pLimit from "p-limit";
 
 import { phantom } from "../_generated/_framework/reified";
@@ -47,7 +47,7 @@ export async function fetchAllObligationsForMarketWithHandler(
           obligations.push(
             Obligation.fromBcs(
               phantom(LENDING_MARKET_TYPE),
-              fromB64((rawObligation.data?.bcs as any).bcsBytes),
+              fromBase64((rawObligation.data?.bcs as any).bcsBytes),
             ),
           );
         }
@@ -95,7 +95,7 @@ export async function fetchAllObligationsForMarket(
     obligations.push(
       Obligation.fromBcs(
         phantom(LENDING_MARKET_TYPE),
-        fromB64((rawObligation.data?.bcs as any).bcsBytes),
+        fromBase64((rawObligation.data?.bcs as any).bcsBytes),
       ),
     );
   }
