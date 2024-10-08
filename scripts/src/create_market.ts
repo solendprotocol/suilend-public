@@ -5,7 +5,7 @@ import {
   LENDING_MARKET_ID,
   LENDING_MARKET_TYPE
 } from "../../sdk/src/beta/client";
-import {  fromBase64 } from "@mysten/sui/utils";
+import { fromBase64 } from "@mysten/sui/utils";
 import { Ed25519Keypair } from "@mysten/sui/keypairs/ed25519";
 import {Side} from "../../sdk/src/core/types";
 
