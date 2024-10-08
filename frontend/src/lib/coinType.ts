@@ -120,8 +120,6 @@ export const isCoinType = (text: string) => {
   try {
     normalizeStructTag(text);
     return true;
-  } catch (err) {
-    console.error(err);
-  }
+  } catch (err) {}
   return false;
 };

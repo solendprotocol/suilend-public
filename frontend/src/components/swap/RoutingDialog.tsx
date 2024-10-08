@@ -585,9 +585,7 @@ export default function RoutingDialog({ quote }: RoutingDialogProps) {
       rootProps={{ open: isOpen, onOpenChange }}
       trigger={
         <TLabelSans className="max-w-max cursor-pointer overflow-hidden text-ellipsis text-nowrap transition-colors hover:text-foreground">
-          <span className="font-medium">
-            {hopsCount} hop{hopsCount !== 1 && "s"}
-          </span>
+          {hopsCount} hop{hopsCount !== 1 && "s"}
           {" via "}
           {formatList(
             Array.from(
