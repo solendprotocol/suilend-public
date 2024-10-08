@@ -15,6 +15,7 @@ import {
   ApiRepayEvent,
   ApiWithdrawEvent,
 } from "@suilend/sdk/types";
+import { reserveSort } from "@suilend/sdk/utils";
 
 import {
   EventsData,
@@ -482,7 +483,7 @@ export default function HistoryTabContent({
                 })
                 .flat(),
             ]),
-          ),
+          ).sort((a, b) => reserveSort(data.lendingMarket.reserves, a, b)),
     [eventsData, data.lendingMarket.reserves],
   );
   const isNotFilteredOutCoinType = (coinType: string) =>

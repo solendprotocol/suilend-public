@@ -17,8 +17,8 @@ import {
   SuiExchange as HopSuiExchange,
   VerifiedToken,
 } from "@hop.ag/sdk";
-import { CoinMetadata, SuiClient } from "@mysten/sui.js/client";
-import { normalizeStructTag } from "@mysten/sui.js/utils";
+import { CoinMetadata, SuiClient } from "@mysten/sui/client";
+import { normalizeStructTag } from "@mysten/sui/utils";
 import {
   Aftermath,
   Router as AftermathRouter,
@@ -232,12 +232,13 @@ export function SwapContextProvider({ children }: PropsWithChildren) {
   );
 
   useEffect(() => {
-    fetchTokensMetadata(
-      data.coinBalancesRaw
+    fetchTokensMetadata([
+      ...data.lendingMarket.reserves.map((reserve) => reserve.coinType),
+      ...data.coinBalancesRaw
         .filter((cb) => +cb.totalBalance > 0)
         .map((cb) => cb.coinType),
-    );
-  }, [fetchTokensMetadata, suiClient, data.coinBalancesRaw]);
+    ]);
+  }, [fetchTokensMetadata, data.lendingMarket.reserves, data.coinBalancesRaw]);
 
   // Selected tokens
   const [tokenInSymbol, tokenOutSymbol] =

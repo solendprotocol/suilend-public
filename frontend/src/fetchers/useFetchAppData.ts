@@ -1,7 +1,8 @@
 import { useRef } from "react";
 
-import { CoinBalance, SuiClient } from "@mysten/sui.js/client";
-import { normalizeStructTag } from "@mysten/sui.js/utils";
+import { CoinBalance, SuiClient } from "@mysten/sui/client";
+import { normalizeStructTag } from "@mysten/sui/utils";
+import { SuiPriceServiceConnection } from "@pythnetwork/pyth-sui-js";
 import * as Sentry from "@sentry/nextjs";
 import { toast } from "sonner";
 import useSWR from "swr";
@@ -17,8 +18,6 @@ import { parseLendingMarket } from "@suilend/sdk/parsers/lendingMarket";
 import { parseObligation } from "@suilend/sdk/parsers/obligation";
 import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 import * as simulate from "@suilend/sdk/utils/simulate";
-
-import { SuiPriceServiceConnection } from "@pyth-sdk";
 
 import { AppContext, AppData } from "@/contexts/AppContext";
 import { ParsedCoinBalance, parseCoinBalances } from "@/lib/coinBalance";
@@ -156,7 +155,9 @@ export default function useFetchAppData(
         await suiClient.getAllBalances({
           owner: address,
         })
-      ).map((cb) => ({ ...cb, coinType: normalizeStructTag(cb.coinType) }));
+      )
+        .map((cb) => ({ ...cb, coinType: normalizeStructTag(cb.coinType) }))
+        .sort((a, b) => (a.coinType < b.coinType ? -1 : 1));
 
       const reserveCoinTypes = lendingMarket.reserves.map(
         (reserve) => reserve.coinType,

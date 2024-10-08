@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { CoinMetadata, SuiClient } from "@mysten/sui.js/client";
-import { TransactionBlock } from "@mysten/sui.js/transactions";
+import { CoinMetadata, SuiClient } from "@mysten/sui/client";
+import { Transaction } from "@mysten/sui/transactions";
 import BigNumber from "bignumber.js";
 import { isEqual } from "lodash";
 import { Eraser, Plus } from "lucide-react";
@@ -31,7 +31,7 @@ export default function AddRewardDialog({
   isDepositReward,
 }: AddRewardDialogProps) {
   const { address } = useWalletContext();
-  const { refreshData, signExecuteAndWaitTransactionBlock, ...restAppContext } =
+  const { refreshData, signExecuteAndWaitForTransaction, ...restAppContext } =
     useAppContext();
   const suiClient = restAppContext.suiClient as SuiClient;
   const suilendClient = restAppContext.suilendClient as SuilendClient<string>;
@@ -129,7 +129,7 @@ export default function AddRewardDialog({
       return;
     }
 
-    const txb = new TransactionBlock();
+    const transaction = new Transaction();
 
     const reserveArrayIndex = reserve.arrayIndex;
     const rewardCoinType = coin.coinType;
@@ -147,10 +147,10 @@ export default function AddRewardDialog({
         rewardValue,
         BigInt(startTimeMs),
         BigInt(endTimeMs),
-        txb,
+        transaction,
       );
 
-      await signExecuteAndWaitTransactionBlock(txb);
+      await signExecuteAndWaitForTransaction(transaction);
 
       toast.success("Added reward");
       setIsDialogOpen(false);

@@ -12,7 +12,6 @@ import {
   ToField,
   ToPhantomTypeArgument,
   ToTypeStr,
-  Vector,
   assertFieldsWithTypesArgsMatch,
   assertReifiedTypeArgsMatch,
   decodeFromFields,
@@ -26,19 +25,20 @@ import {
   FieldsWithTypes,
   composeSuiType,
   compressSuiType,
+  parseTypeName,
 } from "../../_framework/util";
+import { Vector } from "../../_framework/vector";
 import { Decimal } from "../decimal/structs";
-import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { PKG_V1 } from "../index";
+import { bcs } from "@mysten/sui/bcs";
+import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
+import { fromB64 } from "@mysten/sui/utils";
 
 /* ============================== PoolReward =============================== */
 
 export function isPoolReward(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::PoolReward"
-  );
+  return type === `${PKG_V1}::liquidity_mining::PoolReward`;
 }
 
 export interface PoolRewardFields {
@@ -57,15 +57,16 @@ export interface PoolRewardFields {
 export type PoolRewardReified = Reified<PoolReward, PoolRewardFields>;
 
 export class PoolReward implements StructClass {
-  static readonly $typeName =
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::PoolReward";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V1}::liquidity_mining::PoolReward`;
   static readonly $numTypeParams = 0;
+  static readonly $isPhantom = [] as const;
 
   readonly $typeName = PoolReward.$typeName;
-
-  readonly $fullTypeName: "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::PoolReward";
-
+  readonly $fullTypeName: `${typeof PKG_V1}::liquidity_mining::PoolReward`;
   readonly $typeArgs: [];
+  readonly $isPhantom = PoolReward.$isPhantom;
 
   readonly id: ToField<UID>;
   readonly poolRewardManagerId: ToField<ID>;
@@ -82,7 +83,7 @@ export class PoolReward implements StructClass {
     this.$fullTypeName = composeSuiType(
       PoolReward.$typeName,
       ...typeArgs,
-    ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::PoolReward";
+    ) as `${typeof PKG_V1}::liquidity_mining::PoolReward`;
     this.$typeArgs = typeArgs;
 
     this.id = fields.id;
@@ -103,8 +104,9 @@ export class PoolReward implements StructClass {
       fullTypeName: composeSuiType(
         PoolReward.$typeName,
         ...[],
-      ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::PoolReward",
+      ) as `${typeof PKG_V1}::liquidity_mining::PoolReward`,
       typeArgs: [] as [],
+      isPhantom: PoolReward.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         PoolReward.fromFields(fields),
@@ -116,6 +118,8 @@ export class PoolReward implements StructClass {
       fromJSON: (json: Record<string, any>) => PoolReward.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         PoolReward.fromSuiParsedData(content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        PoolReward.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         PoolReward.fetch(client, id),
       new: (fields: PoolRewardFields) => {
@@ -295,6 +299,22 @@ export class PoolReward implements StructClass {
     return PoolReward.fromFieldsWithTypes(content);
   }
 
+  static fromSuiObjectData(data: SuiObjectData): PoolReward {
+    if (data.bcs) {
+      if (data.bcs.dataType !== "moveObject" || !isPoolReward(data.bcs.type)) {
+        throw new Error(`object at is not a PoolReward object`);
+      }
+
+      return PoolReward.fromBcs(fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return PoolReward.fromSuiParsedData(data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch(client: SuiClient, id: string): Promise<PoolReward> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -308,7 +328,8 @@ export class PoolReward implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a PoolReward object`);
     }
-    return PoolReward.fromBcs(fromB64(res.data.bcs.bcsBytes));
+
+    return PoolReward.fromSuiObjectData(res.data);
   }
 }
 
@@ -316,10 +337,7 @@ export class PoolReward implements StructClass {
 
 export function isPoolRewardManager(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::PoolRewardManager"
-  );
+  return type === `${PKG_V1}::liquidity_mining::PoolRewardManager`;
 }
 
 export interface PoolRewardManagerFields {
@@ -335,15 +353,16 @@ export type PoolRewardManagerReified = Reified<
 >;
 
 export class PoolRewardManager implements StructClass {
-  static readonly $typeName =
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::PoolRewardManager";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V1}::liquidity_mining::PoolRewardManager`;
   static readonly $numTypeParams = 0;
+  static readonly $isPhantom = [] as const;
 
   readonly $typeName = PoolRewardManager.$typeName;
-
-  readonly $fullTypeName: "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::PoolRewardManager";
-
+  readonly $fullTypeName: `${typeof PKG_V1}::liquidity_mining::PoolRewardManager`;
   readonly $typeArgs: [];
+  readonly $isPhantom = PoolRewardManager.$isPhantom;
 
   readonly id: ToField<UID>;
   readonly totalShares: ToField<"u64">;
@@ -354,7 +373,7 @@ export class PoolRewardManager implements StructClass {
     this.$fullTypeName = composeSuiType(
       PoolRewardManager.$typeName,
       ...typeArgs,
-    ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::PoolRewardManager";
+    ) as `${typeof PKG_V1}::liquidity_mining::PoolRewardManager`;
     this.$typeArgs = typeArgs;
 
     this.id = fields.id;
@@ -369,8 +388,9 @@ export class PoolRewardManager implements StructClass {
       fullTypeName: composeSuiType(
         PoolRewardManager.$typeName,
         ...[],
-      ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::PoolRewardManager",
+      ) as `${typeof PKG_V1}::liquidity_mining::PoolRewardManager`,
       typeArgs: [] as [],
+      isPhantom: PoolRewardManager.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         PoolRewardManager.fromFields(fields),
@@ -382,6 +402,8 @@ export class PoolRewardManager implements StructClass {
       fromJSON: (json: Record<string, any>) => PoolRewardManager.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         PoolRewardManager.fromSuiParsedData(content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        PoolRewardManager.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         PoolRewardManager.fetch(client, id),
       new: (fields: PoolRewardManagerFields) => {
@@ -451,7 +473,7 @@ export class PoolRewardManager implements StructClass {
       id: this.id,
       totalShares: this.totalShares.toString(),
       poolRewards: fieldToJSON<Vector<Option<PoolReward>>>(
-        `vector<0x1::option::Option<0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::PoolReward>>`,
+        `vector<${Option.$typeName}<${PoolReward.$typeName}>>`,
         this.poolRewards,
       ),
       lastUpdateTimeMs: this.lastUpdateTimeMs.toString(),
@@ -498,6 +520,25 @@ export class PoolRewardManager implements StructClass {
     return PoolRewardManager.fromFieldsWithTypes(content);
   }
 
+  static fromSuiObjectData(data: SuiObjectData): PoolRewardManager {
+    if (data.bcs) {
+      if (
+        data.bcs.dataType !== "moveObject" ||
+        !isPoolRewardManager(data.bcs.type)
+      ) {
+        throw new Error(`object at is not a PoolRewardManager object`);
+      }
+
+      return PoolRewardManager.fromBcs(fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return PoolRewardManager.fromSuiParsedData(data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch(
     client: SuiClient,
     id: string,
@@ -514,7 +555,8 @@ export class PoolRewardManager implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a PoolRewardManager object`);
     }
-    return PoolRewardManager.fromBcs(fromB64(res.data.bcs.bcsBytes));
+
+    return PoolRewardManager.fromSuiObjectData(res.data);
   }
 }
 
@@ -522,9 +564,7 @@ export class PoolRewardManager implements StructClass {
 
 export function isRewardBalance(type: string): boolean {
   type = compressSuiType(type);
-  return type.startsWith(
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::RewardBalance<",
-  );
+  return type.startsWith(`${PKG_V1}::liquidity_mining::RewardBalance` + "<");
 }
 
 export interface RewardBalanceFields<T extends PhantomTypeArgument> {
@@ -539,15 +579,16 @@ export type RewardBalanceReified<T extends PhantomTypeArgument> = Reified<
 export class RewardBalance<T extends PhantomTypeArgument>
   implements StructClass
 {
-  static readonly $typeName =
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::RewardBalance";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V1}::liquidity_mining::RewardBalance`;
   static readonly $numTypeParams = 1;
+  static readonly $isPhantom = [true] as const;
 
   readonly $typeName = RewardBalance.$typeName;
-
-  readonly $fullTypeName: `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::RewardBalance<${PhantomToTypeStr<T>}>`;
-
+  readonly $fullTypeName: `${typeof PKG_V1}::liquidity_mining::RewardBalance<${PhantomToTypeStr<T>}>`;
   readonly $typeArgs: [PhantomToTypeStr<T>];
+  readonly $isPhantom = RewardBalance.$isPhantom;
 
   readonly dummyField: ToField<"bool">;
 
@@ -558,7 +599,7 @@ export class RewardBalance<T extends PhantomTypeArgument>
     this.$fullTypeName = composeSuiType(
       RewardBalance.$typeName,
       ...typeArgs,
-    ) as `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::RewardBalance<${PhantomToTypeStr<T>}>`;
+    ) as `${typeof PKG_V1}::liquidity_mining::RewardBalance<${PhantomToTypeStr<T>}>`;
     this.$typeArgs = typeArgs;
 
     this.dummyField = fields.dummyField;
@@ -572,10 +613,11 @@ export class RewardBalance<T extends PhantomTypeArgument>
       fullTypeName: composeSuiType(
         RewardBalance.$typeName,
         ...[extractType(T)],
-      ) as `0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::RewardBalance<${PhantomToTypeStr<ToPhantomTypeArgument<T>>}>`,
+      ) as `${typeof PKG_V1}::liquidity_mining::RewardBalance<${PhantomToTypeStr<ToPhantomTypeArgument<T>>}>`,
       typeArgs: [extractType(T)] as [
         PhantomToTypeStr<ToPhantomTypeArgument<T>>,
       ],
+      isPhantom: RewardBalance.$isPhantom,
       reifiedTypeArgs: [T],
       fromFields: (fields: Record<string, any>) =>
         RewardBalance.fromFields(T, fields),
@@ -587,6 +629,8 @@ export class RewardBalance<T extends PhantomTypeArgument>
       fromJSON: (json: Record<string, any>) => RewardBalance.fromJSON(T, json),
       fromSuiParsedData: (content: SuiParsedData) =>
         RewardBalance.fromSuiParsedData(T, content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        RewardBalance.fromSuiObjectData(T, content),
       fetch: async (client: SuiClient, id: string) =>
         RewardBalance.fetch(client, T, id),
       new: (fields: RewardBalanceFields<ToPhantomTypeArgument<T>>) => {
@@ -699,6 +743,42 @@ export class RewardBalance<T extends PhantomTypeArgument>
     return RewardBalance.fromFieldsWithTypes(typeArg, content);
   }
 
+  static fromSuiObjectData<T extends PhantomReified<PhantomTypeArgument>>(
+    typeArg: T,
+    data: SuiObjectData,
+  ): RewardBalance<ToPhantomTypeArgument<T>> {
+    if (data.bcs) {
+      if (
+        data.bcs.dataType !== "moveObject" ||
+        !isRewardBalance(data.bcs.type)
+      ) {
+        throw new Error(`object at is not a RewardBalance object`);
+      }
+
+      const gotTypeArgs = parseTypeName(data.bcs.type).typeArgs;
+      if (gotTypeArgs.length !== 1) {
+        throw new Error(
+          `type argument mismatch: expected 1 type argument but got '${gotTypeArgs.length}'`,
+        );
+      }
+      const gotTypeArg = compressSuiType(gotTypeArgs[0]);
+      const expectedTypeArg = compressSuiType(extractType(typeArg));
+      if (gotTypeArg !== compressSuiType(extractType(typeArg))) {
+        throw new Error(
+          `type argument mismatch: expected '${expectedTypeArg}' but got '${gotTypeArg}'`,
+        );
+      }
+
+      return RewardBalance.fromBcs(typeArg, fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return RewardBalance.fromSuiParsedData(typeArg, data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch<T extends PhantomReified<PhantomTypeArgument>>(
     client: SuiClient,
     typeArg: T,
@@ -716,7 +796,8 @@ export class RewardBalance<T extends PhantomTypeArgument>
     ) {
       throw new Error(`object at id ${id} is not a RewardBalance object`);
     }
-    return RewardBalance.fromBcs(typeArg, fromB64(res.data.bcs.bcsBytes));
+
+    return RewardBalance.fromSuiObjectData(typeArg, res.data);
   }
 }
 
@@ -724,10 +805,7 @@ export class RewardBalance<T extends PhantomTypeArgument>
 
 export function isUserReward(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::UserReward"
-  );
+  return type === `${PKG_V1}::liquidity_mining::UserReward`;
 }
 
 export interface UserRewardFields {
@@ -739,15 +817,16 @@ export interface UserRewardFields {
 export type UserRewardReified = Reified<UserReward, UserRewardFields>;
 
 export class UserReward implements StructClass {
-  static readonly $typeName =
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::UserReward";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V1}::liquidity_mining::UserReward`;
   static readonly $numTypeParams = 0;
+  static readonly $isPhantom = [] as const;
 
   readonly $typeName = UserReward.$typeName;
-
-  readonly $fullTypeName: "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::UserReward";
-
+  readonly $fullTypeName: `${typeof PKG_V1}::liquidity_mining::UserReward`;
   readonly $typeArgs: [];
+  readonly $isPhantom = UserReward.$isPhantom;
 
   readonly poolRewardId: ToField<ID>;
   readonly earnedRewards: ToField<Decimal>;
@@ -757,7 +836,7 @@ export class UserReward implements StructClass {
     this.$fullTypeName = composeSuiType(
       UserReward.$typeName,
       ...typeArgs,
-    ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::UserReward";
+    ) as `${typeof PKG_V1}::liquidity_mining::UserReward`;
     this.$typeArgs = typeArgs;
 
     this.poolRewardId = fields.poolRewardId;
@@ -771,8 +850,9 @@ export class UserReward implements StructClass {
       fullTypeName: composeSuiType(
         UserReward.$typeName,
         ...[],
-      ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::UserReward",
+      ) as `${typeof PKG_V1}::liquidity_mining::UserReward`,
       typeArgs: [] as [],
+      isPhantom: UserReward.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         UserReward.fromFields(fields),
@@ -784,6 +864,8 @@ export class UserReward implements StructClass {
       fromJSON: (json: Record<string, any>) => UserReward.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         UserReward.fromSuiParsedData(content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        UserReward.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         UserReward.fetch(client, id),
       new: (fields: UserRewardFields) => {
@@ -898,6 +980,22 @@ export class UserReward implements StructClass {
     return UserReward.fromFieldsWithTypes(content);
   }
 
+  static fromSuiObjectData(data: SuiObjectData): UserReward {
+    if (data.bcs) {
+      if (data.bcs.dataType !== "moveObject" || !isUserReward(data.bcs.type)) {
+        throw new Error(`object at is not a UserReward object`);
+      }
+
+      return UserReward.fromBcs(fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return UserReward.fromSuiParsedData(data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch(client: SuiClient, id: string): Promise<UserReward> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -911,7 +1009,8 @@ export class UserReward implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a UserReward object`);
     }
-    return UserReward.fromBcs(fromB64(res.data.bcs.bcsBytes));
+
+    return UserReward.fromSuiObjectData(res.data);
   }
 }
 
@@ -919,10 +1018,7 @@ export class UserReward implements StructClass {
 
 export function isUserRewardManager(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::UserRewardManager"
-  );
+  return type === `${PKG_V1}::liquidity_mining::UserRewardManager`;
 }
 
 export interface UserRewardManagerFields {
@@ -938,15 +1034,16 @@ export type UserRewardManagerReified = Reified<
 >;
 
 export class UserRewardManager implements StructClass {
-  static readonly $typeName =
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::UserRewardManager";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V1}::liquidity_mining::UserRewardManager`;
   static readonly $numTypeParams = 0;
+  static readonly $isPhantom = [] as const;
 
   readonly $typeName = UserRewardManager.$typeName;
-
-  readonly $fullTypeName: "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::UserRewardManager";
-
+  readonly $fullTypeName: `${typeof PKG_V1}::liquidity_mining::UserRewardManager`;
   readonly $typeArgs: [];
+  readonly $isPhantom = UserRewardManager.$isPhantom;
 
   readonly poolRewardManagerId: ToField<ID>;
   readonly share: ToField<"u64">;
@@ -957,7 +1054,7 @@ export class UserRewardManager implements StructClass {
     this.$fullTypeName = composeSuiType(
       UserRewardManager.$typeName,
       ...typeArgs,
-    ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::UserRewardManager";
+    ) as `${typeof PKG_V1}::liquidity_mining::UserRewardManager`;
     this.$typeArgs = typeArgs;
 
     this.poolRewardManagerId = fields.poolRewardManagerId;
@@ -972,8 +1069,9 @@ export class UserRewardManager implements StructClass {
       fullTypeName: composeSuiType(
         UserRewardManager.$typeName,
         ...[],
-      ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::UserRewardManager",
+      ) as `${typeof PKG_V1}::liquidity_mining::UserRewardManager`,
       typeArgs: [] as [],
+      isPhantom: UserRewardManager.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         UserRewardManager.fromFields(fields),
@@ -985,6 +1083,8 @@ export class UserRewardManager implements StructClass {
       fromJSON: (json: Record<string, any>) => UserRewardManager.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         UserRewardManager.fromSuiParsedData(content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        UserRewardManager.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         UserRewardManager.fetch(client, id),
       new: (fields: UserRewardManagerFields) => {
@@ -1060,7 +1160,7 @@ export class UserRewardManager implements StructClass {
       poolRewardManagerId: this.poolRewardManagerId,
       share: this.share.toString(),
       rewards: fieldToJSON<Vector<Option<UserReward>>>(
-        `vector<0x1::option::Option<0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::liquidity_mining::UserReward>>`,
+        `vector<${Option.$typeName}<${UserReward.$typeName}>>`,
         this.rewards,
       ),
       lastUpdateTimeMs: this.lastUpdateTimeMs.toString(),
@@ -1110,6 +1210,25 @@ export class UserRewardManager implements StructClass {
     return UserRewardManager.fromFieldsWithTypes(content);
   }
 
+  static fromSuiObjectData(data: SuiObjectData): UserRewardManager {
+    if (data.bcs) {
+      if (
+        data.bcs.dataType !== "moveObject" ||
+        !isUserRewardManager(data.bcs.type)
+      ) {
+        throw new Error(`object at is not a UserRewardManager object`);
+      }
+
+      return UserRewardManager.fromBcs(fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return UserRewardManager.fromSuiParsedData(data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch(
     client: SuiClient,
     id: string,
@@ -1126,6 +1245,7 @@ export class UserRewardManager implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a UserRewardManager object`);
     }
-    return UserRewardManager.fromBcs(fromB64(res.data.bcs.bcsBytes));
+
+    return UserRewardManager.fromSuiObjectData(res.data);
   }
 }

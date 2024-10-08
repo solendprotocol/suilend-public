@@ -1,19 +1,15 @@
+import { BcsType, InferBcsType, bcs } from "@mysten/bcs";
+import { SuiClient } from "@mysten/sui/client";
 import {
-  BcsType,
-  InferBcsType,
-  bcs,
-  fromB64,
-  fromHEX,
-  toHEX,
-} from "@mysten/bcs";
-import { ObjectArg as SuiObjectArg } from "@mysten/sui.js/bcs";
-import { SuiClient } from "@mysten/sui.js/client";
-import { TransactionArgument } from "@mysten/sui.js/transactions";
+  TransactionArgument,
+  TransactionObjectInput,
+} from "@mysten/sui/transactions";
+import { fromBase64, fromHex, toHex } from "@mysten/sui/utils";
 
 export const ID = bcs.struct("ID", {
   bytes: bcs.bytes(32).transform({
-    input: (val: string) => fromHEX(val),
-    output: (val: Uint8Array) => toHEX(val),
+    input: (val: string) => fromHex(val),
+    output: (val: Uint8Array) => toHex(val),
   }),
 });
 
@@ -51,8 +47,8 @@ export const Bag = bcs.struct("Bag", {
 export const Obligation = bcs.struct("Obligation", {
   id: UID,
   owner: bcs.bytes(32).transform({
-    input: (val: string) => fromHEX(val),
-    output: (val: Uint8Array) => toHEX(val),
+    input: (val: string) => fromHex(val),
+    output: (val: Uint8Array) => toHex(val),
   }),
   deposits: bcs.vector(Deposit),
   borrows: bcs.vector(Borrow),
@@ -132,19 +128,15 @@ export async function load<T>(
   if (data.data?.bcs?.dataType !== "moveObject") {
     throw new Error("Error: invalid data type");
   }
-  return type.parse(fromB64(data.data.bcs.bcsBytes));
+  return type.parse(fromBase64(data.data.bcs.bcsBytes));
 }
+
+//
 
 export enum Side {
   DEPOSIT = "deposit",
   BORROW = "borrow",
 }
-
-export type ObjectId = string;
-
-export type ObjectCallArg = { Object: SuiObjectArg };
-
-export type ObjectArg = string | ObjectCallArg | TransactionArgument;
 
 export interface PhantomReified<P> {
   phantomType: P;
@@ -152,12 +144,12 @@ export interface PhantomReified<P> {
 }
 
 export interface AddReserveArgs {
-  lendingMarketOwnerCap: ObjectArg;
-  lendingMarket: ObjectArg;
-  priceInfo: ObjectArg;
-  config: ObjectArg;
-  coinMetadata: ObjectArg;
-  clock: ObjectArg;
+  lendingMarketOwnerCap: TransactionObjectInput;
+  lendingMarket: TransactionObjectInput;
+  priceInfo: TransactionObjectInput;
+  config: TransactionObjectInput;
+  coinMetadata: TransactionObjectInput;
+  clock: TransactionObjectInput;
 }
 
 export interface CreateReserveConfigArgs {
@@ -182,143 +174,144 @@ export interface CreateReserveConfigArgs {
 }
 
 export interface UpdateReserveConfigArgs {
-  lendingMarketOwnerCap: ObjectArg;
-  lendingMarket: ObjectArg;
+  lendingMarketOwnerCap: TransactionObjectInput;
+  lendingMarket: TransactionObjectInput;
   reserveArrayIndex: bigint | TransactionArgument;
-  config: ObjectArg;
+  config: TransactionObjectInput;
 }
 
 export interface AddPoolRewardArgs {
-  lendingMarketOwnerCap: ObjectArg;
-  lendingMarket: ObjectArg;
+  lendingMarketOwnerCap: TransactionObjectInput;
+  lendingMarket: TransactionObjectInput;
   reserveArrayIndex: bigint | TransactionArgument;
   isDepositReward: boolean | TransactionArgument;
-  rewards: ObjectArg;
+  rewards: TransactionObjectInput;
   startTimeMs: bigint | TransactionArgument;
   endTimeMs: bigint | TransactionArgument;
-  clock: ObjectArg;
+  clock: TransactionObjectInput;
 }
 
 export interface CancelPoolRewardArgs {
-  lendingMarketOwnerCap: ObjectArg;
-  lendingMarket: ObjectArg;
+  lendingMarketOwnerCap: TransactionObjectInput;
+  lendingMarket: TransactionObjectInput;
   reserveArrayIndex: bigint | TransactionArgument;
   isDepositReward: boolean | TransactionArgument;
   rewardIndex: bigint | TransactionArgument;
-  clock: ObjectArg;
+  clock: TransactionObjectInput;
 }
 
 export interface ClosePoolRewardArgs {
-  lendingMarketOwnerCap: ObjectArg;
-  lendingMarket: ObjectArg;
+  lendingMarketOwnerCap: TransactionObjectInput;
+  lendingMarket: TransactionObjectInput;
   reserveArrayIndex: bigint | TransactionArgument;
   isDepositReward: boolean | TransactionArgument;
   rewardIndex: bigint | TransactionArgument;
-  clock: ObjectArg;
+  clock: TransactionObjectInput;
 }
 
 export interface ClaimRewardsArgs {
-  lendingMarket: ObjectArg;
-  cap: ObjectArg;
-  clock: ObjectArg;
+  lendingMarket: TransactionObjectInput;
+  cap: TransactionObjectInput;
+  clock: TransactionObjectInput;
   reserveId: bigint | TransactionArgument;
   rewardIndex: bigint | TransactionArgument;
   isDepositReward: boolean | TransactionArgument;
 }
 
 export interface ClaimRewardsAndDepositArgs {
-  lendingMarket: ObjectArg;
+  lendingMarket: TransactionObjectInput;
   obligationId: string | TransactionArgument;
-  clock: ObjectArg;
+  clock: TransactionObjectInput;
   rewardReserveId: bigint | TransactionArgument;
   rewardIndex: bigint | TransactionArgument;
   isDepositReward: boolean | TransactionArgument;
   depositReserveId: bigint | TransactionArgument;
 }
 
+// NewConfigArgs
 export interface CreateRateLimiterConfigArgs {
   windowDuration: bigint | TransactionArgument;
   maxOutflow: bigint | TransactionArgument;
 }
 
 export interface UpdateRateLimiterConfigArgs {
-  lendingMarketOwnerCap: ObjectArg;
-  lendingMarket: ObjectArg;
-  clock: ObjectArg;
-  config: ObjectArg;
+  lendingMarketOwnerCap: TransactionObjectInput;
+  lendingMarket: TransactionObjectInput;
+  clock: TransactionObjectInput;
+  config: TransactionObjectInput;
 }
 
 export interface RefreshReservePriceArgs {
-  lendingMarket: ObjectArg;
+  lendingMarket: TransactionObjectInput;
   reserveArrayIndex: bigint | TransactionArgument;
-  clock: ObjectArg;
-  priceInfo: ObjectArg;
+  clock: TransactionObjectInput;
+  priceInfo: TransactionObjectInput;
 }
 
 export interface DepositLiquidityAndMintCtokensArgs {
-  lendingMarket: ObjectArg;
+  lendingMarket: TransactionObjectInput;
   reserveArrayIndex: bigint | TransactionArgument;
-  clock: ObjectArg;
-  deposit: ObjectArg;
+  clock: TransactionObjectInput;
+  deposit: TransactionObjectInput;
 }
 
 export interface DepositCtokensIntoObligationArgs {
-  lendingMarket: ObjectArg;
+  lendingMarket: TransactionObjectInput;
   reserveArrayIndex: bigint | TransactionArgument;
-  obligationOwnerCap: ObjectArg;
-  clock: ObjectArg;
-  deposit: ObjectArg;
+  obligationOwnerCap: TransactionObjectInput;
+  clock: TransactionObjectInput;
+  deposit: TransactionObjectInput;
 }
 
 export interface WithdrawCtokensArgs {
-  lendingMarket: ObjectArg;
+  lendingMarket: TransactionObjectInput;
   reserveArrayIndex: bigint | TransactionArgument;
-  obligationOwnerCap: ObjectArg;
-  clock: ObjectArg;
+  obligationOwnerCap: TransactionObjectInput;
+  clock: TransactionObjectInput;
   amount: bigint | TransactionArgument;
 }
 
 export interface BorrowArgs {
-  lendingMarket: ObjectArg;
+  lendingMarket: TransactionObjectInput;
   reserveArrayIndex: bigint | TransactionArgument;
-  obligationOwnerCap: ObjectArg;
-  clock: ObjectArg;
+  obligationOwnerCap: TransactionObjectInput;
+  clock: TransactionObjectInput;
   amount: bigint | TransactionArgument;
 }
 
 export interface RepayArgs {
-  lendingMarket: ObjectArg;
+  lendingMarket: TransactionObjectInput;
   reserveArrayIndex: bigint | TransactionArgument;
   obligationId: string | TransactionArgument;
-  clock: ObjectArg;
-  maxRepayCoins: ObjectArg;
+  clock: TransactionObjectInput;
+  maxRepayCoins: TransactionObjectInput;
 }
 
 export interface LiquidateArgs {
-  lendingMarket: ObjectArg;
+  lendingMarket: TransactionObjectInput;
   obligationId: string | TransactionArgument;
   repayReserveArrayIndex: bigint | TransactionArgument;
   withdrawReserveArrayIndex: bigint | TransactionArgument;
-  clock: ObjectArg;
-  repayCoins: ObjectArg;
+  clock: TransactionObjectInput;
+  repayCoins: TransactionObjectInput;
 }
 
 export interface MigrateArgs {
-  lendingMarketOwnerCap: ObjectArg;
-  lendingMarket: ObjectArg;
+  lendingMarketOwnerCap: TransactionObjectInput;
+  lendingMarket: TransactionObjectInput;
 }
 
 export interface ClaimFeesArgs {
-  lendingMarket: ObjectArg;
+  lendingMarket: TransactionObjectInput;
   reserveArrayIndex: bigint | TransactionArgument;
 }
 
 export interface RedeemCtokensAndWithdrawLiquidityArgs {
-  lendingMarket: ObjectArg;
+  lendingMarket: TransactionObjectInput;
   reserveArrayIndex: bigint | TransactionArgument;
-  clock: ObjectArg;
-  ctokens: ObjectArg;
-  rateLimiterExemption: ObjectArg | TransactionArgument | null;
+  clock: TransactionObjectInput;
+  ctokens: TransactionObjectInput;
+  rateLimiterExemption: TransactionObjectInput | TransactionArgument | null;
 }
 
 // Events

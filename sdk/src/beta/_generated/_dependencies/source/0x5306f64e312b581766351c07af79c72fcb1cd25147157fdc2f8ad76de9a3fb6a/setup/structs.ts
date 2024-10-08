@@ -15,17 +15,16 @@ import {
   compressSuiType,
 } from "../../../../_framework/util";
 import { UID } from "../../0x2/object/structs";
-import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { PKG_V1 } from "../index";
+import { bcs } from "@mysten/sui/bcs";
+import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
+import { fromB64 } from "@mysten/sui/utils";
 
 /* ============================== DeployerCap =============================== */
 
 export function isDeployerCap(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::setup::DeployerCap"
-  );
+  return type === `${PKG_V1}::setup::DeployerCap`;
 }
 
 export interface DeployerCapFields {
@@ -35,15 +34,16 @@ export interface DeployerCapFields {
 export type DeployerCapReified = Reified<DeployerCap, DeployerCapFields>;
 
 export class DeployerCap implements StructClass {
-  static readonly $typeName =
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::setup::DeployerCap";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V1}::setup::DeployerCap`;
   static readonly $numTypeParams = 0;
+  static readonly $isPhantom = [] as const;
 
   readonly $typeName = DeployerCap.$typeName;
-
-  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::setup::DeployerCap";
-
+  readonly $fullTypeName: `${typeof PKG_V1}::setup::DeployerCap`;
   readonly $typeArgs: [];
+  readonly $isPhantom = DeployerCap.$isPhantom;
 
   readonly id: ToField<UID>;
 
@@ -51,7 +51,7 @@ export class DeployerCap implements StructClass {
     this.$fullTypeName = composeSuiType(
       DeployerCap.$typeName,
       ...typeArgs,
-    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::setup::DeployerCap";
+    ) as `${typeof PKG_V1}::setup::DeployerCap`;
     this.$typeArgs = typeArgs;
 
     this.id = fields.id;
@@ -63,8 +63,9 @@ export class DeployerCap implements StructClass {
       fullTypeName: composeSuiType(
         DeployerCap.$typeName,
         ...[],
-      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::setup::DeployerCap",
+      ) as `${typeof PKG_V1}::setup::DeployerCap`,
       typeArgs: [] as [],
+      isPhantom: DeployerCap.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         DeployerCap.fromFields(fields),
@@ -76,6 +77,8 @@ export class DeployerCap implements StructClass {
       fromJSON: (json: Record<string, any>) => DeployerCap.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         DeployerCap.fromSuiParsedData(content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        DeployerCap.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         DeployerCap.fetch(client, id),
       new: (fields: DeployerCapFields) => {
@@ -162,6 +165,22 @@ export class DeployerCap implements StructClass {
     return DeployerCap.fromFieldsWithTypes(content);
   }
 
+  static fromSuiObjectData(data: SuiObjectData): DeployerCap {
+    if (data.bcs) {
+      if (data.bcs.dataType !== "moveObject" || !isDeployerCap(data.bcs.type)) {
+        throw new Error(`object at is not a DeployerCap object`);
+      }
+
+      return DeployerCap.fromBcs(fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return DeployerCap.fromSuiParsedData(data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch(client: SuiClient, id: string): Promise<DeployerCap> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -175,6 +194,7 @@ export class DeployerCap implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a DeployerCap object`);
     }
-    return DeployerCap.fromBcs(fromB64(res.data.bcs.bcsBytes));
+
+    return DeployerCap.fromSuiObjectData(res.data);
   }
 }

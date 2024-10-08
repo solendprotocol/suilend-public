@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { SuiClient } from "@mysten/sui.js/client";
+import { SuiClient } from "@mysten/sui/client";
 import { ConnectModal, useWallet } from "@suiet/wallet-kit";
 
 import ConnectedWalletDropdownMenu from "@/components/layout/ConnectedWalletDropdownMenu";

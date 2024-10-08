@@ -1,4 +1,4 @@
-import { CoinMetadata, SuiClient } from "@mysten/sui.js/client";
+import { CoinMetadata, SuiClient } from "@mysten/sui/client";
 
 import {
   COINTYPE_LOGO_MAP,

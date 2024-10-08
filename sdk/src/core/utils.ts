@@ -1,4 +1,4 @@
-import { normalizeStructTag } from "@mysten/sui.js/utils";
+import { normalizeStructTag } from "@mysten/sui/utils";
 import BigNumber from "bignumber.js";
 
 import { ParsedReserve } from "./parsers/reserve";
@@ -8,8 +8,13 @@ export const toHexString = (bytes: number[]) =>
     return ("0" + (byte & 0xff).toString(16)).slice(-2);
   }).join("");
 
-export const reserveSort = (a: ParsedReserve, b: ParsedReserve) =>
-  Number(a?.arrayIndex ?? 0) - Number(b?.arrayIndex ?? 0);
+export const reserveSort = (
+  reserves: ParsedReserve[],
+  aCoinType: string,
+  bCoinType: string,
+) =>
+  reserves.findIndex((r) => r.coinType === aCoinType) -
+  reserves.findIndex((r) => r.coinType === bCoinType);
 
 export const linearlyInterpolate = (
   array: any[],

@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from "react";
 
-import { normalizeStructTag } from "@mysten/sui.js/utils";
+import { normalizeStructTag } from "@mysten/sui/utils";
 import { ColumnDef } from "@tanstack/react-table";
 import BigNumber from "bignumber.js";
 
@@ -543,7 +543,7 @@ export default function EarningsTabContent({
     (cumInterestMap?: CumInterestMap) => {
       if (cumInterestMap === undefined) return undefined;
       const sortedCoinTypes = Object.keys(cumInterestMap).sort((a, b) =>
-        reserveSort(data.reserveMap[a], data.reserveMap[b]),
+        reserveSort(data.lendingMarket.reserves, a, b),
       );
       const sortedTimestampsS = Array.from(
         new Set(
@@ -618,7 +618,7 @@ export default function EarningsTabContent({
       }
       return result;
     },
-    [data.reserveMap],
+    [data.lendingMarket.reserves],
   );
   const interpolatedCumInterestEarnedData = useMemo(
     () => getInterpolatedCumInterestData(cumInterestEarnedMap),
@@ -814,7 +814,7 @@ export default function EarningsTabContent({
         [],
       )
       .sort((a, b) =>
-        reserveSort(data.reserveMap[a.coinType], data.reserveMap[b.coinType]),
+        reserveSort(data.lendingMarket.reserves, a.coinType, b.coinType),
       );
 
     const borrowRows = borrowKeys
@@ -833,7 +833,7 @@ export default function EarningsTabContent({
         [],
       )
       .sort((a, b) =>
-        reserveSort(data.reserveMap[a.coinType], data.reserveMap[b.coinType]),
+        reserveSort(data.lendingMarket.reserves, a.coinType, b.coinType),
       );
 
     return { deposit: depositRows, borrow: borrowRows };
@@ -842,7 +842,7 @@ export default function EarningsTabContent({
     cumInterestPaidMap,
     rewardsMap,
     nowS,
-    data.reserveMap,
+    data.lendingMarket.reserves,
   ]);
 
   return (

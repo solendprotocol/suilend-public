@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { TransactionBlock } from "@mysten/sui.js/transactions";
+import { Transaction } from "@mysten/sui/transactions";
 import BigNumber from "bignumber.js";
 import { Coins } from "lucide-react";
 import { toast } from "sonner";
@@ -18,7 +18,7 @@ import { formatToken } from "@/lib/format";
 
 export default function RedeemCTokensDialog() {
   const { address } = useWalletContext();
-  const { refreshData, signExecuteAndWaitTransactionBlock, ...restAppContext } =
+  const { refreshData, signExecuteAndWaitForTransaction, ...restAppContext } =
     useAppContext();
   const suilendClient = restAppContext.suilendClient as SuilendClient<string>;
   const data = restAppContext.data as AppData;
@@ -34,24 +34,24 @@ export default function RedeemCTokensDialog() {
   const submit = async () => {
     if (!address) throw new Error("Wallet not connected");
 
-    const txb = new TransactionBlock();
+    const transaction = new Transaction();
 
     // await suilendClient.depositLiquidityAndGetCTokens(
     //   address,
-    //   NORMALIZED_USDC_COINTYPE,
+    //   NORMALIZED_wUSDC_COINTYPE,
     //   `${0.01 * 10 ** 6}`,
-    //   txb,
+    //   transaction,
     // );
-    // await signExecuteAndWaitTransactionBlock(txb);
+    // await signExecuteAndWaitForTransaction(transaction);
 
     try {
       await suilendClient.redeemCtokensAndWithdrawLiquidity(
         address,
         ctokenCoinBalances.map((cb) => cb.coinType),
-        txb,
+        transaction,
       );
 
-      await signExecuteAndWaitTransactionBlock(txb);
+      await signExecuteAndWaitForTransaction(transaction);
 
       toast.success("Redeemed CTokens");
     } catch (err) {

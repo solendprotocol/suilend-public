@@ -5,7 +5,6 @@ import BigNumber from "bignumber.js";
 
 import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 import { Side } from "@suilend/sdk/types";
-import { reserveSort } from "@suilend/sdk/utils";
 
 import { useActionsModalContext } from "@/components/dashboard/actions-modal/ActionsModalContext";
 import DataTable, {
@@ -170,7 +169,6 @@ export default function MarketTable() {
     () =>
       data.lendingMarket.reserves
         .filter((reserve) => reserve.config.depositLimit.gt(0))
-        .sort(reserveSort)
         .map((reserve) => {
           const coinType = reserve.coinType;
           const price = reserve.price;
@@ -365,9 +363,7 @@ export default function MarketTable() {
               ? undefined
               : () =>
                   openActionsModal(
-                    Number(
-                      (row.original as ReservesRowData).reserve.arrayIndex,
-                    ),
+                    (row.original as ReservesRowData).reserve.symbol,
                   )
           }
         />

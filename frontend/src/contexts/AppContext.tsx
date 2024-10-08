@@ -15,8 +15,8 @@ import {
   CoinMetadata,
   SuiClient,
   SuiTransactionBlockResponse,
-} from "@mysten/sui.js/client";
-import { TransactionBlock } from "@mysten/sui.js/transactions";
+} from "@mysten/sui/client";
+import { Transaction } from "@mysten/sui/transactions";
 import { isEqual } from "lodash";
 import { useLocalStorage } from "usehooks-ts";
 
@@ -56,8 +56,8 @@ export interface AppContext {
   setExplorerId: (id: Explorer) => void;
   obligation: ParsedObligation | null;
   setObligationId: Dispatch<SetStateAction<string | null>>;
-  signExecuteAndWaitTransactionBlock: (
-    txb: TransactionBlock,
+  signExecuteAndWaitForTransaction: (
+    transaction: Transaction,
   ) => Promise<SuiTransactionBlockResponse>;
 }
 
@@ -81,7 +81,7 @@ const defaultContextValue: AppContext = {
   setObligationId: () => {
     throw Error("AppContextProvider not initialized");
   },
-  signExecuteAndWaitTransactionBlock: () => {
+  signExecuteAndWaitForTransaction: () => {
     throw Error("AppContextProvider not initialized");
   },
 };
@@ -91,7 +91,7 @@ const AppContext = createContext<AppContext>(defaultContextValue);
 export const useAppContext = () => useContext(AppContext);
 
 export function AppContextProvider({ children }: PropsWithChildren) {
-  const { address, signExecuteAndWaitTransactionBlock } = useWalletContext();
+  const { address, signExecuteAndWaitForTransaction } = useWalletContext();
 
   // RPC
   const [rpcId, setRpcId] = useLocalStorage<string>(
@@ -107,7 +107,7 @@ export function AppContextProvider({ children }: PropsWithChildren) {
     () =>
       rpcId === Rpc.CUSTOM
         ? { id: Rpc.CUSTOM, name: "Custom", url: customRpcUrl }
-        : RPCS.find((rpc) => rpc.id === rpcId) ?? RPCS[0],
+        : (RPCS.find((rpc) => rpc.id === rpcId) ?? RPCS[0]),
     [rpcId, customRpcUrl],
   );
 
@@ -215,8 +215,8 @@ export function AppContextProvider({ children }: PropsWithChildren) {
         data?.obligations?.[0] ??
         null,
       setObligationId,
-      signExecuteAndWaitTransactionBlock: (txb: TransactionBlock) =>
-        signExecuteAndWaitTransactionBlock(suiClient, txb),
+      signExecuteAndWaitForTransaction: (transaction: Transaction) =>
+        signExecuteAndWaitForTransaction(suiClient, transaction),
     }),
     [
       suiClient,
@@ -231,7 +231,7 @@ export function AppContextProvider({ children }: PropsWithChildren) {
       setExplorerId,
       obligationId,
       setObligationId,
-      signExecuteAndWaitTransactionBlock,
+      signExecuteAndWaitForTransaction,
     ],
   );
 

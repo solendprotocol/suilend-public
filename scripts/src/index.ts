@@ -1,4 +1,4 @@
-import { SuiClient } from "@mysten/sui.js/client";
+import { SuiClient } from "@mysten/sui/client";
 import {
   LENDING_MARKET_ID,
   LENDING_MARKET_TYPE,
@@ -9,11 +9,11 @@ import { fetchAllObligationsForMarket } from "../../sdk/src/mainnet/utils/obliga
 import { phantom } from "../../sdk/src/mainnet/_generated/_framework/reified";
 import { Reserve } from "../../sdk/src/mainnet/_generated/suilend/reserve/structs";
 import * as simulate from "../../sdk/src/mainnet/utils/simulate";
-import { SuiPriceServiceConnection } from "../../pyth-sdk/src";
-import { TransactionBlock } from "@mysten/sui.js/transactions";
+import { SuiPriceServiceConnection } from "@pythnetwork/pyth-sui-js"
+import { Transaction } from "@mysten/sui/transactions";
 import { Side } from "../../sdk/src/core/types";
-import { fromB64, fromHEX } from "@mysten/sui.js/utils";
-import { Ed25519Keypair } from "@mysten/sui.js/keypairs/ed25519";
+import { fromBase64 } from "@mysten/sui/utils";
+import { Ed25519Keypair } from "@mysten/sui/keypairs/ed25519";
 import { Obligation } from "../../sdk/src/mainnet/_generated/suilend/obligation/structs";
 
 const REWARD_TYPE = "0x2::sui::SUI";
@@ -23,7 +23,7 @@ const IS_DEPOSIT_REWARD = true;
 const BATCH_SIZE = 50;
 
 const keypair = Ed25519Keypair.fromSecretKey(
-  fromB64(process.env.SUI_SECRET_KEY!)
+  fromBase64(process.env.SUI_SECRET_KEY!)
 );
 
 async function crankRewards(
@@ -95,7 +95,7 @@ async function crankRewards(
 
   let i = 0;
   while (i < refreshedObligations.length) {
-    let txb = new TransactionBlock();
+    let transaction = new Transaction();
     for (let j = 0; j < BATCH_SIZE && i < refreshedObligations.length; j++) {
       let obligation = refreshedObligations[i];
 
@@ -106,14 +106,14 @@ async function crankRewards(
         REWARD_TYPE,
         IS_DEPOSIT_REWARD ? Side.DEPOSIT : Side.BORROW,
         BigInt(DEPOSIT_RESERVE_INDEX),
-        txb
+        transaction
       );
 
       i++;
     }
 
-    let res = await client.signAndExecuteTransactionBlock({
-      transactionBlock: txb,
+    let res = await client.signAndExecuteTransaction({
+      transaction,
       signer: keypair,
     });
     console.log(res);

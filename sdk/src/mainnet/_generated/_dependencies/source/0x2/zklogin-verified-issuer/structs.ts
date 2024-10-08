@@ -15,15 +15,17 @@ import {
   compressSuiType,
 } from "../../../../_framework/util";
 import { String } from "../../0x1/string/structs";
+import { PKG_V27 } from "../index";
 import { UID } from "../object/structs";
-import { bcs, fromB64, fromHEX, toHEX } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { bcs } from "@mysten/sui/bcs";
+import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
+import { fromB64, fromHEX, toHEX } from "@mysten/sui/utils";
 
 /* ============================== VerifiedIssuer =============================== */
 
 export function isVerifiedIssuer(type: string): boolean {
   type = compressSuiType(type);
-  return type === "0x2::zklogin_verified_issuer::VerifiedIssuer";
+  return type === `${PKG_V27}::zklogin_verified_issuer::VerifiedIssuer`;
 }
 
 export interface VerifiedIssuerFields {
@@ -38,14 +40,16 @@ export type VerifiedIssuerReified = Reified<
 >;
 
 export class VerifiedIssuer implements StructClass {
-  static readonly $typeName = "0x2::zklogin_verified_issuer::VerifiedIssuer";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V27}::zklogin_verified_issuer::VerifiedIssuer`;
   static readonly $numTypeParams = 0;
+  static readonly $isPhantom = [] as const;
 
   readonly $typeName = VerifiedIssuer.$typeName;
-
-  readonly $fullTypeName: "0x2::zklogin_verified_issuer::VerifiedIssuer";
-
+  readonly $fullTypeName: `${typeof PKG_V27}::zklogin_verified_issuer::VerifiedIssuer`;
   readonly $typeArgs: [];
+  readonly $isPhantom = VerifiedIssuer.$isPhantom;
 
   readonly id: ToField<UID>;
   readonly owner: ToField<"address">;
@@ -55,7 +59,7 @@ export class VerifiedIssuer implements StructClass {
     this.$fullTypeName = composeSuiType(
       VerifiedIssuer.$typeName,
       ...typeArgs,
-    ) as "0x2::zklogin_verified_issuer::VerifiedIssuer";
+    ) as `${typeof PKG_V27}::zklogin_verified_issuer::VerifiedIssuer`;
     this.$typeArgs = typeArgs;
 
     this.id = fields.id;
@@ -69,8 +73,9 @@ export class VerifiedIssuer implements StructClass {
       fullTypeName: composeSuiType(
         VerifiedIssuer.$typeName,
         ...[],
-      ) as "0x2::zklogin_verified_issuer::VerifiedIssuer",
+      ) as `${typeof PKG_V27}::zklogin_verified_issuer::VerifiedIssuer`,
       typeArgs: [] as [],
+      isPhantom: VerifiedIssuer.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         VerifiedIssuer.fromFields(fields),
@@ -82,6 +87,8 @@ export class VerifiedIssuer implements StructClass {
       fromJSON: (json: Record<string, any>) => VerifiedIssuer.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         VerifiedIssuer.fromSuiParsedData(content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        VerifiedIssuer.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         VerifiedIssuer.fetch(client, id),
       new: (fields: VerifiedIssuerFields) => {
@@ -183,6 +190,25 @@ export class VerifiedIssuer implements StructClass {
     return VerifiedIssuer.fromFieldsWithTypes(content);
   }
 
+  static fromSuiObjectData(data: SuiObjectData): VerifiedIssuer {
+    if (data.bcs) {
+      if (
+        data.bcs.dataType !== "moveObject" ||
+        !isVerifiedIssuer(data.bcs.type)
+      ) {
+        throw new Error(`object at is not a VerifiedIssuer object`);
+      }
+
+      return VerifiedIssuer.fromBcs(fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return VerifiedIssuer.fromSuiParsedData(data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch(client: SuiClient, id: string): Promise<VerifiedIssuer> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -196,6 +222,7 @@ export class VerifiedIssuer implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a VerifiedIssuer object`);
     }
-    return VerifiedIssuer.fromBcs(fromB64(res.data.bcs.bcsBytes));
+
+    return VerifiedIssuer.fromSuiObjectData(res.data);
   }
 }

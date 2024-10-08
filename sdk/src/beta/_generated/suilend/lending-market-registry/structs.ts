@@ -19,17 +19,16 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../_framework/util";
-import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { PKG_V1 } from "../index";
+import { bcs } from "@mysten/sui/bcs";
+import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
+import { fromB64 } from "@mysten/sui/utils";
 
 /* ============================== LENDING_MARKET_2 =============================== */
 
 export function isLENDING_MARKET_2(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market_registry::LENDING_MARKET_2"
-  );
+  return type === `${PKG_V1}::lending_market_registry::LENDING_MARKET_2`;
 }
 
 export interface LENDING_MARKET_2Fields {
@@ -42,15 +41,16 @@ export type LENDING_MARKET_2Reified = Reified<
 >;
 
 export class LENDING_MARKET_2 implements StructClass {
-  static readonly $typeName =
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market_registry::LENDING_MARKET_2";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V1}::lending_market_registry::LENDING_MARKET_2`;
   static readonly $numTypeParams = 0;
+  static readonly $isPhantom = [] as const;
 
   readonly $typeName = LENDING_MARKET_2.$typeName;
-
-  readonly $fullTypeName: "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market_registry::LENDING_MARKET_2";
-
+  readonly $fullTypeName: `${typeof PKG_V1}::lending_market_registry::LENDING_MARKET_2`;
   readonly $typeArgs: [];
+  readonly $isPhantom = LENDING_MARKET_2.$isPhantom;
 
   readonly dummyField: ToField<"bool">;
 
@@ -58,7 +58,7 @@ export class LENDING_MARKET_2 implements StructClass {
     this.$fullTypeName = composeSuiType(
       LENDING_MARKET_2.$typeName,
       ...typeArgs,
-    ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market_registry::LENDING_MARKET_2";
+    ) as `${typeof PKG_V1}::lending_market_registry::LENDING_MARKET_2`;
     this.$typeArgs = typeArgs;
 
     this.dummyField = fields.dummyField;
@@ -70,8 +70,9 @@ export class LENDING_MARKET_2 implements StructClass {
       fullTypeName: composeSuiType(
         LENDING_MARKET_2.$typeName,
         ...[],
-      ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market_registry::LENDING_MARKET_2",
+      ) as `${typeof PKG_V1}::lending_market_registry::LENDING_MARKET_2`,
       typeArgs: [] as [],
+      isPhantom: LENDING_MARKET_2.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) =>
         LENDING_MARKET_2.fromFields(fields),
@@ -83,6 +84,8 @@ export class LENDING_MARKET_2 implements StructClass {
       fromJSON: (json: Record<string, any>) => LENDING_MARKET_2.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         LENDING_MARKET_2.fromSuiParsedData(content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        LENDING_MARKET_2.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         LENDING_MARKET_2.fetch(client, id),
       new: (fields: LENDING_MARKET_2Fields) => {
@@ -169,6 +172,25 @@ export class LENDING_MARKET_2 implements StructClass {
     return LENDING_MARKET_2.fromFieldsWithTypes(content);
   }
 
+  static fromSuiObjectData(data: SuiObjectData): LENDING_MARKET_2 {
+    if (data.bcs) {
+      if (
+        data.bcs.dataType !== "moveObject" ||
+        !isLENDING_MARKET_2(data.bcs.type)
+      ) {
+        throw new Error(`object at is not a LENDING_MARKET_2 object`);
+      }
+
+      return LENDING_MARKET_2.fromBcs(fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return LENDING_MARKET_2.fromSuiParsedData(data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch(client: SuiClient, id: string): Promise<LENDING_MARKET_2> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -182,7 +204,8 @@ export class LENDING_MARKET_2 implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a LENDING_MARKET_2 object`);
     }
-    return LENDING_MARKET_2.fromBcs(fromB64(res.data.bcs.bcsBytes));
+
+    return LENDING_MARKET_2.fromSuiObjectData(res.data);
   }
 }
 
@@ -190,10 +213,7 @@ export class LENDING_MARKET_2 implements StructClass {
 
 export function isRegistry(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market_registry::Registry"
-  );
+  return type === `${PKG_V1}::lending_market_registry::Registry`;
 }
 
 export interface RegistryFields {
@@ -205,15 +225,16 @@ export interface RegistryFields {
 export type RegistryReified = Reified<Registry, RegistryFields>;
 
 export class Registry implements StructClass {
-  static readonly $typeName =
-    "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market_registry::Registry";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V1}::lending_market_registry::Registry`;
   static readonly $numTypeParams = 0;
+  static readonly $isPhantom = [] as const;
 
   readonly $typeName = Registry.$typeName;
-
-  readonly $fullTypeName: "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market_registry::Registry";
-
+  readonly $fullTypeName: `${typeof PKG_V1}::lending_market_registry::Registry`;
   readonly $typeArgs: [];
+  readonly $isPhantom = Registry.$isPhantom;
 
   readonly id: ToField<UID>;
   readonly version: ToField<"u64">;
@@ -223,7 +244,7 @@ export class Registry implements StructClass {
     this.$fullTypeName = composeSuiType(
       Registry.$typeName,
       ...typeArgs,
-    ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market_registry::Registry";
+    ) as `${typeof PKG_V1}::lending_market_registry::Registry`;
     this.$typeArgs = typeArgs;
 
     this.id = fields.id;
@@ -237,8 +258,9 @@ export class Registry implements StructClass {
       fullTypeName: composeSuiType(
         Registry.$typeName,
         ...[],
-      ) as "0xba79417dd36e8fa1510f53b0491b7a8b2802217a81b1401b1efbb65e4994e016::lending_market_registry::Registry",
+      ) as `${typeof PKG_V1}::lending_market_registry::Registry`,
       typeArgs: [] as [],
+      isPhantom: Registry.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => Registry.fromFields(fields),
       fromFieldsWithTypes: (item: FieldsWithTypes) =>
@@ -249,6 +271,8 @@ export class Registry implements StructClass {
       fromJSON: (json: Record<string, any>) => Registry.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         Registry.fromSuiParsedData(content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        Registry.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         Registry.fetch(client, id),
       new: (fields: RegistryFields) => {
@@ -363,6 +387,22 @@ export class Registry implements StructClass {
     return Registry.fromFieldsWithTypes(content);
   }
 
+  static fromSuiObjectData(data: SuiObjectData): Registry {
+    if (data.bcs) {
+      if (data.bcs.dataType !== "moveObject" || !isRegistry(data.bcs.type)) {
+        throw new Error(`object at is not a Registry object`);
+      }
+
+      return Registry.fromBcs(fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return Registry.fromSuiParsedData(data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch(client: SuiClient, id: string): Promise<Registry> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -376,6 +416,7 @@ export class Registry implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a Registry object`);
     }
-    return Registry.fromBcs(fromB64(res.data.bcs.bcsBytes));
+
+    return Registry.fromSuiObjectData(res.data);
   }
 }

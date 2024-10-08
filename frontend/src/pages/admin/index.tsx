@@ -1,7 +1,7 @@
 import Head from "next/head";
 import { useRouter } from "next/router";
 
-import { TransactionBlock } from "@mysten/sui.js/transactions";
+import { Transaction } from "@mysten/sui/transactions";
 import { Package } from "lucide-react";
 import { toast } from "sonner";
 
@@ -45,7 +45,7 @@ export default function Admin() {
   const {
     refreshData,
     explorer,
-    signExecuteAndWaitTransactionBlock,
+    signExecuteAndWaitForTransaction,
     ...restAppContext
   } = useAppContext();
   const suilendClient = restAppContext.suilendClient as SuilendClient<string>;
@@ -90,12 +90,12 @@ export default function Admin() {
     if (!data.lendingMarketOwnerCapId)
       throw new Error("Error: No lending market owner cap");
 
-    const txb = new TransactionBlock();
+    const transaction = new Transaction();
 
     try {
-      suilendClient.migrate(txb, data.lendingMarketOwnerCapId);
+      suilendClient.migrate(transaction, data.lendingMarketOwnerCapId);
 
-      await signExecuteAndWaitTransactionBlock(txb);
+      await signExecuteAndWaitForTransaction(transaction);
 
       toast.success("Migrated");
     } catch (err) {
@@ -137,7 +137,7 @@ export default function Admin() {
                 return (
                   <Card key={reserve.id}>
                     <CardHeader>
-                      <TTitle className="uppercase">{reserve.symbol}</TTitle>
+                      <TTitle>{reserve.symbol}</TTitle>
                       <CardDescription>
                         <Value
                           value={reserve.id}

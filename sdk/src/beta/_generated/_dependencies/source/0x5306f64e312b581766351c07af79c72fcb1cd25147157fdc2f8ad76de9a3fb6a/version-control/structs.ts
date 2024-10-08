@@ -14,17 +14,16 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
-import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { PKG_V1 } from "../index";
+import { bcs } from "@mysten/sui/bcs";
+import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
+import { fromB64 } from "@mysten/sui/utils";
 
 /* ============================== V__0_2_0 =============================== */
 
 export function isV__0_2_0(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::version_control::V__0_2_0"
-  );
+  return type === `${PKG_V1}::version_control::V__0_2_0`;
 }
 
 export interface V__0_2_0Fields {
@@ -34,15 +33,16 @@ export interface V__0_2_0Fields {
 export type V__0_2_0Reified = Reified<V__0_2_0, V__0_2_0Fields>;
 
 export class V__0_2_0 implements StructClass {
-  static readonly $typeName =
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::version_control::V__0_2_0";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V1}::version_control::V__0_2_0`;
   static readonly $numTypeParams = 0;
+  static readonly $isPhantom = [] as const;
 
   readonly $typeName = V__0_2_0.$typeName;
-
-  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::version_control::V__0_2_0";
-
+  readonly $fullTypeName: `${typeof PKG_V1}::version_control::V__0_2_0`;
   readonly $typeArgs: [];
+  readonly $isPhantom = V__0_2_0.$isPhantom;
 
   readonly dummyField: ToField<"bool">;
 
@@ -50,7 +50,7 @@ export class V__0_2_0 implements StructClass {
     this.$fullTypeName = composeSuiType(
       V__0_2_0.$typeName,
       ...typeArgs,
-    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::version_control::V__0_2_0";
+    ) as `${typeof PKG_V1}::version_control::V__0_2_0`;
     this.$typeArgs = typeArgs;
 
     this.dummyField = fields.dummyField;
@@ -62,8 +62,9 @@ export class V__0_2_0 implements StructClass {
       fullTypeName: composeSuiType(
         V__0_2_0.$typeName,
         ...[],
-      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::version_control::V__0_2_0",
+      ) as `${typeof PKG_V1}::version_control::V__0_2_0`,
       typeArgs: [] as [],
+      isPhantom: V__0_2_0.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => V__0_2_0.fromFields(fields),
       fromFieldsWithTypes: (item: FieldsWithTypes) =>
@@ -74,6 +75,8 @@ export class V__0_2_0 implements StructClass {
       fromJSON: (json: Record<string, any>) => V__0_2_0.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         V__0_2_0.fromSuiParsedData(content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        V__0_2_0.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         V__0_2_0.fetch(client, id),
       new: (fields: V__0_2_0Fields) => {
@@ -160,6 +163,22 @@ export class V__0_2_0 implements StructClass {
     return V__0_2_0.fromFieldsWithTypes(content);
   }
 
+  static fromSuiObjectData(data: SuiObjectData): V__0_2_0 {
+    if (data.bcs) {
+      if (data.bcs.dataType !== "moveObject" || !isV__0_2_0(data.bcs.type)) {
+        throw new Error(`object at is not a V__0_2_0 object`);
+      }
+
+      return V__0_2_0.fromBcs(fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return V__0_2_0.fromSuiParsedData(data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch(client: SuiClient, id: string): Promise<V__0_2_0> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -173,7 +192,8 @@ export class V__0_2_0 implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a V__0_2_0 object`);
     }
-    return V__0_2_0.fromBcs(fromB64(res.data.bcs.bcsBytes));
+
+    return V__0_2_0.fromSuiObjectData(res.data);
   }
 }
 
@@ -181,10 +201,7 @@ export class V__0_2_0 implements StructClass {
 
 export function isV__DUMMY(type: string): boolean {
   type = compressSuiType(type);
-  return (
-    type ===
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::version_control::V__DUMMY"
-  );
+  return type === `${PKG_V1}::version_control::V__DUMMY`;
 }
 
 export interface V__DUMMYFields {
@@ -194,15 +211,16 @@ export interface V__DUMMYFields {
 export type V__DUMMYReified = Reified<V__DUMMY, V__DUMMYFields>;
 
 export class V__DUMMY implements StructClass {
-  static readonly $typeName =
-    "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::version_control::V__DUMMY";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V1}::version_control::V__DUMMY`;
   static readonly $numTypeParams = 0;
+  static readonly $isPhantom = [] as const;
 
   readonly $typeName = V__DUMMY.$typeName;
-
-  readonly $fullTypeName: "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::version_control::V__DUMMY";
-
+  readonly $fullTypeName: `${typeof PKG_V1}::version_control::V__DUMMY`;
   readonly $typeArgs: [];
+  readonly $isPhantom = V__DUMMY.$isPhantom;
 
   readonly dummyField: ToField<"bool">;
 
@@ -210,7 +228,7 @@ export class V__DUMMY implements StructClass {
     this.$fullTypeName = composeSuiType(
       V__DUMMY.$typeName,
       ...typeArgs,
-    ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::version_control::V__DUMMY";
+    ) as `${typeof PKG_V1}::version_control::V__DUMMY`;
     this.$typeArgs = typeArgs;
 
     this.dummyField = fields.dummyField;
@@ -222,8 +240,9 @@ export class V__DUMMY implements StructClass {
       fullTypeName: composeSuiType(
         V__DUMMY.$typeName,
         ...[],
-      ) as "0x5306f64e312b581766351c07af79c72fcb1cd25147157fdc2f8ad76de9a3fb6a::version_control::V__DUMMY",
+      ) as `${typeof PKG_V1}::version_control::V__DUMMY`,
       typeArgs: [] as [],
+      isPhantom: V__DUMMY.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => V__DUMMY.fromFields(fields),
       fromFieldsWithTypes: (item: FieldsWithTypes) =>
@@ -234,6 +253,8 @@ export class V__DUMMY implements StructClass {
       fromJSON: (json: Record<string, any>) => V__DUMMY.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         V__DUMMY.fromSuiParsedData(content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        V__DUMMY.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) =>
         V__DUMMY.fetch(client, id),
       new: (fields: V__DUMMYFields) => {
@@ -320,6 +341,22 @@ export class V__DUMMY implements StructClass {
     return V__DUMMY.fromFieldsWithTypes(content);
   }
 
+  static fromSuiObjectData(data: SuiObjectData): V__DUMMY {
+    if (data.bcs) {
+      if (data.bcs.dataType !== "moveObject" || !isV__DUMMY(data.bcs.type)) {
+        throw new Error(`object at is not a V__DUMMY object`);
+      }
+
+      return V__DUMMY.fromBcs(fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return V__DUMMY.fromSuiParsedData(data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch(client: SuiClient, id: string): Promise<V__DUMMY> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -333,6 +370,7 @@ export class V__DUMMY implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a V__DUMMY object`);
     }
-    return V__DUMMY.fromBcs(fromB64(res.data.bcs.bcsBytes));
+
+    return V__DUMMY.fromSuiObjectData(res.data);
   }
 }

@@ -10,8 +10,8 @@ import {
   useState,
 } from "react";
 
-import { SuiTransactionBlockResponse } from "@mysten/sui.js/client";
-import { TransactionBlock } from "@mysten/sui.js/transactions";
+import { SuiTransactionBlockResponse } from "@mysten/sui/client";
+import { Transaction } from "@mysten/sui/transactions";
 import * as Sentry from "@sentry/nextjs";
 import { cloneDeep } from "lodash";
 import { useLocalStorage } from "usehooks-ts";
@@ -24,7 +24,8 @@ import { useWalletContext } from "@/contexts/WalletContext";
 import { shallowPushQuery } from "@/lib/router";
 
 enum QueryParams {
-  RESERVE_INDEX = "assetIndex",
+  RESERVE_INDEX = "assetIndex", // Being phased out
+  RESERVE_SYMBOL = "asset",
   TAB = "action",
   PARAMETERS_PANEL_TAB = "parametersPanelTab",
 }
@@ -43,9 +44,9 @@ export type ActionSignature = (
 
 interface ActionsModalContext {
   isOpen: boolean;
-  open: (reserveIndex: number) => void;
+  open: (symbol: string) => void;
   close: () => void;
-  reserveIndex?: number;
+  reserveSymbol?: string;
 
   selectedTab: Tab;
   onSelectedTabChange: (tab: Tab) => void;
@@ -68,7 +69,7 @@ const defaultContextValue: ActionsModalContext = {
   close: () => {
     throw Error("ActionsModalContextProvider not initialized");
   },
-  reserveIndex: undefined,
+  reserveSymbol: undefined,
 
   selectedTab: Tab.DEPOSIT,
   onSelectedTabChange: () => {
@@ -104,34 +105,41 @@ export const useActionsModalContext = () => useContext(ActionsModalContext);
 
 export function ActionsModalContextProvider({ children }: PropsWithChildren) {
   const router = useRouter();
-  const queryParams = {
-    [QueryParams.RESERVE_INDEX]: router.query[QueryParams.RESERVE_INDEX] as
-      | string
-      | undefined,
-    [QueryParams.TAB]: router.query[QueryParams.TAB] as Tab | undefined,
-    [QueryParams.PARAMETERS_PANEL_TAB]: router.query[
-      QueryParams.PARAMETERS_PANEL_TAB
-    ] as ParametersPanelTab | undefined,
-  };
+  const queryParams = useMemo(
+    () => ({
+      [QueryParams.RESERVE_INDEX]: router.query[QueryParams.RESERVE_INDEX] as
+        | string
+        | undefined,
+      [QueryParams.RESERVE_SYMBOL]: router.query[QueryParams.RESERVE_SYMBOL] as
+        | string
+        | undefined,
+      [QueryParams.TAB]: router.query[QueryParams.TAB] as Tab | undefined,
+      [QueryParams.PARAMETERS_PANEL_TAB]: router.query[
+        QueryParams.PARAMETERS_PANEL_TAB
+      ] as ParametersPanelTab | undefined,
+    }),
+    [router.query],
+  );
 
   const { address } = useWalletContext();
-  const { obligation, signExecuteAndWaitTransactionBlock, ...restAppContext } =
+  const { obligation, signExecuteAndWaitForTransaction, ...restAppContext } =
     useAppContext();
   const suilendClient = restAppContext.suilendClient as SuilendClient<string>;
   const data = restAppContext.data as AppData;
 
   // Open
   const [isOpen, setIsOpen] = useState<boolean>(
-    queryParams[QueryParams.RESERVE_INDEX] !== undefined,
+    queryParams[QueryParams.RESERVE_INDEX] !== undefined ||
+      queryParams[QueryParams.RESERVE_SYMBOL] !== undefined,
   );
 
   const open = useCallback(
-    (_reserveIndex: number) => {
+    (symbol: string) => {
       setIsOpen(true);
 
       shallowPushQuery(router, {
         ...router.query,
-        [QueryParams.RESERVE_INDEX]: _reserveIndex,
+        [QueryParams.RESERVE_SYMBOL]: symbol,
       });
     },
     [router],
@@ -142,22 +150,35 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
     setTimeout(() => {
       const restQuery = cloneDeep(router.query);
       delete restQuery[QueryParams.RESERVE_INDEX];
+      delete restQuery[QueryParams.RESERVE_SYMBOL];
       shallowPushQuery(router, restQuery);
     }, 250);
   }, [router]);
 
-  // Reserve index
-  const reserveIndex =
-    queryParams[QueryParams.RESERVE_INDEX] !== undefined
-      ? +queryParams[QueryParams.RESERVE_INDEX]
-      : defaultContextValue.reserveIndex;
+  // Reserve symbol
+  const reserveSymbol = useMemo(() => {
+    if (queryParams[QueryParams.RESERVE_INDEX] !== undefined)
+      return data.lendingMarket.reserves.find(
+        (r) =>
+          Number(r.arrayIndex) ===
+          +(queryParams[QueryParams.RESERVE_INDEX] as string),
+      )?.symbol;
+
+    return (
+      queryParams[QueryParams.RESERVE_SYMBOL] ??
+      defaultContextValue.reserveSymbol
+    );
+  }, [queryParams, data.lendingMarket.reserves]);
 
   // Tab
-  const selectedTab =
-    queryParams[QueryParams.TAB] &&
-    Object.values(Tab).includes(queryParams[QueryParams.TAB])
-      ? queryParams[QueryParams.TAB]
-      : defaultContextValue.selectedTab;
+  const selectedTab = useMemo(
+    () =>
+      queryParams[QueryParams.TAB] &&
+      Object.values(Tab).includes(queryParams[QueryParams.TAB])
+        ? queryParams[QueryParams.TAB]
+        : defaultContextValue.selectedTab,
+    [queryParams],
+  );
   const onSelectedTabChange = useCallback(
     (tab: Tab) => {
       shallowPushQuery(router, { ...router.query, [QueryParams.TAB]: tab });
@@ -173,13 +194,16 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
     defaultContextValue.isMoreParametersOpen,
   );
 
-  const selectedParametersPanelTab =
-    queryParams[QueryParams.PARAMETERS_PANEL_TAB] &&
-    Object.values(ParametersPanelTab).includes(
-      queryParams[QueryParams.PARAMETERS_PANEL_TAB],
-    )
-      ? queryParams[QueryParams.PARAMETERS_PANEL_TAB]
-      : defaultContextValue.selectedParametersPanelTab;
+  const selectedParametersPanelTab = useMemo(
+    () =>
+      queryParams[QueryParams.PARAMETERS_PANEL_TAB] &&
+      Object.values(ParametersPanelTab).includes(
+        queryParams[QueryParams.PARAMETERS_PANEL_TAB],
+      )
+        ? queryParams[QueryParams.PARAMETERS_PANEL_TAB]
+        : defaultContextValue.selectedParametersPanelTab,
+    [queryParams],
+  );
   const onSelectedParametersPanelTabChange = useCallback(
     (tab: ParametersPanelTab) => {
       shallowPushQuery(router, {
@@ -191,21 +215,23 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
   );
 
   // Actions
-  const obligationOwnerCap = data.obligationOwnerCaps?.find(
-    (o) => o.obligationId === obligation?.id,
+  const obligationOwnerCap = useMemo(
+    () =>
+      data.obligationOwnerCaps?.find((o) => o.obligationId === obligation?.id),
+    [data.obligationOwnerCaps, obligation?.id],
   );
 
   const deposit = useCallback(
     async (coinType: string, value: string) => {
       if (!address) throw Error("Wallet not connected");
 
-      const txb = new TransactionBlock();
+      const transaction = new Transaction();
       try {
         await suilendClient.depositIntoObligation(
           address,
           coinType,
           value,
-          txb,
+          transaction,
           obligationOwnerCap?.id,
         );
       } catch (err) {
@@ -214,13 +240,13 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
         throw err;
       }
 
-      const res = await signExecuteAndWaitTransactionBlock(txb);
+      const res = await signExecuteAndWaitForTransaction(transaction);
       return res;
     },
     [
       address,
       suilendClient,
-      signExecuteAndWaitTransactionBlock,
+      signExecuteAndWaitForTransaction,
       obligationOwnerCap,
     ],
   );
@@ -231,7 +257,7 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
       if (!obligationOwnerCap || !obligation)
         throw Error("Obligation not found");
 
-      const txb = new TransactionBlock();
+      const transaction = new Transaction();
       try {
         await suilendClient.borrowFromObligation(
           address,
@@ -239,7 +265,7 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
           obligation.id,
           coinType,
           value,
-          txb,
+          transaction,
         );
       } catch (err) {
         Sentry.captureException(err);
@@ -247,13 +273,13 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
         throw err;
       }
 
-      const res = await signExecuteAndWaitTransactionBlock(txb);
+      const res = await signExecuteAndWaitForTransaction(transaction);
       return res;
     },
     [
       address,
       suilendClient,
-      signExecuteAndWaitTransactionBlock,
+      signExecuteAndWaitForTransaction,
       obligationOwnerCap,
       obligation,
     ],
@@ -265,7 +291,7 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
       if (!obligationOwnerCap || !obligation)
         throw Error("Obligation not found");
 
-      const txb = new TransactionBlock();
+      const transaction = new Transaction();
       try {
         await suilendClient.withdrawFromObligation(
           address,
@@ -273,7 +299,7 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
           obligation.id,
           coinType,
           value,
-          txb,
+          transaction,
         );
       } catch (err) {
         Sentry.captureException(err);
@@ -281,13 +307,13 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
         throw err;
       }
 
-      const res = await signExecuteAndWaitTransactionBlock(txb);
+      const res = await signExecuteAndWaitForTransaction(transaction);
       return res;
     },
     [
       address,
       suilendClient,
-      signExecuteAndWaitTransactionBlock,
+      signExecuteAndWaitForTransaction,
       obligationOwnerCap,
       obligation,
     ],
@@ -298,14 +324,14 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
       if (!address) throw Error("Wallet not connected");
       if (!obligation) throw Error("Obligation not found");
 
-      const txb = new TransactionBlock();
+      const transaction = new Transaction();
       try {
         await suilendClient.repayIntoObligation(
           address,
           obligation.id,
           coinType,
           value,
-          txb,
+          transaction,
         );
       } catch (err) {
         Sentry.captureException(err);
@@ -313,19 +339,19 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
         throw err;
       }
 
-      const res = await signExecuteAndWaitTransactionBlock(txb);
+      const res = await signExecuteAndWaitForTransaction(transaction);
       return res;
     },
-    [address, suilendClient, signExecuteAndWaitTransactionBlock, obligation],
+    [address, suilendClient, signExecuteAndWaitForTransaction, obligation],
   );
 
   // Context
   const contextValue = useMemo(
     () => ({
-      isOpen: isOpen && reserveIndex !== undefined,
+      isOpen: isOpen && reserveSymbol !== undefined,
       open,
       close,
-      reserveIndex,
+      reserveSymbol,
 
       selectedTab,
       onSelectedTabChange,
@@ -341,7 +367,7 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
     }),
     [
       isOpen,
-      reserveIndex,
+      reserveSymbol,
       open,
       close,
       selectedTab,

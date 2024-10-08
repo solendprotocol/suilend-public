@@ -1,4 +1,4 @@
-import { SuiClient, SuiEvent } from "@mysten/sui.js/client";
+import { SuiClient, SuiEvent } from "@mysten/sui/client";
 
 type TypeName = {
   name: string;
@@ -44,7 +44,7 @@ class TypedParamsSuiEvent<T> {
   }
 }
 
-export class GenericSuilendEvent extends TypedParamsSuiEvent<{}> {}
+export class GenericSuilendEvent extends TypedParamsSuiEvent<object> {}
 
 export class InterestUpdateEvent extends TypedParamsSuiEvent<{
   lending_market_id: address;

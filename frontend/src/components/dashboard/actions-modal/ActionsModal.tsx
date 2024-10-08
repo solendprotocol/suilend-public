@@ -26,7 +26,7 @@ export default function ActionsModal() {
   const { obligation, ...restAppContext } = useAppContext();
   const data = restAppContext.data as AppData;
   const {
-    reserveIndex,
+    reserveSymbol,
     selectedTab,
     onSelectedTabChange,
     isMoreParametersOpen,
@@ -40,8 +40,8 @@ export default function ActionsModal() {
 
   // Reserve
   const reserve =
-    reserveIndex !== undefined
-      ? data.lendingMarket.reserves[reserveIndex]
+    reserveSymbol !== undefined
+      ? data.lendingMarket.reserves.find((r) => r.symbol === reserveSymbol)
       : undefined;
 
   // Tabs

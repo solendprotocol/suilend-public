@@ -14,15 +14,17 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
+import { PKG_V27 } from "../index";
 import { UID } from "../object/structs";
-import { bcs, fromB64 } from "@mysten/bcs";
-import { SuiClient, SuiParsedData } from "@mysten/sui.js/client";
+import { bcs } from "@mysten/sui/bcs";
+import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
+import { fromB64 } from "@mysten/sui/utils";
 
 /* ============================== Clock =============================== */
 
 export function isClock(type: string): boolean {
   type = compressSuiType(type);
-  return type === "0x2::clock::Clock";
+  return type === `${PKG_V27}::clock::Clock`;
 }
 
 export interface ClockFields {
@@ -33,14 +35,16 @@ export interface ClockFields {
 export type ClockReified = Reified<Clock, ClockFields>;
 
 export class Clock implements StructClass {
-  static readonly $typeName = "0x2::clock::Clock";
+  __StructClass = true as const;
+
+  static readonly $typeName = `${PKG_V27}::clock::Clock`;
   static readonly $numTypeParams = 0;
+  static readonly $isPhantom = [] as const;
 
   readonly $typeName = Clock.$typeName;
-
-  readonly $fullTypeName: "0x2::clock::Clock";
-
+  readonly $fullTypeName: `${typeof PKG_V27}::clock::Clock`;
   readonly $typeArgs: [];
+  readonly $isPhantom = Clock.$isPhantom;
 
   readonly id: ToField<UID>;
   readonly timestampMs: ToField<"u64">;
@@ -49,7 +53,7 @@ export class Clock implements StructClass {
     this.$fullTypeName = composeSuiType(
       Clock.$typeName,
       ...typeArgs,
-    ) as "0x2::clock::Clock";
+    ) as `${typeof PKG_V27}::clock::Clock`;
     this.$typeArgs = typeArgs;
 
     this.id = fields.id;
@@ -62,8 +66,9 @@ export class Clock implements StructClass {
       fullTypeName: composeSuiType(
         Clock.$typeName,
         ...[],
-      ) as "0x2::clock::Clock",
+      ) as `${typeof PKG_V27}::clock::Clock`,
       typeArgs: [] as [],
+      isPhantom: Clock.$isPhantom,
       reifiedTypeArgs: [],
       fromFields: (fields: Record<string, any>) => Clock.fromFields(fields),
       fromFieldsWithTypes: (item: FieldsWithTypes) =>
@@ -74,6 +79,8 @@ export class Clock implements StructClass {
       fromJSON: (json: Record<string, any>) => Clock.fromJSON(json),
       fromSuiParsedData: (content: SuiParsedData) =>
         Clock.fromSuiParsedData(content),
+      fromSuiObjectData: (content: SuiObjectData) =>
+        Clock.fromSuiObjectData(content),
       fetch: async (client: SuiClient, id: string) => Clock.fetch(client, id),
       new: (fields: ClockFields) => {
         return new Clock([], fields);
@@ -164,6 +171,22 @@ export class Clock implements StructClass {
     return Clock.fromFieldsWithTypes(content);
   }
 
+  static fromSuiObjectData(data: SuiObjectData): Clock {
+    if (data.bcs) {
+      if (data.bcs.dataType !== "moveObject" || !isClock(data.bcs.type)) {
+        throw new Error(`object at is not a Clock object`);
+      }
+
+      return Clock.fromBcs(fromB64(data.bcs.bcsBytes));
+    }
+    if (data.content) {
+      return Clock.fromSuiParsedData(data.content);
+    }
+    throw new Error(
+      "Both `bcs` and `content` fields are missing from the data. Include `showBcs` or `showContent` in the request.",
+    );
+  }
+
   static async fetch(client: SuiClient, id: string): Promise<Clock> {
     const res = await client.getObject({ id, options: { showBcs: true } });
     if (res.error) {
@@ -177,6 +200,7 @@ export class Clock implements StructClass {
     ) {
       throw new Error(`object at id ${id} is not a Clock object`);
     }
-    return Clock.fromBcs(fromB64(res.data.bcs.bcsBytes));
+
+    return Clock.fromSuiObjectData(res.data);
   }
 }

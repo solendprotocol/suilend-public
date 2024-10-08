@@ -1,4 +1,4 @@
-import { CoinMetadata } from "@mysten/sui.js/client";
+import { CoinMetadata } from "@mysten/sui/client";
 
 import * as core from "../../core/parsers/lendingMarket";
 import { LendingMarket } from "../_generated/suilend/lending-market/structs";

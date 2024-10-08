@@ -2,7 +2,7 @@ import { CSSProperties, useEffect, useMemo, useRef, useState } from "react";
 
 import Dagre from "@dagrejs/dagre";
 import { SuiExchange as HopSuiExchange, VerifiedToken } from "@hop.ag/sdk";
-import { CoinMetadata, SuiClient } from "@mysten/sui.js/client";
+import { CoinMetadata, SuiClient } from "@mysten/sui/client";
 import {
   RouterProtocolName as AftermathRouterProtocolName,
   RouterTradePath as AftermathRouterTradePath,
@@ -186,8 +186,8 @@ function ExchangeNode({ data }: ExchangeNodeProps) {
         >
           <TLabelSans>
             {"sui_exchange" in data
-              ? HOP_EXCHANGE_NAME_MAP[data.sui_exchange] ?? data.sui_exchange
-              : AF_EXCHANGE_NAME_MAP[data.protocol] ?? data.protocol}
+              ? (HOP_EXCHANGE_NAME_MAP[data.sui_exchange] ?? data.sui_exchange)
+              : (AF_EXCHANGE_NAME_MAP[data.protocol] ?? data.protocol)}
           </TLabelSans>
         </Tooltip>
 
@@ -522,7 +522,7 @@ export default function RoutingDialog({ quote }: RoutingDialogProps) {
                 },
               };
             })
-            .filter(Boolean) as unknown as QuoteNodeWithTokens[])
+            .filter(Boolean) as QuoteNodeWithTokens[])
         : // Aftermath
           (quote.quote.routes
             .reduce(
@@ -585,9 +585,7 @@ export default function RoutingDialog({ quote }: RoutingDialogProps) {
       rootProps={{ open: isOpen, onOpenChange }}
       trigger={
         <TLabelSans className="max-w-max cursor-pointer overflow-hidden text-ellipsis text-nowrap transition-colors hover:text-foreground">
-          <span className="font-medium">
-            {hopsCount} hop{hopsCount !== 1 && "s"}
-          </span>
+          {hopsCount} hop{hopsCount !== 1 && "s"}
           {" via "}
           {formatList(
             Array.from(

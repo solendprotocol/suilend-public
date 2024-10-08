@@ -1,9 +1,9 @@
-import { bcs } from "@mysten/sui.js/bcs";
-import { toHEX } from "@mysten/sui.js/utils";
+import { bcs } from "@mysten/sui/bcs";
+import { toHex } from "@mysten/sui/utils";
+import { SuiPriceServiceConnection } from "@pythnetwork/pyth-sui-js";
 import BigNumber from "bignumber.js";
 import { v4 as uuidv4 } from "uuid";
 
-import { SuiPriceServiceConnection } from "../../../../pyth-sdk/src";
 import { WAD } from "../constants";
 import { linearlyInterpolate } from "../utils";
 
@@ -259,7 +259,7 @@ export class Simulate {
     pythConnection: SuiPriceServiceConnection,
   ): Promise<(typeof this.Reserve)[]> {
     const priceIdentifiers = reserves.map((r) =>
-      toHEX(new Uint8Array(r.priceIdentifier.bytes)),
+      toHex(new Uint8Array(r.priceIdentifier.bytes)),
     );
     const priceData =
       await pythConnection.getLatestPriceFeeds(priceIdentifiers);
