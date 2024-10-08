@@ -15,7 +15,7 @@
     "@mysten/bcs": "0.11.1",
     "@mysten/sui.js": "0.51.2",
     "@pythnetwork/pyth-sui-js": "^2.1.0",
-    "@suilend/sdk": "^1.0.6",
+    "@suilend/sdk": "1.1.0",
     "bignumber.js": "^9.1.2",
     "commander": "^11.1.0",
     "hot-shots": "^10.0.0",
