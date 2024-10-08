@@ -186,8 +186,8 @@ function ExchangeNode({ data }: ExchangeNodeProps) {
         >
           <TLabelSans>
             {"sui_exchange" in data
-              ? HOP_EXCHANGE_NAME_MAP[data.sui_exchange] ?? data.sui_exchange
-              : AF_EXCHANGE_NAME_MAP[data.protocol] ?? data.protocol}
+              ? (HOP_EXCHANGE_NAME_MAP[data.sui_exchange] ?? data.sui_exchange)
+              : (AF_EXCHANGE_NAME_MAP[data.protocol] ?? data.protocol)}
           </TLabelSans>
         </Tooltip>
 

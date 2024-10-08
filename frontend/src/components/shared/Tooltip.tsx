@@ -61,7 +61,7 @@ function CustomTooltipRoot({
     <TooltipRoot
       open={props.open || isOpen}
       onOpenChange={setIsOpen}
-      delayDuration={isTouchscreen ? 0 : delayDuration ?? 0}
+      delayDuration={isTouchscreen ? 0 : (delayDuration ?? 0)}
       {...props}
     >
       <TooltipTriggerContext.Provider value={contextValue}>

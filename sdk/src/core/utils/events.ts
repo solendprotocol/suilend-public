@@ -44,7 +44,7 @@ class TypedParamsSuiEvent<T> {
   }
 }
 
-export class GenericSuilendEvent extends TypedParamsSuiEvent<{}> {}
+export class GenericSuilendEvent extends TypedParamsSuiEvent<object> {}
 
 export class InterestUpdateEvent extends TypedParamsSuiEvent<{
   lending_market_id: address;

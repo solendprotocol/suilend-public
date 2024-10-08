@@ -95,7 +95,7 @@ export function PointsContextProvider({ children }: PropsWithChildren) {
         }
       }
     })();
-  }, []);
+  }, [data, address]);
 
   // Rank
   const [rank, setRank] = useState<PointsContext["rank"]>(

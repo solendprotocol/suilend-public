@@ -276,7 +276,7 @@ export function WalletContextProvider({ children }: PropsWithChildren) {
           `Switched to ${_account?.label ?? addressNameServiceName ?? formatAddress(_address)}`,
           {
             description: _account?.label
-              ? addressNameServiceName ?? formatAddress(_address)
+              ? (addressNameServiceName ?? formatAddress(_address))
               : undefined,
             descriptionClassName: "uppercase !font-mono",
           },

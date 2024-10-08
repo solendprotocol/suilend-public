@@ -107,7 +107,7 @@ export function AppContextProvider({ children }: PropsWithChildren) {
     () =>
       rpcId === Rpc.CUSTOM
         ? { id: Rpc.CUSTOM, name: "Custom", url: customRpcUrl }
-        : RPCS.find((rpc) => rpc.id === rpcId) ?? RPCS[0],
+        : (RPCS.find((rpc) => rpc.id === rpcId) ?? RPCS[0]),
     [rpcId, customRpcUrl],
   );
 
