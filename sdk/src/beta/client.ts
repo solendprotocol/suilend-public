@@ -70,7 +70,7 @@ const deps = {
 
 export class SuilendClient<T extends string> extends BaseSuilendClient {
   constructor(lendingMarket: LendingMarket<T>, client: SuiClient) {
-    super(lendingMarket, client, deps as any);
+    super(lendingMarket, client, deps);
   }
 
   static async initialize(
@@ -78,23 +78,14 @@ export class SuilendClient<T extends string> extends BaseSuilendClient {
     lendingMarketType: string,
     client: SuiClient,
   ) {
-    return super.initialize(
-      lendingMarketId,
-      lendingMarketType,
-      client,
-      deps as any,
-    );
+    return super.initialize(lendingMarketId, lendingMarketType, client, deps);
   }
 
   static async initializeWithLendingMarket(
     lendingMarket: LendingMarket<string>,
     client: SuiClient,
   ) {
-    return super.initializeWithLendingMarket(
-      lendingMarket,
-      client,
-      deps as any,
-    );
+    return super.initializeWithLendingMarket(lendingMarket, client, deps);
   }
 
   static async createNewLendingMarket(
@@ -106,10 +97,7 @@ export class SuilendClient<T extends string> extends BaseSuilendClient {
       registryId,
       lendingMarketType,
       transaction,
-      {
-        LendingMarket,
-        createLendingMarket: createLendingMarket as any,
-      },
+      { LendingMarket, createLendingMarket: createLendingMarket },
     );
   }
 
