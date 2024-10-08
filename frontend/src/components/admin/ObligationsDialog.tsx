@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import { SuiClient } from "@mysten/sui/client";
+import { SuiPriceServiceConnection } from "@pythnetwork/pyth-sui-js";
 import { ColumnDef } from "@tanstack/react-table";
 
 import { phantom } from "@suilend/sdk/_generated/_framework/reified";
@@ -14,8 +15,6 @@ import {
 import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 import { fetchAllObligationsForMarketWithHandler } from "@suilend/sdk/utils/obligation";
 import * as simulate from "@suilend/sdk/utils/simulate";
-
-import { SuiPriceServiceConnection } from "@pyth-sdk";
 
 import Dialog from "@/components/admin/Dialog";
 import LiquidateDialog from "@/components/admin/LiquidateDialog";

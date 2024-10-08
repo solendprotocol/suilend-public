@@ -10,11 +10,10 @@ import {
   normalizeStructTag,
   toHex,
 } from "@mysten/sui/utils";
-
 import {
   SuiPriceServiceConnection,
   SuiPythClient,
-} from "../../../pyth-sdk/src";
+} from "@pythnetwork/pyth-sui-js";
 
 import {
   AddPoolRewardArgs,
@@ -231,7 +230,7 @@ export class SuilendClient {
     this.lendingMarket = lendingMarket;
     this.client = client;
     this.pythClient = new SuiPythClient(
-      client as any,
+      client,
       PYTH_STATE_ID,
       WORMHOLE_STATE_ID,
     );
@@ -448,7 +447,7 @@ export class SuilendClient {
       pythPriceId,
     ]);
     const priceInfoObjectIds = await this.pythClient.updatePriceFeeds(
-      transaction as any,
+      transaction,
       priceUpdateData,
       [pythPriceId],
     );
@@ -766,7 +765,7 @@ export class SuilendClient {
     const priceUpdateData =
       await this.pythConnection.getPriceFeedsUpdateData(priceIds);
     const priceInfoObjectIds = await this.pythClient.updatePriceFeeds(
-      transaction as any,
+      transaction,
       priceUpdateData,
       priceIds,
     );

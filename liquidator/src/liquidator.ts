@@ -2,6 +2,7 @@ import { SuiClient } from "@mysten/sui.js/client";
 import { Ed25519Keypair } from "@mysten/sui.js/keypairs/ed25519";
 import { Secp256k1Keypair } from "@mysten/sui.js/keypairs/secp256k1";
 import { TransactionBlock } from "@mysten/sui.js/transactions";
+import { SuiPriceServiceConnection } from "@pythnetwork/pyth-sui-js";
 import { SuilendClient } from "@suilend/sdk";
 import {
   Borrow,
@@ -11,7 +12,6 @@ import { Reserve } from "@suilend/sdk/mainnet/_generated/suilend/reserve/structs
 import { getRedeemEvent } from "@suilend/sdk/mainnet/utils/events";
 import { fetchAllObligationsForMarket } from "@suilend/sdk/mainnet/utils/obligation";
 import * as simulate from "@suilend/sdk/mainnet/utils/simulate";
-import { SuiPriceServiceConnection } from "@suilend/sdk/pyth-sdk";
 import BigNumber from "bignumber.js";
 import BN from "bn.js";
 import { StatsD } from "hot-shots";

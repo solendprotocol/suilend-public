@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import { SuiClient } from "@mysten/sui/client";
 import { Transaction, TransactionResult } from "@mysten/sui/transactions";
+import { SuiPriceServiceConnection } from "@pythnetwork/pyth-sui-js";
 import { ColumnDef } from "@tanstack/react-table";
 import BigNumber from "bignumber.js";
 import { CheckIcon } from "lucide-react";
@@ -28,8 +29,6 @@ import {
   getObligationHistoryPage,
 } from "@suilend/sdk/utils/obligation";
 import * as simulate from "@suilend/sdk/utils/simulate";
-
-import { SuiPriceServiceConnection } from "@pyth-sdk";
 
 import DataTable, {
   decimalSortingFn,

@@ -9,7 +9,7 @@ import { fetchAllObligationsForMarket } from "../../sdk/src/mainnet/utils/obliga
 import { phantom } from "../../sdk/src/mainnet/_generated/_framework/reified";
 import { Reserve } from "../../sdk/src/mainnet/_generated/suilend/reserve/structs";
 import * as simulate from "../../sdk/src/mainnet/utils/simulate";
-import { SuiPriceServiceConnection } from "../../pyth-sdk/src";
+import { SuiPriceServiceConnection } from "@pythnetwork/pyth-sui-js"
 import { Transaction } from "@mysten/sui/transactions";
 import { Side } from "../../sdk/src/core/types";
 import { fromBase64 } from "@mysten/sui/utils";

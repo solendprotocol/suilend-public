@@ -1,9 +1,9 @@
 import { bcs } from "@mysten/sui/bcs";
 import { toHex } from "@mysten/sui/utils";
+import { SuiPriceServiceConnection } from "@pythnetwork/pyth-sui-js";
 import BigNumber from "bignumber.js";
 import { v4 as uuidv4 } from "uuid";
 
-import { SuiPriceServiceConnection } from "../../../../pyth-sdk/src";
 import { WAD } from "../constants";
 import { linearlyInterpolate } from "../utils";
 
