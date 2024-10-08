@@ -147,12 +147,12 @@ interface Deps {
     args: MigrateArgs,
   ) => TransactionResult;
   claimFees: (
-    txb: Transaction,
+    transaction: Transaction,
     typeArgs: [string, string],
     args: ClaimFeesArgs,
   ) => TransactionResult;
   redeemCtokensAndWithdrawLiquidity: (
-    txb: Transaction,
+    transaction: Transaction,
     typeArgs: [string, string],
     args: RedeemCtokensAndWithdrawLiquidityArgs,
   ) => TransactionResult;

@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useMemo, useState } from "react";
 
-import { SuiClient } from "@mysten/sui.js/client";
-import { TransactionBlock } from "@mysten/sui.js/transactions";
+import { SuiClient } from "@mysten/sui/client";
+import { Transaction } from "@mysten/sui/transactions";
 import BigNumber from "bignumber.js";
 import { Grab } from "lucide-react";
 import { toast } from "sonner";
@@ -26,7 +26,7 @@ interface ClaimFeesDialogProps {
 
 export default function ClaimFeesDialog({ reserve }: ClaimFeesDialogProps) {
   const { address } = useWalletContext();
-  const { refreshData, signExecuteAndWaitTransactionBlock, ...restAppContext } =
+  const { refreshData, signExecuteAndWaitTransaction, ...restAppContext } =
     useAppContext();
   const suiClient = restAppContext.suiClient as SuiClient;
   const suilendClient = restAppContext.suilendClient as SuilendClient<string>;
@@ -91,13 +91,13 @@ export default function ClaimFeesDialog({ reserve }: ClaimFeesDialogProps) {
   const submit = async () => {
     if (!address) throw new Error("Wallet not connected");
 
-    const txb = new TransactionBlock();
+    const transaction = new Transaction();
 
     try {
       for (const _reserve of reserves)
-        suilendClient.claimFees(txb, _reserve.coinType);
+        suilendClient.claimFees(transaction, _reserve.coinType);
 
-      await signExecuteAndWaitTransactionBlock(txb);
+      await signExecuteAndWaitTransaction(transaction);
 
       toast.success("Claimed fees");
     } catch (err) {
