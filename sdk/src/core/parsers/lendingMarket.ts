@@ -41,7 +41,7 @@ export const parseLendingMarket = (
       ),
     )
     .sort((a, b) => {
-      const customOrder = ["SUI", "wUSDC", "USDC"];
+      const customOrder = ["SUI", "USDC", "wUSDC"];
 
       const aCustomOrderIndex = customOrder.indexOf(a.symbol);
       const bCustomOrderIndex = customOrder.indexOf(b.symbol);
