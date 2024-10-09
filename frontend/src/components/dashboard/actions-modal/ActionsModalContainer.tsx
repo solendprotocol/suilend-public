@@ -105,7 +105,7 @@ export default function ActionsModalContainer({ children }: PropsWithChildren) {
   return (
     <DrawerRoot open={isOpen} onRelease={(e, open) => !open && close()}>
       <DrawerContent
-        className="actions-modal-drawer-content !bottom-auto !top-0 mt-16 !h-[calc(100dvh-64px)] !max-h-[calc(100dvh-64px)] rounded-t-lg bg-popover p-0"
+        className="actions-modal-drawer-content !bottom-auto !top-0 mt-16 !h-[calc(100dvh-64px)] !max-h-[calc(100dvh-64px)] rounded-t-lg bg-popover p-4"
         thumbClassName="hidden"
         onEscapeKeyDown={() => close()}
         overlay={{
