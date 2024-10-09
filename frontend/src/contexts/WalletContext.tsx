@@ -225,19 +225,21 @@ export function WalletContextProvider({ children }: PropsWithChildren) {
       if (!account) throw new Error("Missing account");
 
       try {
-        const signedTransaction = await adapter.signTransaction({
-          transaction,
+        // BEGIN legacy code
+        const signedTransaction = await adapter.signTransactionBlock({
+          transactionBlock: transaction as any, // Expects TransactionBlock, not Transaction
           account,
           chain: chain.id as IdentifierString,
         });
 
         const res = await suiClient.executeTransactionBlock({
-          transactionBlock: signedTransaction.bytes,
+          transactionBlock: signedTransaction.transactionBlockBytes,
           signature: signedTransaction.signature,
           options: {
             showEffects: true,
           },
         });
+        // END legacy code
 
         const res2 = await suiClient.waitForTransaction({
           digest: res.digest,
