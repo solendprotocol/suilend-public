@@ -91,7 +91,7 @@ export const getSwapUrl = (
   outSymbol: string = DEFAULT_TOKEN_OUT_SYMBOL,
 ) => `${SWAP_URL}/${inSymbol}-${outSymbol}`;
 
-enum TokenDirection {
+export enum TokenDirection {
   IN = "in",
   OUT = "out",
 }

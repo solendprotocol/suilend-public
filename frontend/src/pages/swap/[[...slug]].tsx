@@ -45,6 +45,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import {
   SwapContextProvider,
+  TokenDirection,
   UnifiedQuote,
   UnifiedQuoteType,
   useSwapContext,
@@ -62,11 +63,6 @@ import { getFilteredRewards, getTotalAprPercent } from "@/lib/liquidityMining";
 import track from "@/lib/track";
 import { Action } from "@/lib/types";
 import { cn } from "@/lib/utils";
-
-enum TokenDirection {
-  IN = "in",
-  OUT = "out",
-}
 
 type SubmitButtonState = {
   isLoading?: boolean;
@@ -278,6 +274,8 @@ function Page() {
           fastestQuoteResult.type,
           fastestQuoteResult.result,
         );
+
+        if (fastestQuoteResult === undefined) throw new Error("No route found");
 
         let unifiedQuote: UnifiedQuote | undefined;
         if (fastestQuoteResult.type === UnifiedQuoteType.HOP) {
@@ -758,13 +756,7 @@ function Page() {
     } else {
       if (swapButtonState.isDisabled) return;
     }
-    if (
-      quoteAmountOut === undefined ||
-      // tokenInUsdValue === undefined ||
-      // tokenOutUsdValue === undefined ||
-      isFetchingQuote
-    )
-      return;
+    if (quoteAmountOut === undefined || isFetchingQuote) return;
 
     (deposit ? setIsSwappingAndDepositing : setIsSwapping)(true);
 
