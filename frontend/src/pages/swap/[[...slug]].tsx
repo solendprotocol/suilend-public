@@ -6,6 +6,8 @@ import {
   GetQuoteResponse as HopGetQuoteResponse,
   VerifiedToken,
 } from "@hop.ag/sdk";
+import { SuiGraphQLClient } from "@mysten/sui/graphql";
+import { graphql } from "@mysten/sui/graphql/schemas/2024.4";
 import { Transaction, TransactionResult } from "@mysten/sui/transactions";
 import { normalizeStructTag } from "@mysten/sui/utils";
 import * as Sentry from "@sentry/nextjs";
@@ -45,6 +47,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import {
   SwapContextProvider,
+  TokenDirection,
   UnifiedQuote,
   UnifiedQuoteType,
   useSwapContext,
@@ -63,11 +66,6 @@ import track from "@/lib/track";
 import { Action } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-enum TokenDirection {
-  IN = "in",
-  OUT = "out",
-}
-
 type SubmitButtonState = {
   isLoading?: boolean;
   isDisabled?: boolean;
@@ -81,6 +79,7 @@ function Page() {
   const { address } = useWalletContext();
   const {
     refreshData,
+    rpc,
     explorer,
     obligation,
     signExecuteAndWaitForTransaction,
@@ -88,6 +87,10 @@ function Page() {
   } = useAppContext();
   const data = restAppContext.data as AppData;
   const suilendClient = restAppContext.suilendClient as SuilendClient<string>;
+
+  const gqlClient = new SuiGraphQLClient({
+    url: "https://sui-mainnet.mystenlabs.com/graphql",
+  });
 
   const { setTokenSymbol, reverseTokenSymbols, ...restSwapContext } =
     useSwapContext();
@@ -278,6 +281,8 @@ function Page() {
           fastestQuoteResult.type,
           fastestQuoteResult.result,
         );
+
+        if (fastestQuoteResult === undefined) throw new Error("No route found");
 
         let unifiedQuote: UnifiedQuote | undefined;
         if (fastestQuoteResult.type === UnifiedQuoteType.HOP) {
@@ -610,7 +615,7 @@ function Page() {
     }
 
     return {
-      title: "Swap",
+      title: `Swap ${value} ${tokenIn.ticker}`,
       isDisabled: !quote || isSwappingAndDepositing,
     };
   })();
@@ -758,19 +763,41 @@ function Page() {
     } else {
       if (swapButtonState.isDisabled) return;
     }
-    if (
-      quoteAmountOut === undefined ||
-      // tokenInUsdValue === undefined ||
-      // tokenOutUsdValue === undefined ||
-      isFetchingQuote
-    )
-      return;
+    if (quoteAmountOut === undefined || isFetchingQuote) return;
 
     (deposit ? setIsSwappingAndDepositing : setIsSwapping)(true);
 
     try {
       const res = await swap(deposit);
       const txUrl = explorer.buildTxUrl(res.digest);
+
+      const balanceChangesQuery = graphql(`
+        query ($digest: String!) {
+          transactionBlock(digest: $digest) {
+            digest
+            effects {
+              balanceChanges {
+                nodes {
+                  owner {
+                    address
+                  }
+                  amount
+                }
+              }
+            }
+          }
+        }
+      `);
+      const balanceChangesQueryResult = await gqlClient.query({
+        query: balanceChangesQuery,
+        variables: {
+          digest: res.digest,
+        },
+      });
+      const balanceChangesNodes =
+        balanceChangesQueryResult.data?.transactionBlock?.effects
+          ?.balanceChanges.nodes;
+      console.log("XXXX", res, balanceChangesQueryResult, balanceChangesNodes);
 
       toast.success(
         `Swapped ${value} ${tokenIn.ticker} for ${tokenOut.ticker}${deposit ? ` and deposited the ${tokenOut.ticker}` : ""}`,
