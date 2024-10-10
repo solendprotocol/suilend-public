@@ -376,16 +376,13 @@ function Page() {
   // Value
   const formatAndSetValue = useCallback(
     (_value: string, token: VerifiedToken) => {
-      if (new BigNumber(_value || 0).lte(0)) {
-        setQuoteMap({});
-        setValue(_value);
-      } else {
-        if (_value.includes(".")) {
-          const [whole, decimals] = _value.split(".");
-          setValue(
-            `${whole}.${decimals.slice(0, Math.min(decimals.length, token.decimals))}`,
-          );
-        } else setValue(_value);
+      if (new BigNumber(_value || 0).lte(0)) setValue(_value);
+      else if (!_value.includes(".")) setValue(_value);
+      else {
+        const [whole, decimals] = _value.split(".");
+        setValue(
+          `${whole}.${decimals.slice(0, Math.min(decimals.length, token.decimals))}`,
+        );
       }
     },
     [],
@@ -394,12 +391,14 @@ function Page() {
   const onValueChange = (_value: string) => {
     formatAndSetValue(_value, tokenIn);
     if (new BigNumber(_value || 0).gt(0)) fetchQuote(tokenIn, tokenOut, _value);
+    else setQuoteMap({});
   };
 
   const useMaxValueWrapper = () => {
     formatAndSetValue(tokenInMaxAmount, tokenIn);
     if (new BigNumber(tokenInMaxAmount).gt(0))
       fetchQuote(tokenIn, tokenOut, tokenInMaxAmount);
+    else setQuoteMap({});
 
     inputRef.current?.focus();
   };
@@ -541,9 +540,10 @@ function Page() {
   // Reverse tokens
   const reverseTokens = () => {
     formatAndSetValue(value, tokenOut);
-    reverseTokenSymbols();
+    if (new BigNumber(value || 0).gt(0)) fetchQuote(tokenOut, tokenIn, value);
+    else setQuoteMap({});
 
-    fetchQuote(tokenOut, tokenIn, value);
+    reverseTokenSymbols();
 
     inputRef.current?.focus();
   };
@@ -772,8 +772,34 @@ function Page() {
       const res = await swap(deposit);
       const txUrl = explorer.buildTxUrl(res.digest);
 
+      const balanceChangeOut = res.balanceChanges?.find(
+        (bc) => normalizeStructTag(bc.coinType) === tokenOut.coin_type,
+      );
+
       toast.success(
-        `Swapped ${value} ${tokenIn.ticker} for ${tokenOut.ticker}${deposit ? ` and deposited the ${tokenOut.ticker}` : ""}`,
+        [
+          "Swapped",
+          formatToken(new BigNumber(value), {
+            dp: tokenIn.decimals,
+            trimTrailingZeros: true,
+          }),
+          tokenIn.ticker,
+          "for",
+          formatToken(
+            balanceChangeOut !== undefined
+              ? new BigNumber(balanceChangeOut.amount).div(
+                  10 ** tokenOut.decimals,
+                )
+              : quoteAmountOut,
+            { dp: tokenOut.decimals, trimTrailingZeros: true },
+          ),
+          [
+            tokenOut.ticker,
+            deposit ? `, and deposited the ${tokenOut.ticker}` : "",
+          ]
+            .filter(Boolean)
+            .join(""),
+        ].join(" "),
         {
           action: (
             <TextLink className="block" href={txUrl}>
