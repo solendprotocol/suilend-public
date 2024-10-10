@@ -7,7 +7,7 @@ import {
   VerifiedToken,
 } from "@hop.ag/sdk";
 import { Transaction, TransactionResult } from "@mysten/sui/transactions";
-import { normalizeStructTag } from "@mysten/sui/utils";
+import { SUI_DECIMALS, normalizeStructTag } from "@mysten/sui/utils";
 import * as Sentry from "@sentry/nextjs";
 import {
   Router as AftermathRouter,
@@ -670,7 +670,7 @@ function Page() {
       const res = await hopSdk.fetchTx({
         trade: (quote.quote as HopGetQuoteResponse).trade,
         sui_address: address,
-        gas_budget: 0.25 * 10 ** 9, // Set to 0.25 SUI
+        gas_budget: 0.25 * 10 ** SUI_DECIMALS, // Set to 0.25 SUI
         max_slippage_bps: slippagePercent * 100,
         return_output_coin_argument: isDepositing,
       });
@@ -723,7 +723,7 @@ function Page() {
         address,
         isDepositing,
       );
-      transaction.setGasBudget(SUI_GAS_MIN * 10 ** 9);
+      transaction.setGasBudget(SUI_GAS_MIN * 10 ** SUI_DECIMALS);
 
       if (isDepositing) {
         if (!outputCoin) throw new Error("Missing coin to deposit");
@@ -764,6 +764,14 @@ function Page() {
       const res = await swap(deposit);
       const txUrl = explorer.buildTxUrl(res.digest);
 
+      const totalGasFeeSui = res.effects
+        ? new BigNumber(
+            +res.effects.gasUsed.computationCost +
+              +res.effects.gasUsed.storageCost -
+              +res.effects.gasUsed.storageRebate,
+          ).div(10 ** SUI_DECIMALS)
+        : new BigNumber(0);
+
       const balanceChangeOut = res.balanceChanges?.find(
         (bc) => normalizeStructTag(bc.coinType) === tokenOut.coin_type,
       );
@@ -779,9 +787,9 @@ function Page() {
           "for",
           formatToken(
             balanceChangeOut !== undefined
-              ? new BigNumber(balanceChangeOut.amount).div(
-                  10 ** tokenOut.decimals,
-                )
+              ? new BigNumber(balanceChangeOut.amount)
+                  .div(10 ** tokenOut.decimals)
+                  .plus(isSui(tokenOut.coin_type) ? totalGasFeeSui : 0)
               : quoteAmountOut,
             { dp: tokenOut.decimals, trimTrailingZeros: true },
           ),
@@ -793,6 +801,7 @@ function Page() {
             .join(""),
         ].join(" "),
         {
+          icon: <ArrowRightLeft className="h-5 w-5 text-success" />,
           action: (
             <TextLink className="block" href={txUrl}>
               View tx on {explorer.name}
