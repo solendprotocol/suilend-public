@@ -132,8 +132,7 @@ function RankStat({ rank, isCentered }: RankStatProps) {
 }
 
 export default function RewardsCard() {
-  const { setIsConnectWalletDropdownOpen, address, isImpersonatingAddress } =
-    useWalletContext();
+  const { setIsConnectWalletDropdownOpen, address } = useWalletContext();
   const { refreshData, explorer, obligation, ...restAppContext } =
     useAppContext();
   const data = restAppContext.data as AppData;
@@ -278,7 +277,6 @@ export default function RewardsCard() {
                   <Button
                     className="w-full sm:w-[134px]"
                     labelClassName="uppercase"
-                    disabled={isImpersonatingAddress}
                     onClick={onClaimRewardsClick}
                   >
                     {isClaiming ? <Spinner size="sm" /> : "Claim rewards"}

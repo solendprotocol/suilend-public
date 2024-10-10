@@ -82,7 +82,7 @@ export default function ActionsModalTabContent({
   getSubmitWarningMessages,
   submit,
 }: ActionsModalTabContentProps) {
-  const { address, isImpersonatingAddress } = useWalletContext();
+  const { address } = useWalletContext();
   const { refreshData, explorer, obligation, ...restAppContext } =
     useAppContext();
   const data = restAppContext.data as AppData;
@@ -500,7 +500,7 @@ export default function ActionsModalTabContent({
           className="h-auto min-h-14 w-full rounded-md py-2"
           labelClassName="text-wrap uppercase"
           style={{ overflowWrap: "anywhere" }}
-          disabled={submitButtonState.isDisabled || isImpersonatingAddress}
+          disabled={submitButtonState.isDisabled}
           onClick={onSubmitClick}
         >
           {submitButtonState.isLoading ? (
