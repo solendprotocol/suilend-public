@@ -58,9 +58,10 @@ import {
 import { ParsedCoinBalance } from "@/lib/coinBalance";
 import { NORMALIZED_SUI_COINTYPE, SUI_COINTYPE, isSui } from "@/lib/coinType";
 import { SUI_GAS_MIN, TX_TOAST_DURATION } from "@/lib/constants";
-import { formatPercent, formatToken } from "@/lib/format";
+import { formatInteger, formatPercent, formatToken } from "@/lib/format";
 import { getFilteredRewards, getTotalAprPercent } from "@/lib/liquidityMining";
 import track from "@/lib/track";
+import { getBalanceChange } from "@/lib/transactions";
 import { Action } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -160,16 +161,24 @@ function Page() {
 
   const formatAndSetSlippagePercent = useCallback(
     (_value: string) => {
-      if (new BigNumber(_value || 0).lt(0)) setSlippagePercent("0");
-      else if (new BigNumber(_value).gt(100)) setSlippagePercent("100");
+      let formattedValue;
+      if (new BigNumber(_value || 0).lt(0)) formattedValue = "0";
+      else if (new BigNumber(_value).gt(100)) formattedValue = "100";
+      else if (!_value.includes(".")) formattedValue = _value;
       else {
-        if (_value.includes(".")) {
-          const [whole, decimals] = _value.split(".");
-          setSlippagePercent(
-            `${whole}.${decimals.slice(0, Math.min(decimals.length, SLIPPAGE_PERCENT_DP))}`,
-          );
-        } else setSlippagePercent(_value);
+        const [integers, decimals] = _value.split(".");
+        const integersFormatted = formatInteger(
+          integers !== "" ? parseInt(integers) : 0,
+          false,
+        );
+        const decimalsFormatted = decimals.slice(
+          0,
+          Math.min(decimals.length, SLIPPAGE_PERCENT_DP),
+        );
+        formattedValue = `${integersFormatted}.${decimalsFormatted}`;
       }
+
+      setSlippagePercent(formattedValue);
     },
     [setSlippagePercent],
   );
@@ -241,6 +250,7 @@ function Page() {
 
         // Use fastest quote
         const fastestQuoteResult = await Promise.any<
+          | undefined
           | { type: UnifiedQuoteType.HOP; result: HopGetQuoteResponse }
           | {
               type: UnifiedQuoteType.AFTERMATH;
@@ -269,12 +279,7 @@ function Page() {
             }
           }),
         ]);
-        console.log(
-          "fastestQuoteResult:",
-          fastestQuoteResult.type,
-          fastestQuoteResult.result,
-        );
-
+        console.log("fastestQuoteResult:", fastestQuoteResult);
         if (fastestQuoteResult === undefined) throw new Error("No route found");
 
         let unifiedQuote: UnifiedQuote | undefined;
@@ -346,7 +351,10 @@ function Page() {
         return unifiedQuote;
       } catch (err) {
         toast.error("Failed to get quote", {
-          description: (err as Error)?.message || "An unknown error occurred",
+          description:
+            err instanceof AggregateError
+              ? "No route found"
+              : (err as Error)?.message || "An unknown error occurred",
         });
         console.error(err);
 
@@ -374,14 +382,23 @@ function Page() {
   // Value
   const formatAndSetValue = useCallback(
     (_value: string, token: VerifiedToken) => {
-      if (new BigNumber(_value || 0).lte(0)) setValue(_value);
-      else if (!_value.includes(".")) setValue(_value);
+      let formattedValue;
+      if (new BigNumber(_value || 0).lt(0)) formattedValue = _value;
+      else if (!_value.includes(".")) formattedValue = _value;
       else {
-        const [whole, decimals] = _value.split(".");
-        setValue(
-          `${whole}.${decimals.slice(0, Math.min(decimals.length, token.decimals))}`,
+        const [integers, decimals] = _value.split(".");
+        const integersFormatted = formatInteger(
+          integers !== "" ? parseInt(integers) : 0,
+          false,
         );
+        const decimalsFormatted = decimals.slice(
+          0,
+          Math.min(decimals.length, token.decimals),
+        );
+        formattedValue = `${integersFormatted}.${decimalsFormatted}`;
       }
+
+      setValue(formattedValue);
     },
     [],
   );
@@ -764,16 +781,11 @@ function Page() {
       const res = await swap(deposit);
       const txUrl = explorer.buildTxUrl(res.digest);
 
-      const totalGasFeeSui = res.effects
-        ? new BigNumber(
-            +res.effects.gasUsed.computationCost +
-              +res.effects.gasUsed.storageCost -
-              +res.effects.gasUsed.storageRebate,
-          ).div(10 ** SUI_DECIMALS)
-        : new BigNumber(0);
-
-      const balanceChangeOut = res.balanceChanges?.find(
-        (bc) => normalizeStructTag(bc.coinType) === tokenOut.coin_type,
+      const balanceChangeOut = getBalanceChange(
+        res,
+        address!,
+        tokenOut.coin_type,
+        tokenOut.decimals,
       );
 
       toast.success(
@@ -786,19 +798,13 @@ function Page() {
           tokenIn.ticker,
           "for",
           formatToken(
-            balanceChangeOut !== undefined
-              ? new BigNumber(balanceChangeOut.amount)
-                  .div(10 ** tokenOut.decimals)
-                  .plus(isSui(tokenOut.coin_type) ? totalGasFeeSui : 0)
-              : quoteAmountOut,
+            !deposit && balanceChangeOut !== undefined
+              ? balanceChangeOut
+              : quoteAmountOut, // When swapping+depositing, the out asset doesn't reach the wallet as it is immediately deposited
             { dp: tokenOut.decimals, trimTrailingZeros: true },
           ),
-          [
-            tokenOut.ticker,
-            deposit ? `, and deposited the ${tokenOut.ticker}` : "",
-          ]
-            .filter(Boolean)
-            .join(""),
+          tokenOut.ticker,
+          ...(deposit ? [`and deposited the ${tokenOut.ticker}`] : []),
         ].join(" "),
         {
           icon: <ArrowRightLeft className="h-5 w-5 text-success" />,

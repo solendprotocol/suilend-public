@@ -37,12 +37,14 @@ import {
 } from "@/lib/constants";
 import { EventType } from "@/lib/events";
 import {
+  formatInteger,
   formatPercent,
   formatPrice,
   formatToken,
   formatUsd,
 } from "@/lib/format";
 import { API_URL } from "@/lib/navigation";
+import { getBalanceChange } from "@/lib/transactions";
 import { Action } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -155,12 +157,23 @@ export default function ActionsModalTabContent({
 
   const formatAndSetValue = useCallback(
     (_value: string) => {
-      if (_value.includes(".")) {
-        const [whole, decimals] = _value.split(".");
-        setValue(
-          `${whole}.${decimals.slice(0, Math.min(decimals.length, reserve.mintDecimals))}`,
+      let formattedValue;
+      if (new BigNumber(_value || 0).lt(0)) formattedValue = _value;
+      else if (!_value.includes(".")) formattedValue = _value;
+      else {
+        const [integers, decimals] = _value.split(".");
+        const integersFormatted = formatInteger(
+          integers !== "" ? parseInt(integers) : 0,
+          false,
         );
-      } else setValue(_value);
+        const decimalsFormatted = decimals.slice(
+          0,
+          Math.min(decimals.length, reserve.mintDecimals),
+        );
+        formattedValue = `${integersFormatted}.${decimalsFormatted}`;
+      }
+
+      setValue(formattedValue);
     },
     [reserve.mintDecimals],
   );
@@ -187,8 +200,6 @@ export default function ActionsModalTabContent({
   }, [useMaxAmount, maxAmount, formatAndSetValue, reserve.mintDecimals]);
 
   const { newBorrowLimitUsd, newBorrowUtilization } = getNewCalculations(value);
-
-  const formattedValue = `${value} ${reserve.symbol}`;
 
   // Borrow fee
   const borrowFee = new BigNumber(value || 0)
@@ -218,7 +229,7 @@ export default function ActionsModalTabContent({
       return getSubmitButtonState(value) as SubmitButtonState;
 
     return {
-      title: `${capitalize(action)} ${formattedValue}`,
+      title: capitalize(action),
     };
   })();
 
@@ -295,21 +306,41 @@ export default function ActionsModalTabContent({
       const res = await submit(reserve.coinType, submitAmount);
       const txUrl = explorer.buildTxUrl(res.digest);
 
-      toast.success(`${capitalize(actionPastTense)} ${formattedValue}`, {
-        action: (
-          <TextLink className="block" href={txUrl}>
-            View tx on {explorer.name}
-          </TextLink>
-        ),
-        duration: TX_TOAST_DURATION,
-      });
+      const balanceChangeOut = getBalanceChange(
+        res,
+        address!,
+        reserve.coinType,
+        reserve.mintDecimals,
+        [Action.DEPOSIT, Action.REPAY].includes(action) ? -1 : 1,
+      );
+
+      toast.success(
+        [
+          capitalize(actionPastTense),
+          formatToken(
+            balanceChangeOut !== undefined
+              ? balanceChangeOut
+              : new BigNumber(value),
+            { dp: reserve.mintDecimals, trimTrailingZeros: true },
+          ),
+          reserve.symbol,
+        ].join(" "),
+        {
+          action: (
+            <TextLink className="block" href={txUrl}>
+              View tx on {explorer.name}
+            </TextLink>
+          ),
+          duration: TX_TOAST_DURATION,
+        },
+      );
       setUseMaxAmount(false);
       setValue("");
 
       if (action === Action.DEPOSIT)
         setTimeout(() => setJustDeposited(true), 1000);
     } catch (err) {
-      toast.error(`Failed to ${action.toLowerCase()} ${formattedValue}`, {
+      toast.error(`Failed to ${action.toLowerCase()}`, {
         description: (err as Error)?.message || "An unknown error occurred",
         duration: TX_TOAST_DURATION,
       });

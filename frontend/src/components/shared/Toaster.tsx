@@ -1,6 +1,6 @@
 import { CSSProperties } from "react";
 
-import { AlertTriangle, Check, Info, X } from "lucide-react";
+import { AlertTriangle, Check, Info } from "lucide-react";
 
 import styles from "@/components/shared/Toaster.module.scss";
 import { Toaster as ToasterComponent } from "@/components/ui/sonner";
@@ -39,7 +39,7 @@ export default function Toaster() {
         success: <Check className="h-5 w-5 text-success" />,
         info: <Info className="h-5 w-5 text-foreground" />,
         warning: <AlertTriangle className="h-5 w-5 text-warning" />,
-        error: <X className="h-5 w-5 text-destructive" />,
+        error: <AlertTriangle className="h-5 w-5 text-destructive" />,
       }}
       position="bottom-left"
       duration={TOAST_DURATION}

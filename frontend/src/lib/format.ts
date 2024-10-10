@@ -117,7 +117,7 @@ export const formatNumber = (
   } else {
     const [integers, decimals] = value.toFixed(dp, roundingMode).split(".");
     const integersFormatted = formatInteger(
-      parseInt(integers),
+      integers !== "" ? parseInt(integers) : 0,
       options?.useGrouping,
     );
 

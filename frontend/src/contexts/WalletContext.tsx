@@ -232,29 +232,26 @@ export function WalletContextProvider({ children }: PropsWithChildren) {
           chain: chain.id as IdentifierString,
         });
 
-        const res = await suiClient.executeTransactionBlock({
+        const res1 = await suiClient.executeTransactionBlock({
           transactionBlock: signedTransaction.transactionBlockBytes,
           signature: signedTransaction.signature,
+        });
+        // END legacy code
+
+        const res2 = await suiClient.waitForTransaction({
+          digest: res1.digest,
           options: {
             showEffects: true,
             showBalanceChanges: true,
           },
         });
-        // END legacy code
-
-        const res2 = await suiClient.waitForTransaction({
-          digest: res.digest,
-          options: {
-            showEffects: true,
-          },
-        });
         if (
-          res2?.effects?.status !== undefined &&
+          res2.effects?.status !== undefined &&
           res2.effects.status.status === "failure"
         )
           throw new Error(res2.effects.status.error ?? "Transaction failed");
 
-        return res;
+        return res2;
       } catch (err) {
         Sentry.captureException(err);
         console.error(err);
