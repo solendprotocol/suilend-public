@@ -6,7 +6,6 @@ import {
   GetQuoteResponse as HopGetQuoteResponse,
   VerifiedToken,
 } from "@hop.ag/sdk";
-import { SuiGraphQLClient } from "@mysten/sui/graphql";
 import { Transaction, TransactionResult } from "@mysten/sui/transactions";
 import { normalizeStructTag } from "@mysten/sui/utils";
 import * as Sentry from "@sentry/nextjs";
@@ -78,7 +77,6 @@ function Page() {
   const { address } = useWalletContext();
   const {
     refreshData,
-    rpc,
     explorer,
     obligation,
     signExecuteAndWaitForTransaction,
@@ -86,10 +84,6 @@ function Page() {
   } = useAppContext();
   const data = restAppContext.data as AppData;
   const suilendClient = restAppContext.suilendClient as SuilendClient<string>;
-
-  const gqlClient = new SuiGraphQLClient({
-    url: "https://sui-mainnet.mystenlabs.com/graphql",
-  });
 
   const { setTokenSymbol, reverseTokenSymbols, ...restSwapContext } =
     useSwapContext();
@@ -614,7 +608,7 @@ function Page() {
     }
 
     return {
-      title: `Swap ${value} ${tokenIn.ticker}`,
+      title: "Swap",
       isDisabled: !quote || isSwappingAndDepositing,
     };
   })();
