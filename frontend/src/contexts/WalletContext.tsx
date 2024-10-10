@@ -237,12 +237,16 @@ export function WalletContextProvider({ children }: PropsWithChildren) {
           signature: signedTransaction.signature,
           options: {
             showEffects: true,
+            showBalanceChanges: true,
           },
         });
         // END legacy code
 
         const res2 = await suiClient.waitForTransaction({
           digest: res.digest,
+          options: {
+            showEffects: true,
+          },
         });
         if (
           res2?.effects?.status !== undefined &&

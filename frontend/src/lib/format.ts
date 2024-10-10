@@ -56,6 +56,7 @@ export const formatNumber = (
     roundingMode?: BigNumber.RoundingMode;
     exact?: boolean;
     useGrouping?: boolean;
+    trimTrailingZeros?: boolean;
   },
 ) => {
   const prefix = options?.prefix ?? "";
@@ -70,9 +71,6 @@ export const formatNumber = (
   // <Min
   const minValue = new BigNumber(10).pow(-dp);
   if (value.lt(minValue)) return `<${prefix}${minValue.toFixed(dp)}`;
-
-  // <1
-  if (value.lt(1)) return `${prefix}${value.toFixed(dp, roundingMode)}`;
 
   if (!exact) {
     let _value = value;
@@ -122,7 +120,16 @@ export const formatNumber = (
       parseInt(integers),
       options?.useGrouping,
     );
-    const decimalsFormatted = decimals !== undefined ? `.${decimals}` : "";
+
+    let decimalsFormatted: string | undefined = decimals;
+    if (options?.trimTrailingZeros && decimalsFormatted !== undefined) {
+      while (decimalsFormatted[decimalsFormatted.length - 1] === "0")
+        decimalsFormatted = decimalsFormatted.slice(0, -1);
+      if (decimalsFormatted.length === 0) decimalsFormatted = undefined;
+    }
+    decimalsFormatted =
+      decimalsFormatted !== undefined ? `.${decimalsFormatted}` : "";
+
     return `${prefix}${integersFormatted}${decimalsFormatted}`;
   }
 };
@@ -191,17 +198,24 @@ export const formatDuration = (seconds: BigNumber) => {
 
 export const formatToken = (
   value: BigNumber,
-  options?: { dp?: number; exact?: boolean; useGrouping?: boolean },
+  options?: {
+    dp?: number;
+    exact?: boolean;
+    useGrouping?: boolean;
+    trimTrailingZeros?: boolean;
+  },
 ) => {
   const dp = options?.dp ?? 3;
   const exact = options?.exact ?? true;
   const useGrouping = options?.useGrouping ?? true;
+  const trimTrailingZeros = options?.trimTrailingZeros ?? false;
 
   return formatNumber(value, {
     dp,
     roundingMode: BigNumber.ROUND_DOWN,
     exact,
     useGrouping,
+    trimTrailingZeros,
   });
 };
 
