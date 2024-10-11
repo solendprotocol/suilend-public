@@ -360,7 +360,7 @@ body {
 
   &[is-loading="true"] {
     .recharts-cartesian-grid .recharts-cartesian-grid-bg {
-      fill: hsla(var(--muted) / 10%);
+      fill: hsla(var(--secondary) / 10%);
       animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; /* animate-pulse */
     }
   }

@@ -123,101 +123,106 @@ export default function AprLineChart({ data, reference }: AprLineChartProps) {
   const domainY = [minY, maxY];
 
   return (
-    <div
-      className="apr-line-chart h-[140px] w-full shrink-0 transform-gpu md:h-[160px]"
-      is-loading="false"
-    >
-      <Recharts.ResponsiveContainer width="100%" height="100%">
-        <Recharts.LineChart
-          data={interpolatedData}
-          margin={{ top: 8, right: 16, bottom: 5, left: -5 }}
-        >
-          <Recharts.CartesianGrid
-            strokeDasharray="1 4"
-            stroke="hsla(var(--secondary) / 20%)"
-            fill="transparent"
-            horizontal={false}
-            vertical={(props) => <CartesianGridVerticalLine {...props} />}
-          />
-          <Recharts.XAxis
-            type="number"
-            dataKey="utilPercent"
-            ticks={ticksX}
-            tickMargin={axis.tickMargin}
-            tick={axis.tick}
-            axisLine={axis.axisLine}
-            tickLine={axis.tickLine}
-            tickFormatter={tickFormatterX}
-            domain={domainX}
+    <div className="-mx-4 flex flex-col">
+      <div className="w-full px-4">
+        <TLabelSans style={{ paddingLeft: 40 }}>
+          Borrow APR vs. utilization
+        </TLabelSans>
+      </div>
+
+      <div
+        className="apr-line-chart h-[140px] w-full shrink-0 transform-gpu md:h-[160px]"
+        is-loading="false"
+      >
+        <Recharts.ResponsiveContainer width="100%" height="100%">
+          <Recharts.LineChart
+            data={interpolatedData}
+            margin={{
+              top: 8,
+              right: 16 + 8,
+              bottom: -30 + 2 + 16,
+              left: -60 + (16 + 40),
+            }}
           >
-            <Recharts.Label
-              value="Utilization"
-              offset={-4}
-              position="insideBottom"
-              style={axisLabel.style}
+            <Recharts.CartesianGrid
+              strokeDasharray="1 4"
+              stroke="hsla(var(--secondary) / 20%)"
+              fill="transparent"
+              horizontal={false}
+              vertical={(props) => <CartesianGridVerticalLine {...props} />}
             />
-          </Recharts.XAxis>
-          <Recharts.YAxis
-            type="number"
-            tickMargin={axis.tickMargin}
-            tick={axis.tick}
-            axisLine={axis.axisLine}
-            tickLine={axis.tickLine}
-            tickFormatter={tickFormatterY}
-            domain={domainY}
-          >
-            <Recharts.Label
-              value="Borrow APR"
-              offset={5 + 5}
-              position="insideLeft"
-              angle={-90}
-              style={axisLabel.style}
+            <Recharts.XAxis
+              type="number"
+              dataKey="utilPercent"
+              ticks={ticksX}
+              tickMargin={axis.tickMargin}
+              tick={axis.tick}
+              axisLine={axis.axisLine}
+              tickLine={axis.tickLine}
+              tickFormatter={tickFormatterX}
+              domain={domainX}
+            >
+              <Recharts.Label
+                value="Utilization"
+                offset={-4}
+                position="insideBottom"
+                style={axisLabel.style}
+              />
+            </Recharts.XAxis>
+            <Recharts.YAxis
+              type="number"
+              tickMargin={axis.tickMargin}
+              tick={axis.tick}
+              axisLine={axis.axisLine}
+              tickLine={axis.tickLine}
+              tickFormatter={tickFormatterY}
+              domain={domainY}
             />
-          </Recharts.YAxis>
-          <Recharts.Line
-            dataKey="transformedAprPercent"
-            isAnimationActive={false}
-            stroke="hsl(var(--success))"
-            dot={line.dot}
-            strokeWidth={line.strokeWidth}
-          />
-          {reference && (
-            <Recharts.ReferenceDot
-              x={reference.utilPercent}
-              y={
-                +linearlyInterpolate(
-                  interpolatedData,
-                  "utilPercent",
-                  "transformedAprPercent",
-                  reference.utilPercent,
-                )
-              }
-              fill="hsl(var(--foreground))"
-              strokeWidth={0}
-              r={4}
-            />
-          )}
-          {data.length > 0 && (
-            <Recharts.Tooltip
+            <Recharts.Line
+              dataKey="transformedAprPercent"
               isAnimationActive={false}
-              filterNull={false}
-              cursor={tooltip.cursor}
-              trigger={isTouchscreen ? "hover" : "hover"}
-              wrapperStyle={tooltip.wrapperStyle}
-              content={({ active, payload, viewBox, coordinate }) => {
-                if (!active || !payload?.[0]?.payload) return null;
-                return (
-                  <TooltipContent
-                    d={payload[0].payload as TransformedChartData}
-                    viewBox={viewBox as any}
-                    x={coordinate?.x}
-                  />
-                );
-              }}
+              stroke="hsl(var(--success))"
+              dot={line.dot}
+              strokeWidth={line.strokeWidth}
             />
-          )}
-        </Recharts.LineChart>
-      </Recharts.ResponsiveContainer>
+            {reference && (
+              <Recharts.ReferenceDot
+                x={reference.utilPercent}
+                y={
+                  +linearlyInterpolate(
+                    interpolatedData,
+                    "utilPercent",
+                    "transformedAprPercent",
+                    reference.utilPercent,
+                  )
+                }
+                fill="hsl(var(--foreground))"
+                strokeWidth={0}
+                r={4}
+              />
+            )}
+            {data.length > 0 && (
+              <Recharts.Tooltip
+                isAnimationActive={false}
+                filterNull={false}
+                cursor={tooltip.cursor}
+                trigger={isTouchscreen ? "hover" : "hover"}
+                wrapperStyle={tooltip.wrapperStyle}
+                content={({ active, payload, viewBox, coordinate }) => {
+                  if (!active || !payload?.[0]?.payload) return null;
+                  return (
+                    <TooltipContent
+                      d={payload[0].payload as TransformedChartData}
+                      viewBox={viewBox as any}
+                      x={coordinate?.x}
+                    />
+                  );
+                }}
+              />
+            )}
+          </Recharts.LineChart>
+        </Recharts.ResponsiveContainer>
+      </div>
     </div>
   );
 }

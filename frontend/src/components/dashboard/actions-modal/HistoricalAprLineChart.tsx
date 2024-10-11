@@ -250,7 +250,12 @@ function Chart({ side, data }: ChartProps) {
     <Recharts.ResponsiveContainer width="100%" height="100%">
       <Recharts.AreaChart
         data={data}
-        margin={{ top: 8, right: 16, bottom: -12, left: -5 }}
+        margin={{
+          top: 8,
+          right: 16 + 8,
+          bottom: -30 + 2 + 16,
+          left: -60 + (16 + 40),
+        }}
       >
         <Recharts.CartesianGrid
           strokeDasharray="1 4"
@@ -279,15 +284,7 @@ function Chart({ side, data }: ChartProps) {
           tickLine={axis.tickLine}
           tickFormatter={tickFormatterY}
           domain={domainY}
-        >
-          <Recharts.Label
-            value={`${capitalize(side)} APR`}
-            offset={5 + 5}
-            position="insideLeft"
-            angle={-90}
-            style={axisLabel.style}
-          />
-        </Recharts.YAxis>
+        />
         {fields.map((field) => {
           const color = getFieldColor(field);
 
@@ -479,25 +476,31 @@ export default function HistoricalAprLineChart({
   const isLoading = chartData === undefined;
 
   return (
-    <div className="-mr-4 flex flex-col items-end">
-      <div className="relative z-[2] -mb-1 -mt-2 flex flex-row pr-4 md:-mt-1">
-        {DAYS.map((_days) => (
-          <Button
-            key={_days}
-            className="px-2"
-            labelClassName={cn(
-              "text-muted-foreground text-xs font-sans",
-              days === _days && "text-primary-foreground",
-            )}
-            variant="ghost"
-            size="sm"
-            onClick={() => onDaysClick(_days)}
-          >
-            {_days === 1 && "1D"}
-            {_days === 7 && "1W"}
-            {_days === 30 && "1M"}
-          </Button>
-        ))}
+    <div className="-mx-4 flex flex-col">
+      <div className="flex w-full flex-row items-center justify-between px-4">
+        <TLabelSans style={{ paddingLeft: 40 }}>
+          {capitalize(side)} APR
+        </TLabelSans>
+
+        <div className="flex h-4 flex-row items-center">
+          {DAYS.map((_days) => (
+            <Button
+              key={_days}
+              className="px-2"
+              labelClassName={cn(
+                "text-muted-foreground text-xs",
+                days === _days && "text-primary-foreground",
+              )}
+              variant="ghost"
+              size="sm"
+              onClick={() => onDaysClick(_days)}
+            >
+              {_days === 1 && "1D"}
+              {_days === 7 && "1W"}
+              {_days === 30 && "1M"}
+            </Button>
+          ))}
+        </div>
       </div>
 
       <div

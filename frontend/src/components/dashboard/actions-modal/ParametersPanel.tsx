@@ -157,7 +157,7 @@ function AdvancedTabContent({ side, reserve }: TabContentProps) {
 function RatesTabContent({ side, reserve }: TabContentProps) {
   return (
     <>
-      <div className="mb-1 w-full">
+      <div className="mb-1 flex w-full flex-col gap-4">
         <AprLineChart
           data={reserve.config.interestRate
             .slice()
@@ -171,6 +171,7 @@ function RatesTabContent({ side, reserve }: TabContentProps) {
             aprPercent: +reserve.borrowAprPercent,
           }}
         />
+        <Separator />
       </div>
 
       <LabelWithValue

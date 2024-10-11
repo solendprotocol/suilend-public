@@ -24,6 +24,7 @@ import Spinner from "@/components/shared/Spinner";
 import TextLink from "@/components/shared/TextLink";
 import Tooltip from "@/components/shared/Tooltip";
 import { TBody, TLabelSans } from "@/components/shared/Typography";
+import { Separator } from "@/components/ui/separator";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { useDashboardContext } from "@/contexts/DashboardContext";
 import { useWalletContext } from "@/contexts/WalletContext";
@@ -482,7 +483,10 @@ export default function ActionsModalTabContent({
         </div>
 
         {!md && isMoreParametersOpen && (
-          <ParametersPanel side={side} reserve={reserve} />
+          <>
+            <Separator />
+            <ParametersPanel side={side} reserve={reserve} />
+          </>
         )}
       </div>
 
