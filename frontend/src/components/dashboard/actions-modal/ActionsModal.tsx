@@ -340,7 +340,7 @@ export default function ActionsModal() {
               </div>
 
               {md && isMoreParametersOpen && (
-                <div className="flex h-[400px] w-[28rem] flex-col gap-4 rounded-md border p-4">
+                <div className="flex h-[440px] w-[28rem] flex-col gap-4 rounded-md border p-4">
                   <ParametersPanel side={side} reserve={reserve} />
                 </div>
               )}

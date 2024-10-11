@@ -3,6 +3,7 @@ import BigNumber from "bignumber.js";
 import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
 import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
 
+import { SubmitButtonState } from "@/components/dashboard/actions-modal/ActionsModalTabContent";
 import { AppData } from "@/contexts/AppContext";
 import {
   NORMALIZED_STABLECOIN_COINTYPES,
@@ -253,7 +254,7 @@ export const getSubmitButtonNoValueState =
     obligations: ParsedObligation[] | undefined,
     obligation: ParsedObligation | null,
   ) =>
-  () => {
+  (): SubmitButtonState | undefined => {
     if (action === Action.DEPOSIT) {
       if (reserve.depositedAmount.gte(reserve.config.depositLimit))
         return {
@@ -275,6 +276,16 @@ export const getSubmitButtonNoValueState =
         )
       )
         return { isDisabled: true, title: "Cannot deposit borrowed asset" };
+      if (
+        obligation &&
+        obligation.deposits.length >= 5 &&
+        !obligation.deposits.find((d) => d.coinType === reserve.coinType)
+      )
+        return {
+          isDisabled: true,
+          title: "Max deposits reached",
+          description: "Cannot have more than 5 unique deposits at a time",
+        };
       return undefined;
     } else if (action === Action.BORROW) {
       if (reserve.borrowedAmount.gte(reserve.config.borrowLimit))
@@ -297,6 +308,16 @@ export const getSubmitButtonNoValueState =
         )
       )
         return { isDisabled: true, title: "Cannot borrow deposited asset" };
+      if (
+        obligation &&
+        obligation.borrows.length >= 5 &&
+        !obligation.borrows.find((b) => b.coinType === reserve.coinType)
+      )
+        return {
+          isDisabled: true,
+          title: "Max borrows reached",
+          description: "Cannot have more than 5 unique borrows at a time",
+        };
 
       // Isolated
       if (!reserve.config.isolated) {
@@ -325,7 +346,7 @@ export const getSubmitButtonState =
     data: AppData,
     obligation: ParsedObligation | null,
   ) =>
-  (value: string) => {
+  (value: string): SubmitButtonState | undefined => {
     const maxCalculations = getMaxCalculations(
       action,
       reserve,

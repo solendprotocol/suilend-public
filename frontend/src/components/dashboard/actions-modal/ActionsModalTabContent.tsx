@@ -52,6 +52,7 @@ export type SubmitButtonState = {
   isLoading?: boolean;
   isDisabled?: boolean;
   title?: string;
+  description?: string;
 };
 
 interface ActionsModalTabContentProps {
@@ -476,7 +477,7 @@ export default function ActionsModalTabContent({
             />
           ) : (
             // Placeholder so the UI doesn't move when switching tabs
-            <div className="h-5" />
+            <div className="h-5 max-md:hidden" />
           )}
         </div>
 
@@ -507,6 +508,11 @@ export default function ActionsModalTabContent({
             <Spinner size="md" />
           ) : (
             submitButtonState.title
+          )}
+          {submitButtonState.description && (
+            <span className="mt-0.5 block font-sans text-xs normal-case">
+              {submitButtonState.description}
+            </span>
           )}
         </Button>
 
