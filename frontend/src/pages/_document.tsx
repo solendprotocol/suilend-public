@@ -1,5 +1,7 @@
 import { Head, Html, Main, NextScript } from "next/document";
 
+import { TWITTER } from "@/lib/constants";
+
 export default function Document() {
   const description = "Money market built on the best chain for developers.";
 
@@ -16,7 +18,7 @@ export default function Document() {
           content="https://www.suilend.fi/android-chrome-384x384.png"
         />
         <meta name="twitter:card" content="summary" />
-        <meta name="twitter:site" content="@suilendprotocol" />
+        <meta name="twitter:site" content={TWITTER} />
         <link
           rel="apple-touch-icon"
           sizes="180x180"
