@@ -50,8 +50,18 @@ function AdvancedTabContent({ side, reserve }: TabContentProps) {
       </div>
 
       <LabelWithValue
+        label="Deposits"
+        value={`${formatToken(reserve.depositedAmount, { dp: 0 })} ${reserve.symbol}`}
+        horizontal
+      />
+      <LabelWithValue
         label="Deposit limit"
         value={`${formatToken(reserve.config.depositLimit, { dp: 0 })} ${reserve.symbol}`}
+        horizontal
+      />
+      <LabelWithValue
+        label="Deposits (USD)"
+        value={formatUsd(reserve.depositedAmountUsd, { dp: 0, exact: true })}
         horizontal
       />
       <LabelWithValue
@@ -62,28 +72,41 @@ function AdvancedTabContent({ side, reserve }: TabContentProps) {
         })}
         horizontal
       />
+
+      <Separator />
+
+      <LabelWithValue
+        label="Borrows"
+        value={`${formatToken(reserve.borrowedAmount, { dp: 0 })} ${reserve.symbol}`}
+        horizontal
+      />
       <LabelWithValue
         label="Borrow limit"
         value={`${formatToken(reserve.config.borrowLimit, { dp: 0 })} ${reserve.symbol}`}
         horizontal
       />
       <LabelWithValue
-        label="Borrow limit (USD)"
-        value={formatUsd(reserve.config.borrowLimitUsd, {
-          dp: 0,
-          exact: true,
-        })}
+        label="Borrows (USD)"
+        value={formatUsd(reserve.borrowedAmountUsd, { dp: 0, exact: true })}
         horizontal
       />
       <LabelWithValue
-        label="Open LTV"
+        label="Borrow limit (USD)"
+        value={formatUsd(reserve.config.borrowLimitUsd, { dp: 0, exact: true })}
+        horizontal
+      />
+
+      <Separator />
+
+      <LabelWithValue
         labelTooltip={OPEN_LTV_TOOLTIP}
+        label="Open LTV"
         value={formatLtvPercent(new BigNumber(reserve.config.openLtvPct))}
         horizontal
       />
       <LabelWithValue
-        label="Close LTV"
         labelTooltip={CLOSE_LTV_TOOLTIP}
+        label="Close LTV"
         value={formatLtvPercent(new BigNumber(reserve.config.closeLtvPct))}
         horizontal
       />
@@ -93,13 +116,16 @@ function AdvancedTabContent({ side, reserve }: TabContentProps) {
         horizontal
       />
       <LabelWithValue
-        label="Borrow weight"
         labelTooltip={BORROW_WEIGHT_TOOLTIP}
+        label="Borrow weight (BW)"
         value={formatBorrowWeight(
           new BigNumber(reserve.config.borrowWeightBps / 10000),
         )}
         horizontal
       />
+
+      <Separator />
+
       <LabelWithValue
         label="Open attributed borrow limit (USD)"
         value={formatUsd(
@@ -175,17 +201,21 @@ function RatesTabContent({ side, reserve }: TabContentProps) {
       </div>
 
       <LabelWithValue
+        labelClassName="items-center"
+        labelEndDecorator={<div className="h-2 w-2 rounded-full bg-white" />}
         label="Current utilization"
         value={formatPercent(reserve.utilizationPercent)}
         horizontal
       />
       <LabelWithValue
-        className="-mt-1.5"
         label="Current borrow APR"
         value={formatPercent(reserve.borrowAprPercent)}
         horizontal
       />
-      {reserve.config.interestRate.map((rate, index) => (
+
+      <Separator />
+
+      {reserve.config.interestRate.map((rate, index, array) => (
         <Fragment key={index}>
           <LabelWithValue
             label={`Utilization threshold ${index + 1}`}
@@ -193,11 +223,11 @@ function RatesTabContent({ side, reserve }: TabContentProps) {
             horizontal
           />
           <LabelWithValue
-            className="-mt-1.5"
             label={`Borrow APR at ${formatPercent(new BigNumber(rate.utilPercent))} util.`}
             value={formatPercent(new BigNumber(rate.aprPercent))}
             horizontal
           />
+          {index !== array.length - 1 && <Separator />}
         </Fragment>
       ))}
     </>

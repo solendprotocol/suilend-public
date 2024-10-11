@@ -41,14 +41,14 @@ export type RewardSummary = {
   };
 };
 
-type AprRewardSummary = Omit<RewardSummary, "stats"> & {
+export type AprRewardSummary = Omit<RewardSummary, "stats"> & {
   stats: RewardSummary["stats"] & {
     aprPercent: BigNumber;
     price: BigNumber;
   };
 };
 
-type PerDayRewardSummary = Omit<RewardSummary, "stats"> & {
+export type PerDayRewardSummary = Omit<RewardSummary, "stats"> & {
   stats: RewardSummary["stats"] & {
     perDay: BigNumber;
   };

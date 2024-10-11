@@ -23,11 +23,7 @@ import Tooltip from "@/components/shared/Tooltip";
 import { TLabel, TTitle } from "@/components/shared/Typography";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { formatToken, formatUsd } from "@/lib/format";
-import {
-  RewardSummary,
-  getFilteredRewards,
-  getTotalAprPercent,
-} from "@/lib/liquidityMining";
+import { getFilteredRewards, getTotalAprPercent } from "@/lib/liquidityMining";
 import {
   ISOLATED_TOOLTIP,
   OPEN_LTV_BORROW_WEIGHT_TOOLTIP,
@@ -52,10 +48,6 @@ export interface ReservesRowData {
   totalDepositAprPercent: BigNumber;
   borrowAprPercent: BigNumber;
   totalBorrowAprPercent: BigNumber;
-  rewards?: {
-    deposit: RewardSummary[];
-    borrow: RewardSummary[];
-  };
   reserve: ParsedReserve;
 }
 
@@ -195,7 +187,6 @@ export default function MarketTable() {
             reserve.borrowAprPercent,
             getFilteredRewards(data.rewardMap[coinType].borrow),
           );
-          const rewards = data.rewardMap[coinType];
 
           const getAlmostExceedsLimit = (limit: BigNumber, total: BigNumber) =>
             !limit.eq(0) &&
@@ -305,7 +296,6 @@ export default function MarketTable() {
             totalDepositAprPercent,
             borrowAprPercent,
             totalBorrowAprPercent,
-            rewards,
             reserve,
           };
         }),

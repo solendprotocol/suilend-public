@@ -27,7 +27,7 @@ import { useLocalStorage } from "usehooks-ts";
 import { v4 as uuidv4 } from "uuid";
 
 import { SuilendClient } from "@suilend/sdk/client";
-import { Side } from "@suilend/sdk/types";
+import { Action, Side } from "@suilend/sdk/types";
 
 import Button from "@/components/shared/Button";
 import Spinner from "@/components/shared/Spinner";
@@ -62,7 +62,6 @@ import { formatInteger, formatPercent, formatToken } from "@/lib/format";
 import { getFilteredRewards, getTotalAprPercent } from "@/lib/liquidityMining";
 import track from "@/lib/track";
 import { getBalanceChange } from "@/lib/transactions";
-import { Action } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 type SubmitButtonState = {

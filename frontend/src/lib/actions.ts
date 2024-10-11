@@ -2,6 +2,7 @@ import BigNumber from "bignumber.js";
 
 import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
 import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
+import { Action } from "@suilend/sdk/types";
 
 import { SubmitButtonState } from "@/components/dashboard/actions-modal/ActionsModalTabContent";
 import { AppData } from "@/contexts/AppContext";
@@ -13,7 +14,6 @@ import {
 import { SUI_GAS_MIN, msPerYear } from "@/lib/constants";
 import { formatList } from "@/lib/format";
 import { LOOPING_THRESHOLD, LOOPING_WARNING_MESSAGE } from "@/lib/looping";
-import { Action } from "@/lib/types";
 
 const getMaxCalculations = (
   action: Action,

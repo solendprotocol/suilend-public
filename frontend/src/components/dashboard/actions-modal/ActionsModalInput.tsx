@@ -4,12 +4,12 @@ import BigNumber from "bignumber.js";
 import { mergeRefs } from "react-merge-refs";
 
 import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
+import { Action } from "@suilend/sdk/types";
 
 import Button from "@/components/shared/Button";
 import { TBody, TLabel } from "@/components/shared/Typography";
 import { Input as InputComponent } from "@/components/ui/input";
 import { formatUsd } from "@/lib/format";
-import { Action } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 const INPUT_HEIGHT = 70; // px

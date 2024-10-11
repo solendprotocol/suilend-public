@@ -3,22 +3,8 @@ import { Side } from "@suilend/sdk/types";
 import AprWithRewardsBreakdown from "@/components/dashboard/AprWithRewardsBreakdown";
 import { ReservesRowData } from "@/components/dashboard/MarketTable";
 
-type DepositAprCellProps = Pick<
-  ReservesRowData,
-  "depositAprPercent" | "rewards" | "reserve"
->;
+type DepositAprCellProps = Pick<ReservesRowData, "reserve">;
 
-export default function DepositAprCell({
-  depositAprPercent,
-  rewards,
-  reserve,
-}: DepositAprCellProps) {
-  return (
-    <AprWithRewardsBreakdown
-      side={Side.DEPOSIT}
-      aprPercent={depositAprPercent}
-      rewards={rewards?.deposit ?? []}
-      reserve={reserve}
-    />
-  );
+export default function DepositAprCell({ reserve }: DepositAprCellProps) {
+  return <AprWithRewardsBreakdown side={Side.DEPOSIT} reserve={reserve} />;
 }

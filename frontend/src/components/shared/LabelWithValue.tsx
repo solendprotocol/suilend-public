@@ -9,10 +9,11 @@ import { cn } from "@/lib/utils";
 
 interface LabelWithValueProps {
   className?: ClassValue;
-  labelStartDecorator?: ReactNode;
-  label: string;
-  labelEndDecorator?: ReactNode;
+  labelClassName?: ClassValue;
   labelTooltip?: string;
+  labelStartDecorator?: ReactNode;
+  labelEndDecorator?: ReactNode;
+  label: string;
   valueStartDecorator?: ReactNode;
   value: string | number | BigNumber;
   valueEndDecorator?: ReactNode;
@@ -29,10 +30,11 @@ interface LabelWithValueProps {
 
 export default function LabelWithValue({
   className,
-  labelStartDecorator,
-  label,
-  labelEndDecorator,
+  labelClassName,
   labelTooltip,
+  labelStartDecorator,
+  labelEndDecorator,
+  label,
   valueStartDecorator,
   value,
   valueEndDecorator,
@@ -55,6 +57,7 @@ export default function LabelWithValue({
       )}
     >
       <LabelWithTooltip
+        className={labelClassName}
         tooltip={labelTooltip}
         startDecorator={labelStartDecorator}
         endDecorator={labelEndDecorator}

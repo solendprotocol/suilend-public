@@ -8,7 +8,7 @@ import { toast } from "sonner";
 
 import { WAD, maxU64 } from "@suilend/sdk/constants";
 import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
-import { ApiDepositEvent, Side } from "@suilend/sdk/types";
+import { Action, ApiDepositEvent, Side } from "@suilend/sdk/types";
 
 import {
   ActionSignature,
@@ -46,7 +46,6 @@ import {
 } from "@/lib/format";
 import { API_URL } from "@/lib/navigation";
 import { getBalanceChange } from "@/lib/transactions";
-import { Action } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 export type SubmitButtonState = {
@@ -353,13 +352,6 @@ export default function ActionsModalTabContent({
     }
   };
 
-  let valueChange = undefined;
-  if (value.length && !new BigNumber(value).isNaN()) {
-    valueChange = [Action.DEPOSIT, Action.BORROW].includes(action)
-      ? new BigNumber(value)
-      : new BigNumber(value).negated();
-  }
-
   return (
     <>
       <div className="relative flex w-full flex-col">
@@ -433,14 +425,9 @@ export default function ActionsModalTabContent({
             customChild={
               <AprWithRewardsBreakdown
                 side={side}
-                aprPercent={
-                  side === Side.DEPOSIT
-                    ? reserve.depositAprPercent
-                    : reserve.borrowAprPercent
-                }
-                rewards={data.rewardMap[reserve.coinType]?.[side] ?? []}
                 reserve={reserve}
-                amountChange={valueChange}
+                action={action}
+                changeAmount={value === "" ? undefined : new BigNumber(value)}
               />
             }
             horizontal
