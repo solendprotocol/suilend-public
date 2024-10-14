@@ -152,7 +152,7 @@ export function ActionsModalContextProvider({ children }: PropsWithChildren) {
       delete restQuery[QueryParams.RESERVE_INDEX];
       delete restQuery[QueryParams.RESERVE_SYMBOL];
       shallowPushQuery(router, restQuery);
-    }, 250);
+    }, 400);
   }, [router]);
 
   // Reserve symbol
