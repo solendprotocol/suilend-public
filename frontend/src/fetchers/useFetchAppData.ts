@@ -15,9 +15,11 @@ import {
   LENDING_MARKET_TYPE,
   SuilendClient,
 } from "@suilend/sdk/client";
+import { WAD } from "@suilend/sdk/constants";
 import { parseLendingMarket } from "@suilend/sdk/parsers/lendingMarket";
 import { parseObligation } from "@suilend/sdk/parsers/obligation";
 import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
+import { toHexString } from "@suilend/sdk/utils";
 import * as simulate from "@suilend/sdk/utils/simulate";
 
 import { AppContext, AppData } from "@/contexts/AppContext";
@@ -51,6 +53,22 @@ export default function useFetchAppData(
       ),
       new SuiPriceServiceConnection("https://hermes.pyth.network"),
     );
+    const deepReserve = refreshedRawReserves.find(
+      (r) => normalizeStructTag(r.coinType.name) === NORMALIZED_DEEP_COINTYPE,
+    );
+    if (
+      deepReserve &&
+      `0x${toHexString(deepReserve.priceIdentifier.bytes)}` !==
+        DEEP_PRICE_IDENTIFIER
+    ) {
+      const price = 0.0125;
+      (deepReserve.price.value as bigint) = BigInt(
+        +new BigNumber(price).times(WAD),
+      );
+      (deepReserve.smoothedPrice.value as bigint) = BigInt(
+        +new BigNumber(price).times(WAD),
+      );
+    }
 
     if (!suilendClientRef.current) {
       suilendClientRef.current =
@@ -85,30 +103,6 @@ export default function useFetchAppData(
       coinMetadataMap,
       now,
     );
-
-    const deepReserve = lendingMarket.reserves.find(
-      (r) => r.coinType === NORMALIZED_DEEP_COINTYPE,
-    );
-    if (deepReserve && deepReserve.priceIdentifier !== DEEP_PRICE_IDENTIFIER) {
-      deepReserve.price = new BigNumber(0.0125);
-      deepReserve.smoothedPrice = deepReserve.price;
-      deepReserve.minPrice = deepReserve.price;
-      deepReserve.maxPrice = deepReserve.price;
-
-      deepReserve.availableAmountUsd = deepReserve.availableAmount.times(
-        deepReserve.price,
-      );
-      deepReserve.borrowedAmountUsd = deepReserve.borrowedAmount.times(
-        deepReserve.price,
-      );
-
-      deepReserve.depositedAmount = deepReserve.borrowedAmount
-        .plus(deepReserve.availableAmount)
-        .minus(deepReserve.unclaimedSpreadFees);
-      deepReserve.depositedAmountUsd = deepReserve.depositedAmount.times(
-        deepReserve.price,
-      );
-    }
 
     const reserveMap = lendingMarket.reserves.reduce(
       (acc, reserve) => ({ ...acc, [reserve.coinType]: reserve }),
