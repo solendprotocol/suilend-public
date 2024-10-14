@@ -4,6 +4,7 @@ import { CoinBalance, SuiClient } from "@mysten/sui/client";
 import { normalizeStructTag } from "@mysten/sui/utils";
 import { SuiPriceServiceConnection } from "@pythnetwork/pyth-sui-js";
 import * as Sentry from "@sentry/nextjs";
+import BigNumber from "bignumber.js";
 import { toast } from "sonner";
 import useSWR from "swr";
 
@@ -22,6 +23,10 @@ import * as simulate from "@suilend/sdk/utils/simulate";
 import { AppContext, AppData } from "@/contexts/AppContext";
 import { ParsedCoinBalance, parseCoinBalances } from "@/lib/coinBalance";
 import { getCoinMetadataMap } from "@/lib/coinMetadata";
+import {
+  DEEP_PRICE_IDENTIFIER,
+  NORMALIZED_DEEP_COINTYPE,
+} from "@/lib/coinType";
 import { formatRewards } from "@/lib/liquidityMining";
 
 export default function useFetchAppData(
@@ -80,6 +85,30 @@ export default function useFetchAppData(
       coinMetadataMap,
       now,
     );
+
+    const deepReserve = lendingMarket.reserves.find(
+      (r) => r.coinType === NORMALIZED_DEEP_COINTYPE,
+    );
+    if (deepReserve && deepReserve.priceIdentifier !== DEEP_PRICE_IDENTIFIER) {
+      deepReserve.price = new BigNumber(0.0125);
+      deepReserve.smoothedPrice = deepReserve.price;
+      deepReserve.minPrice = deepReserve.price;
+      deepReserve.maxPrice = deepReserve.price;
+
+      deepReserve.availableAmountUsd = deepReserve.availableAmount.times(
+        deepReserve.price,
+      );
+      deepReserve.borrowedAmountUsd = deepReserve.borrowedAmount.times(
+        deepReserve.price,
+      );
+
+      deepReserve.depositedAmount = deepReserve.borrowedAmount
+        .plus(deepReserve.availableAmount)
+        .minus(deepReserve.unclaimedSpreadFees);
+      deepReserve.depositedAmountUsd = deepReserve.depositedAmount.times(
+        deepReserve.price,
+      );
+    }
 
     const reserveMap = lendingMarket.reserves.reduce(
       (acc, reserve) => ({ ...acc, [reserve.coinType]: reserve }),
