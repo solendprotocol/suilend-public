@@ -720,9 +720,18 @@ export class SuilendClient {
   async changeReservePriceFeed(
     lendingMarketOwnerCapId: string,
     coinType: string,
-    priceIdentifier: string,
+    pythPriceId: string,
     transaction: Transaction,
   ) {
+    const priceUpdateData = await this.pythConnection.getPriceFeedsUpdateData([
+      pythPriceId,
+    ]);
+    const priceInfoObjectIds = await this.pythClient.updatePriceFeeds(
+      transaction,
+      priceUpdateData,
+      [pythPriceId],
+    );
+
     return this.changeReservePriceFeedFunction(
       transaction,
       [this.lendingMarket.$typeArgs[0], coinType],
@@ -730,7 +739,7 @@ export class SuilendClient {
         lendingMarketOwnerCap: lendingMarketOwnerCapId,
         lendingMarket: this.lendingMarket.id,
         reserveArrayIndex: this.findReserveArrayIndex(coinType),
-        priceInfoObj: priceIdentifier,
+        priceInfoObj: priceInfoObjectIds[0],
         clock: SUI_CLOCK_OBJECT_ID,
       },
     );
