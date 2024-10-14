@@ -20,7 +20,6 @@ import {
   AddReserveArgs,
   BorrowArgs,
   CancelPoolRewardArgs,
-  ChangeReservePriceFeedArgs,
   ClaimFeesArgs,
   ClaimRewardsAndDepositArgs,
   ClaimRewardsArgs,
@@ -159,11 +158,6 @@ interface Deps {
     typeArgs: [string, string],
     args: RedeemCtokensAndWithdrawLiquidityArgs,
   ) => TransactionResult;
-  changeReservePriceFeed: (
-    transaction: Transaction,
-    typeArgs: [string, string],
-    args: ChangeReservePriceFeedArgs,
-  ) => TransactionResult;
 }
 
 export class SuilendClient {
@@ -199,7 +193,6 @@ export class SuilendClient {
   migrateFunction: Deps["migrate"];
   claimFeesFunction: Deps["claimFees"];
   redeemCtokensAndWithdrawLiquidityFunction: Deps["redeemCtokensAndWithdrawLiquidity"];
-  changeReservePriceFeedFunction: Deps["changeReservePriceFeed"];
 
   constructor(
     lendingMarket: any,
@@ -232,7 +225,6 @@ export class SuilendClient {
       migrate,
       claimFees,
       redeemCtokensAndWithdrawLiquidity,
-      changeReservePriceFeed,
     }: Deps,
   ) {
     this.lendingMarket = lendingMarket;
@@ -275,7 +267,6 @@ export class SuilendClient {
     this.claimFeesFunction = claimFees;
     this.redeemCtokensAndWithdrawLiquidityFunction =
       redeemCtokensAndWithdrawLiquidity;
-    this.changeReservePriceFeedFunction = changeReservePriceFeed;
   }
 
   static async initialize(
@@ -713,25 +704,6 @@ export class SuilendClient {
         lendingMarket: this.lendingMarket.id,
         clock: SUI_CLOCK_OBJECT_ID,
         config,
-      },
-    );
-  }
-
-  async changeReservePriceFeed(
-    lendingMarketOwnerCapId: string,
-    coinType: string,
-    priceIdentifier: string,
-    transaction: Transaction,
-  ) {
-    return this.changeReservePriceFeedFunction(
-      transaction,
-      [this.lendingMarket.$typeArgs[0], coinType],
-      {
-        lendingMarketOwnerCap: lendingMarketOwnerCapId,
-        lendingMarket: this.lendingMarket.id,
-        reserveArrayIndex: this.findReserveArrayIndex(coinType),
-        priceInfoObj: priceIdentifier,
-        clock: SUI_CLOCK_OBJECT_ID,
       },
     );
   }

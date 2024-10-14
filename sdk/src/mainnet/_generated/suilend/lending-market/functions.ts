@@ -493,32 +493,6 @@ export function addReserve(
   });
 }
 
-export interface ChangeReservePriceFeedArgs {
-  lendingMarketOwnerCap: TransactionObjectInput;
-  lendingMarket: TransactionObjectInput;
-  reserveArrayIndex: bigint | TransactionArgument;
-  priceInfoObj: TransactionObjectInput;
-  clock: TransactionObjectInput;
-}
-
-export function changeReservePriceFeed(
-  tx: Transaction,
-  typeArgs: [string, string],
-  args: ChangeReservePriceFeedArgs,
-) {
-  return tx.moveCall({
-    target: `${PUBLISHED_AT}::lending_market::change_reserve_price_feed`,
-    typeArguments: typeArgs,
-    arguments: [
-      obj(tx, args.lendingMarketOwnerCap),
-      obj(tx, args.lendingMarket),
-      pure(tx, args.reserveArrayIndex, `u64`),
-      obj(tx, args.priceInfoObj),
-      obj(tx, args.clock),
-    ],
-  });
-}
-
 export interface ClaimRewardsAndDepositArgs {
   lendingMarket: TransactionObjectInput;
   obligationId: string | TransactionArgument;
@@ -635,28 +609,6 @@ export function depositCtokensIntoObligationById(
       pure(tx, args.obligationId, `${ID.$typeName}`),
       obj(tx, args.clock),
       obj(tx, args.deposit),
-    ],
-  });
-}
-
-export interface NewObligationOwnerCapArgs {
-  lendingMarketOwnerCap: TransactionObjectInput;
-  lendingMarket: TransactionObjectInput;
-  obligationId: string | TransactionArgument;
-}
-
-export function newObligationOwnerCap(
-  tx: Transaction,
-  typeArg: string,
-  args: NewObligationOwnerCapArgs,
-) {
-  return tx.moveCall({
-    target: `${PUBLISHED_AT}::lending_market::new_obligation_owner_cap`,
-    typeArguments: [typeArg],
-    arguments: [
-      obj(tx, args.lendingMarketOwnerCap),
-      obj(tx, args.lendingMarket),
-      pure(tx, args.obligationId, `${ID.$typeName}`),
     ],
   });
 }

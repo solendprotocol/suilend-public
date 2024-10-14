@@ -38,6 +38,10 @@ import * as zkloginVerifiedIssuer from "./zklogin-verified-issuer/structs";
 import { StructClassLoader } from "../../../_framework/loader";
 
 export function registerClasses(loader: StructClassLoader) {
+  loader.register(groth16.Curve);
+  loader.register(groth16.PreparedVerifyingKey);
+  loader.register(groth16.ProofPoints);
+  loader.register(groth16.PublicProofInputs);
   loader.register(txContext.TxContext);
   loader.register(object.ID);
   loader.register(object.UID);
@@ -90,10 +94,6 @@ export function registerClasses(loader: StructClassLoader) {
   loader.register(display.Display);
   loader.register(display.DisplayCreated);
   loader.register(display.VersionUpdated);
-  loader.register(groth16.Curve);
-  loader.register(groth16.PreparedVerifyingKey);
-  loader.register(groth16.ProofPoints);
-  loader.register(groth16.PublicProofInputs);
   loader.register(sui.SUI);
   loader.register(transferPolicy.RuleKey);
   loader.register(transferPolicy.TransferPolicy);

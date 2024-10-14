@@ -2,7 +2,6 @@ import { SuiClient } from "@mysten/sui/client";
 import { Transaction } from "@mysten/sui/transactions";
 
 import { SuilendClient as BaseSuilendClient } from "../core/client";
-import { changeReservePriceFeed } from "../mainnet/_generated/suilend/lending-market/functions";
 
 import { phantom } from "./_generated/_framework/reified";
 import { PACKAGE_ID, PUBLISHED_AT } from "./_generated/suilend";
@@ -67,7 +66,6 @@ const deps = {
   migrate,
   claimFees,
   redeemCtokensAndWithdrawLiquidity,
-  changeReservePriceFeed,
 };
 
 export class SuilendClient<T extends string> extends BaseSuilendClient {

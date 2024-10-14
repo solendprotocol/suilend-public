@@ -14,7 +14,6 @@ interface LabelWithValueProps {
   labelStartDecorator?: ReactNode;
   labelEndDecorator?: ReactNode;
   label: string;
-  valueClassName?: ClassValue;
   valueStartDecorator?: ReactNode;
   value: string | number | BigNumber;
   valueEndDecorator?: ReactNode;
@@ -36,7 +35,6 @@ export default function LabelWithValue({
   labelStartDecorator,
   labelEndDecorator,
   label,
-  valueClassName,
   valueStartDecorator,
   value,
   valueEndDecorator,
@@ -70,7 +68,6 @@ export default function LabelWithValue({
 
       {customChild ?? (
         <Value
-          className={valueClassName}
           valueStartDecorator={valueStartDecorator}
           value={value}
           valueEndDecorator={valueEndDecorator}

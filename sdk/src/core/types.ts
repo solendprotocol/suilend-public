@@ -187,14 +187,6 @@ export interface UpdateReserveConfigArgs {
   config: TransactionObjectInput;
 }
 
-export interface ChangeReservePriceFeedArgs {
-  lendingMarketOwnerCap: TransactionObjectInput;
-  lendingMarket: TransactionObjectInput;
-  reserveArrayIndex: bigint | TransactionArgument;
-  priceInfoObj: TransactionObjectInput;
-  clock: TransactionObjectInput;
-}
-
 export interface AddPoolRewardArgs {
   lendingMarketOwnerCap: TransactionObjectInput;
   lendingMarket: TransactionObjectInput;

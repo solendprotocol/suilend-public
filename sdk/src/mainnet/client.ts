@@ -10,7 +10,6 @@ import {
   addReserve,
   borrow,
   cancelPoolReward,
-  changeReservePriceFeed,
   claimFees,
   claimRewards,
   claimRewardsAndDeposit,
@@ -68,7 +67,6 @@ const deps = {
   migrate,
   claimFees,
   redeemCtokensAndWithdrawLiquidity,
-  changeReservePriceFeed,
 };
 
 export class SuilendClient<T extends string> extends BaseSuilendClient {
