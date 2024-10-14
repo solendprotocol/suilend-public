@@ -1,9 +1,6 @@
 import fs from "fs";
 
-// 1. Delete /dist/beta
-fs.rmSync("./dist/beta", { recursive: true, force: true });
-
-// 2. Update package.json
+// 1. Update package.json
 import packageJson from "./package.json";
 const newPackageJson = Object.assign({}, packageJson);
 
@@ -34,5 +31,5 @@ newPackageJson["types"] = "./index.js";
 
 fs.writeFileSync("./dist/package.json", JSON.stringify(newPackageJson), "utf8");
 
-// 3. Copy README.md
+// 2. Copy README.md
 fs.cpSync("./README.md", "./dist/README.md");
