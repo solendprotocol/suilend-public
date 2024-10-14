@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 import { Transaction } from "@mysten/sui/transactions";
 import { cloneDeep } from "lodash";
@@ -18,6 +18,7 @@ import ReserveConfig, {
 } from "@/components/admin/ReserveConfig";
 import Button from "@/components/shared/Button";
 import Grid from "@/components/shared/Grid";
+import Input from "@/components/shared/Input";
 import LabelWithValue from "@/components/shared/LabelWithValue";
 import { TBody } from "@/components/shared/Typography";
 import Value from "@/components/shared/Value";
@@ -25,8 +26,8 @@ import { AppData, useAppContext } from "@/contexts/AppContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 
 interface DiffProps {
-  initialState: ConfigState;
-  currentState: ConfigState;
+  initialState: { pythPriceId: string } & ConfigState;
+  currentState: { pythPriceId: string } & ConfigState;
 }
 
 function Diff({ initialState, currentState }: DiffProps) {
@@ -79,6 +80,11 @@ export default function ReserveConfigDialog({
 
   const isEditable = !!data.lendingMarketOwnerCapId;
 
+  const [pythPriceId, setPythPriceId] = useState<string>(
+    reserve.priceIdentifier,
+  );
+  const initialPythPriceIdRef = useRef<string>(pythPriceId);
+
   const getInitialConfigState = (
     config: ParsedReserve["config"],
   ): ConfigState => ({
@@ -115,6 +121,12 @@ export default function ReserveConfigDialog({
   );
   const { configState, resetConfigState } = reserveConfigState;
 
+  const reset = () => {
+    setPythPriceId(reserve.priceIdentifier);
+
+    resetConfigState();
+  };
+
   // Save
   const saveChanges = async () => {
     if (!address) throw new Error("Wallet not connected");
@@ -125,6 +137,13 @@ export default function ReserveConfigDialog({
     const newConfig = parseConfigState(configState, reserve.mintDecimals);
 
     try {
+      if (pythPriceId !== initialPythPriceIdRef.current)
+        await suilendClient.changeReservePriceFeed(
+          data.lendingMarketOwnerCapId,
+          reserve.coinType,
+          pythPriceId,
+          transaction,
+        );
       await suilendClient.updateReserveConfig(
         address,
         data.lendingMarketOwnerCapId,
@@ -178,7 +197,7 @@ export default function ReserveConfigDialog({
             icon={<Undo2 />}
             variant="ghost"
             size="icon"
-            onClick={resetConfigState}
+            onClick={reset}
           >
             Revert changes
           </Button>
@@ -195,20 +214,30 @@ export default function ReserveConfigDialog({
       }
     >
       <Grid>
-        <div className="md:col-span-2">
-          <LabelWithValue
-            label="$typeName"
-            value={reserve.config.$typeName}
-            isType
-          />
-        </div>
+        <LabelWithValue
+          label="$typeName"
+          value={reserve.config.$typeName}
+          isType
+        />
+        <Input
+          label="pythPriceId"
+          id="pythPriceId"
+          value={pythPriceId}
+          onChange={setPythPriceId}
+        />
 
         <ReserveConfig symbol={reserve.symbol} {...reserveConfigState} />
       </Grid>
 
       <Diff
-        initialState={initialConfigStateRef.current}
-        currentState={configState}
+        initialState={{
+          pythPriceId: initialPythPriceIdRef.current,
+          ...initialConfigStateRef.current,
+        }}
+        currentState={{
+          pythPriceId,
+          ...configState,
+        }}
       />
     </Dialog>
   );

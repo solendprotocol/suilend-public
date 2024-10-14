@@ -14,7 +14,7 @@ import {
   composeSuiType,
   compressSuiType,
 } from "../../../../_framework/util";
-import { PKG_V27 } from "../index";
+import { PKG_V28 } from "../index";
 import { bcs } from "@mysten/sui/bcs";
 import { SuiClient, SuiObjectData, SuiParsedData } from "@mysten/sui/client";
 import { fromB64 } from "@mysten/sui/utils";
@@ -23,7 +23,7 @@ import { fromB64 } from "@mysten/sui/utils";
 
 export function isG1(type: string): boolean {
   type = compressSuiType(type);
-  return type === `${PKG_V27}::bls12381::G1`;
+  return type === `${PKG_V28}::bls12381::G1`;
 }
 
 export interface G1Fields {
@@ -35,12 +35,12 @@ export type G1Reified = Reified<G1, G1Fields>;
 export class G1 implements StructClass {
   __StructClass = true as const;
 
-  static readonly $typeName = `${PKG_V27}::bls12381::G1`;
+  static readonly $typeName = `${PKG_V28}::bls12381::G1`;
   static readonly $numTypeParams = 0;
   static readonly $isPhantom = [] as const;
 
   readonly $typeName = G1.$typeName;
-  readonly $fullTypeName: `${typeof PKG_V27}::bls12381::G1`;
+  readonly $fullTypeName: `${typeof PKG_V28}::bls12381::G1`;
   readonly $typeArgs: [];
   readonly $isPhantom = G1.$isPhantom;
 
@@ -50,7 +50,7 @@ export class G1 implements StructClass {
     this.$fullTypeName = composeSuiType(
       G1.$typeName,
       ...typeArgs,
-    ) as `${typeof PKG_V27}::bls12381::G1`;
+    ) as `${typeof PKG_V28}::bls12381::G1`;
     this.$typeArgs = typeArgs;
 
     this.dummyField = fields.dummyField;
@@ -62,7 +62,7 @@ export class G1 implements StructClass {
       fullTypeName: composeSuiType(
         G1.$typeName,
         ...[],
-      ) as `${typeof PKG_V27}::bls12381::G1`,
+      ) as `${typeof PKG_V28}::bls12381::G1`,
       typeArgs: [] as [],
       isPhantom: G1.$isPhantom,
       reifiedTypeArgs: [],
@@ -197,7 +197,7 @@ export class G1 implements StructClass {
 
 export function isG2(type: string): boolean {
   type = compressSuiType(type);
-  return type === `${PKG_V27}::bls12381::G2`;
+  return type === `${PKG_V28}::bls12381::G2`;
 }
 
 export interface G2Fields {
@@ -209,12 +209,12 @@ export type G2Reified = Reified<G2, G2Fields>;
 export class G2 implements StructClass {
   __StructClass = true as const;
 
-  static readonly $typeName = `${PKG_V27}::bls12381::G2`;
+  static readonly $typeName = `${PKG_V28}::bls12381::G2`;
   static readonly $numTypeParams = 0;
   static readonly $isPhantom = [] as const;
 
   readonly $typeName = G2.$typeName;
-  readonly $fullTypeName: `${typeof PKG_V27}::bls12381::G2`;
+  readonly $fullTypeName: `${typeof PKG_V28}::bls12381::G2`;
   readonly $typeArgs: [];
   readonly $isPhantom = G2.$isPhantom;
 
@@ -224,7 +224,7 @@ export class G2 implements StructClass {
     this.$fullTypeName = composeSuiType(
       G2.$typeName,
       ...typeArgs,
-    ) as `${typeof PKG_V27}::bls12381::G2`;
+    ) as `${typeof PKG_V28}::bls12381::G2`;
     this.$typeArgs = typeArgs;
 
     this.dummyField = fields.dummyField;
@@ -236,7 +236,7 @@ export class G2 implements StructClass {
       fullTypeName: composeSuiType(
         G2.$typeName,
         ...[],
-      ) as `${typeof PKG_V27}::bls12381::G2`,
+      ) as `${typeof PKG_V28}::bls12381::G2`,
       typeArgs: [] as [],
       isPhantom: G2.$isPhantom,
       reifiedTypeArgs: [],
@@ -371,7 +371,7 @@ export class G2 implements StructClass {
 
 export function isGT(type: string): boolean {
   type = compressSuiType(type);
-  return type === `${PKG_V27}::bls12381::GT`;
+  return type === `${PKG_V28}::bls12381::GT`;
 }
 
 export interface GTFields {
@@ -383,12 +383,12 @@ export type GTReified = Reified<GT, GTFields>;
 export class GT implements StructClass {
   __StructClass = true as const;
 
-  static readonly $typeName = `${PKG_V27}::bls12381::GT`;
+  static readonly $typeName = `${PKG_V28}::bls12381::GT`;
   static readonly $numTypeParams = 0;
   static readonly $isPhantom = [] as const;
 
   readonly $typeName = GT.$typeName;
-  readonly $fullTypeName: `${typeof PKG_V27}::bls12381::GT`;
+  readonly $fullTypeName: `${typeof PKG_V28}::bls12381::GT`;
   readonly $typeArgs: [];
   readonly $isPhantom = GT.$isPhantom;
 
@@ -398,7 +398,7 @@ export class GT implements StructClass {
     this.$fullTypeName = composeSuiType(
       GT.$typeName,
       ...typeArgs,
-    ) as `${typeof PKG_V27}::bls12381::GT`;
+    ) as `${typeof PKG_V28}::bls12381::GT`;
     this.$typeArgs = typeArgs;
 
     this.dummyField = fields.dummyField;
@@ -410,7 +410,7 @@ export class GT implements StructClass {
       fullTypeName: composeSuiType(
         GT.$typeName,
         ...[],
-      ) as `${typeof PKG_V27}::bls12381::GT`,
+      ) as `${typeof PKG_V28}::bls12381::GT`,
       typeArgs: [] as [],
       isPhantom: GT.$isPhantom,
       reifiedTypeArgs: [],
@@ -545,7 +545,7 @@ export class GT implements StructClass {
 
 export function isScalar(type: string): boolean {
   type = compressSuiType(type);
-  return type === `${PKG_V27}::bls12381::Scalar`;
+  return type === `${PKG_V28}::bls12381::Scalar`;
 }
 
 export interface ScalarFields {
@@ -557,12 +557,12 @@ export type ScalarReified = Reified<Scalar, ScalarFields>;
 export class Scalar implements StructClass {
   __StructClass = true as const;
 
-  static readonly $typeName = `${PKG_V27}::bls12381::Scalar`;
+  static readonly $typeName = `${PKG_V28}::bls12381::Scalar`;
   static readonly $numTypeParams = 0;
   static readonly $isPhantom = [] as const;
 
   readonly $typeName = Scalar.$typeName;
-  readonly $fullTypeName: `${typeof PKG_V27}::bls12381::Scalar`;
+  readonly $fullTypeName: `${typeof PKG_V28}::bls12381::Scalar`;
   readonly $typeArgs: [];
   readonly $isPhantom = Scalar.$isPhantom;
 
@@ -572,7 +572,7 @@ export class Scalar implements StructClass {
     this.$fullTypeName = composeSuiType(
       Scalar.$typeName,
       ...typeArgs,
-    ) as `${typeof PKG_V27}::bls12381::Scalar`;
+    ) as `${typeof PKG_V28}::bls12381::Scalar`;
     this.$typeArgs = typeArgs;
 
     this.dummyField = fields.dummyField;
@@ -584,7 +584,7 @@ export class Scalar implements StructClass {
       fullTypeName: composeSuiType(
         Scalar.$typeName,
         ...[],
-      ) as `${typeof PKG_V27}::bls12381::Scalar`,
+      ) as `${typeof PKG_V28}::bls12381::Scalar`,
       typeArgs: [] as [],
       isPhantom: Scalar.$isPhantom,
       reifiedTypeArgs: [],
