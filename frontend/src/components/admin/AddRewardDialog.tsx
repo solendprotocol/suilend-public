@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { CoinMetadata, SuiClient } from "@mysten/sui/client";
+import { CoinMetadata } from "@mysten/sui/client";
 import { Transaction } from "@mysten/sui/transactions";
 import BigNumber from "bignumber.js";
 import { isEqual } from "lodash";
@@ -31,9 +31,12 @@ export default function AddRewardDialog({
   isDepositReward,
 }: AddRewardDialogProps) {
   const { address } = useWalletContext();
-  const { refreshData, signExecuteAndWaitForTransaction, ...restAppContext } =
-    useAppContext();
-  const suiClient = restAppContext.suiClient as SuiClient;
+  const {
+    suiClient,
+    refreshData,
+    signExecuteAndWaitForTransaction,
+    ...restAppContext
+  } = useAppContext();
   const suilendClient = restAppContext.suilendClient as SuilendClient<string>;
   const data = restAppContext.data as AppData;
 

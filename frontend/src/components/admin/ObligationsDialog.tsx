@@ -1,6 +1,5 @@
 import { useState } from "react";
 
-import { SuiClient } from "@mysten/sui/client";
 import { SuiPriceServiceConnection } from "@pythnetwork/pyth-sui-js";
 import { ColumnDef } from "@tanstack/react-table";
 
@@ -29,9 +28,8 @@ import Value from "@/components/shared/Value";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 
 export default function ObligationsDialog() {
-  const appContext = useAppContext();
-  const suiClient = appContext.suiClient as SuiClient;
-  const data = appContext.data as AppData;
+  const { suiClient, ...restAppContext } = useAppContext();
+  const data = restAppContext.data as AppData;
   const [minDepositValue, setMinDepositValue] = useState<number>(0);
   const [minWeightedBorrowValue, setMinWeightedBorrowValue] =
     useState<number>(0);

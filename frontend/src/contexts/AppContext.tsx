@@ -45,7 +45,7 @@ export interface AppData {
 }
 
 export interface AppContext {
-  suiClient: SuiClient | null;
+  suiClient: SuiClient;
   suilendClient: SuilendClient<string> | null;
   data: AppData | null;
   refreshData: () => Promise<void>;
@@ -62,7 +62,7 @@ export interface AppContext {
 }
 
 const defaultContextValue: AppContext = {
-  suiClient: null,
+  suiClient: new SuiClient({ url: RPCS[0].url }),
   suilendClient: null,
   data: null,
   refreshData: async () => {

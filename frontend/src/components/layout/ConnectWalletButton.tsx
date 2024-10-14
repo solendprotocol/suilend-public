@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { SuiClient } from "@mysten/sui/client";
 import { ConnectModal, useWallet } from "@suiet/wallet-kit";
 
 import ConnectedWalletDropdownMenu from "@/components/layout/ConnectedWalletDropdownMenu";
@@ -12,8 +11,7 @@ import { useListWallets } from "@/lib/wallets";
 export default function ConnectWalletButton() {
   const { adapter } = useWallet();
   const { accounts, address, isImpersonatingAddress } = useWalletContext();
-  const appContext = useAppContext();
-  const suiClient = appContext.suiClient as SuiClient;
+  const { suiClient } = useAppContext();
 
   // Connect modal
   const [isConnectModalOpen, setIsConnectModalOpen] = useState<boolean>(false);

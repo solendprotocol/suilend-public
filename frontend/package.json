@@ -48,7 +48,7 @@
     "geist": "^1.2.1",
     "launchdarkly-react-client-sdk": "^3.1.0",
     "lodash": "^4.17.21",
-    "lucide-react": "^0.344.0",
+    "lucide-react": "^0.451.0",
     "mixpanel-browser": "^2.49.0",
     "next": "^14.2.15",
     "next-themes": "^0.3.0",
@@ -63,11 +63,11 @@
     "sass": "^1.72.0",
     "sonner": "^1.4.41",
     "swr": "^2.2.4",
-    "tailwind-merge": "^2.2.1",
+    "tailwind-merge": "^2.5.3",
     "tailwindcss-animate": "^1.0.7",
     "usehooks-ts": "^2.15.1",
     "uuid": "^9.0.1",
-    "vaul": "^0.9.0"
+    "vaul": "^1.1.0"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.202",

@@ -17,7 +17,7 @@ import {
   SuiExchange as HopSuiExchange,
   VerifiedToken,
 } from "@hop.ag/sdk";
-import { CoinMetadata, SuiClient } from "@mysten/sui/client";
+import { CoinMetadata } from "@mysten/sui/client";
 import { normalizeStructTag } from "@mysten/sui/utils";
 import {
   Aftermath,
@@ -136,8 +136,7 @@ export function SwapContextProvider({ children }: PropsWithChildren) {
   const router = useRouter();
   const slug = router.query.slug as string[] | undefined;
 
-  const { rpc, ...restAppContext } = useAppContext();
-  const suiClient = restAppContext.suiClient as SuiClient;
+  const { suiClient, rpc, ...restAppContext } = useAppContext();
   const data = restAppContext.data as AppData;
 
   // Hop SDK

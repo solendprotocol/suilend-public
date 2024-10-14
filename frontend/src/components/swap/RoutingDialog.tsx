@@ -2,7 +2,7 @@ import { CSSProperties, useEffect, useMemo, useRef, useState } from "react";
 
 import Dagre from "@dagrejs/dagre";
 import { SuiExchange as HopSuiExchange, VerifiedToken } from "@hop.ag/sdk";
-import { CoinMetadata, SuiClient } from "@mysten/sui/client";
+import { CoinMetadata } from "@mysten/sui/client";
 import {
   RouterProtocolName as AftermathRouterProtocolName,
   RouterTradePath as AftermathRouterTradePath,
@@ -55,8 +55,7 @@ const getLayoutedElements = (nodes: any[], edges: any[], options: any) => {
 };
 
 const useGetCoinMetadataMap = (coinTypes: string[]) => {
-  const appContext = useAppContext();
-  const suiClient = appContext.suiClient as SuiClient;
+  const { suiClient } = useAppContext();
 
   const fetchingCoinTypesRef = useRef<string[]>([]);
   const [coinMetadataMap, setCoinMetadataMap] = useState<

@@ -1,6 +1,5 @@
 import { Fragment, useEffect, useMemo, useState } from "react";
 
-import { SuiClient } from "@mysten/sui/client";
 import { Transaction } from "@mysten/sui/transactions";
 import BigNumber from "bignumber.js";
 import { Grab } from "lucide-react";
@@ -26,9 +25,12 @@ interface ClaimFeesDialogProps {
 
 export default function ClaimFeesDialog({ reserve }: ClaimFeesDialogProps) {
   const { address } = useWalletContext();
-  const { refreshData, signExecuteAndWaitForTransaction, ...restAppContext } =
-    useAppContext();
-  const suiClient = restAppContext.suiClient as SuiClient;
+  const {
+    suiClient,
+    refreshData,
+    signExecuteAndWaitForTransaction,
+    ...restAppContext
+  } = useAppContext();
   const suilendClient = restAppContext.suilendClient as SuilendClient<string>;
   const data = restAppContext.data as AppData;
 

@@ -1,6 +1,5 @@
 import { useState } from "react";
 
-import { SuiClient } from "@mysten/sui/client";
 import { Transaction, TransactionResult } from "@mysten/sui/transactions";
 import { SuiPriceServiceConnection } from "@pythnetwork/pyth-sui-js";
 import { ColumnDef } from "@tanstack/react-table";
@@ -61,9 +60,8 @@ export default function LiquidateDialog({
   fixedObligation,
 }: LiquidateDialogProps) {
   const { address } = useWalletContext();
-  const { signExecuteAndWaitForTransaction, ...restAppContext } =
+  const { suiClient, signExecuteAndWaitForTransaction, ...restAppContext } =
     useAppContext();
-  const suiClient = restAppContext.suiClient as SuiClient;
   const suilendClient = restAppContext.suilendClient as SuilendClient<string>;
   const data = restAppContext.data as AppData;
 

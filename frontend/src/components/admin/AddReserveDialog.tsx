@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { CoinMetadata, SuiClient } from "@mysten/sui/client";
+import { CoinMetadata } from "@mysten/sui/client";
 import { Transaction } from "@mysten/sui/transactions";
 import { isEqual } from "lodash";
 import { Eraser, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { v4 as uuidv4 } from "uuid";
 
-import { SuilendClient } from "@suilend/sdk/client";
+import { SuilendClient } from "@suilend/sdk";
 
 import CoinPopover from "@/components/admin/CoinPopover";
 import Dialog from "@/components/admin/Dialog";
@@ -24,9 +24,12 @@ import { parseCoinBalances } from "@/lib/coinBalance";
 import { getCoinMetadataMap } from "@/lib/coinMetadata";
 
 export default function AddReserveDialog() {
-  const { refreshData, signExecuteAndWaitForTransaction, ...restAppContext } =
-    useAppContext();
-  const suiClient = restAppContext.suiClient as SuiClient;
+  const {
+    suiClient,
+    refreshData,
+    signExecuteAndWaitForTransaction,
+    ...restAppContext
+  } = useAppContext();
   const suilendClient = restAppContext.suilendClient as SuilendClient<string>;
   const data = restAppContext.data as AppData;
 
