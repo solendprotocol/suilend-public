@@ -61,7 +61,23 @@ export default function useFetchAppData(
       `0x${toHexString(deepReserve.priceIdentifier.bytes)}` !==
         DEEP_PRICE_IDENTIFIER
     ) {
-      const price = 0.0125;
+      let price;
+      try {
+        const url = `https://public-api.birdeye.so/defi/price?address=${NORMALIZED_DEEP_COINTYPE}`;
+        const res = await fetch(url, {
+          headers: {
+            "X-API-KEY": process.env.NEXT_PUBLIC_BIRDEYE_API_KEY as string,
+            "x-chain": "sui",
+          },
+        });
+        const json = await res.json();
+        price = json.data.value;
+      } catch (err) {
+        console.error(err);
+
+        price = 0.0125;
+      }
+
       (deepReserve.price.value as bigint) = BigInt(
         +new BigNumber(price).times(WAD),
       );
