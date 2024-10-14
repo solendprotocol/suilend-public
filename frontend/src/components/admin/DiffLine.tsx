@@ -64,6 +64,7 @@ export default function DiffLine({
   return (
     <LabelWithValue
       className="w-fit"
+      valueClassName="break-all"
       label={label}
       value={`${initialValue} → ${newValue}`}
       horizontal

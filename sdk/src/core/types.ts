@@ -122,7 +122,7 @@ export const LendingMarket = bcs.struct("LendingMarket", {
 export async function load<T>(
   client: SuiClient,
   type: BcsType<T>,
-  id: string
+  id: string,
 ): Promise<InferBcsType<BcsType<T>>> {
   const data = await client.getObject({ id, options: { showBcs: true } });
   if (data.data?.bcs?.dataType !== "moveObject") {

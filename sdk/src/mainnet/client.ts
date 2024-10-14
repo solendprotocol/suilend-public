@@ -79,14 +79,14 @@ export class SuilendClient<T extends string> extends BaseSuilendClient {
   static async initialize(
     lendingMarketId: string,
     lendingMarketType: string,
-    client: SuiClient
+    client: SuiClient,
   ) {
     return super.initialize(lendingMarketId, lendingMarketType, client, deps);
   }
 
   static async initializeWithLendingMarket(
     lendingMarket: LendingMarket<string>,
-    client: SuiClient
+    client: SuiClient,
   ) {
     return super.initializeWithLendingMarket(lendingMarket, client, deps);
   }
@@ -94,33 +94,33 @@ export class SuilendClient<T extends string> extends BaseSuilendClient {
   static async createNewLendingMarket(
     registryId: string,
     lendingMarketType: string,
-    transaction: Transaction
+    transaction: Transaction,
   ) {
     return super.createNewLendingMarket(
       registryId,
       lendingMarketType,
       transaction,
-      { LendingMarket, createLendingMarket: createLendingMarket }
+      { LendingMarket, createLendingMarket: createLendingMarket },
     );
   }
 
   static async getObligationOwnerCaps(
     ownerId: string,
     lendingMarketTypeArgs: string[],
-    client: SuiClient
+    client: SuiClient,
   ) {
     return super.getObligationOwnerCaps(
       ownerId,
       lendingMarketTypeArgs,
       client,
-      { phantom, PACKAGE_ID, ObligationOwnerCap }
+      { phantom, PACKAGE_ID, ObligationOwnerCap },
     );
   }
 
   static async getObligation(
     obligationId: string,
     lendingMarketTypeArgs: string[],
-    client: SuiClient
+    client: SuiClient,
   ) {
     return super.getObligation(obligationId, lendingMarketTypeArgs, client, {
       phantom,
@@ -131,13 +131,13 @@ export class SuilendClient<T extends string> extends BaseSuilendClient {
   static async getLendingMarketOwnerCapId(
     ownerId: string,
     lendingMarketTypeArgs: string[],
-    client: SuiClient
+    client: SuiClient,
   ) {
     return super.getLendingMarketOwnerCapId(
       ownerId,
       lendingMarketTypeArgs,
       client,
-      { PACKAGE_ID }
+      { PACKAGE_ID },
     );
   }
 }
