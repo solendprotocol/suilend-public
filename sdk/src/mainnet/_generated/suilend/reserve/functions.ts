@@ -43,6 +43,18 @@ export function price(
   });
 }
 
+export function priceIdentifier(
+  tx: Transaction,
+  typeArg: string,
+  reserve: TransactionObjectInput,
+) {
+  return tx.moveCall({
+    target: `${PUBLISHED_AT}::reserve::price_identifier`,
+    typeArguments: [typeArg],
+    arguments: [obj(tx, reserve)],
+  });
+}
+
 export function coinType(
   tx: Transaction,
   typeArg: string,
@@ -175,6 +187,28 @@ export function calculateUtilizationRate(
     target: `${PUBLISHED_AT}::reserve::calculate_utilization_rate`,
     typeArguments: [typeArg],
     arguments: [obj(tx, reserve)],
+  });
+}
+
+export interface ChangePriceFeedArgs {
+  reserve: TransactionObjectInput;
+  priceInfoObj: TransactionObjectInput;
+  clock: TransactionObjectInput;
+}
+
+export function changePriceFeed(
+  tx: Transaction,
+  typeArg: string,
+  args: ChangePriceFeedArgs,
+) {
+  return tx.moveCall({
+    target: `${PUBLISHED_AT}::reserve::change_price_feed`,
+    typeArguments: [typeArg],
+    arguments: [
+      obj(tx, args.reserve),
+      obj(tx, args.priceInfoObj),
+      obj(tx, args.clock),
+    ],
   });
 }
 
