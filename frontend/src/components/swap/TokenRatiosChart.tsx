@@ -8,11 +8,11 @@ type ChartData = {
   ratio: number;
 };
 
-interface TokensRatioChartProps {
+interface TokenRatiosChartProps {
   data: ChartData[];
 }
 
-export default function TokensRatioChart({ data }: TokensRatioChartProps) {
+export default function TokenRatiosChart({ data }: TokenRatiosChartProps) {
   // Min/max
   const minX = Math.min(...data.map((d) => d.timestampS));
   const maxX = Math.max(...data.map((d) => d.timestampS));
