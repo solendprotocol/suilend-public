@@ -236,7 +236,7 @@ function RatesTabContent({ side, reserve }: TabContentProps) {
 
 function ObjectsTabContent({ side, reserve }: TabContentProps) {
   const { explorer, obligation, ...restAppContext } = useAppContext();
-  const suilendClient = restAppContext.suilendClient as SuilendClient<string>;
+  const suilendClient = restAppContext.suilendClient as SuilendClient;
 
   const pythOracleUrl = getPythOracleUrl(reserve.priceIdentifier);
 

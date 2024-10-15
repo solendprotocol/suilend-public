@@ -44,7 +44,7 @@ export default function ReserveRewardsDialog({
     signExecuteAndWaitForTransaction,
     ...restAppContext
   } = useAppContext();
-  const suilendClient = restAppContext.suilendClient as SuilendClient<string>;
+  const suilendClient = restAppContext.suilendClient as SuilendClient;
   const data = restAppContext.data as AppData;
 
   // Tabs

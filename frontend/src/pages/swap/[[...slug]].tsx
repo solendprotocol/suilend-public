@@ -84,7 +84,7 @@ function Page() {
     ...restAppContext
   } = useAppContext();
   const data = restAppContext.data as AppData;
-  const suilendClient = restAppContext.suilendClient as SuilendClient<string>;
+  const suilendClient = restAppContext.suilendClient as SuilendClient;
 
   const { setTokenSymbol, reverseTokenSymbols, ...restSwapContext } =
     useSwapContext();

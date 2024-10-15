@@ -11,7 +11,7 @@ export const getFormattedMaxOutflow = (rateLimiter: ParsedRateLimiter) => {
     remainingOutflow,
   } = rateLimiter;
 
-  const isMax = new BigNumber(maxOutflow).eq(maxU64);
+  const isMax = new BigNumber(maxOutflow.toString()).eq(maxU64);
 
   const formattedMaxOutflow = isMax
     ? "∞"
