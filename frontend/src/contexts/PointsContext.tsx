@@ -10,12 +10,9 @@ import {
 
 import BigNumber from "bignumber.js";
 
-import { SDK_ENV, SdkEnv } from "@suilend/sdk/constants";
-
 import { useAppContext } from "@/contexts/AppContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 import { API_URL } from "@/lib/navigation";
-import { getPointsStats } from "@/lib/points";
 
 export interface LeaderboardRowData {
   rank: number;
@@ -55,44 +52,25 @@ export function PointsContextProvider({ children }: PropsWithChildren) {
   const isFetchingLeaderboardRowsRef = useRef<boolean>(false);
   useEffect(() => {
     (async () => {
-      if ((SDK_ENV as SdkEnv) === SdkEnv.BETA) {
-        if (data === null) return;
+      if (isFetchingLeaderboardRowsRef.current) return;
 
-        const pointsStats = getPointsStats(data.rewardMap, data.obligations);
-        const sortedRows = [];
+      isFetchingLeaderboardRowsRef.current = true;
+      try {
+        const url = `${API_URL}/points/leaderboard`;
+        const res = await fetch(url);
+        const json = await res.json();
 
-        if (address)
-          sortedRows.push({
-            address,
-            totalPoints: pointsStats.totalPoints.total,
-            pointsPerDay: pointsStats.pointsPerDay.total,
-            rank: 1,
-          });
-
-        setLeaderboardRows(sortedRows);
-        setUpdatedAt(new Date());
-        return;
-      } else {
-        if (isFetchingLeaderboardRowsRef.current) return;
-
-        isFetchingLeaderboardRowsRef.current = true;
-        try {
-          const url = `${API_URL}/points/leaderboard`;
-          const res = await fetch(url);
-          const json = await res.json();
-
-          setLeaderboardRows(
-            json.rows.map((row: any) => ({
-              rank: row.rank,
-              address: row.address,
-              pointsPerDay: new BigNumber(row.pointsPerDay),
-              totalPoints: new BigNumber(row.totalPoints),
-            })),
-          );
-          setUpdatedAt(new Date(json.updatedAt * 1000));
-        } catch (err) {
-          console.error(err);
-        }
+        setLeaderboardRows(
+          json.rows.map((row: any) => ({
+            rank: row.rank,
+            address: row.address,
+            pointsPerDay: new BigNumber(row.pointsPerDay),
+            totalPoints: new BigNumber(row.totalPoints),
+          })),
+        );
+        setUpdatedAt(new Date(json.updatedAt * 1000));
+      } catch (err) {
+        console.error(err);
       }
     })();
   }, [data, address]);

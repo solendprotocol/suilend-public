@@ -16,7 +16,7 @@ export default function PythLogo({ className }: PythLogoProps) {
       <Image
         className={cn("h-4 w-4", className)}
         src={pythLogo}
-        alt="Pyth logomark"
+        alt="Pyth logo"
         width={16}
         height={16}
       />

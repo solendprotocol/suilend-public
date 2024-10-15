@@ -1,5 +1,8 @@
 import { normalizeStructTag } from "@mysten/sui/utils";
 
+export const DEEP_PRICE_IDENTIFIER =
+  "0x29bdd5248234e33bd93d3b81100b5fa32eaa5997843847e2c2cb16d7c6d9f7ff";
+
 const SUILEND_POINTS_COINTYPE =
   "0x34fe4f3c9e450fed4d0a3c587ed842eec5313c30c3cc3c0841247c49425e246b::suilend_point::SUILEND_POINT";
 export const SUI_COINTYPE = "0x2::sui::SUI";

@@ -50,7 +50,7 @@ export default function AccountAssetTable({
         sortingFn: "text",
         header: ({ column }) => tableHeader(column, "Asset name"),
         cell: ({ row }) => {
-          const { coinType, price, symbol, iconUrl } = row.original;
+          const { coinType, price, symbol, iconUrl, reserve } = row.original;
 
           return (
             <AssetCell
@@ -58,6 +58,7 @@ export default function AccountAssetTable({
               price={price}
               symbol={symbol}
               iconUrl={iconUrl}
+              reserve={reserve}
             />
           );
         },

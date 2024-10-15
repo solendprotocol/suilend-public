@@ -1,4 +1,5 @@
 import Head from "next/head";
+import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import {
@@ -40,7 +41,7 @@ import SwapInput from "@/components/swap/SwapInput";
 import SwapSlippagePopover, {
   SLIPPAGE_PERCENT_DP,
 } from "@/components/swap/SwapSlippagePopover";
-import TokensRatioChart from "@/components/swap/TokensRatioChart";
+import TokenRatiosChart from "@/components/swap/TokenRatiosChart";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import {
@@ -83,7 +84,7 @@ function Page() {
     ...restAppContext
   } = useAppContext();
   const data = restAppContext.data as AppData;
-  const suilendClient = restAppContext.suilendClient as SuilendClient<string>;
+  const suilendClient = restAppContext.suilendClient as SuilendClient;
 
   const { setTokenSymbol, reverseTokenSymbols, ...restSwapContext } =
     useSwapContext();
@@ -211,14 +212,6 @@ function Page() {
     ? BigNumber(quote.amount_out.toString())
     : undefined;
 
-  const quoteRatio =
-    quoteAmountOut !== undefined && quoteAmountIn !== undefined
-      ? quoteAmountOut.div(quoteAmountIn)
-      : undefined;
-
-  const [isQuoteRatioInverted, setIsQuoteRatioInverted] =
-    useState<boolean>(false);
-
   const isFetchingQuote = (() => {
     const timestamps = Object.keys(quoteMap).map((timestamp) => +timestamp);
 
@@ -228,12 +221,16 @@ function Page() {
   })();
 
   const fetchQuote = useCallback(
-    async (_tokenIn = tokenIn, _tokenOut = tokenOut, _value = value) => {
+    async (
+      _tokenIn = tokenIn,
+      _tokenOut = tokenOut,
+      _value = value,
+      _timestamp = new Date().getTime(),
+    ) => {
       if (_tokenIn.coin_type === _tokenOut.coin_type) return;
       if (new BigNumber(_value || 0).lte(0)) return;
 
-      const timestamp = new Date().getTime();
-      setQuoteMap((o) => ({ ...o, [timestamp]: undefined }));
+      setQuoteMap((o) => ({ ...o, [_timestamp]: undefined }));
 
       try {
         const params = {
@@ -247,106 +244,118 @@ function Page() {
           ),
         };
 
-        // Use fastest quote
-        const fastestQuoteResult = await Promise.any<
-          | undefined
-          | { type: UnifiedQuoteType.HOP; result: HopGetQuoteResponse }
+        // Use best quote
+        const results = await Promise.allSettled<
+          | { type: UnifiedQuoteType.HOP; quote: HopGetQuoteResponse }
           | {
               type: UnifiedQuoteType.AFTERMATH;
-              result: AftermathRouterCompleteTradeRoute;
+              quote: AftermathRouterCompleteTradeRoute;
             }
         >([
           new Promise(async (resolve, reject) => {
             try {
-              const result = await hopSdk.fetchQuote(params);
-              resolve({ type: UnifiedQuoteType.HOP, result });
+              const quote = await hopSdk.fetchQuote(params);
+              resolve({ type: UnifiedQuoteType.HOP, quote });
             } catch (err) {
               reject(err);
             }
           }),
           new Promise(async (resolve, reject) => {
             try {
-              const result =
+              const quote =
                 await aftermathSdk.getCompleteTradeRouteGivenAmountIn({
                   coinInType: params.token_in,
                   coinOutType: params.token_out,
                   coinInAmount: params.amount_in,
                 });
-              resolve({ type: UnifiedQuoteType.AFTERMATH, result });
+              resolve({ type: UnifiedQuoteType.AFTERMATH, quote });
             } catch (err) {
               reject(err);
             }
           }),
         ]);
-        console.log("fastestQuoteResult:", fastestQuoteResult);
-        if (fastestQuoteResult === undefined) throw new Error("No route found");
+        console.log("results:", results);
 
-        let unifiedQuote: UnifiedQuote | undefined;
-        if (fastestQuoteResult.type === UnifiedQuoteType.HOP) {
-          const hopQuote = fastestQuoteResult.result as HopGetQuoteResponse;
+        const rawQuotes = results
+          .filter((result) => result.status === "fulfilled")
+          .map((result) => result.value);
+        if (rawQuotes.length === 0) throw new Error("No route found");
 
-          hopQuote.trade.amount_in.token = normalizeStructTag(
-            hopQuote.trade.amount_in.token,
-          );
-          hopQuote.trade.amount_out.token = normalizeStructTag(
-            hopQuote.trade.amount_out.token,
-          );
-          for (const node of Object.values(hopQuote.trade.nodes)) {
-            node.amount_in.token = normalizeStructTag(node.amount_in.token);
-            node.amount_out.token = normalizeStructTag(node.amount_out.token);
-          }
+        const unifiedQuotes = rawQuotes
+          .map(({ type, quote }) => {
+            if (type === UnifiedQuoteType.HOP) {
+              const hopQuote = quote as HopGetQuoteResponse;
 
-          unifiedQuote = {
-            id: uuidv4(),
-            amount_in: new BigNumber(
-              hopQuote.trade.amount_in.amount.toString(),
-            ).div(10 ** _tokenIn.decimals),
-            amount_out: new BigNumber(
-              hopQuote.trade.amount_out.amount.toString(),
-            ).div(10 ** _tokenOut.decimals),
-            coin_type_in: hopQuote.trade.amount_in.token,
-            coin_type_out: hopQuote.trade.amount_out.token,
-            type: UnifiedQuoteType.HOP,
-            quote: hopQuote,
-          };
-        } else if (fastestQuoteResult.type === UnifiedQuoteType.AFTERMATH) {
-          const aftermathQuote =
-            fastestQuoteResult.result as AftermathRouterCompleteTradeRoute;
+              hopQuote.trade.amount_in.token = normalizeStructTag(
+                hopQuote.trade.amount_in.token,
+              );
+              hopQuote.trade.amount_out.token = normalizeStructTag(
+                hopQuote.trade.amount_out.token,
+              );
+              for (const node of Object.values(hopQuote.trade.nodes)) {
+                node.amount_in.token = normalizeStructTag(node.amount_in.token);
+                node.amount_out.token = normalizeStructTag(
+                  node.amount_out.token,
+                );
+              }
 
-          aftermathQuote.coinIn.type = normalizeStructTag(
-            aftermathQuote.coinIn.type,
-          );
-          aftermathQuote.coinOut.type = normalizeStructTag(
-            aftermathQuote.coinOut.type,
-          );
-          for (const route of aftermathQuote.routes) {
-            route.coinIn.type = normalizeStructTag(route.coinIn.type);
-            route.coinOut.type = normalizeStructTag(route.coinOut.type);
+              return {
+                id: uuidv4(),
+                amount_in: new BigNumber(
+                  hopQuote.trade.amount_in.amount.toString(),
+                ).div(10 ** _tokenIn.decimals),
+                amount_out: new BigNumber(
+                  hopQuote.trade.amount_out.amount.toString(),
+                ).div(10 ** _tokenOut.decimals),
+                coin_type_in: hopQuote.trade.amount_in.token,
+                coin_type_out: hopQuote.trade.amount_out.token,
+                type: UnifiedQuoteType.HOP,
+                quote: hopQuote,
+              };
+            } else if (type === UnifiedQuoteType.AFTERMATH) {
+              const aftermathQuote = quote as AftermathRouterCompleteTradeRoute;
 
-            for (const path of route.paths) {
-              path.coinIn.type = normalizeStructTag(path.coinIn.type);
-              path.coinOut.type = normalizeStructTag(path.coinOut.type);
-              path.pool.assets[0] = normalizeStructTag(path.pool.assets[0]);
-              path.pool.assets[1] = normalizeStructTag(path.pool.assets[1]);
-            }
-          }
+              aftermathQuote.coinIn.type = normalizeStructTag(
+                aftermathQuote.coinIn.type,
+              );
+              aftermathQuote.coinOut.type = normalizeStructTag(
+                aftermathQuote.coinOut.type,
+              );
+              for (const route of aftermathQuote.routes) {
+                route.coinIn.type = normalizeStructTag(route.coinIn.type);
+                route.coinOut.type = normalizeStructTag(route.coinOut.type);
 
-          unifiedQuote = {
-            id: uuidv4(),
-            amount_in: new BigNumber(
-              aftermathQuote.coinIn.amount.toString(),
-            ).div(10 ** _tokenIn.decimals),
-            amount_out: new BigNumber(
-              aftermathQuote.coinOut.amount.toString(),
-            ).div(10 ** _tokenOut.decimals),
-            coin_type_in: aftermathQuote.coinIn.type,
-            coin_type_out: aftermathQuote.coinOut.type,
-            type: UnifiedQuoteType.AFTERMATH,
-            quote: aftermathQuote,
-          };
-        }
+                for (const path of route.paths) {
+                  path.coinIn.type = normalizeStructTag(path.coinIn.type);
+                  path.coinOut.type = normalizeStructTag(path.coinOut.type);
+                  path.pool.assets[0] = normalizeStructTag(path.pool.assets[0]);
+                  path.pool.assets[1] = normalizeStructTag(path.pool.assets[1]);
+                }
+              }
 
-        setQuoteMap((o) => ({ ...o, [timestamp]: unifiedQuote }));
+              return {
+                id: uuidv4(),
+                amount_in: new BigNumber(
+                  aftermathQuote.coinIn.amount.toString(),
+                ).div(10 ** _tokenIn.decimals),
+                amount_out: new BigNumber(
+                  aftermathQuote.coinOut.amount.toString(),
+                ).div(10 ** _tokenOut.decimals),
+                coin_type_in: aftermathQuote.coinIn.type,
+                coin_type_out: aftermathQuote.coinOut.type,
+                type: UnifiedQuoteType.AFTERMATH,
+                quote: aftermathQuote,
+              };
+            } else return undefined;
+          })
+          .filter(Boolean) as UnifiedQuote[];
+
+        const sortedUnifiedQuotes = unifiedQuotes
+          .slice()
+          .sort((a, b) => +b.amount_out.minus(a.amount_out));
+        const unifiedQuote = sortedUnifiedQuotes[0];
+
+        setQuoteMap((o) => ({ ...o, [_timestamp]: unifiedQuote }));
         return unifiedQuote;
       } catch (err) {
         toast.error("Failed to get quote", {
@@ -358,7 +367,7 @@ function Page() {
         console.error(err);
 
         setQuoteMap((o) => {
-          delete o[timestamp];
+          delete o[_timestamp];
           return o;
         });
       }
@@ -417,9 +426,9 @@ function Page() {
     inputRef.current?.focus();
   };
 
-  // Historical USD prices
-  const HISTORICAL_PRICES_INTERVAL = "3m";
-  const HISTORICAL_PRICES_INTERVAL_S = 3 * 60;
+  // USD prices - historical
+  const HISTORICAL_USD_PRICES_INTERVAL = "5m";
+  const HISTORICAL_USD_PRICES_INTERVAL_S = 5 * 60;
 
   type HistoricalPriceData = {
     timestampS: number;
@@ -433,84 +442,10 @@ function Page() {
   const tokenOutHistoricalUsdPrices =
     historicalUsdPricesMap[tokenOut.coin_type];
 
-  const tokenInCurrentUsdPrice =
-    tokenInHistoricalUsdPrices !== undefined
-      ? tokenInHistoricalUsdPrices[tokenInHistoricalUsdPrices.length - 1]?.value
-      : undefined;
-  const tokenOutCurrentUsdPrice =
-    tokenOutHistoricalUsdPrices !== undefined
-      ? tokenOutHistoricalUsdPrices[tokenOutHistoricalUsdPrices.length - 1]
-          ?.value
-      : undefined;
-
-  const tokenInUsdValue =
-    quoteAmountIn !== undefined && tokenInCurrentUsdPrice !== undefined
-      ? quoteAmountIn.times(tokenInCurrentUsdPrice)
-      : undefined;
-  const tokenOutUsdValue =
-    quoteAmountOut !== undefined && tokenOutCurrentUsdPrice !== undefined
-      ? quoteAmountOut.times(tokenOutCurrentUsdPrice)
-      : undefined;
-
-  const tokensCurrentRatio =
-    tokenInCurrentUsdPrice !== undefined &&
-    tokenOutCurrentUsdPrice !== undefined
-      ? new BigNumber(tokenInCurrentUsdPrice).div(tokenOutCurrentUsdPrice)
-      : undefined;
-  const tokensCurrentRatioDp =
-    tokensCurrentRatio !== undefined
-      ? Math.max(0, -Math.floor(Math.log10(+tokensCurrentRatio)) - 1) + 4
-      : undefined;
-
-  const tokensHistoricalRatios = (() => {
-    if (
-      tokenInHistoricalUsdPrices === undefined ||
-      tokenOutHistoricalUsdPrices === undefined
-    )
-      return undefined;
-
-    const minTimestampS = Math.max(
-      Math.min(...tokenInHistoricalUsdPrices.map((item) => item.timestampS)),
-      Math.min(...tokenOutHistoricalUsdPrices.map((item) => item.timestampS)),
-    );
-    const maxTimestampS = Math.min(
-      Math.max(...tokenInHistoricalUsdPrices.map((item) => item.timestampS)),
-      Math.max(...tokenOutHistoricalUsdPrices.map((item) => item.timestampS)),
-    );
-
-    const timestampsS: number[] = [minTimestampS];
-    while (timestampsS[timestampsS.length - 1] < maxTimestampS) {
-      timestampsS.push(
-        timestampsS[timestampsS.length - 1] + HISTORICAL_PRICES_INTERVAL_S,
-      );
-    }
-
-    return timestampsS
-      .filter((timestampS, index) => index % 3 === 0) // Every third value
-      .map((timestampS) => ({
-        timestampS,
-        ratio: +new BigNumber(
-          tokenInHistoricalUsdPrices.find(
-            (item) => item.timestampS === timestampS,
-          )?.value ?? 0,
-        ).div(
-          tokenOutHistoricalUsdPrices.find(
-            (item) => item.timestampS === timestampS,
-          )?.value ?? 1,
-        ),
-      }));
-  })();
-  const tokensRatio1DChange =
-    tokensCurrentRatio !== undefined && tokensHistoricalRatios !== undefined
-      ? new BigNumber(tokensCurrentRatio.minus(tokensHistoricalRatios[0].ratio))
-          .div(tokensHistoricalRatios[0].ratio)
-          .times(100)
-      : undefined;
-
-  const fetchTokenHistoricalUsdPrice = useCallback(
+  const fetchTokenHistoricalUsdPrices = useCallback(
     async (token: VerifiedToken) => {
       try {
-        const url = `https://public-api.birdeye.so/defi/history_price?address=${isSui(token.coin_type) ? SUI_COINTYPE : token.coin_type}&address_type=token&type=${HISTORICAL_PRICES_INTERVAL}&time_from=${Math.floor(new Date().getTime() / 1000) - 24 * 60 * 60}&time_to=${Math.floor(new Date().getTime() / 1000)}`;
+        const url = `https://public-api.birdeye.so/defi/history_price?address=${isSui(token.coin_type) ? SUI_COINTYPE : token.coin_type}&address_type=token&type=${HISTORICAL_USD_PRICES_INTERVAL}&time_from=${Math.floor(new Date().getTime() / 1000) - 24 * 60 * 60}&time_to=${Math.floor(new Date().getTime() / 1000)}`;
         const res = await fetch(url, {
           headers: {
             "X-API-KEY": process.env.NEXT_PUBLIC_BIRDEYE_API_KEY as string,
@@ -540,15 +475,145 @@ function Page() {
   useEffect(() => {
     if (fetchedInitialTokenHistoricalUsdPricesRef.current) return;
 
-    fetchTokenHistoricalUsdPrice(tokenIn);
-    fetchTokenHistoricalUsdPrice(tokenOut);
+    fetchTokenHistoricalUsdPrices(tokenIn);
+    fetchTokenHistoricalUsdPrices(tokenOut);
     fetchedInitialTokenHistoricalUsdPricesRef.current = true;
-  }, [fetchTokenHistoricalUsdPrice, tokenIn, tokenOut]);
+  }, [fetchTokenHistoricalUsdPrices, tokenIn, tokenOut]);
+
+  // USD prices - current
+  const tokenInUsdPrice =
+    tokenInHistoricalUsdPrices !== undefined
+      ? tokenInHistoricalUsdPrices[tokenInHistoricalUsdPrices.length - 1]?.value
+      : undefined;
+  const tokenOutUsdPrice =
+    tokenOutHistoricalUsdPrices !== undefined
+      ? tokenOutHistoricalUsdPrices[tokenOutHistoricalUsdPrices.length - 1]
+          ?.value
+      : undefined;
+
+  const tokenInUsdValue =
+    quoteAmountIn !== undefined && tokenInUsdPrice !== undefined
+      ? quoteAmountIn.times(tokenInUsdPrice)
+      : undefined;
+  const tokenOutUsdValue =
+    quoteAmountOut !== undefined && tokenOutUsdPrice !== undefined
+      ? quoteAmountOut.times(tokenOutUsdPrice)
+      : undefined;
+
+  // Ratios
+  const [isInverted, setIsInverted] = useState<boolean>(false);
+
+  const currentTokenRatio =
+    tokenInUsdPrice !== undefined && tokenOutUsdPrice !== undefined
+      ? new BigNumber(!isInverted ? tokenInUsdPrice : tokenOutUsdPrice).div(
+          !isInverted ? tokenOutUsdPrice : tokenInUsdPrice,
+        )
+      : undefined;
+  const currentTokenRatioDp =
+    currentTokenRatio !== undefined
+      ? Math.max(0, -Math.floor(Math.log10(+currentTokenRatio)) - 1) + 4
+      : undefined;
+
+  const historicalTokenRatios = (() => {
+    if (
+      tokenInHistoricalUsdPrices === undefined ||
+      tokenOutHistoricalUsdPrices === undefined
+    )
+      return undefined;
+
+    const minTimestampS = Math.max(
+      Math.min(...tokenInHistoricalUsdPrices.map((item) => item.timestampS)),
+      Math.min(...tokenOutHistoricalUsdPrices.map((item) => item.timestampS)),
+    );
+    const maxTimestampS = Math.min(
+      Math.max(...tokenInHistoricalUsdPrices.map((item) => item.timestampS)),
+      Math.max(...tokenOutHistoricalUsdPrices.map((item) => item.timestampS)),
+    );
+
+    const timestampsS: number[] = [minTimestampS];
+    while (timestampsS[timestampsS.length - 1] < maxTimestampS) {
+      timestampsS.push(
+        timestampsS[timestampsS.length - 1] + HISTORICAL_USD_PRICES_INTERVAL_S,
+      );
+    }
+
+    return timestampsS
+      .filter((_, index) => index % 2 === 0) // Every second value
+      .map((timestampS) => ({
+        timestampS,
+        ratio: +new BigNumber(
+          (!isInverted
+            ? tokenInHistoricalUsdPrices
+            : tokenOutHistoricalUsdPrices
+          ).find((item) => item.timestampS === timestampS)?.value ?? 0,
+        ).div(
+          (!isInverted
+            ? tokenOutHistoricalUsdPrices
+            : tokenInHistoricalUsdPrices
+          ).find((item) => item.timestampS === timestampS)?.value ?? 1,
+        ),
+      }));
+  })();
+
+  const tokenRatio24hAgo =
+    historicalTokenRatios !== undefined
+      ? historicalTokenRatios[0].ratio
+      : undefined;
+  const tokenRatio24hChangePercent =
+    currentTokenRatio !== undefined && tokenRatio24hAgo !== undefined
+      ? new BigNumber(currentTokenRatio.minus(tokenRatio24hAgo))
+          .div(tokenRatio24hAgo)
+          .times(100)
+      : undefined;
+
+  // Ratios - quote
+  const quoteRatio =
+    quoteAmountOut !== undefined && quoteAmountIn !== undefined
+      ? (!isInverted ? quoteAmountOut : quoteAmountIn).div(
+          !isInverted ? quoteAmountIn : quoteAmountOut,
+        )
+      : undefined;
 
   // Price impact
+  useEffect(() => {
+    if (tokenInUsdPrice === undefined) return;
+
+    const _value = new BigNumber(1)
+      .div(tokenInUsdPrice)
+      .toFixed(tokenIn.decimals, BigNumber.ROUND_DOWN);
+    fetchQuote(tokenIn, tokenOut, _value, -1);
+  }, [tokenInUsdPrice, tokenIn, fetchQuote, tokenOut]);
+
+  const priceImpactQuote = quoteMap[-1];
+  const priceImpactQuoteAmountIn = priceImpactQuote
+    ? BigNumber(priceImpactQuote.amount_in.toString())
+    : undefined;
+  const priceImpactQuoteAmountOut = priceImpactQuote
+    ? BigNumber(priceImpactQuote.amount_out.toString())
+    : undefined;
+
+  const priceImpactQuoteRatio =
+    priceImpactQuoteAmountOut !== undefined &&
+    priceImpactQuoteAmountIn !== undefined
+      ? (!isInverted
+          ? priceImpactQuoteAmountOut
+          : priceImpactQuoteAmountIn
+        ).div(
+          !isInverted ? priceImpactQuoteAmountIn : priceImpactQuoteAmountOut,
+        )
+      : undefined;
+
   const priceImpactPercent =
-    quoteRatio !== undefined && tokensCurrentRatio !== undefined
-      ? new BigNumber(100).minus(quoteRatio.div(tokensCurrentRatio).times(100))
+    quoteRatio !== undefined && priceImpactQuoteRatio !== undefined
+      ? BigNumber.max(
+          0,
+          new BigNumber(100).minus(
+            (!isInverted
+              ? quoteRatio.div(priceImpactQuoteRatio)
+              : priceImpactQuoteRatio.div(quoteRatio)
+            ).times(100),
+          ),
+        )
       : undefined;
 
   // Reverse tokens
@@ -591,7 +656,7 @@ function Page() {
         value,
       );
       if (historicalUsdPricesMap[_token.coin_type] === undefined)
-        fetchTokenHistoricalUsdPrice(_token);
+        fetchTokenHistoricalUsdPrices(_token);
     }
 
     inputRef.current?.focus();
@@ -947,7 +1012,7 @@ function Page() {
 
           {/* Parameters */}
           {new BigNumber(value || 0).gt(0) && (
-            <div className="mb-4 flex w-full flex-col gap-2 rounded-md bg-border/50 p-3">
+            <div className="mb-4 flex w-full flex-col gap-2">
               {/* Price impact */}
               {priceImpactPercent !== undefined ? (
                 <div className="w-max">
@@ -992,30 +1057,19 @@ function Page() {
 
               {/* Quote */}
               <div className="w-full">
-                {quoteAmountIn && quoteAmountOut ? (
+                {quoteRatio !== undefined ? (
                   <div
                     className="group flex w-max cursor-pointer flex-row items-center gap-2"
-                    onClick={() => setIsQuoteRatioInverted((is) => !is)}
+                    onClick={() => setIsInverted((is) => !is)}
                   >
                     <TLabel className="transition-colors group-hover:text-foreground">
                       {"1 "}
-                      {(!isQuoteRatioInverted ? tokenIn : tokenOut).ticker}{" "}
+                      {(!isInverted ? tokenIn : tokenOut).ticker}{" "}
                       <span className="font-sans">≈</span>{" "}
-                      {formatToken(
-                        (!isQuoteRatioInverted
-                          ? quoteAmountOut
-                          : quoteAmountIn
-                        ).div(
-                          !isQuoteRatioInverted
-                            ? quoteAmountIn
-                            : quoteAmountOut,
-                        ),
-                        {
-                          dp: (!isQuoteRatioInverted ? tokenOut : tokenIn)
-                            .decimals,
-                        },
-                      )}{" "}
-                      {(!isQuoteRatioInverted ? tokenOut : tokenIn).ticker}
+                      {formatToken(quoteRatio, {
+                        dp: (!isInverted ? tokenOut : tokenIn).decimals,
+                      })}{" "}
+                      {(!isInverted ? tokenOut : tokenIn).ticker}
                     </TLabel>
                     <ArrowRightLeft className="h-3 w-3 text-muted-foreground transition-colors group-hover:text-foreground" />
                   </div>
@@ -1026,9 +1080,9 @@ function Page() {
             </div>
           )}
 
-          {/* Swap */}
           <div className="flex w-full flex-col gap-2">
             <div className="flex w-full flex-col gap-[1px] rounded-sm">
+              {/* Swap */}
               <Button
                 className={cn(
                   "h-auto min-h-14 w-full py-2",
@@ -1075,12 +1129,18 @@ function Page() {
           </div>
 
           {/* Tokens */}
-          <div className="mt-6 flex w-full flex-row items-center justify-between gap-6">
+          <div className="mt-6 flex w-full flex-row flex-wrap items-center justify-between gap-x-6 gap-y-4">
             <div className="flex flex-col gap-1.5">
-              <div className="flex flex-row items-center gap-2">
+              <div
+                className="group flex cursor-pointer flex-row items-center gap-2"
+                onClick={() => setIsInverted((is) => !is)}
+              >
                 <TokenLogos
                   className="h-4 w-4"
-                  tokens={[tokenIn, tokenOut].map((t) => ({
+                  tokens={(!isInverted
+                    ? [tokenIn, tokenOut]
+                    : [tokenOut, tokenIn]
+                  ).map((t) => ({
                     coinType: t.coin_type,
                     symbol: t.ticker,
                     iconUrl: t.icon_url,
@@ -1088,30 +1148,33 @@ function Page() {
                 />
 
                 <TBody>
-                  {tokenIn.ticker}
+                  {(!isInverted ? tokenIn : tokenOut).ticker}
                   <span className="font-sans">/</span>
-                  {tokenOut.ticker}
+                  {(!isInverted ? tokenOut : tokenIn).ticker}
                 </TBody>
+
+                <ArrowRightLeft className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-foreground" />
               </div>
 
-              {tokensCurrentRatio !== undefined &&
-              tokensCurrentRatioDp !== undefined &&
-              tokensRatio1DChange !== undefined ? (
+              {currentTokenRatio !== undefined &&
+              currentTokenRatioDp !== undefined &&
+              tokenRatio24hChangePercent !== undefined ? (
                 <TBody className="text-xs">
-                  {formatToken(tokensCurrentRatio, {
-                    dp: tokensCurrentRatioDp,
+                  {formatToken(currentTokenRatio, {
+                    dp: currentTokenRatioDp,
                     exact: true,
                   })}{" "}
                   <span
                     className={cn(
-                      tokensRatio1DChange.gt(0) && "text-success",
-                      tokensRatio1DChange.eq(0) && "text-muted-foreground",
-                      tokensRatio1DChange.lt(0) && "text-destructive",
+                      tokenRatio24hChangePercent.gt(0) && "text-success",
+                      tokenRatio24hChangePercent.eq(0) &&
+                        "text-muted-foreground",
+                      tokenRatio24hChangePercent.lt(0) && "text-destructive",
                     )}
                   >
-                    {tokensRatio1DChange.gt(0) && "+"}
-                    {tokensRatio1DChange.lt(0) && "-"}
-                    {formatPercent(tokensRatio1DChange.abs())}
+                    {tokenRatio24hChangePercent.gt(0) && "+"}
+                    {tokenRatio24hChangePercent.lt(0) && "-"}
+                    {formatPercent(tokenRatio24hChangePercent.abs())}
                   </span>
                 </TBody>
               ) : (
@@ -1119,11 +1182,17 @@ function Page() {
               )}
             </div>
 
-            <div className="h-6 max-w-48 flex-1">
-              {tokensHistoricalRatios !== undefined && (
-                <TokensRatioChart data={tokensHistoricalRatios} />
-              )}
-            </div>
+            <Link
+              className="block flex min-w-32 max-w-56 flex-1 cursor-pointer"
+              target="_blank"
+              href={`https://birdeye.so/token/${isSui(tokenIn.coin_type) ? SUI_COINTYPE : tokenIn.coin_type}?chain=sui`}
+            >
+              <div className="pointer-events-none h-6 w-full pl-6">
+                {historicalTokenRatios !== undefined && (
+                  <TokenRatiosChart data={historicalTokenRatios} />
+                )}
+              </div>
+            </Link>
           </div>
         </div>
 

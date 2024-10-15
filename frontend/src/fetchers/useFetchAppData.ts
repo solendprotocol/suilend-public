@@ -4,6 +4,7 @@ import { CoinBalance, SuiClient } from "@mysten/sui/client";
 import { normalizeStructTag } from "@mysten/sui/utils";
 import { SuiPriceServiceConnection } from "@pythnetwork/pyth-sui-js";
 import * as Sentry from "@sentry/nextjs";
+import BigNumber from "bignumber.js";
 import { toast } from "sonner";
 import useSWR from "swr";
 
@@ -14,14 +15,20 @@ import {
   LENDING_MARKET_TYPE,
   SuilendClient,
 } from "@suilend/sdk/client";
+import { WAD } from "@suilend/sdk/constants";
 import { parseLendingMarket } from "@suilend/sdk/parsers/lendingMarket";
 import { parseObligation } from "@suilend/sdk/parsers/obligation";
 import { ParsedReserve } from "@suilend/sdk/parsers/reserve";
+import { toHexString } from "@suilend/sdk/utils";
 import * as simulate from "@suilend/sdk/utils/simulate";
 
 import { AppContext, AppData } from "@/contexts/AppContext";
 import { ParsedCoinBalance, parseCoinBalances } from "@/lib/coinBalance";
 import { getCoinMetadataMap } from "@/lib/coinMetadata";
+import {
+  DEEP_PRICE_IDENTIFIER,
+  NORMALIZED_DEEP_COINTYPE,
+} from "@/lib/coinType";
 import { formatRewards } from "@/lib/liquidityMining";
 
 export default function useFetchAppData(
@@ -46,6 +53,38 @@ export default function useFetchAppData(
       ),
       new SuiPriceServiceConnection("https://hermes.pyth.network"),
     );
+    const deepReserve = refreshedRawReserves.find(
+      (r) => normalizeStructTag(r.coinType.name) === NORMALIZED_DEEP_COINTYPE,
+    );
+    if (
+      deepReserve &&
+      `0x${toHexString(deepReserve.priceIdentifier.bytes)}` !==
+        DEEP_PRICE_IDENTIFIER
+    ) {
+      let price;
+      try {
+        const url = `https://public-api.birdeye.so/defi/price?address=${NORMALIZED_DEEP_COINTYPE}`;
+        const res = await fetch(url, {
+          headers: {
+            "X-API-KEY": process.env.NEXT_PUBLIC_BIRDEYE_API_KEY as string,
+            "x-chain": "sui",
+          },
+        });
+        const json = await res.json();
+        price = json.data.value;
+      } catch (err) {
+        console.error(err);
+
+        price = 0.0125;
+      }
+
+      (deepReserve.price.value as bigint) = BigInt(
+        +new BigNumber(price).times(WAD),
+      );
+      (deepReserve.smoothedPrice.value as bigint) = BigInt(
+        +new BigNumber(price).times(WAD),
+      );
+    }
 
     if (!suilendClientRef.current) {
       suilendClientRef.current =

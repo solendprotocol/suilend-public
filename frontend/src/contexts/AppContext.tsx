@@ -46,7 +46,7 @@ export interface AppData {
 
 export interface AppContext {
   suiClient: SuiClient;
-  suilendClient: SuilendClient<string> | null;
+  suilendClient: SuilendClient | null;
   data: AppData | null;
   refreshData: () => Promise<void>;
   rpc: (typeof RPCS)[number];

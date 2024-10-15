@@ -9,6 +9,10 @@ import { Action } from "@suilend/sdk/types";
 import Button from "@/components/shared/Button";
 import { TBody, TLabel } from "@/components/shared/Typography";
 import { Input as InputComponent } from "@/components/ui/input";
+import {
+  DEEP_PRICE_IDENTIFIER,
+  NORMALIZED_DEEP_COINTYPE,
+} from "@/lib/coinType";
 import { formatUsd } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -89,8 +93,15 @@ const ActionsModalInput = forwardRef<HTMLInputElement, ActionsModalInputProps>(
             className="text-right"
             style={{ height: `${USD_LABEL_HEIGHT}px` }}
           >
-            {!usdValue.eq(0) && "≈"}
-            {formatUsd(usdValue)}
+            {reserve.coinType === NORMALIZED_DEEP_COINTYPE &&
+            reserve.priceIdentifier !== DEEP_PRICE_IDENTIFIER ? (
+              "--"
+            ) : (
+              <>
+                {!usdValue.eq(0) && "≈"}
+                {formatUsd(usdValue)}
+              </>
+            )}
           </TLabel>
         </div>
       </div>
