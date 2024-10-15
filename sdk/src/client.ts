@@ -12,6 +12,7 @@ import {
 } from "@pythnetwork/pyth-sui-js";
 
 import { phantom } from "./_generated/_framework/reified";
+import { setPublishedAt } from "./_generated/suilend";
 import { PACKAGE_ID, PUBLISHED_AT } from "./_generated/suilend";
 import {
   addPoolReward,
@@ -56,6 +57,20 @@ const WORMHOLE_STATE_ID =
 const PYTH_STATE_ID =
   "0x1f9310238ee9298fb703c3419030b35b22bb1cc37113e3bb5007c99aec79e5b8";
 
+const SUILEND_UPGRADE_CAP_ID =
+  "0x3d4ef1859c3ee9fc72858f588b56a09da5466e64f8cc4e90a7b3b909fba8a7ae";
+
+async function getLatestPackageId(client: SuiClient, upgradeCapId: string) {
+  const object = await client.getObject({
+    id: upgradeCapId,
+    options: {
+      showContent: true,
+    },
+  });
+
+  return (object.data?.content as unknown as any).fields.package;
+}
+
 const SUI_COINTYPE = "0x2::sui::SUI";
 
 export const LENDING_MARKET_ID =
@@ -92,6 +107,12 @@ export class SuilendClient {
       phantom(lendingMarketType),
       lendingMarketId,
     );
+
+    const latestPackageId = await getLatestPackageId(
+      client,
+      SUILEND_UPGRADE_CAP_ID,
+    );
+    setPublishedAt(latestPackageId);
 
     return new SuilendClient(lendingMarket, client);
   }
