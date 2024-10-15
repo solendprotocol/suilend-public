@@ -3,10 +3,14 @@ import { normalizeStructTag } from "@mysten/sui/utils";
 import BigNumber from "bignumber.js";
 import { v4 as uuidv4 } from "uuid";
 
+import {
+  PoolReward,
+  PoolRewardManager,
+} from "../_generated/suilend/liquidity-mining/structs";
+import { Reserve } from "../_generated/suilend/reserve/structs";
 import { WAD } from "../constants";
 import { toHexString } from "../utils";
-
-import { Deps } from "./deps";
+import * as simulate from "../utils/simulate";
 
 export type ParsedReserve = ReturnType<typeof parseReserve>;
 export type ParsedReserveConfig = ReturnType<typeof parseReserveConfig>;
@@ -14,16 +18,10 @@ export type ParsedPoolRewardManager = ReturnType<typeof parsePoolRewardManager>;
 export type ParsedPoolReward = NonNullable<ReturnType<typeof parsePoolReward>>;
 
 export const parseReserve = (
-  {
-    Reserve,
-    PoolRewardManager,
-    PoolReward,
-    simulate,
-  }: Pick<Deps, "Reserve" | "PoolRewardManager" | "PoolReward" | "simulate">,
-  reserve: typeof Reserve,
+  reserve: Reserve<string>,
   coinMetadataMap: Record<string, CoinMetadata>,
 ) => {
-  const config = parseReserveConfig({ Reserve }, reserve);
+  const config = parseReserveConfig(reserve);
 
   const $typeName = reserve.$typeName;
   const id = reserve.id;
@@ -63,12 +61,10 @@ export const parseReserve = (
     reserve.attributedBorrowValue.value.toString(),
   );
   const depositsPoolRewardManager = parsePoolRewardManager(
-    { PoolRewardManager, PoolReward },
     reserve.depositsPoolRewardManager,
     coinMetadataMap,
   );
   const borrowsPoolRewardManager = parsePoolRewardManager(
-    { PoolRewardManager, PoolReward },
     reserve.borrowsPoolRewardManager,
     coinMetadataMap,
   );
@@ -140,10 +136,7 @@ export const parseReserve = (
   };
 };
 
-export const parseReserveConfig = (
-  { Reserve }: Pick<Deps, "Reserve">,
-  reserve: typeof Reserve,
-) => {
+export const parseReserveConfig = (reserve: Reserve<string>) => {
   const config = reserve.config.element;
   if (!config) throw new Error("Reserve config not found");
 
@@ -171,7 +164,7 @@ export const parseReserveConfig = (
   const protocolLiquidationFeeBps = Number(
     config.protocolLiquidationFeeBps.toString(),
   );
-  const isolated = config.isolated as boolean;
+  const isolated = config.isolated;
   const openAttributedBorrowLimitUsd = Number(
     config.openAttributedBorrowLimitUsd.toString(),
   );
@@ -179,15 +172,13 @@ export const parseReserveConfig = (
     config.closeAttributedBorrowLimitUsd.toString(),
   );
   // additionalFields
-  const interestRate = (config.interestRateUtils as any[]).map(
-    (util, index) => ({
-      id: uuidv4(),
-      utilPercent: new BigNumber(util.toString()),
-      aprPercent: new BigNumber(config.interestRateAprs[index].toString()).div(
-        100,
-      ),
-    }),
-  );
+  const interestRate = config.interestRateUtils.map((util, index) => ({
+    id: uuidv4(),
+    utilPercent: new BigNumber(util.toString()),
+    aprPercent: new BigNumber(config.interestRateAprs[index].toString()).div(
+      100,
+    ),
+  }));
 
   return {
     $typeName,
@@ -213,20 +204,14 @@ export const parseReserveConfig = (
 };
 
 export const parsePoolRewardManager = (
-  {
-    PoolRewardManager,
-    PoolReward,
-  }: Pick<Deps, "PoolRewardManager" | "PoolReward">,
-  poolRewardManager: typeof PoolRewardManager,
+  poolRewardManager: PoolRewardManager,
   coinMetadataMap: Record<string, CoinMetadata>,
 ) => {
   const $typeName = poolRewardManager.$typeName;
   const id = poolRewardManager.id;
   const totalShares = poolRewardManager.totalShares;
-  const poolRewards = (poolRewardManager.poolRewards as (typeof PoolReward)[])
-    .map((pr, index) =>
-      parsePoolReward({ PoolReward }, pr, index, coinMetadataMap),
-    )
+  const poolRewards = poolRewardManager.poolRewards
+    .map((pr, index) => parsePoolReward(pr, index, coinMetadataMap))
     .filter(Boolean) as ParsedPoolReward[];
 
   const lastUpdateTimeMs = poolRewardManager.lastUpdateTimeMs;
@@ -241,8 +226,7 @@ export const parsePoolRewardManager = (
 };
 
 export const parsePoolReward = (
-  { PoolReward }: Pick<Deps, "PoolReward">,
-  poolReward: typeof PoolReward | null,
+  poolReward: PoolReward | null,
   rewardIndex: number,
   coinMetadataMap: Record<string, CoinMetadata>,
 ) => {

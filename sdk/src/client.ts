@@ -1,9 +1,5 @@
 import { CoinStruct, SuiClient } from "@mysten/sui/client";
-import {
-  Transaction,
-  TransactionObjectInput,
-  TransactionResult,
-} from "@mysten/sui/transactions";
+import { Transaction, TransactionObjectInput } from "@mysten/sui/transactions";
 import {
   SUI_CLOCK_OBJECT_ID,
   fromBase64,
@@ -15,31 +11,44 @@ import {
   SuiPythClient,
 } from "@pythnetwork/pyth-sui-js";
 
+import { phantom } from "./_generated/_framework/reified";
+import { PACKAGE_ID, PUBLISHED_AT } from "./_generated/suilend";
 import {
-  AddPoolRewardArgs,
-  AddReserveArgs,
-  BorrowArgs,
-  CancelPoolRewardArgs,
-  ChangeReservePriceFeedArgs,
-  ClaimFeesArgs,
-  ClaimRewardsAndDepositArgs,
-  ClaimRewardsArgs,
-  ClosePoolRewardArgs,
-  CreateRateLimiterConfigArgs,
+  addPoolReward,
+  addReserve,
+  borrow,
+  cancelPoolReward,
+  changeReservePriceFeed,
+  claimFees,
+  claimRewards,
+  claimRewardsAndDeposit,
+  closePoolReward,
+  depositCtokensIntoObligation,
+  depositLiquidityAndMintCtokens,
+  liquidate,
+  migrate,
+  redeemCtokensAndWithdrawLiquidity,
+  refreshReservePrice,
+  repay,
+  updateRateLimiterConfig,
+  updateReserveConfig,
+  withdrawCtokens,
+} from "./_generated/suilend/lending-market/functions";
+import {
+  LendingMarket,
+  ObligationOwnerCap,
+} from "./_generated/suilend/lending-market/structs";
+import { createLendingMarket } from "./_generated/suilend/lending-market-registry/functions";
+import { Obligation } from "./_generated/suilend/obligation/structs";
+import {
+  NewConfigArgs as CreateRateLimiterConfigArgs,
+  newConfig as createRateLimiterConfig,
+} from "./_generated/suilend/rate-limiter/functions";
+import {
   CreateReserveConfigArgs,
-  DepositCtokensIntoObligationArgs,
-  DepositLiquidityAndMintCtokensArgs,
-  LiquidateArgs,
-  MigrateArgs,
-  PhantomReified,
-  RedeemCtokensAndWithdrawLiquidityArgs,
-  RefreshReservePriceArgs,
-  RepayArgs,
-  Side,
-  UpdateRateLimiterConfigArgs,
-  UpdateReserveConfigArgs,
-  WithdrawCtokensArgs,
-} from "./types";
+  createReserveConfig,
+} from "./_generated/suilend/reserve-config/functions";
+import { Side } from "./types";
 import { extractCTokenCoinType } from "./utils";
 
 const WORMHOLE_STATE_ID =
@@ -49,192 +58,18 @@ const PYTH_STATE_ID =
 
 const SUI_COINTYPE = "0x2::sui::SUI";
 
-interface Deps {
-  phantom: (phantomType: string) => PhantomReified<string>;
-  PACKAGE_ID: string;
-  PUBLISHED_AT: string;
-  LendingMarket: any;
-  Obligation: any;
-  ObligationOwnerCap: any;
-  createLendingMarket: (
-    transaction: Transaction,
-    typeArg: string,
-    registry: TransactionObjectInput,
-  ) => TransactionResult;
-  createReserveConfig: (
-    transaction: Transaction,
-    args: CreateReserveConfigArgs,
-  ) => TransactionResult;
-  updateReserveConfig: (
-    transaction: Transaction,
-    typeArgs: [string, string],
-    args: UpdateReserveConfigArgs,
-  ) => TransactionResult;
-  addReserve: (
-    transaction: Transaction,
-    typeArgs: [string, string],
-    args: AddReserveArgs,
-  ) => TransactionResult;
-  addPoolReward: (
-    transaction: Transaction,
-    typeArgs: [string, string],
-    args: AddPoolRewardArgs,
-  ) => TransactionResult;
-  cancelPoolReward: (
-    transaction: Transaction,
-    typeArgs: [string, string],
-    args: CancelPoolRewardArgs,
-  ) => TransactionResult;
-  closePoolReward: (
-    transaction: Transaction,
-    typeArgs: [string, string],
-    args: ClosePoolRewardArgs,
-  ) => TransactionResult;
-  claimRewards: (
-    transaction: Transaction,
-    typeArgs: [string, string],
-    args: ClaimRewardsArgs,
-  ) => TransactionResult;
-  claimRewardsAndDeposit: (
-    transaction: Transaction,
-    typeArgs: [string, string],
-    args: ClaimRewardsAndDepositArgs,
-  ) => TransactionResult;
-  createRateLimiterConfig: (
-    transaction: Transaction,
-    args: CreateRateLimiterConfigArgs,
-  ) => TransactionResult;
-  updateRateLimiterConfig: (
-    transaction: Transaction,
-    typeArg: string,
-    args: UpdateRateLimiterConfigArgs,
-  ) => TransactionResult;
-  refreshReservePrice: (
-    transaction: Transaction,
-    typeArg: string,
-    args: RefreshReservePriceArgs,
-  ) => TransactionResult;
-  depositLiquidityAndMintCtokens: (
-    transaction: Transaction,
-    typeArgs: [string, string],
-    args: DepositLiquidityAndMintCtokensArgs,
-  ) => TransactionResult;
-  depositCtokensIntoObligation: (
-    transaction: Transaction,
-    typeArgs: [string, string],
-    args: DepositCtokensIntoObligationArgs,
-  ) => TransactionResult;
-  withdrawCtokens: (
-    transaction: Transaction,
-    typeArgs: [string, string],
-    args: WithdrawCtokensArgs,
-  ) => TransactionResult;
-  borrow: (
-    transaction: Transaction,
-    typeArgs: [string, string],
-    args: BorrowArgs,
-  ) => TransactionResult;
-  repay: (
-    transaction: Transaction,
-    typeArgs: [string, string],
-    args: RepayArgs,
-  ) => TransactionResult;
-  liquidate: (
-    transaction: Transaction,
-    typeArgs: [string, string, string],
-    args: LiquidateArgs,
-  ) => TransactionResult;
-  migrate: (
-    transaction: Transaction,
-    typeArg: string,
-    args: MigrateArgs,
-  ) => TransactionResult;
-  claimFees: (
-    transaction: Transaction,
-    typeArgs: [string, string],
-    args: ClaimFeesArgs,
-  ) => TransactionResult;
-  redeemCtokensAndWithdrawLiquidity: (
-    transaction: Transaction,
-    typeArgs: [string, string],
-    args: RedeemCtokensAndWithdrawLiquidityArgs,
-  ) => TransactionResult;
-  changeReservePriceFeed: (
-    transaction: Transaction,
-    typeArgs: [string, string],
-    args: ChangeReservePriceFeedArgs,
-  ) => TransactionResult;
-}
+export const LENDING_MARKET_ID =
+  "0x84030d26d85eaa7035084a057f2f11f701b7e2e4eda87551becbc7c97505ece1";
+export const LENDING_MARKET_TYPE =
+  "0xf95b06141ed4a174f239417323bde3f209b972f5930d8521ea38a52aff3a6ddf::suilend::MAIN_POOL";
 
 export class SuilendClient {
-  lendingMarket: any;
+  lendingMarket: LendingMarket<string>;
   client: SuiClient;
   pythClient: SuiPythClient;
   pythConnection: SuiPriceServiceConnection;
 
-  phantom: Deps["phantom"];
-  PACKAGE_ID: Deps["PACKAGE_ID"];
-  PUBLISHED_AT: Deps["PUBLISHED_AT"];
-  LendingMarket: Deps["LendingMarket"];
-  Obligation: Deps["Obligation"];
-  ObligationOwnerCap: Deps["ObligationOwnerCap"];
-  createLendingMarketFunction: Deps["createLendingMarket"];
-  createReserveConfigFunction: Deps["createReserveConfig"];
-  updateReserveConfigFunction: Deps["updateReserveConfig"];
-  addReserveFunction: Deps["addReserve"];
-  addPoolRewardFunction: Deps["addPoolReward"];
-  cancelPoolRewardFunction: Deps["cancelPoolReward"];
-  closePoolRewardFunction: Deps["closePoolReward"];
-  claimRewardsFunction: Deps["claimRewards"];
-  claimRewardsAndDepositFunction: Deps["claimRewardsAndDeposit"];
-  createRateLimiterConfigFunction: Deps["createRateLimiterConfig"];
-  updateRateLimiterConfigFunction: Deps["updateRateLimiterConfig"];
-  refreshReservePriceFunction: Deps["refreshReservePrice"];
-  depositLiquidityAndMintCtokensFunction: Deps["depositLiquidityAndMintCtokens"];
-  depositCtokensIntoObligationFunction: Deps["depositCtokensIntoObligation"];
-  withdrawCtokensFunction: Deps["withdrawCtokens"];
-  borrowFunction: Deps["borrow"];
-  repayFunction: Deps["repay"];
-  liquidateFunction: Deps["liquidate"];
-  migrateFunction: Deps["migrate"];
-  claimFeesFunction: Deps["claimFees"];
-  redeemCtokensAndWithdrawLiquidityFunction: Deps["redeemCtokensAndWithdrawLiquidity"];
-  changeReservePriceFeedFunction: Deps["changeReservePriceFeed"];
-
-  constructor(
-    lendingMarket: any,
-    client: SuiClient,
-    {
-      phantom,
-      PACKAGE_ID,
-      PUBLISHED_AT,
-      LendingMarket,
-      Obligation,
-      ObligationOwnerCap,
-      createLendingMarket,
-      createReserveConfig,
-      updateReserveConfig,
-      addReserve,
-      addPoolReward,
-      cancelPoolReward,
-      closePoolReward,
-      claimRewards,
-      claimRewardsAndDeposit,
-      createRateLimiterConfig,
-      updateRateLimiterConfig,
-      refreshReservePrice,
-      depositLiquidityAndMintCtokens,
-      depositCtokensIntoObligation,
-      withdrawCtokens,
-      borrow,
-      repay,
-      liquidate,
-      migrate,
-      claimFees,
-      redeemCtokensAndWithdrawLiquidity,
-      changeReservePriceFeed,
-    }: Deps,
-  ) {
+  constructor(lendingMarket: LendingMarket<string>, client: SuiClient) {
     this.lendingMarket = lendingMarket;
     this.client = client;
     this.pythClient = new SuiPythClient(
@@ -245,60 +80,27 @@ export class SuilendClient {
     this.pythConnection = new SuiPriceServiceConnection(
       "https://hermes.pyth.network",
     );
-
-    this.phantom = phantom;
-    this.PACKAGE_ID = PACKAGE_ID;
-    this.PUBLISHED_AT = PUBLISHED_AT;
-    this.LendingMarket = LendingMarket;
-    this.Obligation = Obligation;
-    this.ObligationOwnerCap = ObligationOwnerCap;
-    this.createLendingMarketFunction = createLendingMarket;
-    this.createReserveConfigFunction = createReserveConfig;
-    this.updateReserveConfigFunction = updateReserveConfig;
-    this.addReserveFunction = addReserve;
-    this.addPoolRewardFunction = addPoolReward;
-    this.cancelPoolRewardFunction = cancelPoolReward;
-    this.closePoolRewardFunction = closePoolReward;
-    this.claimRewardsFunction = claimRewards;
-    this.claimRewardsAndDepositFunction = claimRewardsAndDeposit;
-    this.createRateLimiterConfigFunction = createRateLimiterConfig;
-    this.updateRateLimiterConfigFunction = updateRateLimiterConfig;
-    this.refreshReservePriceFunction = refreshReservePrice;
-    this.depositLiquidityAndMintCtokensFunction =
-      depositLiquidityAndMintCtokens;
-    this.depositCtokensIntoObligationFunction = depositCtokensIntoObligation;
-    this.withdrawCtokensFunction = withdrawCtokens;
-    this.borrowFunction = borrow;
-    this.repayFunction = repay;
-    this.liquidateFunction = liquidate;
-    this.migrateFunction = migrate;
-    this.claimFeesFunction = claimFees;
-    this.redeemCtokensAndWithdrawLiquidityFunction =
-      redeemCtokensAndWithdrawLiquidity;
-    this.changeReservePriceFeedFunction = changeReservePriceFeed;
   }
 
   static async initialize(
     lendingMarketId: string,
     lendingMarketType: string,
     client: SuiClient,
-    deps: Deps,
   ) {
-    const lendingMarket = await deps.LendingMarket.fetch(
+    const lendingMarket = await LendingMarket.fetch(
       client,
-      deps.phantom(lendingMarketType),
+      phantom(lendingMarketType),
       lendingMarketId,
     );
 
-    return new SuilendClient(lendingMarket, client, deps);
+    return new SuilendClient(lendingMarket, client);
   }
 
   static async initializeWithLendingMarket(
-    lendingMarket: any,
+    lendingMarket: LendingMarket<string>,
     client: SuiClient,
-    deps: Deps,
   ) {
-    return new SuilendClient(lendingMarket, client, deps);
+    return new SuilendClient(lendingMarket, client);
   }
 
   static async hasBetaPass(ownerId: string, client: SuiClient) {
@@ -317,10 +119,6 @@ export class SuilendClient {
     registryId: string,
     lendingMarketType: string,
     transaction: Transaction,
-    {
-      LendingMarket,
-      createLendingMarket,
-    }: Pick<Deps, "LendingMarket" | "createLendingMarket">,
   ) {
     const [ownerCap, lendingMarket] = createLendingMarket(
       transaction,
@@ -340,11 +138,6 @@ export class SuilendClient {
     ownerId: string,
     lendingMarketTypeArgs: string[],
     client: SuiClient,
-    {
-      phantom,
-      PACKAGE_ID,
-      ObligationOwnerCap,
-    }: Pick<Deps, "phantom" | "PACKAGE_ID" | "ObligationOwnerCap">,
   ) {
     const objs = await client.getOwnedObjects({
       owner: ownerId,
@@ -363,7 +156,7 @@ export class SuilendClient {
         ),
       );
 
-      const obligationOwnerCaps: (typeof ObligationOwnerCap)[] = [];
+      const obligationOwnerCaps: ObligationOwnerCap<string>[] = [];
       obligationOwnerCapObjs.forEach((obj) => {
         if (obj.data?.bcs?.dataType !== "moveObject")
           throw new Error("Error: invalid data type");
@@ -386,7 +179,6 @@ export class SuilendClient {
     obligationId: string,
     lendingMarketTypeArgs: string[],
     client: SuiClient,
-    { phantom, Obligation }: Pick<Deps, "phantom" | "Obligation">,
   ) {
     const obligationData = await client.getObject({
       id: obligationId,
@@ -410,7 +202,6 @@ export class SuilendClient {
       obligationId,
       this.lendingMarket.$typeArgs,
       this.client,
-      { phantom: this.phantom, Obligation: this.Obligation },
     );
   }
 
@@ -418,7 +209,6 @@ export class SuilendClient {
     ownerId: string,
     lendingMarketTypeArgs: string[],
     client: SuiClient,
-    { PACKAGE_ID }: Pick<Deps, "PACKAGE_ID">,
   ) {
     const objs = await client.getOwnedObjects({
       owner: ownerId,
@@ -436,7 +226,6 @@ export class SuilendClient {
       ownerId,
       this.lendingMarket.$typeArgs,
       this.client,
-      { PACKAGE_ID: this.PACKAGE_ID },
     );
   }
 
@@ -447,10 +236,7 @@ export class SuilendClient {
     coinType: string,
     createReserveConfigArgs: CreateReserveConfigArgs,
   ) {
-    const [config] = this.createReserveConfigFunction(
-      transaction,
-      createReserveConfigArgs,
-    );
+    const [config] = createReserveConfig(transaction, createReserveConfigArgs);
 
     const priceUpdateData = await this.pythConnection.getPriceFeedsUpdateData([
       pythPriceId,
@@ -468,7 +254,7 @@ export class SuilendClient {
       throw new Error("Error: coin metadata not found");
     }
 
-    return this.addReserveFunction(
+    return addReserve(
       transaction,
       [this.lendingMarket.$typeArgs[0], coinType],
       {
@@ -516,7 +302,7 @@ export class SuilendClient {
       [rewardValue],
     );
 
-    return this.addPoolRewardFunction(
+    return addPoolReward(
       transaction,
       [this.lendingMarket.$typeArgs[0], rewardCoinType],
       {
@@ -540,7 +326,7 @@ export class SuilendClient {
     rewardCoinType: string,
     transaction: Transaction,
   ) {
-    return this.cancelPoolRewardFunction(
+    return cancelPoolReward(
       transaction,
       [this.lendingMarket.$typeArgs[0], rewardCoinType],
       {
@@ -562,7 +348,7 @@ export class SuilendClient {
     rewardCoinType: string,
     transaction: Transaction,
   ) {
-    return this.closePoolRewardFunction(
+    return closePoolReward(
       transaction,
       [this.lendingMarket.$typeArgs[0], rewardCoinType],
       {
@@ -584,7 +370,7 @@ export class SuilendClient {
     side: Side,
     transaction: Transaction,
   ) {
-    return this.claimRewardsFunction(
+    return claimRewards(
       transaction,
       [this.lendingMarket.$typeArgs[0], rewardType],
       {
@@ -607,7 +393,7 @@ export class SuilendClient {
     depositReserveArrayIndex: bigint,
     transaction: Transaction,
   ) {
-    return this.claimRewardsAndDepositFunction(
+    return claimRewardsAndDeposit(
       transaction,
       [this.lendingMarket.$typeArgs[0], rewardType],
       {
@@ -665,7 +451,7 @@ export class SuilendClient {
   findReserveArrayIndex(coinType: string): bigint {
     const normalizedCoinType = normalizeStructTag(coinType);
     const array_index = this.lendingMarket.reserves.findIndex(
-      (r: any) => normalizeStructTag(r.coinType.name) == normalizedCoinType,
+      (r) => normalizeStructTag(r.coinType.name) == normalizedCoinType,
     );
 
     return BigInt(array_index);
@@ -678,12 +464,9 @@ export class SuilendClient {
     coinType: string,
     createReserveConfigArgs: CreateReserveConfigArgs,
   ) {
-    const [config] = this.createReserveConfigFunction(
-      transaction,
-      createReserveConfigArgs,
-    );
+    const [config] = createReserveConfig(transaction, createReserveConfigArgs);
 
-    return this.updateReserveConfigFunction(
+    return updateReserveConfig(
       transaction,
       [...this.lendingMarket.$typeArgs, coinType] as [string, string],
       {
@@ -700,12 +483,12 @@ export class SuilendClient {
     transaction: Transaction,
     newRateLimiterConfigArgs: CreateRateLimiterConfigArgs,
   ) {
-    const [config] = this.createRateLimiterConfigFunction(
+    const [config] = createRateLimiterConfig(
       transaction,
       newRateLimiterConfigArgs,
     );
 
-    return this.updateRateLimiterConfigFunction(
+    return updateRateLimiterConfig(
       transaction,
       this.lendingMarket.$typeArgs[0],
       {
@@ -732,7 +515,7 @@ export class SuilendClient {
       [pythPriceId],
     );
 
-    return this.changeReservePriceFeedFunction(
+    return changeReservePriceFeed(
       transaction,
       [this.lendingMarket.$typeArgs[0], coinType],
       {
@@ -747,7 +530,7 @@ export class SuilendClient {
 
   createObligation(transaction: Transaction) {
     return transaction.moveCall({
-      target: `${this.PUBLISHED_AT}::lending_market::create_obligation`,
+      target: `${PUBLISHED_AT}::lending_market::create_obligation`,
       arguments: [transaction.object(this.lendingMarket.id)],
       typeArguments: this.lendingMarket.$typeArgs,
     });
@@ -755,26 +538,22 @@ export class SuilendClient {
 
   async refreshAll(
     transaction: Transaction,
-    obligation: typeof this.Obligation,
+    obligation: Obligation<string>,
     extraReserveArrayIndex?: bigint,
   ) {
     const reserveArrayIndexToPriceId = new Map<bigint, string>();
-    obligation.deposits.forEach((deposit: any) => {
+    obligation.deposits.forEach((deposit) => {
       const reserve =
-        this.lendingMarket.reserves[
-          deposit.reserveArrayIndex as unknown as number
-        ];
+        this.lendingMarket.reserves[Number(deposit.reserveArrayIndex)];
       reserveArrayIndexToPriceId.set(
         deposit.reserveArrayIndex,
         toHex(new Uint8Array(reserve.priceIdentifier.bytes)),
       );
     });
 
-    obligation.borrows.forEach((borrow: any) => {
+    obligation.borrows.forEach((borrow) => {
       const reserve =
-        this.lendingMarket.reserves[
-          borrow.reserveArrayIndex as unknown as number
-        ];
+        this.lendingMarket.reserves[Number(borrow.reserveArrayIndex)];
       reserveArrayIndexToPriceId.set(
         borrow.reserveArrayIndex,
         toHex(new Uint8Array(reserve.priceIdentifier.bytes)),
@@ -787,9 +566,7 @@ export class SuilendClient {
       extraReserveArrayIndex < this.lendingMarket.reserves.length
     ) {
       const reserve =
-        this.lendingMarket.reserves[
-          extraReserveArrayIndex as unknown as number
-        ];
+        this.lendingMarket.reserves[Number(extraReserveArrayIndex)];
       reserveArrayIndexToPriceId.set(
         extraReserveArrayIndex,
         toHex(new Uint8Array(reserve.priceIdentifier.bytes)),
@@ -825,16 +602,12 @@ export class SuilendClient {
       return;
     }
 
-    this.refreshReservePriceFunction(
-      transaction,
-      this.lendingMarket.$typeArgs[0],
-      {
-        lendingMarket: this.lendingMarket.id,
-        reserveArrayIndex,
-        clock: SUI_CLOCK_OBJECT_ID,
-        priceInfo: priceInfoObjectId,
-      },
-    );
+    refreshReservePrice(transaction, this.lendingMarket.$typeArgs[0], {
+      lendingMarket: this.lendingMarket.id,
+      reserveArrayIndex,
+      clock: SUI_CLOCK_OBJECT_ID,
+      priceInfo: priceInfoObjectId,
+    });
   }
 
   async deposit(
@@ -843,7 +616,7 @@ export class SuilendClient {
     obligationOwnerCap: TransactionObjectInput,
     transaction: Transaction,
   ) {
-    const [ctokens] = this.depositLiquidityAndMintCtokensFunction(
+    const [ctokens] = depositLiquidityAndMintCtokens(
       transaction,
       [this.lendingMarket.$typeArgs[0], coinType],
       {
@@ -854,7 +627,7 @@ export class SuilendClient {
       },
     );
 
-    this.depositCtokensIntoObligationFunction(
+    depositCtokensIntoObligation(
       transaction,
       [this.lendingMarket.$typeArgs[0], coinType],
       {
@@ -963,7 +736,7 @@ export class SuilendClient {
       [value],
     );
 
-    const [ctokens] = this.depositLiquidityAndMintCtokensFunction(
+    const [ctokens] = depositLiquidityAndMintCtokens(
       transaction,
       [this.lendingMarket.$typeArgs[0], coinType],
       {
@@ -988,7 +761,7 @@ export class SuilendClient {
     if (!obligation) throw new Error("Error: no obligation");
 
     await this.refreshAll(transaction, obligation);
-    const [ctokens] = this.withdrawCtokensFunction(
+    const [ctokens] = withdrawCtokens(
       transaction,
       [this.lendingMarket.$typeArgs[0], coinType],
       {
@@ -1003,13 +776,13 @@ export class SuilendClient {
     const [exemption] = transaction.moveCall({
       target: `0x1::option::none`,
       typeArguments: [
-        `${this.PACKAGE_ID}::lending_market::RateLimiterExemption<${this.lendingMarket.$typeArgs[0]}, ${coinType}>`,
+        `${PACKAGE_ID}::lending_market::RateLimiterExemption<${this.lendingMarket.$typeArgs[0]}, ${coinType}>`,
       ],
       arguments: [],
     });
 
     return transaction.moveCall({
-      target: `${this.PUBLISHED_AT}::lending_market::redeem_ctokens_and_withdraw_liquidity`,
+      target: `${PUBLISHED_AT}::lending_market::redeem_ctokens_and_withdraw_liquidity`,
       typeArguments: [this.lendingMarket.$typeArgs[0], coinType],
       arguments: [
         transaction.object(this.lendingMarket.id),
@@ -1058,7 +831,7 @@ export class SuilendClient {
       obligation,
       this.findReserveArrayIndex(coinType),
     );
-    const result = this.borrowFunction(
+    const result = borrow(
       transaction,
       [this.lendingMarket.$typeArgs[0], coinType],
       {
@@ -1101,17 +874,13 @@ export class SuilendClient {
     coin: TransactionObjectInput,
     transaction: Transaction,
   ) {
-    return this.repayFunction(
-      transaction,
-      [this.lendingMarket.$typeArgs[0], coinType],
-      {
-        lendingMarket: this.lendingMarket.id,
-        reserveArrayIndex: this.findReserveArrayIndex(coinType),
-        obligationId: obligationId,
-        clock: SUI_CLOCK_OBJECT_ID,
-        maxRepayCoins: coin,
-      },
-    );
+    return repay(transaction, [this.lendingMarket.$typeArgs[0], coinType], {
+      lendingMarket: this.lendingMarket.id,
+      reserveArrayIndex: this.findReserveArrayIndex(coinType),
+      obligationId: obligationId,
+      clock: SUI_CLOCK_OBJECT_ID,
+      maxRepayCoins: coin,
+    });
   }
 
   async repayIntoObligation(
@@ -1151,10 +920,10 @@ export class SuilendClient {
 
   async liquidateAndRedeem(
     transaction: Transaction,
-    obligation: typeof this.Obligation,
+    obligation: Obligation<string>,
     repayCoinType: string,
     withdrawCoinType: string,
-    repayCoinId: any,
+    repayCoinId: TransactionObjectInput,
   ) {
     const [ctokens, exemption] = await this.liquidate(
       transaction,
@@ -1167,13 +936,13 @@ export class SuilendClient {
     const [optionalExemption] = transaction.moveCall({
       target: `0x1::option::some`,
       typeArguments: [
-        `${this.PUBLISHED_AT}::lending_market::RateLimiterExemption<${this.lendingMarket.$typeArgs[0]}, ${withdrawCoinType}>`,
+        `${PUBLISHED_AT}::lending_market::RateLimiterExemption<${this.lendingMarket.$typeArgs[0]}, ${withdrawCoinType}>`,
       ],
       arguments: [exemption],
     });
 
     return transaction.moveCall({
-      target: `${this.PUBLISHED_AT}::lending_market::redeem_ctokens_and_withdraw_liquidity`,
+      target: `${PUBLISHED_AT}::lending_market::redeem_ctokens_and_withdraw_liquidity`,
       typeArguments: [this.lendingMarket.$typeArgs[0], withdrawCoinType],
       arguments: [
         transaction.object(this.lendingMarket.id),
@@ -1187,13 +956,13 @@ export class SuilendClient {
 
   async liquidate(
     transaction: Transaction,
-    obligation: typeof this.Obligation,
+    obligation: Obligation<string>,
     repayCoinType: string,
     withdrawCoinType: string,
-    repayCoinId: any,
+    repayCoinId: TransactionObjectInput,
   ) {
     await this.refreshAll(transaction, obligation);
-    return this.liquidateFunction(
+    return liquidate(
       transaction,
       [this.lendingMarket.$typeArgs[0], repayCoinType, withdrawCoinType],
       {
@@ -1208,21 +977,17 @@ export class SuilendClient {
   }
 
   migrate(transaction: Transaction, lendingMarketOwnerCapId: string) {
-    return this.migrateFunction(transaction, this.lendingMarket.$typeArgs[0], {
+    return migrate(transaction, this.lendingMarket.$typeArgs[0], {
       lendingMarketOwnerCap: lendingMarketOwnerCapId,
       lendingMarket: this.lendingMarket.id,
     });
   }
 
   claimFees(transaction: Transaction, coinType: string) {
-    return this.claimFeesFunction(
-      transaction,
-      [this.lendingMarket.$typeArgs[0], coinType],
-      {
-        lendingMarket: this.lendingMarket.id,
-        reserveArrayIndex: this.findReserveArrayIndex(coinType),
-      },
-    );
+    return claimFees(transaction, [this.lendingMarket.$typeArgs[0], coinType], {
+      lendingMarket: this.lendingMarket.id,
+      reserveArrayIndex: this.findReserveArrayIndex(coinType),
+    });
   }
 
   async redeemCtokensAndWithdrawLiquidity(
@@ -1256,7 +1021,7 @@ export class SuilendClient {
 
       const coinType = extractCTokenCoinType(ctokenCoinType);
 
-      const [redeemCoin] = this.redeemCtokensAndWithdrawLiquidityFunction(
+      const [redeemCoin] = redeemCtokensAndWithdrawLiquidity(
         transaction,
         [this.lendingMarket.$typeArgs[0], coinType],
         {

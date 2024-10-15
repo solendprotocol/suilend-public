@@ -1,18 +1,16 @@
 import BigNumber from "bignumber.js";
 
+import { RateLimiter } from "../_generated/suilend/rate-limiter/structs";
 import { WAD } from "../constants";
-
-import { Deps } from "./deps";
 
 export type ParsedRateLimiter = ReturnType<typeof parseRateLimiter>;
 export type ParsedRateLimiterConfig = ReturnType<typeof parseRateLimiterConfig>;
 
 export const parseRateLimiter = (
-  { RateLimiter }: Pick<Deps, "RateLimiter">,
-  rateLimiter: typeof RateLimiter,
+  rateLimiter: RateLimiter,
   currentTime: number,
 ) => {
-  const config = parseRateLimiterConfig({ RateLimiter }, rateLimiter);
+  const config = parseRateLimiterConfig(rateLimiter);
 
   const $typeName = rateLimiter.$typeName;
   const prevQty = rateLimiter.prevQty.value;
@@ -44,10 +42,7 @@ export const parseRateLimiter = (
   };
 };
 
-export const parseRateLimiterConfig = (
-  { RateLimiter }: Pick<Deps, "RateLimiter">,
-  rateLimiter: typeof RateLimiter,
-) => {
+export const parseRateLimiterConfig = (rateLimiter: RateLimiter) => {
   const config = rateLimiter.config;
   if (!config) throw new Error("Rate limiter config not found");
 

@@ -12,10 +12,7 @@ const exportsMap: Record<string, string> = {
 };
 const files = (
   fs.readdirSync("./dist/", { recursive: true }) as string[]
-).filter(
-  (file) =>
-    !file.startsWith("core") && file !== "index.js" && file.endsWith(".js"),
-);
+).filter((file) => file !== "index.js" && file.endsWith(".js"));
 for (const file of files) {
   const fileName = file.substring(
     0,

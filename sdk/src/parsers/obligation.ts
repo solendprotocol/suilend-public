@@ -1,9 +1,9 @@
 import { normalizeStructTag } from "@mysten/sui/utils";
 import BigNumber from "bignumber.js";
 
+import { Obligation } from "../_generated/suilend/obligation/structs";
 import { WAD } from "../constants";
 
-import { Deps } from "./deps";
 import { ParsedReserve } from "./reserve";
 
 export type ParsedObligation = ReturnType<typeof parseObligation>;
@@ -12,8 +12,7 @@ export type ParsedPosition =
   | ParsedObligation["borrows"][0];
 
 export const parseObligation = (
-  { Obligation }: Pick<Deps, "Obligation">,
-  obligation: typeof Obligation,
+  obligation: Obligation<string>,
   parsedReserveMap: { [coinType: string]: ParsedReserve },
 ) => {
   let totalDepositedAmountUsd = new BigNumber(0);
@@ -28,7 +27,7 @@ export const parseObligation = (
   let depositPositionCount = 0;
   let borrowPositionCount = 0;
 
-  const deposits = (obligation.deposits as any[]).map((deposit) => {
+  const deposits = obligation.deposits.map((deposit) => {
     const coinType = normalizeStructTag(deposit.coinType.name);
     const reserve = parsedReserveMap[coinType];
     if (!reserve)
@@ -80,7 +79,7 @@ export const parseObligation = (
     };
   });
 
-  const borrows = (obligation.borrows as any[]).map((borrow) => {
+  const borrows = obligation.borrows.map((borrow) => {
     const coinType = normalizeStructTag(borrow.coinType.name);
     const reserve = parsedReserveMap[coinType];
     if (!reserve)

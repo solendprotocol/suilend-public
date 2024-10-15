@@ -1,31 +1,17 @@
 import { CoinMetadata } from "@mysten/sui/client";
 import BigNumber from "bignumber.js";
 
-import { Deps } from "./deps";
+import { LendingMarket } from "../_generated/suilend/lending-market/structs";
+import { Reserve } from "../_generated/suilend/reserve/structs";
+
 import { parseRateLimiter } from "./rateLimiter";
 import { parseReserve } from "./reserve";
 
 export type ParsedLendingMarket = ReturnType<typeof parseLendingMarket>;
 
 export const parseLendingMarket = (
-  {
-    LendingMarket,
-    Reserve,
-    PoolRewardManager,
-    PoolReward,
-    simulate,
-    RateLimiter,
-  }: Pick<
-    Deps,
-    | "LendingMarket"
-    | "Reserve"
-    | "PoolRewardManager"
-    | "PoolReward"
-    | "simulate"
-    | "RateLimiter"
-  >,
-  lendingMarket: typeof LendingMarket,
-  reserves: (typeof Reserve)[],
+  lendingMarket: LendingMarket<string>,
+  reserves: Reserve<string>[],
   coinMetadataMap: Record<string, CoinMetadata>,
   currentTime: number,
 ) => {
@@ -33,13 +19,7 @@ export const parseLendingMarket = (
   const version = lendingMarket.version;
 
   const parsedReserves = reserves
-    .map((reserve) =>
-      parseReserve(
-        { Reserve, PoolRewardManager, PoolReward, simulate },
-        reserve,
-        coinMetadataMap,
-      ),
-    )
+    .map((reserve) => parseReserve(reserve, coinMetadataMap))
     .sort((a, b) => {
       const customOrder = ["SUI", "USDC", "wUSDC", "DEEP", "FUD"];
 
@@ -55,7 +35,6 @@ export const parseLendingMarket = (
   const obligations = lendingMarket.obligations;
 
   const parsedRateLimiter = parseRateLimiter(
-    { RateLimiter },
     lendingMarket.rateLimiter,
     currentTime,
   );
