@@ -112,7 +112,6 @@ export class SuilendClient {
       client,
       SUILEND_UPGRADE_CAP_ID,
     );
-    console.log("Latest package ID: ", latestPackageId);
     setPublishedAt(latestPackageId);
 
     return new SuilendClient(lendingMarket, client);
