@@ -30,11 +30,7 @@ import { useDashboardContext } from "@/contexts/DashboardContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 import useBreakpoint from "@/hooks/useBreakpoint";
 import useIsTouchscreen from "@/hooks/useIsTouchscreen";
-import {
-  DEEP_PRICE_IDENTIFIER,
-  NORMALIZED_DEEP_COINTYPE,
-  isSui,
-} from "@/lib/coinType";
+import { COINTYPE_PYTH_PRICE_ID_SYMBOL_MAP, isSui } from "@/lib/coinType";
 import {
   FIRST_DEPOSIT_DIALOG_START_DATE,
   SUI_GAS_MIN,
@@ -422,8 +418,9 @@ export default function ActionsModalTabContent({
           <LabelWithValue
             label="Price"
             value={
-              reserve.coinType === NORMALIZED_DEEP_COINTYPE &&
-              reserve.priceIdentifier !== DEEP_PRICE_IDENTIFIER
+              reserve.priceIdentifier !==
+              COINTYPE_PYTH_PRICE_ID_SYMBOL_MAP[reserve.coinType]
+                .priceIdentifier
                 ? "--"
                 : formatPrice(reserve.price)
             }

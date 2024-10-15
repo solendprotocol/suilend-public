@@ -16,13 +16,16 @@ import LabelWithValue from "@/components/shared/LabelWithValue";
 import { Separator } from "@/components/ui/separator";
 import { useAppContext } from "@/contexts/AppContext";
 import {
+  COINTYPE_PYTH_PRICE_ID_SYMBOL_MAP,
+  getPythOracleUrl,
+} from "@/lib/coinType";
+import {
   formatBorrowWeight,
   formatLtvPercent,
   formatPercent,
   formatToken,
   formatUsd,
 } from "@/lib/format";
-import { PYTH_PRICE_ID_SYMBOL_MAP, getPythOracleUrl } from "@/lib/pyth";
 import {
   BORROW_WEIGHT_TOOLTIP,
   CLOSE_LTV_TOOLTIP,
@@ -238,7 +241,7 @@ function ObjectsTabContent({ side, reserve }: TabContentProps) {
   const { explorer, obligation, ...restAppContext } = useAppContext();
   const suilendClient = restAppContext.suilendClient as SuilendClient;
 
-  const pythOracleUrl = getPythOracleUrl(reserve.priceIdentifier);
+  const pythOracleUrl = getPythOracleUrl(reserve.coinType);
 
   return (
     <>
@@ -262,7 +265,7 @@ function ObjectsTabContent({ side, reserve }: TabContentProps) {
       {pythOracleUrl && (
         <LabelWithValue
           label="Oracle"
-          value={PYTH_PRICE_ID_SYMBOL_MAP[reserve.priceIdentifier]}
+          value={COINTYPE_PYTH_PRICE_ID_SYMBOL_MAP[reserve.coinType].symbol}
           valueEndDecorator={<PythLogo className="my-0.5" />}
           url={pythOracleUrl}
           urlTooltip="View price feed"

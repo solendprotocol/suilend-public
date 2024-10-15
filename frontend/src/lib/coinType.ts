@@ -1,8 +1,5 @@
 import { normalizeStructTag } from "@mysten/sui/utils";
 
-export const DEEP_PRICE_IDENTIFIER =
-  "0x29bdd5248234e33bd93d3b81100b5fa32eaa5997843847e2c2cb16d7c6d9f7ff";
-
 const SUILEND_POINTS_COINTYPE =
   "0x34fe4f3c9e450fed4d0a3c587ed842eec5313c30c3cc3c0841247c49425e246b::suilend_point::SUILEND_POINT";
 export const SUI_COINTYPE = "0x2::sui::SUI";
@@ -95,6 +92,69 @@ export const COINTYPE_COLOR_MAP = {
   [NORMALIZED_DEEP_COINTYPE]: "#1249EC",
 
   [NORMALIZED_BUCK_COINTYPE]: "#2E79DC",
+};
+
+export const COINTYPE_PYTH_PRICE_ID_SYMBOL_MAP: Record<
+  string,
+  { priceIdentifier: string; symbol: string }
+> = {
+  [NORMALIZED_SUI_COINTYPE]: {
+    priceIdentifier:
+      "0x23d7315113f5b1d3ba7a83604c44b94d79f4fd69af77f804fc7f920a6dc65744",
+    symbol: "Crypto.SUI/USD",
+  },
+  [NORMALIZED_wUSDC_COINTYPE]: {
+    priceIdentifier:
+      "0xeaa020c61cc479712813461ce153894a96a6c00b21ed0cfc2798d1f9a9e9c94a",
+    symbol: "Crypto.USDC/USD",
+  },
+  [NORMALIZED_USDC_COINTYPE]: {
+    priceIdentifier:
+      "0xeaa020c61cc479712813461ce153894a96a6c00b21ed0cfc2798d1f9a9e9c94a",
+    symbol: "Crypto.USDC/USD",
+  },
+  [NORMALIZED_USDT_COINTYPE]: {
+    priceIdentifier:
+      "0x2b89b9dc8fdf9f34709a5b106b472f0f39bb6ca9ce04b0fd7f2e971688e2e53b",
+    symbol: "Crypto.USDT/USD",
+  },
+  [NORMALIZED_ETH_COINTYPE]: {
+    priceIdentifier:
+      "0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace",
+    symbol: "Crypto.ETH/USD",
+  },
+  [NORMALIZED_SOL_COINTYPE]: {
+    priceIdentifier:
+      "0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d",
+    symbol: "Crypto.SOL/USD",
+  },
+  [NORMALIZED_AUSD_COINTYPE]: {
+    priceIdentifier:
+      "0xd9912df360b5b7f21a122f15bdd5e27f62ce5e72bd316c291f7c86620e07fb2a",
+    symbol: "Crypto.AUSD/USD",
+  },
+  [NORMALIZED_FUD_COINTYPE]: {
+    priceIdentifier:
+      "0x6a4090703da959247727f2b490eb21aea95c8684ecfac675f432008830890c75",
+    symbol: "Crypto.FUD/USD",
+  },
+  [NORMALIZED_DEEP_COINTYPE]: {
+    priceIdentifier:
+      "0x29bdd5248234e33bd93d3b81100b5fa32eaa5997843847e2c2cb16d7c6d9f7ff",
+    symbol: "Crypto.DEEP/USD",
+  },
+
+  [NORMALIZED_BUCK_COINTYPE]: {
+    priceIdentifier:
+      "0xfdf28a46570252b25fd31cb257973f865afc5ca2f320439e45d95e0394bc7382",
+    symbol: "Crypto.BUCK/USD",
+  },
+};
+export const getPythOracleUrl = (coinType: string) => {
+  const symbol = COINTYPE_PYTH_PRICE_ID_SYMBOL_MAP[coinType].symbol;
+  if (!symbol) return null;
+
+  return `https://pyth.network/price-feeds/${symbol.toLowerCase().replace(/\.|\//g, "-")}?range=1W`;
 };
 
 export const extractSymbolFromCoinType = (coinType: string) =>

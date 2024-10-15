@@ -1,10 +1,7 @@
 import { ReservesRowData } from "@/components/dashboard/MarketTable";
 import TokenLogo from "@/components/shared/TokenLogo";
 import { TBody, TLabel } from "@/components/shared/Typography";
-import {
-  DEEP_PRICE_IDENTIFIER,
-  NORMALIZED_DEEP_COINTYPE,
-} from "@/lib/coinType";
+import { COINTYPE_PYTH_PRICE_ID_SYMBOL_MAP } from "@/lib/coinType";
 import { formatPrice } from "@/lib/format";
 
 type AssetCellProps = Pick<
@@ -26,8 +23,8 @@ export default function AssetCell({
       <div className="flex flex-col gap-1">
         <TBody>{symbol}</TBody>
         <TLabel>
-          {coinType === NORMALIZED_DEEP_COINTYPE &&
-          reserve.priceIdentifier !== DEEP_PRICE_IDENTIFIER
+          {reserve.priceIdentifier !==
+          COINTYPE_PYTH_PRICE_ID_SYMBOL_MAP[reserve.coinType].priceIdentifier
             ? "--"
             : formatPrice(price)}
         </TLabel>

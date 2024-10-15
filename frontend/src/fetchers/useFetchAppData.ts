@@ -25,10 +25,7 @@ import * as simulate from "@suilend/sdk/utils/simulate";
 import { AppContext, AppData } from "@/contexts/AppContext";
 import { ParsedCoinBalance, parseCoinBalances } from "@/lib/coinBalance";
 import { getCoinMetadataMap } from "@/lib/coinMetadata";
-import {
-  DEEP_PRICE_IDENTIFIER,
-  NORMALIZED_DEEP_COINTYPE,
-} from "@/lib/coinType";
+import { COINTYPE_PYTH_PRICE_ID_SYMBOL_MAP } from "@/lib/coinType";
 import { formatRewards } from "@/lib/liquidityMining";
 
 export default function useFetchAppData(
@@ -53,17 +50,18 @@ export default function useFetchAppData(
       ),
       new SuiPriceServiceConnection("https://hermes.pyth.network"),
     );
-    const deepReserve = refreshedRawReserves.find(
-      (r) => normalizeStructTag(r.coinType.name) === NORMALIZED_DEEP_COINTYPE,
+
+    const fakePriceIdentifierReserves = refreshedRawReserves.filter(
+      (r) =>
+        `0x${toHexString(r.priceIdentifier.bytes)}` !==
+        COINTYPE_PYTH_PRICE_ID_SYMBOL_MAP[normalizeStructTag(r.coinType.name)]
+          .priceIdentifier,
     );
-    if (
-      deepReserve &&
-      `0x${toHexString(deepReserve.priceIdentifier.bytes)}` !==
-        DEEP_PRICE_IDENTIFIER
-    ) {
-      let price;
+    for (const fakePriceIdentifierReserve of fakePriceIdentifierReserves) {
+      let price = 0.01;
+
       try {
-        const url = `https://public-api.birdeye.so/defi/price?address=${NORMALIZED_DEEP_COINTYPE}`;
+        const url = `https://public-api.birdeye.so/defi/price?address=${normalizeStructTag(fakePriceIdentifierReserve.coinType.name)}`;
         const res = await fetch(url, {
           headers: {
             "X-API-KEY": process.env.NEXT_PUBLIC_BIRDEYE_API_KEY as string,
@@ -74,15 +72,13 @@ export default function useFetchAppData(
         price = json.data.value;
       } catch (err) {
         console.error(err);
-
-        price = 0.0125;
       }
 
-      (deepReserve.price.value as bigint) = BigInt(
-        +new BigNumber(price).times(WAD),
+      (fakePriceIdentifierReserve.price.value as bigint) = BigInt(
+        +new BigNumber(price).times(WAD).integerValue(BigNumber.ROUND_DOWN),
       );
-      (deepReserve.smoothedPrice.value as bigint) = BigInt(
-        +new BigNumber(price).times(WAD),
+      (fakePriceIdentifierReserve.smoothedPrice.value as bigint) = BigInt(
+        +new BigNumber(price).times(WAD).integerValue(BigNumber.ROUND_DOWN),
       );
     }
 

@@ -21,7 +21,17 @@ export const parseLendingMarket = (
   const parsedReserves = reserves
     .map((reserve) => parseReserve(reserve, coinMetadataMap))
     .sort((a, b) => {
-      const customOrder = ["SUI", "USDC", "wUSDC", "DEEP", "FUD"];
+      const customOrder = [
+        "SUI",
+        "USDC",
+        "wUSDC",
+        "USDT",
+        "ETH",
+        "SOL",
+        "AUSD",
+        "DEEP",
+        "FUD",
+      ];
 
       const aCustomOrderIndex = customOrder.indexOf(a.symbol);
       const bCustomOrderIndex = customOrder.indexOf(b.symbol);
