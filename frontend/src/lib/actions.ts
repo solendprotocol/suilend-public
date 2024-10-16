@@ -22,6 +22,10 @@ const getMaxCalculations = (
   data: AppData,
   obligation: ParsedObligation | null,
 ) => {
+  const MIN_AVAILABLE_AMOUNT = new BigNumber(100).div(
+    10 ** reserve.mintDecimals,
+  );
+
   if (action === Action.DEPOSIT) {
     // Calculate safe deposit limit (subtract 10 mins of deposit APR from cap)
     const tenMinsDepositAprPercent = reserve.depositAprPercent
@@ -71,8 +75,6 @@ const getMaxCalculations = (
 
     return result;
   } else if (action === Action.BORROW) {
-    const MIN_AVAILABLE_AMOUNT = 100;
-
     const borrowFee = reserve.config.borrowFeeBps / 10000;
 
     return [
@@ -80,9 +82,7 @@ const getMaxCalculations = (
         reason: "Insufficient liquidity to borrow",
         isDisabled: true,
         value: reserve.availableAmount
-          .minus(
-            new BigNumber(MIN_AVAILABLE_AMOUNT).div(10 ** reserve.mintDecimals),
-          )
+          .minus(MIN_AVAILABLE_AMOUNT)
           .div(1 + borrowFee),
       },
       {
@@ -128,8 +128,6 @@ const getMaxCalculations = (
       },
     ];
   } else if (action === Action.WITHDRAW) {
-    const MIN_AVAILABLE_AMOUNT = 100;
-
     const depositPosition = obligation?.deposits.find(
       (deposit) => deposit.coinType === reserve.coinType,
     );
@@ -143,11 +141,9 @@ const getMaxCalculations = (
         value: depositedAmount,
       },
       {
-        reason: "Insufficient liquidity to borrow",
+        reason: "Insufficient liquidity to withdraw",
         isDisabled: true,
-        value: reserve.availableAmount.minus(
-          new BigNumber(MIN_AVAILABLE_AMOUNT).div(10 ** reserve.mintDecimals),
-        ),
+        value: reserve.availableAmount.minus(MIN_AVAILABLE_AMOUNT),
       },
       {
         reason: "Pool outflow rate limit surpassed",
