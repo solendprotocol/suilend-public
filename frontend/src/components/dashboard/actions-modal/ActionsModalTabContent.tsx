@@ -249,31 +249,9 @@ export default function ActionsModalTabContent({
         break;
       }
       case Action.WITHDRAW: {
-        // TODO: Revert once fixed
-        if (!obligation || !depositPosition) return;
-
-        if (useMaxAmount)
-          submitAmount = !reserve.config.isolated
-            ? maxU64.toString()
-            : BigNumber.min(
-                new BigNumber(
-                  obligation.original.allowedBorrowValueUsd.value.toString(),
-                ).gt(0)
-                  ? new BigNumber(
-                      new BigNumber(
-                        new BigNumber(
-                          obligation.original.allowedBorrowValueUsd.value.toString(),
-                        ).div(WAD),
-                      ).minus(obligation.borrowedAmountUsd),
-                    )
-                      .div(reserve.price)
-                      .div(reserve.cTokenExchangeRate)
-                  : Infinity,
-                depositPosition.depositedCtokenAmount,
-              )
-                .times(10 ** reserve.mintDecimals)
-                .integerValue(BigNumber.ROUND_DOWN)
-                .toString();
+        // TODO: Remove workaround for isolated reserves
+        if (useMaxAmount && !reserve.config.isolated)
+          submitAmount = maxU64.toString();
         else
           submitAmount = new BigNumber(submitAmount)
             .div(reserve.cTokenExchangeRate)
@@ -282,20 +260,18 @@ export default function ActionsModalTabContent({
         break;
       }
       case Action.BORROW: {
-        if (useMaxAmount) submitAmount = maxU64.toString();
+        // TODO: Remove workaround for isolated reserves
+        if (useMaxAmount && !reserve.config.isolated)
+          submitAmount = maxU64.toString();
         break;
       }
       case Action.REPAY: {
-        if (useMaxAmount) {
-          if (isSui(reserve.coinType)) {
-            submitAmount = balance
-              .minus(new BigNumber(SUI_GAS_MIN))
-              .times(10 ** reserve.mintDecimals)
-              .toString();
-          } else {
-            submitAmount = balance.times(10 ** reserve.mintDecimals).toString();
-          }
-        }
+        if (useMaxAmount)
+          submitAmount = balance
+            .minus(isSui(reserve.coinType) ? SUI_GAS_MIN : 0)
+            .times(10 ** reserve.mintDecimals)
+            .toString();
+
         break;
       }
       default: {
