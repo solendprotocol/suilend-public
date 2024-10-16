@@ -93,6 +93,14 @@ const getMaxCalculations = (
           .div(1 + borrowFee),
       },
       {
+        reason: "Exceeds reserve USD borrow limit",
+        isDisabled: true,
+        value: reserve.config.borrowLimitUsd
+          .minus(reserve.borrowedAmount.times(reserve.price))
+          .div(reserve.price)
+          .div(1 + borrowFee),
+      },
+      {
         reason: "Borrows cannot exceed borrow limit",
         isDisabled: true,
         value:
