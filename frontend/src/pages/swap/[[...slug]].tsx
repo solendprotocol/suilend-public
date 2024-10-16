@@ -213,7 +213,9 @@ function Page() {
     : undefined;
 
   const isFetchingQuote = (() => {
-    const timestamps = Object.keys(quoteMap).map((timestamp) => +timestamp);
+    const timestamps = Object.keys(quoteMap)
+      .map((timestamp) => +timestamp)
+      .filter((timestampS) => timestampS !== -1);
 
     return timestamps.length === 0
       ? false
@@ -246,6 +248,7 @@ function Page() {
 
         // Use best quote
         const results = await Promise.allSettled<
+          | undefined
           | { type: UnifiedQuoteType.HOP; quote: HopGetQuoteResponse }
           | {
               type: UnifiedQuoteType.AFTERMATH;
@@ -278,10 +281,19 @@ function Page() {
 
         const rawQuotes = results
           .filter((result) => result.status === "fulfilled")
+          .filter((result) => result.value !== undefined)
           .map((result) => result.value);
         if (rawQuotes.length === 0) throw new Error("No route found");
 
-        const unifiedQuotes = rawQuotes
+        const unifiedQuotes = (
+          rawQuotes as (
+            | { type: UnifiedQuoteType.HOP; quote: HopGetQuoteResponse }
+            | {
+                type: UnifiedQuoteType.AFTERMATH;
+                quote: AftermathRouterCompleteTradeRoute;
+              }
+          )[]
+        )
           .map(({ type, quote }) => {
             if (type === UnifiedQuoteType.HOP) {
               const hopQuote = quote as HopGetQuoteResponse;
@@ -761,30 +773,34 @@ function Page() {
         outputCoin: res.output_coin,
       };
     } else if (quote.type === UnifiedQuoteType.AFTERMATH) {
-      if (isDepositing) {
-        const res = await aftermathSdk.addTransactionForCompleteTradeRouteV0({
-          tx: new Transaction() as any,
-          walletAddress: address,
-          completeRoute: quote.quote as AftermathRouterCompleteTradeRoute,
-          slippage: slippagePercent / 100,
-        });
-
-        return {
-          transaction: res.tx as unknown as Transaction,
-          outputCoin: res.coinOutId as TransactionResult | undefined,
-        };
-      } else {
-        const transaction =
-          await aftermathSdk.getTransactionForCompleteTradeRouteV0({
+      try {
+        if (isDepositing) {
+          const res = await aftermathSdk.addTransactionForCompleteTradeRouteV0({
+            tx: new Transaction() as any,
             walletAddress: address,
             completeRoute: quote.quote as AftermathRouterCompleteTradeRoute,
             slippage: slippagePercent / 100,
           });
 
-        return {
-          transaction: transaction as unknown as Transaction,
-          outputCoin: undefined,
-        };
+          return {
+            transaction: res.tx as unknown as Transaction,
+            outputCoin: res.coinOutId as TransactionResult | undefined,
+          };
+        } else {
+          const transaction =
+            await aftermathSdk.getTransactionForCompleteTradeRouteV0({
+              walletAddress: address,
+              completeRoute: quote.quote as AftermathRouterCompleteTradeRoute,
+              slippage: slippagePercent / 100,
+            });
+
+          return {
+            transaction: transaction as unknown as Transaction,
+            outputCoin: undefined,
+          };
+        }
+      } catch (err) {
+        throw new Error("Unable to get transaction for quote");
       }
     } else throw new Error("Unknown quote type");
   };
@@ -845,6 +861,13 @@ function Page() {
       const res = await swap(deposit);
       const txUrl = explorer.buildTxUrl(res.digest);
 
+      const balanceChangeIn = getBalanceChange(
+        res,
+        address!,
+        tokenIn.coin_type,
+        tokenIn.decimals,
+        -1,
+      );
       const balanceChangeOut = getBalanceChange(
         res,
         address!,
@@ -855,10 +878,12 @@ function Page() {
       toast.success(
         [
           "Swapped",
-          formatToken(new BigNumber(value), {
-            dp: tokenIn.decimals,
-            trimTrailingZeros: true,
-          }),
+          formatToken(
+            balanceChangeIn !== undefined
+              ? balanceChangeIn
+              : new BigNumber(value),
+            { dp: tokenIn.decimals, trimTrailingZeros: true },
+          ),
           tokenIn.ticker,
           "for",
           formatToken(
@@ -886,22 +911,22 @@ function Page() {
         assetIn: tokenIn.ticker,
         assetOut: tokenOut.ticker,
         amountIn: value,
-        amountOut: formatToken(quoteAmountOut, {
-          dp: tokenOut.decimals,
-          useGrouping: false,
-        }),
+        amountOut: quoteAmountOut.toFixed(
+          tokenOut.decimals,
+          BigNumber.ROUND_DOWN,
+        ),
         deposit: deposit ? "true" : "false",
       };
       if (tokenInUsdValue !== undefined)
-        properties.amountInUsd = formatToken(tokenInUsdValue, {
-          dp: 2,
-          useGrouping: false,
-        });
+        properties.amountInUsd = tokenInUsdValue.toFixed(
+          2,
+          BigNumber.ROUND_DOWN,
+        );
       if (tokenOutUsdValue !== undefined)
-        properties.amountOutUsd = formatToken(tokenOutUsdValue, {
-          dp: 2,
-          useGrouping: false,
-        });
+        properties.amountOutUsd = tokenOutUsdValue.toFixed(
+          2,
+          BigNumber.ROUND_DOWN,
+        );
 
       track("swap_success", properties);
     } catch (err) {
@@ -980,10 +1005,10 @@ function Page() {
                 value={
                   new BigNumber(value || 0).gt(0) &&
                   quoteAmountOut !== undefined
-                    ? formatToken(quoteAmountOut, {
-                        dp: tokenOut.decimals,
-                        useGrouping: false,
-                      })
+                    ? quoteAmountOut.toFixed(
+                        tokenOut.decimals,
+                        BigNumber.ROUND_DOWN,
+                      )
                     : ""
                 }
                 isValueLoading={isFetchingQuote}

@@ -307,7 +307,7 @@ export default function ActionsModalTabContent({
       const res = await submit(reserve.coinType, submitAmount);
       const txUrl = explorer.buildTxUrl(res.digest);
 
-      const balanceChangeOut = getBalanceChange(
+      const balanceChange = getBalanceChange(
         res,
         address!,
         reserve.coinType,
@@ -319,9 +319,7 @@ export default function ActionsModalTabContent({
         [
           capitalize(actionPastTense),
           formatToken(
-            balanceChangeOut !== undefined
-              ? balanceChangeOut
-              : new BigNumber(value),
+            balanceChange !== undefined ? balanceChange : new BigNumber(value),
             { dp: reserve.mintDecimals, trimTrailingZeros: true },
           ),
           reserve.symbol,
