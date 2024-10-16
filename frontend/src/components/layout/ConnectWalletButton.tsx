@@ -16,7 +16,7 @@ export default function ConnectWalletButton() {
   // Connect modal
   const [isConnectModalOpen, setIsConnectModalOpen] = useState<boolean>(false);
 
-  // Wallet details
+  // Conencted wallet details
   const { wallets } = useListWallets();
   const connectedWallet = wallets.find((w) => w.id === adapter?.name);
 

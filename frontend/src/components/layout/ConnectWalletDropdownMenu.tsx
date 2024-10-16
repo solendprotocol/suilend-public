@@ -1,6 +1,7 @@
 import Image from "next/image";
 import React, { useState } from "react";
 
+import * as Sentry from "@sentry/nextjs";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "sonner";
 
@@ -46,6 +47,7 @@ function WalletDropdownItem({ wallet }: WalletDropdownItemProps) {
       toast.error(`Failed to connect ${wallet.name}`, {
         description: "Please try a different wallet.",
       });
+      Sentry.captureException(err);
       console.error(err);
     }
   };
@@ -76,8 +78,11 @@ function WalletDropdownItem({ wallet }: WalletDropdownItemProps) {
 }
 
 export default function ConnectWalletDropdownMenu() {
-  const { isConnectWalletDropdownOpen, setIsConnectWalletDropdownOpen } =
-    useWalletContext();
+  const {
+    isConnectWalletDropdownOpen,
+    setIsConnectWalletDropdownOpen,
+    isImpersonatingAddress,
+  } = useWalletContext();
 
   // Wallets
   const { mainWallets, otherWallets } = useListWallets();
@@ -94,7 +99,11 @@ export default function ConnectWalletDropdownMenu() {
         onOpenChange: setIsConnectWalletDropdownOpen,
       }}
       trigger={
-        <Button labelClassName="uppercase" endIcon={<Icon />}>
+        <Button
+          labelClassName="uppercase"
+          endIcon={<Icon />}
+          disabled={isImpersonatingAddress}
+        >
           Connect<span className="hidden sm:inline"> wallet</span>
         </Button>
       }
