@@ -327,8 +327,8 @@ export class SuilendClient {
       transaction,
       [this.lendingMarket.$typeArgs[0], rewardCoinType],
       {
-        lendingMarketOwnerCap: lendingMarketOwnerCapId,
-        lendingMarket: this.lendingMarket.id,
+        lendingMarketOwnerCap: transaction.object(lendingMarketOwnerCapId),
+        lendingMarket: transaction.object(this.lendingMarket.id),
         reserveArrayIndex,
         isDepositReward,
         rewards: rewardCoin,
