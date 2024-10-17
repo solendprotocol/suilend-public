@@ -329,12 +329,12 @@ export class SuilendClient {
       {
         lendingMarketOwnerCap: transaction.object(lendingMarketOwnerCapId),
         lendingMarket: transaction.object(this.lendingMarket.id),
-        reserveArrayIndex,
-        isDepositReward,
-        rewards: rewardCoin,
-        startTimeMs,
-        endTimeMs,
-        clock: SUI_CLOCK_OBJECT_ID,
+        reserveArrayIndex: transaction.pure.u64(reserveArrayIndex),
+        isDepositReward: transaction.pure.bool(isDepositReward),
+        rewards: transaction.object(rewardCoin),
+        startTimeMs: transaction.pure.u64(startTimeMs),
+        endTimeMs: transaction.pure.u64(endTimeMs),
+        clock: transaction.object(SUI_CLOCK_OBJECT_ID),
       },
     );
   }
