@@ -601,28 +601,11 @@ export class SuilendClient {
 
     const priceUpdateData =
       await this.pythConnection.getPriceFeedsUpdateData(priceIds);
-
-    const numUniqueAssets =
-      obligation.deposits.length +
-      obligation.borrows.length +
-      (extraReserveArrayIndex != null ? 1 : 0);
-
-    let priceInfoObjectIds = [];
-
-    if (numUniqueAssets >= 3) {
-      const tx = new Transaction(); // hack
-      priceInfoObjectIds = await this.pythClient.updatePriceFeeds(
-        tx,
-        priceUpdateData,
-        priceIds,
-      );
-    } else {
-      priceInfoObjectIds = await this.pythClient.updatePriceFeeds(
-        transaction,
-        priceUpdateData,
-        priceIds,
-      );
-    }
+    const priceInfoObjectIds = await this.pythClient.updatePriceFeeds(
+      transaction,
+      priceUpdateData,
+      priceIds,
+    );
 
     for (let i = 0; i < tuples.length; i++) {
       this.refreshReservePrices(
