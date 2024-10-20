@@ -2,7 +2,6 @@ import Image from "next/image";
 import { useState } from "react";
 
 import { ChevronDown, ChevronUp, VenetianMask } from "lucide-react";
-import { useLocalStorage } from "usehooks-ts";
 
 import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
 
@@ -45,32 +44,12 @@ export default function ConnectedWalletDropdownMenu({
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const Icon = isOpen ? ChevronUp : ChevronDown;
 
-  // Disconnect
   const hasDisconnect = !isImpersonatingAddress;
 
-  // Subaccounts
   const hasSubaccounts =
     data && data.obligations && data.obligations.length > 1 && obligation;
-
-  const [areSubaccountsCollapsed, setAreSubaccountsCollapsed] =
-    useLocalStorage<boolean>("areSubaccountsCollapsed", false);
-  const toggleAreSubaccountsCollapsed = () =>
-    setAreSubaccountsCollapsed((are) => !are);
-
-  const SubaccountsCollapseIcon = !areSubaccountsCollapsed
-    ? ChevronUp
-    : ChevronDown;
-
-  // Wallets
   const hasWallets = !isImpersonatingAddress && accounts.length > 1;
 
-  const [areWalletsCollapsed, setAreWalletsCollapsed] =
-    useLocalStorage<boolean>("areWalletsCollapsed", false);
-  const toggleAreWalletsCollapsed = () => setAreWalletsCollapsed((are) => !are);
-
-  const WalletsCollapseIcon = !areWalletsCollapsed ? ChevronUp : ChevronDown;
-
-  // Items
   const noItems = !hasDisconnect && !hasSubaccounts && !hasWallets;
 
   return (
@@ -132,109 +111,90 @@ export default function ConnectedWalletDropdownMenu({
           {/* Subaccounts */}
           {hasSubaccounts && (
             <>
-              <Button
-                className={cn(
-                  "h-4 justify-start p-0 text-muted-foreground hover:bg-transparent",
-                  hasDisconnect && "mt-2",
-                )}
-                labelClassName="font-sans text-xs"
-                endIcon={<SubaccountsCollapseIcon />}
-                variant="ghost"
-                onClick={toggleAreSubaccountsCollapsed}
-              >
+              <TLabelSans className={cn(hasDisconnect && "mt-2")}>
                 Subaccounts
-              </Button>
+              </TLabelSans>
 
-              {!areSubaccountsCollapsed &&
-                (data.obligations as ParsedObligation[]).map(
-                  (o, index, array) => (
-                    <DropdownMenuItem
-                      key={o.id}
-                      className="flex flex-col items-start gap-1"
-                      isSelected={o.id === obligation.id}
-                      onClick={() => setObligationId(o.id)}
-                    >
-                      <div className="flex w-full justify-between">
-                        <TLabelSans className="text-foreground">
-                          Subaccount{" "}
-                          {array.findIndex((_o) => _o.id === o.id) + 1}
-                        </TLabelSans>
-                        <TLabelSans>
-                          {o.positionCount} position
-                          {o.positionCount !== 1 ? "s" : ""}
-                        </TLabelSans>
-                      </div>
+              {(data.obligations as ParsedObligation[]).map(
+                (o, index, array) => (
+                  <DropdownMenuItem
+                    key={o.id}
+                    className="flex flex-col items-start gap-1"
+                    isSelected={o.id === obligation.id}
+                    onClick={() => setObligationId(o.id)}
+                  >
+                    <div className="flex w-full justify-between">
+                      <TLabelSans className="text-foreground">
+                        Subaccount {array.findIndex((_o) => _o.id === o.id) + 1}
+                      </TLabelSans>
+                      <TLabelSans>
+                        {o.positionCount} position
+                        {o.positionCount !== 1 ? "s" : ""}
+                      </TLabelSans>
+                    </div>
 
-                      <div className="flex w-full justify-between">
-                        <TLabelSans>
-                          {formatUsd(o.depositedAmountUsd)} deposited
-                        </TLabelSans>
-                        <TLabelSans>
-                          {formatUsd(o.borrowedAmountUsd)} borrowed
-                        </TLabelSans>
-                      </div>
+                    <div className="flex w-full justify-between">
+                      <TLabelSans>
+                        {formatUsd(o.depositedAmountUsd)} deposited
+                      </TLabelSans>
+                      <TLabelSans>
+                        {formatUsd(o.borrowedAmountUsd)} borrowed
+                      </TLabelSans>
+                    </div>
 
-                      <UtilizationBar
-                        className="mt-2 h-1"
-                        obligation={o}
-                        noTooltip
-                      />
-                    </DropdownMenuItem>
-                  ),
-                )}
+                    <UtilizationBar
+                      className="mt-2 h-1"
+                      obligation={o}
+                      noTooltip
+                    />
+                  </DropdownMenuItem>
+                ),
+              )}
             </>
           )}
 
           {/* Wallets */}
           {hasWallets && (
             <>
-              <Button
-                className={cn(
-                  "h-4 justify-start p-0 text-muted-foreground hover:bg-transparent",
-                  (hasDisconnect || hasSubaccounts) && "mt-2",
-                )}
-                labelClassName="font-sans text-xs"
-                endIcon={<WalletsCollapseIcon />}
-                variant="ghost"
-                onClick={toggleAreWalletsCollapsed}
+              <TLabelSans
+                className={cn((hasDisconnect || hasSubaccounts) && "mt-2")}
               >
                 Wallets
-              </Button>
+              </TLabelSans>
 
-              {!areWalletsCollapsed &&
-                accounts.map((a) => (
-                  <DropdownMenuItem
-                    key={a.address}
-                    className="flex flex-col items-start gap-1"
-                    isSelected={a.address === address}
-                    onClick={() =>
-                      selectAccount(
-                        a.address,
-                        addressNameServiceNameMap[a.address],
-                      )
-                    }
-                  >
-                    <div className="flex w-full flex-row items-center justify-between gap-2">
-                      <TLabel
-                        className={cn(
-                          "uppercase text-foreground",
-                          addressNameServiceNameMap[a.address]
-                            ? "overflow-hidden text-ellipsis text-nowrap"
-                            : "shrink-0",
-                        )}
-                      >
-                        {addressNameServiceNameMap[a.address] ??
-                          formatAddress(a.address)}
-                      </TLabel>
-
-                      {a.label && (
-                        <TLabelSans className="overflow-hidden text-ellipsis text-nowrap">
-                          {a.label}
-                        </TLabelSans>
+              {accounts.map((a) => (
+                <DropdownMenuItem
+                  key={a.address}
+                  className="flex flex-col items-start gap-1"
+                  isSelected={a.address === address}
+                  onClick={() =>
+                    selectAccount(
+                      a.address,
+                      addressNameServiceNameMap[a.address],
+                    )
+                  }
+                >
+                  <div className="flex w-full flex-row items-center justify-between gap-2">
+                    <TLabel
+                      className={cn(
+                        "uppercase text-foreground",
+                        addressNameServiceNameMap[a.address]
+                          ? "overflow-hidden text-ellipsis text-nowrap"
+                          : "shrink-0",
                       )}
-                    </div>
-                  </DropdownMenuItem>
-                ))}
+                    >
+                      {addressNameServiceNameMap[a.address] ??
+                        formatAddress(a.address)}
+                    </TLabel>
+
+                    {a.label && (
+                      <TLabelSans className="overflow-hidden text-ellipsis text-nowrap">
+                        {a.label}
+                      </TLabelSans>
+                    )}
+                  </div>
+                </DropdownMenuItem>
+              ))}
             </>
           )}
         </>
