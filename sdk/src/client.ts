@@ -279,12 +279,12 @@ export class SuilendClient {
       transaction,
       [this.lendingMarket.$typeArgs[0], coinType],
       {
-        lendingMarketOwnerCap: lendingMarketOwnerCapId,
-        lendingMarket: this.lendingMarket.id,
-        priceInfo: priceInfoObjectIds[0],
-        config,
-        coinMetadata: coin_metadata.id as string,
-        clock: SUI_CLOCK_OBJECT_ID,
+        lendingMarketOwnerCap: transaction.object(lendingMarketOwnerCapId),
+        lendingMarket: transaction.object(this.lendingMarket.id),
+        priceInfo: transaction.object(priceInfoObjectIds[0]),
+        config: transaction.object(config),
+        coinMetadata: transaction.object(coin_metadata.id as string),
+        clock: transaction.object(SUI_CLOCK_OBJECT_ID),
       },
     );
   }
@@ -491,10 +491,12 @@ export class SuilendClient {
       transaction,
       [...this.lendingMarket.$typeArgs, coinType] as [string, string],
       {
-        lendingMarketOwnerCap: lendingMarketOwnerCapId,
-        lendingMarket: this.lendingMarket.id,
-        reserveArrayIndex: this.findReserveArrayIndex(coinType),
-        config,
+        lendingMarketOwnerCap: transaction.object(lendingMarketOwnerCapId),
+        lendingMarket: transaction.object(this.lendingMarket.id),
+        reserveArrayIndex: transaction.pure.u64(
+          this.findReserveArrayIndex(coinType),
+        ),
+        config: transaction.object(config),
       },
     );
   }
