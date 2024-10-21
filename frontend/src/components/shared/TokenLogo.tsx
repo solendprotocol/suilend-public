@@ -65,7 +65,7 @@ export default function TokenLogo({
           {token.iconUrl ? (
             <Image
               key={token.iconUrl}
-              className={cn("object-cover", imageClassName)}
+              className={cn("rounded-full object-cover", imageClassName)}
               src={token.iconUrl}
               alt={`${token.symbol} logo`}
               fill
