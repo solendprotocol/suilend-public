@@ -7,9 +7,9 @@ import TextLink from "@/components/shared/TextLink";
 import Tooltip from "@/components/shared/Tooltip";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import {
-  NORMALIZED_ETH_COINTYPE,
   NORMALIZED_SOL_COINTYPE,
   NORMALIZED_USDT_COINTYPE,
+  NORMALIZED_WETH_COINTYPE,
   NORMALIZED_wUSDC_COINTYPE,
 } from "@/lib/coinType";
 import { DOCS_BRIDGE_LEARN_MORE_URL } from "@/lib/navigation";
@@ -37,8 +37,8 @@ export default function TokenLogo({
   const nativeAssetMap: Record<string, string> = {
     [NORMALIZED_wUSDC_COINTYPE]: "Wormhole Wrapped Ethereum-native USDC",
     [NORMALIZED_USDT_COINTYPE]: "Wormhole Wrapped Ethereum-native USDT",
-    [NORMALIZED_ETH_COINTYPE]: "Wormhole Wrapped Ethereum-native Ethereum",
-    [NORMALIZED_SOL_COINTYPE]: "Wormhole Wrapped Solana-native Solana",
+    [NORMALIZED_WETH_COINTYPE]: "Wormhole Wrapped Ethereum-native WETH",
+    [NORMALIZED_SOL_COINTYPE]: "Wormhole Wrapped Solana-native SOL",
   };
   const nativeAsset = nativeAssetMap[token.coinType];
 

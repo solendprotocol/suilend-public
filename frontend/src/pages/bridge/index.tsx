@@ -6,7 +6,7 @@ import TextLink from "@/components/shared/TextLink";
 import { bodySansClassNames } from "@/components/shared/Typography";
 import { Alert, AlertTitle } from "@/components/ui/alert";
 import { AppData, useAppContext } from "@/contexts/AppContext";
-import { isEthNative, isSolNative } from "@/lib/coinType";
+import { isEthNativeOnly, isSolNativeOnly } from "@/lib/coinType";
 import { formatList } from "@/lib/format";
 import { DOCS_BRIDGE_LEARN_MORE_URL } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
@@ -16,10 +16,10 @@ export default function Bridge() {
   const data = appContext.data as AppData;
 
   const ethNativeReserves = data.lendingMarket.reserves.filter((reserve) =>
-    isEthNative(reserve.coinType),
+    isEthNativeOnly(reserve.coinType),
   );
   const solNativeReserves = data.lendingMarket.reserves.filter((reserve) =>
-    isSolNative(reserve.coinType),
+    isSolNativeOnly(reserve.coinType),
   );
 
   return (
@@ -35,11 +35,7 @@ export default function Bridge() {
             className={cn(bodySansClassNames, "mb-0 tracking-normal")}
           >
             {"Note: Only Wormhole Wrapped Ethereum-native "}
-            {formatList(
-              ethNativeReserves.map((reserve) =>
-                reserve.symbol === "wUSDC" ? "USDC" : reserve.symbol,
-              ),
-            )}
+            {formatList(ethNativeReserves.map((reserve) => reserve.symbol))}
             {solNativeReserves.length > 0 &&
               ` and Wormhole Wrapped Solana-native ${formatList(solNativeReserves.map((reserve) => reserve.symbol))}`}
             {" are supported on Suilend. "}
