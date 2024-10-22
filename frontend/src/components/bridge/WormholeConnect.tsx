@@ -167,15 +167,12 @@ export default function WormholeConnect({ isHidden }: WormholeConnectProps) {
               "https://rpc.ankr.com/eth/d57d49c5cc988185579623ea8fc23e7a0fc7005e843939bc29ed460952b381cb",
             solana: `https://solendf-solendf-67c7.rpcpool.com/${process.env.NEXT_PUBLIC_SOL_TRITON_ONE_DEV_API_KEY ?? ""}`,
             sui: rpc.url,
-            base: "https://rpc.ankr.com/base/d57d49c5cc988185579623ea8fc23e7a0fc7005e843939bc29ed460952b381cb",
-            arbitrum:
-              "https://rpc.ankr.com/arbitrum/d57d49c5cc988185579623ea8fc23e7a0fc7005e843939bc29ed460952b381cb",
           },
           tokens: ["WETH", "USDCeth", "USDT", "WSOL", "SOL"],
           cta: { text: "Deposit", link: DASHBOARD_URL },
           bridgeDefaults: { toNetwork: "sui", requiredNetwork: "sui" },
           pageHeader: "Bridge",
-          networks: ["ethereum", "solana", "sui", "base", "arbitrum"],
+          networks: ["ethereum", "solana", "sui"],
           showHamburgerMenu: false,
         })}
         data-theme={JSON.stringify({
