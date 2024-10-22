@@ -4,6 +4,8 @@ import React, { useState } from "react";
 import BigNumber from "bignumber.js";
 import { toast } from "sonner";
 
+import { ParsedReserve } from "@suilend/sdk/parsers";
+
 import Card from "@/components/dashboard/Card";
 import PointsCount from "@/components/points/PointsCount";
 import PointsRank from "@/components/points/PointsRank";
@@ -26,6 +28,35 @@ import { RewardSummary } from "@/lib/liquidityMining";
 import { POINTS_URL } from "@/lib/navigation";
 import { getPointsStats } from "@/lib/points";
 import { cn } from "@/lib/utils";
+
+interface ClaimableRewardProps {
+  reserve: ParsedReserve;
+  claimableRewards: BigNumber;
+}
+
+function ClaimableReward({ reserve, claimableRewards }: ClaimableRewardProps) {
+  return (
+    <div className="flex flex-row items-center gap-1.5">
+      <TokenLogo
+        className="h-4 w-4"
+        token={{
+          coinType: reserve.coinType,
+          symbol: reserve.symbol,
+          iconUrl: reserve.iconUrl,
+        }}
+      />
+      <Tooltip
+        title={`${formatToken(claimableRewards, {
+          dp: reserve.mintDecimals,
+        })} ${reserve.symbol}`}
+      >
+        <TBody>
+          {formatToken(claimableRewards, { exact: false })} {reserve.symbol}
+        </TBody>
+      </Tooltip>
+    </div>
+  );
+}
 
 interface ClaimableRewardsProps {
   claimableRewardsMap: Record<string, BigNumber>;
@@ -54,29 +85,11 @@ function ClaimableRewards({
 
             if (!reserve) return null;
             return (
-              <div
+              <ClaimableReward
                 key={coinType}
-                className="flex flex-row items-center gap-1.5"
-              >
-                <TokenLogo
-                  className="h-4 w-4"
-                  token={{
-                    coinType,
-                    symbol: reserve.symbol,
-                    iconUrl: reserve.iconUrl,
-                  }}
-                />
-                <Tooltip
-                  title={`${formatToken(claimableRewards, {
-                    dp: reserve.mintDecimals,
-                  })} ${reserve.symbol}`}
-                >
-                  <TBody>
-                    {formatToken(claimableRewards, { exact: false })}{" "}
-                    {reserve.symbol}
-                  </TBody>
-                </Tooltip>
-              </div>
+                reserve={reserve}
+                claimableRewards={claimableRewards}
+              />
             );
           },
         )}
