@@ -182,7 +182,7 @@ export const isStablecoin = (coinType: string) =>
   NORMALIZED_STABLECOIN_COINTYPES.includes(normalizeStructTag(coinType));
 
 export const isEthNativeOnly = (coinType: string) =>
-  [NORMALIZED_USDT_COINTYPE, NORMALIZED_WETH_COINTYPE].includes(coinType);
+  [NORMALIZED_USDT_COINTYPE].includes(coinType);
 export const isSolNativeOnly = (coinType: string) =>
   [NORMALIZED_SOL_COINTYPE].includes(coinType);
 
