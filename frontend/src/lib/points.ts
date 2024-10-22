@@ -3,7 +3,11 @@ import BigNumber from "bignumber.js";
 import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
 
 import { isSuilendPoints } from "@/lib/coinType";
-import { RewardMap } from "@/lib/liquidityMining";
+import {
+  RewardMap,
+  getBorrowShare,
+  getDepositShare,
+} from "@/lib/liquidityMining";
 
 export const roundPoints = (value: BigNumber) =>
   value.decimalPlaces(0, BigNumber.ROUND_HALF_UP);
@@ -36,33 +40,41 @@ export const getPointsStats = (
 
   obligations.forEach((obligation) => {
     pointsRewards.deposit.forEach((reward) => {
+      const deposit = obligation.deposits.find(
+        (d) => d.coinType === reward.stats.reserve.coinType,
+      );
+
       totalPoints.deposit = totalPoints.deposit.plus(
         reward.obligationClaims[obligation.id]?.claimableAmount ??
           new BigNumber(0),
       );
 
-      if (reward.stats.isActive) {
+      if (deposit && reward.stats.isActive) {
         pointsPerDay.deposit = pointsPerDay.deposit.plus(
-          obligation.deposits
-            .find((d) => d.coinType === reward.stats.reserveCoinType)
-            ?.depositedAmount.times(reward.stats.perDay ?? new BigNumber(0)) ??
-            new BigNumber(0),
+          getDepositShare(
+            reward.stats.reserve,
+            new BigNumber(deposit.userRewardManager.share.toString()),
+          ).times(reward.stats.perDay ?? new BigNumber(0)),
         );
       }
     });
 
     pointsRewards.borrow.forEach((reward) => {
+      const borrow = obligation.borrows.find(
+        (b) => b.coinType === reward.stats.reserve.coinType,
+      );
+
       totalPoints.borrow = totalPoints.borrow.plus(
         reward.obligationClaims[obligation.id]?.claimableAmount ??
           new BigNumber(0),
       );
 
-      if (reward.stats.isActive) {
+      if (borrow && reward.stats.isActive) {
         pointsPerDay.borrow = pointsPerDay.borrow.plus(
-          obligation.borrows
-            .find((d) => d.coinType === reward.stats.reserveCoinType)
-            ?.borrowedAmount.times(reward.stats.perDay ?? new BigNumber(0)) ??
-            new BigNumber(0),
+          getBorrowShare(
+            reward.stats.reserve,
+            new BigNumber(borrow.userRewardManager.share.toString()),
+          ).times(reward.stats.perDay ?? new BigNumber(0)),
         );
       }
     });

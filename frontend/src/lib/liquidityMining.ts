@@ -26,7 +26,7 @@ export type RewardSummary = {
     id: string;
     isActive: boolean;
     rewardIndex: number;
-    reserveCoinType: string;
+    reserve: ParsedReserve;
     rewardCoinType: string;
     mintDecimals: number;
     price?: BigNumber;
@@ -54,12 +54,12 @@ export type PerDayRewardSummary = Omit<RewardSummary, "stats"> & {
   };
 };
 
-const getDepositShare = (reserve: ParsedReserve, share: BigNumber) =>
+export const getDepositShare = (reserve: ParsedReserve, share: BigNumber) =>
   share.div(10 ** reserve.mintDecimals).times(reserve.cTokenExchangeRate);
 const getDepositShareUsd = (reserve: ParsedReserve, share: BigNumber) =>
   getDepositShare(reserve, share).times(reserve.price);
 
-const getBorrowShare = (reserve: ParsedReserve, share: BigNumber) =>
+export const getBorrowShare = (reserve: ParsedReserve, share: BigNumber) =>
   share.div(10 ** reserve.mintDecimals).times(reserve.cumulativeBorrowRate);
 const getBorrowShareUsd = (reserve: ParsedReserve, share: BigNumber) =>
   getBorrowShare(reserve, share).times(reserve.price);
@@ -139,7 +139,7 @@ export const formatRewards = (
         id: poolReward.id,
         isActive,
         rewardIndex: poolReward.rewardIndex,
-        reserveCoinType: reserve.coinType,
+        reserve,
         rewardCoinType: poolReward.coinType,
         mintDecimals: poolReward.mintDecimals,
         price: rewardReserve?.price,
