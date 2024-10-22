@@ -592,8 +592,10 @@ export default function RoutingDialog({ quote }: RoutingDialogProps) {
                 quote.type === UnifiedQuoteType.HOP
                   ? Object.values(quote.quote.trade.nodes).map(
                       (node) =>
-                        HOP_EXCHANGE_NAME_MAP[node.pool.sui_exchange] ??
-                        node.pool.sui_exchange,
+                        HOP_EXCHANGE_NAME_MAP[
+                          node.pool
+                            .sui_exchange as keyof typeof HOP_EXCHANGE_NAME_MAP
+                        ] ?? node.pool.sui_exchange,
                     )
                   : quote.quote.routes
                       .reduce(
