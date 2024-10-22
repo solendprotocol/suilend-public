@@ -351,12 +351,12 @@ export class SuilendClient {
       transaction,
       [this.lendingMarket.$typeArgs[0], rewardCoinType],
       {
-        lendingMarketOwnerCap: lendingMarketOwnerCapId,
-        lendingMarket: this.lendingMarket.id,
-        reserveArrayIndex,
-        isDepositReward,
+        lendingMarketOwnerCap: transaction.object(lendingMarketOwnerCapId),
+        lendingMarket: transaction.object(this.lendingMarket.id),
+        reserveArrayIndex: transaction.pure.u64(reserveArrayIndex),
+        isDepositReward: transaction.pure.bool(isDepositReward),
         rewardIndex,
-        clock: SUI_CLOCK_OBJECT_ID,
+        clock: transaction.object(SUI_CLOCK_OBJECT_ID),
       },
     );
   }
@@ -373,12 +373,12 @@ export class SuilendClient {
       transaction,
       [this.lendingMarket.$typeArgs[0], rewardCoinType],
       {
-        lendingMarketOwnerCap: lendingMarketOwnerCapId,
-        lendingMarket: this.lendingMarket.id,
-        reserveArrayIndex,
-        isDepositReward,
+        lendingMarketOwnerCap: transaction.object(lendingMarketOwnerCapId),
+        lendingMarket: transaction.object(this.lendingMarket.id),
+        reserveArrayIndex: transaction.pure.u64(reserveArrayIndex),
+        isDepositReward: transaction.pure.bool(isDepositReward),
         rewardIndex,
-        clock: SUI_CLOCK_OBJECT_ID,
+        clock: transaction.object(SUI_CLOCK_OBJECT_ID),
       },
     );
   }
@@ -397,10 +397,10 @@ export class SuilendClient {
       {
         lendingMarket: transaction.object(this.lendingMarket.id),
         cap: transaction.object(obligationOwnerCapId),
-        clock: SUI_CLOCK_OBJECT_ID,
-        reserveId: reserveArrayIndex,
+        clock: transaction.object(SUI_CLOCK_OBJECT_ID),
+        reserveId: transaction.pure.u64(reserveArrayIndex),
         rewardIndex,
-        isDepositReward: side === Side.DEPOSIT,
+        isDepositReward: transaction.pure.bool(side === Side.DEPOSIT),
       },
     );
   }
@@ -421,10 +421,10 @@ export class SuilendClient {
         lendingMarket: transaction.object(this.lendingMarket.id),
         obligationId,
         clock: transaction.object(SUI_CLOCK_OBJECT_ID),
-        rewardReserveId: rewardReserveArrayIndex,
-        rewardIndex,
-        isDepositReward: side === Side.DEPOSIT,
-        depositReserveId: depositReserveArrayIndex,
+        rewardReserveId: transaction.pure.u64(rewardReserveArrayIndex),
+        rewardIndex: transaction.pure.u64(rewardIndex),
+        isDepositReward: transaction.pure.bool(side === Side.DEPOSIT),
+        depositReserveId: transaction.pure.u64(depositReserveArrayIndex),
       },
     );
   }
@@ -515,10 +515,10 @@ export class SuilendClient {
       transaction,
       this.lendingMarket.$typeArgs[0],
       {
-        lendingMarketOwnerCap: lendingMarketOwnerCapId,
-        lendingMarket: this.lendingMarket.id,
-        clock: SUI_CLOCK_OBJECT_ID,
-        config,
+        lendingMarketOwnerCap: transaction.object(lendingMarketOwnerCapId),
+        lendingMarket: transaction.object(this.lendingMarket.id),
+        clock: transaction.object(SUI_CLOCK_OBJECT_ID),
+        config: transaction.object(config),
       },
     );
   }
@@ -542,11 +542,13 @@ export class SuilendClient {
       transaction,
       [this.lendingMarket.$typeArgs[0], coinType],
       {
-        lendingMarketOwnerCap: lendingMarketOwnerCapId,
-        lendingMarket: this.lendingMarket.id,
-        reserveArrayIndex: this.findReserveArrayIndex(coinType),
-        priceInfoObj: priceInfoObjectIds[0],
-        clock: SUI_CLOCK_OBJECT_ID,
+        lendingMarketOwnerCap: transaction.object(lendingMarketOwnerCapId),
+        lendingMarket: transaction.object(this.lendingMarket.id),
+        reserveArrayIndex: transaction.pure.u64(
+          this.findReserveArrayIndex(coinType),
+        ),
+        priceInfoObj: transaction.object(priceInfoObjectIds[0]),
+        clock: transaction.object(SUI_CLOCK_OBJECT_ID),
       },
     );
   }
@@ -626,10 +628,10 @@ export class SuilendClient {
     }
 
     refreshReservePrice(transaction, this.lendingMarket.$typeArgs[0], {
-      lendingMarket: this.lendingMarket.id,
-      reserveArrayIndex,
-      clock: SUI_CLOCK_OBJECT_ID,
-      priceInfo: priceInfoObjectId,
+      lendingMarket: transaction.object(this.lendingMarket.id),
+      reserveArrayIndex: transaction.pure.u64(reserveArrayIndex),
+      clock: transaction.object(SUI_CLOCK_OBJECT_ID),
+      priceInfo: transaction.object(priceInfoObjectId),
     });
   }
 
@@ -643,9 +645,11 @@ export class SuilendClient {
       transaction,
       [this.lendingMarket.$typeArgs[0], coinType],
       {
-        lendingMarket: this.lendingMarket.id,
-        reserveArrayIndex: this.findReserveArrayIndex(coinType),
-        clock: SUI_CLOCK_OBJECT_ID,
+        lendingMarket: transaction.object(this.lendingMarket.id),
+        reserveArrayIndex: transaction.pure.u64(
+          this.findReserveArrayIndex(coinType),
+        ),
+        clock: transaction.object(SUI_CLOCK_OBJECT_ID),
         deposit: sendCoin,
       },
     );
@@ -654,10 +658,12 @@ export class SuilendClient {
       transaction,
       [this.lendingMarket.$typeArgs[0], coinType],
       {
-        lendingMarket: this.lendingMarket.id,
-        reserveArrayIndex: this.findReserveArrayIndex(coinType),
+        lendingMarket: transaction.object(this.lendingMarket.id),
+        reserveArrayIndex: transaction.pure.u64(
+          this.findReserveArrayIndex(coinType),
+        ),
         obligationOwnerCap,
-        clock: SUI_CLOCK_OBJECT_ID,
+        clock: transaction.object(SUI_CLOCK_OBJECT_ID),
         deposit: ctokens,
       },
     );
@@ -763,9 +769,11 @@ export class SuilendClient {
       transaction,
       [this.lendingMarket.$typeArgs[0], coinType],
       {
-        lendingMarket: this.lendingMarket.id,
-        reserveArrayIndex: this.findReserveArrayIndex(coinType),
-        clock: SUI_CLOCK_OBJECT_ID,
+        lendingMarket: transaction.object(this.lendingMarket.id),
+        reserveArrayIndex: transaction.pure.u64(
+          this.findReserveArrayIndex(coinType),
+        ),
+        clock: transaction.object(SUI_CLOCK_OBJECT_ID),
         deposit: sendCoin,
       },
     );
@@ -788,10 +796,12 @@ export class SuilendClient {
       transaction,
       [this.lendingMarket.$typeArgs[0], coinType],
       {
-        lendingMarket: this.lendingMarket.id,
-        reserveArrayIndex: this.findReserveArrayIndex(coinType),
+        lendingMarket: transaction.object(this.lendingMarket.id),
+        reserveArrayIndex: transaction.pure.u64(
+          this.findReserveArrayIndex(coinType),
+        ),
         obligationOwnerCap: obligationOwnerCapId,
-        clock: SUI_CLOCK_OBJECT_ID,
+        clock: transaction.object(SUI_CLOCK_OBJECT_ID),
         amount: BigInt(value),
       },
     );
@@ -858,10 +868,12 @@ export class SuilendClient {
       transaction,
       [this.lendingMarket.$typeArgs[0], coinType],
       {
-        lendingMarket: this.lendingMarket.id,
-        reserveArrayIndex: this.findReserveArrayIndex(coinType),
+        lendingMarket: transaction.object(this.lendingMarket.id),
+        reserveArrayIndex: transaction.pure.u64(
+          this.findReserveArrayIndex(coinType),
+        ),
         obligationOwnerCap: obligationOwnerCapId,
-        clock: SUI_CLOCK_OBJECT_ID,
+        clock: transaction.object(SUI_CLOCK_OBJECT_ID),
         amount: BigInt(value),
       },
     );
@@ -898,10 +910,12 @@ export class SuilendClient {
     transaction: Transaction,
   ) {
     return repay(transaction, [this.lendingMarket.$typeArgs[0], coinType], {
-      lendingMarket: this.lendingMarket.id,
-      reserveArrayIndex: this.findReserveArrayIndex(coinType),
+      lendingMarket: transaction.object(this.lendingMarket.id),
+      reserveArrayIndex: transaction.pure.u64(
+        this.findReserveArrayIndex(coinType),
+      ),
       obligationId: obligationId,
-      clock: SUI_CLOCK_OBJECT_ID,
+      clock: transaction.object(SUI_CLOCK_OBJECT_ID),
       maxRepayCoins: coin,
     });
   }
@@ -989,11 +1003,15 @@ export class SuilendClient {
       transaction,
       [this.lendingMarket.$typeArgs[0], repayCoinType, withdrawCoinType],
       {
-        lendingMarket: this.lendingMarket.id,
+        lendingMarket: transaction.object(this.lendingMarket.id),
         obligationId: obligation.id,
-        repayReserveArrayIndex: this.findReserveArrayIndex(repayCoinType),
-        withdrawReserveArrayIndex: this.findReserveArrayIndex(withdrawCoinType),
-        clock: SUI_CLOCK_OBJECT_ID,
+        repayReserveArrayIndex: transaction.pure.u64(
+          this.findReserveArrayIndex(repayCoinType),
+        ),
+        withdrawReserveArrayIndex: transaction.pure.u64(
+          this.findReserveArrayIndex(withdrawCoinType),
+        ),
+        clock: transaction.object(SUI_CLOCK_OBJECT_ID),
         repayCoins: repayCoinId,
       },
     );
@@ -1001,15 +1019,17 @@ export class SuilendClient {
 
   migrate(transaction: Transaction, lendingMarketOwnerCapId: string) {
     return migrate(transaction, this.lendingMarket.$typeArgs[0], {
-      lendingMarketOwnerCap: lendingMarketOwnerCapId,
-      lendingMarket: this.lendingMarket.id,
+      lendingMarketOwnerCap: transaction.object(lendingMarketOwnerCapId),
+      lendingMarket: transaction.object(this.lendingMarket.id),
     });
   }
 
   claimFees(transaction: Transaction, coinType: string) {
     return claimFees(transaction, [this.lendingMarket.$typeArgs[0], coinType], {
-      lendingMarket: this.lendingMarket.id,
-      reserveArrayIndex: this.findReserveArrayIndex(coinType),
+      lendingMarket: transaction.object(this.lendingMarket.id),
+      reserveArrayIndex: transaction.pure.u64(
+        this.findReserveArrayIndex(coinType),
+      ),
     });
   }
 
@@ -1048,9 +1068,11 @@ export class SuilendClient {
         transaction,
         [this.lendingMarket.$typeArgs[0], coinType],
         {
-          lendingMarket: this.lendingMarket.id,
-          reserveArrayIndex: this.findReserveArrayIndex(coinType),
-          clock: SUI_CLOCK_OBJECT_ID,
+          lendingMarket: transaction.object(this.lendingMarket.id),
+          reserveArrayIndex: transaction.pure.u64(
+            this.findReserveArrayIndex(coinType),
+          ),
+          clock: transaction.object(SUI_CLOCK_OBJECT_ID),
           ctokens: transaction.object(mergeCoin.coinObjectId),
           rateLimiterExemption: null,
         },
