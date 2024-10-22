@@ -249,14 +249,18 @@ export default function ActionsModalTabContent({
         break;
       }
       case Action.WITHDRAW: {
+        if (!depositPosition) return;
+
         // TODO: Remove workaround for isolated reserves
         if (useMaxAmount && !reserve.config.isolated)
           submitAmount = maxU64.toString();
         else
-          submitAmount = new BigNumber(submitAmount)
-            .div(reserve.cTokenExchangeRate)
-            .integerValue(BigNumber.ROUND_DOWN)
-            .toString();
+          submitAmount = BigNumber.min(
+            new BigNumber(submitAmount)
+              .div(reserve.cTokenExchangeRate)
+              .integerValue(BigNumber.ROUND_UP),
+            depositPosition.depositedCtokenAmount,
+          ).toString();
         break;
       }
       case Action.BORROW: {

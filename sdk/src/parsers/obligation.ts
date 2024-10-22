@@ -39,10 +39,10 @@ export const parseObligation = (
 
     const depositedCtokenAmount = new BigNumber(
       deposit.depositedCtokenAmount.toString(),
-    ).div(10 ** reserve.mintDecimals);
-    const depositedAmount = depositedCtokenAmount.times(
-      reserve.cTokenExchangeRate,
     );
+    const depositedAmount = depositedCtokenAmount
+      .times(reserve.cTokenExchangeRate)
+      .div(10 ** reserve.mintDecimals);
     const depositedAmountUsd = depositedAmount.times(reserve.price);
 
     totalDepositedAmountUsd = totalDepositedAmountUsd.plus(depositedAmountUsd);
