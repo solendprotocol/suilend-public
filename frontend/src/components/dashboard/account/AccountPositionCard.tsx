@@ -1,6 +1,6 @@
 import { useRouter } from "next/router";
 
-import { AlertTriangle, FileClock } from "lucide-react";
+import { FileClock } from "lucide-react";
 
 import { ParsedObligation } from "@suilend/sdk/parsers/obligation";
 
@@ -16,18 +16,17 @@ import Card from "@/components/dashboard/Card";
 import UtilizationBar, {
   getWeightedBorrowsUsd,
 } from "@/components/dashboard/UtilizationBar";
-import LoopedPosition from "@/components/layout/LoopedPosition";
 import Button from "@/components/shared/Button";
 import LabelWithTooltip from "@/components/shared/LabelWithTooltip";
 import Tooltip from "@/components/shared/Tooltip";
-import { TBody, TBodySans, TLabelSans } from "@/components/shared/Typography";
+import { TBody, TLabelSans } from "@/components/shared/Typography";
 import { CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 import { formatPercent, formatUsd } from "@/lib/format";
 import { getNetAprPercent } from "@/lib/liquidityMining";
-import { LOOPING_MESSAGE, getLoopedAssetCoinTypes } from "@/lib/looping";
+import { getLoopedAssetCoinTypes } from "@/lib/looping";
 import { shallowPushQuery } from "@/lib/router";
 import {
   BORROWS_TOOLTIP,
@@ -98,40 +97,14 @@ function AccountPositionCardContent() {
 
       <div className="flex flex-row items-center justify-between gap-2">
         <LabelWithTooltip tooltip={NET_APR_TOOLTIP}>Net APR</LabelWithTooltip>
-        <Tooltip
-          contentProps={{ className: "flex-col flex gap-4" }}
-          content={
-            loopedAssetCoinTypes.length > 0 ? (
-              <>
-                <TBodySans className="text-xs">{LOOPING_MESSAGE}</TBodySans>
-                <Separator />
-                <div className="flex flex-col gap-2">
-                  {loopedAssetCoinTypes.map((coinTypes) => (
-                    <LoopedPosition
-                      key={coinTypes.join(".")}
-                      coinTypes={coinTypes}
-                    />
-                  ))}
-                </div>
-              </>
-            ) : undefined
-          }
+        <TBody
+          className={cn(
+            "w-max text-right",
+            loopedAssetCoinTypes.length > 0 && "text-warning",
+          )}
         >
-          <div className="flex w-max flex-row items-center justify-end gap-2">
-            {loopedAssetCoinTypes.length > 0 && (
-              <AlertTriangle className="h-4 w-4 text-warning" />
-            )}
-
-            <TBody
-              className={cn(
-                "w-max text-right",
-                loopedAssetCoinTypes.length > 0 && "text-warning",
-              )}
-            >
-              {formatPercent(netAprPercent)}
-            </TBody>
-          </div>
-        </Tooltip>
+          {formatPercent(netAprPercent)}
+        </TBody>
       </div>
 
       {obligation.positionCount > 0 && (

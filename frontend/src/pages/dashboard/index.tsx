@@ -1,6 +1,7 @@
 import Head from "next/head";
 
 import AccountPositionCard from "@/components/dashboard/account/AccountPositionCard";
+import LoopingCard from "@/components/dashboard/account/LoopingCard";
 import ActionsModal from "@/components/dashboard/actions-modal/ActionsModal";
 import FirstDepositDialog from "@/components/dashboard/FirstDepositDialog";
 import MarketOverview from "@/components/dashboard/MarketOverview";
@@ -16,6 +17,7 @@ import useBreakpoint from "@/hooks/useBreakpoint";
 function Cards() {
   return (
     <>
+      <LoopingCard />
       <AccountPositionCard />
       <ObligationDepositsCard />
       <ObligationBorrowsCard />

@@ -7,9 +7,9 @@ export const LOOPING_THRESHOLD = 0;
 
 const LOOPING_DEFINITION =
   "depositing and borrowing the same non-stablecoin asset, or the same/different stablecoin assets";
-export const LOOPING_MESSAGE = `You are looping (defined as ${LOOPING_DEFINITION}). Looped positions are no longer eligible for LM rewards. Please unloop and redeposit to be eligible for rewards.`;
+export const LOOPING_MESSAGE = `You are looping (defined as ${LOOPING_DEFINITION}). Looped positions are not eligible for LM rewards (Suilend Points, rewards). Please unloop and redeposit to be eligible for LM rewards.`;
 export const LOOPING_WARNING_MESSAGE = (action: string, symbol: string) =>
-  `Note that by ${action} ${symbol} you will be looping (defined as ${LOOPING_DEFINITION}) and no longer eligible for LM rewards.`;
+  `Note that by ${action} ${symbol} you will be looping (defined as ${LOOPING_DEFINITION}) and no longer eligible for LM rewards (Suilend Points, rewards).`;
 
 export const getLoopedAssetCoinTypes = (data: AppData) => {
   if (data.obligations === undefined || data.obligations.length === 0)

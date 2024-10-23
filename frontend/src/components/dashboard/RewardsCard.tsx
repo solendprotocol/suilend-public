@@ -25,6 +25,7 @@ import { isSuilendPoints } from "@/lib/coinType";
 import { TX_TOAST_DURATION } from "@/lib/constants";
 import { formatToken } from "@/lib/format";
 import { RewardSummary } from "@/lib/liquidityMining";
+import { getLoopedAssetCoinTypes } from "@/lib/looping";
 import { POINTS_URL } from "@/lib/navigation";
 import { getPointsStats } from "@/lib/points";
 import { cn } from "@/lib/utils";
@@ -120,12 +121,20 @@ interface PointsPerDayStatProps {
 }
 
 function PointsPerDayStat({ pointsPerDay, isCentered }: PointsPerDayStatProps) {
+  const appContext = useAppContext();
+  const data = appContext.data as AppData;
+
+  const loopedAssetCoinTypes = getLoopedAssetCoinTypes(data);
+
   return (
     <div className={cn("flex flex-col gap-1", isCentered && "items-center")}>
       <TLabelSans className={cn(isCentered && "text-center")}>
         Points per day
       </TLabelSans>
-      <PointsCount points={pointsPerDay} />
+      <PointsCount
+        points={pointsPerDay}
+        labelClassName={cn(loopedAssetCoinTypes.length > 0 && "text-warning")}
+      />
     </div>
   );
 }

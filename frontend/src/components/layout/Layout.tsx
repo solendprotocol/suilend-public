@@ -8,7 +8,6 @@ import AccountOverviewDialog from "@/components/dashboard/account-overview/Accou
 import AppHeader from "@/components/layout/AppHeader";
 import Footer from "@/components/layout/Footer";
 import LaunchDarklyBanner from "@/components/layout/LaunchDarklyBanner";
-import LoopingDialog from "@/components/layout/LoopingDialog";
 import Container from "@/components/shared/Container";
 import FullPageSpinner from "@/components/shared/FullPageSpinner";
 import { useAppContext } from "@/contexts/AppContext";
@@ -77,7 +76,6 @@ export default function Layout({ children }: PropsWithChildren) {
                 {children}
 
                 <AccountOverviewDialog />
-                <LoopingDialog />
               </ReserveAssetDataEventsContextProvider>
             )}
           </Container>
