@@ -18,6 +18,7 @@ import { IdentifierString, WalletAccount } from "@mysten/wallet-standard";
 import * as Sentry from "@sentry/nextjs";
 import { useWallet } from "@suiet/wallet-kit";
 import { useLDClient } from "launchdarkly-react-client-sdk";
+import { executeAuction } from "shio-sdk";
 import { toast } from "sonner";
 
 import { formatAddress } from "@/lib/format";
@@ -41,6 +42,7 @@ interface WalletContext {
   signExecuteAndWaitForTransaction: (
     suiClient: SuiClient,
     transaction: Transaction,
+    auction?: boolean,
   ) => Promise<SuiTransactionBlockResponse>;
 }
 
@@ -197,7 +199,11 @@ export function WalletContextProvider({ children }: PropsWithChildren) {
   // Tx
   // Note: Do NOT import and use this function directly. Instead, use signExecuteAndWaitForTransaction from AppContext.
   const signExecuteAndWaitForTransaction = useCallback(
-    async (suiClient: SuiClient, transaction: Transaction) => {
+    async (
+      suiClient: SuiClient,
+      transaction: Transaction,
+      auction?: boolean,
+    ) => {
       const _address = impersonatedAddress ?? account?.address;
       if (_address) {
         (async () => {
@@ -231,6 +237,16 @@ export function WalletContextProvider({ children }: PropsWithChildren) {
           account,
           chain: chain.id as IdentifierString,
         });
+
+        // Shio auction
+        if (auction) {
+          try {
+            await executeAuction(
+              signedTransaction.transactionBlockBytes,
+              signedTransaction.signature,
+            );
+          } catch (err) {}
+        }
 
         const res1 = await suiClient.executeTransactionBlock({
           transactionBlock: signedTransaction.transactionBlockBytes,

@@ -846,7 +846,7 @@ function Page() {
       throw err;
     }
 
-    const res = await signExecuteAndWaitForTransaction(transaction);
+    const res = await signExecuteAndWaitForTransaction(transaction, true);
     return res;
   };
 

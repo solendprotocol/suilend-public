@@ -58,6 +58,7 @@ export interface AppContext {
   setObligationId: Dispatch<SetStateAction<string | null>>;
   signExecuteAndWaitForTransaction: (
     transaction: Transaction,
+    auction?: boolean,
   ) => Promise<SuiTransactionBlockResponse>;
 }
 
@@ -215,8 +216,10 @@ export function AppContextProvider({ children }: PropsWithChildren) {
         data?.obligations?.[0] ??
         null,
       setObligationId,
-      signExecuteAndWaitForTransaction: (transaction: Transaction) =>
-        signExecuteAndWaitForTransaction(suiClient, transaction),
+      signExecuteAndWaitForTransaction: (
+        transaction: Transaction,
+        auction?: boolean,
+      ) => signExecuteAndWaitForTransaction(suiClient, transaction, auction),
     }),
     [
       suiClient,
