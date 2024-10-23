@@ -360,6 +360,19 @@ function Page() {
     [hopSdk, aftermathSdk],
   );
 
+  const refreshIntervalRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  useEffect(() => {
+    if (refreshIntervalRef.current) clearInterval(refreshIntervalRef.current);
+    refreshIntervalRef.current = setInterval(
+      () => fetchQuote(tokenIn, tokenOut, value),
+      30 * 1000,
+    );
+
+    return () => {
+      if (refreshIntervalRef.current) clearInterval(refreshIntervalRef.current);
+    };
+  }, [fetchQuote, tokenIn, tokenOut, value]);
+
   const quoteAmountIn = quote
     ? BigNumber(quote.amount_in.toString())
     : undefined;
@@ -393,6 +406,7 @@ function Page() {
 
   const onValueChange = (_value: string) => {
     formatAndSetValue(_value, tokenIn);
+
     if (new BigNumber(_value || 0).gt(0)) fetchQuote(tokenIn, tokenOut, _value);
     else
       setQuotesMap((o) => {
@@ -407,6 +421,7 @@ function Page() {
 
   const useMaxValueWrapper = () => {
     formatAndSetValue(tokenInMaxAmount, tokenIn);
+
     if (new BigNumber(tokenInMaxAmount).gt(0))
       fetchQuote(tokenIn, tokenOut, tokenInMaxAmount);
     else
@@ -584,7 +599,7 @@ function Page() {
   useEffect(() => {
     if (tokenInUsdPrice === undefined) return;
 
-    const _value = new BigNumber(1)
+    const _value = new BigNumber(10) // 10 USD worth of tokenIn
       .div(tokenInUsdPrice)
       .toFixed(tokenIn.decimals, BigNumber.ROUND_DOWN);
     fetchQuote(tokenIn, tokenOut, _value, PRICE_IMPACT_TIMESTAMP_S);
@@ -624,8 +639,9 @@ function Page() {
   // Reverse tokens
   const reverseTokens = () => {
     formatAndSetValue(value, tokenOut);
+    setQuotesMap({});
+
     if (new BigNumber(value || 0).gt(0)) fetchQuote(tokenOut, tokenIn, value);
-    else setQuotesMap({});
 
     reverseTokenSymbols();
 
@@ -640,13 +656,14 @@ function Page() {
     const _token = tokens.find((t) => t.coin_type === coinType);
     if (!_token) return;
 
-    setQuotesMap({});
     if (
       _token.coin_type ===
       (direction === TokenDirection.IN ? tokenOut : tokenIn).coin_type
     )
       reverseTokens();
     else {
+      setQuotesMap({});
+
       const isVerifiedToken = verifiedTokens.find(
         (t) => t.coin_type === coinType,
       );
