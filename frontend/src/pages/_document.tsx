@@ -45,7 +45,7 @@ export default function Document() {
         {/* Wormhole Connect */}
         <link
           rel="stylesheet"
-          href="https://suilend.fi/wormhole-connect@0.3.21/main.css"
+          href="https://suilend.fi/wormhole-connect@0.3.22-beta.6-development/main.css"
         />
       </Head>
       <body>

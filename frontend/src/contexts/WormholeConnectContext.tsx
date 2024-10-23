@@ -40,7 +40,7 @@ export function WormholeConnectContextProvider({
     <WormholeConnectContext.Provider value={contextValue}>
       <Script
         type="module"
-        src="https://suilend.fi/wormhole-connect@0.3.21/main.js"
+        src="https://suilend.fi/wormhole-connect@0.3.22-beta.6-development/main.js"
         onLoad={() => setIsLoading(false)}
       />
       {children}
