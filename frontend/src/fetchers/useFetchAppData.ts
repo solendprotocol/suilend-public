@@ -3,7 +3,6 @@ import { useRef } from "react";
 import { CoinBalance, SuiClient } from "@mysten/sui/client";
 import { normalizeStructTag } from "@mysten/sui/utils";
 import { SuiPriceServiceConnection } from "@pythnetwork/pyth-sui-js";
-import * as Sentry from "@sentry/nextjs";
 import BigNumber from "bignumber.js";
 import { toast } from "sonner";
 import useSWR from "swr";
@@ -236,7 +235,6 @@ export default function useFetchAppData(
             description: (err as Error)?.message || "An unknown error occured",
           },
         );
-        Sentry.captureException(err);
         console.error(err);
       },
     },

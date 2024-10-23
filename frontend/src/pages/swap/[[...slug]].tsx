@@ -813,13 +813,16 @@ function Page() {
 
     const isDepositing = !!(deposit && hasTokenOutReserve);
 
+    let transaction: Transaction;
     try {
-      const { transaction, outputCoin } = await getTransactionForUnifiedQuote(
-        quote,
-        +slippagePercent,
-        address,
-        isDepositing,
-      );
+      const { transaction: transaction2, outputCoin } =
+        await getTransactionForUnifiedQuote(
+          quote,
+          +slippagePercent,
+          address,
+          isDepositing,
+        );
+      transaction = transaction2;
       transaction.setGasBudget(SUI_GAS_MIN * 10 ** SUI_DECIMALS);
 
       if (isDepositing) {
@@ -837,14 +840,14 @@ function Page() {
           obligationOwnerCap?.id,
         );
       }
-
-      const res = await signExecuteAndWaitForTransaction(transaction);
-      return res;
     } catch (err) {
       Sentry.captureException(err);
       console.error(err);
       throw err;
     }
+
+    const res = await signExecuteAndWaitForTransaction(transaction);
+    return res;
   };
 
   const onSwapClick = async (deposit?: boolean) => {

@@ -1,7 +1,5 @@
 import { MouseEvent, useEffect, useState } from "react";
 
-import * as Sentry from "@sentry/nextjs";
-
 import styles from "@/components/bridge/WormholeConnect.module.scss";
 import Container from "@/components/shared/Container";
 import { useAppContext } from "@/contexts/AppContext";
@@ -15,10 +13,6 @@ interface WormholeConnectProps {
 
 export default function WormholeConnect({ isHidden }: WormholeConnectProps) {
   const { rpc } = useAppContext();
-  // const { rpc, ...restAppContext } = useAppContext();
-  // const data = restAppContext.data as AppData;
-
-  // const wormholeToReserveSymbolMap = { WETH: "ETH", WSOL: "SOL" };
 
   // Analytics
   const [didSubmit, setDidSubmit] = useState<boolean>(false);
@@ -53,50 +47,14 @@ export default function WormholeConnect({ isHidden }: WormholeConnectProps) {
           const fromAmount = fromAmountAsset?.split(" ")?.[0] ?? undefined;
           const fromAssetSymbol = fromAmountAsset?.split(" ")?.[1] ?? undefined;
 
-          // const fromReserveSymbol =
-          //   fromAssetSymbol !== undefined
-          //     ? wormholeToReserveSymbolMap[
-          //         fromAssetSymbol as keyof typeof wormholeToReserveSymbolMap
-          //       ]
-          //     : undefined;
-          // const fromReserve = data.lendingMarket.reserves.find(
-          //   (r) => r.symbol === fromReserveSymbol,
-          // );
-          // const fromAmountUsd =
-          //   fromAmount !== undefined && fromReserve !== undefined
-          //     ? formatToken(
-          //         new BigNumber(fromAmount).times(fromReserve.price),
-          //         {
-          //           dp: 2,
-          //           useGrouping: false,
-          //         },
-          //       )
-          //     : undefined;
-
-          // const toAmountAsset = amountAssetElems[1]?.textContent ?? undefined;
-          // const toAmount = toAmountAsset?.split(" ")?.[0] ?? undefined;
-          // const toAssetSymbol = toAmountAsset?.split(" ")?.[1] ?? undefined;
-
-          const properties: Record<string, string | undefined> = {
+          setDidSubmit(false);
+          setDidClaim(false);
+          track("bridge_complete", {
             fromNetwork,
             toNetwork,
             amount: fromAmount,
-            // amountUsd: fromAmountUsd,
             asset: fromAssetSymbol,
-          };
-          if (Object.values(properties).includes(undefined)) {
-            const undefinedKeys = Object.keys(properties).filter(
-              (key) => properties[key] === undefined,
-            );
-
-            Sentry.captureException(
-              `Unable to retrieve the following properties from the DOM for the bridge_complete event: ${undefinedKeys.join(", ")}`,
-            );
-          }
-
-          track("bridge_complete", properties as Record<string, string>);
-          setDidSubmit(false);
-          setDidClaim(false);
+          } as Record<string, string>);
         }
       }
     }, 1000);
