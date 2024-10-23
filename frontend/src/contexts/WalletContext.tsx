@@ -269,7 +269,13 @@ export function WalletContextProvider({ children }: PropsWithChildren) {
 
         return res2;
       } catch (err) {
-        Sentry.captureException(err);
+        if (
+          !["User canceled", "Rejected from user"].includes(
+            (err as Error).message || "",
+          )
+        )
+          Sentry.captureException(err);
+
         console.error(err);
         throw err;
       }

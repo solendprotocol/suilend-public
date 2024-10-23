@@ -23,7 +23,6 @@ import {
 } from "lucide-react";
 import { ReactFlowProvider } from "reactflow";
 import { toast } from "sonner";
-import useSWR from "swr";
 import { useLocalStorage } from "usehooks-ts";
 import { v4 as uuidv4 } from "uuid";
 
@@ -64,6 +63,8 @@ import { getFilteredRewards, getTotalAprPercent } from "@/lib/liquidityMining";
 import track from "@/lib/track";
 import { getBalanceChange } from "@/lib/transactions";
 import { cn } from "@/lib/utils";
+
+const PRICE_IMPACT_TIMESTAMP_S = -1;
 
 type SubmitButtonState = {
   isLoading?: boolean;
@@ -188,51 +189,50 @@ function Page() {
   const [value, setValue] = useState<string>("");
 
   // Quote
-  const [quoteMap, setQuoteMap] = useState<
-    Record<number, UnifiedQuote | undefined>
+  const [quotesMap, setQuotesMap] = useState<
+    Record<number, UnifiedQuote[] | undefined>
   >({});
-  const quote = (() => {
-    const timestamps = Object.entries(quoteMap)
-      .filter(
-        ([timestamp, quote]) =>
-          quote !== undefined &&
-          quote.coin_type_in === tokenIn.coin_type &&
-          quote.coin_type_out === tokenOut.coin_type,
-      )
-      .map(([timestamp]) => +timestamp);
 
-    return timestamps.length === 0
-      ? undefined
-      : quoteMap[Math.max(...timestamps)];
+  const quotes = (() => {
+    const timestampsS = Object.entries(quotesMap)
+      .filter(([, quotes]) => quotes !== undefined)
+      .map(([timestampS]) => +timestampS)
+      .filter((timestampS) => timestampS !== PRICE_IMPACT_TIMESTAMP_S);
+    if (timestampsS.length === 0) return undefined;
+
+    const maxTimestampS = Math.max(...timestampsS);
+    const quotes = quotesMap[maxTimestampS];
+    if (quotes === undefined) return undefined;
+
+    const sortedQuotes = quotes
+      .slice()
+      .sort((a, b) => +b.amount_out.minus(a.amount_out));
+    return sortedQuotes;
   })();
-  const quoteAmountIn = quote
-    ? BigNumber(quote.amount_in.toString())
-    : undefined;
-  const quoteAmountOut = quote
-    ? BigNumber(quote.amount_out.toString())
-    : undefined;
+  const quote = quotes?.[0];
 
   const isFetchingQuote = (() => {
-    const timestamps = Object.keys(quoteMap)
-      .map((timestamp) => +timestamp)
-      .filter((timestampS) => timestampS !== -1);
+    const timestampsS = Object.keys(quotesMap)
+      .map((timestampS) => +timestampS)
+      .filter((timestampS) => timestampS !== PRICE_IMPACT_TIMESTAMP_S);
+    if (timestampsS.length === 0) return false;
 
-    return timestamps.length === 0
-      ? false
-      : quoteMap[Math.max(...timestamps)] === undefined;
+    const maxTimestampS = Math.max(...timestampsS);
+    const quotes = quotesMap[maxTimestampS];
+    return quotes === undefined;
   })();
 
   const fetchQuote = useCallback(
     async (
-      _tokenIn = tokenIn,
-      _tokenOut = tokenOut,
-      _value = value,
+      _tokenIn: VerifiedToken,
+      _tokenOut: VerifiedToken,
+      _value: string,
       _timestamp = new Date().getTime(),
     ) => {
       if (_tokenIn.coin_type === _tokenOut.coin_type) return;
       if (new BigNumber(_value || 0).lte(0)) return;
 
-      setQuoteMap((o) => ({ ...o, [_timestamp]: undefined }));
+      setQuotesMap((o) => ({ ...o, [_timestamp]: undefined }));
 
       try {
         const params = {
@@ -246,129 +246,102 @@ function Page() {
           ),
         };
 
-        // Use best quote
-        const results = await Promise.allSettled<
-          | undefined
-          | { type: UnifiedQuoteType.HOP; quote: HopGetQuoteResponse }
-          | {
-              type: UnifiedQuoteType.AFTERMATH;
-              quote: AftermathRouterCompleteTradeRoute;
+        // Fetch quotes in parallel
+        // Hop
+        (async () => {
+          console.log("Swap - fetching Hop quote");
+
+          try {
+            const quote = await hopSdk.fetchQuote(params);
+
+            quote.trade.amount_in.token = normalizeStructTag(
+              quote.trade.amount_in.token,
+            );
+            quote.trade.amount_out.token = normalizeStructTag(
+              quote.trade.amount_out.token,
+            );
+            for (const node of Object.values(quote.trade.nodes)) {
+              node.amount_in.token = normalizeStructTag(node.amount_in.token);
+              node.amount_out.token = normalizeStructTag(node.amount_out.token);
             }
-        >([
-          new Promise(async (resolve, reject) => {
-            try {
-              const quote = await hopSdk.fetchQuote(params);
-              resolve({ type: UnifiedQuoteType.HOP, quote });
-            } catch (err) {
-              reject(err);
+
+            const standardizedQuote = {
+              id: uuidv4(),
+              amount_in: new BigNumber(
+                quote.trade.amount_in.amount.toString(),
+              ).div(10 ** _tokenIn.decimals),
+              amount_out: new BigNumber(
+                quote.trade.amount_out.amount.toString(),
+              ).div(10 ** _tokenOut.decimals),
+              coin_type_in: quote.trade.amount_in.token,
+              coin_type_out: quote.trade.amount_out.token,
+              type: UnifiedQuoteType.HOP,
+              quote,
+            } as UnifiedQuote;
+
+            setQuotesMap((o) => ({
+              ...o,
+              [_timestamp]: [...(o[_timestamp] ?? []), standardizedQuote],
+            }));
+            console.log("Swap - set Hop quote", +standardizedQuote.amount_out);
+          } catch (err) {
+            console.error(err);
+          }
+        })();
+
+        // Aftermath
+        (async () => {
+          console.log("Swap - fetching Aftermath quote");
+
+          try {
+            const quote = await aftermathSdk.getCompleteTradeRouteGivenAmountIn(
+              {
+                coinInType: params.token_in,
+                coinOutType: params.token_out,
+                coinInAmount: params.amount_in,
+              },
+            );
+
+            quote.coinIn.type = normalizeStructTag(quote.coinIn.type);
+            quote.coinOut.type = normalizeStructTag(quote.coinOut.type);
+            for (const route of quote.routes) {
+              route.coinIn.type = normalizeStructTag(route.coinIn.type);
+              route.coinOut.type = normalizeStructTag(route.coinOut.type);
+
+              for (const path of route.paths) {
+                path.coinIn.type = normalizeStructTag(path.coinIn.type);
+                path.coinOut.type = normalizeStructTag(path.coinOut.type);
+                path.pool.assets[0] = normalizeStructTag(path.pool.assets[0]);
+                path.pool.assets[1] = normalizeStructTag(path.pool.assets[1]);
+              }
             }
-          }),
-          new Promise(async (resolve, reject) => {
-            try {
-              const quote =
-                await aftermathSdk.getCompleteTradeRouteGivenAmountIn({
-                  coinInType: params.token_in,
-                  coinOutType: params.token_out,
-                  coinInAmount: params.amount_in,
-                });
-              resolve({ type: UnifiedQuoteType.AFTERMATH, quote });
-            } catch (err) {
-              reject(err);
-            }
-          }),
-        ]);
-        console.log("results:", results);
 
-        const rawQuotes = results
-          .filter((result) => result.status === "fulfilled")
-          .filter((result) => result.value !== undefined)
-          .map((result) => result.value);
-        if (rawQuotes.length === 0) throw new Error("No route found");
+            const standardizedQuote = {
+              id: uuidv4(),
+              amount_in: new BigNumber(quote.coinIn.amount.toString()).div(
+                10 ** _tokenIn.decimals,
+              ),
+              amount_out: new BigNumber(quote.coinOut.amount.toString()).div(
+                10 ** _tokenOut.decimals,
+              ),
+              coin_type_in: quote.coinIn.type,
+              coin_type_out: quote.coinOut.type,
+              type: UnifiedQuoteType.AFTERMATH,
+              quote,
+            } as UnifiedQuote;
 
-        const unifiedQuotes = (
-          rawQuotes as (
-            | { type: UnifiedQuoteType.HOP; quote: HopGetQuoteResponse }
-            | {
-                type: UnifiedQuoteType.AFTERMATH;
-                quote: AftermathRouterCompleteTradeRoute;
-              }
-          )[]
-        )
-          .map(({ type, quote }) => {
-            if (type === UnifiedQuoteType.HOP) {
-              const hopQuote = quote as HopGetQuoteResponse;
-
-              hopQuote.trade.amount_in.token = normalizeStructTag(
-                hopQuote.trade.amount_in.token,
-              );
-              hopQuote.trade.amount_out.token = normalizeStructTag(
-                hopQuote.trade.amount_out.token,
-              );
-              for (const node of Object.values(hopQuote.trade.nodes)) {
-                node.amount_in.token = normalizeStructTag(node.amount_in.token);
-                node.amount_out.token = normalizeStructTag(
-                  node.amount_out.token,
-                );
-              }
-
-              return {
-                id: uuidv4(),
-                amount_in: new BigNumber(
-                  hopQuote.trade.amount_in.amount.toString(),
-                ).div(10 ** _tokenIn.decimals),
-                amount_out: new BigNumber(
-                  hopQuote.trade.amount_out.amount.toString(),
-                ).div(10 ** _tokenOut.decimals),
-                coin_type_in: hopQuote.trade.amount_in.token,
-                coin_type_out: hopQuote.trade.amount_out.token,
-                type: UnifiedQuoteType.HOP,
-                quote: hopQuote,
-              };
-            } else if (type === UnifiedQuoteType.AFTERMATH) {
-              const aftermathQuote = quote as AftermathRouterCompleteTradeRoute;
-
-              aftermathQuote.coinIn.type = normalizeStructTag(
-                aftermathQuote.coinIn.type,
-              );
-              aftermathQuote.coinOut.type = normalizeStructTag(
-                aftermathQuote.coinOut.type,
-              );
-              for (const route of aftermathQuote.routes) {
-                route.coinIn.type = normalizeStructTag(route.coinIn.type);
-                route.coinOut.type = normalizeStructTag(route.coinOut.type);
-
-                for (const path of route.paths) {
-                  path.coinIn.type = normalizeStructTag(path.coinIn.type);
-                  path.coinOut.type = normalizeStructTag(path.coinOut.type);
-                  path.pool.assets[0] = normalizeStructTag(path.pool.assets[0]);
-                  path.pool.assets[1] = normalizeStructTag(path.pool.assets[1]);
-                }
-              }
-
-              return {
-                id: uuidv4(),
-                amount_in: new BigNumber(
-                  aftermathQuote.coinIn.amount.toString(),
-                ).div(10 ** _tokenIn.decimals),
-                amount_out: new BigNumber(
-                  aftermathQuote.coinOut.amount.toString(),
-                ).div(10 ** _tokenOut.decimals),
-                coin_type_in: aftermathQuote.coinIn.type,
-                coin_type_out: aftermathQuote.coinOut.type,
-                type: UnifiedQuoteType.AFTERMATH,
-                quote: aftermathQuote,
-              };
-            } else return undefined;
-          })
-          .filter(Boolean) as UnifiedQuote[];
-
-        const sortedUnifiedQuotes = unifiedQuotes
-          .slice()
-          .sort((a, b) => +b.amount_out.minus(a.amount_out));
-        const unifiedQuote = sortedUnifiedQuotes[0];
-
-        setQuoteMap((o) => ({ ...o, [_timestamp]: unifiedQuote }));
-        return unifiedQuote;
+            setQuotesMap((o) => ({
+              ...o,
+              [_timestamp]: [...(o[_timestamp] ?? []), standardizedQuote],
+            }));
+            console.log(
+              "Swap - set Aftermath quote",
+              +standardizedQuote.amount_out,
+            );
+          } catch (err) {
+            console.error(err);
+          }
+        })();
       } catch (err) {
         toast.error("Failed to get quote", {
           description:
@@ -378,26 +351,21 @@ function Page() {
         });
         console.error(err);
 
-        setQuoteMap((o) => {
+        setQuotesMap((o) => {
           delete o[_timestamp];
           return o;
         });
       }
     },
-    [tokenIn, tokenOut, value, hopSdk, aftermathSdk],
+    [hopSdk, aftermathSdk],
   );
 
-  const fetchQuoteWrapper = useCallback(() => fetchQuote(), [fetchQuote]);
-
-  useSWR<UnifiedQuote | undefined>("quote", fetchQuoteWrapper, {
-    refreshInterval: 30 * 1000,
-    onSuccess: (data) => {
-      console.log("Fetched quote", data);
-    },
-    onError: (err) => {
-      console.error(err);
-    },
-  });
+  const quoteAmountIn = quote
+    ? BigNumber(quote.amount_in.toString())
+    : undefined;
+  const quoteAmountOut = quote
+    ? BigNumber(quote.amount_out.toString())
+    : undefined;
 
   // Value
   const formatAndSetValue = useCallback(
@@ -426,14 +394,30 @@ function Page() {
   const onValueChange = (_value: string) => {
     formatAndSetValue(_value, tokenIn);
     if (new BigNumber(_value || 0).gt(0)) fetchQuote(tokenIn, tokenOut, _value);
-    else setQuoteMap({});
+    else
+      setQuotesMap((o) => {
+        const timestampsS = Object.keys(o)
+          .map((timestampS) => +timestampS)
+          .filter((timestampS) => timestampS !== PRICE_IMPACT_TIMESTAMP_S);
+        for (const timestampS of timestampsS) delete o[timestampS];
+
+        return o;
+      });
   };
 
   const useMaxValueWrapper = () => {
     formatAndSetValue(tokenInMaxAmount, tokenIn);
     if (new BigNumber(tokenInMaxAmount).gt(0))
       fetchQuote(tokenIn, tokenOut, tokenInMaxAmount);
-    else setQuoteMap({});
+    else
+      setQuotesMap((o) => {
+        const timestampsS = Object.keys(o)
+          .map((timestampS) => +timestampS)
+          .filter((timestampS) => timestampS !== PRICE_IMPACT_TIMESTAMP_S);
+        for (const timestampS of timestampsS) delete o[timestampS];
+
+        return o;
+      });
 
     inputRef.current?.focus();
   };
@@ -587,16 +571,25 @@ function Page() {
       : undefined;
 
   // Price impact
+  const priceImpactQuote = (() => {
+    const quotes = quotesMap[PRICE_IMPACT_TIMESTAMP_S];
+    if (quotes === undefined) return undefined;
+
+    const sortedQuotes = quotes
+      .slice()
+      .sort((a, b) => +b.amount_out.minus(a.amount_out));
+    return sortedQuotes[0];
+  })();
+
   useEffect(() => {
     if (tokenInUsdPrice === undefined) return;
 
     const _value = new BigNumber(1)
       .div(tokenInUsdPrice)
       .toFixed(tokenIn.decimals, BigNumber.ROUND_DOWN);
-    fetchQuote(tokenIn, tokenOut, _value, -1);
+    fetchQuote(tokenIn, tokenOut, _value, PRICE_IMPACT_TIMESTAMP_S);
   }, [tokenInUsdPrice, tokenIn, fetchQuote, tokenOut]);
 
-  const priceImpactQuote = quoteMap[-1];
   const priceImpactQuoteAmountIn = priceImpactQuote
     ? BigNumber(priceImpactQuote.amount_in.toString())
     : undefined;
@@ -632,7 +625,7 @@ function Page() {
   const reverseTokens = () => {
     formatAndSetValue(value, tokenOut);
     if (new BigNumber(value || 0).gt(0)) fetchQuote(tokenOut, tokenIn, value);
-    else setQuoteMap({});
+    else setQuotesMap({});
 
     reverseTokenSymbols();
 
@@ -647,7 +640,7 @@ function Page() {
     const _token = tokens.find((t) => t.coin_type === coinType);
     if (!_token) return;
 
-    setQuoteMap({});
+    setQuotesMap({});
     if (
       _token.coin_type ===
       (direction === TokenDirection.IN ? tokenOut : tokenIn).coin_type
@@ -750,64 +743,80 @@ function Page() {
     };
   })();
 
-  const getTransactionForUnifiedQuote = async (
-    quote: UnifiedQuote,
-    slippagePercent: number,
+  const getTransactionForUnifiedQuotes = async (
     address: string,
+    quotes: UnifiedQuote[],
     isDepositing: boolean,
   ): Promise<{
     transaction: Transaction;
     outputCoin: TransactionResult | undefined;
   }> => {
-    if (quote.type === UnifiedQuoteType.HOP) {
-      const res = await hopSdk.fetchTx({
-        trade: (quote.quote as HopGetQuoteResponse).trade,
-        sui_address: address,
-        gas_budget: 0.25 * 10 ** SUI_DECIMALS, // Set to 0.25 SUI
-        max_slippage_bps: slippagePercent * 100,
-        return_output_coin_argument: isDepositing,
-      });
+    for (const _quote of quotes) {
+      if (_quote.type === UnifiedQuoteType.HOP) {
+        console.log("Swap - fetching transaction for Hop quote");
 
-      return {
-        transaction: res.transaction,
-        outputCoin: res.output_coin,
-      };
-    } else if (quote.type === UnifiedQuoteType.AFTERMATH) {
-      try {
-        if (isDepositing) {
-          const res = await aftermathSdk.addTransactionForCompleteTradeRouteV0({
-            tx: new Transaction() as any,
-            walletAddress: address,
-            completeRoute: quote.quote as AftermathRouterCompleteTradeRoute,
-            slippage: slippagePercent / 100,
+        try {
+          const res = await hopSdk.fetchTx({
+            trade: (_quote.quote as HopGetQuoteResponse).trade,
+            sui_address: address,
+            gas_budget: 0.25 * 10 ** SUI_DECIMALS, // Set to 0.25 SUI
+            max_slippage_bps: +slippagePercent * 100,
+            return_output_coin_argument: isDepositing,
           });
 
           return {
-            transaction: res.tx as unknown as Transaction,
-            outputCoin: res.coinOutId as TransactionResult | undefined,
+            transaction: res.transaction,
+            outputCoin: res.output_coin,
           };
-        } else {
-          const transaction =
-            await aftermathSdk.getTransactionForCompleteTradeRouteV0({
-              walletAddress: address,
-              completeRoute: quote.quote as AftermathRouterCompleteTradeRoute,
-              slippage: slippagePercent / 100,
-            });
-
-          return {
-            transaction: transaction as unknown as Transaction,
-            outputCoin: undefined,
-          };
+        } catch (err) {
+          console.error(err);
+          continue;
         }
-      } catch (err) {
-        throw new Error("Unable to get transaction for quote");
-      }
-    } else throw new Error("Unknown quote type");
+      } else if (_quote.type === UnifiedQuoteType.AFTERMATH) {
+        console.log("Swap - fetching transaction for Aftermath quote");
+
+        try {
+          if (isDepositing) {
+            const res =
+              await aftermathSdk.addTransactionForCompleteTradeRouteV0({
+                tx: new Transaction() as any,
+                walletAddress: address,
+                completeRoute:
+                  _quote.quote as AftermathRouterCompleteTradeRoute,
+                slippage: +slippagePercent / 100,
+              });
+
+            return {
+              transaction: res.tx as unknown as Transaction,
+              outputCoin: res.coinOutId as TransactionResult | undefined,
+            };
+          } else {
+            const transaction =
+              await aftermathSdk.getTransactionForCompleteTradeRouteV0({
+                walletAddress: address,
+                completeRoute:
+                  _quote.quote as AftermathRouterCompleteTradeRoute,
+                slippage: +slippagePercent / 100,
+              });
+
+            return {
+              transaction: transaction as unknown as Transaction,
+              outputCoin: undefined,
+            };
+          }
+        } catch (err) {
+          console.error(err);
+          continue;
+        }
+      } else throw new Error("Unknown quote type");
+    }
+
+    throw new Error("Unable to get transaction for quote");
   };
 
   const swap = async (deposit?: boolean) => {
     if (!address) throw new Error("Wallet not connected");
-    if (!quote) throw new Error("Quote not found");
+    if (!quotes) throw new Error("Quote not found");
     if (deposit && !hasTokenOutReserve)
       throw new Error("Cannot deposit this token");
 
@@ -816,12 +825,7 @@ function Page() {
     let transaction: Transaction;
     try {
       const { transaction: transaction2, outputCoin } =
-        await getTransactionForUnifiedQuote(
-          quote,
-          +slippagePercent,
-          address,
-          isDepositing,
-        );
+        await getTransactionForUnifiedQuotes(address, quotes, isDepositing);
       transaction = transaction2;
       transaction.setGasBudget(SUI_GAS_MIN * 10 ** SUI_DECIMALS);
 
@@ -959,7 +963,7 @@ function Page() {
               tooltip="Refresh"
               icon={<RotateCw className="h-3 w-3" />}
               variant="ghost"
-              onClick={fetchQuoteWrapper}
+              onClick={() => fetchQuote(tokenIn, tokenOut, value)}
             >
               Refresh
             </Button>
