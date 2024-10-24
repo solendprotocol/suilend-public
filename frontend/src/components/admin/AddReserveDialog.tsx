@@ -20,10 +20,12 @@ import Button from "@/components/shared/Button";
 import Grid from "@/components/shared/Grid";
 import Input from "@/components/shared/Input";
 import { AppData, useAppContext } from "@/contexts/AppContext";
+import { useWalletContext } from "@/contexts/WalletContext";
 import { parseCoinBalances } from "@/lib/coinBalance";
 import { getCoinMetadataMap } from "@/lib/coinMetadata";
 
 export default function AddReserveDialog() {
+  const { address } = useWalletContext();
   const {
     suiClient,
     refreshData,
@@ -126,6 +128,7 @@ export default function AddReserveDialog() {
 
   // Save
   const submit = async () => {
+    if (!address) throw new Error("Wallet not connected");
     if (!data.lendingMarketOwnerCapId)
       throw new Error("Error: No lending market owner cap");
 

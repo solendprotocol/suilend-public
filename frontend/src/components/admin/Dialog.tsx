@@ -68,7 +68,7 @@ export default function Dialog({
           <>
             <DialogHeader>
               {title && (
-                <DialogTitle className="flex flex-row flex-wrap gap-2 text-left font-mono text-sm font-normal tracking-normal">
+                <DialogTitle className="flex flex-row flex-wrap gap-2 text-left font-mono text-sm font-normal uppercase tracking-normal">
                   {titleIcon &&
                     cloneElement(titleIcon, {
                       className:
