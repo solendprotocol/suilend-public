@@ -9,7 +9,8 @@ export const LOOPING_THRESHOLD = 0;
 
 const LOOPING_DEFINITION =
   "depositing and borrowing the same non-stablecoin asset, or the same/different stablecoin assets";
-const LM_REWARDS_DEFINITION = "LM rewards (Suilend Points and rewards)";
+const LM_REWARDS_DEFINITION =
+  "liquidity mining rewards (Suilend Points and rewards)";
 
 export const IS_LOOPING_MESSAGE = `You are looping (defined as ${LOOPING_DEFINITION}). Wallets with looped positions are not eligible for ${LM_REWARDS_DEFINITION}.`;
 export const WAS_LOOPING_MESSAGE = (
