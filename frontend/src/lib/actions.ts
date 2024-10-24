@@ -225,37 +225,24 @@ export const getMaxValue =
     );
   };
 
-const getDepositedAmountAcrossObligations = (
+const getObligationDepositedAmount = (
   coinType: string,
-  obligations?: ParsedObligation[],
+  obligation: ParsedObligation | null,
 ) =>
-  (obligations ?? []).reduce(
-    (acc, obligation) =>
-      acc.plus(
-        obligation.deposits.find((d) => d.coinType === coinType)
-          ?.depositedAmount ?? new BigNumber(0),
-      ),
-    new BigNumber(0),
-  );
-const getBorrowedAmountAcrossObligations = (
+  obligation?.deposits.find((d) => d.coinType === coinType)?.depositedAmount ??
+  new BigNumber(0);
+const getObligationBorrowedAmount = (
   coinType: string,
-  obligations?: ParsedObligation[],
+  obligation: ParsedObligation | null,
 ) =>
-  (obligations ?? []).reduce(
-    (acc, obligation) =>
-      acc.plus(
-        obligation.borrows.find((b) => b.coinType === coinType)
-          ?.borrowedAmount ?? new BigNumber(0),
-      ),
-    new BigNumber(0),
-  );
+  obligation?.borrows.find((b) => b.coinType === coinType)?.borrowedAmount ??
+  new BigNumber(0);
 
 export const getSubmitButtonNoValueState =
   (
     action: Action,
     reserves: ParsedReserve[],
     reserve: ParsedReserve,
-    obligations: ParsedObligation[] | undefined,
     obligation: ParsedObligation | null,
   ) =>
   (): SubmitButtonState | undefined => {
@@ -275,7 +262,7 @@ export const getSubmitButtonNoValueState =
           title: "Reserve USD deposit limit reached",
         };
       if (
-        getBorrowedAmountAcrossObligations(reserve.coinType, obligations).gt(
+        getObligationBorrowedAmount(reserve.coinType, obligation).gt(
           LOOPING_THRESHOLD,
         )
       )
@@ -307,7 +294,7 @@ export const getSubmitButtonNoValueState =
           title: "Reserve USD borrow limit reached",
         };
       if (
-        getDepositedAmountAcrossObligations(reserve.coinType, obligations).gt(
+        getObligationDepositedAmount(reserve.coinType, obligation).gt(
           LOOPING_THRESHOLD,
         )
       )
@@ -380,7 +367,6 @@ export const getSubmitWarningMessages =
     action: Action,
     reserves: ParsedReserve[],
     reserve: ParsedReserve,
-    obligations: ParsedObligation[] | undefined,
     obligation: ParsedObligation | null,
   ) =>
   () => {
@@ -392,10 +378,9 @@ export const getSubmitWarningMessages =
           if (stablecoinCoinType === reserve.coinType) continue;
 
           if (
-            getBorrowedAmountAcrossObligations(
-              stablecoinCoinType,
-              obligations,
-            ).gt(LOOPING_THRESHOLD)
+            getObligationBorrowedAmount(stablecoinCoinType, obligation).gt(
+              LOOPING_THRESHOLD,
+            )
           ) {
             result.push(LOOPING_WARNING_MESSAGE("depositing", reserve.symbol));
             break;
@@ -408,10 +393,9 @@ export const getSubmitWarningMessages =
           if (stablecoinCoinType === reserve.coinType) continue;
 
           if (
-            getDepositedAmountAcrossObligations(
-              stablecoinCoinType,
-              obligations,
-            ).gt(LOOPING_THRESHOLD)
+            getObligationDepositedAmount(stablecoinCoinType, obligation).gt(
+              LOOPING_THRESHOLD,
+            )
           ) {
             result.push(LOOPING_WARNING_MESSAGE("borrowing", reserve.symbol));
             break;

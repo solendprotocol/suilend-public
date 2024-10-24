@@ -40,7 +40,7 @@ function AccountPositionCardContent() {
   const data = appContext.data as AppData;
   const obligation = appContext.obligation as ParsedObligation;
 
-  const loopedAssetCoinTypes = getLoopedAssetCoinTypes(data);
+  const loopedAssetCoinTypes = getLoopedAssetCoinTypes(data, obligation);
 
   // APR
   const netAprPercent = getNetAprPercent(obligation, data.rewardMap);

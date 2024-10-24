@@ -121,10 +121,10 @@ interface PointsPerDayStatProps {
 }
 
 function PointsPerDayStat({ pointsPerDay, isCentered }: PointsPerDayStatProps) {
-  const appContext = useAppContext();
-  const data = appContext.data as AppData;
+  const { obligation, ...restAppContext } = useAppContext();
+  const data = restAppContext.data as AppData;
 
-  const loopedAssetCoinTypes = getLoopedAssetCoinTypes(data);
+  const loopedAssetCoinTypes = getLoopedAssetCoinTypes(data, obligation);
 
   return (
     <div className={cn("flex flex-col gap-1", isCentered && "items-center")}>
