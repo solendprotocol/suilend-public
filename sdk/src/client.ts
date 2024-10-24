@@ -28,6 +28,7 @@ import {
   depositLiquidityAndMintCtokens,
   liquidate,
   migrate,
+  newObligationOwnerCap,
   redeemCtokensAndWithdrawLiquidity,
   refreshReservePrice,
   repay,
@@ -499,6 +500,18 @@ export class SuilendClient {
         config: transaction.object(config),
       },
     );
+  }
+
+  async newObligationOwnerCap(
+    transaction: Transaction,
+    lendingMarketOwnerCapId: string,
+    obligationId: string,
+  ) {
+    return newObligationOwnerCap(transaction, this.lendingMarket.$typeArgs[0], {
+      lendingMarketOwnerCap: transaction.object(lendingMarketOwnerCapId),
+      lendingMarket: transaction.object(this.lendingMarket.id),
+      obligationId,
+    });
   }
 
   async updateRateLimiterConfig(
