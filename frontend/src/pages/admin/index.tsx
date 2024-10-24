@@ -15,6 +15,7 @@ import ObligationsDialog from "@/components/admin/ObligationsDialog";
 import RateLimiterConfigDialog from "@/components/admin/RateLimiterConfigDialog";
 import RateLimiterPropertiesDialog from "@/components/admin/RateLimiterPropertiesDialog";
 import RedeemCTokensDialog from "@/components/admin/RedeemCTokensDialog";
+import RemintObligationOwnerCapDialog from "@/components/admin/RemintObligationOwnerCapDialog";
 import ReserveConfigDialog from "@/components/admin/ReserveConfigDialog";
 import ReservePropertiesDialog from "@/components/admin/ReservePropertiesDialog";
 import ReserveRewardsDialog from "@/components/admin/ReserveRewardsDialog";
@@ -30,7 +31,6 @@ import {
 } from "@/components/ui/card";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { shallowPushQuery } from "@/lib/router";
-import { cn } from "@/lib/utils";
 
 enum QueryParams {
   TAB = "tab",
@@ -58,9 +58,10 @@ export default function Admin() {
     RESERVES = "reserves",
     RATE_LIMITER = "rateLimiter",
     LENDING_MARKET = "lendingMarket",
+    OBLIGATION = "obligation",
+    CTOKENS = "ctokens",
     LIQUIDATE = "liquidate",
     OBLIGATIONS = "obligations",
-    CTOKENS = "ctokens",
   }
 
   const tabs = [
@@ -70,9 +71,12 @@ export default function Admin() {
       { id: Tab.LENDING_MARKET, title: "Lending market" },
     ],
     [
+      { id: Tab.OBLIGATION, title: "Obligation" },
+      { id: Tab.CTOKENS, title: "CTokens" },
+    ],
+    [
       { id: Tab.LIQUIDATE, title: "Liquidate" },
       { id: Tab.OBLIGATIONS, title: "Obligations" },
-      { id: Tab.CTOKENS, title: "CTokens" },
     ],
   ];
 
@@ -115,18 +119,14 @@ export default function Admin() {
 
       <div className="flex w-full flex-col items-center">
         <div className="flex w-full max-w-[800px] flex-col">
-          <div className="mb-4 flex flex-col">
+          <div className="mb-4 flex flex-col gap-px">
             {tabs.map((tabsRow, index) => (
               <Tabs
                 key={index}
                 tabs={tabsRow}
                 selectedTab={selectedTab}
                 onTabChange={(tab) => onSelectedTabChange(tab as Tab)}
-                listClassName={cn(
-                  "mb-0",
-                  index !== 0 && "rounded-t-none",
-                  index !== tabs.length - 1 && "border-b-0 rounded-b-none",
-                )}
+                listClassName="mb-0"
               />
             ))}
           </div>
@@ -165,7 +165,6 @@ export default function Admin() {
               </div>
             </div>
           )}
-
           {selectedTab === Tab.RATE_LIMITER && (
             <Card>
               <CardHeader>
@@ -177,7 +176,6 @@ export default function Admin() {
               </CardContent>
             </Card>
           )}
-
           {selectedTab === Tab.LENDING_MARKET && (
             <Card>
               <CardHeader>
@@ -197,6 +195,27 @@ export default function Admin() {
             </Card>
           )}
 
+          {selectedTab === Tab.OBLIGATION && (
+            <Card>
+              <CardHeader>
+                <TTitle className="uppercase">Obligation</TTitle>
+              </CardHeader>
+              <CardContent className="flex flex-row flex-wrap gap-2">
+                <RemintObligationOwnerCapDialog />
+              </CardContent>
+            </Card>
+          )}
+          {selectedTab === Tab.CTOKENS && (
+            <Card>
+              <CardHeader>
+                <TTitle className="uppercase">CTokens</TTitle>
+              </CardHeader>
+              <CardContent className="flex flex-row flex-wrap gap-2">
+                <RedeemCTokensDialog />
+              </CardContent>
+            </Card>
+          )}
+
           {selectedTab === Tab.LIQUIDATE && (
             <Card>
               <CardHeader>
@@ -207,7 +226,6 @@ export default function Admin() {
               </CardContent>
             </Card>
           )}
-
           {selectedTab === Tab.OBLIGATIONS && (
             <Card>
               <CardHeader>
@@ -215,17 +233,6 @@ export default function Admin() {
               </CardHeader>
               <CardContent className="flex flex-row flex-wrap gap-2">
                 <ObligationsDialog />
-              </CardContent>
-            </Card>
-          )}
-
-          {selectedTab === Tab.CTOKENS && (
-            <Card>
-              <CardHeader>
-                <TTitle className="uppercase">CTokens</TTitle>
-              </CardHeader>
-              <CardContent className="flex flex-row flex-wrap gap-2">
-                <RedeemCTokensDialog />
               </CardContent>
             </Card>
           )}

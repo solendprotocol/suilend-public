@@ -505,13 +505,23 @@ export class SuilendClient {
   async newObligationOwnerCap(
     transaction: Transaction,
     lendingMarketOwnerCapId: string,
+    destinationAddress: string,
     obligationId: string,
   ) {
-    return newObligationOwnerCap(transaction, this.lendingMarket.$typeArgs[0], {
-      lendingMarketOwnerCap: transaction.object(lendingMarketOwnerCapId),
-      lendingMarket: transaction.object(this.lendingMarket.id),
-      obligationId,
-    });
+    const [obligationOwnerCap] = newObligationOwnerCap(
+      transaction,
+      this.lendingMarket.$typeArgs[0],
+      {
+        lendingMarketOwnerCap: transaction.object(lendingMarketOwnerCapId),
+        lendingMarket: transaction.object(this.lendingMarket.id),
+        obligationId,
+      },
+    );
+
+    transaction.transferObjects(
+      [obligationOwnerCap],
+      transaction.pure.address(destinationAddress),
+    );
   }
 
   async updateRateLimiterConfig(
