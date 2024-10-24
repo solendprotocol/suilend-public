@@ -230,7 +230,10 @@ export default function ActionsModalTabContent({
       return getSubmitButtonState(value) as SubmitButtonState;
 
     return {
-      title: capitalize(action),
+      title: `${capitalize(action)} ${formatToken(new BigNumber(value), {
+        dp: reserve.mintDecimals,
+        trimTrailingZeros: true,
+      })} ${reserve.symbol}`,
     };
   })();
 
@@ -294,16 +297,13 @@ export default function ActionsModalTabContent({
         reserve.mintDecimals,
         [Action.DEPOSIT, Action.REPAY].includes(action) ? -1 : 1,
       );
+      const balanceChangeFormatted = formatToken(
+        balanceChange !== undefined ? balanceChange : new BigNumber(value),
+        { dp: reserve.mintDecimals, trimTrailingZeros: true },
+      );
 
       toast.success(
-        [
-          capitalize(actionPastTense),
-          formatToken(
-            balanceChange !== undefined ? balanceChange : new BigNumber(value),
-            { dp: reserve.mintDecimals, trimTrailingZeros: true },
-          ),
-          reserve.symbol,
-        ].join(" "),
+        `${capitalize(actionPastTense)} ${balanceChangeFormatted} ${reserve.symbol}`,
         {
           action: (
             <TextLink className="block" href={txUrl}>

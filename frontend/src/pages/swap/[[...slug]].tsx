@@ -2,18 +2,14 @@ import Head from "next/head";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { HopApi, VerifiedToken } from "@hop.ag/sdk";
 import {
-  HopApi,
-  GetQuoteResponse as HopGetQuoteResponse,
-  VerifiedToken,
-} from "@hop.ag/sdk";
-import { Transaction, TransactionResult } from "@mysten/sui/transactions";
+  Transaction,
+  TransactionObjectArgument,
+} from "@mysten/sui/transactions";
 import { SUI_DECIMALS, normalizeStructTag } from "@mysten/sui/utils";
 import * as Sentry from "@sentry/nextjs";
-import {
-  Router as AftermathRouter,
-  RouterCompleteTradeRoute as AftermathRouterCompleteTradeRoute,
-} from "aftermath-ts-sdk";
+import { Router as AftermathRouter } from "aftermath-ts-sdk";
 import BigNumber from "bignumber.js";
 import {
   AlertTriangle,
@@ -711,7 +707,10 @@ function Page() {
     }
 
     return {
-      title: "Swap",
+      title: `Swap ${formatToken(new BigNumber(value), {
+        dp: tokenIn.decimals,
+        trimTrailingZeros: true,
+      })} ${tokenIn.ticker}`,
       isDisabled: !quote || isSwappingAndDepositing,
     };
   })();
@@ -760,80 +759,55 @@ function Page() {
     };
   })();
 
-  const getTransactionForUnifiedQuotes = async (
+  const getTransactionForUnifiedQuote = async (
     address: string,
-    quotes: UnifiedQuote[],
+    _quote: UnifiedQuote,
     isDepositing: boolean,
   ): Promise<{
     transaction: Transaction;
-    outputCoin: TransactionResult | undefined;
+    outputCoin?: TransactionObjectArgument;
   }> => {
-    for (const _quote of quotes) {
-      if (_quote.type === UnifiedQuoteType.HOP) {
-        console.log("Swap - fetching transaction for Hop quote");
+    if (_quote.type === UnifiedQuoteType.HOP) {
+      console.log("Swap - fetching transaction for Hop quote");
 
-        try {
-          const res = await hopSdk.fetchTx({
-            trade: (_quote.quote as HopGetQuoteResponse).trade,
-            sui_address: address,
-            gas_budget: 0.25 * 10 ** SUI_DECIMALS, // Set to 0.25 SUI
-            max_slippage_bps: +slippagePercent * 100,
-            return_output_coin_argument: isDepositing,
+      const { transaction, output_coin: outputCoin } = await hopSdk.fetchTx({
+        trade: _quote.quote.trade,
+        sui_address: address,
+        gas_budget: 0.25 * 10 ** SUI_DECIMALS, // Set to 0.25 SUI
+        max_slippage_bps: +slippagePercent * 100,
+        return_output_coin_argument: isDepositing,
+      });
+
+      return { transaction, outputCoin };
+    } else if (_quote.type === UnifiedQuoteType.AFTERMATH) {
+      console.log("Swap - fetching transaction for Aftermath quote");
+
+      if (isDepositing) {
+        const { tx: transaction, coinOutId: outputCoin } =
+          await aftermathSdk.addTransactionForCompleteTradeRoute({
+            tx: new Transaction(),
+            walletAddress: address,
+            completeRoute: _quote.quote,
+            slippage: +slippagePercent / 100,
           });
 
-          return {
-            transaction: res.transaction,
-            outputCoin: res.output_coin,
-          };
-        } catch (err) {
-          console.error(err);
-          continue;
-        }
-      } else if (_quote.type === UnifiedQuoteType.AFTERMATH) {
-        console.log("Swap - fetching transaction for Aftermath quote");
+        return { transaction, outputCoin };
+      } else {
+        const transaction =
+          await aftermathSdk.getTransactionForCompleteTradeRoute({
+            walletAddress: address,
+            completeRoute: _quote.quote,
+            slippage: +slippagePercent / 100,
+          });
 
-        try {
-          if (isDepositing) {
-            const res =
-              await aftermathSdk.addTransactionForCompleteTradeRouteV0({
-                tx: new Transaction() as any,
-                walletAddress: address,
-                completeRoute:
-                  _quote.quote as AftermathRouterCompleteTradeRoute,
-                slippage: +slippagePercent / 100,
-              });
-
-            return {
-              transaction: res.tx as unknown as Transaction,
-              outputCoin: res.coinOutId as TransactionResult | undefined,
-            };
-          } else {
-            const transaction =
-              await aftermathSdk.getTransactionForCompleteTradeRouteV0({
-                walletAddress: address,
-                completeRoute:
-                  _quote.quote as AftermathRouterCompleteTradeRoute,
-                slippage: +slippagePercent / 100,
-              });
-
-            return {
-              transaction: transaction as unknown as Transaction,
-              outputCoin: undefined,
-            };
-          }
-        } catch (err) {
-          console.error(err);
-          continue;
-        }
-      } else throw new Error("Unknown quote type");
-    }
-
-    throw new Error("Unable to get transaction for quote");
+        return { transaction };
+      }
+    } else throw new Error("Unknown quote type");
   };
 
   const swap = async (deposit?: boolean) => {
     if (!address) throw new Error("Wallet not connected");
-    if (!quotes) throw new Error("Quote not found");
+    if (!quote) throw new Error("Quote not found");
     if (deposit && !hasTokenOutReserve)
       throw new Error("Cannot deposit this token");
 
@@ -842,7 +816,7 @@ function Page() {
     let transaction: Transaction;
     try {
       const { transaction: transaction2, outputCoin } =
-        await getTransactionForUnifiedQuotes(address, quotes, isDepositing);
+        await getTransactionForUnifiedQuote(address, quote, isDepositing);
       transaction = transaction2;
       transaction.setGasBudget(SUI_GAS_MIN * 10 ** SUI_DECIMALS);
 
@@ -892,34 +866,30 @@ function Page() {
         tokenIn.decimals,
         -1,
       );
+      const balanceChangeInFormatted = formatToken(
+        balanceChangeIn !== undefined ? balanceChangeIn : new BigNumber(value),
+        { dp: tokenIn.decimals, trimTrailingZeros: true },
+      );
+
       const balanceChangeOut = getBalanceChange(
         res,
         address!,
         tokenOut.coin_type,
         tokenOut.decimals,
       );
+      const balanceChangeOutFormatted = formatToken(
+        !deposit && balanceChangeOut !== undefined
+          ? balanceChangeOut
+          : quoteAmountOut, // When swapping+depositing, the out asset doesn't reach the wallet as it is immediately deposited
+        { dp: tokenOut.decimals, trimTrailingZeros: true },
+      );
 
       toast.success(
-        [
-          "Swapped",
-          formatToken(
-            balanceChangeIn !== undefined
-              ? balanceChangeIn
-              : new BigNumber(value),
-            { dp: tokenIn.decimals, trimTrailingZeros: true },
-          ),
-          tokenIn.ticker,
-          "for",
-          formatToken(
-            !deposit && balanceChangeOut !== undefined
-              ? balanceChangeOut
-              : quoteAmountOut, // When swapping+depositing, the out asset doesn't reach the wallet as it is immediately deposited
-            { dp: tokenOut.decimals, trimTrailingZeros: true },
-          ),
-          tokenOut.ticker,
-          ...(deposit ? [`and deposited the ${tokenOut.ticker}`] : []),
-        ].join(" "),
+        `Swapped ${balanceChangeInFormatted} ${tokenIn.ticker} for ${balanceChangeOutFormatted} ${tokenOut.ticker}`,
         {
+          description: deposit
+            ? `Deposited ${balanceChangeOutFormatted} ${tokenOut.ticker}`
+            : undefined,
           icon: <ArrowRightLeft className="h-5 w-5 text-success" />,
           action: (
             <TextLink className="block" href={txUrl}>
@@ -954,7 +924,7 @@ function Page() {
 
       track("swap_success", properties);
     } catch (err) {
-      toast.error("Failed to swap", {
+      toast.error(`Failed to ${deposit ? "swap and deposit" : "swap"}`, {
         description: (err as Error)?.message || "An unknown error occurred",
         duration: TX_TOAST_DURATION,
       });
