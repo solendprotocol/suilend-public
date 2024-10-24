@@ -26,7 +26,7 @@ import { AppData, useAppContext } from "@/contexts/AppContext";
 import { useWalletContext } from "@/contexts/WalletContext";
 import { formatPercent, formatUsd } from "@/lib/format";
 import { getNetAprPercent } from "@/lib/liquidityMining";
-import { getLoopedAssetCoinTypes } from "@/lib/looping";
+import { getIsLooping, getWasLooping } from "@/lib/looping";
 import { shallowPushQuery } from "@/lib/router";
 import {
   BORROWS_TOOLTIP,
@@ -40,7 +40,8 @@ function AccountPositionCardContent() {
   const data = appContext.data as AppData;
   const obligation = appContext.obligation as ParsedObligation;
 
-  const loopedAssetCoinTypes = getLoopedAssetCoinTypes(data, obligation);
+  const isLooping = getIsLooping(data, obligation);
+  const wasLooping = getWasLooping(data, obligation);
 
   // APR
   const netAprPercent = getNetAprPercent(obligation, data.rewardMap);
@@ -100,7 +101,7 @@ function AccountPositionCardContent() {
         <TBody
           className={cn(
             "w-max text-right",
-            loopedAssetCoinTypes.length > 0 && "text-warning",
+            (isLooping || wasLooping) && "text-warning",
           )}
         >
           {formatPercent(netAprPercent)}

@@ -80,3 +80,35 @@ export const getLoopedAssetCoinTypes = (
 
   return result;
 };
+export const getIsLooping = (
+  data: AppData,
+  obligation: ParsedObligation | null,
+) => {
+  const loopedAssetCoinTypes = getLoopedAssetCoinTypes(data, obligation);
+  return loopedAssetCoinTypes.length > 0;
+};
+
+export const getZeroSharePositions = (obligation: ParsedObligation | null) => ({
+  deposits: (obligation?.deposits || []).filter(
+    (d) =>
+      d.depositedAmount.gt(0) &&
+      new BigNumber(d.userRewardManager.share.toString()).eq(0),
+  ),
+  borrows: (obligation?.borrows || []).filter(
+    (b) =>
+      b.borrowedAmount.gt(0) &&
+      new BigNumber(b.userRewardManager.share.toString()).eq(0),
+  ),
+});
+export const getWasLooping = (
+  data: AppData,
+  obligation: ParsedObligation | null,
+) => {
+  const isLooping = getIsLooping(data, obligation);
+  const { deposits: zeroShareDeposits, borrows: zeroShareBorrows } =
+    getZeroSharePositions(obligation);
+
+  return (
+    !isLooping && (zeroShareDeposits.length > 0 || zeroShareBorrows.length > 0)
+  );
+};
