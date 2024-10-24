@@ -9,18 +9,17 @@ export const LOOPING_THRESHOLD = 0;
 
 const LOOPING_DEFINITION =
   "depositing and borrowing the same non-stablecoin asset, or the same/different stablecoin assets";
-const LM_REWARDS_DEFINITION =
-  "liquidity mining rewards (Suilend Points and rewards)";
+const REWARDS_DEFINITION = "rewards (including Suilend Points)";
 
-export const IS_LOOPING_MESSAGE = `You are looping (defined as ${LOOPING_DEFINITION}). Wallets with looped positions are not eligible for ${LM_REWARDS_DEFINITION}.`;
+export const IS_LOOPING_MESSAGE = `You are looping (defined as ${LOOPING_DEFINITION}). Wallets with looped positions are not eligible for ${REWARDS_DEFINITION}.`;
 export const WAS_LOOPING_MESSAGE = (
   <>
     You were looping in the past (defined as {LOOPING_DEFINITION}).
     <br />
     <br />
-    Restore eligibility for {LM_REWARDS_DEFINITION} by interacting with each
-    asset (deposit or withdraw any amount for deposits, borrow or repay any
-    amount for borrows).
+    Restore eligibility for {REWARDS_DEFINITION} by interacting with each asset
+    (deposit or withdraw any amount for deposits, borrow or repay any amount for
+    borrows).
     <br />
     <br />
     You can automate this process by clicking the button below.
@@ -28,7 +27,7 @@ export const WAS_LOOPING_MESSAGE = (
 );
 
 export const LOOPING_WARNING_MESSAGE = (action: string, symbol: string) =>
-  `Note that by ${action} ${symbol} you will be looping (defined as ${LOOPING_DEFINITION}) and no longer eligible for ${LM_REWARDS_DEFINITION}.`;
+  `Note that by ${action} ${symbol} you will be looping (defined as ${LOOPING_DEFINITION}) and no longer eligible for ${REWARDS_DEFINITION}.`;
 
 export const getLoopedAssetCoinTypes = (
   data: AppData,

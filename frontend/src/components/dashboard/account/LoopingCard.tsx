@@ -97,7 +97,7 @@ export default function LoopingCard() {
         headerProps={{
           titleClassName: "text-warning",
           titleIcon: <Pause />,
-          title: "Liquidity Mining Rewards Paused",
+          title: "Rewards Paused",
           noSeparator: true,
         }}
       >
