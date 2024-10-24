@@ -15,6 +15,7 @@ import AssetCell from "@/components/dashboard/market-table/AssetCell";
 import { TBody, TLabel } from "@/components/shared/Typography";
 import { AppData, useAppContext } from "@/contexts/AppContext";
 import { formatToken, formatUsd } from "@/lib/format";
+import { cn } from "@/lib/utils";
 
 interface RowData {
   coinType: string;
@@ -102,6 +103,12 @@ export default function AccountAssetTable({
         columns={columns}
         data={sortedAssets}
         noDataMessage={noAssetsMessage}
+        tableCellClassName={(cell) =>
+          cn(
+            cell && cell.column.getIsFirstColumn() && "pr-0",
+            cell && cell.column.getIsLastColumn() && "pl-0",
+          )
+        }
         onRowClick={(row) => () =>
           openActionsModal(row.original.reserve.symbol)
         }

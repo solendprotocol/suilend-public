@@ -109,7 +109,6 @@ export default function ActionsModal() {
           Action.DEPOSIT,
           data.lendingMarket.reserves,
           reserve,
-          data.obligations,
           obligation,
         ),
         getSubmitButtonState: getSubmitButtonState(
@@ -123,7 +122,6 @@ export default function ActionsModal() {
           Action.DEPOSIT,
           data.lendingMarket.reserves,
           reserve,
-          data.obligations,
           obligation,
         ),
         submit: deposit,
@@ -176,7 +174,6 @@ export default function ActionsModal() {
           Action.BORROW,
           data.lendingMarket.reserves,
           reserve,
-          data.obligations,
           obligation,
         ),
         getSubmitButtonState: getSubmitButtonState(
@@ -190,7 +187,6 @@ export default function ActionsModal() {
           Action.BORROW,
           data.lendingMarket.reserves,
           reserve,
-          data.obligations,
           obligation,
         ),
         submit: borrow,

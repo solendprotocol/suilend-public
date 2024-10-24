@@ -722,7 +722,6 @@ function Page() {
       Action.DEPOSIT,
       data.lendingMarket.reserves,
       tokenOutReserve,
-      data.obligations,
       obligation,
     )();
     const depositSubmitButtonState = getSubmitButtonState(
