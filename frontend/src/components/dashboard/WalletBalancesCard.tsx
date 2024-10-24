@@ -42,6 +42,7 @@ export default function WalletBalancesCard() {
           assets={Object.values(data.coinBalancesMap)
             .filter((cb) => !cb.balance.eq(0))
             .map((cb) => ({
+              isBalance: true,
               coinType: cb.coinType,
               mintDecimals: cb.mintDecimals,
               price: cb.price as BigNumber,

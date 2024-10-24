@@ -1217,7 +1217,7 @@ function Page() {
         <TLabelSans className="opacity-50">
           {"Powered by "}
           <TextLink
-            className="text-muted-foreground decoration-muted-foreground/50"
+            className="text-muted-foreground decoration-muted-foreground/50 hover:text-foreground hover:decoration-foreground"
             href="https://hop.ag/"
             noIcon
           >
@@ -1225,7 +1225,7 @@ function Page() {
           </TextLink>
           {" & "}
           <TextLink
-            className="text-muted-foreground decoration-muted-foreground/50"
+            className="text-muted-foreground decoration-muted-foreground/50 hover:text-foreground hover:decoration-foreground"
             href="https://aftermath.finance/trade"
             noIcon
           >

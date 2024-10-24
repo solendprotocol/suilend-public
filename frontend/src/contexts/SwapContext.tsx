@@ -84,7 +84,7 @@ export const AF_EXCHANGE_NAME_MAP: Record<AftermathRouterProtocolName, string> =
   };
 
 const DEFAULT_TOKEN_IN_SYMBOL = "SUI";
-const DEFAULT_TOKEN_OUT_SYMBOL = "wUSDC";
+const DEFAULT_TOKEN_OUT_SYMBOL = "USDC";
 
 export const getSwapUrl = (
   inSymbol: string = DEFAULT_TOKEN_IN_SYMBOL,

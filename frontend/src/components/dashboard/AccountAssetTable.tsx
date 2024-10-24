@@ -18,6 +18,7 @@ import { formatToken, formatUsd } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 interface RowData {
+  isBalance?: boolean;
   coinType: string;
   mintDecimals: number;
   price: BigNumber;
@@ -51,10 +52,12 @@ export default function AccountAssetTable({
         sortingFn: "text",
         header: ({ column }) => tableHeader(column, "Asset name"),
         cell: ({ row }) => {
-          const { coinType, price, symbol, iconUrl, reserve } = row.original;
+          const { isBalance, coinType, price, symbol, iconUrl, reserve } =
+            row.original;
 
           return (
             <AssetCell
+              isBalance={isBalance}
               coinType={coinType}
               price={price}
               symbol={symbol}
